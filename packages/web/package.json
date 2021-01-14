@@ -1,14 +1,35 @@
 {
   "name": "justnotecc",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "private": true,
+  "scripts": {
+    "start-js": "HTTPS=true BROWSER=none react-scripts start",
+    "start": "react-scripts start",
+    "build-css-dev": "postcss tailwind.css -o src/stylesheets/tailwind.css",
+    "build-css": "postcss tailwind.css -o src/stylesheets/tailwind.css --env production",
+    "build-js": "react-scripts build",
+    "build": "npm-run-all build-css build-js",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
   "dependencies": {
+    "@tailwindcss/aspect-ratio": "^0.2.0",
+    "@tailwindcss/forms": "^0.2.1",
+    "@tailwindcss/typography": "^0.3.1",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
+    "@welldone-software/why-did-you-render": "^6.0.5",
+    "autoprefixer": "^10.2.1",
+    "npm-run-all": "^4.1.5",
+    "postcss-cli": "^8.3.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-redux": "^7.2.2",
     "react-scripts": "4.0.1",
+    "redux": "^4.0.5",
+    "redux-loop": "^6.0.1",
+    "tailwindcss": "^2.0.2",
     "web-vitals": "^0.2.4",
     "workbox-background-sync": "^5.1.3",
     "workbox-broadcast-update": "^5.1.3",
@@ -22,12 +43,6 @@
     "workbox-routing": "^5.1.3",
     "workbox-strategies": "^5.1.3",
     "workbox-streams": "^5.1.3"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [

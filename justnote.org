@@ -1,0 +1,72 @@
+* Inspiring Adversary
+** evernote.com
+** Google Keep
+** bear.app
+** collectednotes.com
+** joplinapp.org
+** wereturtle.github.io/ghostwriter/
+** milanote.com
+** cloverapp.co
+** nat.app/note-taking
+** www.zotero.org
+** usejournal.com
+** getpolarized.io
+** github.com/zadam/trilium
+** github.com/logseq/logseq
+* Same Name
+* Requirements
+** simple, fast, intuitive
+- quick notes VS in-depth essays
+- focus mode
+- advanced markup options
+- dark mode, themes, fonts
+- Sidebar, Note list, Note editor
+  + 5 screens: desktop, tablet:portrait, tablet:landscape, mobile:portrait, mobile:landscape
+** in-line image
+** sync
+** lists
+** export
+** share
+- direct url to the note
+- iOS, Android extensions?
+- Chrome, Firefox extensions?
+** domain name
+- http://justnote.cc
+- http://www.justnote.cc
+- https://justnote.cc
+- https://www.justnote.cc
+** hashtags
+* POC
+** sync in mobile app
+** text editor
+*** web
+**** github.com/wordpress-mobile/gutenberg
+**** github.com/ianstormtaylor/slate
+**** github.com/quilljs/quill
+**** draftjs.org
+*** mobile
+**** github.com/wordpress-mobile/gutenberg-mobile
+** routers
+*** web
+*** mobile
+** view mode vs edit mode
+** 
+** lists
+** fonts
+- Atkinson Hyperlegible Font: brailleinstitute.org/freefont
+  + Might not enough. There only regular and bold
+* MVP
+* Fully Fledged
+* Implementation
+** Web Steps
+- npx create-react-app justnotecc --template cra-template-pwa
+- yarn add tailwindcss postcss-cli autoprefixer
+- yarn add @tailwindcss/forms @tailwindcss/typography @tailwindcss/aspect-ratio
+- npx tailwindcss init
+- yarn add npm-run-all
+- yarn add redux react-redux redux-loop
+- yarn add @welldone-software/why-did-you-render
+- Fix dev server crash because of Emacs temp/lock file
+  + github.com/facebook/create-react-app/issues/9056#issuecomment-744168146
+** Mobile Steps
+- 
