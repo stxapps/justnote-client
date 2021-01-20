@@ -1,23 +1,34 @@
 {
   "name": "Justnotecc",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
+    "build-css": "create-tailwind-rn tailwind.css src/stylesheets/tailwind.json",
     "android": "react-native run-android",
+    "android-release": "react-native run-android --variant=release",
+    "ios-install": "npx pod-install",
     "ios": "react-native run-ios",
+    "ios-release": "react-native run-ios --configuration Release",
     "start": "react-native start",
     "test": "jest",
     "lint": "eslint ."
   },
   "dependencies": {
     "react": "16.13.1",
-    "react-native": "0.63.4"
+    "react-native": "0.63.4",
+    "react-native-svg": "^12.1.0",
+    "react-redux": "^7.2.2",
+    "redux": "^4.0.5",
+    "redux-loop": "^6.0.1",
+    "tailwind-rn": "https://github.com/bracedotto/tailwind-rn#45e6a6b6ebf0d010c3434c82f4a8719dbebd1b31"
   },
   "devDependencies": {
     "@babel/core": "^7.8.4",
     "@babel/runtime": "^7.8.4",
     "@react-native-community/eslint-config": "^1.1.0",
+    "@welldone-software/why-did-you-render": "^6.0.5",
     "babel-jest": "^25.1.0",
+    "babel-plugin-inline-import": "^3.0.0",
     "eslint": "^6.5.1",
     "jest": "^25.1.0",
     "metro-react-native-babel-preset": "^0.59.0",

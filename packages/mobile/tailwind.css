@@ -1,0 +1,8 @@
+/* purgecss start ignore */
+/* base in TailwindCSS V2 doesn't work with isUtilitySupported
+@tailwind base; */
+
+@tailwind components;
+/* purgecss end ignore */
+
+@tailwind utilities;
