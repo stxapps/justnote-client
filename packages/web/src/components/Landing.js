@@ -1,14 +1,17 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 
+import { signUp, signIn } from '../actions';
+
 import logoShort from '../images/logo-short.svg';
 import logoFull from '../images/logo-full.svg';
 
-import mainDesktop from '../images/main-desktop.png';
-import appScreen from '../images/app-screen.png';
+import mainDesktopInDarkChrome from '../images/main-desktop-in-dark-chrome.png';
 import creator from '../images/creator.jpeg';
 
 const Landing = React.memo(() => {
+
+  const dispatch = useDispatch();
 
   return (
     <React.Fragment>
@@ -44,14 +47,14 @@ const Landing = React.memo(() => {
                       <img className="h-8 w-auto sm:h-10" src={logoShort} alt="" />
                     </div>
                     <div className="-mr-2 flex items-center md:hidden">
-                      <button type="button" className="bg-white rounded-md shadow px-4 py-2 border border-transparent text-base font-medium text-green-600 hover:text-green-500 inline-flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500" id="main-menu" aria-haspopup="true">
+                      <button onClick={() => dispatch(signIn())} type="button" className="bg-white rounded-md shadow px-4 py-2 border border-transparent text-base font-medium text-green-600 hover:text-green-500 inline-flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500" id="main-menu" aria-haspopup="true">
                         Log in
                       </button>
                     </div>
                   </div>
                 </div>
                 <div className="hidden md:absolute md:flex md:items-center md:justify-end md:inset-y-0 md:right-0">
-                  <button type="button" className="bg-white rounded-md shadow px-4 py-2 border border-transparent text-base font-medium text-green-600 hover:text-green-500 inline-flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500" id="main-menu" aria-haspopup="true">
+                  <button onClick={() => dispatch(signIn())} type="button" className="bg-white rounded-md shadow px-4 py-2 border border-transparent text-base font-medium text-green-600 hover:text-green-500 inline-flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500" id="main-menu" aria-haspopup="true">
                     Log in
                   </button>
                 </div>
@@ -66,7 +69,7 @@ const Landing = React.memo(() => {
                   Justnote is a note taking app that you can use it easily, take a note rapidly, and importantly, have full control of your data.
                 </p>
                 <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
-                  <button className="w-full flex items-center justify-center px-8 py-3 border border-transparent rounded-md shadow text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 sm:w-max md:py-4 md:text-lg md:px-10">
+                  <button onClick={() => dispatch(signUp())} className="w-full flex items-center justify-center px-8 py-3 border border-transparent rounded-md shadow text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 sm:w-max md:py-4 md:text-lg md:px-10">
                     Get started
                     <svg style={{ marginTop: '0.125rem' }} className="ml-2 w-1.5" viewBox="0 0 6 10" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                       <path fillRule="evenodd" clipRule="evenodd" d="M0.29289 9.7071C-0.09763 9.3166 -0.09763 8.6834 0.29289 8.2929L3.5858 5L0.29289 1.70711C-0.09763 1.31658 -0.09763 0.68342 0.29289 0.29289C0.68342 -0.09763 1.31658 -0.09763 1.70711 0.29289L5.7071 4.29289C6.0976 4.68342 6.0976 5.3166 5.7071 5.7071L1.70711 9.7071C1.31658 10.0976 0.68342 10.0976 0.29289 9.7071Z" />
@@ -82,7 +85,7 @@ const Landing = React.memo(() => {
               <div className="flex-1 w-full bg-gray-800"></div>
             </div>
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
-              <img className="relative rounded-lg shadow-lg mx-auto" src={mainDesktop} alt="App screenshot" />
+              <img className="relative rounded-lg shadow-lg mx-auto" src={mainDesktopInDarkChrome} alt="App screenshot" />
             </div>
           </div>
         </div>
@@ -250,24 +253,18 @@ const Landing = React.memo(() => {
       </div>
       <section className="py-12 bg-white overflow-hidden md:py-20 lg:py-24">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <svg className="absolute top-full right-full transform translate-x-1/3 -translate-y-1/4 lg:translate-x-1/2 xl:-translate-y-1/2" width="404" height="404" fill="none" viewBox="0 0 404 404" role="img" aria-labelledby="svg-justnote">
-            <title id="svg-justnote">Justnote</title>
-            <defs>
-              <pattern id="ad119f34-7694-4c31-947f-5c9d249b21f3" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                <rect x="0" y="0" width="4" height="4" className="text-gray-200" fill="currentColor" />
-              </pattern>
-            </defs>
-            <rect width="404" height="404" fill="url(#ad119f34-7694-4c31-947f-5c9d249b21f3)" />
-          </svg>
           <div className="relative">
             <img className="mx-auto h-8" src={logoFull} alt="Justnote" />
             <blockquote className="mt-10">
-              <div className="max-w-3xl mx-auto text-center text-lg leading-9 font-normal text-gray-600">
+              <div className="relative max-w-3xl mx-auto text-left text-lg leading-9 font-normal text-gray-600">
+                <svg className="absolute top-0 left-0 transform -translate-x-8 -translate-y-24 h-36 w-36 text-green-200 opacity-50 hidden sm:block" stroke="currentColor" fill="none" viewBox="0 0 144 144" aria-hidden="true">
+                  <path strokeWidth="2" d="M41.485 15C17.753 31.753 1 59.208 1 89.455c0 24.664 14.891 39.09 32.109 39.09 16.287 0 28.386-13.03 28.386-28.387 0-15.356-10.703-26.524-24.663-26.524-2.792 0-6.515.465-7.446.93 2.327-15.821 17.218-34.435 32.11-43.742L41.485 15zm80.04 0c-23.268 16.753-40.02 44.208-40.02 74.455 0 24.664 14.891 39.09 32.109 39.09 15.822 0 28.386-13.03 28.386-28.387 0-15.356-11.168-26.524-25.129-26.524-2.792 0-6.049.465-6.98.93 2.327-15.821 16.753-34.435 31.644-43.742L121.525 15z" />
+                </svg>
                 <p>
-                  &ldquo;Hi everyone, I want to share with you why I create Justnote. It’s a note taking app I want to have myself. I want to have a simple, small, and fast one without annoying ads. I want an app that I can take a quick small note when I on the run and I can get back easily when I need infomation in that note. So here I am. I hope that as it’s useful to me and I love it, it’s also useful to you and you love it too.
+                  Hi everyone, I want to share with you why I create Justnote. It’s a note taking app I want to have myself. I want to have a simple, small, and fast one without annoying ads. I want an app that I can take a quick small note when I on the run and I can get back easily when I need infomation in that note. So here I am. I hope that as it’s useful to me and I love it, it’s also useful to you and you love it too.
                 </p>
                 <p className="pt-6">
-                  You can be sure that I don’t be evil and with Stacks technology, I can’t. You can use Justnote with peace of mind. Your identity is always yours. Your data is always yours. No nightmare of you’re banned from your account or you lose all your data whatsoever.&rdquo;
+                  You can be sure that I don’t be evil and with Stacks technology, I can’t. You can use Justnote with peace of mind. Your identity is always yours. Your data is always yours. No nightmare of you’re banned from your account or you lose all your data whatsoever.
                 </p>
               </div>
               <footer className="mt-8">
@@ -298,7 +295,7 @@ const Landing = React.memo(() => {
                   <span className="block">Start using for free today.</span>
                 </h2>
                 <p className="mt-4 text-lg leading-6 text-green-200">Let’s try Justnote - a simple, fast, and privacy-focused note taking app that you will love.</p>
-                <button className="mt-8 bg-white border border-transparent rounded-md shadow px-6 py-3 inline-flex items-center text-base font-medium text-green-600 hover:bg-green-50">
+                <button onClick={() => dispatch(signUp())} className="mt-8 bg-white border border-transparent rounded-md shadow px-6 py-3 inline-flex items-center text-base font-medium text-green-600 hover:bg-green-50">
                   Get started for free
                   <svg style={{ marginTop: '0.125rem' }} className="ml-2 w-1.5" viewBox="0 0 6 10" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path fillRule="evenodd" clipRule="evenodd" d="M0.29289 9.7071C-0.09763 9.3166 -0.09763 8.6834 0.29289 8.2929L3.5858 5L0.29289 1.70711C-0.09763 1.31658 -0.09763 0.68342 0.29289 0.29289C0.68342 -0.09763 1.31658 -0.09763 1.70711 0.29289L5.7071 4.29289C6.0976 4.68342 6.0976 5.3166 5.7071 5.7071L1.70711 9.7071C1.31658 10.0976 0.68342 10.0976 0.29289 9.7071Z" />
@@ -307,7 +304,7 @@ const Landing = React.memo(() => {
               </div>
             </div>
             <div className="-mt-6 aspect-w-5 aspect-h-3 md:aspect-w-2 md:aspect-h-1">
-              <img className="transform translate-x-6 translate-y-6 rounded-md object-cover object-left-top sm:translate-x-16 lg:translate-y-20" src={mainDesktop} alt="App screenshot" />
+              <img className="transform translate-x-6 translate-y-6 rounded-md object-cover object-left-top sm:translate-x-16 lg:translate-y-20" src={mainDesktopInDarkChrome} alt="App screenshot" />
             </div>
           </div>
         </div>

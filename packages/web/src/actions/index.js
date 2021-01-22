@@ -54,3 +54,11 @@ export const init = () => async (dispatch, getState) => {
 const handlePendingSignIn = () => async (dispatch, getState) => {
 
 };
+
+export const signUp = () => async (dispatch, getState) => {
+
+};
+
+export const signIn = () => async (dispatch, getState) => {
+
+};
