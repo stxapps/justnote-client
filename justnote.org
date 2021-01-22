@@ -4,63 +4,132 @@
 ** bear.app
 ** collectednotes.com
 ** joplinapp.org
-** wereturtle.github.io/ghostwriter/
+** github.com/mozilla/notes
+** wereturtle.github.io/ghostwriter
 ** milanote.com
 ** cloverapp.co
 ** nat.app/note-taking
+** gekri.com
 ** www.zotero.org
 ** usejournal.com
 ** getpolarized.io
 ** github.com/zadam/trilium
 ** github.com/logseq/logseq
 * Same Name
+** jusnote.com - The most powerful software for managing the legal practice
+** justnotepad.com
+** justnoteit.com
+** play.google.com/store/apps/details?id=enterprise.velle.justnote
+** play.google.com/store/apps/details?id=app.pnrnts.notes.notes
+** github.com/pavlo-zin/JustNote
+** github.com/tseleski/JustNote
+** www.macupdate.com/app/mac/33266/justnotes
 * Requirements
 ** simple, fast, intuitive
 - quick notes VS in-depth essays
 - focus mode
 - advanced markup options
 - dark mode, themes, fonts
-- Sidebar, Note list, Note editor
-  + 5 screens: desktop, tablet:portrait, tablet:landscape, mobile:portrait, mobile:landscape
-** in-line image
 ** sync
-** lists
 ** export
 ** share
-- direct url to the note
+- direct url to the note, to other's note? another specific view?
 - iOS, Android extensions?
 - Chrome, Firefox extensions?
+** popup and back
+** fast
+- while loading data from server, new note button should be clickable and can add a new note right away
+** lists
+** tags
+** Live demo
+- No need, super easy to try, no setup
+* POC
 ** domain name
 - http://justnote.cc
 - http://www.justnote.cc
-- https://justnote.cc
+- https://justnote.cc <-- choose this one
 - https://www.justnote.cc
-** hashtags
-* POC
-** sync in mobile app
+** Consistent in name
+- Justnote
+** fonts
+- Atkinson Hyperlegible Font: brailleinstitute.org/freefont
+  + Might not enough. There only regular and bold
+- Inter <-- choose this one
+** All Notes VS My Notes
+- Notebooks? Lists?
+- My Notes, Archive, Trash, <-- choose this one
+** supported screens
+- 5 screens: desktop, tablet:portrait, tablet:landscape, mobile:portrait, mobile:landscape
+- breakpoint at lg
+- Sidebar, Note list, Note editor
+  + should be able to adjust width?
+- Fixed topbar, Fixed bottombar
+** Flow
+*** Sign up / Sign in
+*** Create a new note
+*** list notes
+*** Open a note
+*** Edit/Update/Save a note
+*** Move a note: archive, remove, restore, move to
+*** Delete a note: permanently delete
+*** Change listname
+*** Create a new listname <-- in Settings
+*** Rename/Delete a listname <-- in Settings
+*** Bulk edit: archive, remove, restore, move to, delete
+*** Profile: settings, support, sign out
+*** Sync indicator: syncing, new update,
+*** StatusPopup
+*** Search
+*** Delete old notes in trash, export data, delete all data
+** url hash
+- Also use url for popup and confirm delete!
+- url: https://justnote.cc
+  + /, /about, /privacy, /terms, /support
+  + /#?u=<username>&n=<note-id>&p=<popup-id>&cd=true
+** routers
+*** web
+- No need react-router, use framer-motion!
+*** native
+- No need react-navigation, use reanimated?
+** components
+*** sidebar
+- show/hide sidebar, need a button to click to show!
+*** note list
+*** editor
+*** search
+- need to add top padding dynamically?
+** z-index
+- 0: note list, note
+- 10: search popup
+- 20: top bar, bottom bar
+- 30: popup
+- 40: setting popup
+- 50: confirm delete
+** loading
+*** web
+*** native
+** offline and sync in mobile app
+- versioning/conflict/merge with file name!
+- delete need to keep all files!
 ** text editor
+*** view mode vs edit mode
+*** file format!
+- web vs native
+*** inline image
+*** how and when to save
 *** web
 **** github.com/wordpress-mobile/gutenberg
 **** github.com/ianstormtaylor/slate
 **** github.com/quilljs/quill
 **** draftjs.org
-*** mobile
+*** native
 **** github.com/wordpress-mobile/gutenberg-mobile
-** routers
-*** web
-*** mobile
-** view mode vs edit mode
-** 
-** lists
-** fonts
-- Atkinson Hyperlegible Font: brailleinstitute.org/freefont
-  + Might not enough. There only regular and bold
 * MVP
 * Fully Fledged
 * Implementation
 ** Web Steps
 - npx create-react-app justnotecc --template cra-template-pwa
-- yarn add tailwindcss postcss-cli autoprefixer
+- yarn add tailwindcss postcss postcss-cli autoprefixer
 - yarn add @tailwindcss/forms @tailwindcss/typography @tailwindcss/aspect-ratio
 - npx tailwindcss init
 - yarn add npm-run-all
@@ -68,5 +137,28 @@
 - yarn add @welldone-software/why-did-you-render
 - Fix dev server crash because of Emacs temp/lock file
   + github.com/facebook/create-react-app/issues/9056#issuecomment-744168146
-** Mobile Steps
+  + stackoverflow.com/questions/62567370/reactjs-local-server-crashes-after-editing-file-in-emacs-even-without-saving/62571200#62571200
+- Favicon
+  + cd public
+  + convert logo16.png logo32.png logo48.png logo64.png favicon.ico
+- Font
+  + Config in tailwind.config.js
+  + Add font-face in layer: base in tailwind.css
+- yarn add url-parse
+- yarn add framer-motion
 - 
+** Native Steps
+- npx react-native init Justnotecc
+- yarn add https://github.com/bracedotto/tailwind-rn#45e6a6b6ebf0d010c3434c82f4a8719dbebd1b31
+- yarn add redux react-redux redux-loop
+- yarn add react-native-svg
+- yarn add babel-plugin-inline-import --dev
+  + Update babel.config.js to work with .svg
+- yarn add @welldone-software/why-did-you-render --dev
+- Font
+  + Create react-native.config.js
+  + Run npx react-native link
+  + medium.com/@mehrankhandev/ultimate-guide-to-use-custom-fonts-in-react-native-77fcdf859cf4
+- yarn add url-parse
+- 
+- Proguard

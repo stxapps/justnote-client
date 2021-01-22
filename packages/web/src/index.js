@@ -6,29 +6,43 @@ import { Provider } from 'react-redux';
 import { createStore, compose } from 'redux';
 import { install as installReduxLoop } from 'redux-loop';
 
-import reducers from './reducers';
 import './stylesheets/tailwind.css';
+
+import { BLOCKSTACK_AUTH } from './types/const';
+import reducers from './reducers';
+import { getUrlPathQueryHash } from './utils';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 
 import App from './components/App';
+import BlockstackAuth from './components/BlockstackAuth';
 
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-const store = createStore(
-  reducers,
-  composeEnhancers(
-    installReduxLoop({ ENABLE_THUNK_MIGRATION: true }),
-  )
-);
+if (getUrlPathQueryHash(window.location.href).startsWith(BLOCKSTACK_AUTH.slice(1))) {
+  ReactDOM.render(
+    <React.StrictMode>
+      <BlockstackAuth />
+    </React.StrictMode>,
+    document.getElementById('root')
+  );
+} else {
+  /** @ts-ignore */
+  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+  const store = createStore(
+    /** @type {any} */(reducers),
+    composeEnhancers(
+      installReduxLoop({ ENABLE_THUNK_MIGRATION: true }),
+    )
+  );
 
-ReactDOM.render(
-  <React.StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+  ReactDOM.render(
+    <React.StrictMode>
+      <Provider store={store}>
+        <App />
+      </Provider>
+    </React.StrictMode>,
+    document.getElementById('root')
+  );
+}
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

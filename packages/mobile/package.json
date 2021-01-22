@@ -20,7 +20,8 @@
     "react-redux": "^7.2.2",
     "redux": "^4.0.5",
     "redux-loop": "^6.0.1",
-    "tailwind-rn": "https://github.com/bracedotto/tailwind-rn#45e6a6b6ebf0d010c3434c82f4a8719dbebd1b31"
+    "tailwind-rn": "https://github.com/bracedotto/tailwind-rn#45e6a6b6ebf0d010c3434c82f4a8719dbebd1b31",
+    "url-parse": "^1.4.7"
   },
   "devDependencies": {
     "@babel/core": "^7.8.4",
