@@ -160,5 +160,20 @@
   + Run npx react-native link
   + medium.com/@mehrankhandev/ultimate-guide-to-use-custom-fonts-in-react-native-77fcdf859cf4
 - yarn add url-parse
-- 
-- Proguard
+- yarn add react-native-safe-area-context
+- yarn add react-native-svg
+- Android
+  + android/build.gradle
+    ~ *set minSDK*
+  + android/app/build.gradle
+    ~ enableHermes: true
+    ~ enableProguardInReleaseBuilds = true
+  + *set proguard rules*
+  + android/app/src/main/AndroidManifest.xml
+    ~ Add intent-filter BROWSER for redirect from web to app
+  + android/app/src/main/res/values/strings.xml
+    ~ app_name Justnote
+  + android/app/src/main/res/mipmap-xxxx
+    ~ ic_launcher
+- iOS
+  + 

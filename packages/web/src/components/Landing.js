@@ -48,14 +48,14 @@ const Landing = React.memo(() => {
                     </div>
                     <div className="-mr-2 flex items-center md:hidden">
                       <button onClick={() => dispatch(signIn())} type="button" className="bg-white rounded-md shadow px-4 py-2 border border-transparent text-base font-medium text-green-600 hover:text-green-500 inline-flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500" id="main-menu" aria-haspopup="true">
-                        Log in
+                        Sign in
                       </button>
                     </div>
                   </div>
                 </div>
                 <div className="hidden md:absolute md:flex md:items-center md:justify-end md:inset-y-0 md:right-0">
                   <button onClick={() => dispatch(signIn())} type="button" className="bg-white rounded-md shadow px-4 py-2 border border-transparent text-base font-medium text-green-600 hover:text-green-500 inline-flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500" id="main-menu" aria-haspopup="true">
-                    Log in
+                    Sign in
                   </button>
                 </div>
               </nav>
@@ -69,7 +69,7 @@ const Landing = React.memo(() => {
                   Justnote is a note taking app that you can use it easily, take a note rapidly, and importantly, have full control of your data.
                 </p>
                 <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
-                  <button onClick={() => dispatch(signUp())} className="w-full flex items-center justify-center px-8 py-3 border border-transparent rounded-md shadow text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 sm:w-max md:py-4 md:text-lg md:px-10">
+                  <button onClick={() => dispatch(signUp())} className="w-full flex items-center justify-center px-8 py-3 border border-transparent rounded-md shadow text-base font-medium text-white bg-green-600 hover:bg-green-700 sm:w-max md:py-4 md:text-lg md:px-10">
                     Get started
                     <svg style={{ marginTop: '0.125rem' }} className="ml-2 w-1.5" viewBox="0 0 6 10" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                       <path fillRule="evenodd" clipRule="evenodd" d="M0.29289 9.7071C-0.09763 9.3166 -0.09763 8.6834 0.29289 8.2929L3.5858 5L0.29289 1.70711C-0.09763 1.31658 -0.09763 0.68342 0.29289 0.29289C0.68342 -0.09763 1.31658 -0.09763 1.70711 0.29289L5.7071 4.29289C6.0976 4.68342 6.0976 5.3166 5.7071 5.7071L1.70711 9.7071C1.31658 10.0976 0.68342 10.0976 0.29289 9.7071Z" />
