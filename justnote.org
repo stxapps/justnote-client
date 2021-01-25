@@ -146,6 +146,8 @@
   + Add font-face in layer: base in tailwind.css
 - yarn add url-parse
 - yarn add framer-motion
+- yarn add @stacks/auth @stacks/storage @stacks/connect
+- yarn add blockstack --dev
 - 
 ** Native Steps
 - npx react-native init Justnotecc
@@ -177,3 +179,8 @@
     ~ ic_launcher
 - iOS
   + 
+* test users
+- No username: piece garlic material chronic dad possible beauty jealous elephant cage still rule
+* servers
+- https://192.168.1.37:3000
+- 

@@ -15,13 +15,14 @@ import Support from './Support';
 const App = React.memo(() => {
 
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
+  const isHandlingSignIn = useSelector(state => state.display.isHandlingSignIn);
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(init());
   }, [dispatch]);
 
-  if (isUserSignedIn === null) return <Loading />;
+  if (isUserSignedIn === null || isHandlingSignIn) return <Loading />;
 
   const { pathname } = extractUrl(window.location.href);
   if (pathname === '/about') return <About />;

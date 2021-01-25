@@ -7,7 +7,7 @@ import logoShort from '../images/logo-short.svg';
 import logoFull from '../images/logo-full.svg';
 
 import mainDesktopInDarkChrome from '../images/main-desktop-in-dark-chrome.png';
-import creator from '../images/creator.jpeg';
+import creator from '../images/creator.jpg';
 
 const Landing = React.memo(() => {
 

@@ -13,6 +13,9 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
+    "@stacks/auth": "^1.0.1",
+    "@stacks/connect": "^4.3.15",
+    "@stacks/storage": "^1.0.1",
     "@tailwindcss/aspect-ratio": "^0.2.0",
     "@tailwindcss/forms": "^0.2.1",
     "@tailwindcss/typography": "^0.3.1",
@@ -64,5 +67,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "blockstack": "^21.1.1"
   }
 }
