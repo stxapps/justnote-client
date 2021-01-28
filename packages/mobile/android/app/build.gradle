@@ -133,7 +133,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
-        versionName "1.0"
+        versionName "0.1.0"
     }
     splits {
         abi {
@@ -149,6 +149,14 @@ android {
             storePassword 'android'
             keyAlias 'androiddebugkey'
             keyPassword 'android'
+        }
+        release {
+            if (project.hasProperty('BRACE_UPLOAD_STORE_FILE')) {
+                storeFile file(BRACE_UPLOAD_STORE_FILE)
+                storePassword BRACE_UPLOAD_STORE_PASSWORD
+                keyAlias BRACE_UPLOAD_KEY_ALIAS
+                keyPassword BRACE_UPLOAD_KEY_PASSWORD
+            }
         }
     }
     buildTypes {
@@ -177,6 +185,18 @@ android {
             }
 
         }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/kotlinx-io.kotlin_module'
+        exclude 'META-INF/kbignumbers.kotlin_module'
+        exclude 'META-INF/ripemd160.kotlin_module'
+        exclude 'META-INF/atomicfu.kotlin_module'
+        exclude 'META-INF/extensions.kotlin_module'
+        exclude 'META-INF/core.kotlin_module'
+        exclude 'META-INF/keccak.kotlin_module'
+        exclude 'META-INF/sha256.kotlin_module'
+        exclude 'META-INF/khash-extensions.kotlin_module'
     }
 }
 

@@ -15,6 +15,7 @@
 ** getpolarized.io
 ** github.com/zadam/trilium
 ** github.com/logseq/logseq
+** github.com/twitter/TwitterTextEditor
 * Same Name
 ** jusnote.com - The most powerful software for managing the legal practice
 ** justnotepad.com
@@ -127,7 +128,7 @@
 * MVP
 * Fully Fledged
 * Implementation
-** Web Steps
+** Web steps
 - npx create-react-app justnotecc --template cra-template-pwa
 - yarn add tailwindcss postcss postcss-cli autoprefixer
 - yarn add @tailwindcss/forms @tailwindcss/typography @tailwindcss/aspect-ratio
@@ -147,9 +148,12 @@
 - yarn add url-parse
 - yarn add framer-motion
 - yarn add @stacks/auth @stacks/storage @stacks/connect
+  + @stacks/auth still has delete etag bug!, need to update to newer version
+  + @stacks/connect still depends on blockstack, not @stacks/auth, need to update to newer version
 - yarn add blockstack --dev
+  + Need to remove when @stacks/connect not depends to
 - 
-** Native Steps
+** Native steps
 - npx react-native init Justnotecc
 - yarn add https://github.com/bracedotto/tailwind-rn#45e6a6b6ebf0d010c3434c82f4a8719dbebd1b31
 - yarn add redux react-redux redux-loop
@@ -164,23 +168,41 @@
 - yarn add url-parse
 - yarn add react-native-safe-area-context
 - yarn add react-native-svg
+- yarn add 'https://gitpkg.now.sh/bracedotto/blockstack-react-native/BlockstackSDK?6d3814e88711af1394d0148586c871cff7038f6e'
 - Android
+  + android/gradle/wrapper/gradle-wrapper.properties
+    ~ set gradle version in zip fpath
   + android/build.gradle
-    ~ *set minSDK*
+    ~ set android gradle plugin version
+    ~ set minSdk, targetSdk, compileSdk, buildTools version
+  + gen upload keystore
+    ~ keytool -genkeypair -v -keystore justnote-android-upload-key.keystore -alias justnote-android-upload-key -keyalg RSA -keysize 2048 -validity 10000
+  + android/gradle.properties
+    ~ add variables for upload keystore
   + android/app/build.gradle
     ~ enableHermes: true
     ~ enableProguardInReleaseBuilds = true
-  + *set proguard rules*
+    ~ add exclude fpaths in packagingOptions in android block
+    ~ add upload keystore in signingConfigs in android block
+  + android/app/proguard-rules.pro
+    ~ add proguard rules
   + android/app/src/main/AndroidManifest.xml
-    ~ Add intent-filter BROWSER for redirect from web to app
+    ~ Add 2 intent filters: justnotecc:// and https://justnote.cc
   + android/app/src/main/res/values/strings.xml
     ~ app_name Justnote
   + android/app/src/main/res/mipmap-xxxx
     ~ ic_launcher
 - iOS
-  + 
+  + ios/Podfile
+    ~ Add PromiseObjC and Blockstack dependencies
+  + Xcode/Project?Targets:project/Info/URL Types
+    ~ Add 2 URL Types: justnotecc:// and https://justnote.cc
+** Server steps
+- 
 * test users
 - No username: piece garlic material chronic dad possible beauty jealous elephant cage still rule
+- No username: open below advance dolphin wolf man never useless maximum clock proof bike
+- No username: angry juice scatter parrot spider remind tuna crash giggle section isolate film
 * servers
 - https://192.168.1.37:3000
 - 

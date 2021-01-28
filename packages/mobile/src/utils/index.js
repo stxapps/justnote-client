@@ -184,3 +184,16 @@ export const isArrayEqual = (arr1, arr2) => {
 
   return true;
 };
+
+export const getUserImageUrl = (userData) => {
+  const userImage = (userData && userData.profile && userData.profile.image) || null;
+
+  let userImageUrl = null;
+  if (userImage) {
+    if (Array.isArray(userImage) && userImage.length > 0) {
+      userImageUrl = userImage[0].contentUrl || null;
+    }
+  }
+
+  return userImageUrl;
+};
