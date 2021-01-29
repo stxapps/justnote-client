@@ -10,7 +10,7 @@
     "build-js": "react-scripts build",
     "build": "npm-run-all build-css build-js",
     "test": "react-scripts test",
-    "deploy-prod": "aws s3 sync build/static s3://justnote-web/static --size-only --delete --acl public-read --cache-control max-age=31536000 --profile justnote && aws s3 sync build s3://justnote-web --exclude static/* --size-only --delete --acl public-read --profile justnote && aws s3 cp build/service-worker.js s3://justnote-web/service-worker.js --acl public-read --cache-control no-cache --profile justnote && aws s3 cp build/index.html s3://justnote-web/index.html --acl public-read --cache-control no-cache --profile justnote && aws cloudfront create-invalidation --distribution-id E1G6UHDXNDOUN --paths /index.html /.wellknown/* --profile justnote",
+    "deploy-prod": "aws s3 sync build/static s3://justnote-web/static --size-only --delete --acl public-read --cache-control max-age=31536000 --profile justnote && aws s3 sync build s3://justnote-web --exclude static/* --size-only --delete --acl public-read --profile justnote && aws s3 cp build/.wellknown/apple-app-site-association s3://justnote-web/.wellknown/apple-app-site-association --acl public-read --content-type application/json --profile justnote && aws s3 cp build/service-worker.js s3://justnote-web/service-worker.js --acl public-read --cache-control no-cache --profile justnote && aws s3 cp build/index.html s3://justnote-web/index.html --acl public-read --cache-control no-cache --profile justnote && aws cloudfront create-invalidation --distribution-id E1G6UHDXNDOUN --paths /index.html /.wellknown/* --profile justnote",
     "eject": "react-scripts eject"
   },
   "dependencies": {

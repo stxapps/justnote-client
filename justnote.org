@@ -209,9 +209,21 @@
 - iOS
   + ios/Podfile
     ~ Add PromiseObjC and Blockstack dependencies
-  + Xcode/Project?Targets:project/Info/URL Types
-    ~ Add 2 URL Types: justnotecc:// and https://justnote.cc
-- Setup Universal Link and App Link
+    ~ Change platform version
+  + Xcode/Justnotecc/Project
+    ~ set iOS Deployment Target
+  + Xcode/Justnotecc/Targets
+    ~ set Display Name, Bundle Id, Version, Build, Deployment Info
+    ~ set team
+    ~ Add justnotecc://
+  + Xcode/Justnotecc/Targets/Signing & Capabilities
+    ~ Click + and double clicks Associated Domains
+    ~ Add applinks:justnote.cc
+  + Xcode/Images.xcassets
+    ~ app icons
+  + ios/Justnotecc/AppDelegate.m
+    ~ Add source code
+- Setup Universal Link and App Link on server
    + Upload assetlinks.json to justnote.cc/.wellknown/
     ~ assume debug.keystore unchanged: git update-index --assume-unchanged packages/mobile/android/app/debug.keystore
     ~ generate a new debug.keystore and don't publish to github
