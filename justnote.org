@@ -153,6 +153,20 @@
 - yarn add blockstack --dev
   + Need to remove when @stacks/connect not depends to
 - 
+** Server steps
+*** s3
+- Set public and enable CORS
+*** cloudfront, lambda@edge, certificate manager, and namecheap
+- Create SSL certificate and verify at namecheap
+- Create cloudfront distribution
+- Create a lambda function named redirectUrl, comes with a role i.e. redirectUrl-role-xxxxx, need to add more policies to that role like a lot
+- At that role -> Trust relationships, edit that json to contain server: edgelambda.amazonaws.com
+- Back to the function page -> Designer -> Add trigger, select cloudfront -> deploy to Lambda@Edge, select the correct distribution and select Viewer request.
+- Set cloudfront url in namecheap
+*** aws-cli
+- create justnote-cli user in IAM with S3FullAccess and CloudFrontFullAccess
+- aws-cli supports multiple users/profiles, add in ~/.aws/config and ~/.aws/credentials
+- every command follows by --profile <name>
 ** Native steps
 - npx react-native init Justnotecc
 - yarn add https://github.com/bracedotto/tailwind-rn#45e6a6b6ebf0d010c3434c82f4a8719dbebd1b31
@@ -197,8 +211,16 @@
     ~ Add PromiseObjC and Blockstack dependencies
   + Xcode/Project?Targets:project/Info/URL Types
     ~ Add 2 URL Types: justnotecc:// and https://justnote.cc
-** Server steps
-- 
+- Setup Universal Link and App Link
+   + Upload assetlinks.json to justnote.cc/.wellknown/
+    ~ assume debug.keystore unchanged: git update-index --assume-unchanged packages/mobile/android/app/debug.keystore
+    ~ generate a new debug.keystore and don't publish to github
+    ~ generate sha256 for debug.keystore, make sure these two keystores never be published
+      keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+      keytool -list -v -keystore android/app/debug.keystore -alias androiddebugkey -storepass android -keypass android
+    ~ *Need sha256 from Play Store Console* at Release Management > App signing > App signing certificate > SHA-256 certificate fingerprint (medium.com/@joeykaan/the-definitive-guide-to-app-links-eef50a4c26e9)
+    ~ *Need to update the file for every release!*
+   + Upload apple-app-site-association to justnote.cc/.wellknown
 * test users
 - No username: piece garlic material chronic dad possible beauty jealous elephant cage still rule
 - No username: open below advance dolphin wolf man never useless maximum clock proof bike

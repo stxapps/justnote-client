@@ -12,7 +12,11 @@ import Terms from './Terms';
 import Privacy from './Privacy';
 import Support from './Support';
 
+import Parking from './Parking';
+
 const App = React.memo(() => {
+
+  return <Parking />;
 
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
   const isHandlingSignIn = useSelector(state => state.display.isHandlingSignIn);
