@@ -1,14 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+
+import { APP_DOMAIN_NAME, BLOCKSTACK_AUTH } from '../types/const';
+import { separateUrlAndParam } from '../utils';
+
+const genAppBlockstackAuthUrl = () => {
+  const url = window.location.href;
+  const { param: { authResponse } } = separateUrlAndParam(url, 'authResponse');
+  return APP_DOMAIN_NAME + BLOCKSTACK_AUTH + '?authResponse=' + authResponse;
+}
 
 const BlockstackAuth = React.memo(() => {
+
+  const [hasTimeout, setHasTimeout] = useState(false);
+  const blockstackAuthUrl = useMemo(() => genAppBlockstackAuthUrl(), []);
+
+  useEffect(() => {
+    window.location.replace(blockstackAuthUrl);
+    setTimeout(() => setHasTimeout(true), 3000);
+  }, [blockstackAuthUrl]);
 
   return (
     <div className="px-4 bg-gray-200 min-h-screen md:px-6 lg:px-8">
       <section className="pt-12 pb-4">
         <div style={{ borderRadius: '1.5rem' }} className="mx-auto px-4 pt-8 pb-8 w-full max-w-md bg-white">
           <h1 className="text-2xl text-gray-900 font-semibold text-left sm:text-center">Justnote is processing...</h1>
-          <div className={'mt-6 text-gray-700 text-left'}>
-            <p>Normally, Justnote app should be open and process your authentication token automatically. If this page is still showing, please try manually <a className="underline focus:outline-none focus:shadow-outline" href={window.location.href}>send the token to the app</a>.</p>
+          <div className={`mt-6 text-gray-700 text-left ${hasTimeout ? '' : 'hidden'}`}>
+            <p>Normally, Justnote app should be open and process your authentication token automatically. If this page is still showing, please try manually <a className="underline focus:outline-none focus:shadow-outline" href={blockstackAuthUrl}>send the token to the app</a>.</p>
             <p className="mt-6">If the app still not open, please <span className="whitespace-nowrap">
               <a className="underline hover:text-black focus:outline-none focus:shadow-outline" href="/support">
                 contact us

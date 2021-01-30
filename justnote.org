@@ -224,7 +224,7 @@
   + ios/Justnotecc/AppDelegate.m
     ~ Add source code
 - Setup Universal Link and App Link on server
-   + Upload assetlinks.json to justnote.cc/.wellknown/
+   + Upload assetlinks.json to justnote.cc/.well-known/, *not .wellknown!*
     ~ assume debug.keystore unchanged: git update-index --assume-unchanged packages/mobile/android/app/debug.keystore
     ~ generate a new debug.keystore and don't publish to github
     ~ generate sha256 for debug.keystore, make sure these two keystores never be published
@@ -232,7 +232,7 @@
       keytool -list -v -keystore android/app/debug.keystore -alias androiddebugkey -storepass android -keypass android
     ~ *Need sha256 from Play Store Console* at Release Management > App signing > App signing certificate > SHA-256 certificate fingerprint (medium.com/@joeykaan/the-definitive-guide-to-app-links-eef50a4c26e9)
     ~ *Need to update the file for every release!*
-   + Upload apple-app-site-association to justnote.cc/.wellknown
+   + Upload apple-app-site-association to justnote.cc/.well-known, *not .wellknown and content type application/json!*
 * test users
 - No username: piece garlic material chronic dad possible beauty jealous elephant cage still rule
 - No username: open below advance dolphin wolf man never useless maximum clock proof bike
