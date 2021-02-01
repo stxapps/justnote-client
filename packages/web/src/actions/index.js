@@ -77,18 +77,6 @@ const handlePendingSignIn = () => async (dispatch, getState) => {
     //   - Already signed in with different account
   }
 
-  if (userSession.isUserSignedIn()) {
-    const userData = userSession.loadUserData();
-    dispatch({
-      type: UPDATE_USER,
-      payload: {
-        isUserSignedIn: true,
-        username: userData.username,
-        image: getUserImageUrl(userData),
-      }
-    });
-  }
-
   const { separatedUrl } = separateUrlAndParam(window.location.href, 'authResponse');
   window.history.replaceState(window.history.state, '', separatedUrl);
 
@@ -120,7 +108,7 @@ export const signUp = () => async (dispatch, getState) => {
       });
     },
     sendToSignIn: false,
-    userSession: userSession,
+    userSession: /** @type any */(userSession),
   };
 
   showConnect(authOptions);
@@ -147,7 +135,7 @@ export const signIn = () => async (dispatch, getState) => {
       });
     },
     sendToSignIn: true,
-    userSession: userSession,
+    userSession: /** @type any */(userSession),
   };
 
   authenticate(authOptions);
