@@ -15,6 +15,9 @@ module.exports = {
       colors: {
         green: colors.green,
       },
+      cursor: {
+        resize: 'col-resize',
+      },
     },
   },
   variants: {
