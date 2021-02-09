@@ -193,11 +193,13 @@
     ~ keytool -genkeypair -v -keystore justnote-android-upload-key.keystore -alias justnote-android-upload-key -keyalg RSA -keysize 2048 -validity 10000
   + android/gradle.properties
     ~ add variables for upload keystore
+    ~ add more memory when build (stackoverflow.com/questions/56075455/expiring-daemon-because-jvm-heap-space-is-exhausted)
   + android/app/build.gradle
     ~ enableHermes: true
     ~ enableProguardInReleaseBuilds = true
     ~ add exclude fpaths in packagingOptions in android block
     ~ add upload keystore in signingConfigs in android block
+    ~ add javaMaxHeapSize in android block
   + android/app/proguard-rules.pro
     ~ add proguard rules
   + android/app/src/main/AndroidManifest.xml
@@ -223,15 +225,16 @@
     ~ app icons
   + ios/Justnotecc/AppDelegate.m
     ~ Add source code
+  + ios/Justnotecc/Targets/Build Settings
+    ~ Search Paths/Library Search Paths: both Debug and Release add "${SDKROOT}/usr/lib/swift" non-recursive (developer.apple.com/forums/thread/655438)
 - Setup Universal Link and App Link on server
    + Upload assetlinks.json to justnote.cc/.well-known/, *not .wellknown!*
     ~ assume debug.keystore unchanged: git update-index --assume-unchanged packages/mobile/android/app/debug.keystore
     ~ generate a new debug.keystore and don't publish to github
-    ~ generate sha256 for debug.keystore, make sure these two keystores never be published
+    ~ generate sha256 for debug.keystore, make sure these two keystores never be published (*if passowrd contains $, put single quote around!*)
       keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
       keytool -list -v -keystore android/app/debug.keystore -alias androiddebugkey -storepass android -keypass android
     ~ *Need sha256 from Play Store Console* at Release Management > App signing > App signing certificate > SHA-256 certificate fingerprint (medium.com/@joeykaan/the-definitive-guide-to-app-links-eef50a4c26e9)
-    ~ *Need to update the file for every release!*
    + Upload apple-app-site-association to justnote.cc/.well-known, *not .wellknown and content type application/json!*
 * test users
 - No username: piece garlic material chronic dad possible beauty jealous elephant cage still rule

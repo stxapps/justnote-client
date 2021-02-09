@@ -7,7 +7,7 @@ import {
   RESET_STATE,
 } from '../types/actionTypes';
 import {
-  DOMAIN_NAME, BLOCKSTACK_AUTH,
+  DOMAIN_NAME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH,
 } from '../types/const';
 import {
   separateUrlAndParam, getUserImageUrl,
@@ -65,7 +65,8 @@ export const init = () => async (dispatch, getState) => {
 
 const handlePendingSignIn = (url) => async (dispatch, getState) => {
 
-  if (!url.startsWith(DOMAIN_NAME + BLOCKSTACK_AUTH)) return;
+  if (!url.startsWith(DOMAIN_NAME + BLOCKSTACK_AUTH) &&
+    !url.startsWith(APP_DOMAIN_NAME + BLOCKSTACK_AUTH)) return;
 
   // As handle pending sign in takes time, show loading first.
   dispatch({
@@ -105,7 +106,7 @@ const handlePendingSignIn = (url) => async (dispatch, getState) => {
 
 export const signUp = () => async (dispatch, getState) => {
   // On Android, signUp and signIn will always lead to handlePendingSignIn.
-  // On iOS, signIn will always return a promise.
+  // On iOS, signUp and signIn will always return a promise.
   if (Platform.OS === 'android') {
     await userSession.signUp();
   } else if (Platform.OS === 'ios') {

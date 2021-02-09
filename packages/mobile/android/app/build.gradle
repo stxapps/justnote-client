@@ -151,11 +151,11 @@ android {
             keyPassword 'android'
         }
         release {
-            if (project.hasProperty('BRACE_UPLOAD_STORE_FILE')) {
-                storeFile file(BRACE_UPLOAD_STORE_FILE)
-                storePassword BRACE_UPLOAD_STORE_PASSWORD
-                keyAlias BRACE_UPLOAD_KEY_ALIAS
-                keyPassword BRACE_UPLOAD_KEY_PASSWORD
+            if (project.hasProperty('JUSTNOTE_UPLOAD_STORE_FILE')) {
+                storeFile file(JUSTNOTE_UPLOAD_STORE_FILE)
+                storePassword JUSTNOTE_UPLOAD_STORE_PASSWORD
+                keyAlias JUSTNOTE_UPLOAD_KEY_ALIAS
+                keyPassword JUSTNOTE_UPLOAD_KEY_PASSWORD
             }
         }
     }
@@ -166,7 +166,7 @@ android {
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
@@ -197,6 +197,10 @@ android {
         exclude 'META-INF/keccak.kotlin_module'
         exclude 'META-INF/sha256.kotlin_module'
         exclude 'META-INF/khash-extensions.kotlin_module'
+    }
+
+    dexOptions {
+       javaMaxHeapSize "3g"
     }
 }
 
