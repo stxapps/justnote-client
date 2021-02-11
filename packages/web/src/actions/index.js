@@ -1,15 +1,17 @@
 import { showConnect, authenticate } from '@stacks/connect';
+import Url from 'url-parse';
 
 import userSession from '../userSession';
 import {
-  INIT, UPDATE_WINDOW_SIZE, UPDATE_USER, UPDATE_HANDLING_SIGN_IN, RESET_STATE,
+  INIT, UPDATE_WINDOW_SIZE, UPDATE_USER, UPDATE_HANDLING_SIGN_IN,
+  UPDATE_POPUP, RESET_STATE,
 } from '../types/actionTypes';
 import {
   APP_NAME, APP_ICON_NAME,
 } from '../types/const';
 import {
   throttle, getUserImageUrl,
-  extractUrl, separateUrlAndParam, getUrlPathQueryHash,
+  extractUrl, separateUrlAndParam, getUrlPathQueryHash, urlHashToObj, objToUrlHash,
 } from '../utils';
 
 export const init = () => async (dispatch, getState) => {
@@ -24,8 +26,7 @@ export const init = () => async (dispatch, getState) => {
     userImage = getUserImageUrl(userData);
   }
 
-  // Handle fragment in the url
-
+  handleUrlHash();
 
   dispatch({
     type: INIT,
@@ -38,13 +39,13 @@ export const init = () => async (dispatch, getState) => {
     }
   });
 
-  /*
-    update when fragment in the url changed
+  // Let hash get updated first before add an listener
+  setTimeout(() => {
+    window.addEventListener('hashchange', function (e) {
+      onUrlHashChange(e.oldURL, e.newURL, dispatch, getState);
+    });
+  }, 1);
 
-  window.addEventListener('popstate', function () {
-    popHistoryState(store);
-  });
-  */
   window.addEventListener('resize', throttle(() => {
     dispatch({
       type: UPDATE_WINDOW_SIZE,
@@ -149,4 +150,73 @@ export const signOut = () => async (dispatch, getState) => {
   dispatch({
     type: RESET_STATE,
   });
+};
+
+export const handleUrlHash = () => {
+  const urlObj = new Url(window.location.href, {});
+  if (urlObj.hash !== '') {
+    urlObj.set('hash', '');
+    window.location.replace(urlObj.toString());
+  }
+};
+
+export const onUrlHashChange = (oldUrl, newUrl, dispatch, getState) => {
+  console.log(`onUrlHashChange called with oldUrl: ${oldUrl} and newUrl: ${newUrl}.`);
+
+  const oldUrlObj = new Url(oldUrl, {});
+  const oldHashObj = urlHashToObj(oldUrlObj.hash);
+
+  const newUrlObj = new Url(newUrl, {});
+  const newHashObj = urlHashToObj(newUrlObj.hash);
+
+  console.log(`oldHashObj: `, oldHashObj);
+  console.log(`newHashObj: `, newHashObj);
+
+  if ('p' in oldHashObj && 'p' in newHashObj) {
+    // something else changed
+    if (oldHashObj['p'] === newHashObj['p']) {
+
+    } else {
+
+    }
+  } else if ('p' in oldHashObj && !('p' in newHashObj)) {
+    // Close popup
+    dispatch(updatePopup(oldHashObj['p'], false, null));
+  } else if (!('p' in oldHashObj) && 'p' in newHashObj) {
+    // Open popup
+    dispatch(updatePopup(newHashObj['p'], true, {
+      top: parseInt(newHashObj['ppt']),
+      right: parseInt(newHashObj['ppr']),
+      bottom: parseInt(newHashObj['ppb']),
+      left: parseInt(newHashObj['ppl']),
+      width: parseInt(newHashObj['ppw']),
+      height: parseInt(newHashObj['pph']),
+    }));
+  }
+};
+
+export const updateUrlHash = (q) => {
+  const hashObj = { ...urlHashToObj(window.location.hash), ...q };
+  const updatedHash = objToUrlHash(hashObj);
+  window.location.hash = updatedHash;
+};
+
+export const updatePopupUrlHash = (id, isShown, anchorPosition) => {
+  const obj = {};
+  obj.p = isShown ? id : null;
+  obj.ppt = isShown ? Math.round(anchorPosition.top) : null;
+  obj.ppr = isShown ? Math.round(anchorPosition.right) : null;
+  obj.ppb = isShown ? Math.round(anchorPosition.bottom) : null;
+  obj.ppl = isShown ? Math.round(anchorPosition.left) : null;
+  obj.ppw = isShown ? Math.round(anchorPosition.width) : null;
+  obj.pph = isShown ? Math.round(anchorPosition.height) : null;
+
+  updateUrlHash(obj);
+};
+
+export const updatePopup = (id, isShown, anchorPosition) => {
+  return {
+    type: UPDATE_POPUP,
+    payload: { id, isShown, anchorPosition },
+  };
 };

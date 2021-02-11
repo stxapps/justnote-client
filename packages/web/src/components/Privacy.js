@@ -1,10 +1,14 @@
 import React, { useEffect } from 'react';
 
-const Privacy = React.memo(() => {
+const Privacy = () => {
+
+  useEffect(() => {
+
+  });
 
   return (
     <div>Privacy</div>
   );
-});
+};
 
-export default Privacy;
+export default React.memo(Privacy);

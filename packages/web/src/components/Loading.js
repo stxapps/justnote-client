@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
-const Loading = React.memo(() => {
+const Loading = () => {
 
   return (
     <div>Loading</div>
   );
-});
+};
 
-export default Loading;
+export default React.memo(Loading);

@@ -5,16 +5,19 @@ import { LG_WIDTH } from '../types/const';
 import { useSafeAreaFrame } from '.';
 import ColsPanel from './ColsPanel';
 import NavPanel from './NavPanel';
+import SidebarProfilePopup from './SidebarProfilePopup';
 
-const Main = React.memo(() => {
+const Main = () => {
 
   const { width: safeAreaWidth } = useSafeAreaFrame();
+  const panel = safeAreaWidth < LG_WIDTH ? <NavPanel /> : <ColsPanel />;
 
-  if (safeAreaWidth < LG_WIDTH) {
-    return <NavPanel />;
-  } else {
-    return <ColsPanel />;
-  }
-});
+  return (
+    <React.Fragment>
+      {panel}
+      <SidebarProfilePopup />
+    </React.Fragment>
+  );
+};
 
-export default Main;
+export default React.memo(Main);

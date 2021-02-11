@@ -162,5 +162,19 @@
 }
 
 @layer utilities {
+  .focus\:outline-none-outer:focus {
+    @apply outline-none;
+  }
 
+  .focus\:outline-none-outer:focus > .focus\:ring-2 {
+    @apply ring-2;
+  }
+
+  .focus\:outline-none-outer:focus > .focus\:ring-green-600 {
+    @apply ring-green-600;
+  }
+
+  .focus\:outline-none-outer:focus > .focus\:ring-gray-600 {
+    @apply ring-gray-600;
+  }
 }

@@ -18,6 +18,10 @@ module.exports = {
       cursor: {
         resize: 'col-resize',
       },
+      minWidth: {
+        '56': '14rem',
+        '64': '16rem',
+      },
     },
   },
   variants: {
@@ -27,5 +31,6 @@ module.exports = {
     require('@tailwindcss/forms'),
     require('@tailwindcss/aspect-ratio'),
     require('@tailwindcss/typography'),
+    require('@tailwindcss/line-clamp'),
   ],
 }

@@ -9,7 +9,7 @@ const genAppBlockstackAuthUrl = () => {
   return APP_DOMAIN_NAME + BLOCKSTACK_AUTH + '?authResponse=' + authResponse;
 }
 
-const BlockstackAuth = React.memo(() => {
+const BlockstackAuth = () => {
 
   const [hasTimeout, setHasTimeout] = useState(false);
   const blockstackAuthUrl = useMemo(() => genAppBlockstackAuthUrl(), []);
@@ -40,6 +40,6 @@ const BlockstackAuth = React.memo(() => {
       </section>
     </div>
   );
-});
+};
 
-export default BlockstackAuth;
+export default React.memo(BlockstackAuth);

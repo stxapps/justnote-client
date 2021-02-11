@@ -9,7 +9,7 @@ import logoFull from '../images/logo-full.svg';
 import mainDesktopInDarkChrome from '../images/main-desktop-in-dark-chrome.png';
 import creator from '../images/creator.jpg';
 
-const Landing = React.memo(() => {
+const Landing = () => {
 
   const dispatch = useDispatch();
 
@@ -354,6 +354,6 @@ const Landing = React.memo(() => {
       </footer>
     </React.Fragment>
   );
-});
+};
 
-export default Landing;
+export default React.memo(Landing);

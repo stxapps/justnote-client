@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-const NavPanel = React.memo(() => {
+const NavPanel = () => {
 
   useEffect(() => {
 
@@ -9,6 +9,6 @@ const NavPanel = React.memo(() => {
   return (
     <div>Nav Panel</div>
   );
-});
+};
 
-export default NavPanel;
+export default React.memo(NavPanel);

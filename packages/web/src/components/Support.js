@@ -1,10 +1,14 @@
 import React, { useEffect } from 'react';
 
-const Support = React.memo(() => {
+const Support = () => {
+
+  useEffect(() => {
+
+  });
 
   return (
     <div>Support</div>
   );
-});
+};
 
-export default Support;
+export default React.memo(Support);

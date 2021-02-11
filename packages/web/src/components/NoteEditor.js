@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const _NoteEditor = (props) => {
+const NoteEditor = (props) => {
 
   const { isFullScreen, onToggleFullScreen } = props;
 
@@ -13,11 +13,9 @@ const _NoteEditor = (props) => {
   );
 };
 
-_NoteEditor.protoTypes = {
+NoteEditor.protoTypes = {
   isFullScreen: PropTypes.bool.isRequired,
   onToggleFullScreen: PropTypes.func.isRequired,
 };
 
-const NoteEditor = React.memo(_NoteEditor);
-
-export default NoteEditor;
+export default React.memo(NoteEditor);

@@ -1,10 +1,14 @@
 import React, { useEffect } from 'react';
 
-const Terms = React.memo(() => {
+const Terms = () => {
+
+  useEffect(() => {
+
+  });
 
   return (
     <div>Terms</div>
   );
-});
+};
 
-export default Terms;
+export default React.memo(Terms);

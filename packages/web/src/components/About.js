@@ -1,10 +1,14 @@
 import React, { useEffect } from 'react';
 
-const About = React.memo(() => {
+const About = () => {
+
+  useEffect(() => {
+
+  });
 
   return (
     <div>About</div>
   );
-});
+};
 
-export default About;
+export default React.memo(About);

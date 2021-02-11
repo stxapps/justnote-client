@@ -12,7 +12,7 @@ import Terms from './Terms';
 import Privacy from './Privacy';
 import Support from './Support';
 
-const App = React.memo(() => {
+const App = () => {
 
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
   const isHandlingSignIn = useSelector(state => state.display.isHandlingSignIn);
@@ -33,6 +33,6 @@ const App = React.memo(() => {
   if (isUserSignedIn === true) return <Main />;
 
   return <Landing />;
-});
+};
 
-export default App;
+export default React.memo(App);

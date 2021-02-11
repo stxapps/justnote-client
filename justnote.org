@@ -99,6 +99,8 @@
 *** editor
 *** search
 - need to add top padding dynamically?
+*** split screens
+- github.com/tomkp/react-split-pane
 ** z-index
 - 0: note list, note
 - 10: search popup
@@ -112,6 +114,7 @@
 ** offline and sync in mobile app
 - versioning/conflict/merge with file name!
 - delete need to keep all files!
+- sqlite on mobile
 ** text editor
 *** view mode vs edit mode
 *** file format!
@@ -131,7 +134,7 @@
 ** Web steps
 - npx create-react-app justnotecc --template cra-template-pwa
 - yarn add tailwindcss postcss postcss-cli autoprefixer
-- yarn add @tailwindcss/forms @tailwindcss/typography @tailwindcss/aspect-ratio
+- yarn add @tailwindcss/forms @tailwindcss/typography @tailwindcss/aspect-ratio @tailwindcss/line-clamp
 - npx tailwindcss init
 - yarn add npm-run-all
 - yarn add redux react-redux redux-loop
