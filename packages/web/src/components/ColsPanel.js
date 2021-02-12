@@ -180,7 +180,7 @@ const ColsPanel = () => {
 
   return (
     <div className="w-full h-screen flex overflow-hidden bg-white">
-      <motion.div style={{ width: state.pane1Width }} className={`overflow-hidden ${pane1Classes}`} layout={!isResizeActive}>
+      <motion.div style={{ width: state.pane1Width }} className={`bg-white overflow-hidden ${pane1Classes}`} layout={!isResizeActive}>
         <Sidebar />
       </motion.div>
       <motion.div onMouseDown={onLeftResizerMouseDown} onTouchStart={onLeftResizerTouchStart} onTouchEnd={onTouchEnd} style={{ width: resizerWidth }} className={`relative bg-gray-200 bg-clip-padding cursor-resize border-l-4 border-r-0 border-gray-100 overflow-visible ${resizer1Classes}`} layout={!isResizeActive}>
@@ -190,7 +190,7 @@ const ColsPanel = () => {
           </svg>
         </button>
       </motion.div>
-      <motion.div style={{ width: state.pane2Width }} className={`relative overflow-hidden ${pane2Classes}`} layout={!isResizeActive}>
+      <motion.div style={{ width: state.pane2Width }} className={`relative bg-white overflow-hidden ${pane2Classes}`} layout={!isResizeActive}>
         <NoteList />
         <AnimatePresence>
           {!state.isPane1Shown && <motion.button onClick={onTogglePane1Shown} className="absolute left-0 bottom-8 w-5 h-7 bg-gray-300 rounded-tr rounded-br shadow-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -202,7 +202,7 @@ const ColsPanel = () => {
         </AnimatePresence>
       </motion.div>
       <motion.div onMouseDown={onRightResizerMouseDown} onTouchStart={onRightResizerTouchStart} onTouchEnd={onTouchEnd} style={{ width: resizerWidth }} className={`relative bg-gray-200 bg-clip-padding cursor-resize border-l-0 border-r-4 border-white overflow-visible ${resizer2Classes}`} layout={!isResizeActive}></motion.div >
-      <motion.div className="flex-1 overflow-hidden" layout={!isResizeActive}>
+      <motion.div className="flex-1 bg-white overflow-hidden" layout={!isResizeActive}>
         <NoteEditor isFullScreen={state.isPane3FullScreen} onToggleFullScreen={onTogglePane3FullScreen} />
       </motion.div>
     </div >

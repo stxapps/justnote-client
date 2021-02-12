@@ -6,6 +6,7 @@ import { useSafeAreaFrame } from '.';
 import ColsPanel from './ColsPanel';
 import NavPanel from './NavPanel';
 import SidebarProfilePopup from './SidebarProfilePopup';
+import NoteListMenuPopup from './NoteListMenuPopup';
 
 const Main = () => {
 
@@ -16,6 +17,7 @@ const Main = () => {
     <React.Fragment>
       {panel}
       <SidebarProfilePopup />
+      <NoteListMenuPopup />
     </React.Fragment>
   );
 };

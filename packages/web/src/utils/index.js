@@ -2,6 +2,7 @@ import Url from 'url-parse';
 
 import {
   HTTP, HTTPS, WWW,
+  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_REMOVING, DIED_DELETING,
   VALID_URL, NO_URL, ASK_CONFIRM_URL,
 } from '../types/const';
 
@@ -231,4 +232,32 @@ export const objToUrlHash = (obj) => {
   }
 
   return `#?${s}`;
+};
+
+export const getListNameDisplayName = (listName, listNameMap) => {
+  for (const listNameObj of listNameMap) {
+    if (listNameObj.listName === listName) return listNameObj.displayName;
+  }
+
+  // Not throw an error because it can happen:
+  //   - Delete a link
+  //   - Delete a list name
+  //   - Commit delete the link -> cause rerender without the list name!
+  console.log(`getListNameDisplayName: invalid listName: ${listName} and listNameMap: ${listNameMap}`);
+  return listName;
+};
+
+export const doContainListName = (listName, listNameObjs) => {
+
+  for (const listNameObj of listNameObjs) {
+    if (listNameObj.listName === listName) return true;
+  }
+
+  return false;
+};
+
+export const isDiedStatus = (status) => {
+  return [
+    DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_REMOVING, DIED_DELETING,
+  ].includes(status);
 };

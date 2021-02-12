@@ -36,6 +36,7 @@
     "react-scripts": "4.0.1",
     "redux": "^4.0.5",
     "redux-loop": "^6.0.1",
+    "reselect": "^4.0.0",
     "tailwindcss": "^2.0.2",
     "url-parse": "^1.4.7",
     "web-vitals": "^0.2.4",

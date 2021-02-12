@@ -1,21 +1,23 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { useSelector } from 'react-redux'
+
+import NoteEditorCommands from './NoteEditorCommands';
+import NoteEditorEditor from './NoteEditorEditor';
+import NoteEditorBulkEditCommands from './NoteEditorBulkEditCommands';
 
 const NoteEditor = (props) => {
 
   const { isFullScreen, onToggleFullScreen } = props;
+  const isBulkEditing = useSelector(state => state.display.isBulkEditing);
+
+  if (isBulkEditing) return <NoteEditorBulkEditCommands />;
 
   return (
-    <div className="bg-red-300 w-full">
-      <h3>Note Editor</h3>
-      <button onClick={onToggleFullScreen} className="m-4 px-3 py-2 bg-indigo-400 rounded shadow-sm">{isFullScreen ? 'Exit' : 'Full screen'}</button>
+    <div className="w-full h-full">
+      <NoteEditorCommands isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} />
+      <NoteEditorEditor />
     </div>
   );
-};
-
-NoteEditor.protoTypes = {
-  isFullScreen: PropTypes.bool.isRequired,
-  onToggleFullScreen: PropTypes.func.isRequired,
 };
 
 export default React.memo(NoteEditor);

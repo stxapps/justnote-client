@@ -155,7 +155,7 @@
   + @stacks/connect still depends on blockstack, not @stacks/auth, need to update to newer version
 - yarn add blockstack --dev
   + Need to remove when @stacks/connect not depends to
-- 
+- yarn add reselect
 ** Server steps
 *** s3
 - Set public and enable CORS

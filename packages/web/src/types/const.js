@@ -19,3 +19,24 @@ export const LG_WIDTH = 1024;
 export const XL_WIDTH = 1280;
 
 export const PROFILE_POPUP = 'PROFILE_POPUP';
+export const NOTE_LIST_MENU_POPUP = 'NOTE_LIST_MENU_POPUP';
+export const BULK_EDIT_MOVE_TO_POPUP = 'BULK_EDIT_MOVE_TO_POPUP';
+
+export const MY_NOTES = 'My Notes';
+export const TRASH = 'Trash';
+export const ARCHIVE = 'Archive';
+
+export const NEW_NOTE = 'NEW_NOTE';
+
+export const ADDING = 'ADDING';
+export const ADDED = 'ADDED';
+export const MOVING = 'MOVING';
+export const MOVED = 'MOVED';
+export const REMOVING = 'REMOVING';
+export const DELETING = 'DELETING';
+export const UPDATING = 'UPDATING';
+export const DIED_ADDING = 'DIED_ADDING';
+export const DIED_MOVING = 'DIED_MOVING';
+export const DIED_REMOVING = 'DIED_REMOVING';
+export const DIED_DELETING = 'DIED_DELETING';
+export const DIED_UPDATING = 'DIED_UPDATING';

@@ -4,7 +4,9 @@ import Url from 'url-parse';
 import userSession from '../userSession';
 import {
   INIT, UPDATE_WINDOW_SIZE, UPDATE_USER, UPDATE_HANDLING_SIGN_IN,
-  UPDATE_POPUP, RESET_STATE,
+  UPDATE_POPUP, UPDATE_BULK_EDITING,
+  ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, CLEAR_SELECTED_NOTE_IDS,
+  RESET_STATE,
 } from '../types/actionTypes';
 import {
   APP_NAME, APP_ICON_NAME,
@@ -157,27 +159,23 @@ export const handleUrlHash = () => {
   if (urlObj.hash !== '') {
     urlObj.set('hash', '');
     window.location.replace(urlObj.toString());
+    console.log(`Set hash to empty in handleHash.`);
   }
 };
 
 export const onUrlHashChange = (oldUrl, newUrl, dispatch, getState) => {
-  console.log(`onUrlHashChange called with oldUrl: ${oldUrl} and newUrl: ${newUrl}.`);
-
+  console.log('onUrlHashChange called.', oldUrl, newUrl);
   const oldUrlObj = new Url(oldUrl, {});
   const oldHashObj = urlHashToObj(oldUrlObj.hash);
 
   const newUrlObj = new Url(newUrl, {});
   const newHashObj = urlHashToObj(newUrlObj.hash);
 
-  console.log(`oldHashObj: `, oldHashObj);
-  console.log(`newHashObj: `, newHashObj);
-
   if ('p' in oldHashObj && 'p' in newHashObj) {
-    // something else changed
     if (oldHashObj['p'] === newHashObj['p']) {
-
+      // something else changed, do nothing here.
     } else {
-
+      throw new Error(`Shouldn't reach here!`);
     }
   } else if ('p' in oldHashObj && !('p' in newHashObj)) {
     // Close popup
@@ -193,24 +191,57 @@ export const onUrlHashChange = (oldUrl, newUrl, dispatch, getState) => {
       height: parseInt(newHashObj['pph']),
     }));
   }
+
+  if ('ibe' in oldHashObj && 'ibe' in newHashObj) {
+    if (oldHashObj['ibe'] === newHashObj['ibe']) {
+      // something else changed, do nothing here.
+    } else {
+      throw new Error(`Shouldn't reach here!`);
+    }
+  } else if ('ibe' in oldHashObj && !('ibe' in newHashObj)) {
+    // Exit bulk editing
+    dispatch(updateBulkEdit(false));
+    dispatch(clearSelectedNoteIds());
+  } else if (!('ibe' in oldHashObj) && 'ibe' in newHashObj) {
+    // Enter bulk editing
+    dispatch(updateBulkEdit(true));
+  }
 };
 
-export const updateUrlHash = (q) => {
+export const updateUrlHash = (q, doReplace = false) => {
   const hashObj = { ...urlHashToObj(window.location.hash), ...q };
   const updatedHash = objToUrlHash(hashObj);
-  window.location.hash = updatedHash;
+
+  if (doReplace) {
+    const urlObj = new Url(window.location.href, {});
+    urlObj.set('hash', updatedHash);
+    window.location.replace(urlObj.toString());
+  } else window.location.hash = updatedHash;
+};
+
+export const updateNoteIdUrlHash = (id) => {
+
+};
+
+export const updateNoteId = (id) => {
+
 };
 
 export const updatePopupUrlHash = (id, isShown, anchorPosition) => {
-  const obj = {};
-  obj.p = isShown ? id : null;
-  obj.ppt = isShown ? Math.round(anchorPosition.top) : null;
-  obj.ppr = isShown ? Math.round(anchorPosition.right) : null;
-  obj.ppb = isShown ? Math.round(anchorPosition.bottom) : null;
-  obj.ppl = isShown ? Math.round(anchorPosition.left) : null;
-  obj.ppw = isShown ? Math.round(anchorPosition.width) : null;
-  obj.pph = isShown ? Math.round(anchorPosition.height) : null;
+  if (!isShown) {
+    window.history.back();
+    return;
+  }
 
+  const obj = {
+    p: id,
+    ppt: Math.round(anchorPosition.top),
+    ppr: Math.round(anchorPosition.right),
+    ppb: Math.round(anchorPosition.bottom),
+    ppl: Math.round(anchorPosition.left),
+    ppw: Math.round(anchorPosition.width),
+    pph: Math.round(anchorPosition.height),
+  };
   updateUrlHash(obj);
 };
 
@@ -218,5 +249,45 @@ export const updatePopup = (id, isShown, anchorPosition) => {
   return {
     type: UPDATE_POPUP,
     payload: { id, isShown, anchorPosition },
+  };
+};
+
+export const updateBulkEditUrlHash = (isBulkEditing, doReplace = false) => {
+  if (!isBulkEditing) {
+    window.history.back();
+    return;
+  }
+
+  const obj = {
+    ibe: true,
+    p: null, ppt: null, ppr: null, ppb: null, ppl: null, ppw: null, pph: null,
+  };
+  updateUrlHash(obj, doReplace);
+};
+
+export const updateBulkEdit = (isBulkEditing) => {
+  return {
+    type: UPDATE_BULK_EDITING,
+    payload: isBulkEditing,
+  };
+};
+
+export const addSelectedNoteIds = (ids) => {
+  return {
+    type: ADD_SELECTED_NOTE_IDS,
+    payload: ids,
+  };
+};
+
+export const deleteSelectedNoteIds = (ids) => {
+  return {
+    type: DELETE_SELECTED_NOTE_IDS,
+    payload: ids,
+  };
+};
+
+export const clearSelectedNoteIds = () => {
+  return {
+    type: CLEAR_SELECTED_NOTE_IDS
   };
 };

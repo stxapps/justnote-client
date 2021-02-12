@@ -15,6 +15,7 @@ export const popupFMV = {
     transition: { ease: 'easeOut', duration: 0.1 },
   },
 };
+
 export const tlPopupFMV = {
   hidden: {
     scale: 0,
