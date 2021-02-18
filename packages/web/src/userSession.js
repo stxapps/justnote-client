@@ -1,4 +1,4 @@
-import { UserSession, AppConfig } from '@stacks/auth';
+import { UserSession, AppConfig } from 'blockstack';
 
 import { DOMAIN_NAME } from './types/const';
 

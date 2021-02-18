@@ -7,6 +7,9 @@ import ColsPanel from './ColsPanel';
 import NavPanel from './NavPanel';
 import SidebarProfilePopup from './SidebarProfilePopup';
 import NoteListMenuPopup from './NoteListMenuPopup';
+import MoveToPopup from './MoveToPopup';
+import ConfirmDeletePopup from './ConfirmDeletePopup';
+import SettingsPopup from './SettingsPopup';
 
 const Main = () => {
 
@@ -18,6 +21,9 @@ const Main = () => {
       {panel}
       <SidebarProfilePopup />
       <NoteListMenuPopup />
+      <MoveToPopup />
+      <ConfirmDeletePopup />
+      <SettingsPopup />
     </React.Fragment>
   );
 };

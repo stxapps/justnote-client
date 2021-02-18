@@ -1,4 +1,4 @@
-import { createSelectorCreator, defaultMemoize } from 'reselect';
+import { createSelectorCreator, defaultMemoize, createSelector } from 'reselect';
 
 import {
   ADDED, ADDING, UPDATING, MOVING, DIED_ADDING, DIED_UPDATING, DIED_MOVING,
@@ -44,5 +44,23 @@ export const getListNameMap = createSelectorListNameMap(
     }
 
     return listNameMap;
+  }
+);
+
+/** @return {function(any, any): any} */
+export const makeIsNoteIdSelected = () => {
+  return createSelector(
+    state => state.display.selectedNoteIds,
+    (_, noteId) => noteId,
+    (selectedNoteIds, noteId) => {
+      return selectedNoteIds.includes(noteId);
+    }
+  );
+};
+
+export const getSelectedNoteIdsLength = createSelector(
+  state => state.display.selectedNoteIds,
+  selectedNoteIds => {
+    return selectedNoteIds.length;
   }
 );

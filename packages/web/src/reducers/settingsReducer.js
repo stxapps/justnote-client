@@ -7,7 +7,8 @@ const initialState = {
   listNameMap: [
     { listName: MY_NOTES, displayName: MY_NOTES, status: ADDED },
     { listName: TRASH, displayName: TRASH, status: ADDED },
-    { listName: ARCHIVE, displayName: ARCHIVE, status: ADDED }
+    { listName: ARCHIVE, displayName: ARCHIVE, status: ADDED },
+    { listName: '8112983192', displayName: 'Busan Trip', status: ADDED },
   ],
 };
 

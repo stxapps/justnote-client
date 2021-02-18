@@ -1,7 +1,8 @@
 import React, { useRef } from 'react';
+import { useDispatch } from 'react-redux';
 
-import { updatePopupUrlHash } from '../actions';
-import { PROFILE_POPUP } from '../types/const';
+import { updateNoteId, updatePopupUrlHash } from '../actions';
+import { NEW_NOTE, PROFILE_POPUP } from '../types/const';
 
 import SidebarSearchInput from './SidebarSearchInput';
 import SidebarListNames from './SidebarListNames';
@@ -11,9 +12,14 @@ import logoFull from '../images/logo-full.svg';
 const Sidebar = () => {
 
   const profileBtn = useRef(null);
+  const dispatch = useDispatch();
 
   const onProfileBtnClick = () => {
     updatePopupUrlHash(PROFILE_POPUP, true, profileBtn.current.getBoundingClientRect());
+  };
+
+  const onAddBtnClick = () => {
+    dispatch(updateNoteId(NEW_NOTE));
   };
 
   return (
@@ -23,7 +29,7 @@ const Sidebar = () => {
       </div>
       <div className="h-0 flex-1 flex flex-col">
         {/* User account dropdown */}
-        <div className="pl-3 pr-1 mt-6 relative inline-block text-left">
+        <div className="hidden pl-3 pr-1 mt-6 relative inline-block text-left lg:block">
           <button ref={profileBtn} onClick={onProfileBtnClick} type="button" className="group w-full bg-gray-100 rounded-md px-3.5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-green-600" aria-haspopup="true" aria-expanded="true">
             <span className="flex w-full justify-between items-center">
               <span className="flex-1 flex min-w-0 items-center justify-between space-x-3">
@@ -41,8 +47,8 @@ const Sidebar = () => {
         {/* Sidebar Search */}
         <SidebarSearchInput />
         {/* Add Button */}
-        <div className="pl-3 pr-1 mt-6">
-          <button type="button" className="py-2 w-full bg-green-600 text-sm font-medium text-white border border-green-600 rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-green-600">
+        <div className="hidden pl-3 pr-1 mt-6 lg:block">
+          <button onClick={onAddBtnClick} type="button" className="py-2 w-full bg-green-600 text-sm font-medium text-white border border-green-600 rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-green-600">
             <div className="w-full h-full relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none" aria-hidden="true">
                 <svg className="mr-3 h-4 w-4 text-white" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" fill="currentColor">

@@ -1,7 +1,7 @@
 import Url from 'url-parse';
 
 import {
-  HTTP, HTTPS, WWW,
+  HTTP,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_REMOVING, DIED_DELETING,
   VALID_URL, NO_URL, ASK_CONFIRM_URL,
 } from '../types/const';
@@ -260,4 +260,9 @@ export const isDiedStatus = (status) => {
   return [
     DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_REMOVING, DIED_DELETING,
   ].includes(status);
+};
+
+export const getLastHalfHeight = (height, textHeight, pt, pb) => {
+  const x = Math.floor(((height - pt - pb) / textHeight) - 0.5);
+  return Math.round((textHeight * x + textHeight / 2) + pt + pb);
 };

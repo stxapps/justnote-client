@@ -101,6 +101,8 @@
 - need to add top padding dynamically?
 *** split screens
 - github.com/tomkp/react-split-pane
+- github.com/brucelin0325/react-native-resizable-flex-panes
+- github.com/STRML/react-grid-layout
 ** z-index
 - 0: note list, note
 - 10: search popup

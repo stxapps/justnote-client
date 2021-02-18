@@ -18,15 +18,19 @@ export const MD_WIDTH = 768;
 export const LG_WIDTH = 1024;
 export const XL_WIDTH = 1280;
 
-export const PROFILE_POPUP = 'PROFILE_POPUP';
-export const NOTE_LIST_MENU_POPUP = 'NOTE_LIST_MENU_POPUP';
-export const BULK_EDIT_MOVE_TO_POPUP = 'BULK_EDIT_MOVE_TO_POPUP';
-
 export const MY_NOTES = 'My Notes';
 export const TRASH = 'Trash';
 export const ARCHIVE = 'Archive';
 
 export const NEW_NOTE = 'NEW_NOTE';
+
+export const PROFILE_POPUP = 'PROFILE_POPUP';
+export const NOTE_LIST_MENU_POPUP = 'NOTE_LIST_MENU_POPUP';
+export const MOVE_TO_POPUP = 'MOVE_TO_POPUP';
+export const SIDEBAR_POPUP = 'SIDEBAR_POPUP';
+export const SEARCH_POPUP = 'SEARCH_POPUP';
+export const CONFIRM_DELETE_POPUP = 'CONFIRM_DELETE_POPUP';
+export const SETTINGS_POPUP = 'SETTINGS_POPUP';
 
 export const ADDING = 'ADDING';
 export const ADDED = 'ADDED';
@@ -40,3 +44,9 @@ export const DIED_MOVING = 'DIED_MOVING';
 export const DIED_REMOVING = 'DIED_REMOVING';
 export const DIED_DELETING = 'DIED_DELETING';
 export const DIED_UPDATING = 'DIED_UPDATING';
+
+export const ZERO = 'ZERO'; // top or left of the window
+export const CENTER = 'CENTER'; // center of the window
+export const EDGE = 'EDGE'; // bottom or right of the window
+export const AT_TRIGGER = 'AT_TRIGGER'; // top or left of the trigger
+export const EDGE_TRIGGER = 'EDGE_TRIGGER'; // bottom or right of the trigger

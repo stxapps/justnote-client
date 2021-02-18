@@ -1,20 +1,20 @@
 import React from 'react';
 import { useSelector } from 'react-redux'
 
-import NoteEditorCommands from './NoteEditorCommands';
+import NoteEditorTopBar from './NoteEditorTopBar';
 import NoteEditorEditor from './NoteEditorEditor';
-import NoteEditorBulkEditCommands from './NoteEditorBulkEditCommands';
+import NoteEditorBulkEdit from './NoteEditorBulkEdit';
 
 const NoteEditor = (props) => {
 
-  const { isFullScreen, onToggleFullScreen } = props;
+  const { isFullScreen, onToggleFullScreen, onRightPanelCloseBtnClick } = props;
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
 
-  if (isBulkEditing) return <NoteEditorBulkEditCommands />;
+  if (isBulkEditing) return <NoteEditorBulkEdit />;
 
   return (
-    <div className="w-full h-full">
-      <NoteEditorCommands isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} />
+    <div className="w-full h-full bg-white">
+      <NoteEditorTopBar isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} onRightPanelCloseBtnClick={onRightPanelCloseBtnClick} />
       <NoteEditorEditor />
     </div>
   );

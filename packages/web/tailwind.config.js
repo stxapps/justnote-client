@@ -22,10 +22,21 @@ module.exports = {
         '56': '14rem',
         '64': '16rem',
       },
+      maxWidth: {
+        '56': '14rem',
+        '64': '16rem',
+      },
     },
   },
   variants: {
-    extend: {},
+    extend: {
+      textColor: ['group-focus', 'focus-visible'],
+      ringColor: ['group-focus', 'focus-visible'],
+      ringOffsetColor: ['group-focus', 'focus-visible'],
+      ringOffsetWidth: ['group-focus', 'focus-visible'],
+      ringOpacity: ['group-focus', 'focus-visible'],
+      ringWidth: ['group-focus', 'focus-visible'],
+    },
   },
   plugins: [
     require('@tailwindcss/forms'),

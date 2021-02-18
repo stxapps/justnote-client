@@ -1,35 +1,27 @@
-import React, { useRef } from 'react';
+import React from 'react';
+import { useSelector } from 'react-redux';
 
-import { updatePopupUrlHash } from '../actions';
-import { NOTE_LIST_MENU_POPUP } from '../types/const';
+import { updateNoteIdUrlHash } from '../actions';
+import { NEW_NOTE } from '../types/const';
 
+import NoteListTopBar from './NoteListTopBar';
 import NoteListItem from './NoteListItem';
 
-const NoteList = () => {
+const NoteList = (props) => {
 
-  const menuBtn = useRef(null);
+  const { onSidebarOpenBtnClick } = props;
+  const isBulkEditing = useSelector(state => state.display.isBulkEditing);
 
-  const onMenuBtnClick = () => {
-    updatePopupUrlHash(
-      NOTE_LIST_MENU_POPUP, true, menuBtn.current.getBoundingClientRect()
-    );
+  const onAddBtnClick = () => {
+    updateNoteIdUrlHash(NEW_NOTE);
   };
 
   return (
-    <div className="w-full min-w-64 h-full overflow-y-auto">
+    <div className="relative w-full min-w-64 h-full">
       {/* TopBar */}
-      <div className="border-b border-gray-200 pl-4 pr-0 py-4 flex items-center justify-between sm:pl-6 lg:pl-8">
-        <div className="flex-1 min-w-0">
-          <h1 className="text-lg font-medium leading-6 text-gray-900 truncate">My Notes</h1>
-        </div>
-        <button ref={menuBtn} onClick={onMenuBtnClick} type="button" className="group ml-3 inline-flex items-center px-4 border border-white text-sm font-medium text-gray-400 hover:text-gray-600 focus:outline-none-outer">
-          <svg className="w-5 py-2 rounded-full group-hover:bg-gray-200 focus:ring-2 focus:ring-green-600" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path d="M10 6C9.46957 6 8.96086 5.78929 8.58579 5.41421C8.21071 5.03914 8 4.53043 8 4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2C10.5304 2 11.0391 2.21071 11.4142 2.58579C11.7893 2.96086 12 3.46957 12 4C12 4.53043 11.7893 5.03914 11.4142 5.41421C11.0391 5.78929 10.5304 6 10 6ZM10 12C9.46957 12 8.96086 11.7893 8.58579 11.4142C8.21071 11.0391 8 10.5304 8 10C8 9.46957 8.21071 8.96086 8.58579 8.58579C8.96086 8.21071 9.46957 8 10 8C10.5304 8 11.0391 8.21071 11.4142 8.58579C11.7893 8.96086 12 9.46957 12 10C12 10.5304 11.7893 11.0391 11.4142 11.4142C11.0391 11.7893 10.5304 12 10 12ZM10 18C9.46957 18 8.96086 17.7893 8.58579 17.4142C8.21071 17.0391 8 16.5304 8 16C8 15.4696 8.21071 14.9609 8.58579 14.5858C8.96086 14.2107 9.46957 14 10 14C10.5304 14 11.0391 14.2107 11.4142 14.5858C11.7893 14.9609 12 15.4696 12 16C12 16.5304 11.7893 17.0391 11.4142 17.4142C11.0391 17.7893 10.5304 18 10 18Z" />
-          </svg>
-        </button>
-      </div>
+      <NoteListTopBar onSidebarOpenBtnClick={onSidebarOpenBtnClick} />
       {/* Main */}
-      <div>
+      <div className="overflow-y-auto">
         <div className="mt-6">
           <ul className="-my-5 divide-y divide-gray-200">
             <NoteListItem note={{ id: '1', title: 'First note', text: 'Tenetur libero voluptatem rerum occaecati qui est molestiae exercitationem. Voluptate quisquam iure assumenda consequatur ex et recusandae. Alias consectetur voluptatibus. Accusamus a ab dicta et. Consequatur quis dignissimos voluptatem nisi.', createdDt: '1882181' }} />
@@ -41,6 +33,12 @@ const NoteList = () => {
           <button className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-600 bg-white hover:bg-gray-50">More</button>
         </div>
       </div>
+      {/* Add button */}
+      {!isBulkEditing && <button onClick={onAddBtnClick} className="absolute right-4 bottom-4 rounded-full bg-green-600 text-white w-16 h-16 shadow-md flex items-center justify-center hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 lg:hidden">
+        <svg className="w-10 h-10" viewBox="0 0 40 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path fillRule="evenodd" clipRule="evenodd" d="M20 10C20.5304 10 21.0391 10.2107 21.4142 10.5858C21.7893 10.9609 22 11.4696 22 12V18H28C28.5304 18 29.0391 18.2107 29.4142 18.5858C29.7893 18.9609 30 19.4696 30 20C30 20.5304 29.7893 21.0391 29.4142 21.4142C29.0391 21.7893 28.5304 22 28 22H22V28C22 28.5304 21.7893 29.0391 21.4142 29.4142C21.0391 29.7893 20.5304 30 20 30C19.4696 30 18.9609 29.7893 18.5858 29.4142C18.2107 29.0391 18 28.5304 18 28V22H12C11.4696 22 10.9609 21.7893 10.5858 21.4142C10.2107 21.0391 10 20.5304 10 20C10 19.4696 10.2107 18.9609 10.5858 18.5858C10.9609 18.2107 11.4696 18 12 18H18V12C18 11.4696 18.2107 10.9609 18.5858 10.5858C18.9609 10.2107 19.4696 10 20 10Z" />
+        </svg>
+      </button>}
     </div>
   );
 };

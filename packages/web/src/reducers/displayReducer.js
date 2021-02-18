@@ -1,13 +1,12 @@
-import { UPDATE_HANDLING_SIGN_IN, RESET_STATE } from '../types/actionTypes';
-
 import {
-  UPDATE_POPUP,
-  UPDATE_BULK_EDITING,
+  UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP,
+  UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, CLEAR_SELECTED_NOTE_IDS,
+  RESET_STATE,
 } from '../types/actionTypes';
 import {
-  PROFILE_POPUP, NOTE_LIST_MENU_POPUP, BULK_EDIT_MOVE_TO_POPUP,
-  MY_NOTES,
+  PROFILE_POPUP, NOTE_LIST_MENU_POPUP, MOVE_TO_POPUP, SIDEBAR_POPUP, SEARCH_POPUP,
+  CONFIRM_DELETE_POPUP, SETTINGS_POPUP, MY_NOTES,
 } from '../types/const';
 
 const initialState = {
@@ -18,17 +17,30 @@ const initialState = {
   profilePopupPosition: null,
   isNoteListMenuPopupShown: false,
   noteListMenuPopupPosition: null,
+  isMoveToPopupShown: false,
+  moveToPopupPosition: null,
+  isSidebarPopupShown: false,
+  isSearchPopupShown: false,
+  isConfirmDeletePopupShown: false,
+  isSettingsPopupShown: false,
   isEditorFocused: false,
   searchString: '',
   isBulkEditing: false,
   selectedNoteIds: [],
-  isBulkEditMoveToPopupShown: false,
 };
 
 const displayReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_HANDLING_SIGN_IN) {
     return { ...state, isHandlingSignIn: action.payload };
+  }
+
+  if (action.type === UPDATE_LIST_NAME) {
+    return { ...state, listName: action.payload };
+  }
+
+  if (action.type === UPDATE_NOTE_ID) {
+    return { ...state, noteId: action.payload };
   }
 
   if (action.type === UPDATE_POPUP) {
@@ -49,11 +61,39 @@ const displayReducer = (state = initialState, action) => {
       };
     }
 
-    if (action.payload.id === BULK_EDIT_MOVE_TO_POPUP) {
-      return { ...state, isBulkEditMoveToPopupShown: action.payload.isShown }
+    if (action.payload.id === MOVE_TO_POPUP) {
+      return {
+        ...state,
+        isMoveToPopupShown: isShown,
+        moveToPopupPosition: anchorPosition,
+      }
+    }
+
+    if (id === SIDEBAR_POPUP) {
+      return {
+        ...state, isSidebarPopupShown: isShown,
+      };
+    }
+
+    if (action.payload.id === SEARCH_POPUP) {
+      return { ...state, isSearchPopupShown: isShown }
+    }
+
+    if (action.payload.id === CONFIRM_DELETE_POPUP) {
+      return { ...state, isConfirmDeletePopupShown: isShown }
+    }
+
+    if (id === SETTINGS_POPUP) {
+      return {
+        ...state, isSettingsPopupShown: isShown,
+      };
     }
 
     throw new Error(`Invalid type: ${action.type} and payload: ${action.payload}`);
+  }
+
+  if (action.type === UPDATE_SEARCH_STRING) {
+    return { ...state, searchString: action.payload };
   }
 
   if (action.type === UPDATE_BULK_EDITING) {
