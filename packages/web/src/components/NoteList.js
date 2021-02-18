@@ -5,7 +5,8 @@ import { updateNoteIdUrlHash } from '../actions';
 import { NEW_NOTE } from '../types/const';
 
 import NoteListTopBar from './NoteListTopBar';
-import NoteListItem from './NoteListItem';
+import NoteListItems from './NoteListItems';
+//import LoadingNoteListItems from './LoadingNoteListItems';
 
 const NoteList = (props) => {
 
@@ -16,23 +17,15 @@ const NoteList = (props) => {
     updateNoteIdUrlHash(NEW_NOTE);
   };
 
+  const noteListItems = <NoteListItems />;
+  //const noteListItems = <LoadingNoteListItems />;
+
   return (
-    <div className="relative w-full min-w-64 h-full">
+    <div className="relative w-full min-w-64 h-full flex flex-col">
       {/* TopBar */}
       <NoteListTopBar onSidebarOpenBtnClick={onSidebarOpenBtnClick} />
       {/* Main */}
-      <div className="overflow-y-auto">
-        <div className="mt-6">
-          <ul className="-my-5 divide-y divide-gray-200">
-            <NoteListItem note={{ id: '1', title: 'First note', text: 'Tenetur libero voluptatem rerum occaecati qui est molestiae exercitationem. Voluptate quisquam iure assumenda consequatur ex et recusandae. Alias consectetur voluptatibus. Accusamus a ab dicta et. Consequatur quis dignissimos voluptatem nisi.', createdDt: '1882181' }} />
-            <NoteListItem note={{ id: '2', title: 'My second note', text: 'This is a test. That is a book.', createdDt: '192882' }} />
-            <NoteListItem note={{ id: '3', title: 'Holy Shit! I did it.', text: 'WTF. Why you whining like a girl?', createdDt: '2082181' }} />
-          </ul>
-        </div>
-        <div className="mt-6 px-4 sm:px-6 lg:px-8">
-          <button className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-600 bg-white hover:bg-gray-50">More</button>
-        </div>
-      </div>
+      {noteListItems}
       {/* Add button */}
       {!isBulkEditing && <button onClick={onAddBtnClick} className="absolute right-4 bottom-4 rounded-full bg-green-600 text-white w-16 h-16 shadow-md flex items-center justify-center hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 lg:hidden">
         <svg className="w-10 h-10" viewBox="0 0 40 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">

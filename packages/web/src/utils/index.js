@@ -266,3 +266,11 @@ export const getLastHalfHeight = (height, textHeight, pt, pb) => {
   const x = Math.floor(((height - pt - pb) / textHeight) - 0.5);
   return Math.round((textHeight * x + textHeight / 2) + pt + pb);
 };
+
+export const randInt = (max) => {
+  return Math.floor(Math.random() * Math.floor(max));
+};
+
+export const sample = (arr) => {
+  return arr[Math.floor(Math.random() * arr.length)];
+};

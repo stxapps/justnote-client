@@ -40,6 +40,7 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_NOTE_ID) {
+    if (state.noteId === action.payload) return { ...state, noteId: null };
     return { ...state, noteId: action.payload };
   }
 

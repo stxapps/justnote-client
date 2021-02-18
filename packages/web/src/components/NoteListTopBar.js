@@ -27,9 +27,11 @@ const NoteListTopBar = (props) => {
 
   if (safeAreaWidth < LG_WIDTH && isBulkEditing) return <NoteListTopBarBulkEdit />;
 
+  const title = <h1 className="text-lg font-medium leading-6 text-gray-900 truncate">My Notes</h1>;
+  //const title = <div className="bg-gray-300 w-20 h-6 rounded-md animate-pulse"></div>
 
   return (
-    <div>
+    <div className="flex-grow-0 flex-shrink-0">
       <div className="h-16 border-b border-gray-200 flex items-center justify-between">
         <button onClick={onSidebarOpenBtnClick} className="h-full px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-600 sm:px-6 lg:hidden">
           <span className="sr-only">Open sidebar</span>
@@ -39,7 +41,7 @@ const NoteListTopBar = (props) => {
         </button>
         <div className="pl-4 flex-1 flex items-center justify-between sm:pl-6 lg:pl-8">
           <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-medium leading-6 text-gray-900 truncate">My Notes</h1>
+            {title}
           </div>
           <div className="ml-4 flex">
             <button onClick={onSearchBtnClick} type="button" className="group inline-flex items-center px-1 border border-white text-sm text-gray-400 bg-white hover:text-gray-600 focus:outline-none lg:hidden">

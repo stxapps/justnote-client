@@ -6,6 +6,7 @@ import { NEW_NOTE, PROFILE_POPUP } from '../types/const';
 
 import SidebarSearchInput from './SidebarSearchInput';
 import SidebarListNames from './SidebarListNames';
+//import LoadingSidebarListNames from './LoadingSidebarListNames';
 
 import logoFull from '../images/logo-full.svg';
 
@@ -21,6 +22,9 @@ const Sidebar = () => {
   const onAddBtnClick = () => {
     dispatch(updateNoteId(NEW_NOTE));
   };
+
+  const listNames = <SidebarListNames />;
+  //const listNames = <LoadingSidebarListNames />;
 
   return (
     <div className="flex flex-col w-full min-w-56 h-full pt-5 pb-4 bg-gray-100">
@@ -60,7 +64,7 @@ const Sidebar = () => {
           </button>
         </div>
         {/* List Names */}
-        <SidebarListNames />
+        {listNames}
       </div>
     </div>
   );
