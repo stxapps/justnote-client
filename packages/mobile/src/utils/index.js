@@ -1,7 +1,8 @@
 import Url from 'url-parse';
 
 import {
-  HTTP, HTTPS, WWW,
+  HTTP,
+  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_REMOVING, DIED_DELETING,
   VALID_URL, NO_URL, ASK_CONFIRM_URL,
 } from '../types/const';
 
@@ -100,6 +101,19 @@ export const getUrlPathQueryHash = (url) => {
   return url.split('/').slice(i).join('/');
 };
 
+export const getUserImageUrl = (userData) => {
+  const userImage = (userData && userData.profile && userData.profile.image) || null;
+
+  let userImageUrl = null;
+  if (userImage) {
+    if (Array.isArray(userImage) && userImage.length > 0) {
+      userImageUrl = userImage[0].contentUrl || null;
+    }
+  }
+
+  return userImageUrl;
+};
+
 export const throttle = (func, limit) => {
   let lastFunc;
   let lastRan;
@@ -185,15 +199,78 @@ export const isArrayEqual = (arr1, arr2) => {
   return true;
 };
 
-export const getUserImageUrl = (userData) => {
-  const userImage = (userData && userData.profile && userData.profile.image) || null;
+export const urlHashToObj = (hash) => {
 
-  let userImageUrl = null;
-  if (userImage) {
-    if (Array.isArray(userImage) && userImage.length > 0) {
-      userImageUrl = userImage[0].contentUrl || null;
-    }
+  if (hash === null || hash === undefined || !isString(hash)) {
+    throw new Error(`Invalid hash: ${hash}`);
   }
 
-  return userImageUrl;
+  const obj = {};
+  if (hash === '' || hash === '#' || hash === '#?') return obj;
+  if (hash.startsWith('#')) hash = hash.slice(1);
+  if (hash.startsWith('?')) hash = hash.slice(1);
+
+  const arr = hash.split('&');
+  for (const el of arr) {
+    const kv = el.split('=');
+    if (kv.length !== 2) throw new Error(`Invalid hash: ${hash}`);
+    obj[kv[0]] = kv[1];
+  }
+
+  return obj;
+};
+
+export const objToUrlHash = (obj) => {
+
+  let s = '';
+  for (const [k, v] of Object.entries(obj)) {
+    if (v === undefined) throw new Error(`Invalid obj: ${obj}`);
+    if (v === null) continue;
+
+    if (s.length > 0) s += '&';
+    s += k + '=' + v;
+  }
+
+  return `#?${s}`;
+};
+
+export const getListNameDisplayName = (listName, listNameMap) => {
+  for (const listNameObj of listNameMap) {
+    if (listNameObj.listName === listName) return listNameObj.displayName;
+  }
+
+  // Not throw an error because it can happen:
+  //   - Delete a link
+  //   - Delete a list name
+  //   - Commit delete the link -> cause rerender without the list name!
+  console.log(`getListNameDisplayName: invalid listName: ${listName} and listNameMap: ${listNameMap}`);
+  return listName;
+};
+
+export const doContainListName = (listName, listNameObjs) => {
+
+  for (const listNameObj of listNameObjs) {
+    if (listNameObj.listName === listName) return true;
+  }
+
+  return false;
+};
+
+export const isDiedStatus = (status) => {
+  return [
+    DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_REMOVING, DIED_DELETING,
+  ].includes(status);
+};
+
+export const getLastHalfHeight = (height, textHeight, pt, pb) => {
+  const x = Math.floor(((height - pt - pb) / textHeight) - 0.5);
+  return Math.round((textHeight * x + textHeight / 2) + pt + pb);
+};
+
+export const randInt = (max) => {
+  return Math.floor(Math.random() * Math.floor(max));
+};
+
+export const sample = (arr) => {
+  return arr[Math.floor(Math.random() * arr.length)];
 };

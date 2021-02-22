@@ -1,11 +1,20 @@
-import React, { useEffect } from 'react';
-import { View, Text } from 'react-native';
+import React from 'react';
+import { View } from 'react-native';
+import { SvgXml } from 'react-native-svg';
 
-const Loading = React.memo(() => {
+import cache from '../utils/cache';
+import { tailwind } from '../stylesheets/tailwind';
 
+import logo from '../images/logo-short.svg';
+
+const Loading = () => {
   return (
-    <Text>Loading</Text>
+    <View style={tailwind('items-center w-full h-full')}>
+      <View style={cache('LO_view', [{ top: '33.3333%', transform: [{ translateY: -24 }] }, tailwind('w-12 h-12')])}>
+        <SvgXml width={48} height={48} xml={logo} />
+      </View>
+    </View>
   );
-});
+};
 
-export default Loading;
+export default React.memo(Loading);

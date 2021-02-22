@@ -174,7 +174,7 @@
 - every command follows by --profile <name>
 ** Native steps
 - npx react-native init Justnotecc
-- yarn add https://github.com/bracedotto/tailwind-rn#45e6a6b6ebf0d010c3434c82f4a8719dbebd1b31
+- yarn add https://github.com/bracedotto/tailwind-rn#eb66f05f229c8525d913130808eddc2ebffbd692
 - yarn add redux react-redux redux-loop
 - yarn add react-native-svg
 - yarn add babel-plugin-inline-import --dev
@@ -188,6 +188,8 @@
 - yarn add react-native-safe-area-context
 - yarn add react-native-svg
 - yarn add 'https://gitpkg.now.sh/bracedotto/blockstack-react-native/BlockstackSDK?6d3814e88711af1394d0148586c871cff7038f6e'
+- yarn add reselect
+- yarn add react-native-fast-image
 - Android
   + android/gradle/wrapper/gradle-wrapper.properties
     ~ set gradle version in zip fpath

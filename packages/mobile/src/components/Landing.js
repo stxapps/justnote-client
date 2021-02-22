@@ -10,7 +10,7 @@ import cache from '../utils/cache';
 
 import logoFull from '../images/logo-full.svg';
 
-const Landing = React.memo(() => {
+const Landing = () => {
 
   const windowWidth = useSelector(state => state.window.width);
   const dispatch = useDispatch();
@@ -40,6 +40,6 @@ const Landing = React.memo(() => {
       </View>
     </ScrollView>
   );
-});
+};
 
-export default Landing;
+export default React.memo(Landing);

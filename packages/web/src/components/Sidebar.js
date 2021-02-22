@@ -33,7 +33,7 @@ const Sidebar = () => {
       </div>
       <div className="h-0 flex-1 flex flex-col">
         {/* User account dropdown */}
-        <div className="hidden pl-3 pr-1 mt-6 relative inline-block text-left lg:block">
+        <div className="hidden pl-3 pr-1 mt-6 relative text-left lg:block">
           <button ref={profileBtn} onClick={onProfileBtnClick} type="button" className="group w-full bg-gray-100 rounded-md px-3.5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-green-600" aria-haspopup="true" aria-expanded="true">
             <span className="flex w-full justify-between items-center">
               <span className="flex-1 flex min-w-0 items-center justify-between space-x-3">

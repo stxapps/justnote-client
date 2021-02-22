@@ -285,16 +285,6 @@ export const updateUrlHash = (q, doReplace = false) => {
   } else window.location.hash = updatedHash;
 };
 
-export const changeListName = (listName) => async (dispatch, getState) => {
-
-  dispatch({
-    type: UPDATE_LIST_NAME,
-    payload: listName,
-  })
-
-  dispatch(clearSelectedNoteIds());
-};
-
 export const updateNoteIdUrlHash = (id) => {
   if (!id) {
     window.history.back();
@@ -303,13 +293,6 @@ export const updateNoteIdUrlHash = (id) => {
 
   const obj = { n: id };
   updateUrlHash(obj);
-};
-
-export const updateNoteId = (id) => {
-  return {
-    type: UPDATE_NOTE_ID,
-    payload: id,
-  };
 };
 
 export const updatePopupUrlHash = (id, isShown, anchorPosition, doReplace = false) => {
@@ -338,6 +321,36 @@ export const updatePopupUrlHash = (id, isShown, anchorPosition, doReplace = fals
   updateUrlHash(obj, doReplace);
 };
 
+export const updateBulkEditUrlHash = (isBulkEditing, doReplace = false) => {
+  if (!isBulkEditing) {
+    window.history.back();
+    return;
+  }
+
+  const obj = {
+    ibe: true,
+    p: null, ppt: null, ppr: null, ppb: null, ppl: null, ppw: null, pph: null,
+  };
+  updateUrlHash(obj, doReplace);
+};
+
+export const changeListName = (listName) => async (dispatch, getState) => {
+
+  dispatch({
+    type: UPDATE_LIST_NAME,
+    payload: listName,
+  })
+
+  dispatch(clearSelectedNoteIds());
+};
+
+export const updateNoteId = (id) => {
+  return {
+    type: UPDATE_NOTE_ID,
+    payload: id,
+  };
+};
+
 export const updatePopup = (id, isShown, anchorPosition) => {
   return {
     type: UPDATE_POPUP,
@@ -350,19 +363,6 @@ export const updateSearchString = (searchString) => {
     type: UPDATE_SEARCH_STRING,
     payload: searchString,
   };
-};
-
-export const updateBulkEditUrlHash = (isBulkEditing, doReplace = false) => {
-  if (!isBulkEditing) {
-    window.history.back();
-    return;
-  }
-
-  const obj = {
-    ibe: true,
-    p: null, ppt: null, ppr: null, ppb: null, ppl: null, ppw: null, pph: null,
-  };
-  updateUrlHash(obj, doReplace);
 };
 
 export const updateBulkEdit = (isBulkEditing) => {

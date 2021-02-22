@@ -17,12 +17,14 @@
     "react": "16.13.1",
     "react-native": "0.63.4",
     "react-native-blockstack": "https://gitpkg.now.sh/bracedotto/blockstack-react-native/BlockstackSDK?6d3814e88711af1394d0148586c871cff7038f6e",
+    "react-native-fast-image": "^8.3.4",
     "react-native-safe-area-context": "^3.1.9",
     "react-native-svg": "^12.1.0",
     "react-redux": "^7.2.2",
     "redux": "^4.0.5",
     "redux-loop": "^6.0.1",
-    "tailwind-rn": "https://github.com/bracedotto/tailwind-rn#45e6a6b6ebf0d010c3434c82f4a8719dbebd1b31",
+    "reselect": "^4.0.0",
+    "tailwind-rn": "https://github.com/bracedotto/tailwind-rn#eb66f05f229c8525d913130808eddc2ebffbd692",
     "url-parse": "^1.4.7"
   },
   "devDependencies": {

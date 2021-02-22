@@ -1,11 +1,31 @@
-import React, { useEffect } from 'react';
-import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
-const Main = React.memo(() => {
+import { LG_WIDTH } from '../types/const';
+
+import ColsPanel from './ColsPanel';
+import NavPanel from './NavPanel';
+import SidebarProfilePopup from './SidebarProfilePopup';
+import NoteListMenuPopup from './NoteListMenuPopup';
+import MoveToPopup from './MoveToPopup';
+import ConfirmDeletePopup from './ConfirmDeletePopup';
+import SettingsPopup from './SettingsPopup';
+
+const Main = () => {
+
+  const { width: safeAreaWidth } = useSafeAreaFrame();
+  const panel = safeAreaWidth < LG_WIDTH ? <NavPanel /> : <ColsPanel />;
 
   return (
-    <Text>Main</Text>
+    <React.Fragment>
+      {panel}
+      <SidebarProfilePopup />
+      <NoteListMenuPopup />
+      <MoveToPopup />
+      <ConfirmDeletePopup />
+      <SettingsPopup />
+    </React.Fragment>
   );
-});
+};
 
-export default Main;
+export default React.memo(Main);

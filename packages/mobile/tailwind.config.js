@@ -8,6 +8,14 @@ module.exports = {
       colors: {
         green: colors.green,
       },
+      minWidth: {
+        '56': '14rem',
+        '64': '16rem',
+      },
+      maxWidth: {
+        '56': '14rem',
+        '64': '16rem',
+      },
     },
   },
   variants: {

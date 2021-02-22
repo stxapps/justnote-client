@@ -3,7 +3,9 @@ import { Linking, Dimensions, Platform } from 'react-native';
 import userSession from '../userSession';
 import {
   INIT, UPDATE_WINDOW_SIZE, UPDATE_USER, UPDATE_HANDLING_SIGN_IN,
-  UPDATE_POPUP,
+  UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP, UPDATE_SEARCH_STRING,
+  UPDATE_BULK_EDITING,
+  ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, CLEAR_SELECTED_NOTE_IDS,
   RESET_STATE,
 } from '../types/actionTypes';
 import {
@@ -203,9 +205,60 @@ export const signOut = () => async (dispatch, getState) => {
   });
 };
 
-export const updatePopup = (id, isShown) => {
+export const changeListName = (listName) => async (dispatch, getState) => {
+
+  dispatch({
+    type: UPDATE_LIST_NAME,
+    payload: listName,
+  })
+
+  dispatch(clearSelectedNoteIds());
+};
+
+export const updateNoteId = (id) => {
+  return {
+    type: UPDATE_NOTE_ID,
+    payload: id,
+  };
+};
+
+export const updatePopup = (id, isShown, anchorPosition) => {
   return {
     type: UPDATE_POPUP,
-    payload: { id, isShown },
+    payload: { id, isShown, anchorPosition },
+  };
+};
+
+export const updateSearchString = (searchString) => {
+  return {
+    type: UPDATE_SEARCH_STRING,
+    payload: searchString,
+  };
+};
+
+export const updateBulkEdit = (isBulkEditing) => {
+  return {
+    type: UPDATE_BULK_EDITING,
+    payload: isBulkEditing,
+  };
+};
+
+export const addSelectedNoteIds = (ids) => {
+  return {
+    type: ADD_SELECTED_NOTE_IDS,
+    payload: ids,
+  };
+};
+
+export const deleteSelectedNoteIds = (ids) => {
+  return {
+    type: DELETE_SELECTED_NOTE_IDS,
+    payload: ids,
+  };
+};
+
+export const clearSelectedNoteIds = () => {
+  return {
+    type: CLEAR_SELECTED_NOTE_IDS
   };
 };
