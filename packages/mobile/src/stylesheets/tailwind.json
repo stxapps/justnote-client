@@ -3703,6 +3703,9 @@
 	"max-w-0": {
 		"maxWidth": 0
 	},
+	"max-w-48": {
+		"maxWidth": 192
+	},
 	"max-w-56": {
 		"maxWidth": 224
 	},
@@ -3780,6 +3783,9 @@
 	},
 	"min-w-0": {
 		"minWidth": 0
+	},
+	"min-w-28": {
+		"minWidth": 112
 	},
 	"min-w-56": {
 		"minWidth": 224

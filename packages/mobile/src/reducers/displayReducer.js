@@ -27,6 +27,7 @@ const initialState = {
   searchString: '',
   isBulkEditing: false,
   selectedNoteIds: [],
+  listChangedCount: 0,
 };
 
 const displayReducer = (state = initialState, action) => {
@@ -36,7 +37,11 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_LIST_NAME) {
-    return { ...state, listName: action.payload };
+    return {
+      ...state,
+      listName: action.payload,
+      listChangedCount: state.listChangedCount + 1,
+    };
   }
 
   if (action.type === UPDATE_NOTE_ID) {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  View, Text, TouchableOpacity, Animated, Linking, BackHandler,
+  View, Text, TouchableOpacity, TouchableWithoutFeedback, Animated, Linking, BackHandler,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux'
 import Svg, { Path } from 'react-native-svg';
@@ -15,10 +15,10 @@ const SidebarProfilePopup = () => {
   const isShown = useSelector(state => state.display.isProfilePopupShown);
   const anchorPosition = useSelector(state => state.display.profilePopupPosition);
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
-  const [derivedIsShown, setDerivedIsShown] = useState(isShown);
   const popupAnim = useRef(new Animated.Value(0)).current;
   const popupBackHandler = useRef(null);
-  const _anchorPosition = useRef(null);
+  const derivedIsShown = useRef(isShown);
+  const derivedAnchorPosition = useRef(anchorPosition);
   const dispatch = useDispatch();
 
   const onProfileCancelBtnClick = () => {
@@ -37,7 +37,7 @@ const SidebarProfilePopup = () => {
 
   const onSignOutBtnClick = () => {
     onProfileCancelBtnClick();
-    dispatch(signOut())
+    dispatch(signOut());
   }
 
   const registerPopupBackHandler = (isShown) => {
@@ -76,32 +76,37 @@ const SidebarProfilePopup = () => {
     };
   }, [isShown]);
 
-  if (derivedIsShown !== isShown) {
-    if (derivedIsShown && !isShown) setDidCloseAnimEnd(false);
-    setDerivedIsShown(isShown);
+  if (derivedIsShown.current !== isShown) {
+    if (derivedIsShown.current && !isShown) setDidCloseAnimEnd(false);
+    derivedIsShown.current = isShown;
   }
 
   if (!isShown && didCloseAnimEnd) return null;
 
-  if (anchorPosition) _anchorPosition.current = anchorPosition;
+  if (anchorPosition && anchorPosition !== derivedAnchorPosition.current) {
+    derivedAnchorPosition.current = anchorPosition;
+  }
+
   const popupStyle = {
-    width: _anchorPosition.current.width,
-    top: _anchorPosition.current.top + _anchorPosition.current.height,
-    left: _anchorPosition.current.left,
+    width: derivedAnchorPosition.current.width,
+    top: derivedAnchorPosition.current.top + derivedAnchorPosition.current.height,
+    left: derivedAnchorPosition.current.left,
     opacity: popupAnim,
-    transform: [{
-      scale: popupAnim.interpolate({
-        inputRange: [0, 1], outputRange: [0.95, 1]
-      }),
-      translateY: popupAnim.interpolate({
-        inputRange: [0, 1], outputRange: [-1 * 0.05 * 140, 0]
-      }),
-    }],
+    transform: [
+      { scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) },
+      {
+        translateY: popupAnim.interpolate({
+          inputRange: [0, 1], outputRange: [-1 * 0.05 * 140, 0]
+        })
+      },
+    ],
   };
 
   return (
     <React.Fragment>
-      <TouchableOpacity onPress={onProfileCancelBtnClick} style={tailwind('absolute inset-0 w-full h-full opacity-25 bg-black')}></TouchableOpacity>
+      <TouchableWithoutFeedback onPress={onProfileCancelBtnClick}>
+        <View style={tailwind('absolute inset-0 opacity-25 bg-black')}></View>
+      </TouchableWithoutFeedback>
       <Animated.View style={[tailwind('absolute mt-1 rounded-md shadow-lg bg-white'), popupStyle]}>
         <View style={tailwind('py-1')}>
           <TouchableOpacity onPress={onSettingsBtnClick} style={tailwind('w-full flex-row items-center px-4 py-3')}>

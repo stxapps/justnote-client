@@ -14,7 +14,7 @@ const SidebarSearchInput = () => {
   const dispatch = useDispatch();
 
   const onSearchInputChange = (e) => {
-    dispatch(updateSearchString(e.target.value));
+    dispatch(updateSearchString(e.nativeEvent.text));
   }
 
   const onSearchClearBtnClick = () => {

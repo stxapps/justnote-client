@@ -19,20 +19,14 @@ const Sidebar = () => {
 
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const profileBtn = useRef(null);
-  const profileBtnRect = useRef(null);
   const dispatch = useDispatch();
 
   const onProfileBtnClick = () => {
-    if (profileBtnRect.current) {
-      dispatch(updatePopup(PROFILE_POPUP, true, profileBtnRect.current));
-    }
-  };
-
-  const onProfileBtnLayout = (e) => {
     profileBtn.current.measure((_fx, _fy, width, height, x, y) => {
-      profileBtnRect.current = {
+      const rect = {
         x, y, width, height, top: y, right: x + width, bottom: y + height, left: x,
       };
+      dispatch(updatePopup(PROFILE_POPUP, true, rect));
     });
   };
 
@@ -51,7 +45,7 @@ const Sidebar = () => {
       <View style={tailwind('flex-1')}>
         {/* User account dropdown */}
         <View style={tailwind('hidden pl-3 pr-1 mt-6 lg:flex', safeAreaWidth)}>
-          <TouchableOpacity ref={profileBtn} onLayout={onProfileBtnLayout} onPress={onProfileBtnClick} style={tailwind('w-full bg-gray-100 rounded-md px-3.5 py-2 text-sm font-medium text-gray-700')}>
+          <TouchableOpacity ref={profileBtn} onPress={onProfileBtnClick} style={tailwind('w-full bg-gray-100 rounded-md px-3.5 py-2 text-sm font-medium text-gray-700')}>
             <View style={tailwind('flex-row w-full justify-between items-center')}>
               <View style={tailwind('flex-1 flex-row items-center justify-between')}>
                 <FastImage style={tailwind('w-10 h-10 bg-gray-300 rounded-full flex-shrink-0')} source={{ uri: 'https://images.unsplash.com/photo-1502685104226-ee32379fefbe?ixlib=rb-1.2.1&ixqx=c2MT4LynBj&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80' }} />

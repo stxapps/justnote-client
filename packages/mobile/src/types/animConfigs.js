@@ -12,3 +12,16 @@ export const popupFMV = {
     useNativeDriver: true,
   }
 };
+
+export const sidebarFMV = {
+  hidden: {
+    duration: 300,
+    easing: Easing.inOut(Easing.ease),
+    useNativeDriver: true,
+  },
+  visible: {
+    duration: 300,
+    easing: Easing.inOut(Easing.ease),
+    useNativeDriver: true,
+  }
+};

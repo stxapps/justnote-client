@@ -26,7 +26,7 @@
   "font-black": {
     "fontFamily": "Inter-Black"
   },
-  "shadow-xs": {
+  "shadow-sm": {
     "shadowColor": "rgba(0, 0, 0, 0.05)",
     "shadowOffset": {
       "width": 0,
@@ -37,7 +37,7 @@
 
     "elevation": 1
   },
-  "shadow-sm": {
+  "shadow": {
     "shadowColor": "rgba(0, 0, 0, 0.05)",
     "shadowOffset": {
       "width": 0,
@@ -48,7 +48,7 @@
 
     "elevation": 1.2
   },
-  "shadow": {
+  "shadow-md": {
     "shadowColor": "rgba(0, 0, 0, 0.1)",
     "shadowOffset": {
       "width": 0,
