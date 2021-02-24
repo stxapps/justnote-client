@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useMemo } from 'react';
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux';
 
 import {
   updateNoteIdUrlHash, updateNoteId, updateBulkEditUrlHash,
@@ -85,8 +85,8 @@ const NoteListItemContent = (props) => {
   return (
     <button onTouchStart={onTouchPress} onTouchMove={onTouchPressRelease} onTouchEnd={onTouchPressRelease} onTouchCancel={onTouchPressRelease} onMouseDown={onClickPress} onMouseMove={onClickPressRelease} onMouseUp={onClickPressRelease} onMouseLeave={onClickPressRelease} onClick={onContentBtnClick} className="group w-full text-left rounded-sm flex items-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600">
       {isBulkEditing && <div className="w-10 h-10 bg-gray-200 border border-gray-300 mr-3 rounded-full"></div>}
-      <div className="flex-1">
-        <h3 className="text-sm font-semibold text-gray-800 group-hover:underline">{title}</h3>
+      <div className="flex-1 min-w-0">
+        <h3 className="text-sm font-semibold text-gray-800 truncate group-hover:underline">{title}</h3>
         <p className="mt-1 text-sm text-gray-600 line-clamp-3">{text}</p>
       </div>
     </button>

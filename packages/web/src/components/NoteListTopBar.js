@@ -39,10 +39,8 @@ const NoteListTopBar = (props) => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
           </svg>
         </button>
-        <div className="pl-4 flex-1 flex items-center justify-between sm:pl-6 lg:pl-8">
-          <div className="flex-1 min-w-0">
-            {title}
-          </div>
+        <div className="pl-4 flex-1 min-w-0 flex items-center justify-between sm:pl-6 lg:pl-8">
+          <div className="flex-1 min-w-0">{title}</div>
           <div className="ml-4 flex">
             <button onClick={onSearchBtnClick} type="button" className="group inline-flex items-center px-1 border border-white text-sm text-gray-400 bg-white hover:text-gray-600 focus:outline-none lg:hidden">
               <div className="p-2 rounded group-hover:bg-gray-200 group-focus:ring-2 group-focus:ring-green-600">

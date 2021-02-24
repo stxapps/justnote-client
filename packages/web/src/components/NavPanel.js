@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux'
+import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 
 import { updatePopupUrlHash, updateNoteIdUrlHash } from '../actions';

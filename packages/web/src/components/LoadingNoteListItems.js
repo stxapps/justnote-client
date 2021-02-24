@@ -2,12 +2,11 @@ import React from 'react';
 
 import { randInt, sample } from '../utils';
 
-const titleWidths = [144, 152, 160, 168, 172, 180];
-const textWidths = [232, 240, 248, 256, 264, 272, 280, 288, 296, 304];
+const widths = ['20%', '25%', '30%', '35%', '40%', '45%', '50%', '55%', '60%', '65%', '70%', '75%', '80%', '85%', '90%', '95%', '100%'];
 
 const LoadingNoteListItem = () => {
 
-  const titleWidth = sample(titleWidths);
+  const titleWidth = sample(widths);
   const nTexts = 1 + randInt(3);
   const textIndices = [];
   for (let i = 0; i < nTexts; i++) textIndices.push(i);
@@ -17,7 +16,7 @@ const LoadingNoteListItem = () => {
       <div style={{ width: titleWidth }} className="h-5 bg-gray-300 rounded-md"></div>
       <div className="mt-1">
         {textIndices.map(i => {
-          const textWidth = sample(textWidths);
+          const textWidth = sample(widths);
           return (
             <div key={i} className="h-5 flex items-center">
               <div style={{ width: textWidth }} className="h-3 bg-gray-200 rounded"></div>

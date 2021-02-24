@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { updatePopupUrlHash } from '../actions';
 import { SETTINGS_POPUP, MD_WIDTH } from '../types/const';
@@ -23,6 +23,7 @@ const SettingsPanel = () => {
   const [viewId, setViewId] = useState(VIEW_ACCOUNT);
   const panelContent = useRef(null);
   const cancelBtn = useRef(null);
+  const derivedIsShown = useRef(isShown);
 
   /*const isViewSelected = (refViewId) => {
     const dataViews = [VIEW_DATA, VIEW_DATA_EXPORT, VIEW_DATA_DELETE];
@@ -86,12 +87,11 @@ const SettingsPanel = () => {
     if (panelContent.current) panelContent.current.scroll(0, 0);
   }, [viewId]);
 
-  useMemo(() => {
-    if (isSidebarShown) {
-      if (isSidebarShown) setIsSidebarShown(false);
-      if (viewId !== VIEW_ACCOUNT) setViewId(VIEW_ACCOUNT);
-    }
-  }, [isSidebarShown, viewId]);
+  if (derivedIsShown.current !== isShown) {
+    if (isSidebarShown) setIsSidebarShown(false);
+    if (viewId !== VIEW_ACCOUNT) setViewId(VIEW_ACCOUNT);
+    derivedIsShown.current = isShown;
+  }
 
   if (!isShown) return (
     <AnimatePresence key="AP_SP"></AnimatePresence>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { throttle } from '../utils';
 
@@ -20,7 +20,6 @@ const unFocus = (document, window) => {
 
 const ColsPanel = () => {
 
-  const resizerWidth = 5;
   const pane1DefaultWidth = 256;
 
   const pane1MinWidth = 160;
@@ -183,7 +182,7 @@ const ColsPanel = () => {
       <motion.div style={{ width: state.pane1Width }} className={`bg-white overflow-hidden ${pane1Classes}`} layout={!isResizeActive}>
         <Sidebar />
       </motion.div>
-      <motion.div onMouseDown={onLeftResizerMouseDown} onTouchStart={onLeftResizerTouchStart} onTouchEnd={onTouchEnd} style={{ width: resizerWidth }} className={`relative bg-gray-200 bg-clip-padding cursor-resize border-l-8 border-r-0 border-gray-100 overflow-visible ${resizer1Classes}`} layout={!isResizeActive}>
+      <motion.div onMouseDown={onLeftResizerMouseDown} onTouchStart={onLeftResizerTouchStart} onTouchEnd={onTouchEnd} className={`relative w-2 bg-gray-100 cursor-resize overflow-visible ${resizer1Classes}`} layout={!isResizeActive}>
         <button onClick={onTogglePane1Shown} className="absolute right-0 bottom-8 w-5 h-7 bg-gray-300 rounded-tl rounded-bl shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400">
           <svg className="w-5 h-5 text-gray-400 hover:text-gray-500" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path fillRule="evenodd" clipRule="evenodd" d="M15.707 15.707C15.5195 15.8945 15.2652 15.9998 15 15.9998C14.7349 15.9998 14.4806 15.8945 14.293 15.707L9.29303 10.707C9.10556 10.5195 9.00024 10.2652 9.00024 10C9.00024 9.73486 9.10556 9.48055 9.29303 9.29302L14.293 4.29302C14.3853 4.19751 14.4956 4.12133 14.6176 4.06892C14.7396 4.01651 14.8709 3.98892 15.0036 3.98777C15.1364 3.98662 15.2681 4.01192 15.391 4.0622C15.5139 4.11248 15.6255 4.18673 15.7194 4.28062C15.8133 4.37452 15.8876 4.48617 15.9379 4.60907C15.9881 4.73196 16.0134 4.86364 16.0123 4.99642C16.0111 5.1292 15.9835 5.26042 15.9311 5.38242C15.8787 5.50443 15.8025 5.61477 15.707 5.70702L11.414 10L15.707 14.293C15.8945 14.4805 15.9998 14.7349 15.9998 15C15.9998 15.2652 15.8945 15.5195 15.707 15.707ZM9.70703 15.707C9.5195 15.8945 9.26519 15.9998 9.00003 15.9998C8.73487 15.9998 8.48056 15.8945 8.29303 15.707L3.29303 10.707C3.10556 10.5195 3.00024 10.2652 3.00024 10C3.00024 9.73486 3.10556 9.48055 3.29303 9.29302L8.29303 4.29302C8.48163 4.11086 8.73423 4.01007 8.99643 4.01235C9.25863 4.01462 9.50944 4.11979 9.69485 4.3052C9.88026 4.49061 9.98543 4.74142 9.9877 5.00362C9.98998 5.26582 9.88919 5.51842 9.70703 5.70702L5.41403 10L9.70703 14.293C9.8945 14.4805 9.99982 14.7349 9.99982 15C9.99982 15.2652 9.8945 15.5195 9.70703 15.707Z" />
@@ -201,7 +200,7 @@ const ColsPanel = () => {
           </motion.button>}
         </AnimatePresence>
       </motion.div>
-      <motion.div onMouseDown={onRightResizerMouseDown} onTouchStart={onRightResizerTouchStart} onTouchEnd={onTouchEnd} style={{ width: resizerWidth }} className={`relative bg-gray-200 bg-clip-padding cursor-resize border-l-0 border-r-4 border-white overflow-visible ${resizer2Classes}`} layout={!isResizeActive}></motion.div >
+      <motion.div onMouseDown={onRightResizerMouseDown} onTouchStart={onRightResizerTouchStart} onTouchEnd={onTouchEnd} className={`relative bg-white border-l border-gray-100 pr-1 cursor-resize overflow-visible ${resizer2Classes}`} layout={!isResizeActive}></motion.div >
       <motion.div className="flex-1 bg-white overflow-hidden" layout={!isResizeActive}>
         <NoteEditor isFullScreen={state.isPane3FullScreen} onToggleFullScreen={onTogglePane3FullScreen} />
       </motion.div>

@@ -62,13 +62,13 @@ const SidebarListNames = () => {
     return (
       <button key={listNameObj.listName} onClick={() => onListNameBtnClick(listNameObj.listName)} className={`${btnClassNames} group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full focus:outline-none`}>
         {svg}
-        {listNameObj.displayName}
+        <span className="truncate">{listNameObj.displayName}</span>
       </button>
     );
   });
 
   return (
-    <nav className="pl-3 pr-1 mt-6">
+    <nav className="pl-3 pr-1 mt-6 overflow-y-auto">
       <div className="space-y-1">
         {buttons}
       </div>

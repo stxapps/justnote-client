@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelector } from 'react-redux'
+import { useSelector } from 'react-redux';
 
 import { updateBulkEditUrlHash } from '../actions';
 import { getSelectedNoteIdsLength } from '../selectors';
@@ -25,7 +25,7 @@ const NoteEditorBulkEdit = () => {
         <div className="w-full h-16"></div>
         <div>
           <h3 className="pt-5 text-white text-lg font-medium">{selectedNoteIdsLength} Notes selected</h3>
-          <p className="pt-7 text-white text-sm font-regular">Please choose an action below.</p>
+          <p className="pt-7 text-white text-sm font-normal">Please choose an action below.</p>
           <div className="pt-3">
             <NoteCommands isOnDarkBackground={true} isLeftAlign={true} />
           </div>

@@ -1,11 +1,9 @@
 import React from 'react';
-import { useSelector } from 'react-redux'
+import { useSelector } from 'react-redux';
 
 import { MY_NOTES, TRASH, ARCHIVE } from '../types/const';
 import { getListNameMap } from '../selectors';
-import {
-  getListNameDisplayName,
-} from '../utils';
+import { getListNameDisplayName } from '../utils';
 
 import NoteListItem from './NoteListItem';
 
@@ -27,7 +25,7 @@ const NoteListItems = () => {
       return (
         <div className="pt-4 px-4 sm:pt-6 sm:px-6 lg:px-8">
           <p className="text-base text-gray-600">Your search - <span className="text-lg text-gray-700 font-medium">{searchString}</span> - did not match any notes.</p>
-          <p className="text-base text-gray-600 pt-4 md:pt-6">Suggestion:</p>
+          <p className="text-base text-gray-600 pt-4 sm:pt-6">Suggestion:</p>
           <ul className="text-base text-gray-600 pt-2 pl-2 list-disc list-inside">
             <li>Make sure all words are spelled correctly.</li>
             <li className="pt-1">Try different keywords.</li>
@@ -87,24 +85,6 @@ const NoteListItems = () => {
     );
   };
 
-  const renderItems = () => {
-    return (
-      <div className="mt-6">
-        <ul className="-my-5 divide-y divide-gray-200">
-          <NoteListItem note={{ id: '1', title: 'First note', text: 'Tenetur libero voluptatem rerum occaecati qui est molestiae exercitationem. Voluptate quisquam iure assumenda consequatur ex et recusandae. Alias consectetur voluptatibus. Accusamus a ab dicta et. Consequatur quis dignissimos voluptatem nisi.', createdDt: '1882181' }} />
-          <NoteListItem note={{ id: '2', title: 'My second note', text: 'This is a test. That is a book.', createdDt: '192882' }} />
-          <NoteListItem note={{ id: '3', title: 'Holy Shit! I did it.', text: 'WTF. Why you whining like a girl?', createdDt: '2082181' }} />
-          <NoteListItem note={{ id: '1', title: 'First note', text: 'Tenetur libero voluptatem rerum occaecati qui est molestiae exercitationem. Voluptate quisquam iure assumenda consequatur ex et recusandae. Alias consectetur voluptatibus. Accusamus a ab dicta et. Consequatur quis dignissimos voluptatem nisi.', createdDt: '1882181' }} />
-          <NoteListItem note={{ id: '2', title: 'My second note', text: 'This is a test. That is a book.', createdDt: '192882' }} />
-          <NoteListItem note={{ id: '3', title: 'Holy Shit! I did it.', text: 'WTF. Why you whining like a girl?', createdDt: '2082181' }} />
-          <NoteListItem note={{ id: '1', title: 'First note', text: 'Tenetur libero voluptatem rerum occaecati qui est molestiae exercitationem. Voluptate quisquam iure assumenda consequatur ex et recusandae. Alias consectetur voluptatibus. Accusamus a ab dicta et. Consequatur quis dignissimos voluptatem nisi.', createdDt: '1882181' }} />
-          <NoteListItem note={{ id: '2', title: 'My second note', text: 'This is a test. That is a book.', createdDt: '192882' }} />
-          <NoteListItem note={{ id: '3', title: 'Holy Shit! I did it.', text: 'WTF. Why you whining like a girl?', createdDt: '2082181' }} />
-        </ul>
-      </div>
-    );
-  };
-
   const renderFetchMoreBtn = () => {
     return (
       <div className="my-6 px-4 sm:px-6 lg:px-8">
@@ -119,14 +99,26 @@ const NoteListItems = () => {
     );
   };
 
-  let x = 1;
+  const renderItems = () => {
+    return (
+      <div className="mt-6">
+        <ul className="-my-5 divide-y divide-gray-200">
+          <NoteListItem note={{ id: '1', title: 'First note', text: 'Tenetur libero voluptatem rerum occaecati qui est molestiae exercitationem. Voluptate quisquam iure assumenda consequatur ex et recusandae. Alias consectetur voluptatibus. Accusamus a ab dicta et. Consequatur quis dignissimos voluptatem nisi.', createdDt: '1882181' }} />
+          <NoteListItem note={{ id: '2', title: 'My second note', text: 'This is a test. That is a book.', createdDt: '192882' }} />
+          <NoteListItem note={{ id: '3', title: 'Holy Shit! I did it.', text: 'WTF. Why you whining like a girl?', createdDt: '2082181' }} />
+        </ul>
+      </div>
+    );
+  };
+
+  let x = 2;
 
   return (
     <div className="flex-grow flex-shrink overflow-y-auto">
-      {renderEmpty()}
+      {x === 1 && renderEmpty()}
       {x === 2 && renderItems()}
       {x === 2 && renderFetchMoreBtn()}
-      {x === 2 && renderFetchingMore()}
+      {x === 3 && renderFetchingMore()}
     </div>
   );
 };
