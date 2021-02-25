@@ -40,7 +40,7 @@ const NoteListTopBar = (props) => {
   return (
     <View style={tailwind('flex-grow-0 flex-shrink-0')}>
       <View style={tailwind('h-16 border-b border-gray-200 flex-row items-center justify-between')}>
-        <TouchableOpacity onPress={onSidebarOpenBtnClick} style={tailwind('h-full px-4 border-r border-gray-200 sm:px-6 lg:hidden', safeAreaWidth)}>
+        <TouchableOpacity onPress={onSidebarOpenBtnClick} style={tailwind('h-full px-4 border-r border-gray-200 justify-center sm:px-6 lg:hidden', safeAreaWidth)}>
           <Svg width={24} height={24} style={tailwind('text-gray-500 font-normal')} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <Path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
           </Svg>

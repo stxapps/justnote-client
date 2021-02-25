@@ -67,9 +67,7 @@ const SidebarProfilePopup = () => {
         setDidCloseAnimEnd(true);
       });
     }
-  }, [isShown]);
 
-  useEffect(() => {
     registerPopupBackHandler(isShown);
     return () => {
       registerPopupBackHandler(false);

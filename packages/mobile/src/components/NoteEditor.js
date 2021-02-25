@@ -11,6 +11,10 @@ import NoteEditorBulkEdit from './NoteEditorBulkEdit';
 
 const NoteEditor = (props) => {
 
+  // TODO: On mobile, just noteId is not enough:
+  //   - slide in with loading, then update with content
+  //   - silde out first before reset to ready state
+
   const { isFullScreen, onToggleFullScreen, onRightPanelCloseBtnClick, width } = props;
   const noteId = useSelector(state => state.display.noteId);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);

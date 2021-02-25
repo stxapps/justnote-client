@@ -1,10 +1,10 @@
-import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, TouchableOpacity, BackHandler } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
-import { updateNoteId } from '../actions';
+import { updateBulkEdit, updateNoteId } from '../actions';
 import { NEW_NOTE } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 
@@ -17,17 +17,44 @@ const NoteList = (props) => {
   const { onSidebarOpenBtnClick } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
+  const bulkEditBackHandler = useRef(null);
   const dispatch = useDispatch();
 
   const onAddBtnClick = () => {
     dispatch(updateNoteId(NEW_NOTE));
   };
 
+  const registerBackEditBackHandler = (isShown) => {
+    if (isShown) {
+      if (!bulkEditBackHandler.current) {
+        bulkEditBackHandler.current = BackHandler.addEventListener(
+          "hardwareBackPress",
+          () => {
+            dispatch(updateBulkEdit(false));
+            return true;
+          }
+        );
+      }
+    } else {
+      if (bulkEditBackHandler.current) {
+        bulkEditBackHandler.current.remove();
+        bulkEditBackHandler.current = null;
+      }
+    }
+  };
+
+  useEffect(() => {
+    registerBackEditBackHandler(isBulkEditing);
+    return () => {
+      registerBackEditBackHandler(false);
+    };
+  }, [isBulkEditing]);
+
   const noteListItems = <NoteListItems />;
   //const noteListItems = <LoadingNoteListItems />;
 
   return (
-    <View style={tailwind('w-full min-w-64 h-full')}>
+    <View style={[tailwind('w-full min-w-64 h-full'), { elevation: 0 }]}>
       {/* TopBar */}
       <NoteListTopBar onSidebarOpenBtnClick={onSidebarOpenBtnClick} />
       {/* Main */}

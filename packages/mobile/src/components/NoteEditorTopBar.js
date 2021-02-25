@@ -21,7 +21,7 @@ const NoteEditorTopBar = (props) => {
   return (
     <View style={tailwind('border-b border-gray-200 w-full h-16')}>
       <ScrollView horizontal={true}>
-        <View style={[tailwind('h-full flex-row items-center justify-between sm:px-6 lg:px-8', safeAreaWidth), style]}>
+        <View style={[tailwind('h-full flex-row justify-between sm:px-6 lg:px-8 lg:items-center', safeAreaWidth), style]}>
           <View style={tailwind('flex-row')}>
             <TouchableOpacity onPress={onRightPanelCloseBtnClick} style={tailwind('justify-center px-4 h-full rounded-md bg-white lg:hidden', safeAreaWidth)}>
               <Svg width={20} height={20} style={tailwind('text-gray-500 font-normal')} viewBox="0 0 20 20" fill="currentColor">
