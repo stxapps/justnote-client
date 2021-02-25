@@ -51,7 +51,7 @@ const NavPanel = () => {
             </svg>
           </button>
         </div>
-        <motion.div className="flex-1 w-full max-w-64 bg-gray-100 pr-2" variants={sideBarFMV}>
+        <motion.div className="flex-1 max-w-64 bg-gray-100 pr-2" variants={sideBarFMV}>
           <Sidebar />
         </motion.div>
         <div className="flex-shrink-0 w-14">
