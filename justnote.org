@@ -114,9 +114,33 @@
 *** web
 *** native
 ** offline and sync in mobile app
+*** foundings
 - versioning/conflict/merge with file name!
 - delete need to keep all files!
+- fpath: notes/<listname>/<fname>/index.json
+- fname: <timestamp><4 random chars>-parents
+- delete: add new one w/o content and update old one w/o content
 - sqlite on mobile
+** data
+*** Gaia
+- /notes/<listName>/<id>_<parentIds>/index.json
+  + title
+  + body
+- /notes/<listName>/<id>_<parentIds>/[*.* i.e. jpg, png]
+*** noteId
+- id, parentIds, addedDT, updatedDT, isConflicted, conflictWith, listName, fpaths,
+*** Redux state
+- notes[listName][id]
+  + parentIds
+  + id
+  + title
+  + body
+  + media: {
+      <name>: <content>,
+      ...
+    }
+  + addedDT
+  + updatedDT
 ** text editor
 *** view mode vs edit mode
 *** file format!
@@ -158,6 +182,7 @@
 - yarn add blockstack --dev
   + Need to remove when @stacks/connect not depends to
 - yarn add reselect
+- yarn add file-saver
 ** Server steps
 *** s3
 - Set public and enable CORS

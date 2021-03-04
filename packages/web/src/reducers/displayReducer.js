@@ -2,11 +2,16 @@ import {
   UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP,
   UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, CLEAR_SELECTED_NOTE_IDS,
-  RESET_STATE,
+  FETCH_COMMIT, DELETE_LIST_NAMES, UPDATE_DELETING_LIST_NAME,
+  UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
+  UPDATE_UPDATE_SETTINGS_PROGRESS,
+  UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
+  DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   PROFILE_POPUP, NOTE_LIST_MENU_POPUP, MOVE_TO_POPUP, SIDEBAR_POPUP, SEARCH_POPUP,
-  CONFIRM_DELETE_POPUP, SETTINGS_POPUP, MY_NOTES,
+  CONFIRM_DELETE_POPUP, SETTINGS_POPUP, MY_NOTES, TRASH, ARCHIVE,
+  UPDATING, DIED_UPDATING,
 } from '../types/const';
 
 const initialState = {
@@ -27,6 +32,11 @@ const initialState = {
   searchString: '',
   isBulkEditing: false,
   selectedNoteIds: [],
+  deletingListName: null,
+  listChangedCount: 0,
+  exportAllDataProgress: null,
+  deleteAllDataProgress: null,
+  updateSettingsProgress: null,
 };
 
 const displayReducer = (state = initialState, action) => {
@@ -36,7 +46,11 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_LIST_NAME) {
-    return { ...state, listName: action.payload };
+    return {
+      ...state,
+      listName: action.payload,
+      listChangedCount: state.listChangedCount + 1,
+    };
   }
 
   if (action.type === UPDATE_NOTE_ID) {
@@ -121,7 +135,63 @@ const displayReducer = (state = initialState, action) => {
     return { ...state, selectedNoteIds: [] };
   }
 
-  if (action.type === RESET_STATE) {
+  if (action.type === FETCH_COMMIT) {
+
+    const newState = { ...state };
+
+    // Make sure listName is in listNameMap, if not, set to My List.
+    const { doFetchSettings, settings } = action.payload;
+    if (!doFetchSettings) return newState;
+
+    if (settings) {
+      if (!settings.listNameMap.map(obj => obj.listName).includes(newState.listName)) {
+        newState.listName = MY_NOTES;
+      }
+    } else {
+      if (![MY_NOTES, TRASH, ARCHIVE].includes(newState.listName)) {
+        newState.listName = MY_NOTES;
+      }
+    }
+
+    return newState;
+  }
+
+  if (action.type === DELETE_LIST_NAMES) {
+    const { listNames } = action.payload;
+    if (listNames.includes(state.listName)) {
+      return { ...state, listName: MY_NOTES };
+    }
+  }
+
+  if (action.type === UPDATE_DELETING_LIST_NAME) {
+    return { ...state, deletingListName: action.payload };
+  }
+
+  if (action.type === UPDATE_EXPORT_ALL_DATA_PROGRESS) {
+    return { ...state, exportAllDataProgress: action.payload };
+  }
+
+  if (action.type === UPDATE_DELETE_ALL_DATA_PROGRESS) {
+    return { ...state, deleteAllDataProgress: action.payload };
+  }
+
+  if (action.type === UPDATE_SETTINGS) {
+    return { ...state, updateSettingsProgress: { status: UPDATING } };
+  }
+
+  if (action.type === UPDATE_SETTINGS_COMMIT) {
+    return { ...state, updateSettingsProgress: null };
+  }
+
+  if (action.type === UPDATE_SETTINGS_ROLLBACK) {
+    return { ...state, updateSettingsProgress: { status: DIED_UPDATING } };
+  }
+
+  if (action.type === UPDATE_UPDATE_SETTINGS_PROGRESS) {
+    return { ...state, updateSettingsProgress: action.payload };
+  }
+
+  if (action.type === DELETE_ALL_DATA || action.type === RESET_STATE) {
     return { ...initialState };
   }
 

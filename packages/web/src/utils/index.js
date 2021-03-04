@@ -2,8 +2,9 @@ import Url from 'url-parse';
 
 import {
   HTTP,
-  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_REMOVING, DIED_DELETING,
+  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
   VALID_URL, NO_URL, ASK_CONFIRM_URL,
+  MAX_CHARS,
 } from '../types/const';
 
 export const containUrlProtocol = (url) => {
@@ -258,7 +259,7 @@ export const doContainListName = (listName, listNameObjs) => {
 
 export const isDiedStatus = (status) => {
   return [
-    DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_REMOVING, DIED_DELETING,
+    DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
   ].includes(status);
 };
 
@@ -273,4 +274,79 @@ export const randInt = (max) => {
 
 export const sample = (arr) => {
   return arr[Math.floor(Math.random() * arr.length)];
+};
+
+export const randomString = (length) => {
+
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+};
+
+export const containUppercase = (letters) => {
+  for (let i = 0; i < letters.length; i++) {
+    if (letters[i] === letters[i].toUpperCase()
+      && letters[i] !== letters[i].toLowerCase()) {
+      return true;
+    }
+  }
+  return false;
+};
+
+export const isStringIn = (note, searchString) => {
+
+  let title = note.title.slice(0, MAX_CHARS);
+  if (!containUppercase(searchString)) title = title.toLowerCase();
+
+  let body = note.body.slice(0, MAX_CHARS);
+  if (!containUppercase(searchString)) body = body.toLowerCase();
+
+  const content = title + ' ' + body;
+  const searchWords = searchString.split(' ');
+
+  return searchWords.every(word => content.includes(word));
+};
+
+export const swapArrayElements = (a, x, y) => (a[x] && a[y] && [
+  ...a.slice(0, x),
+  a[y],
+  ...a.slice(x + 1, y),
+  a[x],
+  ...a.slice(y + 1)
+]) || a;
+
+export const getInsertIndex = (listNameObj, oldListNameMap, newListNameMap) => {
+
+  // listNameObj is in oldListNameMap and try to find where to insert into newListNameMap
+  //   while preserving the order.
+
+  const i = oldListNameMap.findIndex(obj => obj.listName === listNameObj.listName);
+  if (i < 0) {
+    console.log(`getInsertIndex: invalid listNameObj: ${listNameObj} and oldListNameMap: ${oldListNameMap}`);
+    return -1;
+  }
+
+  let prev = i - 1;
+  let next = i + 1;
+  while (prev >= 0 || next < oldListNameMap.length) {
+    if (prev >= 0) {
+      const listName = oldListNameMap[prev].listName;
+      const listNameIndex = newListNameMap.findIndex(obj => obj.listName === listName);
+      if (listNameIndex >= 0) return listNameIndex + 1;
+      prev -= 1;
+    }
+    if (next < oldListNameMap.length) {
+      const listName = oldListNameMap[next].listName;
+      const listNameIndex = newListNameMap.findIndex(obj => obj.listName === listName);
+      if (listNameIndex >= 0) return listNameIndex;
+      next += 1;
+    }
+  }
+
+  return -1;
 };

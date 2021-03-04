@@ -32,21 +32,38 @@ export const SEARCH_POPUP = 'SEARCH_POPUP';
 export const CONFIRM_DELETE_POPUP = 'CONFIRM_DELETE_POPUP';
 export const SETTINGS_POPUP = 'SETTINGS_POPUP';
 
-export const ADDING = 'ADDING';
 export const ADDED = 'ADDED';
-export const MOVING = 'MOVING';
-export const MOVED = 'MOVED';
-export const REMOVING = 'REMOVING';
-export const DELETING = 'DELETING';
+export const ADDING = 'ADDING';
 export const UPDATING = 'UPDATING';
+export const MOVING = 'MOVING';
+export const DELETING = 'DELETING';
 export const DIED_ADDING = 'DIED_ADDING';
-export const DIED_MOVING = 'DIED_MOVING';
-export const DIED_REMOVING = 'DIED_REMOVING';
-export const DIED_DELETING = 'DIED_DELETING';
 export const DIED_UPDATING = 'DIED_UPDATING';
+export const DIED_MOVING = 'DIED_MOVING';
+export const DIED_DELETING = 'DIED_DELETING';
 
 export const ZERO = 'ZERO'; // top or left of the window
 export const CENTER = 'CENTER'; // center of the window
 export const EDGE = 'EDGE'; // bottom or right of the window
 export const AT_TRIGGER = 'AT_TRIGGER'; // top or left of the trigger
 export const EDGE_TRIGGER = 'EDGE_TRIGGER'; // bottom or right of the trigger
+
+export const SETTINGS_FNAME = 'settings.json';
+
+export const N_NOTES = 10;
+export const MAX_TRY = 3;
+export const N_DAYS = 45;
+export const MAX_SELECTED_NOTE_IDS = 10;
+export const MAX_CHARS = 150;
+
+export const ID = 'id';
+export const STATUS = 'status';
+
+export const VALID_LIST_NAME = 'VALID_LIST_NAME';
+export const NO_LIST_NAME = 'NO_LIST_NAME';
+export const TOO_LONG_LIST_NAME = 'TOO_LONG_LIST_NAME';
+export const DUPLICATE_LIST_NAME = 'DUPLICATE_LIST_NAME';
+export const IN_USE_LIST_NAME = 'IN_USE_LIST_NAME';
+
+export const SWAP_LEFT = 'SWAP_LEFT';
+export const SWAP_RIGHT = 'SWAP_RIGHT';
