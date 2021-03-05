@@ -1,17 +1,18 @@
 import React, { useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
 import { updateNoteId, updatePopupUrlHash } from '../actions';
 import { NEW_NOTE, PROFILE_POPUP } from '../types/const';
 
 import SidebarSearchInput from './SidebarSearchInput';
 import SidebarListNames from './SidebarListNames';
-//import LoadingSidebarListNames from './LoadingSidebarListNames';
+import LoadingSidebarListNames from './LoadingSidebarListNames';
 
 import logoFull from '../images/logo-full.svg';
 
 const Sidebar = () => {
 
+  const didFetch = useSelector(state => state.display.didFetch);
   const profileBtn = useRef(null);
   const dispatch = useDispatch();
 
@@ -23,8 +24,7 @@ const Sidebar = () => {
     dispatch(updateNoteId(NEW_NOTE));
   };
 
-  const listNames = <SidebarListNames />;
-  //const listNames = <LoadingSidebarListNames />;
+  const listNames = didFetch ? <SidebarListNames /> : <LoadingSidebarListNames />;
 
   return (
     <div className="flex flex-col w-full min-w-56 h-full pt-5 pb-4 bg-gray-100">

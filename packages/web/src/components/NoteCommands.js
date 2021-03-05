@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
-import { updatePopupUrlHash } from '../actions';
+import { updatePopupUrlHash, moveNotes } from '../actions';
 import {
   MOVE_TO_POPUP, CONFIRM_DELETE_POPUP, MY_NOTES, ARCHIVE, TRASH,
 } from '../types/const';
@@ -13,19 +13,19 @@ const NoteCommands = (props) => {
   const { isOnDarkBackground, isLeftAlign } = props;
   const listName = useSelector(state => state.display.listName);
   const listNameMap = useSelector(getListNameMap);
-  //const noteId = useSelector(state => state.display.noteId);
   const moveToBtn = useRef(null);
+  const dispatch = useDispatch();
 
   const onArchiveBtnClick = () => {
-
+    dispatch(moveNotes(ARCHIVE));
   };
 
   const onRemoveBtnClick = () => {
-
+    dispatch(moveNotes(TRASH));
   };
 
   const onRestoreBtnClick = () => {
-
+    dispatch(moveNotes(MY_NOTES));
   };
 
   const onDeleteBtnClick = () => {

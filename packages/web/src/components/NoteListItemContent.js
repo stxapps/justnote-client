@@ -12,7 +12,7 @@ import { useSafeAreaFrame } from '.';
 
 const NoteListItemContent = (props) => {
 
-  const { id, title, text } = props.note;
+  const { id, title, body } = props.note;
   const { width: safeAreaWidth } = useSafeAreaFrame();
 
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
@@ -87,7 +87,7 @@ const NoteListItemContent = (props) => {
       {isBulkEditing && <div className="w-10 h-10 bg-gray-200 border border-gray-300 mr-3 rounded-full"></div>}
       <div className="flex-1 min-w-0">
         <h3 className="text-sm font-semibold text-gray-800 truncate group-hover:underline">{title}</h3>
-        <p className="mt-1 text-sm text-gray-600 line-clamp-3">{text}</p>
+        <p className="mt-1 text-sm text-gray-600 line-clamp-3">{body}</p>
       </div>
     </button>
   );

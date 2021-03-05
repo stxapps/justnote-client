@@ -2,9 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import {
-  updatePopupUrlHash, updateBulkEditUrlHash, clearSelectedNoteIds,
-} from '../actions';
+import { updatePopupUrlHash, updateBulkEditUrlHash, moveNotes } from '../actions';
 import { MOVE_TO_POPUP, ARCHIVE, TRASH, LG_WIDTH } from '../types/const';
 import { getListNameMap } from '../selectors';
 import { getLastHalfHeight } from '../utils';
@@ -20,9 +18,7 @@ const MoveToPopup = () => {
   const anchorPosition = useSelector(state => state.display.moveToPopupPosition);
   const listName = useSelector(state => state.display.listName);
   const listNameMap = useSelector(getListNameMap);
-  //const noteId = useSelector(state => state.display.noteId);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
-  //const selectedNoteIds = useSelector(state => state.display.selectedNoteIds);
   const [popupSize, setPopupSize] = useState(null);
   const popup = useRef(null);
   const cancelBtn = useRef(null);
@@ -38,15 +34,9 @@ const MoveToPopup = () => {
   const onMoveToItemBtnClick = (listName) => {
     if (didClick.current) return;
 
-    if (isBulkEditing) {
-      //dispatch(moveNotes(listName, selectedNoteIds));
-      dispatch(clearSelectedNoteIds());
-      onMoveToCancelBtnClick();
-      updateBulkEditUrlHash(false);
-    } else {
-      //dispatch(moveNotes(listName, [noteId]));
-      onMoveToCancelBtnClick();
-    }
+    dispatch(moveNotes(listName));
+    onMoveToCancelBtnClick();
+    if (isBulkEditing) updateBulkEditUrlHash(false);
 
     didClick.current = true;
   };
@@ -97,7 +87,7 @@ const MoveToPopup = () => {
     });
     const triggerOffsetX = safeAreaWidth < LG_WIDTH ? 0 : 25;
     const triggerOffsetY = safeAreaWidth < LG_WIDTH ? 52 : anchorPosition.height;
-    const triggerOffsetWidth = safeAreaWidth < LG_WIDTH ? -8 : 0;
+    const triggerOffsetWidth = safeAreaWidth < LG_WIDTH ? -8 : -25;
     const triggerOffsets = {
       x: triggerOffsetX, y: triggerOffsetY, width: triggerOffsetWidth, height: 0
     };

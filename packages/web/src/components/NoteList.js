@@ -1,24 +1,31 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 
-import { updateNoteIdUrlHash } from '../actions';
+import { updateNoteIdUrlHash, fetch } from '../actions';
 import { NEW_NOTE } from '../types/const';
+import { getNotes } from '../selectors';
 
 import NoteListTopBar from './NoteListTopBar';
 import NoteListItems from './NoteListItems';
-//import LoadingNoteListItems from './LoadingNoteListItems';
+import LoadingNoteListItems from './LoadingNoteListItems';
 
 const NoteList = (props) => {
 
   const { onSidebarOpenBtnClick } = props;
+  const listName = useSelector(state => state.display.listName);
+  const notes = useSelector(getNotes);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
+  const dispatch = useDispatch();
 
   const onAddBtnClick = () => {
     updateNoteIdUrlHash(NEW_NOTE);
   };
 
-  const noteListItems = <NoteListItems />;
-  //const noteListItems = <LoadingNoteListItems />;
+  useEffect(() => {
+    if (!notes) dispatch(fetch());
+  }, [listName, notes, dispatch]);
+
+  const noteListItems = notes ? <NoteListItems /> : <LoadingNoteListItems />;
 
   return (
     <div className="relative w-full min-w-64 h-full flex flex-col">

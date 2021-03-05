@@ -1,8 +1,9 @@
 import {
   UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP,
-  UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING,
+  UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, CLEAR_SELECTED_NOTE_IDS,
   FETCH_COMMIT, DELETE_LIST_NAMES, UPDATE_DELETING_LIST_NAME,
+  UPDATE_NOTE_TITLE, UPDATE_NOTE_BODY, UPDATE_NOTE_MEDIA,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
   UPDATE_UPDATE_SETTINGS_PROGRESS,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
@@ -28,11 +29,15 @@ const initialState = {
   isSearchPopupShown: false,
   isConfirmDeletePopupShown: false,
   isSettingsPopupShown: false,
-  isEditorFocused: false,
   searchString: '',
   isBulkEditing: false,
+  isEditorFocused: false,
   selectedNoteIds: [],
   deletingListName: null,
+  noteTitle: '',
+  noteBody: '',
+  noteMedia: [],
+  didFetch: false,
   listChangedCount: 0,
   exportAllDataProgress: null,
   deleteAllDataProgress: null,
@@ -115,6 +120,10 @@ const displayReducer = (state = initialState, action) => {
     return { ...state, isBulkEditing: action.payload };
   }
 
+  if (action.type === UPDATE_EDITOR_FOCUSED) {
+    return { ...state, isEditorFocused: action.payload };
+  }
+
   if (action.type === ADD_SELECTED_NOTE_IDS) {
     const selectedNoteIds = [...state.selectedNoteIds];
     for (const noteId of action.payload) {
@@ -137,9 +146,9 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === FETCH_COMMIT) {
 
-    const newState = { ...state };
+    const newState = { ...state, didFetch: true };
 
-    // Make sure listName is in listNameMap, if not, set to My List.
+    // Make sure listName is in listNameMap, if not, set to My Notes.
     const { doFetchSettings, settings } = action.payload;
     if (!doFetchSettings) return newState;
 
@@ -165,6 +174,18 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_DELETING_LIST_NAME) {
     return { ...state, deletingListName: action.payload };
+  }
+
+  if (action.type === UPDATE_NOTE_TITLE) {
+    return { ...state, noteTitle: action.payload };
+  }
+
+  if (action.type === UPDATE_NOTE_BODY) {
+    return { ...state, noteBody: action.payload };
+  }
+
+  if (action.type === UPDATE_NOTE_MEDIA) {
+    return { ...state, noteMedia: action.payload };
   }
 
   if (action.type === UPDATE_EXPORT_ALL_DATA_PROGRESS) {

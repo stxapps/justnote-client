@@ -2,9 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import {
-  updatePopupUrlHash, updateBulkEditUrlHash, clearSelectedNoteIds,
-} from '../actions';
+import { updatePopupUrlHash, updateBulkEditUrlHash, deleteNotes } from '../actions';
 import { CONFIRM_DELETE_POPUP } from '../types/const';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
 
@@ -14,10 +12,7 @@ const ConfirmDeletePopup = () => {
 
   const { height: safeAreaHeight } = useSafeAreaFrame();
   const isShown = useSelector(state => state.display.isConfirmDeletePopupShown);
-  //const listName = useSelector(state => state.display.listName);
-  //const noteId = useSelector(state => state.display.noteId);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
-  //const selectedNoteIds = useSelector(state => state.display.selectedNoteIds);
   const cancelBtn = useRef(null);
   const didClick = useRef(false);
   const dispatch = useDispatch();
@@ -31,15 +26,9 @@ const ConfirmDeletePopup = () => {
   const onConfirmDeleteOkBtnClick = () => {
     if (didClick.current) return;
 
-    if (isBulkEditing) {
-      //dispatch(deleteNotes(listName, selectedNoteIds));
-      dispatch(clearSelectedNoteIds());
-      onConfirmDeleteCancelBtnClick();
-      updateBulkEditUrlHash(false);
-    } else {
-      //dispatch(deleteNotes(listName, [noteId]));
-      onConfirmDeleteCancelBtnClick();
-    }
+    dispatch(deleteNotes());
+    onConfirmDeleteCancelBtnClick();
+    if (isBulkEditing) updateBulkEditUrlHash(false);
 
     didClick.current = true;
   };

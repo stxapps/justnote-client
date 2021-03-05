@@ -1,8 +1,9 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
+import { fetchMore } from '../actions';
 import { MY_NOTES, TRASH, ARCHIVE } from '../types/const';
-import { getListNameMap } from '../selectors';
+import { getListNameMap, getNotes } from '../selectors';
 import { getListNameDisplayName } from '../utils';
 
 import NoteListItem from './NoteListItem';
@@ -11,10 +12,14 @@ const NoteListItems = () => {
 
   const listName = useSelector(state => state.display.listName);
   const listNameMap = useSelector(getListNameMap);
+  const notes = useSelector(getNotes);
   const searchString = useSelector(state => state.display.searchString);
+  const hasMore = useSelector(state => state.hasMoreNotes[listName]);
+  const isFetchingMore = useSelector(state => state.isFetchingMoreNotes[listName]);
+  const dispatch = useDispatch();
 
   const onFetchMoreBtnClick = () => {
-    //dispatch(fetchMore());
+    dispatch(fetchMore());
   }
 
   const renderEmpty = () => {
@@ -103,22 +108,23 @@ const NoteListItems = () => {
     return (
       <div className="mt-6">
         <ul className="-my-5 divide-y divide-gray-200">
-          <NoteListItem note={{ id: '1', title: 'First note', text: 'Tenetur libero voluptatem rerum occaecati qui est molestiae exercitationem. Voluptate quisquam iure assumenda consequatur ex et recusandae. Alias consectetur voluptatibus. Accusamus a ab dicta et. Consequatur quis dignissimos voluptatem nisi.', createdDt: '1882181' }} />
-          <NoteListItem note={{ id: '2', title: 'My second note', text: 'This is a test. That is a book.', createdDt: '192882' }} />
-          <NoteListItem note={{ id: '3', title: 'Holy Shit! I did it.', text: 'WTF. Why you whining like a girl?', createdDt: '2082181' }} />
+          {notes.map(note => <NoteListItem key={note.id} note={note} />)}
         </ul>
       </div>
     );
   };
 
-  let x = 2;
+  if (!notes) throw new Error(`Invalid notes: ${notes}. Notes cannot be undefined as in NoteSelector and if notes is null, it should be handled in NoteList, not in NoteListItems.`);
+
+  const showFetchMoreBtn = hasMore && !isFetchingMore;
+  const showFetchingMore = hasMore && isFetchingMore;
 
   return (
     <div className="flex-grow flex-shrink overflow-y-auto">
-      {x === 1 && renderEmpty()}
-      {x === 2 && renderItems()}
-      {x === 2 && renderFetchMoreBtn()}
-      {x === 3 && renderFetchingMore()}
+      {notes.length === 0 && renderEmpty()}
+      {notes.length > 0 && renderItems()}
+      {showFetchMoreBtn && renderFetchMoreBtn()}
+      {showFetchingMore && renderFetchingMore()}
     </div>
   );
 };

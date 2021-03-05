@@ -7,7 +7,7 @@ import dataApi from '../apis/blockstack';
 import {
   INIT, UPDATE_WINDOW_SIZE, UPDATE_USER, UPDATE_HANDLING_SIGN_IN,
   UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP, UPDATE_SEARCH_STRING,
-  UPDATE_BULK_EDITING,
+  UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, CLEAR_SELECTED_NOTE_IDS,
   FETCH, FETCH_COMMIT, FETCH_ROLLBACK,
   FETCH_MORE, FETCH_MORE_COMMIT, FETCH_MORE_ROLLBACK,
@@ -25,6 +25,7 @@ import {
   UPDATE_DELETING_LIST_NAME,
   RETRY_ADD_LIST_NAMES, RETRY_UPDATE_LIST_NAMES, RETRY_MOVE_LIST_NAME,
   RETRY_DELETE_LIST_NAMES, CANCEL_DIED_LIST_NAMES,
+  UPDATE_NOTE_TITLE, UPDATE_NOTE_BODY, UPDATE_NOTE_MEDIA,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
   UPDATE_UPDATE_SETTINGS_PROGRESS,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
@@ -32,7 +33,7 @@ import {
 } from '../types/actionTypes';
 import {
   APP_NAME, APP_ICON_NAME, SEARCH_POPUP, CONFIRM_DELETE_POPUP,
-  MY_NOTES, TRASH, ID,
+  MY_NOTES, TRASH, ID, NEW_NOTE,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
   SWAP_LEFT, SWAP_RIGHT, N_NOTES,
 } from '../types/const';
@@ -363,6 +364,9 @@ export const updateBulkEditUrlHash = (isBulkEditing, doReplace = false) => {
 
 export const changeListName = (listName) => async (dispatch, getState) => {
 
+  dispatch(updateNoteId(null));
+  dispatch(updateEditorFocused(false));
+
   dispatch({
     type: UPDATE_LIST_NAME,
     payload: listName,
@@ -396,6 +400,13 @@ export const updateBulkEdit = (isBulkEditing) => {
   return {
     type: UPDATE_BULK_EDITING,
     payload: isBulkEditing,
+  };
+};
+
+export const updateEditorFocused = (isFocused) => {
+  return {
+    type: UPDATE_EDITOR_FOCUSED,
+    payload: isFocused,
   };
 };
 
@@ -457,7 +468,7 @@ export const fetchMore = () => async (dispatch, getState) => {
   }
 };
 
-export const addNote = (title, body, media, listName) => async (dispatch, getState) => {
+export const addNote = (title, body, media, listName = null) => async (dispatch, getState) => {
 
   const addedDT = Date.now();
   if (listName === null) listName = getState().display.listName;
@@ -465,7 +476,7 @@ export const addNote = (title, body, media, listName) => async (dispatch, getSta
 
   const note = {
     parentIds: null,
-    id: `${addedDT}${randomString(4)}}`,
+    id: `${addedDT}${randomString(4)}`,
     title, body, media, addedDT,
     updatedDT: addedDT,
   };
@@ -491,7 +502,7 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
   const toNote = {
     ...fromNote,
     parentIds: [fromNote.id],
-    id: `${addedDT}${randomString(4)}}`,
+    id: `${addedDT}${randomString(4)}`,
     title, body, media,
     updatedDT: addedDT,
   };
@@ -523,7 +534,17 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
   dispatch({ type: UPDATE_NOTE_COMMIT, payload });
 };
 
-export const moveNotes = (toListName, ids, fromListName = null) => async (dispatch, getState) => {
+export const saveNote = () => async (dispatch, getState) => {
+
+  const { noteId, noteTitle, noteBody, noteMedia } = getState().display;
+  if (noteId === NEW_NOTE) {
+    dispatch(addNote(noteTitle, noteBody, noteMedia));
+  } else {
+    dispatch(updateNote(noteTitle, noteBody, noteMedia, noteId));
+  }
+};
+
+const _moveNotes = (toListName, ids, fromListName = null) => async (dispatch, getState) => {
 
   let addedDT = Date.now();
   if (!fromListName) fromListName = getState().display.listName;
@@ -533,7 +554,7 @@ export const moveNotes = (toListName, ids, fromListName = null) => async (dispat
     const toNote = {
       ...note,
       parentIds: [note.id],
-      id: `${addedDT}${randomString(4)}}`,
+      id: `${addedDT}${randomString(4)}`,
       updatedDT: addedDT,
     };
     addedDT += 1;
@@ -569,7 +590,19 @@ export const moveNotes = (toListName, ids, fromListName = null) => async (dispat
   dispatch({ type: MOVE_NOTES_COMMIT, payload });
 };
 
-export const deleteNotes = (ids) => async (dispatch, getState) => {
+export const moveNotes = (toListName) => async (dispatch, getState) => {
+
+  const { noteId, isBulkEditing, selectedNoteIds } = getState().display;
+
+  if (isBulkEditing) {
+    dispatch(_moveNotes(toListName, selectedNoteIds));
+    dispatch(clearSelectedNoteIds());
+  } else {
+    dispatch(_moveNotes(toListName, [noteId]));
+  }
+};
+
+const _deleteNotes = (ids) => async (dispatch, getState) => {
 
   let addedDT = Date.now();
   const listName = getState().display.listName;
@@ -579,7 +612,7 @@ export const deleteNotes = (ids) => async (dispatch, getState) => {
     const toNote = {
       ...note,
       parentIds: [note.id],
-      id: `deleted${addedDT}${randomString(4)}}`,
+      id: `deleted${addedDT}${randomString(4)}`,
       title: '',
       body: '',
       media: note.media ? note.media.map(m => ({ name: m.name, content: '' })) : null,
@@ -616,6 +649,18 @@ export const deleteNotes = (ids) => async (dispatch, getState) => {
   }
 
   dispatch({ type: DELETE_NOTES_COMMIT, payload });
+};
+
+export const deleteNotes = () => async (dispatch, getState) => {
+
+  const { noteId, isBulkEditing, selectedNoteIds } = getState().display;
+
+  if (isBulkEditing) {
+    dispatch(_deleteNotes(selectedNoteIds));
+    dispatch(clearSelectedNoteIds());
+  } else {
+    dispatch(_deleteNotes([noteId]));
+  }
 };
 
 export const retryDiedNotes = (ids) => async (dispatch, getState) => {
@@ -749,7 +794,7 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (dispatc
     const toNote = {
       ...note,
       parentIds: [note.id],
-      id: `deleted${addedDT}${randomString(4)}}`,
+      id: `deleted${addedDT}${randomString(4)}`,
       title: '',
       body: '',
       media: note.media ? note.media.map(m => ({ name: m.name, content: '' })) : null,
@@ -992,6 +1037,27 @@ export const cancelDiedListNames = (listNames) => {
   };
 };
 
+export const updateNoteTitle = (title) => {
+  return {
+    type: UPDATE_NOTE_TITLE,
+    payload: title
+  };
+};
+
+export const updateNoteBody = (body) => {
+  return {
+    type: UPDATE_NOTE_BODY,
+    payload: body
+  };
+};
+
+export const updateNoteMedia = (media) => {
+  return {
+    type: UPDATE_NOTE_MEDIA,
+    payload: media
+  };
+};
+
 export const updateSettings = (updatedValues) => async (dispatch, getState) => {
 
   const rollbackValues = {};
@@ -1119,7 +1185,7 @@ const deleteAllDataLoop = async (dispatch, noteIds, total, doneCount) => {
     const toNote = {
       ...note,
       parentIds: [note.id],
-      id: `deleted${addedDT}${randomString(4)}}`,
+      id: `deleted${addedDT}${randomString(4)}`,
       title: '',
       body: '',
       media: note.media ? note.media.map(m => ({ name: m.name, content: '' })) : null,

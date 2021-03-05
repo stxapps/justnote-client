@@ -11,7 +11,12 @@ const conflictedNotesReducer = (state = initialState, action) => {
 
   if (action.type === FETCH_COMMIT) {
     const { listName, conflictedNotes } = action.payload;
-    return { ...state, [listName]: _.mapKeys(conflictedNotes, ID) };
+
+    if (conflictedNotes && Object.keys(conflictedNotes).length > 0) {
+      return { ...state, [listName]: _.mapKeys(conflictedNotes, ID) };
+    }
+
+    return state;
   }
 
 

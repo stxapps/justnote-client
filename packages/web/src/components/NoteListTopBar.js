@@ -12,7 +12,9 @@ const NoteListTopBar = (props) => {
 
   const { onSidebarOpenBtnClick } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
+  const listName = useSelector(state => state.display.listName);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
+  const didFetch = useSelector(state => state.display.didFetch);
   const menuBtn = useRef(null);
 
   const onMenuBtnClick = () => {
@@ -27,8 +29,9 @@ const NoteListTopBar = (props) => {
 
   if (safeAreaWidth < LG_WIDTH && isBulkEditing) return <NoteListTopBarBulkEdit />;
 
-  const title = <h1 className="text-lg font-medium leading-6 text-gray-900 truncate">My Notes</h1>;
-  //const title = <div className="bg-gray-300 w-20 h-6 rounded-md animate-pulse"></div>
+  let title;
+  if (didFetch) title = <h1 className="text-lg font-medium leading-6 text-gray-900 truncate">{listName}</h1>;
+  else title = <div className="bg-gray-300 w-20 h-6 rounded-md animate-pulse"></div>;
 
   return (
     <div className="flex-grow-0 flex-shrink-0">

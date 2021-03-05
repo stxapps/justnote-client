@@ -28,7 +28,7 @@ const NoteEditor = (props) => {
   );
 
   return (
-    <div className="w-full h-full bg-white">
+    <div className="w-full h-full bg-white flex flex-col">
       <NoteEditorTopBar isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} onRightPanelCloseBtnClick={onRightPanelCloseBtnClick} />
       <NoteEditorEditor />
     </div>
