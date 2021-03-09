@@ -15,10 +15,10 @@ const SidebarProfilePopup = () => {
   const isShown = useSelector(state => state.display.isProfilePopupShown);
   const anchorPosition = useSelector(state => state.display.profilePopupPosition);
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
+  const [derivedIsShown, setDerivedIsShown] = useState(isShown);
+  const [derivedAnchorPosition, setDerivedAnchorPosition] = useState(anchorPosition);
   const popupAnim = useRef(new Animated.Value(0)).current;
   const popupBackHandler = useRef(null);
-  const derivedIsShown = useRef(isShown);
-  const derivedAnchorPosition = useRef(anchorPosition);
   const dispatch = useDispatch();
 
   const onProfileCancelBtnClick = () => {
@@ -74,21 +74,21 @@ const SidebarProfilePopup = () => {
     };
   }, [isShown]);
 
-  if (derivedIsShown.current !== isShown) {
-    if (derivedIsShown.current && !isShown) setDidCloseAnimEnd(false);
-    derivedIsShown.current = isShown;
+  if (derivedIsShown !== isShown) {
+    if (derivedIsShown && !isShown) setDidCloseAnimEnd(false);
+    setDerivedIsShown(isShown);
   }
 
   if (!isShown && didCloseAnimEnd) return null;
 
-  if (anchorPosition && anchorPosition !== derivedAnchorPosition.current) {
-    derivedAnchorPosition.current = anchorPosition;
+  if (anchorPosition && anchorPosition !== derivedAnchorPosition) {
+    setDerivedAnchorPosition(anchorPosition);
   }
 
   const popupStyle = {
-    width: derivedAnchorPosition.current.width,
-    top: derivedAnchorPosition.current.top + derivedAnchorPosition.current.height,
-    left: derivedAnchorPosition.current.left,
+    width: derivedAnchorPosition.width,
+    top: derivedAnchorPosition.top + derivedAnchorPosition.height,
+    left: derivedAnchorPosition.left,
     opacity: popupAnim,
     transform: [
       { scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) },

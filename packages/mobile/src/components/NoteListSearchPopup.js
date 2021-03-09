@@ -17,10 +17,10 @@ const NoteListSearchPopup = () => {
   const isShown = useSelector(state => state.display.isSearchPopupShown);
   const searchString = useSelector(state => state.display.searchString);
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
+  const [derivedIsShown, setDerivedIsShown] = useState(isShown);
   const searchInput = useRef(null);
   const popupAnim = useRef(new Animated.Value(0)).current;
   const popupBackHandler = useRef(null);
-  const derivedIsShown = useRef(isShown);
   const dispatch = useDispatch();
 
   const onSearchInputChange = (e) => {
@@ -76,9 +76,9 @@ const NoteListSearchPopup = () => {
     };
   }, [isShown]);
 
-  if (derivedIsShown.current !== isShown) {
-    if (derivedIsShown.current && !isShown) setDidCloseAnimEnd(false);
-    derivedIsShown.current = isShown;
+  if (derivedIsShown !== isShown) {
+    if (derivedIsShown && !isShown) setDidCloseAnimEnd(false);
+    setDerivedIsShown(isShown);
   }
 
   if (!isShown && didCloseAnimEnd) return null;

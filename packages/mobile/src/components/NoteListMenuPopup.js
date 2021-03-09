@@ -20,10 +20,10 @@ const NoteListMenuPopup = () => {
   const anchorPosition = useSelector(state => state.display.noteListMenuPopupPosition);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
+  const [derivedIsShown, setDerivedIsShown] = useState(isShown);
+  const [derivedAnchorPosition, setDerivedAnchorPosition] = useState(anchorPosition);
   const popupAnim = useRef(new Animated.Value(0)).current;
   const popupBackHandler = useRef(null);
-  const derivedIsShown = useRef(isShown);
-  const derivedAnchorPosition = useRef(anchorPosition);
   const dispatch = useDispatch();
 
   const onNoteListMenuCancelBtnClick = () => {
@@ -89,24 +89,24 @@ const NoteListMenuPopup = () => {
     };
   }, [isShown]);
 
-  if (derivedIsShown.current !== isShown) {
-    if (derivedIsShown.current && !isShown) setDidCloseAnimEnd(false);
-    derivedIsShown.current = isShown;
+  if (derivedIsShown !== isShown) {
+    if (derivedIsShown && !isShown) setDidCloseAnimEnd(false);
+    setDerivedIsShown(isShown);
   }
 
   if (!isShown && didCloseAnimEnd) return null;
 
-  if (anchorPosition && anchorPosition !== derivedAnchorPosition.current) {
-    derivedAnchorPosition.current = anchorPosition;
+  if (anchorPosition && anchorPosition !== derivedAnchorPosition) {
+    setDerivedAnchorPosition(anchorPosition);
   }
 
   const popupStyle = {
-    top: derivedAnchorPosition.current.top + derivedAnchorPosition.current.height,
+    top: derivedAnchorPosition.top + derivedAnchorPosition.height,
     opacity: popupAnim,
     transform: [],
   };
   if (safeAreaWidth < LG_WIDTH) {
-    popupStyle.right = safeAreaWidth - derivedAnchorPosition.current.right + 16;
+    popupStyle.right = safeAreaWidth - derivedAnchorPosition.right + 16;
     if (isBulkEditing) {
       console.log('NoteListMenuPopup: should not reach here for safeAreaWidth < LG_WIDTH and isBulkEditing = true.');
     } else {
@@ -122,7 +122,7 @@ const NoteListMenuPopup = () => {
       });
     }
   } else {
-    popupStyle.left = derivedAnchorPosition.current.left + 16;
+    popupStyle.left = derivedAnchorPosition.left + 16;
     if (isBulkEditing) {
       popupStyle.transform.push({
         translateX: popupAnim.interpolate({

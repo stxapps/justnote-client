@@ -29,12 +29,12 @@ const SettingsPopup = () => {
   const [viewId, setViewId] = useState(VIEW_ACCOUNT);
   const [isSidebarShown, setIsSidebarShown] = useState(safeAreaWidth < MD_WIDTH);
   const [didSidebarAnimEnd, setDidSidebarAnimEnd] = useState(true);
+  const [derivedIsShown, setDerivedIsShown] = useState(isShown);
 
   const popupAnim = useRef(new Animated.Value(0)).current;
   const sidebarAnim = useRef(new Animated.Value(0)).current;
   const popupBackHandler = useRef(null);
   const panelContent = useRef(null);
-  const derivedIsShown = useRef(isShown);
 
   const dispatch = useDispatch();
 
@@ -148,14 +148,14 @@ const SettingsPopup = () => {
     }
   }, [viewId]);
 
-  if (derivedIsShown.current !== isShown) {
-    if (derivedIsShown.current && !isShown) {
+  if (derivedIsShown !== isShown) {
+    if (derivedIsShown && !isShown) {
       setDidCloseAnimEnd(false);
       setViewId(VIEW_ACCOUNT);
       setIsSidebarShown(safeAreaWidth < MD_WIDTH);
       setDidSidebarAnimEnd(true);
     }
-    derivedIsShown.current = isShown;
+    setDerivedIsShown(isShown);
   }
 
   if (!isShown && didCloseAnimEnd) return null;

@@ -21,9 +21,9 @@ const ConfirmDeletePopup = () => {
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   //const selectedNoteIds = useSelector(state => state.display.selectedNoteIds);
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
+  const [derivedIsShown, setDerivedIsShown] = useState(isShown);
   const popupAnim = useRef(new Animated.Value(0)).current;
   const popupBackHandler = useRef(null);
-  const derivedIsShown = useRef(isShown);
   const didClick = useRef(false);
   const dispatch = useDispatch();
 
@@ -84,9 +84,9 @@ const ConfirmDeletePopup = () => {
     };
   }, [isShown]);
 
-  if (derivedIsShown.current !== isShown) {
-    if (derivedIsShown.current && !isShown) setDidCloseAnimEnd(false);
-    derivedIsShown.current = isShown;
+  if (derivedIsShown !== isShown) {
+    if (derivedIsShown && !isShown) setDidCloseAnimEnd(false);
+    setDerivedIsShown(isShown);
   }
 
   if (!isShown && didCloseAnimEnd) return null;

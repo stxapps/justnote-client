@@ -22,8 +22,8 @@ const Main = () => {
       <SidebarProfilePopup />
       <NoteListMenuPopup />
       <MoveToPopup />
-      <ConfirmDeletePopup />
       <SettingsPopup />
+      <ConfirmDeletePopup />
     </React.Fragment>
   );
 };

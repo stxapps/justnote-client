@@ -26,10 +26,10 @@ const MoveToPopup = () => {
   //const selectedNoteIds = useSelector(state => state.display.selectedNoteIds);
   const [popupSize, setPopupSize] = useState(null);
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
+  const [derivedIsShown, setDerivedIsShown] = useState(isShown);
+  const [derivedAnchorPosition, setDerivedAnchorPosition] = useState(anchorPosition);
   const popupAnim = useRef(new Animated.Value(0)).current;
   const popupBackHandler = useRef(null);
-  const derivedIsShown = useRef(isShown);
-  const derivedAnchorPosition = useRef(anchorPosition);
   const didClick = useRef(false);
   const dispatch = useDispatch();
 
@@ -102,15 +102,15 @@ const MoveToPopup = () => {
     };
   }, [isShown]);
 
-  if (derivedIsShown.current !== isShown) {
-    if (derivedIsShown.current && !isShown) setDidCloseAnimEnd(false);
-    derivedIsShown.current = isShown;
+  if (derivedIsShown !== isShown) {
+    if (derivedIsShown && !isShown) setDidCloseAnimEnd(false);
+    setDerivedIsShown(isShown);
   }
 
   if (!isShown && didCloseAnimEnd) return null;
 
-  if (anchorPosition && anchorPosition !== derivedAnchorPosition.current) {
-    derivedAnchorPosition.current = anchorPosition;
+  if (anchorPosition && anchorPosition !== derivedAnchorPosition) {
+    setDerivedAnchorPosition(anchorPosition);
   }
 
   const moveTo = [];
@@ -139,12 +139,12 @@ const MoveToPopup = () => {
 
     const maxHeight = getLastHalfHeight(Math.min(256, safeAreaHeight - 16), 44, 4, 4);
     const layouts = createLayouts(
-      derivedAnchorPosition.current,
+      derivedAnchorPosition,
       { width: popupSize.width, height: Math.min(popupSize.height, maxHeight) },
       { width: safeAreaWidth, height: safeAreaHeight }
     );
     const triggerOffsetX = safeAreaWidth < LG_WIDTH ? 0 : 25;
-    const triggerOffsetY = safeAreaWidth < LG_WIDTH ? 52 : derivedAnchorPosition.current.height;
+    const triggerOffsetY = safeAreaWidth < LG_WIDTH ? 52 : derivedAnchorPosition.height;
     const triggerOffsetWidth = safeAreaWidth < LG_WIDTH ? -8 : 0;
     const triggerOffsets = {
       x: triggerOffsetX, y: triggerOffsetY, width: triggerOffsetWidth, height: 0

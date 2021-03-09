@@ -22,14 +22,14 @@ const NavPanel = () => {
 
   const [isSidebarShown, setIsSidebarShown] = useState(false);
   const [didSidebarAnimEnd, setDidSidebarAnimEnd] = useState(true);
+  const [derivedIsSidebarShown, setDerivedIsSidebarShown] = useState(isSidebarShown);
   const sidebarAnim = useRef(new Animated.Value(1)).current;
   const sidebarBackHandler = useRef(null);
-  const derivedIsSidebarShown = useRef(isSidebarShown);
 
   const [didRightPanelAnimEnd, setDidRightPanelAnimEnd] = useState(true);
+  const [derivedNoteId, setDerivedNoteId] = useState(noteId);
   const rightPanelAnim = useRef(new Animated.Value(1)).current;
   const rightPanelBackHandler = useRef(null);
-  const derivedNoteId = useRef(noteId);
 
   const dispatch = useDispatch();
 
@@ -117,14 +117,14 @@ const NavPanel = () => {
     };
   }, [noteId]);
 
-  if (derivedIsSidebarShown.current !== isSidebarShown) {
+  if (derivedIsSidebarShown !== isSidebarShown) {
     setDidSidebarAnimEnd(false);
-    derivedIsSidebarShown.current = isSidebarShown;
+    setDerivedIsSidebarShown(isSidebarShown);
   }
 
-  if (derivedNoteId.current !== noteId) {
+  if (derivedNoteId !== noteId) {
     setDidRightPanelAnimEnd(false);
-    derivedNoteId.current = noteId;
+    setDerivedNoteId(noteId);
   }
 
   const leftCanvasClassNames = !isSidebarShown && didSidebarAnimEnd ? 'hidden relative' : 'absolute inset-0 flex flex-row';
