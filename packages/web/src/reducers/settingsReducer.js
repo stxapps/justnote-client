@@ -13,12 +13,13 @@ import {
   MY_NOTES, TRASH, ARCHIVE,
   ADDED, ADDING, UPDATING, MOVING, DELETING,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
-  SWAP_LEFT, SWAP_RIGHT,
+  SWAP_LEFT, SWAP_RIGHT, ADDED_DT,
 } from '../types/const';
 import { doContainListName, swapArrayElements, getInsertIndex } from '../utils';
 
 export const initialState = {
   doDeleteOldLinksInTrash: true,
+  sortOn: ADDED_DT,
   doDescendingOrder: true,
   listNameMap: [
     { listName: MY_NOTES, displayName: MY_NOTES, status: ADDED },

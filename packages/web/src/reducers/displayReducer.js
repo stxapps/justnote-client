@@ -212,7 +212,11 @@ const displayReducer = (state = initialState, action) => {
     return { ...state, updateSettingsProgress: action.payload };
   }
 
-  if (action.type === DELETE_ALL_DATA || action.type === RESET_STATE) {
+  if (action.type === DELETE_ALL_DATA) {
+    return { ...initialState, didFetch: true };
+  }
+
+  if (action.type === RESET_STATE) {
     return { ...initialState };
   }
 

@@ -7,6 +7,7 @@ import { createStore, compose } from 'redux';
 import { install as installReduxLoop } from 'redux-loop';
 
 import './stylesheets/tailwind.css';
+import './stylesheets/loading.css';
 
 import { BLOCKSTACK_AUTH } from './types/const';
 import reducers from './reducers';

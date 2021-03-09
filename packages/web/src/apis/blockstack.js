@@ -202,13 +202,13 @@ const toConflictedNotes = (noteIds, conflictWiths, fpaths, contents) => {
 
 const fetch = async (params) => {
 
-  const { listName, doDescendingOrder, doFetchSettings } = params;
+  const { listName, sortOn, doDescendingOrder, doFetchSettings } = params;
 
   const { noteFPaths, settingsFPath } = await listFPaths();
   const { noteIds, conflictedIds, conflictWiths } = listNoteIds(noteFPaths);
 
   const namedNoteIds = noteIds.filter(id => id.listName === listName);
-  let selectedNoteIds = namedNoteIds.sort((a, b) => a.addedDT - b.addedDT);
+  let selectedNoteIds = namedNoteIds.sort((a, b) => a[sortOn] - b[sortOn]);
   if (doDescendingOrder) selectedNoteIds.reverse();
   selectedNoteIds = selectedNoteIds.slice(0, N_NOTES);
 
@@ -253,13 +253,13 @@ const fetch = async (params) => {
 
 const fetchMore = async (params) => {
 
-  const { listName, ids, doDescendingOrder } = params;
+  const { listName, ids, sortOn, doDescendingOrder } = params;
 
   const { noteFPaths } = await listFPaths();
   const { noteIds } = listNoteIds(noteFPaths);
 
   const namedNoteIds = noteIds.filter(id => id.listName === listName)
-  let sortedNoteIds = namedNoteIds.sort((a, b) => a.addedDT - b.addedDT);
+  let sortedNoteIds = namedNoteIds.sort((a, b) => a[sortOn] - b[sortOn]);
   if (doDescendingOrder) sortedNoteIds.reverse();
 
   const indexes = ids.map(id => sortedNoteIds.indexOf(id));

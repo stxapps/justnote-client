@@ -1,10 +1,10 @@
 import Url from 'url-parse';
 
 import {
-  HTTP,
+  HTTP, MAX_CHARS,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
   VALID_URL, NO_URL, ASK_CONFIRM_URL,
-  MAX_CHARS,
+  VALID_LIST_NAME, NO_LIST_NAME, TOO_LONG_LIST_NAME, DUPLICATE_LIST_NAME,
 } from '../types/const';
 
 export const containUrlProtocol = (url) => {
@@ -255,6 +255,31 @@ export const doContainListName = (listName, listNameObjs) => {
   }
 
   return false;
+};
+
+export const doContainListNameDisplayName = (displayName, listNameObjs) => {
+
+  for (const listNameObj of listNameObjs) {
+    if (listNameObj.displayName === displayName) return true;
+  }
+
+  return false;
+};
+
+export const validateListNameDisplayName = (displayName, listNameMap) => {
+
+  // Validate:
+  //   1. Empty 2. Contain space at the begining or the end 3. Contain invalid characters
+  //   4. Too long 5. Duplicate
+  //
+  // 2 and 3 are not the problem because this is display name!
+
+  if (!displayName || !isString(displayName) || displayName === '') return NO_LIST_NAME;
+  if (displayName.length > 256) return TOO_LONG_LIST_NAME;
+
+  if (doContainListNameDisplayName(displayName, listNameMap)) return DUPLICATE_LIST_NAME;
+
+  return VALID_LIST_NAME;
 };
 
 export const isDiedStatus = (status) => {

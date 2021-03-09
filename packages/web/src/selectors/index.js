@@ -67,6 +67,9 @@ const createSelectorNotes = createSelectorCreator(
   defaultMemoize,
   (prevVal, val) => {
 
+    if (prevVal['settings'].sortOn !== val['settings'].sortOn) {
+      return false;
+    }
     if (prevVal['settings'].doDescendingOrder !== val['settings'].doDescendingOrder) {
       return false;
     }
@@ -107,13 +110,14 @@ export const _getNotes = (state) => {
   const notes = state.notes;
   const listName = state.display.listName;
   const searchString = state.display.searchString;
+  const sortOn = state.settings.sortOn;
   const doDescendingOrder = state.settings.doDescendingOrder;
 
   if (!notes || !notes[listName]) return null;
 
   const selectedNotes = _.select(notes[listName], STATUS, [ADDED, ADDING, UPDATING, MOVING, DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING]);
   const sortedNotes = Object.values(selectedNotes).sort((a, b) => {
-    return a.addedDT - b.addedDT;
+    return a[sortOn] - b[sortOn];
   });
   if (doDescendingOrder) sortedNotes.reverse();
 
@@ -132,12 +136,13 @@ export const _getConflictedNotes = (state) => {
 
   const conflictedNotes = state.conflictedNotes;
   const listName = state.display.listName;
+  const sortOn = state.settings.sortOn;
   const doDescendingOrder = state.settings.doDescendingOrder;
 
   if (!conflictedNotes || !conflictedNotes[listName]) return null;
 
   const sortedNotes = Object.values(conflictedNotes[listName]).sort((a, b) => {
-    return a.addedDT - b.addedDT;
+    return a[sortOn] - b[sortOn];
   });
   if (doDescendingOrder) sortedNotes.reverse();
 

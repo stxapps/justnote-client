@@ -45,7 +45,7 @@ const NavPanel = () => {
           <div className="absolute inset-0 bg-white"></div>
         </motion.button>
         <div className="absolute top-0 right-0 p-1">
-          <button onClick={onSidebarCloseBtnClick} className="flex items-center justify-center h-7 w-7 rounded-full group focus:outline-none focus:shadow-outline" aria-label="Close settings popup">
+          <button onClick={onSidebarCloseBtnClick} className="flex items-center justify-center h-7 w-7 rounded-full group focus:outline-none focus:ring-2 focus:ring-green-600" aria-label="Close settings popup">
             <svg className="h-5 w-5 text-gray-500 group-hover:text-gray-700" stroke="currentColor" fill="none" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>

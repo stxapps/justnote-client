@@ -67,3 +67,6 @@ export const IN_USE_LIST_NAME = 'IN_USE_LIST_NAME';
 
 export const SWAP_LEFT = 'SWAP_LEFT';
 export const SWAP_RIGHT = 'SWAP_RIGHT';
+
+export const ADDED_DT = 'addedDT';
+export const UPDATED_DT = 'updatedDT';

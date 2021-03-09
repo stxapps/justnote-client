@@ -52,3 +52,19 @@ export const rightPanelFMV = {
     transition: { ease: 'easeOut', duration: 0.1 },
   },
 };
+
+export const slideDownFMV = {
+  hidden: {
+    scaleY: 0,
+    translateY: '-100%',
+    transition: { ease: 'easeIn', duration: 0.075 },
+  },
+  visible: {
+    scaleY: 1,
+    translateY: '0%',
+    transition: { ease: 'easeOut', duration: 0.1 },
+  },
+  exit: {
+    opacity: 0,
+  },
+};

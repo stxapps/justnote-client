@@ -171,7 +171,7 @@ const Landing = () => {
         <div className="mx-auto max-w-md px-4 text-center sm:max-w-3xl sm:px-6 lg:px-8 lg:max-w-7xl">
           <h2 className="text-base font-semibold tracking-wider text-indigo-600 uppercase">Safe & Secure</h2>
           <p className="mt-2 text-3xl font-extrabold text-gray-900 tracking-tight sm:text-4xl">
-            With privacy at heart powered by <a className="underline hover:text-gray-900 focus:outline-none focus:shadow-outline" href="https://www.stacks.co">Stacks</a>
+            With privacy at heart powered by <a className="underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600" href="https://www.stacks.co">Stacks</a>
           </p>
           <p className="mt-5 max-w-prose mx-auto text-xl text-gray-500">
             Stacks technology empowers Justnote to be a decentralized app on Bitcoin blockchain so you have true ownership of your identity and your data.

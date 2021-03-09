@@ -32,7 +32,7 @@ import {
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
-  APP_NAME, APP_ICON_NAME, SEARCH_POPUP, CONFIRM_DELETE_POPUP,
+  APP_NAME, APP_ICON_NAME, SEARCH_POPUP, CONFIRM_DELETE_POPUP, SETTINGS_POPUP,
   MY_NOTES, TRASH, ID, NEW_NOTE,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
   SWAP_LEFT, SWAP_RIGHT, N_NOTES,
@@ -435,13 +435,14 @@ export const fetch = (
 ) => async (dispatch, getState) => {
 
   const listName = getState().display.listName;
+  const sortOn = getState().settings.sortOn;
   const doDescendingOrder = getState().settings.doDescendingOrder;
 
   dispatch({ type: FETCH });
 
   try {
     const params = {
-      listName, doDescendingOrder, doDeleteOldNotesInTrash, doFetchSettings,
+      listName, sortOn, doDescendingOrder, doDeleteOldNotesInTrash, doFetchSettings,
     };
     const fetched = await dataApi.fetch(params);
     dispatch({ type: FETCH_COMMIT, payload: { ...params, ...fetched } });
@@ -454,13 +455,14 @@ export const fetchMore = () => async (dispatch, getState) => {
 
   const listName = getState().display.listName;
   const ids = Object.keys(getState().notes[listName]);
+  const sortOn = getState().settings.sortOn;
   const doDescendingOrder = getState().settings.doDescendingOrder;
 
   const payload = { listName };
   dispatch({ type: FETCH_MORE, payload });
 
   try {
-    const params = { listName, ids, doDescendingOrder };
+    const params = { listName, ids, sortOn, doDescendingOrder };
     const fetched = await dataApi.fetchMore(params);
     dispatch({ type: FETCH_MORE_COMMIT, payload: { ...params, ...fetched } });
   } catch (e) {
@@ -1118,9 +1120,9 @@ export const exportAllData = () => async (dispatch, getState) => {
   let fpaths = [];
   try {
     const { noteFPaths, settingsFPath } = await dataApi.listFPaths();
-    const { noteIds, conflictedNoteIds } = dataApi.listNoteIds(noteFPaths);
+    const { noteIds, conflictedIds } = dataApi.listNoteIds(noteFPaths);
 
-    for (const noteId of [...noteIds, ...conflictedNoteIds]) {
+    for (const noteId of [...noteIds, ...conflictedIds]) {
       for (const fpath of noteId.fpaths) {
         if (fpath.endsWith('index.json')) fpaths.push(fpath);
       }
@@ -1222,9 +1224,9 @@ export const deleteAllData = () => async (dispatch, getState) => {
   let allNoteIds, settingsFPath;
   try {
     const { noteFPaths, settingsFPath: sFPath } = await dataApi.listFPaths();
-    const { noteIds, conflictedNoteIds } = dataApi.listNoteIds(noteFPaths);
+    const { noteIds, conflictedIds } = dataApi.listNoteIds(noteFPaths);
 
-    allNoteIds = [...noteIds, ...conflictedNoteIds];
+    allNoteIds = [...noteIds, ...conflictedIds];
     settingsFPath = sFPath;
   } catch (e) {
     dispatch(updateDeleteAllDataProgress({
@@ -1244,6 +1246,7 @@ export const deleteAllData = () => async (dispatch, getState) => {
     if (allNoteIds.length > 0) await deleteAllDataLoop(dispatch, allNoteIds, total, 0);
     if (settingsFPath) await dataApi.updateSettings(initialSettings);
 
+    updatePopupUrlHash(SETTINGS_POPUP, false, null);
     dispatch({ type: DELETE_ALL_DATA });
   } catch (e) {
     dispatch(updateDeleteAllDataProgress({
