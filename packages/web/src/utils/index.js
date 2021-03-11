@@ -375,3 +375,17 @@ export const getInsertIndex = (listNameObj, oldListNameMap, newListNameMap) => {
 
   return -1;
 };
+
+export const getFormattedDT = (dt) => {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  const d = new Date(dt);
+
+  const year = d.getFullYear() % 2000;
+  const month = months[d.getMonth()];
+  const date = d.getDate();
+  const hour = d.getHours();
+  const min = d.getMinutes();
+
+  return `${date} ${month} ${year} ${hour}:${min}`;
+};

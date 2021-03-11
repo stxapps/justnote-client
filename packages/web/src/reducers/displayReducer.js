@@ -2,7 +2,8 @@ import {
   UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP,
   UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, CLEAR_SELECTED_NOTE_IDS,
-  FETCH_COMMIT, DELETE_LIST_NAMES, UPDATE_DELETING_LIST_NAME,
+  FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT,
+  DELETE_LIST_NAMES, UPDATE_DELETING_LIST_NAME,
   UPDATE_NOTE_TITLE, UPDATE_NOTE_BODY, UPDATE_NOTE_MEDIA,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
   UPDATE_UPDATE_SETTINGS_PROGRESS,
@@ -165,11 +166,22 @@ const displayReducer = (state = initialState, action) => {
     return newState;
   }
 
+  if (action.type === ADD_NOTE) {
+    const { note } = action.payload;
+    return { ...state, noteId: note.id };
+  }
+
+  if (action.type === UPDATE_NOTE || action.type === MERGE_NOTES_COMMIT) {
+    const { toNote } = action.payload;
+    return { ...state, noteId: toNote.id };
+  }
+
   if (action.type === DELETE_LIST_NAMES) {
     const { listNames } = action.payload;
     if (listNames.includes(state.listName)) {
       return { ...state, listName: MY_NOTES };
     }
+    return state;
   }
 
   if (action.type === UPDATE_DELETING_LIST_NAME) {

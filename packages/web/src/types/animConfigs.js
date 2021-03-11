@@ -53,7 +53,7 @@ export const rightPanelFMV = {
   },
 };
 
-export const slideDownFMV = {
+export const listsFMV = {
   hidden: {
     scaleY: 0,
     translateY: '-100%',
@@ -67,4 +67,9 @@ export const slideDownFMV = {
   exit: {
     opacity: 0,
   },
+};
+
+export const slideYFMV = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
 };

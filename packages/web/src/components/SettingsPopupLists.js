@@ -14,7 +14,7 @@ import {
 import { getListNameMap } from '../selectors';
 import dataApi from '../apis/blockstack';
 import { validateListNameDisplayName, isDiedStatus } from '../utils';
-import { slideDownFMV } from '../types/animConfigs';
+import { listsFMV } from '../types/animConfigs';
 
 const SettingsPopupLists = (props) => {
 
@@ -42,7 +42,7 @@ const SettingsPopupLists = (props) => {
           <AnimatePresence initial={false}>
             {listNameMap.map(listNameObj => {
               return (
-                <motion.div key={listNameObj.listName} layoutId={listNameObj.listName} variants={slideDownFMV} initial="hidden" animate="visible" exit="exit">
+                <motion.div key={listNameObj.listName} layoutId={listNameObj.listName} variants={listsFMV} initial="hidden" animate="visible" exit="exit">
                   <ListNameEditor listNameObj={listNameObj} validateDisplayName={validateDisplayName} />
                 </motion.div>
               )
@@ -284,7 +284,7 @@ const _ListNameEditor = (props) => {
       );
     } else {
       deleteBtn = (
-        <button onClick={onDeleteBtnClick} className={'flex-grow-0 flex-shrink-0 flex justify-start items-center w-8 h-10 group focus:outline-none group'}>
+        <button onClick={onDeleteBtnClick} className="flex-grow-0 flex-shrink-0 flex justify-start items-center w-8 h-10 group focus:outline-none group">
           <svg className="h-4 text-gray-500 rounded-sm group-hover:text-gray-700 group-focus:ring-2 group-focus:ring-offset-4 group-focus:ring-green-600" viewBox="0 0 14 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path fillRule="evenodd" clipRule="evenodd" d="M6 0C5.62123 0 5.27497 0.214 5.10557 0.55279L4.38197 2H1C0.44772 2 0 2.44772 0 3C0 3.55228 0.44772 4 1 4V14C1 15.1046 1.89543 16 3 16H11C12.1046 16 13 15.1046 13 14V4C13.5523 4 14 3.55228 14 3C14 2.44772 13.5523 2 13 2H9.618L8.8944 0.55279C8.725 0.214 8.3788 0 8 0H6ZM4 6C4 5.44772 4.44772 5 5 5C5.55228 5 6 5.44772 6 6V12C6 12.5523 5.55228 13 5 13C4.44772 13 4 12.5523 4 12V6ZM9 5C8.4477 5 8 5.44772 8 6V12C8 12.5523 8.4477 13 9 13C9.5523 13 10 12.5523 10 12V6C10 5.44772 9.5523 5 9 5Z" />
           </svg>

@@ -7,6 +7,7 @@ import {
   MOVE_NOTES, MOVE_NOTES_COMMIT, MOVE_NOTES_ROLLBACK,
   DELETE_NOTES, DELETE_NOTES_COMMIT, DELETE_NOTES_ROLLBACK,
   CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
+  MERGE_NOTES_COMMIT,
   ADD_LIST_NAMES_COMMIT, DELETE_LIST_NAMES_COMMIT,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -231,6 +232,17 @@ const notesReducer = (state = initialState, action) => {
 
     const newState = { ...state };
     newState[listName] = _.exclude(state[listName], ID, ids);
+
+    return newState;
+  }
+
+  if (action.type === MERGE_NOTES_COMMIT) {
+    const { toListName, toNote } = action.payload;
+
+    const newState = { ...state };
+    newState[toListName] = {
+      ...newState[toListName], ...toObjAndAddAttrs([toNote], ADDED)
+    };
 
     return newState;
   }

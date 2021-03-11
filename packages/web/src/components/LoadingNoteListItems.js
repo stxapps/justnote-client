@@ -12,7 +12,7 @@ const LoadingNoteListItem = () => {
   for (let i = 0; i < nTexts; i++) textIndices.push(i);
 
   return (
-    <li className="px-4 py-5 sm:px-6 lg:px-8">
+    <li className="px-4 py-5 sm:px-6">
       <div style={{ width: titleWidth }} className="h-5 bg-gray-300 rounded-md"></div>
       <div className="mt-1">
         {textIndices.map(i => {

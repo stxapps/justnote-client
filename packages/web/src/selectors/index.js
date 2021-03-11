@@ -146,7 +146,7 @@ export const _getConflictedNotes = (state) => {
   });
   if (doDescendingOrder) sortedNotes.reverse();
 
-  return conflictedNotes[listName];
+  return sortedNotes;
 };
 
 export const getNotes = createSelectorNotes(

@@ -188,12 +188,17 @@ const toConflictedNotes = (noteIds, conflictWiths, fpaths, contents) => {
   const conflictedNotes = [];
   for (const conflictWith of conflictWiths) {
     const selectedNotes = notes.filter(note => conflictWith.includes(note.id));
+    const sortedNotes = selectedNotes.sort((a, b) => a.addedDT - b.addedDT);
+    const sortedListNames = sortedNotes.map(note => {
+      return noteIds.find(noteId => noteId.id === note.id).listName;
+    });
 
     conflictedNotes.push({
-      id: 'conflict-' + selectedNotes.map(note => note.id).join('-'),
-      notes: selectedNotes,
-      addedDT: Math.min(...selectedNotes.map(note => note.addedDT)),
-      updatedDT: Math.max(...selectedNotes.map(note => note.updatedDT)),
+      id: 'conflict-' + sortedNotes.map(note => note.id).join('-'),
+      listNames: sortedListNames,
+      notes: sortedNotes,
+      addedDT: Math.min(...sortedNotes.map(note => note.addedDT)),
+      updatedDT: Math.max(...sortedNotes.map(note => note.updatedDT)),
     });
   }
 
@@ -212,7 +217,14 @@ const fetch = async (params) => {
   if (doDescendingOrder) selectedNoteIds.reverse();
   selectedNoteIds = selectedNoteIds.slice(0, N_NOTES);
 
-  const selectedConflictWiths = conflictWiths.slice(0, N_NOTES);
+  const namedConflictWiths = conflictWiths.filter(conflictWith => {
+    for (const id of conflictWith) {
+      const conflictedId = conflictedIds.find(noteId => noteId.id === id);
+      if (conflictedId.listName === listName) return true;
+    }
+    return false;
+  });
+  const selectedConflictWiths = namedConflictWiths.slice(0, N_NOTES);
   const selectedConflictedIds = conflictedIds.filter(noteId => {
     return selectedConflictWiths.some(conflictWith => conflictWith.includes(noteId.id));
   });

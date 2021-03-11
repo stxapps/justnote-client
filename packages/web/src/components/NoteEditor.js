@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import NoteEditorTopBar from './NoteEditorTopBar';
 import NoteEditorEditor from './NoteEditorEditor';
 import NoteEditorBulkEdit from './NoteEditorBulkEdit';
+import NoteEditorConflict from './NoteEditorConflict';
 
 const NoteEditor = (props) => {
 
@@ -22,10 +23,11 @@ const NoteEditor = (props) => {
         </div>
       </div>
       <div className="absolute inset-x-0 bottom-8">
-        <p className="text-sm text-gray-600 text-center">Click "+ New Note" button or select your note</p>
+        <p className="text-sm text-gray-500 text-center">Click "+ New Note" button or select your note</p>
       </div>
     </div>
   );
+  if (noteId.startsWith('conflict')) return <NoteEditorConflict />;
 
   return (
     <div className="w-full h-full bg-white flex flex-col">

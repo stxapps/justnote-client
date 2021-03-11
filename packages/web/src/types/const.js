@@ -37,10 +37,12 @@ export const ADDING = 'ADDING';
 export const UPDATING = 'UPDATING';
 export const MOVING = 'MOVING';
 export const DELETING = 'DELETING';
+export const MERGING = 'MERGING';
 export const DIED_ADDING = 'DIED_ADDING';
 export const DIED_UPDATING = 'DIED_UPDATING';
 export const DIED_MOVING = 'DIED_MOVING';
 export const DIED_DELETING = 'DIED_DELETING';
+export const DIED_MERGING = 'DIED_MERGING';
 
 export const ZERO = 'ZERO'; // top or left of the window
 export const CENTER = 'CENTER'; // center of the window

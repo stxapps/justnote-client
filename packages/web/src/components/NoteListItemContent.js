@@ -83,11 +83,11 @@ const NoteListItemContent = (props) => {
   }, []);
 
   return (
-    <button onTouchStart={onTouchPress} onTouchMove={onTouchPressRelease} onTouchEnd={onTouchPressRelease} onTouchCancel={onTouchPressRelease} onMouseDown={onClickPress} onMouseMove={onClickPressRelease} onMouseUp={onClickPressRelease} onMouseLeave={onClickPressRelease} onClick={onContentBtnClick} className="group w-full text-left rounded-sm flex items-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600">
+    <button onTouchStart={onTouchPress} onTouchMove={onTouchPressRelease} onTouchEnd={onTouchPressRelease} onTouchCancel={onTouchPressRelease} onMouseDown={onClickPress} onMouseMove={onClickPressRelease} onMouseUp={onClickPressRelease} onMouseLeave={onClickPressRelease} onClick={onContentBtnClick} className="group w-full text-left rounded-sm flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-600">
       {isBulkEditing && <div className="w-10 h-10 bg-gray-200 border border-gray-300 mr-3 rounded-full"></div>}
       <div className="flex-1 min-w-0">
         <h3 className="text-sm font-semibold text-gray-800 truncate group-hover:underline">{title}</h3>
-        <p className="mt-1 text-sm text-gray-600 line-clamp-3">{body}</p>
+        <p className="mt-1 text-sm text-gray-500 line-clamp-3">{body}</p>
       </div>
     </button>
   );

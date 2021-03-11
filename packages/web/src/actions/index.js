@@ -18,6 +18,7 @@ import {
   CANCEL_DIED_NOTES,
   DELETE_OLD_NOTES_IN_TRASH, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
   DELETE_OLD_NOTES_IN_TRASH_ROLLBACK,
+  MERGE_NOTES, MERGE_NOTES_COMMIT, MERGE_NOTES_ROLLBACK,
   ADD_LIST_NAMES, ADD_LIST_NAMES_COMMIT, ADD_LIST_NAMES_ROLLBACK,
   UPDATE_LIST_NAMES, UPDATE_LIST_NAMES_COMMIT, UPDATE_LIST_NAMES_ROLLBACK,
   MOVE_LIST_NAME, MOVE_LIST_NAME_COMMIT, MOVE_LIST_NAME_ROLLBACK,
@@ -485,7 +486,6 @@ export const addNote = (title, body, media, listName = null) => async (dispatch,
 
   const payload = { listName, note };
   dispatch({ type: ADD_NOTE, payload });
-  dispatch(updateNoteId(note.id));
 
   try {
     await dataApi.putNotes({ listName, notes: [note] });
@@ -500,24 +500,22 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
   const addedDT = Date.now();
   const listName = getState().display.listName;
 
-  const fromNote = getState().notes[listName][id];
+  const note = getState().notes[listName][id];
   const toNote = {
-    ...fromNote,
-    parentIds: [fromNote.id],
+    ...note,
+    parentIds: [note.id],
     id: `${addedDT}${randomString(4)}`,
     title, body, media,
     updatedDT: addedDT,
   };
-
-  fromNote.title = '';
-  fromNote.body = '';
-  if (fromNote.media) {
-    fromNote.media = fromNote.media.map(m => ({ name: m.name, content: '' }));
-  }
+  const fromNote = {
+    ...note,
+    title: '', body: '',
+    media: note.media ? note.media.map(m => ({ name: m.name, content: '' })) : null,
+  };
 
   const payload = { listName, fromNote, toNote };
   dispatch({ type: UPDATE_NOTE, payload });
-  dispatch(updateNoteId(toNote.id));
 
   try {
     await dataApi.putNotes({ listName, notes: [toNote] });
@@ -551,8 +549,8 @@ const _moveNotes = (toListName, ids, fromListName = null) => async (dispatch, ge
   let addedDT = Date.now();
   if (!fromListName) fromListName = getState().display.listName;
 
-  let fromNotes = Object.values(_.select(getState().notes[fromListName], ID, ids));
-  const toNotes = fromNotes.map(note => {
+  const notes = Object.values(_.select(getState().notes[fromListName], ID, ids));
+  const toNotes = notes.map(note => {
     const toNote = {
       ...note,
       parentIds: [note.id],
@@ -562,13 +560,13 @@ const _moveNotes = (toListName, ids, fromListName = null) => async (dispatch, ge
     addedDT += 1;
     return toNote;
   });
-  fromNotes = fromNotes.map(note => {
-    note.title = '';
-    note.body = '';
-    if (note.media) {
-      note.media = note.media.map(m => ({ name: m.name, content: '' }));
-    }
-    return note;
+  const fromNotes = notes.map(note => {
+    const fromNote = {
+      ...note,
+      title: '', body: '',
+      media: note.media ? note.media.map(m => ({ name: m.name, content: '' })) : null,
+    };
+    return fromNote;
   });
 
   const payload = { fromListName, fromNotes, toListName, toNotes };
@@ -609,27 +607,25 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
   let addedDT = Date.now();
   const listName = getState().display.listName;
 
-  let fromNotes = Object.values(_.select(getState().notes[listName], ID, ids));
-  const toNotes = fromNotes.map(note => {
+  const notes = Object.values(_.select(getState().notes[listName], ID, ids));
+  const toNotes = notes.map(note => {
     const toNote = {
       ...note,
       parentIds: [note.id],
       id: `deleted${addedDT}${randomString(4)}`,
-      title: '',
-      body: '',
-      media: note.media ? note.media.map(m => ({ name: m.name, content: '' })) : null,
+      title: '', body: '', media: [],
       updatedDT: addedDT,
     };
     addedDT += 1;
     return toNote;
   });
-  fromNotes = fromNotes.map(note => {
-    note.title = '';
-    note.body = '';
-    if (note.media) {
-      note.media = note.media.map(m => ({ name: m.name, content: '' }));
-    }
-    return note;
+  const fromNotes = notes.map(note => {
+    const fromNote = {
+      ...note,
+      title: '', body: '',
+      media: note.media ? note.media.map(m => ({ name: m.name, content: '' })) : null,
+    };
+    return fromNote;
   });
 
   const payload = { listName, ids };
@@ -678,7 +674,6 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
     if (status === DIED_ADDING) {
       const payload = { listName, note };
       dispatch({ type: ADD_NOTE, payload });
-      dispatch(updateNoteId(note.id));
 
       try {
         await dataApi.putNotes({ listName, notes: [note] });
@@ -692,7 +687,6 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       const payload = { listName, fromNote, toNote };
       dispatch({ type: UPDATE_NOTE, payload });
-      dispatch(updateNoteId(toNote.id));
 
       try {
         await dataApi.putNotes({ listName, notes: [toNote] });
@@ -797,21 +791,19 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (dispatc
       ...note,
       parentIds: [note.id],
       id: `deleted${addedDT}${randomString(4)}`,
-      title: '',
-      body: '',
-      media: note.media ? note.media.map(m => ({ name: m.name, content: '' })) : null,
+      title: '', body: '', media: [],
       updatedDT: addedDT,
     };
     addedDT += 1;
     return toNote;
   });
   const fromNotes = oldNotes.map(note => {
-    note.title = '';
-    note.body = '';
-    if (note.media) {
-      note.media = note.media.map(m => ({ name: m.name, content: '' }));
-    }
-    return note;
+    const fromNote = {
+      ...note,
+      title: '', body: '',
+      media: note.media ? note.media.map(m => ({ name: m.name, content: '' })) : null,
+    };
+    return fromNote;
   });
 
   const payload = { listName, ids: _.extract(fromNotes, ID) };
@@ -832,6 +824,60 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (dispatc
   }
 
   dispatch({ type: DELETE_OLD_NOTES_IN_TRASH_COMMIT, payload });
+};
+
+export const mergeNotes = (selectedId) => async (dispatch, getState) => {
+
+  const addedDT = Date.now();
+  const listName = getState().display.listName;
+  const noteId = getState().display.noteId;
+  const conflictedNote = getState().conflictedNotes[listName][noteId];
+
+  let toListName, toNote;
+  const fromNotes = {};
+  for (let i = 0; i < conflictedNote.notes.length; i++) {
+
+    const listName = conflictedNote.listNames[i];
+    const note = conflictedNote.notes[i];
+
+    if (note.id === selectedId) {
+      toListName = listName;
+      toNote = {
+        parentIds: conflictedNote.notes.map(note => note.id),
+        id: `${addedDT}${randomString(4)}`,
+        title: note.title, body: note.body, media: note.media,
+        updatedDT: addedDT,
+      };
+    }
+
+    if (!fromNotes[listName]) fromNotes[listName] = [];
+    fromNotes[listName].push({
+      ...note,
+      title: '', body: '',
+      media: note.media ? note.media.map(m => ({ name: m.name, content: '' })) : null,
+    });
+  }
+
+  const payload = { conflictedNote, toListName, toNote };
+  dispatch({ type: MERGE_NOTES, payload });
+
+  try {
+    await dataApi.putNotes({ listName: toListName, notes: [toNote] });
+  } catch (e) {
+    dispatch({ type: MERGE_NOTES_ROLLBACK, payload: { ...payload, error: e } });
+    return;
+  }
+
+  try {
+    for (const [_listName, _notes] of Object.entries(fromNotes)) {
+      await dataApi.putNotes({ listName: _listName, notes: _notes });
+    }
+  } catch (e) {
+    console.log('mergeNote: putNotes with fromNotes error: ', e);
+    // error in this step should be fine
+  }
+
+  dispatch({ type: MERGE_NOTES_COMMIT, payload });
 };
 
 export const addListNames = (newNames) => async (dispatch, getState) => {
@@ -1179,27 +1225,36 @@ const deleteAllDataLoop = async (dispatch, noteIds, total, doneCount) => {
     else contents.push('');
   }
 
-  let addedDT = Date.now();
-  const listName = TRASH;
+  const selectedNotes = dataApi.toNotes(selectedNoteIds, fpaths, contents);
 
-  const fromNotes = dataApi.toNotes(selectedNoteIds, fpaths, contents);
-  const toNotes = fromNotes.map(note => {
-    const toNote = {
+  let addedDT = Date.now();
+  const toNotes = {}, fromNotes = {};
+  for (let i = 0; i < selectedNoteIds.length; i++) {
+    const noteId = selectedNoteIds[i];
+    const note = selectedNotes[i];
+
+    if (!toNotes[noteId.listName]) toNotes[noteId.listName] = [];
+    toNotes[noteId.listName].push({
       ...note,
       parentIds: [note.id],
       id: `deleted${addedDT}${randomString(4)}`,
-      title: '',
-      body: '',
-      media: note.media ? note.media.map(m => ({ name: m.name, content: '' })) : null,
+      title: '', body: '', media: [],
       updatedDT: addedDT,
-    };
+    });
     addedDT += 1;
-    return toNote;
-  });
 
-  await dataApi.putNotes({ listName, notes: toNotes });
+    if (!fromNotes[noteId.listName]) fromNotes[noteId.listName] = [];
+    fromNotes[noteId.listName].push({ ...note });
+  }
+
+  for (const [_listName, _notes] of Object.entries(toNotes)) {
+    await dataApi.putNotes({ listName: _listName, notes: _notes });
+  }
+
   try {
-    await dataApi.putNotes({ listName, notes: fromNotes });
+    for (const [_listName, _notes] of Object.entries(fromNotes)) {
+      await dataApi.putNotes({ listName: _listName, notes: _notes });
+    }
   } catch (e) {
     console.log('deleteAllDataLoop: putNotes with fromNotes error: ', e);
     // error in this step should be fine
