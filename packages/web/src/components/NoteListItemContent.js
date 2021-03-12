@@ -12,13 +12,13 @@ import { useSafeAreaFrame } from '.';
 
 const NoteListItemContent = (props) => {
 
-  const { id, title, body } = props.note;
+  const { note } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
 
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
 
   const getIsNoteIdSelected = useMemo(makeIsNoteIdSelected, []);
-  const isNoteIdSelected = useSelector(state => getIsNoteIdSelected(state, id));
+  const isNoteIdSelected = useSelector(state => getIsNoteIdSelected(state, note.id));
 
   const clickPressTimer = useRef(null);
   const touchPressTimer = useRef(null);
@@ -31,7 +31,7 @@ const NoteListItemContent = (props) => {
     clickPressTimer.current = setTimeout(() => {
       isLongPress.current = true;
       updateBulkEditUrlHash(true);
-      addSelectedNoteIds([id]);
+      addSelectedNoteIds([note.id]);
     }, 500);
   }
 
@@ -39,8 +39,8 @@ const NoteListItemContent = (props) => {
     if (clickPressTimer.current) {
       clearTimeout(clickPressTimer.current);
       if (!isLongPress.current) {
-        if (safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(id);
-        else dispatch(updateNoteId(id));
+        if (safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(note.id);
+        else dispatch(updateNoteId(note.id));
       }
       clickPressTimer.current = null;
       isLongPress.current = false;
@@ -52,7 +52,7 @@ const NoteListItemContent = (props) => {
     touchPressTimer.current = setTimeout(() => {
       isLongPress.current = true;
       updateBulkEditUrlHash(true);
-      addSelectedNoteIds([id]);
+      addSelectedNoteIds([note.id]);
     }, 500);
   }
 
@@ -60,8 +60,8 @@ const NoteListItemContent = (props) => {
     if (touchPressTimer.current) {
       clearTimeout(touchPressTimer.current);
       if (isLongPress.current) {
-        if (safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(id);
-        else dispatch(updateNoteId(id));
+        if (safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(note.id);
+        else dispatch(updateNoteId(note.id));
       }
       touchPressTimer.current = null;
       isLongPress.current = false;
@@ -70,8 +70,8 @@ const NoteListItemContent = (props) => {
 
   const onContentBtnClick = () => {
     if (isBulkEditing) {
-      if (isNoteIdSelected) dispatch(deleteSelectedNoteIds([id]));
-      else dispatch(addSelectedNoteIds([id]))
+      if (isNoteIdSelected) dispatch(deleteSelectedNoteIds([note.id]));
+      else dispatch(addSelectedNoteIds([note.id]))
     }
   };
 
@@ -86,8 +86,8 @@ const NoteListItemContent = (props) => {
     <button onTouchStart={onTouchPress} onTouchMove={onTouchPressRelease} onTouchEnd={onTouchPressRelease} onTouchCancel={onTouchPressRelease} onMouseDown={onClickPress} onMouseMove={onClickPressRelease} onMouseUp={onClickPressRelease} onMouseLeave={onClickPressRelease} onClick={onContentBtnClick} className="group w-full text-left rounded-sm flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-600">
       {isBulkEditing && <div className="w-10 h-10 bg-gray-200 border border-gray-300 mr-3 rounded-full"></div>}
       <div className="flex-1 min-w-0">
-        <h3 className="text-sm font-semibold text-gray-800 truncate group-hover:underline">{title}</h3>
-        <p className="mt-1 text-sm text-gray-500 line-clamp-3">{body}</p>
+        <h3 className="text-sm font-semibold text-gray-800 truncate group-hover:underline">{note.title}</h3>
+        <p className="mt-1 text-sm text-gray-500 line-clamp-3">{note.body}</p>
       </div>
     </button>
   );

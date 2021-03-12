@@ -14,18 +14,25 @@ const NoteCommands = (props) => {
   const listName = useSelector(state => state.display.listName);
   const listNameMap = useSelector(getListNameMap);
   const moveToBtn = useRef(null);
+  const didClick = useRef(false);
   const dispatch = useDispatch();
 
   const onArchiveBtnClick = () => {
+    if (didClick.current) return;
     dispatch(moveNotes(ARCHIVE));
+    didClick.current = true;
   };
 
   const onRemoveBtnClick = () => {
+    if (didClick.current) return;
     dispatch(moveNotes(TRASH));
+    didClick.current = true;
   };
 
   const onRestoreBtnClick = () => {
+    if (didClick.current) return;
     dispatch(moveNotes(MY_NOTES));
+    didClick.current = true;
   };
 
   const onDeleteBtnClick = () => {

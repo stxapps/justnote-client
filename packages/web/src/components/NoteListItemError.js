@@ -5,17 +5,27 @@ import { updateNoteIdUrlHash, updateNoteId } from '../actions';
 import { LG_WIDTH } from '../types/const';
 
 import { useSafeAreaFrame } from '.';
+import { isDiedStatus } from '../utils';
 
-const ConflictedNoteListItemContent = (props) => {
+const NoteListItemError = (props) => {
 
-  const { id } = props.note;
+  const { note } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const dispatch = useDispatch();
 
   const onContentBtnClick = () => {
-    if (safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(id);
-    else dispatch(updateNoteId(id));
+    if (safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(note.id);
+    else dispatch(updateNoteId(note.id));
   };
+
+  let title, body;
+  if (note.id.startsWith('conflict')) {
+    title = 'Version Conflicts';
+    body = 'Select this note and manually choose the correct version.';
+  } else if (isDiedStatus(note.status)) {
+    title = 'Oops..., something went wrong';
+    body = 'Select this note and try again.';
+  } else throw new Error(`Invalid id: ${note.id} and status: ${note.status}.`);
 
   return (
     <button onClick={onContentBtnClick} className="group w-full text-left rounded-sm flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-600">
@@ -25,11 +35,11 @@ const ConflictedNoteListItemContent = (props) => {
         </svg>
       </div>
       <div className="flex-1 min-w-0">
-        <h3 className="text-sm font-semibold text-red-700 truncate group-hover:underline">Version Conflicts</h3>
-        <p className="mt-1 text-sm text-red-600 line-clamp-3">Select this note and manually choose the correct version.</p>
+        <h3 className="text-sm font-semibold text-red-700 truncate group-hover:underline">{title}</h3>
+        <p className="mt-1 text-sm text-red-600 line-clamp-3">{body}</p>
       </div>
     </button>
   );
 };
 
-export default React.memo(ConflictedNoteListItemContent);
+export default React.memo(NoteListItemError);

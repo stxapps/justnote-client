@@ -7,7 +7,6 @@ import { getListNameMap, getNotes } from '../selectors';
 import { getListNameDisplayName } from '../utils';
 
 import NoteListItem from './NoteListItem';
-import ConflictedNoteListItem from './ConflictedNoteListItem';
 
 const NoteListItems = () => {
 
@@ -109,13 +108,7 @@ const NoteListItems = () => {
     return (
       <div className="mt-6">
         <ul className="-my-5 divide-y divide-gray-200">
-          {notes.map(note => {
-            if (note.id.startsWith('conflict')) {
-              return <ConflictedNoteListItem key={note.id} note={note} />;
-            } else {
-              return <NoteListItem key={note.id} note={note} />;
-            }
-          })}
+          {notes.map(note => <NoteListItem key={note.id} note={note} />)}
         </ul>
       </div>
     );

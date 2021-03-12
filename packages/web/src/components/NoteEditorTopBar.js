@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { updateNoteId, updateEditorFocused, saveNote } from '../actions';
+import { updateEditorFocused, saveNote } from '../actions';
 import { NEW_NOTE, LG_WIDTH } from '../types/const';
 
 import { useSafeAreaFrame } from '.';
@@ -13,16 +13,20 @@ const NoteEditorTopBar = (props) => {
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const noteId = useSelector(state => state.display.noteId);
   const isEditorFocused = useSelector(state => state.display.isEditorFocused);
+  const didClick = useRef(false);
   const dispatch = useDispatch();
 
   const onCancelBtnClick = () => {
-    dispatch(updateNoteId(null));
+    if (didClick.current) return;
     dispatch(updateEditorFocused(false));
+    didClick.current = true;
   };
 
   const onSaveBtnClick = () => {
+    if (didClick.current) return;
     dispatch(saveNote());
     dispatch(updateEditorFocused(false));
+    didClick.current = true;
   };
 
   const renderFocusedCommands = () => {
@@ -47,6 +51,10 @@ const NoteEditorTopBar = (props) => {
       </React.Fragment>
     );
   };
+
+  useEffect(() => {
+    didClick.current = false;
+  }, [noteId]);
 
   const style = safeAreaWidth < LG_WIDTH ? {} : { minWidth: 496 };
 
