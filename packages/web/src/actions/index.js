@@ -26,7 +26,7 @@ import {
   UPDATE_DELETING_LIST_NAME,
   RETRY_ADD_LIST_NAMES, RETRY_UPDATE_LIST_NAMES, RETRY_MOVE_LIST_NAME,
   RETRY_DELETE_LIST_NAMES, CANCEL_DIED_LIST_NAMES,
-  UPDATE_NOTE_TITLE, UPDATE_NOTE_BODY, UPDATE_NOTE_MEDIA,
+  UPDATE_EDITOR_CONTENT,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
   UPDATE_UPDATE_SETTINGS_PROGRESS,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
@@ -36,7 +36,7 @@ import {
   APP_NAME, APP_ICON_NAME, SEARCH_POPUP, CONFIRM_DELETE_POPUP, SETTINGS_POPUP,
   MY_NOTES, TRASH, ID, NEW_NOTE,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
-  SWAP_LEFT, SWAP_RIGHT, N_NOTES,
+  SWAP_LEFT, SWAP_RIGHT, N_NOTES, LG_WIDTH,
 } from '../types/const';
 import {
   throttle, getUserImageUrl,
@@ -571,7 +571,6 @@ const _moveNotes = (toListName, ids, fromListName = null) => async (dispatch, ge
 
   const payload = { fromListName, fromNotes, toListName, toNotes };
   dispatch({ type: MOVE_NOTES, payload });
-  if (ids.includes(getState().display.noteId)) dispatch(updateNoteId(null));
 
   try {
     await dataApi.putNotes({ listName: toListName, notes: toNotes });
@@ -590,13 +589,17 @@ const _moveNotes = (toListName, ids, fromListName = null) => async (dispatch, ge
   dispatch({ type: MOVE_NOTES_COMMIT, payload });
 };
 
-export const moveNotes = (toListName) => async (dispatch, getState) => {
+export const moveNotes = (toListName, safeAreaWidth) => async (dispatch, getState) => {
 
   const { noteId, isBulkEditing, selectedNoteIds } = getState().display;
+
+  if (safeAreaWidth < LG_WIDTH && !isBulkEditing) updateNoteIdUrlHash(null);
+  else dispatch(updateNoteId(null));
 
   if (isBulkEditing) {
     dispatch(_moveNotes(toListName, selectedNoteIds));
     dispatch(clearSelectedNoteIds());
+    updateBulkEditUrlHash(false);
   } else {
     dispatch(_moveNotes(toListName, [noteId]));
   }
@@ -630,7 +633,6 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
 
   const payload = { listName, ids };
   dispatch({ type: DELETE_NOTES, payload });
-  if (ids.includes(getState().display.noteId)) dispatch(updateNoteId(null));
 
   try {
     await dataApi.putNotes({ listName, notes: toNotes });
@@ -649,13 +651,17 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
   dispatch({ type: DELETE_NOTES_COMMIT, payload });
 };
 
-export const deleteNotes = () => async (dispatch, getState) => {
+export const deleteNotes = (safeAreaWidth) => async (dispatch, getState) => {
 
   const { noteId, isBulkEditing, selectedNoteIds } = getState().display;
+
+  if (safeAreaWidth < LG_WIDTH && !isBulkEditing) updateNoteIdUrlHash(null);
+  else dispatch(updateNoteId(null));
 
   if (isBulkEditing) {
     dispatch(_deleteNotes(selectedNoteIds));
     dispatch(clearSelectedNoteIds());
+    updateBulkEditUrlHash(false);
   } else {
     dispatch(_deleteNotes([noteId]));
   }
@@ -711,7 +717,6 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
         fromListName, fromNotes: [fromNote], toListName, toNotes: [toNote],
       };
       dispatch({ type: MOVE_NOTES, payload });
-      if (id === getState().display.noteId) dispatch(updateNoteId(null));
 
       try {
         await dataApi.putNotes({ listName: toListName, notes: [toNote] });
@@ -734,7 +739,6 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       const payload = { listName, ids: [id] };
       dispatch({ type: DELETE_NOTES, payload });
-      if (ids.includes(getState().display.noteId)) dispatch(updateNoteId(null));
 
       try {
         await dataApi.putNotes({ listName, notes: [toNote] });
@@ -1085,24 +1089,10 @@ export const cancelDiedListNames = (listNames) => {
   };
 };
 
-export const updateNoteTitle = (title) => {
+export const updateEditorContent = (content) => {
   return {
-    type: UPDATE_NOTE_TITLE,
-    payload: title
-  };
-};
-
-export const updateNoteBody = (body) => {
-  return {
-    type: UPDATE_NOTE_BODY,
-    payload: body
-  };
-};
-
-export const updateNoteMedia = (media) => {
-  return {
-    type: UPDATE_NOTE_MEDIA,
-    payload: media
+    type: UPDATE_EDITOR_CONTENT,
+    payload: content,
   };
 };
 

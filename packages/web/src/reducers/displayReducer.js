@@ -2,9 +2,9 @@ import {
   UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP,
   UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, CLEAR_SELECTED_NOTE_IDS,
-  FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT,
+  FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES,
   DELETE_LIST_NAMES, UPDATE_DELETING_LIST_NAME,
-  UPDATE_NOTE_TITLE, UPDATE_NOTE_BODY, UPDATE_NOTE_MEDIA,
+  UPDATE_EDITOR_CONTENT,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
   UPDATE_UPDATE_SETTINGS_PROGRESS,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
@@ -15,6 +15,7 @@ import {
   CONFIRM_DELETE_POPUP, SETTINGS_POPUP, MY_NOTES, TRASH, ARCHIVE,
   UPDATING, DIED_UPDATING,
 } from '../types/const';
+import { isString } from '../utils';
 
 const initialState = {
   isHandlingSignIn: false,
@@ -176,6 +177,10 @@ const displayReducer = (state = initialState, action) => {
     return { ...state, noteId: toNote.id };
   }
 
+  if (action.type === CANCEL_DIED_NOTES) {
+    return { ...state, noteId: null };
+  }
+
   if (action.type === DELETE_LIST_NAMES) {
     const { listNames } = action.payload;
     if (listNames.includes(state.listName)) {
@@ -188,16 +193,15 @@ const displayReducer = (state = initialState, action) => {
     return { ...state, deletingListName: action.payload };
   }
 
-  if (action.type === UPDATE_NOTE_TITLE) {
-    return { ...state, noteTitle: action.payload };
-  }
+  if (action.type === UPDATE_EDITOR_CONTENT) {
+    const { title, body, media } = action.payload;
 
-  if (action.type === UPDATE_NOTE_BODY) {
-    return { ...state, noteBody: action.payload };
-  }
-
-  if (action.type === UPDATE_NOTE_MEDIA) {
-    return { ...state, noteMedia: action.payload };
+    return {
+      ...state,
+      noteTitle: isString(title) ? title : state.noteTitle,
+      noteBody: isString(body) ? body : state.noteBody,
+      noteMedia: Array.isArray(media) ? media : state.media,
+    };
   }
 
   if (action.type === UPDATE_EXPORT_ALL_DATA_PROGRESS) {

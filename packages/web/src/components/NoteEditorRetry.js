@@ -1,14 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { retryDiedNotes, cancelDiedNotes } from '../actions';
-import { LG_WIDTH } from '../types/const';
+import {
+  updateNoteIdUrlHash, updateNoteId, retryDiedNotes, cancelDiedNotes,
+} from '../actions';
+import { DIED_DELETING, LG_WIDTH } from '../types/const';
 
 import { useSafeAreaFrame } from '.';
 
-const NoteEditorRetry = (props) => {
+const NoteEditorRetry = () => {
 
-  const { onRightPanelCloseBtnClick } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const note = useSelector(state => {
     const { listName, noteId } = state.display;
@@ -16,6 +17,12 @@ const NoteEditorRetry = (props) => {
   });
   const didClick = useRef(false);
   const dispatch = useDispatch();
+
+  const onRightPanelCloseBtnClick = () => {
+    if (didClick.current) return;
+    updateNoteIdUrlHash(null);
+    didClick.current = true;
+  };
 
   const onRetryCancelBtnClick = () => {
     if (didClick.current) return;
@@ -25,6 +32,10 @@ const NoteEditorRetry = (props) => {
 
   const onRetryRetryBtnClick = () => {
     if (didClick.current) return;
+    if (note.status === DIED_DELETING) {
+      if (safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(null);
+      else dispatch(updateNoteId(null));
+    }
     dispatch(retryDiedNotes([note.id]));
     didClick.current = true;
   };

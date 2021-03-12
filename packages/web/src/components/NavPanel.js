@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 
-import { updatePopupUrlHash, updateNoteIdUrlHash } from '../actions';
+import { updatePopupUrlHash } from '../actions';
 import { SIDEBAR_POPUP } from '../types/const';
 import {
   canvasFMV, sideBarOverlayFMV, sideBarFMV, rightPanelFMV,
@@ -25,10 +25,6 @@ const NavPanel = () => {
 
   const onSidebarCloseBtnClick = () => {
     updatePopupUrlHash(SIDEBAR_POPUP, false, null);
-  };
-
-  const onRightPanelCloseBtnClick = () => {
-    updateNoteIdUrlHash(null);
   };
 
   return (
@@ -57,7 +53,7 @@ const NavPanel = () => {
       {/* Right panel */}
       <motion.div className="absolute inset-0 overflow-hidden" variants={canvasFMV} initial={false} animate={noteId ? 'visible' : 'hidden'}>
         <motion.div className="w-full h-full" variants={rightPanelFMV}>
-          <NoteEditor onRightPanelCloseBtnClick={onRightPanelCloseBtnClick} />
+          <NoteEditor />
         </motion.div>
       </motion.div>
     </div>

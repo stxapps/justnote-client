@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
+import { NEW_NOTE } from '../types/const';
 import { isDiedStatus } from '../utils';
 
 import NoteEditorTopBar from './NoteEditorTopBar';
@@ -11,11 +12,12 @@ import NoteEditorRetry from './NoteEditorRetry';
 
 const NoteEditor = (props) => {
 
-  const { isFullScreen, onToggleFullScreen, onRightPanelCloseBtnClick } = props;
+  const { isFullScreen, onToggleFullScreen } = props;
   const noteId = useSelector(state => state.display.noteId);
   const note = useSelector(state => {
     const { listName, noteId } = state.display;
-    return noteId ? state.notes[listName][noteId] : null;
+    if (!noteId || noteId === NEW_NOTE || noteId.startsWith('conflict')) return null;
+    return state.notes[listName][noteId];
   });
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
 
@@ -34,12 +36,12 @@ const NoteEditor = (props) => {
       </div>
     </div>
   );
-  if (noteId.startsWith('conflict')) return <NoteEditorConflict onRightPanelCloseBtnClick={onRightPanelCloseBtnClick} />;
-  if (isDiedStatus(note.status)) return <NoteEditorRetry onRightPanelCloseBtnClick={onRightPanelCloseBtnClick} />;
+  if (noteId.startsWith('conflict')) return <NoteEditorConflict />;
+  if (note && isDiedStatus(note.status)) return <NoteEditorRetry />;
 
   return (
     <div className="w-full h-full bg-white flex flex-col">
-      <NoteEditorTopBar isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} onRightPanelCloseBtnClick={onRightPanelCloseBtnClick} />
+      <NoteEditorTopBar isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} />
       <NoteEditorEditor />
     </div>
   );

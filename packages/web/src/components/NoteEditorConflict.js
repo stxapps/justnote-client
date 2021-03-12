@@ -2,21 +2,28 @@ import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence, AnimateSharedLayout } from 'framer-motion';
 
-import { mergeNotes } from '../actions';
+import { updateNoteIdUrlHash, mergeNotes } from '../actions';
 import { MERGING, DIED_MERGING, LG_WIDTH } from '../types/const';
 import { getFormattedDT } from '../utils';
 import { slideYFMV, popupFMV } from '../types/animConfigs';
 
 import { useSafeAreaFrame } from '.';
 
-const NoteEditorConflict = (props) => {
+const NoteEditorConflict = () => {
 
-  const { onRightPanelCloseBtnClick } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
+  const noteId = useSelector(state => state.display.noteId);
   const conflictedNote = useSelector(state => {
     const { listName, noteId } = state.display;
     return state.conflictedNotes[listName][noteId];
   });
+  const didClick = useRef(false);
+
+  const onRightPanelCloseBtnClick = () => {
+    if (didClick.current) return;
+    updateNoteIdUrlHash(null);
+    didClick.current = true;
+  };
 
   const renderLoading = () => {
     if (!(conflictedNote.status && conflictedNote.status === MERGING)) return null;
@@ -68,10 +75,14 @@ const NoteEditorConflict = (props) => {
     );
   };
 
+  useEffect(() => {
+    didClick.current = false;
+  }, [noteId]);
+
   const style = safeAreaWidth < LG_WIDTH ? {} : { minWidth: 442 };
 
   return (
-    <div className="w-full h-full bg-white overflow-auto">
+    <div className="relative w-full h-full bg-white overflow-auto">
       <div style={style} className="relative px-4 pb-4 sm:px-6 sm:pb-6">
         <div className="absolute top-0 left-0 lg:hidden">
           <button onClick={onRightPanelCloseBtnClick} type="button" className="px-4 py-4 text-sm rounded-md text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-inset lg:hidden">
@@ -135,7 +146,7 @@ const _ConflictItem = (props) => {
     <motion.div className="mt-6 border border-gray-200 rounded-lg" layout={true}>
       <motion.div className={`bg-gray-50 rounded-t-lg ${!isOpen ? 'rounded-b-lg' : ''} sm:flex sm:items-start sm:justify-between`} layout={true}>
         <div className="sm:flex-grow sm:flex-shrink">
-          <button onClick={onOpenBtnClick} type="button" className="block flex pt-3 pl-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-inset rounded-lg">
+          <button onClick={onOpenBtnClick} type="button" className="w-full flex pt-3 pl-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-inset rounded-lg">
             {arrowSvg}
             <div className="ml-1">
               <div className="text-sm font-medium text-gray-800 text-left">Last update on {updatedDTStr}</div>

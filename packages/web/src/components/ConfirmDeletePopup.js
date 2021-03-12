@@ -3,8 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import {
-  updatePopupUrlHash, updateBulkEditUrlHash, deleteNotes,
-  deleteListNames, updateDeletingListName,
+  updatePopupUrlHash, deleteNotes, deleteListNames, updateDeletingListName,
 } from '../actions';
 import { CONFIRM_DELETE_POPUP } from '../types/const';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
@@ -13,9 +12,8 @@ import { useSafeAreaFrame } from '.';
 
 const ConfirmDeletePopup = () => {
 
-  const { height: safeAreaHeight } = useSafeAreaFrame();
+  const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
   const isShown = useSelector(state => state.display.isConfirmDeletePopupShown);
-  const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const deletingListName = useSelector(state => state.display.deletingListName);
   const cancelBtn = useRef(null);
   const didClick = useRef(false);
@@ -32,10 +30,8 @@ const ConfirmDeletePopup = () => {
     if (didClick.current) return;
 
     if (deletingListName) dispatch(deleteListNames([deletingListName]));
-    else dispatch(deleteNotes());
-
+    else dispatch(deleteNotes(safeAreaWidth));
     onConfirmDeleteCancelBtnClick();
-    if (isBulkEditing) updateBulkEditUrlHash(false);
 
     didClick.current = true;
   };

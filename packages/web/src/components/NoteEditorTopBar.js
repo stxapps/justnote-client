@@ -1,20 +1,29 @@
 import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { updateEditorFocused, saveNote } from '../actions';
-import { NEW_NOTE, LG_WIDTH } from '../types/const';
+import { updateNoteIdUrlHash, updateEditorFocused, saveNote } from '../actions';
+import { NEW_NOTE, ADDED, LG_WIDTH } from '../types/const';
 
 import { useSafeAreaFrame } from '.';
 import NoteCommands from './NoteCommands';
 
 const NoteEditorTopBar = (props) => {
 
-  const { isFullScreen, onToggleFullScreen, onRightPanelCloseBtnClick } = props;
+  const { isFullScreen, onToggleFullScreen } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
-  const noteId = useSelector(state => state.display.noteId);
+  const note = useSelector(state => {
+    const { listName, noteId } = state.display;
+    return noteId === NEW_NOTE ? null : state.notes[listName][noteId];
+  });
   const isEditorFocused = useSelector(state => state.display.isEditorFocused);
   const didClick = useRef(false);
   const dispatch = useDispatch();
+
+  const onRightPanelCloseBtnClick = () => {
+    if (didClick.current) return;
+    updateNoteIdUrlHash(null);
+    didClick.current = true;
+  };
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;
@@ -52,14 +61,25 @@ const NoteEditorTopBar = (props) => {
     );
   };
 
+  const renderLoading = () => {
+    return (
+      <div className="inline-flex items-center px-4 h-full sm:px-1">
+        <div className="ball-clip-rotate">
+          <div></div>
+        </div>
+      </div>
+    );
+  };
+
   useEffect(() => {
     didClick.current = false;
-  }, [noteId]);
+  }, [note, isEditorFocused]);
 
   const style = safeAreaWidth < LG_WIDTH ? {} : { minWidth: 496 };
 
   let commands;
-  if (noteId === NEW_NOTE) commands = isEditorFocused ? renderFocusedCommands() : null;
+  if (!note) commands = isEditorFocused ? renderFocusedCommands() : null;
+  else if (note.status !== ADDED) commands = renderLoading();
   else commands = isEditorFocused ? renderFocusedCommands() : <NoteCommands />;
 
   return (

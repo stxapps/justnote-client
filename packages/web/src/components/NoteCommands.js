@@ -8,9 +8,12 @@ import {
 import { getListNameMap } from '../selectors';
 import { getListNameDisplayName } from '../utils';
 
+import { useSafeAreaFrame } from '.';
+
 const NoteCommands = (props) => {
 
   const { isOnDarkBackground, isLeftAlign } = props;
+  const { width: safeAreaWidth } = useSafeAreaFrame();
   const listName = useSelector(state => state.display.listName);
   const listNameMap = useSelector(getListNameMap);
   const moveToBtn = useRef(null);
@@ -19,19 +22,19 @@ const NoteCommands = (props) => {
 
   const onArchiveBtnClick = () => {
     if (didClick.current) return;
-    dispatch(moveNotes(ARCHIVE));
+    dispatch(moveNotes(ARCHIVE, safeAreaWidth));
     didClick.current = true;
   };
 
   const onRemoveBtnClick = () => {
     if (didClick.current) return;
-    dispatch(moveNotes(TRASH));
+    dispatch(moveNotes(TRASH, safeAreaWidth));
     didClick.current = true;
   };
 
   const onRestoreBtnClick = () => {
     if (didClick.current) return;
-    dispatch(moveNotes(MY_NOTES));
+    dispatch(moveNotes(MY_NOTES, safeAreaWidth));
     didClick.current = true;
   };
 

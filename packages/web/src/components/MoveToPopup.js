@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { updatePopupUrlHash, updateBulkEditUrlHash, moveNotes } from '../actions';
+import { updatePopupUrlHash, moveNotes } from '../actions';
 import { MOVE_TO_POPUP, ARCHIVE, TRASH, LG_WIDTH } from '../types/const';
 import { getListNameMap } from '../selectors';
 import { getLastHalfHeight } from '../utils';
@@ -18,7 +18,6 @@ const MoveToPopup = () => {
   const anchorPosition = useSelector(state => state.display.moveToPopupPosition);
   const listName = useSelector(state => state.display.listName);
   const listNameMap = useSelector(getListNameMap);
-  const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const [popupSize, setPopupSize] = useState(null);
   const popup = useRef(null);
   const cancelBtn = useRef(null);
@@ -33,11 +32,8 @@ const MoveToPopup = () => {
 
   const onMoveToItemBtnClick = (listName) => {
     if (didClick.current) return;
-
-    dispatch(moveNotes(listName));
+    dispatch(moveNotes(listName, safeAreaWidth));
     onMoveToCancelBtnClick();
-    if (isBulkEditing) updateBulkEditUrlHash(false);
-
     didClick.current = true;
   };
 
