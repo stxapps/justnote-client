@@ -2,7 +2,8 @@ import Url from 'url-parse';
 
 import {
   HTTP, MAX_CHARS,
-  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
+  ADDING, UPDATING, MOVING, DELETING, MERGING,
+  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, DIED_MERGING,
   VALID_URL, NO_URL, ASK_CONFIRM_URL,
   VALID_LIST_NAME, NO_LIST_NAME, TOO_LONG_LIST_NAME, DUPLICATE_LIST_NAME,
 } from '../types/const';
@@ -284,7 +285,13 @@ export const validateListNameDisplayName = (displayName, listNameMap) => {
 
 export const isDiedStatus = (status) => {
   return [
-    DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
+    DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, DIED_MERGING,
+  ].includes(status);
+};
+
+export const isBusyStatus = (status) => {
+  return [
+    ADDING, UPDATING, MOVING, DELETING, MERGING,
   ].includes(status);
 };
 

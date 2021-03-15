@@ -23,7 +23,6 @@ const NoteListSearchPopup = () => {
   };
 
   const onSearchCancelBtnClick = () => {
-    dispatch(updateSearchString(''));
     updatePopupUrlHash(SEARCH_POPUP, false, null);
   };
 

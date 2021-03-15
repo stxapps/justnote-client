@@ -86,16 +86,16 @@ const SettingsPopupMisc = (props) => {
   const doDeleteBtnClassNames = doDeleteOldLinksInTrash ? 'bg-green-600' : 'bg-gray-200';
   const doDeleteBtnInnerClassNames = doDeleteOldLinksInTrash ? 'translate-x-5' : 'translate-x-0';
 
-  const addedDTBtnClassNames = sortOn === ADDED_DT ? 'bg-green-100 border-green-200 z-10' : 'border-gray-200';
+  const addedDTBtnClassNames = sortOn === ADDED_DT ? 'bg-green-100 border-green-200' : 'border-gray-200';
   const addedDTBtnInnerClassNames = sortOn === ADDED_DT ? 'text-green-800' : 'text-gray-700';
 
-  const updatedDTBtnClassNames = sortOn === UPDATED_DT ? 'bg-green-100 border-green-200 z-10' : 'border-gray-200';
+  const updatedDTBtnClassNames = sortOn === UPDATED_DT ? 'bg-green-100 border-green-200' : 'border-gray-200';
   const updatedDTBtnInnerClassNames = sortOn === UPDATED_DT ? 'text-green-800' : 'text-gray-700';
 
-  const ascendingBtnClassNames = !doDescendingOrder ? 'bg-green-100 border-green-200 z-10' : 'border-gray-200';
+  const ascendingBtnClassNames = !doDescendingOrder ? 'bg-green-100 border-green-200' : 'border-gray-200';
   const ascendingBtnInnerClassNames = !doDescendingOrder ? 'text-green-800' : 'text-gray-700';
 
-  const descendingBtnClassNames = doDescendingOrder ? 'bg-green-100 border-green-200 z-10' : 'border-gray-200';
+  const descendingBtnClassNames = doDescendingOrder ? 'bg-green-100 border-green-200' : 'border-gray-200';
   const descendingBtnInnerClassNames = doDescendingOrder ? 'text-green-800' : 'text-gray-700';
 
   return (

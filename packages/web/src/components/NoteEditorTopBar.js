@@ -34,7 +34,6 @@ const NoteEditorTopBar = (props) => {
   const onSaveBtnClick = () => {
     if (didClick.current) return;
     dispatch(saveNote());
-    dispatch(updateEditorFocused(false));
     didClick.current = true;
   };
 

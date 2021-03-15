@@ -296,7 +296,6 @@ export const onUrlHashChange = (oldUrl, newUrl, dispatch, getState) => {
   } else if ('ibe' in oldHashObj && !('ibe' in newHashObj)) {
     // Exit bulk editing
     dispatch(updateBulkEdit(false));
-    dispatch(clearSelectedNoteIds());
   } else if (!('ibe' in oldHashObj) && 'ibe' in newHashObj) {
     // Enter bulk editing
     dispatch(updateBulkEdit(true));
@@ -363,17 +362,11 @@ export const updateBulkEditUrlHash = (isBulkEditing, doReplace = false) => {
   updateUrlHash(obj, doReplace);
 };
 
-export const changeListName = (listName) => async (dispatch, getState) => {
-
-  dispatch(updateNoteId(null));
-  dispatch(updateEditorFocused(false));
-
-  dispatch({
+export const changeListName = (listName) => {
+  return {
     type: UPDATE_LIST_NAME,
     payload: listName,
-  })
-
-  dispatch(clearSelectedNoteIds());
+  };
 };
 
 export const updateNoteId = (id) => {
@@ -598,8 +591,6 @@ export const moveNotes = (toListName, safeAreaWidth) => async (dispatch, getStat
 
   if (isBulkEditing) {
     dispatch(_moveNotes(toListName, selectedNoteIds));
-    dispatch(clearSelectedNoteIds());
-    updateBulkEditUrlHash(false);
   } else {
     dispatch(_moveNotes(toListName, [noteId]));
   }
@@ -660,14 +651,12 @@ export const deleteNotes = (safeAreaWidth) => async (dispatch, getState) => {
 
   if (isBulkEditing) {
     dispatch(_deleteNotes(selectedNoteIds));
-    dispatch(clearSelectedNoteIds());
-    updateBulkEditUrlHash(false);
   } else {
     dispatch(_deleteNotes([noteId]));
   }
 };
 
-export const retryDiedNotes = (ids) => async (dispatch, getState) => {
+export const retryDiedNotes = (ids, safeAreaWidth) => async (dispatch, getState) => {
 
   const listName = getState().display.listName;
   for (const id of ids) {
@@ -736,6 +725,9 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
     } else if (status === DIED_DELETING) {
       const { fromNote } = note;
       const toNote = note;
+
+      if (safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(null);
+      else dispatch(updateNoteId(null));
 
       const payload = { listName, ids: [id] };
       dispatch({ type: DELETE_NOTES, payload });

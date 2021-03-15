@@ -22,7 +22,6 @@ const ConfirmDeletePopup = () => {
   const onConfirmDeleteCancelBtnClick = () => {
     if (didClick.current) return;
     updatePopupUrlHash(CONFIRM_DELETE_POPUP, false, null);
-    dispatch(updateDeletingListName(null));
     didClick.current = true;
   };
 

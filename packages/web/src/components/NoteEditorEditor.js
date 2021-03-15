@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { updateEditorFocused, updateEditorContent } from '../actions';
+import { updateEditorContent } from '../actions';
 import { NEW_NOTE, ADDED } from '../types/const';
 
 const NoteEditorEditor = () => {
@@ -10,7 +10,6 @@ const NoteEditorEditor = () => {
     const { listName, noteId } = state.display;
     return noteId === NEW_NOTE ? null : state.notes[listName][noteId];
   });
-  const isFocused = useSelector(state => state.display.isEditorFocused);
   const title = useSelector(state => state.display.noteTitle);
   const body = useSelector(state => state.display.noteBody);
   //const media = useSelector(state => state.display.noteMedia);
@@ -18,12 +17,10 @@ const NoteEditorEditor = () => {
   const dispatch = useDispatch();
 
   const onTitleInputChange = (e) => {
-    if (!isFocused) dispatch(updateEditorFocused(true));
     dispatch(updateEditorContent({ title: e.target.value }));
   }
 
   const onBodyInputChange = (e) => {
-    if (!isFocused) dispatch(updateEditorFocused(true));
     dispatch(updateEditorContent({ body: e.target.value }));
   }
 

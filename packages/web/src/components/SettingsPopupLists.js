@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimateSharedLayout, AnimatePresence } from 'framer-motion';
 
 import {
-  MY_NOTES, TRASH, ARCHIVE, ADDING, UPDATING, MOVING, VALID_LIST_NAME, IN_USE_LIST_NAME,
+  MY_NOTES, TRASH, ARCHIVE, VALID_LIST_NAME, IN_USE_LIST_NAME,
   NO_LIST_NAME, TOO_LONG_LIST_NAME, DUPLICATE_LIST_NAME,
   CONFIRM_DELETE_POPUP, SWAP_LEFT, SWAP_RIGHT,
 } from '../types/const';
@@ -13,7 +13,7 @@ import {
 } from '../actions';
 import { getListNameMap } from '../selectors';
 import dataApi from '../apis/blockstack';
-import { validateListNameDisplayName, isDiedStatus } from '../utils';
+import { validateListNameDisplayName, isDiedStatus, isBusyStatus } from '../utils';
 import { listsFMV } from '../types/animConfigs';
 
 const SettingsPopupLists = (props) => {
@@ -218,10 +218,8 @@ const _ListNameEditor = (props) => {
       if (
         (!isDiedStatus(prevListNameObj.current.status) &&
           isDiedStatus(listNameObj.status)) ||
-        (prevListNameObj.current.status === UPDATING &&
-          listNameObj.status !== UPDATING) ||
-        (prevListNameObj.current.status === MOVING &&
-          listNameObj.status !== MOVING)
+        (!isBusyStatus(prevListNameObj.current.status) &&
+          isBusyStatus(listNameObj.status))
       ) {
         didClick.current = false;
       }
@@ -257,7 +255,7 @@ const _ListNameEditor = (props) => {
     deleteListName();
   }, [state.isCheckingCanDelete, listNameObj, dispatch])
 
-  const isBusy = (listNameObj && [ADDING, UPDATING, MOVING].includes(listNameObj.status)) || state.isCheckingCanDelete;
+  const isBusy = (listNameObj && isBusyStatus(listNameObj.status)) || state.isCheckingCanDelete;
   const doRetry = listNameObj && isDiedStatus(listNameObj.status);
 
   let deleteBtn;

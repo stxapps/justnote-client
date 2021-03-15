@@ -1,10 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import {
-  updateNoteIdUrlHash, updateNoteId, retryDiedNotes, cancelDiedNotes,
-} from '../actions';
-import { DIED_DELETING, LG_WIDTH } from '../types/const';
+import { updateNoteIdUrlHash, retryDiedNotes, cancelDiedNotes } from '../actions';
+import { LG_WIDTH } from '../types/const';
 
 import { useSafeAreaFrame } from '.';
 
@@ -32,10 +30,6 @@ const NoteEditorRetry = () => {
 
   const onRetryRetryBtnClick = () => {
     if (didClick.current) return;
-    if (note.status === DIED_DELETING) {
-      if (safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(null);
-      else dispatch(updateNoteId(null));
-    }
     dispatch(retryDiedNotes([note.id]));
     didClick.current = true;
   };

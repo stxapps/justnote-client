@@ -2,9 +2,9 @@ import {
   UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP,
   UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, CLEAR_SELECTED_NOTE_IDS,
-  FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES,
-  DELETE_LIST_NAMES, UPDATE_DELETING_LIST_NAME,
-  UPDATE_EDITOR_CONTENT,
+  FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MOVE_NOTES, DELETE_NOTES,
+  MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES,
+  DELETE_LIST_NAMES, UPDATE_DELETING_LIST_NAME, UPDATE_EDITOR_CONTENT,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
   UPDATE_UPDATE_SETTINGS_PROGRESS,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
@@ -13,7 +13,7 @@ import {
 import {
   PROFILE_POPUP, NOTE_LIST_MENU_POPUP, MOVE_TO_POPUP, SIDEBAR_POPUP, SEARCH_POPUP,
   CONFIRM_DELETE_POPUP, SETTINGS_POPUP, MY_NOTES, TRASH, ARCHIVE,
-  UPDATING, DIED_UPDATING,
+  UPDATING, DIED_UPDATING, MAX_SELECTED_NOTE_IDS,
 } from '../types/const';
 import { isString } from '../utils';
 
@@ -35,6 +35,7 @@ const initialState = {
   isBulkEditing: false,
   isEditorFocused: false,
   selectedNoteIds: [],
+  isSelectedNoteIdsMaxErrorShown: false,
   deletingListName: null,
   noteTitle: '',
   noteBody: '',
@@ -57,6 +58,10 @@ const displayReducer = (state = initialState, action) => {
       ...state,
       listName: action.payload,
       listChangedCount: state.listChangedCount + 1,
+      noteId: null,
+      isEditorFocused: false,
+      selectedNoteIds: [],
+      isSelectedNoteIdsMaxErrorShown: false,
     };
   }
 
@@ -88,7 +93,7 @@ const displayReducer = (state = initialState, action) => {
         ...state,
         isMoveToPopupShown: isShown,
         moveToPopupPosition: anchorPosition,
-      }
+      };
     }
 
     if (id === SIDEBAR_POPUP) {
@@ -98,11 +103,13 @@ const displayReducer = (state = initialState, action) => {
     }
 
     if (action.payload.id === SEARCH_POPUP) {
-      return { ...state, isSearchPopupShown: isShown }
+      return { ...state, isSearchPopupShown: isShown, searchString: '' };
     }
 
     if (action.payload.id === CONFIRM_DELETE_POPUP) {
-      return { ...state, isConfirmDeletePopupShown: isShown }
+      const newState = { ...state, isConfirmDeletePopupShown: isShown };
+      if (!isShown) newState.deletingListName = null;
+      return newState;
     }
 
     if (id === SETTINGS_POPUP) {
@@ -119,7 +126,12 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_BULK_EDITING) {
-    return { ...state, isBulkEditing: action.payload };
+    const newState = { ...state, isBulkEditing: action.payload, noteId: null };
+    if (!action.payload) {
+      newState.selectedNoteIds = [];
+      newState.isSelectedNoteIdsMaxErrorShown = false;
+    }
+    return newState;
   }
 
   if (action.type === UPDATE_EDITOR_FOCUSED) {
@@ -131,6 +143,9 @@ const displayReducer = (state = initialState, action) => {
     for (const noteId of action.payload) {
       if (!selectedNoteIds.includes(noteId)) selectedNoteIds.push(noteId);
     }
+    if (selectedNoteIds.length > MAX_SELECTED_NOTE_IDS) {
+      return { ...state, isSelectedNoteIdsMaxErrorShown: true };
+    }
     return { ...state, selectedNoteIds };
   }
 
@@ -139,11 +154,12 @@ const displayReducer = (state = initialState, action) => {
     for (const noteId of state.selectedNoteIds) {
       if (!action.payload.includes(noteId)) selectedNoteIds.push(noteId);
     }
-    return { ...state, selectedNoteIds };
+    const isShown = selectedNoteIds.length > MAX_SELECTED_NOTE_IDS;
+    return { ...state, selectedNoteIds, isSelectedNoteIdsMaxErrorShown: isShown };
   }
 
   if (action.type === CLEAR_SELECTED_NOTE_IDS) {
-    return { ...state, selectedNoteIds: [] };
+    return { ...state, selectedNoteIds: [], isSelectedNoteIdsMaxErrorShown: false };
   }
 
   if (action.type === FETCH_COMMIT) {
@@ -169,12 +185,21 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === ADD_NOTE) {
     const { note } = action.payload;
-    return { ...state, noteId: note.id };
+    return { ...state, noteId: note.id, isEditorFocused: false };
   }
 
   if (action.type === UPDATE_NOTE || action.type === MERGE_NOTES_COMMIT) {
     const { toNote } = action.payload;
-    return { ...state, noteId: toNote.id };
+    return { ...state, noteId: toNote.id, isEditorFocused: false };
+  }
+
+  if (action.type === MOVE_NOTES || action.type === DELETE_NOTES) {
+    return {
+      ...state,
+      isBulkEditing: false,
+      selectedNoteIds: [],
+      isSelectedNoteIdsMaxErrorShown: false,
+    };
   }
 
   if (action.type === CANCEL_DIED_NOTES) {
@@ -198,9 +223,10 @@ const displayReducer = (state = initialState, action) => {
 
     return {
       ...state,
+      isEditorFocused: true,
       noteTitle: isString(title) ? title : state.noteTitle,
       noteBody: isString(body) ? body : state.noteBody,
-      noteMedia: Array.isArray(media) ? media : state.media,
+      noteMedia: Array.isArray(media) ? media : state.noteMedia,
     };
   }
 
