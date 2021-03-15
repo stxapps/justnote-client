@@ -66,8 +66,9 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_NOTE_ID) {
-    if (state.noteId === action.payload) return { ...state, noteId: null };
-    return { ...state, noteId: action.payload };
+    const newState = { ...state, isEditorFocused: false };
+    newState.noteId = state.noteId === action.payload ? null : action.payload;
+    return newState;
   }
 
   if (action.type === UPDATE_POPUP) {
@@ -223,7 +224,6 @@ const displayReducer = (state = initialState, action) => {
 
     return {
       ...state,
-      isEditorFocused: true,
       noteTitle: isString(title) ? title : state.noteTitle,
       noteBody: isString(body) ? body : state.noteBody,
       noteMedia: Array.isArray(media) ? media : state.noteMedia,

@@ -1,18 +1,15 @@
 import React, { useEffect, useRef } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { updateNoteIdUrlHash, retryDiedNotes, cancelDiedNotes } from '../actions';
 import { LG_WIDTH } from '../types/const';
 
 import { useSafeAreaFrame } from '.';
 
-const NoteEditorRetry = () => {
+const NoteEditorRetry = (props) => {
 
+  const { note } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
-  const note = useSelector(state => {
-    const { listName, noteId } = state.display;
-    return state.notes[listName][noteId];
-  });
   const didClick = useRef(false);
   const dispatch = useDispatch();
 

@@ -1,7 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { updateNoteIdUrlHash, updateEditorFocused, saveNote } from '../actions';
+import {
+  updateNoteIdUrlHash, updateEditorFocused, updateEditorContent, saveNote,
+} from '../actions';
 import { NEW_NOTE, ADDED, LG_WIDTH } from '../types/const';
 
 import { useSafeAreaFrame } from '.';
@@ -9,12 +11,8 @@ import NoteCommands from './NoteCommands';
 
 const NoteEditorTopBar = (props) => {
 
-  const { isFullScreen, onToggleFullScreen } = props;
+  const { note, isFullScreen, onToggleFullScreen } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
-  const note = useSelector(state => {
-    const { listName, noteId } = state.display;
-    return noteId === NEW_NOTE ? null : state.notes[listName][noteId];
-  });
   const isEditorFocused = useSelector(state => state.display.isEditorFocused);
   const didClick = useRef(false);
   const dispatch = useDispatch();
@@ -27,7 +25,13 @@ const NoteEditorTopBar = (props) => {
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;
+
+    let content;
+    if (note.id === NEW_NOTE) content = { title: '', body: '', media: [] };
+    else content = { title: note.title, body: note.body, media: note.media };
+
     dispatch(updateEditorFocused(false));
+    dispatch(updateEditorContent(content));
     didClick.current = true;
   };
 
@@ -77,7 +81,7 @@ const NoteEditorTopBar = (props) => {
   const style = safeAreaWidth < LG_WIDTH ? {} : { minWidth: 496 };
 
   let commands;
-  if (!note) commands = isEditorFocused ? renderFocusedCommands() : null;
+  if (note.id === NEW_NOTE) commands = isEditorFocused ? renderFocusedCommands() : null;
   else if (note.status !== ADDED) commands = renderLoading();
   else commands = isEditorFocused ? renderFocusedCommands() : <NoteCommands />;
 

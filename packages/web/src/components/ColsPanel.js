@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { NEW_NOTE, NEW_NOTE_OBJ } from '../types/const';
 import { throttle } from '../utils';
 
 import { useSafeAreaFrame } from '.';
@@ -28,6 +30,14 @@ const ColsPanel = () => {
   const pane2MaxWidth = 480;
 
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
+  const note = useSelector(state => {
+    const { listName, noteId } = state.display;
+
+    if (!noteId) return null;
+    if (noteId === NEW_NOTE) return NEW_NOTE_OBJ;
+    if (noteId.startsWith('conflict')) return state.conflictedNotes[listName][noteId];
+    return state.notes[listName][noteId];
+  });
 
   const storageKey = 'colsPanelState';
   const storedState = useMemo(() => localStorage.getItem(storageKey), []);
@@ -202,7 +212,7 @@ const ColsPanel = () => {
       </motion.div>
       <motion.div onMouseDown={onRightResizerMouseDown} onTouchStart={onRightResizerTouchStart} onTouchEnd={onTouchEnd} className={`relative bg-white border-l border-gray-100 pr-1 cursor-resize overflow-visible ${resizer2Classes}`} layout={!isResizeActive}></motion.div >
       <motion.div className="flex-1 bg-white overflow-hidden" layout={!isResizeActive}>
-        <NoteEditor isFullScreen={state.isPane3FullScreen} onToggleFullScreen={onTogglePane3FullScreen} />
+        <NoteEditor note={note} isFullScreen={state.isPane3FullScreen} onToggleFullScreen={onTogglePane3FullScreen} />
       </motion.div>
     </div >
   );

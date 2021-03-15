@@ -1,5 +1,5 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { motion, AnimatePresence, AnimateSharedLayout } from 'framer-motion';
 
 import { updateNoteIdUrlHash, mergeNotes } from '../actions';
@@ -9,14 +9,10 @@ import { slideYFMV, popupFMV } from '../types/animConfigs';
 
 import { useSafeAreaFrame } from '.';
 
-const NoteEditorConflict = () => {
+const NoteEditorConflict = (props) => {
 
+  const { note: conflictedNote } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
-  const noteId = useSelector(state => state.display.noteId);
-  const conflictedNote = useSelector(state => {
-    const { listName, noteId } = state.display;
-    return state.conflictedNotes[listName][noteId];
-  });
   const didClick = useRef(false);
 
   const onRightPanelCloseBtnClick = () => {
@@ -26,7 +22,7 @@ const NoteEditorConflict = () => {
   };
 
   const renderLoading = () => {
-    if (!(conflictedNote.status && conflictedNote.status === MERGING)) return null;
+    if (!(conflictedNote.status === MERGING)) return null;
 
     return (
       <React.Fragment>
@@ -41,7 +37,7 @@ const NoteEditorConflict = () => {
   };
 
   const renderMergeError = () => {
-    if (!(conflictedNote.status && conflictedNote.status === DIED_MERGING)) return (
+    if (!(conflictedNote.status === DIED_MERGING)) return (
       <AnimatePresence key="AP_NEC_mergeError"></AnimatePresence>
     );
 
@@ -77,7 +73,7 @@ const NoteEditorConflict = () => {
 
   useEffect(() => {
     didClick.current = false;
-  }, [noteId]);
+  }, [conflictedNote]);
 
   const style = safeAreaWidth < LG_WIDTH ? {} : { minWidth: 442 };
 
