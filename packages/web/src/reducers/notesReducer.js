@@ -230,6 +230,8 @@ const notesReducer = (state = initialState, action) => {
   if (action.type === DELETE_OLD_NOTES_IN_TRASH_COMMIT) {
     const { listName, ids } = action.payload;
 
+    if (!state[listName]) return state;
+
     const newState = { ...state };
     newState[listName] = _.exclude(state[listName], ID, ids);
 

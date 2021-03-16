@@ -4,7 +4,7 @@ import {
   ADDED, ADDING, UPDATING, MOVING, DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
   STATUS,
 } from '../types/const';
-import { isObject, isArrayEqual, isEqual, doContainListName, isStringIn } from '../utils';
+import { isObject, isArrayEqual, isEqual, isStringIn } from '../utils';
 import { _ } from '../utils/obj';
 
 const createSelectorListNameMap = createSelectorCreator(
