@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -14,10 +15,10 @@ import LoadingNoteListItems from './LoadingNoteListItems';
 const NoteList = (props) => {
 
   const { onSidebarOpenBtnClick } = props;
-  const listName = useSelector(state => state.display.listName);
   const notes = useSelector(getNotes);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const isMaxErrorShown = useSelector(state => state.display.isSelectedNoteIdsMaxErrorShown);
+  const didFetch = useSelector(state => state.display.didFetch);
   const dispatch = useDispatch();
 
   const onAddBtnClick = () => {
@@ -48,8 +49,8 @@ const NoteList = (props) => {
   };
 
   useEffect(() => {
-    if (!notes) dispatch(fetch());
-  }, [listName, notes, dispatch]);
+    if (!notes) dispatch(fetch(!didFetch, !didFetch));
+  }, [notes, didFetch, dispatch]);
 
   const noteListItems = notes ? <NoteListItems /> : <LoadingNoteListItems />;
 

@@ -12,7 +12,7 @@ import {
   retryDiedListNames, cancelDiedListNames, updatePopupUrlHash,
 } from '../actions';
 import { getListNameMap } from '../selectors';
-import dataApi from '../apis/blockstack';
+import dataApi from '../apis/data';
 import { validateListNameDisplayName, isDiedStatus, isBusyStatus } from '../utils';
 import { listsFMV } from '../types/animConfigs';
 
@@ -312,8 +312,8 @@ const _ListNameEditor = (props) => {
         </svg>
       </button>}
       <div className="relative flex-grow flex-shrink">
-        <input ref={input} onFocus={onInputFocus} onBlur={onInputBlur} onChange={onInputChange} onKeyPress={onInputKeyPress} className="py-1 w-full bg-white text-base text-gray-600 border-0 focus:outline-none focus:ring-2 focus:ring-green-600" type="text" placeholder="Create new list" value={state.value} disabled={isBusy || doRetry} />
-        <p style={{ bottom: '-0.5rem' }} className="absolute left-0 right-0 text-sm text-red-600 font-medium leading-5 truncate">{errMsg}</p>
+        <input ref={input} onFocus={onInputFocus} onBlur={onInputBlur} onChange={onInputChange} onKeyPress={onInputKeyPress} className="px-0 py-1 w-full bg-white text-base text-gray-600 border-0 focus:outline-none focus:ring-0" type="text" placeholder="Create new list" value={state.value} disabled={isBusy || doRetry} />
+        <p style={{ bottom: '-0.75rem' }} className="absolute left-0 right-0 text-sm text-red-600 font-medium leading-5 truncate">{errMsg}</p>
       </div>
       {state.mode === MODE_EDIT && <button onTouchStart={onOkBtnPress} onMouseDown={onOkBtnPress} onClick={onOkBtnClick} className="flex-grow-0 flex-shrink-0 flex justify-center items-center w-10 h-10 group focus:outline-none">
         <svg className="w-4 text-gray-500 rounded-sm group-hover:text-gray-700 group-focus:ring-2 group-focus:ring-offset-4 group-focus:ring-green-600" viewBox="0 0 14 10" fill="currentColor" xmlns="http://www.w3.org/2000/svg">

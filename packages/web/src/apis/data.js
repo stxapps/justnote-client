@@ -400,9 +400,9 @@ const canDeleteListNames = async (listNames) => {
   return canDeletes;
 };
 
-const blockstack = {
+const data = {
   listFPaths, listNoteIds, batchGetFileWithRetry, toNotes,
   fetch, fetchMore, putNotes, fetchOldNotesInTrash, updateSettings, canDeleteListNames,
 };
 
-export default blockstack;
+export default data;

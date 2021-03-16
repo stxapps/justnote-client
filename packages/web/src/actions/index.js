@@ -3,7 +3,7 @@ import Url from 'url-parse';
 import { saveAs } from 'file-saver';
 
 import userSession from '../userSession';
-import dataApi from '../apis/blockstack';
+import dataApi from '../apis/data';
 import {
   INIT, UPDATE_WINDOW_SIZE, UPDATE_USER, UPDATE_HANDLING_SIGN_IN,
   UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP, UPDATE_SEARCH_STRING,
@@ -591,6 +591,7 @@ export const moveNotes = (toListName, safeAreaWidth) => async (dispatch, getStat
 
   if (isBulkEditing) {
     dispatch(_moveNotes(toListName, selectedNoteIds));
+    updateBulkEditUrlHash(false);
   } else {
     dispatch(_moveNotes(toListName, [noteId]));
   }
@@ -651,6 +652,7 @@ export const deleteNotes = (safeAreaWidth) => async (dispatch, getState) => {
 
   if (isBulkEditing) {
     dispatch(_deleteNotes(selectedNoteIds));
+    updateBulkEditUrlHash(false);
   } else {
     dispatch(_deleteNotes([noteId]));
   }
@@ -883,8 +885,6 @@ export const addListNames = (newNames) => async (dispatch, getState) => {
 
   const listNameObjs = [];
   for (const newName of newNames) {
-    // If cpu is fast enough, addedDT will be the same for all new names!
-    //    so use a predefined one with added loop index.
     const id = `${addedDT + i}-${randomString(4)}`;
     const listNameObj = { listName: id, displayName: newName };
     listNameObjs.push(listNameObj);

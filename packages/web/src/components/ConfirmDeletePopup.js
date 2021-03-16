@@ -2,9 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import {
-  updatePopupUrlHash, deleteNotes, deleteListNames, updateDeletingListName,
-} from '../actions';
+import { updatePopupUrlHash, deleteNotes, deleteListNames } from '../actions';
 import { CONFIRM_DELETE_POPUP } from '../types/const';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
 

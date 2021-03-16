@@ -2,8 +2,8 @@ import React, { } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { changeListName, updatePopupUrlHash } from '../actions';
-import { getListNameMap } from '../selectors';
 import { SIDEBAR_POPUP, TRASH, ARCHIVE, LG_WIDTH } from '../types/const';
+import { getListNameMap } from '../selectors';
 
 import { useSafeAreaFrame } from '.';
 

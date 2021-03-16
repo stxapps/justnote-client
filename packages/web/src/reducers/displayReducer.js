@@ -2,8 +2,7 @@ import {
   UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP,
   UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, CLEAR_SELECTED_NOTE_IDS,
-  FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MOVE_NOTES, DELETE_NOTES,
-  MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES,
+  FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES,
   DELETE_LIST_NAMES, UPDATE_DELETING_LIST_NAME, UPDATE_EDITOR_CONTENT,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
   UPDATE_UPDATE_SETTINGS_PROGRESS,
@@ -15,7 +14,7 @@ import {
   CONFIRM_DELETE_POPUP, SETTINGS_POPUP, MY_NOTES, TRASH, ARCHIVE,
   UPDATING, DIED_UPDATING, MAX_SELECTED_NOTE_IDS,
 } from '../types/const';
-import { isString } from '../utils';
+import { isString, doContainListName } from '../utils';
 
 const initialState = {
   isHandlingSignIn: false,
@@ -168,11 +167,12 @@ const displayReducer = (state = initialState, action) => {
     const newState = { ...state, didFetch: true };
 
     // Make sure listName is in listNameMap, if not, set to My Notes.
-    const { doFetchSettings, settings } = action.payload;
+    const { listNames, doFetchSettings, settings } = action.payload;
+    if (listNames.includes(newState.listName)) return newState;
     if (!doFetchSettings) return newState;
 
     if (settings) {
-      if (!settings.listNameMap.map(obj => obj.listName).includes(newState.listName)) {
+      if (!doContainListName(newState.listName, settings.listNameMap)) {
         newState.listName = MY_NOTES;
       }
     } else {
@@ -192,15 +192,6 @@ const displayReducer = (state = initialState, action) => {
   if (action.type === UPDATE_NOTE || action.type === MERGE_NOTES_COMMIT) {
     const { toNote } = action.payload;
     return { ...state, noteId: toNote.id, isEditorFocused: false };
-  }
-
-  if (action.type === MOVE_NOTES || action.type === DELETE_NOTES) {
-    return {
-      ...state,
-      isBulkEditing: false,
-      selectedNoteIds: [],
-      isSelectedNoteIdsMaxErrorShown: false,
-    };
   }
 
   if (action.type === CANCEL_DIED_NOTES) {
