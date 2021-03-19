@@ -1,5 +1,7 @@
 import MMKVStorage from "react-native-mmkv-storage";
 
+import { SETTINGS_FNAME } from "./types/const";
+
 let _instance = null;
 
 const getInstance = () => {
@@ -8,15 +10,18 @@ const getInstance = () => {
 };
 
 const putFile = async (path, content) => {
-  if (path.endsWith('.json')) await getInstance().setMapAsync(path, content);
-  else await getInstance().setStringAsync(path, content);
+  if (path.endsWith('index.json') || path === SETTINGS_FNAME) {
+    await getInstance().setMapAsync(path, content);
+  } else await getInstance().setStringAsync(path, content);
 
   return path;
 };
 
 const getFile = async (path) => {
   try {
-    if (path.endsWith('.json')) return await getInstance().getMapAsync(path);
+    if (path.endsWith('index.json') || path === SETTINGS_FNAME) {
+      return await getInstance().getMapAsync(path);
+    }
     return await getInstance().getStringAsync(path);
   } catch (e) {
     console.log('getFile error: ', e);

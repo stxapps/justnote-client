@@ -1,7 +1,9 @@
 import { Linking, Dimensions, Platform } from 'react-native';
 
 import userSession from '../userSession';
+import mmkvStorage from '../mmkvStorage';
 import dataApi from '../apis/data';
+import serverApi from '../apis/server';
 import {
   INIT, UPDATE_WINDOW_SIZE, UPDATE_USER, UPDATE_HANDLING_SIGN_IN,
   UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP, UPDATE_SEARCH_STRING,
@@ -27,6 +29,7 @@ import {
   UPDATE_EDITOR_CONTENT,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
   UPDATE_UPDATE_SETTINGS_PROGRESS,
+  SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -34,10 +37,10 @@ import {
   DOMAIN_NAME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH,
   MY_NOTES, TRASH, ID, NEW_NOTE,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
-  SWAP_LEFT, SWAP_RIGHT, N_NOTES, LG_WIDTH,
+  SWAP_LEFT, SWAP_RIGHT, N_NOTES,
 } from '../types/const';
 import {
-  separateUrlAndParam, getUserImageUrl, randomString, swapArrayElements,
+  separateUrlAndParam, getUserImageUrl, randomString, swapArrayElements, isString,
 } from '../utils';
 import { _ } from '../utils/obj';
 import { initialState as initialSettings } from '../reducers/settingsReducer';
@@ -985,6 +988,105 @@ export const updateUpdateSettingsProgress = (progress) => {
   };
 };
 
+export const sync = () => async (dispatch, getState) => {
+
+  dispatch({ type: SYNC });
+
+  // Not sync settings so user can set differently on web and each device
+
+  try {
+    const { noteFPaths } = await serverApi.listFPaths();
+    const { noteIds, conflictedIds } = dataApi.listNoteIds(noteFPaths);
+
+    const leafFPaths = [];
+    for (const noteId of noteIds) leafFPaths.push(...noteId.fpaths);
+    for (const conflictedId of conflictedIds) {
+      for (const noteId of conflictedId.notes) leafFPaths.push(...noteId.fpaths);
+    }
+
+    const { noteFPaths: _noteFPaths } = await dataApi.listFPaths();
+    const {
+      noteIds: _noteIds, conflictedIds: _conflictedIds
+    } = dataApi.listNoteIds(_noteFPaths);
+
+    const _leafFPaths = [];
+    for (const noteId of _noteIds) _leafFPaths.push(...noteId.fpaths);
+    for (const conflictedId of _conflictedIds) {
+      for (const noteId of conflictedId.notes) _leafFPaths.push(...noteId.fpaths);
+    }
+
+    const allNoteFPaths = [...new Set([...noteFPaths, ..._noteFPaths])];
+    const {
+      noteIds: allNoteIds, conflictedIds: allConflictedIds
+    } = dataApi.listNoteIds(allNoteFPaths);
+
+    const allLeafFPaths = [];
+    for (const noteId of allNoteIds) allLeafFPaths.push(...noteId.fpaths);
+    for (const conflictedId of allConflictedIds) {
+      for (const noteId of conflictedId.notes) allLeafFPaths.push(...noteId.fpaths);
+    }
+
+    // 1. Server side: upload all fpaths
+    for (const fpath of _noteFPaths) {
+      if (noteFPaths.includes(fpath)) continue;
+
+      let content;
+      if (allLeafFPaths.includes(fpath)) content = await mmkvStorage.getFile(fpath);
+      else {
+        if (fpath.endsWith('index.json')) content = { title: '', body: '' };
+        else content = '';
+      }
+
+      if (!isString(content)) content = JSON.stringify(content);
+      await userSession.putFile(fpath, content);
+    }
+
+    // 2. Server side: loop used to be leaves in server and set to empty
+    for (const fpath of leafFPaths) {
+      if (allLeafFPaths.includes(fpath)) continue
+
+      let content;
+      if (fpath.endsWith('index.json')) content = { title: '', body: '' };
+      else content = '';
+
+      if (!isString(content)) content = JSON.stringify(content);
+      await userSession.putFile(fpath, content);
+    }
+
+    // 3. Local side: download all fpaths
+    for (const fpath of noteFPaths) {
+      if (_noteFPaths.includes(fpath)) continue;
+
+      let content;
+      if (allLeafFPaths.includes(fpath)) content = await userSession.getFile(fpath);
+      else {
+        if (fpath.endsWith('index.json')) content = { title: '', body: '' };
+        else content = '';
+      }
+
+      if (isString(content) && fpath.endsWith('index.json')) {
+        content = JSON.parse(content);
+      }
+      await mmkvStorage.putFile(fpath, content);
+    }
+
+    // 4. Local side: loop used to be leaves in local and set to empty
+    for (const fpath of _leafFPaths) {
+      if (allLeafFPaths.includes(fpath)) continue;
+
+      let content;
+      if (fpath.endsWith('index.json')) content = { title: '', body: '' };
+      else content = '';
+
+      await mmkvStorage.putFile(fpath, content);
+    }
+
+    dispatch({ type: SYNC_COMMIT });
+  } catch (e) {
+    dispatch({ type: SYNC_ROLLBACK });
+  }
+};
+
 const exportAllDataLoop = async (dispatch, fpaths, doneCount) => {
 
   if (fpaths.length === 0) throw new Error(`Invalid fpaths: ${fpaths}`);
@@ -993,7 +1095,8 @@ const exportAllDataLoop = async (dispatch, fpaths, doneCount) => {
   const selectedFPaths = fpaths.slice(doneCount, doneCount + selectedCount);
   const responses = await dataApi.batchGetFileWithRetry(selectedFPaths, 0);
   const data = responses.map((response, i) => {
-    return { path: selectedFPaths[i], data: JSON.parse(response.content) };
+    // Export only index.json so safe to not JSON.parse all responses.
+    return { path: selectedFPaths[i], data: response.content };
   });
 
   doneCount = doneCount + selectedCount;
