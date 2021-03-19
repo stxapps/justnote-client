@@ -27,7 +27,7 @@ const NoteEditorConflict = (props) => {
     return (
       <React.Fragment>
         <div className="absolute inset-0 bg-white opacity-25"></div>
-        <div style={{ top: '33.3333%' }} className="absolute left-1/2 flex justify-center items-center transform -translate-x-1/2 -translate-y-1/2">
+        <div className="absolute top-1/3 left-1/2 flex justify-center items-center transform -translate-x-1/2 -translate-y-1/2">
           <div className="ball-clip-rotate">
             <div></div>
           </div>
@@ -44,7 +44,7 @@ const NoteEditorConflict = (props) => {
     return (
       <AnimatePresence key="AP_NEC_mergeError">
         <motion.div className="absolute top-0 inset-x-0 flex justify-center items-start" variants={popupFMV} initial="hidden" animate="visible" exit="hidden">
-          <div className="m-4 p-4 bg-red-50 rounded-md ">
+          <div className="m-4 p-4 bg-red-50 rounded-md">
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -55,7 +55,7 @@ const NoteEditorConflict = (props) => {
                 <h3 className="text-sm text-red-800 font-medium text-left">Oops..., something went wrong!</h3>
                 <p className="mt-2.5 text-sm text-red-700">
                   Please wait a moment and try again.<br />If the problem persists, please&nbsp;
-                  <a className="underline hover:text-gray-900 focus:outline-none focus:shadow-outline" href="/#support">
+                  <a className="underline hover:text-red-900 focus:outline-none focus:shadow-outline" href="/support">
                     contact us
                     <svg className="mb-2 inline-block w-4" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                       <path d="M11 3C10.4477 3 10 3.44772 10 4C10 4.55228 10.4477 5 11 5H13.5858L7.29289 11.2929C6.90237 11.6834 6.90237 12.3166 7.29289 12.7071C7.68342 13.0976 8.31658 13.0976 8.70711 12.7071L15 6.41421V9C15 9.55228 15.4477 10 16 10C16.5523 10 17 9.55228 17 9V4C17 3.44772 16.5523 3 16 3H11Z" />
@@ -81,7 +81,7 @@ const NoteEditorConflict = (props) => {
     <div className="relative w-full h-full bg-white overflow-auto">
       <div style={style} className="relative px-4 pb-4 sm:px-6 sm:pb-6">
         <div className="absolute top-0 left-0 lg:hidden">
-          <button onClick={onRightPanelCloseBtnClick} type="button" className="px-4 py-4 text-sm rounded-md text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-inset lg:hidden">
+          <button onClick={onRightPanelCloseBtnClick} type="button" className="px-4 py-4 text-sm rounded-md text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-inset">
             <svg className="text-gray-500 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
               <path fillRule="evenodd" clipRule="evenodd" d="M7.70703 14.707C7.5195 14.8945 7.26519 14.9998 7.00003 14.9998C6.73487 14.9998 6.48056 14.8945 6.29303 14.707L2.29303 10.707C2.10556 10.5195 2.00024 10.2652 2.00024 10C2.00024 9.73488 2.10556 9.48057 2.29303 9.29304L6.29303 5.29304C6.48163 5.11088 6.73423 5.01009 6.99643 5.01237C7.25863 5.01465 7.50944 5.11981 7.69485 5.30522C7.88026 5.49063 7.98543 5.74144 7.9877 6.00364C7.98998 6.26584 7.88919 6.51844 7.70703 6.70704L5.41403 9.00004H17C17.2652 9.00004 17.5196 9.1054 17.7071 9.29293C17.8947 9.48047 18 9.73482 18 10C18 10.2653 17.8947 10.5196 17.7071 10.7071C17.5196 10.8947 17.2652 11 17 11H5.41403L7.70703 13.293C7.8945 13.4806 7.99982 13.7349 7.99982 14C7.99982 14.2652 7.8945 14.5195 7.70703 14.707Z" />
             </svg>

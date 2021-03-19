@@ -3,9 +3,9 @@ import { useDispatch } from 'react-redux';
 
 import { updateNoteIdUrlHash, updateNoteId } from '../actions';
 import { LG_WIDTH } from '../types/const';
+import { isDiedStatus } from '../utils';
 
 import { useSafeAreaFrame } from '.';
-import { isDiedStatus } from '../utils';
 
 const NoteListItemError = (props) => {
 

@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { fetchMore } from '../actions';
 import { MY_NOTES, TRASH, ARCHIVE } from '../types/const';
 import { getListNameMap, getNotes } from '../selectors';
-import { getListNameDisplayName } from '../utils';
+import { getListNameDisplayName, throttle } from '../utils';
 
 import NoteListItem from './NoteListItem';
 
@@ -16,7 +16,26 @@ const NoteListItems = () => {
   const searchString = useSelector(state => state.display.searchString);
   const hasMore = useSelector(state => state.hasMoreNotes[listName]);
   const isFetchingMore = useSelector(state => state.isFetchingMoreNotes[listName]);
+  const listChangedCount = useSelector(state => state.display.listChangedCount);
+  const flatList = useRef(null);
   const dispatch = useDispatch();
+
+  const updateScrollY = throttle(() => {
+    if (!hasMore || isFetchingMore) return;
+    if (!flatList.current) return;
+
+    const scrollHeight = Math.max(
+      flatList.current.clientHeight,
+      flatList.current.scrollHeight,
+      flatList.current.offsetHeight,
+    );
+    const windowHeight = Math.max(
+      flatList.current.innerHeight, flatList.current.offsetHeight,
+    );
+    const windowBottom = windowHeight + flatList.current.pageYOffset;
+
+    if (windowBottom > (scrollHeight * 0.96)) dispatch(fetchMore());
+  }, 16);
 
   const onFetchMoreBtnClick = () => {
     dispatch(fetchMore());
@@ -114,13 +133,35 @@ const NoteListItems = () => {
     );
   };
 
+  useEffect(() => {
+    if (flatList.current) {
+      setTimeout(() => {
+        if (flatList.current) {
+          flatList.current.scrollTo(0, 0);
+        }
+      }, 1);
+    }
+  }, [listChangedCount]);
+
+  useEffect(() => {
+    const _flatList = flatList.current;
+    if (_flatList && _flatList.addEventListener) {
+      _flatList.addEventListener('scroll', updateScrollY);
+    }
+    return () => {
+      if (_flatList && _flatList.addEventListener) {
+        _flatList.removeEventListener('scroll', updateScrollY);
+      }
+    };
+  }, [updateScrollY]);
+
   if (!notes) throw new Error(`Invalid notes: ${notes}. Notes cannot be undefined as in NoteSelector and if notes is null, it should be handled in NoteList, not in NoteListItems.`);
 
   const showFetchMoreBtn = hasMore && !isFetchingMore;
   const showFetchingMore = hasMore && isFetchingMore;
 
   return (
-    <div className="flex-grow flex-shrink overflow-y-auto">
+    <div ref={flatList} className="flex-grow flex-shrink overflow-y-auto">
       {notes.length === 0 && renderEmpty()}
       {notes.length > 0 && renderItems()}
       {showFetchMoreBtn && renderFetchMoreBtn()}

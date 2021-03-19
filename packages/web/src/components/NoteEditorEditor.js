@@ -6,7 +6,7 @@ import { NEW_NOTE, ADDED } from '../types/const';
 
 const NoteEditorEditor = (props) => {
 
-  const { note } = props
+  const { note } = props;
   const isFocused = useSelector(state => state.display.isEditorFocused);
   const title = useSelector(state => state.display.noteTitle);
   const body = useSelector(state => state.display.noteBody);
@@ -17,12 +17,12 @@ const NoteEditorEditor = (props) => {
   const onTitleInputChange = (e) => {
     if (!isFocused) dispatch(updateEditorFocused(true));
     dispatch(updateEditorContent({ title: e.target.value }));
-  }
+  };
 
   const onBodyInputChange = (e) => {
     if (!isFocused) dispatch(updateEditorFocused(true));
     dispatch(updateEditorContent({ body: e.target.value }));
-  }
+  };
 
   useEffect(() => {
     if (note.id === NEW_NOTE) {

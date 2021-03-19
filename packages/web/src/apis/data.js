@@ -295,7 +295,7 @@ const fetchMore = async (params) => {
   const hasMore = namedNoteIds.length > N_NOTES;
 
   return { notes, hasMore };
-}
+};
 
 const batchPutFileWithRetry = async (fpaths, contents, callCount) => {
 

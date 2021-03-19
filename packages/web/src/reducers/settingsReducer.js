@@ -18,7 +18,7 @@ import {
 import { doContainListName, swapArrayElements, getInsertIndex } from '../utils';
 
 export const initialState = {
-  doDeleteOldLinksInTrash: true,
+  doDeleteOldNotesInTrash: true,
   sortOn: ADDED_DT,
   doDescendingOrder: true,
   listNameMap: [
@@ -334,7 +334,7 @@ const settingsReducer = (state = initialState, action) => {
         continue;
       }
 
-      // DIED_ADDING -> remove this link
+      // DIED_ADDING -> remove this note
       // DIED_UPDATING -> set display name to previous and status to ADDED
       // DIED_MOVING -> just add here and move back below
       // DIED_DELETING -> just set status to ADDED

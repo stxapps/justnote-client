@@ -53,7 +53,7 @@ const ColsPanel = () => {
     initialState.pane1Width = s.pane1Width;
     initialState.pane2Width = s.pane2Width;
   }
-  const [state, setState] = useState(initialState);
+  const [state, setState] = useState({ ...initialState });
 
   const [isResizeActive, setIsResizeActive] = useState(false);
   const startInfo = useRef(null);

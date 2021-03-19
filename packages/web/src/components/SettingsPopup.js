@@ -95,7 +95,11 @@ const SettingsPopup = () => {
   }, [isShown, safeAreaWidth]);
 
   useEffect(() => {
-    if (panelContent.current) panelContent.current.scroll(0, 0);
+    if (panelContent.current) {
+      setTimeout(() => {
+        if (panelContent.current) panelContent.current.scroll(0, 0);
+      }, 1);
+    }
   }, [viewId]);
 
   if (!isShown) return (

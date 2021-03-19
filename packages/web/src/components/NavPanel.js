@@ -26,7 +26,6 @@ const NavPanel = () => {
     return state.notes[listName][noteId];
   });
   const [derivedNote, setDerivedNote] = useState(note);
-  const noteId = useSelector(state => state.display.noteId);
 
   const onSidebarOpenBtnClick = () => {
     updatePopupUrlHash(SIDEBAR_POPUP, true, null);
@@ -68,7 +67,7 @@ const NavPanel = () => {
         </div>
       </motion.div>
       {/* Right panel */}
-      <motion.div className="absolute inset-0 overflow-hidden" variants={canvasFMV} initial={false} animate={noteId ? 'visible' : 'hidden'} onAnimationComplete={onRightPanelAnimEnd}>
+      <motion.div className="absolute inset-0 overflow-hidden" variants={canvasFMV} initial={false} animate={note ? 'visible' : 'hidden'} onAnimationComplete={onRightPanelAnimEnd}>
         <motion.div className="w-full h-full" variants={rightPanelFMV}>
           <NoteEditor note={derivedNote} />
         </motion.div>

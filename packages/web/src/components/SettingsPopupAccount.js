@@ -30,7 +30,7 @@ const SettingsPopupAccount = (props) => {
         </button>
         <h3 className="pb-2 text-xl text-gray-800 font-medium leading-none">Account</h3>
       </div>
-      <p className="mt-4 text-base text-gray-500 leading-relaxed md:mt-0">You sign in to Brace.to using your Stacks Identity. This is similar to some websites that allow you to use your Google, Facebook, or Twitter account to sign in to their websites. Not similarly, your Stacks Identity lives in blockchain and only you with your secret key can control it. If you want to change your Stacks Identity’s information i.e. your profile picture, please visit <a className="underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 rounded" href="https://browser.blockstack.org/profiles">Blockstack Browser</a>.</p>
+      <p className="mt-4 text-base text-gray-500 leading-relaxed md:mt-0">You sign in to Justnote using your Stacks Identity. This is similar to some websites that allow you to use your Google, Facebook, or Twitter account to sign in to their websites. Not similarly, your Stacks Identity lives in blockchain and only you with your secret key can control it. If you want to change your Stacks Identity’s information i.e. your profile picture, please visit <a className="underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 rounded" href="https://browser.blockstack.org/profiles">Blockstack Browser</a>.</p>
       <div className="mt-8 md:clearfix">
         <div className="md:float-right md:w-3/12">
           {userImage}
@@ -50,7 +50,7 @@ const SettingsPopupAccount = (props) => {
                 <p className="text-sm text-gray-500 text-right">Password:</p>
               </td>
               <td className="pl-2 align-baseline">
-                <p className="text-base text-gray-500 leading-relaxed">Unlike traditional systems, your password cannnot be reset. Your password is a 12-word secret key. It's only known to you. If you lose it, there is no way to retrieve it back. Keep it safe before you sign out. You can view it only when you sign in.</p>
+                <p className="text-base text-gray-500 leading-relaxed">Unlike traditional systems, your password cannot be reset. Your password is a 12-word secret key. It's only known to you. If you lose it, there is no way to retrieve it back. Keep it safe before you sign out. You can view it only when you sign in.</p>
                 <p className="pt-2 text-base text-blue-500 leading-relaxed underline hover:text-blue-700"><a className="focus:outline-none focus:ring-2 focus:ring-blue-400 rounded" href="https://app.blockstack.org/#/settings/secret-key">View your 12-word secret key</a></p>
               </td>
             </tr>
@@ -65,13 +65,13 @@ const SettingsPopupAccount = (props) => {
             </svg>
           </div>
           <div className="ml-3">
-            <p className="text-base font-normal text-yellow-700 leading-relaxed">Signing out from Brace.to doesn’t sign out from Stacks. If you want to sign out from Stacks, especially when you use not-your-own devices, you need to go to <a className="underline hover:text-yellow-800 focus:outline-none focus:ring-2 focus:ring-yellow-600 rounded" href="https://app.blockstack.org/">Stacks App</a> and/or <a className="underline hover:text-yellow-800 focus:outline-none focus:ring-2 focus:ring-yellow-600 rounded" href="https://browser.blockstack.org/account/delete">Blockstack Browser</a> and sign out there.</p>
+            <p className="text-base font-normal text-yellow-700 leading-relaxed">Signing out from Justnote doesn’t sign out from Stacks. If you want to sign out from Stacks, especially when you use not-your-own devices, you need to go to <a className="underline hover:text-yellow-800 focus:outline-none focus:ring-2 focus:ring-yellow-600 rounded" href="https://app.blockstack.org/">Stacks App</a> and/or <a className="underline hover:text-yellow-800 focus:outline-none focus:ring-2 focus:ring-yellow-600 rounded" href="https://browser.blockstack.org/account/delete">Blockstack Browser</a> and sign out there.</p>
           </div>
         </div>
       </div>
       <div className="mt-8 mb-4">
         <h4 className="text-base text-red-600 font-medium leading-none">Delete Account</h4>
-        <p className="mt-2.5 text-base text-gray-500 leading-relaxed">Brace.to uses Stacks Identity to sign you in. If you want to delete your Stacks Identity, please send an email to support@blockstack.com. For more information, please visit <a className="underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 rounded" href="https://forum.stacks.org/t/is-blockstack-gdrp-compliant/10931/4">here</a>.</p>
+        <p className="mt-2.5 text-base text-gray-500 leading-relaxed">Justnote uses Stacks Identity to sign you in. If you want to delete your Stacks Identity, please send an email to support@blockstack.com. For more information, please visit <a className="underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 rounded" href="https://forum.stacks.org/t/is-blockstack-gdrp-compliant/10931/4">here</a>.</p>
       </div>
     </div>
   );

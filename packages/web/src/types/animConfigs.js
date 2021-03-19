@@ -27,29 +27,29 @@ export const canvasFMV = /** @type {any} */ ({
 });
 
 export const sideBarOverlayFMV = {
-  hidden: { opacity: 0, transition: { ease: 'easeIn', duration: 0.075 }, },
-  visible: { opacity: 1, transition: { ease: 'easeOut', duration: 0.1 }, },
+  hidden: { opacity: 0, transition: { ease: 'easeIn', duration: 0.3 }, },
+  visible: { opacity: 1, transition: { ease: 'easeOut', duration: 0.3 }, },
 };
 
 export const sideBarFMV = {
   hidden: {
     translateX: '-100%',
-    transition: { ease: 'easeIn', duration: 0.075 },
+    transition: { ease: 'easeIn', duration: 0.3 },
   },
   visible: {
     translateX: '0%',
-    transition: { ease: 'easeOut', duration: 0.1 },
+    transition: { ease: 'easeOut', duration: 0.3 },
   },
 };
 
 export const rightPanelFMV = {
   hidden: {
     translateX: '100%',
-    transition: { ease: 'easeIn', duration: 0.075 },
+    transition: { ease: 'easeIn', duration: 0.3 },
   },
   visible: {
     translateX: '0%',
-    transition: { ease: 'easeOut', duration: 0.1 },
+    transition: { ease: 'easeOut', duration: 0.3 },
   },
 };
 

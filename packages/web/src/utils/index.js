@@ -242,9 +242,9 @@ export const getListNameDisplayName = (listName, listNameMap) => {
   }
 
   // Not throw an error because it can happen:
-  //   - Delete a link
+  //   - Delete a note
   //   - Delete a list name
-  //   - Commit delete the link -> cause rerender without the list name!
+  //   - Commit delete the note -> cause rerender without the list name!
   console.log(`getListNameDisplayName: invalid listName: ${listName} and listNameMap: ${listNameMap}`);
   return listName;
 };

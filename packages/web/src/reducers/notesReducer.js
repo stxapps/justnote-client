@@ -271,7 +271,7 @@ const notesReducer = (state = initialState, action) => {
           state[listName] !== null &&
           !isEqual(state[listName], {})
         ) {
-          throw new Error(`links: ${listName} should be undefined, null, or an empty object.`);
+          throw new Error(`notes: ${listName} should be undefined, null, or an empty object.`);
         }
         continue;
       }

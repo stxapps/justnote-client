@@ -2,17 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimateSharedLayout, AnimatePresence } from 'framer-motion';
 
+import dataApi from '../apis/data';
+import {
+  addListNames, updateListNames, moveListName, updateDeletingListName,
+  retryDiedListNames, cancelDiedListNames, updatePopupUrlHash,
+} from '../actions';
 import {
   MY_NOTES, TRASH, ARCHIVE, VALID_LIST_NAME, IN_USE_LIST_NAME,
   NO_LIST_NAME, TOO_LONG_LIST_NAME, DUPLICATE_LIST_NAME,
   CONFIRM_DELETE_POPUP, SWAP_LEFT, SWAP_RIGHT,
 } from '../types/const';
-import {
-  addListNames, updateListNames, moveListName, updateDeletingListName,
-  retryDiedListNames, cancelDiedListNames, updatePopupUrlHash,
-} from '../actions';
 import { getListNameMap } from '../selectors';
-import dataApi from '../apis/data';
 import { validateListNameDisplayName, isDiedStatus, isBusyStatus } from '../utils';
 import { listsFMV } from '../types/animConfigs';
 
@@ -75,7 +75,7 @@ const _ListNameEditor = (props) => {
     msg: '',
     isCheckingCanDelete: false,
   };
-  const [state, setState] = useState(initialState);
+  const [state, setState] = useState({ ...initialState });
 
   const input = useRef(null);
   const didOkBtnJustPress = useRef(false);

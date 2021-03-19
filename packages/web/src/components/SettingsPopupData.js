@@ -24,7 +24,7 @@ const _SettingsPopupData = (props) => {
       </div>
       <div className="mt-6 md:mt-0">
         <h4 className="text-base text-gray-800 font-medium leading-none">Data Server</h4>
-        <p className="mt-2.5 text-base text-gray-500 leading-relaxed">With your Stacks identity, you can have your own data server called Gaia to store all your data from apps you use with your Stacks identity. You just need to specify your server’s information in Stacks blockchain. Brace.to stores all your data in the server specified in the blockchain. For more details, please visit <a className="underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 rounded" href="https://docs.blockstack.org/data-storage/overview">Stacks Gaia</a> and <a className="underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 rounded" href="https://docs.blockstack.org/storage-hubs/overview">Stacks Gaia hubs</a>.</p>
+        <p className="mt-2.5 text-base text-gray-500 leading-relaxed">With your Stacks identity, you can have your own data server called Gaia to store all your data from apps you use with your Stacks identity. You just need to specify your server’s information in Stacks blockchain. Justnote stores all your data in the server specified in the blockchain. For more details, please visit <a className="underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 rounded" href="https://docs.blockstack.org/data-storage/overview">Stacks Gaia</a> and <a className="underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 rounded" href="https://docs.blockstack.org/storage-hubs/overview">Stacks Gaia hubs</a>.</p>
       </div>
       <div className="mt-8">
         <button onClick={onToExportAllDataViewBtnClick} className="focus:outline-none focus:ring-2 focus:ring-green-600 rounded">
@@ -36,7 +36,7 @@ const _SettingsPopupData = (props) => {
         <button onClick={onToDeleteAllDataViewBtnClick} className="focus:outline-none focus:ring-2 focus:ring-green-600 rounded">
           <h4 className="text-base text-gray-800 font-medium underline hover:text-gray-900">Delete All Data</h4>
         </button>
-        <p className="mt-2.5 text-base text-gray-500 leading-relaxed">Delete all your data including but not limited to all your saved links in all lists, all your created lists, and all your settings.</p>
+        <p className="mt-2.5 text-base text-gray-500 leading-relaxed">Delete all your data including but not limited to all your saved notes in all lists, all your created lists, and all your settings.</p>
       </div>
     </div>
   );
@@ -262,7 +262,7 @@ const _SettingsPopupDataDelete = (props) => {
         </button>
         <h3 className="pb-2 text-xl text-gray-800 font-medium leading-none md:pb-0">Delete All Data</h3>
       </div>
-      <p className="mt-6 text-base text-gray-500 leading-relaxed">Delete all your data including but not limited to all your saved links in all lists, all your created lists, and all your settings.</p>
+      <p className="mt-6 text-base text-gray-500 leading-relaxed">Delete all your data including but not limited to all your saved notes in all lists, all your created lists, and all your settings.</p>
       <p className="mt-6 text-base text-gray-500 leading-relaxed">This will only remove all your data, not your account. You will still be able to sign in.</p>
       <p className="mt-6 text-base text-gray-500 leading-relaxed">It may take several minutes to delete all your data.</p>
       <p className="mt-6 text-base text-red-600 leading-relaxed">This action CANNOT be undone.</p>
