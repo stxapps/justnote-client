@@ -1,30 +1,32 @@
 import React, { useEffect, useRef } from 'react';
-import { View, TouchableOpacity, BackHandler } from 'react-native';
+import { View, Text, TouchableOpacity, Animated, BackHandler } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
-import { updateBulkEdit, updateNoteId } from '../actions';
-import { NEW_NOTE } from '../types/const';
+import { updateBulkEdit, updateNoteId, fetch } from '../actions';
+import { NEW_NOTE, MAX_SELECTED_NOTE_IDS } from '../types/const';
+import { getNotes } from '../selectors';
 import { tailwind } from '../stylesheets/tailwind';
+import { popupFMV } from '../types/animConfigs';
 
 import NoteListTopBar from './NoteListTopBar';
 import NoteListItems from './NoteListItems';
-//import LoadingNoteListItems from './LoadingNoteListItems';
+import LoadingNoteListItems from './LoadingNoteListItems';
 
 const NoteList = (props) => {
 
   const { onSidebarOpenBtnClick } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
+  const notes = useSelector(getNotes);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
+  const isMaxErrorShown = useSelector(state => state.display.isSelectedNoteIdsMaxErrorShown);
+  const didFetch = useSelector(state => state.display.didFetch);
+  const maxErrorAnim = useRef(new Animated.Value(0)).current;
   const bulkEditBackHandler = useRef(null);
   const dispatch = useDispatch();
 
-  const onAddBtnClick = () => {
-    dispatch(updateNoteId(NEW_NOTE));
-  };
-
-  const registerBackEditBackHandler = (isShown) => {
+  const registerBulkEditBackHandler = (isShown) => {
     if (isShown) {
       if (!bulkEditBackHandler.current) {
         bulkEditBackHandler.current = BackHandler.addEventListener(
@@ -43,15 +45,57 @@ const NoteList = (props) => {
     }
   };
 
+  const onAddBtnClick = () => {
+    dispatch(updateNoteId(NEW_NOTE));
+  };
+
+  const renderMaxError = () => {
+    if (!isMaxErrorShown) return null;
+
+    const maxErrorStyle = {
+      transform: [{
+        scale: maxErrorAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }),
+      }]
+    };
+
+    return (
+      <View style={tailwind('absolute top-0 inset-x-0 justify-center items-center')}>
+        <Animated.View style={[tailwind('m-4 p-4 bg-red-50 rounded-md shadow-lg'), maxErrorStyle]}>
+          <View style={tailwind('flex-row w-full')}>
+            <View style={tailwind('flex-shrink-0 flex-grow-0')}>
+              <Svg style={tailwind('text-base text-red-400 font-normal')} width={24} height={24} viewBox="0 0 20 20" fill="currentColor">
+                <Path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </Svg>
+            </View>
+            <View style={tailwind('ml-3 flex-shrink flex-grow')}>
+              <Text style={tailwind('text-sm text-red-800 font-medium leading-5 text-left')}>To prevent network overload, up to {MAX_SELECTED_NOTE_IDS} items can be selected.</Text>
+            </View>
+          </View>
+        </Animated.View>
+      </View>
+    );
+  };
+
   useEffect(() => {
-    registerBackEditBackHandler(isBulkEditing);
+    if (!notes) dispatch(fetch(!didFetch, !didFetch));
+  }, [notes, didFetch, dispatch]);
+
+  useEffect(() => {
+    registerBulkEditBackHandler(isBulkEditing);
     return () => {
-      registerBackEditBackHandler(false);
+      registerBulkEditBackHandler(false);
     };
   }, [isBulkEditing]);
 
-  const noteListItems = <NoteListItems />;
-  //const noteListItems = <LoadingNoteListItems />;
+  useEffect(() => {
+    if (isMaxErrorShown) {
+      Animated.timing(maxErrorAnim, { toValue: 1, ...popupFMV.visible }).start();
+    } else {
+      Animated.timing(maxErrorAnim, { toValue: 0, ...popupFMV.visible }).start();
+    }
+  }, [isMaxErrorShown]);
+
+  const noteListItems = notes ? <NoteListItems /> : <LoadingNoteListItems />;
 
   return (
     <View style={[tailwind('w-full min-w-64 h-full'), { elevation: 0 }]}>
@@ -65,6 +109,7 @@ const NoteList = (props) => {
           <Path fillRule="evenodd" clipRule="evenodd" d="M20 10C20.5304 10 21.0391 10.2107 21.4142 10.5858C21.7893 10.9609 22 11.4696 22 12V18H28C28.5304 18 29.0391 18.2107 29.4142 18.5858C29.7893 18.9609 30 19.4696 30 20C30 20.5304 29.7893 21.0391 29.4142 21.4142C29.0391 21.7893 28.5304 22 28 22H22V28C22 28.5304 21.7893 29.0391 21.4142 29.4142C21.0391 29.7893 20.5304 30 20 30C19.4696 30 18.9609 29.7893 18.5858 29.4142C18.2107 29.0391 18 28.5304 18 28V22H12C11.4696 22 10.9609 21.7893 10.5858 21.4142C10.2107 21.0391 10 20.5304 10 20C10 19.4696 10.2107 18.9609 10.5858 18.5858C10.9609 18.2107 11.4696 18 12 18H18V12C18 11.4696 18.2107 10.9609 18.5858 10.5858C18.9609 10.2107 19.4696 10 20 10Z" />
         </Svg>
       </TouchableOpacity>}
+      {renderMaxError()}
     </View>
   );
 };

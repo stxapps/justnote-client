@@ -100,6 +100,8 @@ const NoteListMenuPopup = () => {
     setDerivedAnchorPosition(anchorPosition);
   }
 
+  if (!derivedAnchorPosition) return null;
+
   const popupStyle = {
     top: derivedAnchorPosition.top + derivedAnchorPosition.height,
     opacity: popupAnim,

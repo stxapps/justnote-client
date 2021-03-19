@@ -24,3 +24,11 @@
 -dontwarn org.codehaus.mojo.animal_sniffer.*
 -dontwarn okhttp3.internal.platform.ConscryptPlatform
 -dontwarn org.conscrypt.ConscryptHostnameVerifier
+-keepclasseswithmembers,includedescriptorclasses class com.tencent.mmkv.** {
+  native <methods>;
+  long nativeHandle;
+  private static *** onMMKVCRCCheckFail(***);
+  private static *** onMMKVFileLengthError(***);
+  private static *** mmkvLogImp(...);
+  private static *** onContentChangedByOuterProcess(***);
+}

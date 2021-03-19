@@ -33,9 +33,7 @@ const NoteListSearchPopup = () => {
   };
 
   const onSearchCancelBtnClick = () => {
-    dispatch(updateSearchString(''));
     dispatch(updatePopup(SEARCH_POPUP, false, null));
-
     Keyboard.dismiss();
   };
 

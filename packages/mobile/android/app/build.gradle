@@ -197,6 +197,7 @@ android {
         exclude 'META-INF/keccak.kotlin_module'
         exclude 'META-INF/sha256.kotlin_module'
         exclude 'META-INF/khash-extensions.kotlin_module'
+        pickFirst '**/*.so'
     }
 
     dexOptions {

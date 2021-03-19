@@ -89,9 +89,9 @@
   + /#?u=<username>&n=<note-id>&p=<popup-id>&cd=true
 ** routers
 *** web
-- No need react-router, use framer-motion!
+- No need react-router, use framer-motion
 *** native
-- No need react-navigation, use reanimated?
+- No need react-navigation, use animated
 ** components
 *** sidebar
 - show/hide sidebar, need a button to click to show!
@@ -121,6 +121,27 @@
 - fname: <timestamp><4 random chars>-parents
 - delete: add new one w/o content and update old one w/o content
 - sqlite on mobile
+*** storage on mobile
+- github.com/react-native-async-storage/async-storage
+  + slower
+  + on Android, need to set storage size limit
+- github.com/mrousavy/react-native-mmkv
+- github.com/ammarahm-ed/react-native-mmkv-storage
+  + Faster
+  + based on Tencent MMKV which should be ok
+  + No need to set storage size limit
+  + might need to trim storage size!
+  + might have issues with JSI, Hermes and Proguard!
+  + Proguard rules
+    # Keep all native methods, their classes and any classes in their descriptors
+    -keepclasseswithmembers,includedescriptorclasses class com.tencent.mmkv.** {
+        native <methods>;
+        long nativeHandle;
+        private static *** onMMKVCRCCheckFail(***);
+        private static *** onMMKVFileLengthError(***);
+        private static *** mmkvLogImp(...);
+        private static *** onContentChangedByOuterProcess(***);
+    }
 ** data
 *** Gaia
 - /notes/<listName>/<id>_<parentIds>/index.json
@@ -215,6 +236,12 @@
 - yarn add 'https://gitpkg.now.sh/bracedotto/blockstack-react-native/BlockstackSDK?6d3814e88711af1394d0148586c871cff7038f6e'
 - yarn add reselect
 - yarn add react-native-fast-image
+- yarn add react-native-mmkv-storage
+  + Add pickFirst in build.gradle
+  + Add proguard rules
+  + require iOS target to 11.0
+- yarn add react-native-animated-spinkit
+- yarn add react-native-keyboard-manager
 - Android
   + android/gradle/wrapper/gradle-wrapper.properties
     ~ set gradle version in zip fpath

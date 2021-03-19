@@ -10,7 +10,7 @@ import logo from '../images/logo-short.svg';
 const Loading = () => {
   return (
     <View style={tailwind('items-center w-full h-full')}>
-      <View style={cache('LO_view', [{ top: '33.3333%', transform: [{ translateY: -24 }] }, tailwind('w-12 h-12')])}>
+      <View style={cache('LO_view', [{ transform: [{ translateY: -24 }] }, tailwind('top-1/3 w-12 h-12')])}>
         <SvgXml width={48} height={48} xml={logo} />
       </View>
     </View>

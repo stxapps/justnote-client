@@ -6,6 +6,8 @@ import Svg, { Path } from 'react-native-svg';
 
 import { updatePopup } from '../actions';
 import { NOTE_LIST_MENU_POPUP, SEARCH_POPUP, LG_WIDTH } from '../types/const';
+import { getListNameMap } from '../selectors';
+import { getListNameDisplayName } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 
 import NoteListSearchPopup from './NoteListSearchPopup';
@@ -15,7 +17,10 @@ const NoteListTopBar = (props) => {
 
   const { onSidebarOpenBtnClick } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
+  const listName = useSelector(state => state.display.listName);
+  const listNameMap = useSelector(getListNameMap);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
+  const didFetch = useSelector(state => state.display.didFetch);
   const menuBtn = useRef(null);
   const dispatch = useDispatch();
 
@@ -34,8 +39,9 @@ const NoteListTopBar = (props) => {
 
   if (safeAreaWidth < LG_WIDTH && isBulkEditing) return <NoteListTopBarBulkEdit />;
 
-  const title = <Text style={tailwind('text-lg font-medium leading-6 text-gray-900')} numberOfLines={1} ellipsizeMode="tail">My Notes</Text>
-  //const title = <View style={tailwind('bg-gray-300 w-20 h-6 rounded-md')}></View>
+  let title;
+  if (didFetch) title = <Text style={tailwind('text-lg font-medium leading-6 text-gray-900')} numberOfLines={1} ellipsizeMode="tail">{getListNameDisplayName(listName, listNameMap)}</Text>;
+  else title = <View style={tailwind('bg-gray-300 w-20 h-6 rounded-md')}></View>;
 
   return (
     <View style={tailwind('flex-grow-0 flex-shrink-0')}>

@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import Svg, { SvgXml, Path } from 'react-native-svg';
 import FastImage from 'react-native-fast-image';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
@@ -11,13 +11,14 @@ import { tailwind } from '../stylesheets/tailwind';
 
 import SidebarSearchInput from './SidebarSearchInput';
 import SidebarListNames from './SidebarListNames';
-//import LoadingSidebarListNames from './LoadingSidebarListNames';
+import LoadingSidebarListNames from './LoadingSidebarListNames';
 
 import logoFull from '../images/logo-full.svg';
 
 const Sidebar = () => {
 
   const { width: safeAreaWidth } = useSafeAreaFrame();
+  const didFetch = useSelector(state => state.display.didFetch);
   const profileBtn = useRef(null);
   const dispatch = useDispatch();
 
@@ -34,8 +35,7 @@ const Sidebar = () => {
     dispatch(updateNoteId(NEW_NOTE));
   };
 
-  const listNames = <SidebarListNames />;
-  //const listNames = <LoadingSidebarListNames />;
+  const listNames = didFetch ? <SidebarListNames /> : <LoadingSidebarListNames />;
 
   return (
     <View style={tailwind('w-full min-w-56 h-full pt-5 pb-4 bg-gray-100')}>

@@ -3,24 +3,22 @@ import { View, Text } from 'react-native';
 import { useSelector } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
+import { isDiedStatus } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 
 import NoteEditorTopBar from './NoteEditorTopBar';
 import NoteEditorEditor from './NoteEditorEditor';
 import NoteEditorBulkEdit from './NoteEditorBulkEdit';
+import NoteEditorConflict from './NoteEditorConflict';
+import NoteEditorRetry from './NoteEditorRetry';
 
 const NoteEditor = (props) => {
 
-  // TODO: On mobile, just noteId is not enough:
-  //   - slide in with loading, then update with content
-  //   - silde out first before reset to ready state
-
-  const { isFullScreen, onToggleFullScreen, onRightPanelCloseBtnClick, width } = props;
-  const noteId = useSelector(state => state.display.noteId);
+  const { note, isFullScreen, onToggleFullScreen, width } = props;
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
 
   if (isBulkEditing) return <NoteEditorBulkEdit width={width} />;
-  if (!noteId) return (
+  if (!note) return (
     <View style={tailwind('w-full h-full bg-white')}>
       <View style={[tailwind('items-center'), { paddingTop: 172 }]}>
         <View style={tailwind('bg-gray-200 w-32 h-32 rounded-full flex items-center justify-center')}>
@@ -30,15 +28,17 @@ const NoteEditor = (props) => {
         </View>
       </View>
       <View style={tailwind('absolute inset-x-0 bottom-8')}>
-        <Text style={tailwind('text-sm font-normal text-gray-600 text-center')}>Click "+ New Note" button or select your note</Text>
+        <Text style={tailwind('text-sm font-normal text-gray-500 text-center')}>Click "+ New Note" button or select your note</Text>
       </View>
     </View>
   );
+  if (note.id.startsWith('conflict')) return <NoteEditorConflict note={note} />;
+  if (isDiedStatus(note.status)) return <NoteEditorRetry note={note} />;
 
   return (
     <View style={tailwind('w-full h-full bg-white')}>
-      <NoteEditorTopBar isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} onRightPanelCloseBtnClick={onRightPanelCloseBtnClick} width={width} />
-      <NoteEditorEditor />
+      <NoteEditorTopBar note={note} isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} width={width} />
+      <NoteEditorEditor note={note} width={width} />
     </View>
   );
 };

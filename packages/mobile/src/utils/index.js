@@ -1,9 +1,11 @@
 import Url from 'url-parse';
 
 import {
-  HTTP,
-  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_REMOVING, DIED_DELETING,
+  HTTP, MAX_CHARS,
+  ADDING, UPDATING, MOVING, DELETING, MERGING,
+  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, DIED_MERGING,
   VALID_URL, NO_URL, ASK_CONFIRM_URL,
+  VALID_LIST_NAME, NO_LIST_NAME, TOO_LONG_LIST_NAME, DUPLICATE_LIST_NAME,
 } from '../types/const';
 
 export const containUrlProtocol = (url) => {
@@ -240,9 +242,9 @@ export const getListNameDisplayName = (listName, listNameMap) => {
   }
 
   // Not throw an error because it can happen:
-  //   - Delete a link
+  //   - Delete a note
   //   - Delete a list name
-  //   - Commit delete the link -> cause rerender without the list name!
+  //   - Commit delete the note -> cause rerender without the list name!
   console.log(`getListNameDisplayName: invalid listName: ${listName} and listNameMap: ${listNameMap}`);
   return listName;
 };
@@ -256,9 +258,40 @@ export const doContainListName = (listName, listNameObjs) => {
   return false;
 };
 
+export const doContainListNameDisplayName = (displayName, listNameObjs) => {
+
+  for (const listNameObj of listNameObjs) {
+    if (listNameObj.displayName === displayName) return true;
+  }
+
+  return false;
+};
+
+export const validateListNameDisplayName = (displayName, listNameMap) => {
+
+  // Validate:
+  //   1. Empty 2. Contain space at the begining or the end 3. Contain invalid characters
+  //   4. Too long 5. Duplicate
+  //
+  // 2 and 3 are not the problem because this is display name!
+
+  if (!displayName || !isString(displayName) || displayName === '') return NO_LIST_NAME;
+  if (displayName.length > 256) return TOO_LONG_LIST_NAME;
+
+  if (doContainListNameDisplayName(displayName, listNameMap)) return DUPLICATE_LIST_NAME;
+
+  return VALID_LIST_NAME;
+};
+
 export const isDiedStatus = (status) => {
   return [
-    DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_REMOVING, DIED_DELETING,
+    DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, DIED_MERGING,
+  ].includes(status);
+};
+
+export const isBusyStatus = (status) => {
+  return [
+    ADDING, UPDATING, MOVING, DELETING, MERGING,
   ].includes(status);
 };
 
@@ -273,4 +306,93 @@ export const randInt = (max) => {
 
 export const sample = (arr) => {
   return arr[Math.floor(Math.random() * arr.length)];
+};
+
+export const randomString = (length) => {
+
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+};
+
+export const containUppercase = (letters) => {
+  for (let i = 0; i < letters.length; i++) {
+    if (letters[i] === letters[i].toUpperCase()
+      && letters[i] !== letters[i].toLowerCase()) {
+      return true;
+    }
+  }
+  return false;
+};
+
+export const isStringIn = (note, searchString) => {
+
+  let title = note.title.slice(0, MAX_CHARS);
+  if (!containUppercase(searchString)) title = title.toLowerCase();
+
+  let body = note.body.slice(0, MAX_CHARS);
+  if (!containUppercase(searchString)) body = body.toLowerCase();
+
+  const content = title + ' ' + body;
+  const searchWords = searchString.split(' ');
+
+  return searchWords.every(word => content.includes(word));
+};
+
+export const swapArrayElements = (a, x, y) => (a[x] && a[y] && [
+  ...a.slice(0, x),
+  a[y],
+  ...a.slice(x + 1, y),
+  a[x],
+  ...a.slice(y + 1)
+]) || a;
+
+export const getInsertIndex = (listNameObj, oldListNameMap, newListNameMap) => {
+
+  // listNameObj is in oldListNameMap and try to find where to insert into newListNameMap
+  //   while preserving the order.
+
+  const i = oldListNameMap.findIndex(obj => obj.listName === listNameObj.listName);
+  if (i < 0) {
+    console.log(`getInsertIndex: invalid listNameObj: ${listNameObj} and oldListNameMap: ${oldListNameMap}`);
+    return -1;
+  }
+
+  let prev = i - 1;
+  let next = i + 1;
+  while (prev >= 0 || next < oldListNameMap.length) {
+    if (prev >= 0) {
+      const listName = oldListNameMap[prev].listName;
+      const listNameIndex = newListNameMap.findIndex(obj => obj.listName === listName);
+      if (listNameIndex >= 0) return listNameIndex + 1;
+      prev -= 1;
+    }
+    if (next < oldListNameMap.length) {
+      const listName = oldListNameMap[next].listName;
+      const listNameIndex = newListNameMap.findIndex(obj => obj.listName === listName);
+      if (listNameIndex >= 0) return listNameIndex;
+      next += 1;
+    }
+  }
+
+  return -1;
+};
+
+export const getFormattedDT = (dt) => {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  const d = new Date(dt);
+
+  const year = d.getFullYear() % 2000;
+  const month = months[d.getMonth()];
+  const date = d.getDate();
+  const hour = d.getHours();
+  const min = d.getMinutes();
+
+  return `${date} ${month} ${year} ${hour}:${min}`;
 };

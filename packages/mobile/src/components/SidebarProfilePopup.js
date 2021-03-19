@@ -85,6 +85,8 @@ const SidebarProfilePopup = () => {
     setDerivedAnchorPosition(anchorPosition);
   }
 
+  if (!derivedAnchorPosition) return null;
+
   const popupStyle = {
     width: derivedAnchorPosition.width,
     top: derivedAnchorPosition.top + derivedAnchorPosition.height,

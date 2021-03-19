@@ -6,7 +6,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
-import { updatePopup, updateBulkEdit, clearSelectedNoteIds } from '../actions';
+import { updatePopup, moveNotes } from '../actions';
 import { MOVE_TO_POPUP, ARCHIVE, TRASH, LG_WIDTH } from '../types/const';
 import { getListNameMap } from '../selectors';
 import { getLastHalfHeight } from '../utils';
@@ -21,9 +21,6 @@ const MoveToPopup = () => {
   const anchorPosition = useSelector(state => state.display.moveToPopupPosition);
   const listName = useSelector(state => state.display.listName);
   const listNameMap = useSelector(getListNameMap);
-  //const noteId = useSelector(state => state.display.noteId);
-  const isBulkEditing = useSelector(state => state.display.isBulkEditing);
-  //const selectedNoteIds = useSelector(state => state.display.selectedNoteIds);
   const [popupSize, setPopupSize] = useState(null);
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
   const [derivedIsShown, setDerivedIsShown] = useState(isShown);
@@ -41,17 +38,8 @@ const MoveToPopup = () => {
 
   const onMoveToItemBtnClick = (listName) => {
     if (didClick.current) return;
-
-    if (isBulkEditing) {
-      //dispatch(moveNotes(listName, selectedNoteIds));
-      dispatch(clearSelectedNoteIds());
-      onMoveToCancelBtnClick();
-      dispatch(updateBulkEdit(false));
-    } else {
-      //dispatch(moveNotes(listName, [noteId]));
-      onMoveToCancelBtnClick();
-    }
-
+    dispatch(moveNotes(listName));
+    onMoveToCancelBtnClick();
     didClick.current = true;
   };
 
@@ -113,6 +101,8 @@ const MoveToPopup = () => {
     setDerivedAnchorPosition(anchorPosition);
   }
 
+  if (!derivedAnchorPosition) return null;
+
   const moveTo = [];
   for (const listNameObj of listNameMap) {
     if ([TRASH, ARCHIVE].includes(listNameObj.listName)) continue;
@@ -145,7 +135,7 @@ const MoveToPopup = () => {
     );
     const triggerOffsetX = safeAreaWidth < LG_WIDTH ? 0 : 25;
     const triggerOffsetY = safeAreaWidth < LG_WIDTH ? 52 : derivedAnchorPosition.height;
-    const triggerOffsetWidth = safeAreaWidth < LG_WIDTH ? -8 : 0;
+    const triggerOffsetWidth = safeAreaWidth < LG_WIDTH ? -8 : -25;
     const triggerOffsets = {
       x: triggerOffsetX, y: triggerOffsetY, width: triggerOffsetWidth, height: 0
     };

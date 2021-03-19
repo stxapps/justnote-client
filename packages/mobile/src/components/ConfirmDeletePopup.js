@@ -5,9 +5,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import {
-  updatePopup, updateBulkEdit, clearSelectedNoteIds,
-} from '../actions';
+import { updatePopup, deleteNotes, deleteListNames } from '../actions';
 import { CONFIRM_DELETE_POPUP } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import { popupFMV } from '../types/animConfigs';
@@ -16,10 +14,7 @@ const ConfirmDeletePopup = () => {
 
   const insets = useSafeAreaInsets();
   const isShown = useSelector(state => state.display.isConfirmDeletePopupShown);
-  //const listName = useSelector(state => state.display.listName);
-  //const noteId = useSelector(state => state.display.noteId);
-  const isBulkEditing = useSelector(state => state.display.isBulkEditing);
-  //const selectedNoteIds = useSelector(state => state.display.selectedNoteIds);
+  const deletingListName = useSelector(state => state.display.deletingListName);
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
   const [derivedIsShown, setDerivedIsShown] = useState(isShown);
   const popupAnim = useRef(new Animated.Value(0)).current;
@@ -36,15 +31,9 @@ const ConfirmDeletePopup = () => {
   const onConfirmDeleteOkBtnClick = () => {
     if (didClick.current) return;
 
-    if (isBulkEditing) {
-      //dispatch(deleteNotes(listName, selectedNoteIds));
-      dispatch(clearSelectedNoteIds());
-      onConfirmDeleteCancelBtnClick();
-      dispatch(updateBulkEdit(false));
-    } else {
-      //dispatch(deleteNotes(listName, [noteId]));
-      onConfirmDeleteCancelBtnClick();
-    }
+    if (deletingListName) dispatch(deleteListNames([deletingListName]));
+    else dispatch(deleteNotes());
+    onConfirmDeleteCancelBtnClick();
 
     didClick.current = true;
   };

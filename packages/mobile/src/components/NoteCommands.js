@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
-import { updatePopup } from '../actions';
+import { updatePopup, moveNotes } from '../actions';
 import {
   MOVE_TO_POPUP, CONFIRM_DELETE_POPUP, MY_NOTES, ARCHIVE, TRASH,
 } from '../types/const';
@@ -18,20 +18,26 @@ const NoteCommands = (props) => {
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const listName = useSelector(state => state.display.listName);
   const listNameMap = useSelector(getListNameMap);
-  //const noteId = useSelector(state => state.display.noteId);
   const moveToBtn = useRef(null);
+  const didClick = useRef(false);
   const dispatch = useDispatch();
 
   const onArchiveBtnClick = () => {
-
+    if (didClick.current) return;
+    dispatch(moveNotes(ARCHIVE));
+    didClick.current = true;
   };
 
   const onRemoveBtnClick = () => {
-
+    if (didClick.current) return;
+    dispatch(moveNotes(TRASH));
+    didClick.current = true;
   };
 
   const onRestoreBtnClick = () => {
-
+    if (didClick.current) return;
+    dispatch(moveNotes(MY_NOTES));
+    didClick.current = true;
   };
 
   const onDeleteBtnClick = () => {

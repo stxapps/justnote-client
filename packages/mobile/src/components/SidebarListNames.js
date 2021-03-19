@@ -5,8 +5,8 @@ import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
 import { changeListName, updatePopup } from '../actions';
-import { getListNameMap } from '../selectors';
 import { SIDEBAR_POPUP, TRASH, ARCHIVE, LG_WIDTH } from '../types/const';
+import { getListNameMap } from '../selectors';
 import { tailwind } from '../stylesheets/tailwind';
 
 const SidebarListNames = () => {

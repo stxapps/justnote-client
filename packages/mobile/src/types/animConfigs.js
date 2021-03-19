@@ -1,4 +1,4 @@
-import { Easing } from 'react-native';
+import { LayoutAnimation, Easing } from 'react-native';
 
 export const popupFMV = {
   hidden: {
@@ -24,4 +24,12 @@ export const sidebarFMV = {
     easing: Easing.inOut(Easing.bezier(0.4, 0, 0.2, 1)),
     useNativeDriver: true,
   }
+};
+
+export const swapAnimConfig = () => {
+  return LayoutAnimation.create(
+    225,
+    LayoutAnimation.Types.easeInEaseOut,
+    LayoutAnimation.Properties.scaleY
+  );
 };

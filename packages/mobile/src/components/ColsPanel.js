@@ -1,11 +1,11 @@
 import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { View, TouchableOpacity, PanResponder } from 'react-native';
+import { useSelector } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
+import { NEW_NOTE, NEW_NOTE_OBJ } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
-// TODO: use cache!
-//import cache from '../utils/cache';
 
 import Sidebar from './Sidebar';
 import NoteList from './NoteList';
@@ -21,6 +21,14 @@ const ColsPanel = () => {
   const pane2MaxWidth = 480;
 
   const { width: safeAreaWidth } = useSafeAreaFrame();
+  const note = useSelector(state => {
+    const { listName, noteId } = state.display;
+
+    if (!noteId) return null;
+    if (noteId === NEW_NOTE) return NEW_NOTE_OBJ;
+    if (noteId.startsWith('conflict')) return state.conflictedNotes[listName][noteId];
+    return state.notes[listName][noteId];
+  });
 
   //const storageKey = 'colsPanelState';
   //const storedState = useMemo(() => localStorage.getItem(storageKey), []);
@@ -37,7 +45,7 @@ const ColsPanel = () => {
     initialState.pane1Width = s.pane1Width;
     initialState.pane2Width = s.pane2Width;
   }
-  const [state, setState] = useState(initialState);
+  const [state, setState] = useState({ ...initialState });
 
   const isResizeActive = useRef(false);
   const startInfo = useRef(null);
@@ -175,7 +183,7 @@ const ColsPanel = () => {
       </View>
       <View {...rightPanResponder.panHandlers} style={tailwind(`bg-white border-l border-gray-100 pr-1 overflow-visible ${resizer2Classes}`)}></View>
       <View style={tailwind('flex-1 bg-white overflow-hidden')}>
-        <NoteEditor isFullScreen={state.isPane3FullScreen} onToggleFullScreen={onTogglePane3FullScreen} width={editorWidth} />
+        <NoteEditor note={note} isFullScreen={state.isPane3FullScreen} onToggleFullScreen={onTogglePane3FullScreen} width={editorWidth} />
       </View>
     </View>
   );

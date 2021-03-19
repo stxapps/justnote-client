@@ -1,13 +1,20 @@
 import {
   UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP,
-  UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING,
+  UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, CLEAR_SELECTED_NOTE_IDS,
-  RESET_STATE,
+  FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES,
+  DELETE_LIST_NAMES, UPDATE_DELETING_LIST_NAME, UPDATE_EDITOR_CONTENT,
+  UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
+  UPDATE_UPDATE_SETTINGS_PROGRESS,
+  UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
+  DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   PROFILE_POPUP, NOTE_LIST_MENU_POPUP, MOVE_TO_POPUP, SIDEBAR_POPUP, SEARCH_POPUP,
-  CONFIRM_DELETE_POPUP, SETTINGS_POPUP, MY_NOTES,
+  CONFIRM_DELETE_POPUP, SETTINGS_POPUP, MY_NOTES, TRASH, ARCHIVE,
+  UPDATING, DIED_UPDATING, MAX_SELECTED_NOTE_IDS,
 } from '../types/const';
+import { isString, doContainListName } from '../utils';
 
 const initialState = {
   isHandlingSignIn: false,
@@ -23,11 +30,20 @@ const initialState = {
   isSearchPopupShown: false,
   isConfirmDeletePopupShown: false,
   isSettingsPopupShown: false,
-  isEditorFocused: false,
   searchString: '',
   isBulkEditing: false,
+  isEditorFocused: false,
   selectedNoteIds: [],
+  isSelectedNoteIdsMaxErrorShown: false,
+  deletingListName: null,
+  noteTitle: '',
+  noteBody: '',
+  noteMedia: [],
+  didFetch: false,
   listChangedCount: 0,
+  exportAllDataProgress: null,
+  deleteAllDataProgress: null,
+  updateSettingsProgress: null,
 };
 
 const displayReducer = (state = initialState, action) => {
@@ -41,12 +57,17 @@ const displayReducer = (state = initialState, action) => {
       ...state,
       listName: action.payload,
       listChangedCount: state.listChangedCount + 1,
+      noteId: null,
+      isEditorFocused: false,
+      selectedNoteIds: [],
+      isSelectedNoteIdsMaxErrorShown: false,
     };
   }
 
   if (action.type === UPDATE_NOTE_ID) {
-    if (state.noteId === action.payload) return { ...state, noteId: null };
-    return { ...state, noteId: action.payload };
+    const newState = { ...state, isEditorFocused: false };
+    newState.noteId = state.noteId === action.payload ? null : action.payload;
+    return newState;
   }
 
   if (action.type === UPDATE_POPUP) {
@@ -72,7 +93,7 @@ const displayReducer = (state = initialState, action) => {
         ...state,
         isMoveToPopupShown: isShown,
         moveToPopupPosition: anchorPosition,
-      }
+      };
     }
 
     if (id === SIDEBAR_POPUP) {
@@ -82,11 +103,13 @@ const displayReducer = (state = initialState, action) => {
     }
 
     if (action.payload.id === SEARCH_POPUP) {
-      return { ...state, isSearchPopupShown: isShown }
+      return { ...state, isSearchPopupShown: isShown, searchString: '' };
     }
 
     if (action.payload.id === CONFIRM_DELETE_POPUP) {
-      return { ...state, isConfirmDeletePopupShown: isShown }
+      const newState = { ...state, isConfirmDeletePopupShown: isShown };
+      if (!isShown) newState.deletingListName = null;
+      return newState;
     }
 
     if (id === SETTINGS_POPUP) {
@@ -103,13 +126,25 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_BULK_EDITING) {
-    return { ...state, isBulkEditing: action.payload };
+    const newState = { ...state, isBulkEditing: action.payload, noteId: null };
+    if (!action.payload) {
+      newState.selectedNoteIds = [];
+      newState.isSelectedNoteIdsMaxErrorShown = false;
+    }
+    return newState;
+  }
+
+  if (action.type === UPDATE_EDITOR_FOCUSED) {
+    return { ...state, isEditorFocused: action.payload };
   }
 
   if (action.type === ADD_SELECTED_NOTE_IDS) {
     const selectedNoteIds = [...state.selectedNoteIds];
     for (const noteId of action.payload) {
       if (!selectedNoteIds.includes(noteId)) selectedNoteIds.push(noteId);
+    }
+    if (selectedNoteIds.length > MAX_SELECTED_NOTE_IDS) {
+      return { ...state, isSelectedNoteIdsMaxErrorShown: true };
     }
     return { ...state, selectedNoteIds };
   }
@@ -119,11 +154,99 @@ const displayReducer = (state = initialState, action) => {
     for (const noteId of state.selectedNoteIds) {
       if (!action.payload.includes(noteId)) selectedNoteIds.push(noteId);
     }
-    return { ...state, selectedNoteIds };
+    const isShown = selectedNoteIds.length > MAX_SELECTED_NOTE_IDS;
+    return { ...state, selectedNoteIds, isSelectedNoteIdsMaxErrorShown: isShown };
   }
 
   if (action.type === CLEAR_SELECTED_NOTE_IDS) {
-    return { ...state, selectedNoteIds: [] };
+    return { ...state, selectedNoteIds: [], isSelectedNoteIdsMaxErrorShown: false };
+  }
+
+  if (action.type === FETCH_COMMIT) {
+
+    const newState = { ...state, didFetch: true };
+
+    // Make sure listName is in listNameMap, if not, set to My Notes.
+    const { listNames, doFetchSettings, settings } = action.payload;
+    if (listNames.includes(newState.listName)) return newState;
+    if (!doFetchSettings) return newState;
+
+    if (settings) {
+      if (!doContainListName(newState.listName, settings.listNameMap)) {
+        newState.listName = MY_NOTES;
+      }
+    } else {
+      if (![MY_NOTES, TRASH, ARCHIVE].includes(newState.listName)) {
+        newState.listName = MY_NOTES;
+      }
+    }
+
+    return newState;
+  }
+
+  if (action.type === ADD_NOTE) {
+    const { note } = action.payload;
+    return { ...state, noteId: note.id, isEditorFocused: false };
+  }
+
+  if (action.type === UPDATE_NOTE || action.type === MERGE_NOTES_COMMIT) {
+    const { toNote } = action.payload;
+    return { ...state, noteId: toNote.id, isEditorFocused: false };
+  }
+
+  if (action.type === CANCEL_DIED_NOTES) {
+    return { ...state, noteId: null };
+  }
+
+  if (action.type === DELETE_LIST_NAMES) {
+    const { listNames } = action.payload;
+    if (listNames.includes(state.listName)) {
+      return { ...state, listName: MY_NOTES };
+    }
+    return state;
+  }
+
+  if (action.type === UPDATE_DELETING_LIST_NAME) {
+    return { ...state, deletingListName: action.payload };
+  }
+
+  if (action.type === UPDATE_EDITOR_CONTENT) {
+    const { title, body, media } = action.payload;
+
+    return {
+      ...state,
+      noteTitle: isString(title) ? title : state.noteTitle,
+      noteBody: isString(body) ? body : state.noteBody,
+      noteMedia: Array.isArray(media) ? media : state.noteMedia,
+    };
+  }
+
+  if (action.type === UPDATE_EXPORT_ALL_DATA_PROGRESS) {
+    return { ...state, exportAllDataProgress: action.payload };
+  }
+
+  if (action.type === UPDATE_DELETE_ALL_DATA_PROGRESS) {
+    return { ...state, deleteAllDataProgress: action.payload };
+  }
+
+  if (action.type === UPDATE_SETTINGS) {
+    return { ...state, updateSettingsProgress: { status: UPDATING } };
+  }
+
+  if (action.type === UPDATE_SETTINGS_COMMIT) {
+    return { ...state, updateSettingsProgress: null };
+  }
+
+  if (action.type === UPDATE_SETTINGS_ROLLBACK) {
+    return { ...state, updateSettingsProgress: { status: DIED_UPDATING } };
+  }
+
+  if (action.type === UPDATE_UPDATE_SETTINGS_PROGRESS) {
+    return { ...state, updateSettingsProgress: action.payload };
+  }
+
+  if (action.type === DELETE_ALL_DATA) {
+    return { ...initialState, didFetch: true };
   }
 
   if (action.type === RESET_STATE) {

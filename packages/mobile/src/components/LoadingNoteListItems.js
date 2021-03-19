@@ -16,7 +16,7 @@ const LoadingNoteListItem = () => {
   for (let i = 0; i < nTexts; i++) textIndices.push(i);
 
   return (
-    <View style={tailwind('border-b border-gray-200 px-4 py-5 sm:px-6 lg:px-8', safeAreaWidth)}>
+    <View style={tailwind('border-b border-gray-200 px-4 py-5 sm:px-6', safeAreaWidth)}>
       <View style={[tailwind('h-5 bg-gray-300 rounded-md'), { width: titleWidth }]}></View>
       <View style={tailwind('mt-1')}>
         {textIndices.map(i => {

@@ -6,7 +6,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
-import { updateNoteId } from '../actions';
+import { updateNoteId, updatePopup } from '../actions';
+import { NEW_NOTE, NEW_NOTE_OBJ, SIDEBAR_POPUP } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import { sidebarFMV } from '../types/animConfigs';
 
@@ -18,27 +19,33 @@ const NavPanel = () => {
 
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const insets = useSafeAreaInsets();
-  const noteId = useSelector(state => state.display.noteId);
+  const note = useSelector(state => {
+    const { listName, noteId } = state.display;
 
-  const [isSidebarShown, setIsSidebarShown] = useState(false);
+    if (!noteId) return null;
+    if (noteId === NEW_NOTE) return NEW_NOTE_OBJ;
+    if (noteId.startsWith('conflict')) return state.conflictedNotes[listName][noteId];
+    return state.notes[listName][noteId];
+  });
+  const [derivedNote, setDerivedNote] = useState(note);
+
+  const isSidebarShown = useSelector(state => state.display.isSidebarPopupShown);
   const [didSidebarAnimEnd, setDidSidebarAnimEnd] = useState(true);
   const [derivedIsSidebarShown, setDerivedIsSidebarShown] = useState(isSidebarShown);
   const sidebarAnim = useRef(new Animated.Value(1)).current;
   const sidebarBackHandler = useRef(null);
 
-  const [didRightPanelAnimEnd, setDidRightPanelAnimEnd] = useState(true);
-  const [derivedNoteId, setDerivedNoteId] = useState(noteId);
   const rightPanelAnim = useRef(new Animated.Value(1)).current;
   const rightPanelBackHandler = useRef(null);
 
   const dispatch = useDispatch();
 
   const onSidebarOpenBtnClick = () => {
-    setIsSidebarShown(true);
+    dispatch(updatePopup(SIDEBAR_POPUP, true));
   };
 
   const onSidebarCloseBtnClick = () => {
-    setIsSidebarShown(false);
+    dispatch(updatePopup(SIDEBAR_POPUP, false));
   };
 
   const onRightPanelCloseBtnClick = () => {
@@ -101,30 +108,27 @@ const NavPanel = () => {
   }, [isSidebarShown]);
 
   useEffect(() => {
-    if (noteId) {
-      Animated.timing(rightPanelAnim, { toValue: 0, ...sidebarFMV.visible }).start(() => {
-        setDidRightPanelAnimEnd(true);
-      });
+    if (note) {
+      Animated.timing(rightPanelAnim, { toValue: 0, ...sidebarFMV.visible }).start();
     } else {
       Animated.timing(rightPanelAnim, { toValue: 1, ...sidebarFMV.hidden }).start(() => {
-        setDidRightPanelAnimEnd(true);
+        if (!note && note !== derivedNote) setDerivedNote(note);
       });
     }
 
-    registerRightPanelBackHandler(!!noteId);
+    registerRightPanelBackHandler(!!note);
     return () => {
       registerRightPanelBackHandler(false);
     };
-  }, [noteId]);
+  }, [note]);
 
   if (derivedIsSidebarShown !== isSidebarShown) {
     setDidSidebarAnimEnd(false);
     setDerivedIsSidebarShown(isSidebarShown);
   }
 
-  if (derivedNoteId !== noteId) {
-    setDidRightPanelAnimEnd(false);
-    setDerivedNoteId(noteId);
+  if (note && note !== derivedNote) {
+    setDerivedNote(note);
   }
 
   const leftCanvasClassNames = !isSidebarShown && didSidebarAnimEnd ? 'hidden relative' : 'absolute inset-0 flex flex-row';
@@ -139,7 +143,7 @@ const NavPanel = () => {
     }]
   };
 
-  const rightCanvasClassNames = noteId === null && didRightPanelAnimEnd ? 'hidden relative' : 'absolute inset-0';
+  const rightCanvasClassNames = derivedNote === null ? 'hidden relative' : 'absolute inset-0';
   const rightPanelStyle = {
     transform: [{
       translateX: rightPanelAnim.interpolate({
@@ -174,7 +178,7 @@ const NavPanel = () => {
       {/* Right panel */}
       <View style={tailwind(rightCanvasClassNames)}>
         <Animated.View style={[tailwind('w-full h-full'), rightPanelStyle]}>
-          <NoteEditor onRightPanelCloseBtnClick={onRightPanelCloseBtnClick} width={safeAreaWidth} />
+          <NoteEditor note={derivedNote} width={safeAreaWidth} />
         </Animated.View>
       </View>
     </View>
