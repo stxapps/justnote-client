@@ -48,7 +48,7 @@ const NoteList = (props) => {
   };
 
   useEffect(() => {
-    if (!notes) dispatch(fetch(!didFetch, !didFetch));
+    if (!notes) dispatch(fetch(null, !didFetch));
   }, [notes, didFetch, dispatch]);
 
   const noteListItems = notes ? <NoteListItems /> : <LoadingNoteListItems />;

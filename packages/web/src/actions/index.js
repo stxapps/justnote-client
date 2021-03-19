@@ -1123,6 +1123,7 @@ const exportAllDataLoop = async (dispatch, fpaths, doneCount) => {
   const selectedFPaths = fpaths.slice(doneCount, doneCount + selectedCount);
   const responses = await dataApi.batchGetFileWithRetry(selectedFPaths, 0);
   const data = responses.map((response, i) => {
+    // Export only index.json so safe to JSON.parse all responses.
     return { path: selectedFPaths[i], data: JSON.parse(response.content) };
   });
 
@@ -1203,7 +1204,7 @@ const deleteAllDataLoop = async (dispatch, noteIds, total, doneCount) => {
 
   const contents = [];
   for (let i = 0; i < fpaths.length; i++) {
-    if (fpaths[i].endsWith('index.json')) contents.push({ title: '', body: '' })
+    if (fpaths[i].endsWith('index.json')) contents.push({ title: '', body: '' });
     else contents.push('');
   }
 

@@ -237,7 +237,7 @@ const fetch = async (params) => {
   const contents = [];
   for (let i = 0; i < fpaths.length; i++) {
     let content = responses[i].content;
-    if (fpaths[i].endsWith('.json')) content = JSON.parse(content);
+    if (fpaths[i].endsWith('index.json')) content = JSON.parse(content);
     contents.push(content);
   }
 
@@ -287,7 +287,7 @@ const fetchMore = async (params) => {
   const contents = [];
   for (let i = 0; i < fpaths.length; i++) {
     let content = responses[i].content;
-    if (fpaths[i].endsWith('.json')) content = JSON.parse(content);
+    if (fpaths[i].endsWith('index.json')) content = JSON.parse(content);
     contents.push(content);
   }
 
