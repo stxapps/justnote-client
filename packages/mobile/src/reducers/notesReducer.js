@@ -1,6 +1,6 @@
 import { loop, Cmd } from 'redux-loop';
 
-import { deleteOldNotesInTrash } from '../actions';
+import { deleteOldNotesInTrash, sync } from '../actions';
 import {
   FETCH_COMMIT, FETCH_MORE_COMMIT, ADD_NOTE, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK,
   UPDATE_NOTE, UPDATE_NOTE_COMMIT, UPDATE_NOTE_ROLLBACK,
@@ -89,7 +89,7 @@ const notesReducer = (state = initialState, action) => {
     const newState = { ...state };
     newState[listName] = _.update(newState[listName], ID, note.id, STATUS, ADDED);
 
-    return newState;
+    return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
   }
 
   if (action.type === ADD_NOTE_ROLLBACK) {
@@ -119,7 +119,7 @@ const notesReducer = (state = initialState, action) => {
     const newState = { ...state };
     newState[listName] = _.update(newState[listName], ID, toNote.id, STATUS, ADDED);
 
-    return newState;
+    return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
   }
 
   if (action.type === UPDATE_NOTE_ROLLBACK) {
@@ -159,7 +159,7 @@ const notesReducer = (state = initialState, action) => {
       newState[toListName], ID, _.extract(toNotes, ID), STATUS, ADDED
     );
 
-    return newState;
+    return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
   }
 
   if (action.type === MOVE_NOTES_ROLLBACK) {
@@ -188,7 +188,7 @@ const notesReducer = (state = initialState, action) => {
     const newState = { ...state };
     newState[listName] = _.exclude(newState[listName], ID, ids);
 
-    return newState;
+    return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
   }
 
   if (action.type === DELETE_NOTES_ROLLBACK) {
@@ -235,7 +235,7 @@ const notesReducer = (state = initialState, action) => {
     const newState = { ...state };
     newState[listName] = _.exclude(state[listName], ID, ids);
 
-    return newState;
+    return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
   }
 
   if (action.type === MERGE_NOTES_COMMIT) {
@@ -246,7 +246,7 @@ const notesReducer = (state = initialState, action) => {
       ...newState[toListName], ...toObjAndAddAttrs([toNote], ADDED)
     };
 
-    return newState;
+    return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
   }
 
   if (action.type === ADD_LIST_NAMES_COMMIT) {
@@ -288,7 +288,10 @@ const notesReducer = (state = initialState, action) => {
         newState[k] = {};
       }
     }
-    return newState;
+    return loop(
+      newState,
+      Cmd.run(sync(false, 1), { args: [Cmd.dispatch, Cmd.getState] })
+    );
   }
 
   if (action.type === RESET_STATE) {

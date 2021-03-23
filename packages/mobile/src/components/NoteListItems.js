@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
-import { View, Text, TouchableOpacity, Animated } from 'react-native';
+import { FlatList, View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
-import { fetchMore } from '../actions';
+import { updatePageYOffset, fetchMore } from '../actions';
 import { MY_NOTES, TRASH, ARCHIVE } from '../types/const';
 import { getListNameMap, getNotes } from '../selectors';
 import { getListNameDisplayName } from '../utils';
@@ -28,8 +28,6 @@ const NoteListItems = () => {
   const flatList = useRef(null);
   const dispatch = useDispatch();
 
-  if (!notes) throw new Error(`Invalid notes: ${notes}. Notes cannot be undefined as in NoteSelector and if notes is null, it should be handled in NoteList, not in NoteListItems.`);
-
   const data = useMemo(() => {
     const data = [...notes];
 
@@ -41,9 +39,13 @@ const NoteListItems = () => {
     return data;
   }, [notes, hasMore, isFetchingMore]);
 
+  const onScrollEnd = (e) => {
+    updatePageYOffset(e.nativeEvent.contentOffset.y);
+  };
+
   const onFetchMoreBtnClick = () => {
     dispatch(fetchMore());
-  }
+  };
 
   const onEndReached = useCallback(() => {
     if (!hasMore || isFetchingMore) return;
@@ -154,9 +156,11 @@ const NoteListItems = () => {
     }
   }, [listChangedCount]);
 
+  if (!notes) throw new Error(`Invalid notes: ${notes}. Notes cannot be undefined as in NoteSelector and if notes is null, it should be handled in NoteList, not in NoteListItems.`);
+
   return (
     <View style={tailwind('flex-grow flex-shrink')}>
-      <Animated.FlatList
+      <FlatList
         ref={flatList}
         contentContainerStyle={tailwind('')}
         data={data}
@@ -165,7 +169,9 @@ const NoteListItems = () => {
         ListEmptyComponent={renderEmpty}
         onEndReached={onEndReached}
         onEndReachedThreshold={0.9}
-        removeClippedSubviews={false} />
+        removeClippedSubviews={false}
+        onScrollEndDrag={onScrollEnd}
+        onMomentumScrollEnd={onScrollEnd} />
     </View>
   );
 };

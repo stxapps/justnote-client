@@ -1,10 +1,11 @@
-import React, { useState, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { View, TouchableOpacity, PanResponder } from 'react-native';
 import { useSelector } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
-import { NEW_NOTE, NEW_NOTE_OBJ } from '../types/const';
+import mmkvStorage from '../mmkvStorage';
+import { COLS_PANEL_STATE, NEW_NOTE, NEW_NOTE_OBJ } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 
 import Sidebar from './Sidebar';
@@ -30,9 +31,8 @@ const ColsPanel = () => {
     return state.notes[listName][noteId];
   });
 
-  //const storageKey = 'colsPanelState';
-  //const storedState = useMemo(() => localStorage.getItem(storageKey), []);
-  const storedState = null;
+  const storageKey = COLS_PANEL_STATE;
+  const storedState = useMemo(() => mmkvStorage.getItem(storageKey), []);
   const initialState = {
     isPane1Shown: true,
     isPane3FullScreen: false,
@@ -148,6 +148,10 @@ const ColsPanel = () => {
       return { ...prevState, isPane3FullScreen: !state.isPane3FullScreen };
     });
   }, [state.isPane3FullScreen]);
+
+  useEffect(() => {
+    mmkvStorage.setItem(storageKey, JSON.stringify(state));
+  }, [state]);
 
   const pane1Classes = state.isPane1Shown && !state.isPane3FullScreen ? '' : 'hidden';
   const resizer1Classes = state.isPane1Shown && !state.isPane3FullScreen ? '' : 'hidden';

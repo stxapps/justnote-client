@@ -1,7 +1,6 @@
 import { Linking, Dimensions, Platform } from 'react-native';
 
 import userSession from '../userSession';
-import mmkvStorage from '../mmkvStorage';
 import dataApi from '../apis/data';
 import serverApi from '../apis/server';
 import {
@@ -9,13 +8,13 @@ import {
   UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP, UPDATE_SEARCH_STRING,
   UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, CLEAR_SELECTED_NOTE_IDS,
+  UPDATE_STATUS, UPDATE_PAGE_Y_OFFSET,
   FETCH, FETCH_COMMIT, FETCH_ROLLBACK,
   FETCH_MORE, FETCH_MORE_COMMIT, FETCH_MORE_ROLLBACK,
   ADD_NOTE, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK,
   UPDATE_NOTE, UPDATE_NOTE_COMMIT, UPDATE_NOTE_ROLLBACK,
   MOVE_NOTES, MOVE_NOTES_COMMIT, MOVE_NOTES_ROLLBACK,
-  DELETE_NOTES, DELETE_NOTES_COMMIT, DELETE_NOTES_ROLLBACK,
-  CANCEL_DIED_NOTES,
+  DELETE_NOTES, DELETE_NOTES_COMMIT, DELETE_NOTES_ROLLBACK, CANCEL_DIED_NOTES,
   DELETE_OLD_NOTES_IN_TRASH, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
   DELETE_OLD_NOTES_IN_TRASH_ROLLBACK,
   MERGE_NOTES, MERGE_NOTES_COMMIT, MERGE_NOTES_ROLLBACK,
@@ -25,11 +24,9 @@ import {
   DELETE_LIST_NAMES, DELETE_LIST_NAMES_COMMIT, DELETE_LIST_NAMES_ROLLBACK,
   UPDATE_DELETING_LIST_NAME,
   RETRY_ADD_LIST_NAMES, RETRY_UPDATE_LIST_NAMES, RETRY_MOVE_LIST_NAME,
-  RETRY_DELETE_LIST_NAMES, CANCEL_DIED_LIST_NAMES,
-  UPDATE_EDITOR_CONTENT,
+  RETRY_DELETE_LIST_NAMES, CANCEL_DIED_LIST_NAMES, UPDATE_EDITOR_CONTENT,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
-  UPDATE_UPDATE_SETTINGS_PROGRESS,
-  SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
+  UPDATE_UPDATE_SETTINGS_PROGRESS, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -37,13 +34,13 @@ import {
   DOMAIN_NAME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH,
   MY_NOTES, TRASH, ID, NEW_NOTE,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
-  SWAP_LEFT, SWAP_RIGHT, N_NOTES,
+  SWAP_LEFT, SWAP_RIGHT, N_NOTES, SETTINGS, INDEX, DOT_JSON, SHOW_SYNCED,
 } from '../types/const';
 import {
   separateUrlAndParam, getUserImageUrl, randomString, swapArrayElements, isString,
 } from '../utils';
 import { _ } from '../utils/obj';
-import { initialState as initialSettings } from '../reducers/settingsReducer';
+import { initialSettingsState } from '../types/initialStates';
 
 export const init = () => async (dispatch, getState) => {
 
@@ -229,6 +226,9 @@ export const signOut = () => async (dispatch, getState) => {
 
   await userSession.signUserOut();
 
+  // clear mmkv storage
+
+
   // clear all user data!
   dispatch({
     type: RESET_STATE,
@@ -300,6 +300,14 @@ export const clearSelectedNoteIds = () => {
   };
 };
 
+export const updatePageYOffset = (pageYOffset) => {
+  return { type: UPDATE_PAGE_Y_OFFSET, payload: pageYOffset };
+};
+
+export const updateStatus = (status) => {
+  return { type: UPDATE_STATUS, payload: status };
+};
+
 export const fetch = (
   doDeleteOldNotesInTrash, doFetchSettings = false
 ) => async (dispatch, getState) => {
@@ -340,7 +348,9 @@ export const fetchMore = () => async (dispatch, getState) => {
   }
 };
 
-export const addNote = (title, body, media, listName = null) => async (dispatch, getState) => {
+export const addNote = (title, body, media, listName = null) => async (
+  dispatch, getState
+) => {
 
   const addedDT = Date.now();
   if (listName === null) listName = getState().display.listName;
@@ -413,7 +423,9 @@ export const saveNote = () => async (dispatch, getState) => {
   }
 };
 
-const _moveNotes = (toListName, ids, fromListName = null) => async (dispatch, getState) => {
+const _moveNotes = (toListName, ids, fromListName = null) => async (
+  dispatch, getState
+) => {
 
   let addedDT = Date.now();
   if (!fromListName) fromListName = getState().display.listName;
@@ -551,6 +563,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
         dispatch({ type: ADD_NOTE_COMMIT, payload });
       } catch (e) {
         dispatch({ type: ADD_NOTE_ROLLBACK, payload: { ...payload, error: e } });
+        return;
       }
     } else if (status === DIED_UPDATING) {
       const fromNote = note.fromNote;
@@ -639,12 +652,17 @@ export const cancelDiedNotes = (ids, listName = null) => async (dispatch, getSta
   });
 };
 
-export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (dispatch, getState) => {
+export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
+  dispatch, getState
+) => {
 
   if (doDeleteOldNotesInTrash === null) {
     doDeleteOldNotesInTrash = getState().settings.doDeleteOldNotesInTrash;
   }
-  if (!doDeleteOldNotesInTrash) return;
+  if (!doDeleteOldNotesInTrash) {
+    dispatch(sync());
+    return;
+  }
 
   let addedDT = Date.now();
   const listName = TRASH;
@@ -765,6 +783,7 @@ export const addListNames = (newNames) => async (dispatch, getState) => {
     i += 1;
   }
 
+  const settingsFPath = `${SETTINGS}${addedDT + i}${DOT_JSON}`;
   const settings = { ...getState().settings };
   settings.listNameMap = [
     ...settings.listNameMap.map(listNameObj => {
@@ -773,22 +792,34 @@ export const addListNames = (newNames) => async (dispatch, getState) => {
     ...listNameObjs
   ];
 
-  const payload = { listNameObjs };
+  const payload = { settingsFPath, listNameObjs };
   dispatch({ type: ADD_LIST_NAMES, payload });
 
   try {
-    await dataApi.updateSettings(settings);
-    dispatch({ type: ADD_LIST_NAMES_COMMIT, payload });
+    await dataApi.putFiles([settingsFPath], [settings]);
   } catch (e) {
     dispatch({ type: ADD_LIST_NAMES_ROLLBACK, payload: { ...payload, error: e } });
+    return;
   }
+
+  try {
+    const _settingsFPath = getState().settingsFPath.fpath;
+    if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
+  } catch (e) {
+    console.log('addListNames: deleteFiles with _settingsFPath error: ', e);
+    // error in this step should be fine
+  }
+
+  dispatch({ type: ADD_LIST_NAMES_COMMIT, payload });
 };
 
 export const updateListNames = (listNames, newNames) => async (dispatch, getState) => {
 
+  const addedDT = Date.now();
+
+  const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
   const settings = { ...getState().settings };
   settings.listNameMap = settings.listNameMap.map(listNameObj => {
-
     const i = listNames.indexOf(listNameObj.listName);
     if (i >= 0) {
       return { listName: listNameObj.listName, displayName: newNames[i] };
@@ -797,19 +828,32 @@ export const updateListNames = (listNames, newNames) => async (dispatch, getStat
     return { listName: listNameObj.listName, displayName: listNameObj.displayName };
   });
 
-  const payload = { listNames, newNames };
+  const payload = { settingsFPath, listNames, newNames };
   dispatch({ type: UPDATE_LIST_NAMES, payload });
 
   try {
-    await dataApi.updateSettings(settings);
-    dispatch({ type: UPDATE_LIST_NAMES_COMMIT, payload });
+    await dataApi.putFiles([settingsFPath], [settings]);
   } catch (e) {
     dispatch({ type: UPDATE_LIST_NAMES_ROLLBACK, payload: { ...payload, error: e } });
+    return;
   }
+
+  try {
+    const _settingsFPath = getState().settingsFPath.fpath;
+    if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
+  } catch (e) {
+    console.log('updateListNames: deleteFiles with _settingsFPath error: ', e);
+    // error in this step should be fine
+  }
+
+  dispatch({ type: UPDATE_LIST_NAMES_COMMIT, payload });
 };
 
 export const moveListName = (listName, direction) => async (dispatch, getState) => {
 
+  const addedDT = Date.now();
+
+  const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
   const settings = { ...getState().settings };
   settings.listNameMap = settings.listNameMap.map(listNameObj => {
     return { listName: listNameObj.listName, displayName: listNameObj.displayName };
@@ -828,19 +872,32 @@ export const moveListName = (listName, direction) => async (dispatch, getState) 
     throw new Error(`Invalid direction: ${direction}`);
   }
 
-  const payload = { listName, direction };
+  const payload = { settingsFPath, listName, direction };
   dispatch({ type: MOVE_LIST_NAME, payload });
 
   try {
-    await dataApi.updateSettings(settings);
-    dispatch({ type: MOVE_LIST_NAME_COMMIT, payload });
+    await dataApi.putFiles([settingsFPath], [settings]);
   } catch (e) {
     dispatch({ type: MOVE_LIST_NAME_ROLLBACK, payload: { ...payload, error: e } });
+    return;
   }
+
+  try {
+    const _settingsFPath = getState().settingsFPath.fpath;
+    if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
+  } catch (e) {
+    console.log('moveListName: deleteFiles with _settingsFPath error: ', e);
+    // error in this step should be fine
+  }
+
+  dispatch({ type: MOVE_LIST_NAME_COMMIT, payload });
 };
 
 export const deleteListNames = (listNames) => async (dispatch, getState) => {
 
+  const addedDT = Date.now();
+
+  const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
   const settings = { ...getState().settings };
   settings.listNameMap = settings.listNameMap.filter(listNameObj => {
     return !listNames.includes(listNameObj.listName);
@@ -849,15 +906,25 @@ export const deleteListNames = (listNames) => async (dispatch, getState) => {
     return { listName: listNameObj.listName, displayName: listNameObj.displayName };
   });
 
-  const payload = { listNames };
+  const payload = { settingsFPath, listNames };
   dispatch({ type: DELETE_LIST_NAMES, payload });
 
   try {
-    await dataApi.updateSettings(settings);
-    dispatch({ type: DELETE_LIST_NAMES_COMMIT, payload });
+    await dataApi.putFiles([settingsFPath], [settings]);
   } catch (e) {
     dispatch({ type: DELETE_LIST_NAMES_ROLLBACK, payload: { ...payload, error: e } });
+    return;
   }
+
+  try {
+    const _settingsFPath = getState().settingsFPath.fpath;
+    if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
+  } catch (e) {
+    console.log('deleteListNames: deleteFiles with _settingsFPath error: ', e);
+    // error in this step should be fine
+  }
+
+  dispatch({ type: DELETE_LIST_NAMES_COMMIT, payload });
 };
 
 export const updateDeletingListName = (listName) => {
@@ -869,6 +936,9 @@ export const updateDeletingListName = (listName) => {
 
 export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
 
+  const addedDT = Date.now();
+
+  const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
   const settings = { ...getState().settings };
 
   const listNameObjs = settings.listNameMap.filter(obj => {
@@ -885,18 +955,25 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
     return obj.status === DIED_ADDING;
   });
   if (diedAddingListNameObjs.length > 0) {
-    const payload = { listNameObjs: diedAddingListNameObjs };
+    const payload = { settingsFPath, listNameObjs: diedAddingListNameObjs };
     dispatch({ type: RETRY_ADD_LIST_NAMES, payload });
 
     try {
-      await dataApi.updateSettings(settings);
-      dispatch({ type: ADD_LIST_NAMES_COMMIT, payload });
+      await dataApi.putFiles([settingsFPath], [settings]);
     } catch (e) {
-      dispatch({
-        type: ADD_LIST_NAMES_ROLLBACK,
-        payload: { ...payload, error: e },
-      });
+      dispatch({ type: ADD_LIST_NAMES_ROLLBACK, payload: { ...payload, error: e } });
+      return;
     }
+
+    try {
+      const _settingsFPath = getState().settingsFPath.fpath;
+      if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
+    } catch (e) {
+      console.log('retryAddListNames: deleteFiles error: ', e);
+      // error in this step should be fine
+    }
+
+    dispatch({ type: ADD_LIST_NAMES_COMMIT, payload });
   }
 
   const diedUpdatingListNameObjs = listNameObjs.filter(obj => {
@@ -904,30 +981,50 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
   });
   if (diedUpdatingListNameObjs.length > 0) {
     const diedUpdatingListNames = diedUpdatingListNameObjs.map(obj => obj.listName);
-    const payload = { listNames: diedUpdatingListNames };
+    const payload = { settingsFPath, listNames: diedUpdatingListNames };
     dispatch({ type: RETRY_UPDATE_LIST_NAMES, payload });
 
     try {
-      await dataApi.updateSettings(settings);
-      dispatch({ type: UPDATE_LIST_NAMES_COMMIT, payload });
+      await dataApi.putFiles([settingsFPath], [settings]);
     } catch (e) {
       dispatch({ type: UPDATE_LIST_NAMES_ROLLBACK, payload: { ...payload, error: e } });
+      return;
     }
+
+    try {
+      const _settingsFPath = getState().settingsFPath.fpath;
+      if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
+    } catch (e) {
+      console.log('retryUpdateListNames: deleteFiles error: ', e);
+      // error in this step should be fine
+    }
+
+    dispatch({ type: UPDATE_LIST_NAMES_COMMIT, payload });
   }
 
   const diedMovingListNameObjs = listNameObjs.filter(obj => {
     return obj.status === DIED_MOVING;
   });
   for (const diedMovingListNameObj of diedMovingListNameObjs) {
-    const payload = { listName: diedMovingListNameObj.listName };
+    const payload = { settingsFPath, listName: diedMovingListNameObj.listName };
     dispatch({ type: RETRY_MOVE_LIST_NAME, payload });
 
     try {
-      await dataApi.updateSettings(settings);
-      dispatch({ type: MOVE_LIST_NAME_COMMIT, payload });
+      await dataApi.putFiles([settingsFPath], [settings]);
     } catch (e) {
       dispatch({ type: MOVE_LIST_NAME_ROLLBACK, payload: { ...payload, error: e } });
+      return;
     }
+
+    try {
+      const _settingsFPath = getState().settingsFPath.fpath;
+      if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
+    } catch (e) {
+      console.log('retryMoveListNames: deleteFiles error: ', e);
+      // error in this step should be fine
+    }
+
+    dispatch({ type: MOVE_LIST_NAME_COMMIT, payload });
   }
 
   const diedDeletingListNameObjs = listNameObjs.filter(obj => {
@@ -935,15 +1032,25 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
   });
   if (diedDeletingListNameObjs.length > 0) {
     const diedDeletingListNames = diedDeletingListNameObjs.map(obj => obj.listName);
-    const payload = { listNames: diedDeletingListNames };
+    const payload = { settingsFPath, listNames: diedDeletingListNames };
     dispatch({ type: RETRY_DELETE_LIST_NAMES, payload });
 
     try {
-      await dataApi.updateSettings(settings);
-      dispatch({ type: DELETE_LIST_NAMES_COMMIT, payload });
+      await dataApi.putFiles([settingsFPath], [settings]);
     } catch (e) {
       dispatch({ type: DELETE_LIST_NAMES_ROLLBACK, payload: { ...payload, error: e } });
+      return;
     }
+
+    try {
+      const _settingsFPath = getState().settingsFPath.fpath;
+      if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
+    } catch (e) {
+      console.log('retryDeleteListNames: deleteFiles error: ', e);
+      // error in this step should be fine
+    }
+
+    dispatch({ type: DELETE_LIST_NAMES_COMMIT, payload });
   }
 };
 
@@ -963,22 +1070,35 @@ export const updateEditorContent = (content) => {
 
 export const updateSettings = (updatedValues) => async (dispatch, getState) => {
 
+  const addedDT = Date.now();
+
   const rollbackValues = {};
   for (const k of Object.keys(updatedValues)) {
     rollbackValues[k] = getState().settings[k];
   }
 
+  const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
   const settings = { ...getState().settings, ...updatedValues };
 
-  const payload = { settings, rollbackValues };
+  const payload = { settingsFPath, settings, rollbackValues };
   dispatch({ type: UPDATE_SETTINGS, payload });
 
   try {
-    await dataApi.updateSettings(settings);
-    dispatch({ type: UPDATE_SETTINGS_COMMIT, payload });
+    await dataApi.putFiles([settingsFPath], [settings]);
   } catch (e) {
     dispatch({ type: UPDATE_SETTINGS_ROLLBACK, payload: { ...payload, error: e } });
+    return;
   }
+
+  try {
+    const _settingsFPath = getState().settingsFPath.fpath;
+    if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
+  } catch (e) {
+    console.log('updateListNames: deleteFiles with _settingsFPath error: ', e);
+    // error in this step should be fine
+  }
+
+  dispatch({ type: UPDATE_SETTINGS_COMMIT, payload });
 };
 
 export const updateUpdateSettingsProgress = (progress) => {
@@ -988,14 +1108,24 @@ export const updateUpdateSettingsProgress = (progress) => {
   };
 };
 
-export const sync = () => async (dispatch, getState) => {
+/*
+ * updateAction: 0 - normal, update immediately or show notification
+ *               1 - force, update immediately no matter what
+ *               2 - no update even there is a change
+ */
+export const sync = (doForceServerListFPaths = false, updateAction = 0) => async (
+  dispatch, getState
+) => {
 
   dispatch({ type: SYNC });
 
-  // Not sync settings so user can set differently on web and each device
-
   try {
-    const { noteFPaths } = await serverApi.listFPaths();
+    let haveUpdate = false;
+
+    let { noteFPaths, settingsFPath } = getState().serverFPaths;
+    if (doForceServerListFPaths || !noteFPaths) {
+      ({ noteFPaths, settingsFPath } = await serverApi.listFPaths());
+    };
     const { noteIds, conflictedIds } = dataApi.listNoteIds(noteFPaths);
 
     const leafFPaths = [];
@@ -1004,7 +1134,9 @@ export const sync = () => async (dispatch, getState) => {
       for (const noteId of conflictedId.notes) leafFPaths.push(...noteId.fpaths);
     }
 
-    const { noteFPaths: _noteFPaths } = await dataApi.listFPaths();
+    const {
+      noteFPaths: _noteFPaths, settingsFPath: _settingsFPath
+    } = await dataApi.listFPaths();
     const {
       noteIds: _noteIds, conflictedIds: _conflictedIds
     } = dataApi.listNoteIds(_noteFPaths);
@@ -1027,64 +1159,148 @@ export const sync = () => async (dispatch, getState) => {
     }
 
     // 1. Server side: upload all fpaths
+    let fpaths = [], contents = [];
     for (const fpath of _noteFPaths) {
       if (noteFPaths.includes(fpath)) continue;
 
       let content;
-      if (allLeafFPaths.includes(fpath)) content = await mmkvStorage.getFile(fpath);
+      if (allLeafFPaths.includes(fpath)) content = await dataApi.getFiles([fpath])[0];
       else {
-        if (fpath.endsWith('index.json')) content = { title: '', body: '' };
+        if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
         else content = '';
       }
-
       if (!isString(content)) content = JSON.stringify(content);
-      await userSession.putFile(fpath, content);
+
+      fpaths.push(fpath);
+      contents.push(content);
     }
+    await serverApi.putFiles(fpaths, contents);
 
     // 2. Server side: loop used to be leaves in server and set to empty
+    fpaths = [], contents = [];
     for (const fpath of leafFPaths) {
       if (allLeafFPaths.includes(fpath)) continue
 
       let content;
-      if (fpath.endsWith('index.json')) content = { title: '', body: '' };
+      if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
       else content = '';
-
       if (!isString(content)) content = JSON.stringify(content);
-      await userSession.putFile(fpath, content);
+
+      fpaths.push(fpath);
+      contents.push(content);
     }
+    await serverApi.putFiles(fpaths, contents);
 
     // 3. Local side: download all fpaths
+    fpaths = [], contents = [];
+    const gFPaths = [];
     for (const fpath of noteFPaths) {
       if (_noteFPaths.includes(fpath)) continue;
+      haveUpdate = true;
+
+      if (allLeafFPaths.includes(fpath)) {
+        gFPaths.push(fpath);
+        continue;
+      }
 
       let content;
-      if (allLeafFPaths.includes(fpath)) content = await userSession.getFile(fpath);
-      else {
-        if (fpath.endsWith('index.json')) content = { title: '', body: '' };
-        else content = '';
-      }
+      if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
+      else content = '';
 
-      if (isString(content) && fpath.endsWith('index.json')) {
-        content = JSON.parse(content);
-      }
-      await mmkvStorage.putFile(fpath, content);
+      fpaths.push(fpath);
+      contents.push(content);
     }
+    const gContents = await serverApi.getFiles(gFPaths);
+    await dataApi.putFiles([...fpaths, ...gFPaths], [...contents, ...gContents]);
 
     // 4. Local side: loop used to be leaves in local and set to empty
+    fpaths = [], contents = [];
     for (const fpath of _leafFPaths) {
       if (allLeafFPaths.includes(fpath)) continue;
 
       let content;
-      if (fpath.endsWith('index.json')) content = { title: '', body: '' };
+      if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
       else content = '';
 
-      await mmkvStorage.putFile(fpath, content);
+      fpaths.push(fpath);
+      contents.push(content);
     }
+    await dataApi.putFiles(fpaths, contents);
 
-    dispatch({ type: SYNC_COMMIT });
+    // Settings
+    //   action: 0 - no settings or already the same,
+    //           1 - download from server to device,
+    //           2 - upload from device to server
+    let syncSettingsAction;
+    if (settingsFPath && _settingsFPath) {
+      const dt = parseInt(settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length));
+      const _dt = parseInt(_settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length));
+
+      if (dt > _dt) syncSettingsAction = 1;
+      else if (dt < _dt) syncSettingsAction = 2;
+      else syncSettingsAction = 0;
+    } else if (settingsFPath) syncSettingsAction = 1;
+    else if (_settingsFPath) syncSettingsAction = 2;
+    else syncSettingsAction = 0;
+
+    let syncSettingsFPath;
+    if (syncSettingsAction === 0) syncSettingsFPath = _settingsFPath;
+    else if (syncSettingsAction === 1) {
+      // Download from server to device
+      const content = await serverApi.getFiles([settingsFPath])[0];
+      await dataApi.putFiles([settingsFPath], [content]);
+
+      // Delete obsolete version in device
+      if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
+
+      syncSettingsFPath = settingsFPath;
+    } else if (syncSettingsAction === 2) {
+      // Upload from device to server
+      const content = await dataApi.getFiles([_settingsFPath])[0];
+      await serverApi.putFiles([_settingsFPath], [JSON.stringify(content)]);
+
+      // Delete obsolete version in server
+      if (settingsFPath) await serverApi.deleteFiles([settingsFPath]);
+
+      syncSettingsFPath = _settingsFPath;
+    } else throw new Error(`Invalid syncSettingsAction: ${syncSettingsAction}`);
+
+    dispatch({
+      type: SYNC_COMMIT,
+      payload: {
+        serverFPaths: { noteFPaths: allNoteFPaths, settingsFPath: syncSettingsFPath },
+        updateAction,
+        haveUpdate,
+      }
+    });
   } catch (e) {
     dispatch({ type: SYNC_ROLLBACK });
   }
+};
+
+export const tryUpdateSynced = (updateAction, haveUpdate) => async (
+  dispatch, getState
+) => {
+  if (updateAction === 2) return;
+  if (updateAction === 1) {
+    dispatch(fetch(false));
+    return;
+  }
+
+  const pageYOffset = getState().window.pageYOffset;
+  const isPopupShown = (
+    getState().display.isProfilePopupShown ||
+    getState().display.isNoteListMenuPopupShown ||
+    getState().display.isMoveToPopupShown ||
+    getState().display.isSidebarPopupShown ||
+    getState().display.isSearchPopupShown
+  );
+  if (pageYOffset === 0 && !isPopupShown) {
+    dispatch(fetch(false));
+    return;
+  }
+
+  dispatch(updateStatus(SHOW_SYNCED));
 };
 
 const exportAllDataLoop = async (dispatch, fpaths, doneCount) => {
@@ -1095,7 +1311,7 @@ const exportAllDataLoop = async (dispatch, fpaths, doneCount) => {
   const selectedFPaths = fpaths.slice(doneCount, doneCount + selectedCount);
   const responses = await dataApi.batchGetFileWithRetry(selectedFPaths, 0);
   const data = responses.map((response, i) => {
-    // Export only index.json so safe to not JSON.parse all responses.
+    // Export only index.json and settings.json so safe to not JSON.parse all responses.
     return { path: selectedFPaths[i], data: response.content };
   });
 
@@ -1125,7 +1341,7 @@ export const exportAllData = () => async (dispatch, getState) => {
 
     for (const noteId of [...noteIds, ...conflictedIds]) {
       for (const fpath of noteId.fpaths) {
-        if (fpath.endsWith('index.json')) fpaths.push(fpath);
+        if (fpath.endsWith(INDEX + DOT_JSON)) fpaths.push(fpath);
       }
     }
     if (settingsFPath) fpaths.push(settingsFPath);
@@ -1176,7 +1392,7 @@ const deleteAllDataLoop = async (dispatch, noteIds, total, doneCount) => {
 
   const contents = [];
   for (let i = 0; i < fpaths.length; i++) {
-    if (fpaths[i].endsWith('index.json')) contents.push({ title: '', body: '' })
+    if (fpaths[i].endsWith(INDEX + DOT_JSON)) contents.push({ title: '', body: '' })
     else contents.push('');
   }
 
@@ -1230,14 +1446,18 @@ const deleteAllDataLoop = async (dispatch, noteIds, total, doneCount) => {
 export const deleteAllData = () => async (dispatch, getState) => {
 
   dispatch(updateDeleteAllDataProgress({ total: 'calculating...', done: 0 }));
+  dispatch(sync(true, 2));
 
-  let allNoteIds, settingsFPath;
+  const addedDT = Date.now();
+  const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
+
+  let allNoteIds, _settingsFPath;
   try {
-    const { noteFPaths, settingsFPath: sFPath } = await dataApi.listFPaths();
+    const { noteFPaths, settingsFPath } = await dataApi.listFPaths();
     const { noteIds, conflictedIds } = dataApi.listNoteIds(noteFPaths);
 
     allNoteIds = [...noteIds, ...conflictedIds];
-    settingsFPath = sFPath;
+    _settingsFPath = settingsFPath;
   } catch (e) {
     dispatch(updateDeleteAllDataProgress({
       total: -1,
@@ -1247,16 +1467,24 @@ export const deleteAllData = () => async (dispatch, getState) => {
     return;
   }
 
-  const total = allNoteIds.length + (settingsFPath ? 1 : 0);
+  const total = allNoteIds.length + (_settingsFPath ? 1 : 0);
   dispatch(updateDeleteAllDataProgress({ total, done: 0 }));
 
   if (total === 0) return;
 
   try {
     if (allNoteIds.length > 0) await deleteAllDataLoop(dispatch, allNoteIds, total, 0);
-    if (settingsFPath) await dataApi.updateSettings(initialSettings);
+    if (_settingsFPath) {
+      await dataApi.putFiles([settingsFPath], [{ ...initialSettingsState }]);
+      try {
+        await dataApi.deleteFiles([_settingsFPath]);
+      } catch (e) {
+        console.log('deleteAllData: deleteFiles with _settingsFPath error: ', e);
+        // error in this step should be fine
+      }
+    }
 
-    dispatch({ type: DELETE_ALL_DATA });
+    dispatch({ type: DELETE_ALL_DATA, payload: { settingsFPath } });
   } catch (e) {
     dispatch(updateDeleteAllDataProgress({
       total: -1,

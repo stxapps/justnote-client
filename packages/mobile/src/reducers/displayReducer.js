@@ -5,7 +5,7 @@ import {
   FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES,
   DELETE_LIST_NAMES, UPDATE_DELETING_LIST_NAME, UPDATE_EDITOR_CONTENT,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
-  SYNC, SYNC_COMMIT, SYNC_ROLLBACK, UPDATE_UPDATE_SETTINGS_PROGRESS,
+  UPDATE_UPDATE_SETTINGS_PROGRESS, SYNC, SYNC_COMMIT, SYNC_ROLLBACK, UPDATE_STATUS,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -41,7 +41,7 @@ const initialState = {
   noteMedia: [],
   didFetch: false,
   listChangedCount: 0,
-  syncProgress: null,
+  status: null,
   exportAllDataProgress: null,
   deleteAllDataProgress: null,
   updateSettingsProgress: null,
@@ -222,26 +222,6 @@ const displayReducer = (state = initialState, action) => {
     };
   }
 
-  if (action.type === SYNC) {
-    return { ...state, syncProgress: SYNC };
-  }
-
-  if (action.type === SYNC_COMMIT) {
-    return { ...state, syncProgress: null };
-  }
-
-  if (action.type === SYNC_ROLLBACK) {
-    return { ...state, syncProgress: SYNC_ROLLBACK };
-  }
-
-  if (action.type === UPDATE_EXPORT_ALL_DATA_PROGRESS) {
-    return { ...state, exportAllDataProgress: action.payload };
-  }
-
-  if (action.type === UPDATE_DELETE_ALL_DATA_PROGRESS) {
-    return { ...state, deleteAllDataProgress: action.payload };
-  }
-
   if (action.type === UPDATE_SETTINGS) {
     return { ...state, updateSettingsProgress: { status: UPDATING } };
   }
@@ -256,6 +236,30 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_UPDATE_SETTINGS_PROGRESS) {
     return { ...state, updateSettingsProgress: action.payload };
+  }
+
+  if (action.type === SYNC) {
+    return { ...state, status: SYNC };
+  }
+
+  if (action.type === SYNC_COMMIT) {
+    return { ...state, status: null };
+  }
+
+  if (action.type === SYNC_ROLLBACK) {
+    return { ...state, status: SYNC_ROLLBACK };
+  }
+
+  if (action.type === UPDATE_STATUS) {
+    return { ...state, status: action.payload };
+  }
+
+  if (action.type === UPDATE_EXPORT_ALL_DATA_PROGRESS) {
+    return { ...state, exportAllDataProgress: action.payload };
+  }
+
+  if (action.type === UPDATE_DELETE_ALL_DATA_PROGRESS) {
+    return { ...state, deleteAllDataProgress: action.payload };
   }
 
   if (action.type === DELETE_ALL_DATA) {

@@ -1,6 +1,6 @@
 import MMKVStorage from "react-native-mmkv-storage";
 
-import { SETTINGS_FNAME } from "./types/const";
+import { COLS_PANEL_STATE, INDEX, SETTINGS, DOT_JSON } from "./types/const";
 
 let _instance = null;
 
@@ -10,7 +10,7 @@ const getInstance = () => {
 };
 
 const putFile = async (path, content) => {
-  if (path.endsWith('index.json') || path === SETTINGS_FNAME) {
+  if (path.endsWith(INDEX + DOT_JSON) || path.startsWith(SETTINGS)) {
     await getInstance().setMapAsync(path, content);
   } else await getInstance().setStringAsync(path, content);
 
@@ -19,7 +19,7 @@ const putFile = async (path, content) => {
 
 const getFile = async (path) => {
   try {
-    if (path.endsWith('index.json') || path === SETTINGS_FNAME) {
+    if (path.endsWith(INDEX + DOT_JSON) || path.startsWith(SETTINGS)) {
       return await getInstance().getMapAsync(path);
     }
     return await getInstance().getStringAsync(path);
@@ -37,12 +37,21 @@ const deleteFile = async (path) => {
 const listFiles = async (callback) => {
   const files = await getInstance().indexer.getKeys();
   files.forEach(file => {
-    if (['default', 'boolIndex'].includes(file)) return;
+    if ([COLS_PANEL_STATE, 'default', 'boolIndex'].includes(file)) return;
     callback(file)
   });
   return files.length;
 };
 
+const getItem = (key) => {
+  return getInstance().getString(key);
+};
+
+const setItem = (key, value) => {
+  getInstance().setString(key, value);
+};
+
 export default {
   putFile, getFile, deleteFile, listFiles,
+  getItem, setItem,
 };
