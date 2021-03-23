@@ -77,7 +77,7 @@ const NoteList = (props) => {
   };
 
   useEffect(() => {
-    if (!notes) dispatch(fetch(null, !didFetch));
+    if (!notes) dispatch(fetch(didFetch ? false : null, !didFetch));
   }, [notes, didFetch, dispatch]);
 
   useEffect(() => {
