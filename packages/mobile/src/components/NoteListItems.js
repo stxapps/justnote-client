@@ -29,28 +29,28 @@ const NoteListItems = () => {
   const dispatch = useDispatch();
 
   const data = useMemo(() => {
-    const data = [...notes];
+    const _data = [...notes];
 
     const showFetchMoreBtn = hasMore && !isFetchingMore;
     const showFetchingMore = hasMore && isFetchingMore;
-    if (showFetchMoreBtn) data.push({ id: SHOW_FETCH_MORE_BTN });
-    if (showFetchingMore) data.push({ id: SHOW_FETCHING_MORE });
+    if (showFetchMoreBtn) _data.push({ id: SHOW_FETCH_MORE_BTN });
+    if (showFetchingMore) _data.push({ id: SHOW_FETCHING_MORE });
 
-    return data;
+    return _data;
   }, [notes, hasMore, isFetchingMore]);
 
   const onScrollEnd = (e) => {
     updatePageYOffset(e.nativeEvent.contentOffset.y);
   };
 
-  const onFetchMoreBtnClick = () => {
+  const onFetchMoreBtnClick = useCallback(() => {
     dispatch(fetchMore());
-  };
+  }, [dispatch]);
 
   const onEndReached = useCallback(() => {
     if (!hasMore || isFetchingMore) return;
     dispatch(fetchMore());
-  }, []);
+  }, [hasMore, isFetchingMore, dispatch]);
 
   const getItemId = useCallback((item) => {
     return item.id;
@@ -103,7 +103,7 @@ const NoteListItems = () => {
             <Text style={[tailwind('mt-4 text-sm text-gray-500 font-normal text-center tracking-wide'), { lineHeight: 22 }]}>Tap <Text style={tailwind('text-sm text-gray-600 font-semibold')}>"Remove"</Text> from the menu to move notes you don't need anymore here</Text>
           </View>
         </View>
-      )
+      );
     }
 
     const textName = listName === ARCHIVE ? `"${displayName}"` : `"Move to... -> ${displayName}"`;
@@ -124,7 +124,7 @@ const NoteListItems = () => {
     );
   }, [listName, listNameMap, searchString, safeAreaWidth]);
 
-  const renderFetchMoreBtn = () => {
+  const renderFetchMoreBtn = useCallback(() => {
     return (
       <View style={tailwind('my-6 px-4 sm:px-6', safeAreaWidth)}>
         <TouchableOpacity onPress={onFetchMoreBtnClick} style={tailwind('w-full px-4 py-2 border border-gray-300 shadow-sm rounded-md bg-white items-center')}>
@@ -132,19 +132,19 @@ const NoteListItems = () => {
         </TouchableOpacity>
       </View>
     );
-  };
+  }, [onFetchMoreBtnClick, safeAreaWidth]);
 
-  const renderFetchingMore = () => {
+  const renderFetchingMore = useCallback(() => {
     return (
       <Text style={tailwind('')}>Fetching more...</Text>
     );
-  };
+  }, []);
 
   const renderItem = useCallback(({ item }) => {
     if (item.id === SHOW_FETCH_MORE_BTN) return renderFetchMoreBtn();
     if (item.id === SHOW_FETCHING_MORE) return renderFetchingMore();
     return <NoteListItem note={item} />;
-  }, []);
+  }, [renderFetchMoreBtn, renderFetchingMore]);
 
   useEffect(() => {
     if (flatList.current) {

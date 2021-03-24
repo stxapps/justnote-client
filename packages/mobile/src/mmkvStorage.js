@@ -1,6 +1,6 @@
-import MMKVStorage from "react-native-mmkv-storage";
+import MMKVStorage from 'react-native-mmkv-storage';
 
-import { COLS_PANEL_STATE, INDEX, SETTINGS, DOT_JSON } from "./types/const";
+import { COLS_PANEL_STATE, INDEX, SETTINGS, DOT_JSON } from './types/const';
 
 let _instance = null;
 
@@ -41,7 +41,7 @@ const listFiles = async (callback) => {
       COLS_PANEL_STATE,
       'default', 'boolIndex', 'numberIndex', 'stringIndex', 'arrayIndex', 'mapIndex',
     ].includes(file)) return;
-    callback(file)
+    callback(file);
   });
   return files.length;
 };

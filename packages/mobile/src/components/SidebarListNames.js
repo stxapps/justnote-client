@@ -16,8 +16,8 @@ const SidebarListNames = () => {
   const listNameMap = useSelector(getListNameMap);
   const dispatch = useDispatch();
 
-  const onListNameBtnClick = (listName) => {
-    dispatch(changeListName(listName));
+  const onListNameBtnClick = (selectedListName) => {
+    dispatch(changeListName(selectedListName));
     if (safeAreaWidth < LG_WIDTH) dispatch(updatePopup(SIDEBAR_POPUP, false, null));
   };
 

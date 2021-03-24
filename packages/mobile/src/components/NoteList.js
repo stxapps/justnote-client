@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { View, Text, TouchableOpacity, Animated, BackHandler } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
@@ -26,11 +26,11 @@ const NoteList = (props) => {
   const bulkEditBackHandler = useRef(null);
   const dispatch = useDispatch();
 
-  const registerBulkEditBackHandler = (isShown) => {
+  const registerBulkEditBackHandler = useCallback((isShown) => {
     if (isShown) {
       if (!bulkEditBackHandler.current) {
         bulkEditBackHandler.current = BackHandler.addEventListener(
-          "hardwareBackPress",
+          'hardwareBackPress',
           () => {
             dispatch(updateBulkEdit(false));
             return true;
@@ -43,7 +43,7 @@ const NoteList = (props) => {
         bulkEditBackHandler.current = null;
       }
     }
-  };
+  }, [dispatch]);
 
   const onAddBtnClick = () => {
     dispatch(updateNoteId(NEW_NOTE));
@@ -55,7 +55,7 @@ const NoteList = (props) => {
     const maxErrorStyle = {
       transform: [{
         scale: maxErrorAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }),
-      }]
+      }],
     };
 
     return (
@@ -85,7 +85,7 @@ const NoteList = (props) => {
     return () => {
       registerBulkEditBackHandler(false);
     };
-  }, [isBulkEditing]);
+  }, [isBulkEditing, registerBulkEditBackHandler]);
 
   useEffect(() => {
     if (isMaxErrorShown) {
@@ -93,7 +93,7 @@ const NoteList = (props) => {
     } else {
       Animated.timing(maxErrorAnim, { toValue: 0, ...popupFMV.visible }).start();
     }
-  }, [isMaxErrorShown]);
+  }, [isMaxErrorShown, maxErrorAnim]);
 
   const noteListItems = notes ? <NoteListItems /> : <LoadingNoteListItems />;
 

@@ -11,7 +11,7 @@ const settingsFPathReducer = (state = initialState, action) => {
 
   if ([
     FETCH_COMMIT, ADD_LIST_NAMES_COMMIT, UPDATE_LIST_NAMES_COMMIT, MOVE_LIST_NAME_COMMIT,
-    DELETE_LIST_NAMES_COMMIT, UPDATE_SETTINGS_COMMIT
+    DELETE_LIST_NAMES_COMMIT, UPDATE_SETTINGS_COMMIT,
   ].includes(action.type)) {
     const { settingsFPath } = action.payload;
     return { ...state, fpath: settingsFPath };

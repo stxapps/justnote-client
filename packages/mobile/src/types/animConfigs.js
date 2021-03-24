@@ -10,7 +10,7 @@ export const popupFMV = {
     duration: 100,
     easing: Easing.out(Easing.bezier(0, 0, 0.2, 1)),
     useNativeDriver: true,
-  }
+  },
 };
 
 export const sidebarFMV = {
@@ -23,7 +23,7 @@ export const sidebarFMV = {
     duration: 300,
     easing: Easing.inOut(Easing.bezier(0.4, 0, 0.2, 1)),
     useNativeDriver: true,
-  }
+  },
 };
 
 export const swapAnimConfig = () => {

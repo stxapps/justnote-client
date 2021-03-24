@@ -3,7 +3,7 @@ import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
-import { Circle } from 'react-native-animated-spinkit'
+import { Circle } from 'react-native-animated-spinkit';
 
 import {
   updateNoteId, updateEditorFocused, updateEditorContent, saveNote,
@@ -77,7 +77,7 @@ const NoteEditorTopBar = (props) => {
 
   const style = {
     width: safeAreaWidth < LG_WIDTH ? Math.max(180, width) : Math.max(496, width),
-  }
+  };
 
   let commands;
   if (note.id === NEW_NOTE) commands = isEditorFocused ? renderFocusedCommands() : null;

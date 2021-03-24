@@ -39,7 +39,7 @@ const NoteEditorRetry = (props) => {
 
   const style = {
     width: safeAreaWidth < LG_WIDTH ? width : Math.max(400, width),
-  }
+  };
 
   return (
     <View style={tailwind('w-full h-full bg-white')}>
@@ -52,7 +52,7 @@ const NoteEditorRetry = (props) => {
               </Svg>
             </TouchableOpacity>
           </View>
-          <View style={tailwind('w-full h-16')}></View>
+          <View style={tailwind('w-full h-16')} />
           <Text style={tailwind('pt-5 text-gray-800 text-lg font-medium')}>Problem found</Text>
           <Text style={tailwind('text-gray-500 text-sm font-normal')}>Please wait a moment and try again. If the problem persists, please <Text onPress={() => Linking.openURL('https://justnote.cc/support')} style={tailwind('text-gray-500 text-sm font-normal underline')}>contact us</Text>
             <Svg width={16} height={16} style={tailwind('mb-2 text-sm text-gray-500 font-normal')} viewBox="0 0 20 20" fill="currentColor">

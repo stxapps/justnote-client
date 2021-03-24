@@ -28,13 +28,12 @@ const SettingsPopupAccount = (props) => {
 
   const onDoDescendingInputChange = (value) => {
 
-    let doDescendingOrder;
-
-    if (value === 'ascending') doDescendingOrder = false;
-    else if (value === 'descending') doDescendingOrder = true;
+    let doDescend;
+    if (value === 'ascending') doDescend = false;
+    else if (value === 'descending') doDescend = true;
     else throw new Error(`Invalid value: ${value}`);
 
-    dispatch(updateSettings({ doDescendingOrder }));
+    dispatch(updateSettings({ doDescendingOrder: doDescend }));
   };
 
   const onDiedUpdatingCloseBtnClick = () => {
@@ -136,7 +135,7 @@ const SettingsPopupAccount = (props) => {
                 <View style={tailwind(`${addedDTBtnClassNames} p-4 flex-row border rounded-tl-md rounded-tr-md`)}>
                   <View style={tailwind('flex-row items-center h-5')}>
                     <View style={tailwind(`${addedDTRBtnClassNames} justify-center items-center h-4 w-4 bg-transparent border rounded-full`)}>
-                      <View style={tailwind(`${addedDTRBtnInnerClassNames} h-3 w-3 rounded-full`)}></View>
+                      <View style={tailwind(`${addedDTRBtnInnerClassNames} h-3 w-3 rounded-full`)} />
                     </View>
                   </View>
                   <Text style={tailwind(`${addedDTBtnInnerClassNames} ml-3 text-sm leading-5 font-medium`)}>Added Date</Text>
@@ -146,7 +145,7 @@ const SettingsPopupAccount = (props) => {
                 <View style={tailwind(`${updatedDTBtnClassNames} p-4 flex-row border rounded-bl-md rounded-br-md`)}>
                   <View style={tailwind('flex-row items-center h-5')}>
                     <View style={tailwind(`${updatedDTRBtnClassNames} justify-center items-center h-4 w-4 bg-transparent border rounded-full`)}>
-                      <View style={tailwind(`${updatedDTRBtnInnerClassNames} h-3 w-3 rounded-full`)}></View>
+                      <View style={tailwind(`${updatedDTRBtnInnerClassNames} h-3 w-3 rounded-full`)} />
                     </View>
                   </View>
                   <Text style={tailwind(`${updatedDTBtnInnerClassNames} ml-3 text-sm leading-5 font-medium`)}>Updated Date</Text>
@@ -168,7 +167,7 @@ const SettingsPopupAccount = (props) => {
                 <View style={tailwind(`${ascendingBtnClassNames} p-4 flex-row border rounded-tl-md rounded-tr-md`)}>
                   <View style={tailwind('flex-row items-center h-5')}>
                     <View style={tailwind(`${ascendingRBtnClassNames} justify-center items-center h-4 w-4 bg-transparent border rounded-full`)}>
-                      <View style={tailwind(`${ascendingRBtnInnerClassNames} h-3 w-3 rounded-full`)}></View>
+                      <View style={tailwind(`${ascendingRBtnInnerClassNames} h-3 w-3 rounded-full`)} />
                     </View>
                   </View>
                   <Text style={tailwind(`${ascendingBtnInnerClassNames} ml-3 text-sm leading-5 font-medium`)}>Ascending order</Text>
@@ -178,7 +177,7 @@ const SettingsPopupAccount = (props) => {
                 <View style={tailwind(`${descendingBtnClassNames} p-4 flex-row border rounded-bl-md rounded-br-md`)}>
                   <View style={tailwind('flex-row items-center h-5')}>
                     <View style={tailwind(`${descendingRBtnClassNames} justify-center items-center h-4 w-4 bg-transparent border rounded-full`)}>
-                      <View style={tailwind(`${descendingRBtnInnerClassNames} h-3 w-3 rounded-full`)}></View>
+                      <View style={tailwind(`${descendingRBtnInnerClassNames} h-3 w-3 rounded-full`)} />
                     </View>
                   </View>
                   <Text style={tailwind(`${descendingBtnInnerClassNames} ml-3 text-sm leading-5 font-medium`)}>Descending order</Text>

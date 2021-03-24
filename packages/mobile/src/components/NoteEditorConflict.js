@@ -32,7 +32,7 @@ const NoteEditorConflict = (props) => {
 
     return (
       <React.Fragment>
-        <View style={tailwind('absolute inset-0 bg-white opacity-25')}></View>
+        <View style={tailwind('absolute inset-0 bg-white opacity-25')} />
         <View style={[tailwind('absolute top-1/3 left-1/2 flex justify-center items-center'), { transform: [{ translateX: -10 }, { translateY: -10 }] }]}>
           <Circle size={20} color="rgba(107, 114, 128, 1)" />
         </View>
@@ -46,7 +46,7 @@ const NoteEditorConflict = (props) => {
     const mergeErrorStyle = {
       transform: [{
         scale: mergeErrorAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }),
-      }]
+      }],
     };
 
     return (
@@ -83,11 +83,11 @@ const NoteEditorConflict = (props) => {
     } else {
       Animated.timing(mergeErrorAnim, { toValue: 0, ...popupFMV.visible }).start();
     }
-  }, [conflictedNote.status]);
+  }, [conflictedNote.status, mergeErrorAnim]);
 
   const style = {
     width: safeAreaWidth < LG_WIDTH ? width : Math.max(442, width),
-  }
+  };
 
   return (
     <View style={tailwind('w-full h-full bg-white')}>
@@ -100,7 +100,7 @@ const NoteEditorConflict = (props) => {
               </Svg>
             </TouchableOpacity>
           </View>
-          <View style={tailwind('w-full h-16')}></View>
+          <View style={tailwind('w-full h-16')} />
           <Text style={tailwind('pt-5 text-gray-800 text-lg font-medium')}>{conflictedNote.notes.length} Versions found</Text>
           <Text style={tailwind('text-gray-500 text-sm font-normal')}>Please choose the correct version of this note.</Text>
           {conflictedNote.notes.map((note, i) => <ConflictItem key={note.id} listName={conflictedNote.listNames[i]} note={note} status={conflictedNote.status} />)}

@@ -17,13 +17,13 @@ const LoadingNoteListItem = () => {
 
   return (
     <View style={tailwind('border-b border-gray-200 px-4 py-5 sm:px-6', safeAreaWidth)}>
-      <View style={[tailwind('h-5 bg-gray-300 rounded-md'), { width: titleWidth }]}></View>
+      <View style={[tailwind('h-5 bg-gray-300 rounded-md'), { width: titleWidth }]} />
       <View style={tailwind('mt-1')}>
         {textIndices.map(i => {
           const textWidth = sample(widths);
           return (
             <View key={i} style={tailwind('h-5 justify-center')}>
-              <View style={[tailwind('h-3 bg-gray-200 rounded'), { width: textWidth }]}></View>
+              <View style={[tailwind('h-3 bg-gray-200 rounded'), { width: textWidth }]} />
             </View>
           );
         })}

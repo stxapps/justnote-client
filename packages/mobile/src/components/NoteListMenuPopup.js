@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, TouchableWithoutFeedback, Animated, Linking, BackHandler,
 } from 'react-native';
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
@@ -26,9 +26,9 @@ const NoteListMenuPopup = () => {
   const popupBackHandler = useRef(null);
   const dispatch = useDispatch();
 
-  const onNoteListMenuCancelBtnClick = () => {
+  const onNoteListMenuCancelBtnClick = useCallback(() => {
     dispatch(updatePopup(NOTE_LIST_MENU_POPUP, false, null));
-  };
+  }, [dispatch]);
 
   const onSelectBtnClick = () => {
     onNoteListMenuCancelBtnClick();
@@ -55,11 +55,11 @@ const NoteListMenuPopup = () => {
     dispatch(updateBulkEdit(false));
   };
 
-  const registerPopupBackHandler = (isShown) => {
-    if (isShown) {
+  const registerPopupBackHandler = useCallback((doRegister) => {
+    if (doRegister) {
       if (!popupBackHandler.current) {
         popupBackHandler.current = BackHandler.addEventListener(
-          "hardwareBackPress",
+          'hardwareBackPress',
           () => {
             onNoteListMenuCancelBtnClick();
             return true;
@@ -72,7 +72,7 @@ const NoteListMenuPopup = () => {
         popupBackHandler.current = null;
       }
     }
-  };
+  }, [onNoteListMenuCancelBtnClick]);
 
   useEffect(() => {
     if (isShown) {
@@ -87,7 +87,7 @@ const NoteListMenuPopup = () => {
     return () => {
       registerPopupBackHandler(false);
     };
-  }, [isShown]);
+  }, [isShown, popupAnim, registerPopupBackHandler]);
 
   if (derivedIsShown !== isShown) {
     if (derivedIsShown && !isShown) setDidCloseAnimEnd(false);
@@ -114,13 +114,13 @@ const NoteListMenuPopup = () => {
     } else {
       popupStyle.transform.push({
         translateX: popupAnim.interpolate({
-          inputRange: [0, 1], outputRange: [0.05 * 148, 0]
-        })
+          inputRange: [0, 1], outputRange: [0.05 * 148, 0],
+        }),
       });
       popupStyle.transform.push({
         translateY: popupAnim.interpolate({
-          inputRange: [0, 1], outputRange: [-1 * 0.05 * 184, 0]
-        })
+          inputRange: [0, 1], outputRange: [-1 * 0.05 * 184, 0],
+        }),
       });
     }
   } else {
@@ -128,24 +128,24 @@ const NoteListMenuPopup = () => {
     if (isBulkEditing) {
       popupStyle.transform.push({
         translateX: popupAnim.interpolate({
-          inputRange: [0, 1], outputRange: [-1 * 0.05 * 88, 0]
-        })
+          inputRange: [0, 1], outputRange: [-1 * 0.05 * 88, 0],
+        }),
       });
     } else {
       popupStyle.transform.push({
         translateX: popupAnim.interpolate({
-          inputRange: [0, 1], outputRange: [-1 * 0.05 * 148, 0]
-        })
+          inputRange: [0, 1], outputRange: [-1 * 0.05 * 148, 0],
+        }),
       });
     }
     popupStyle.transform.push({
       translateY: popupAnim.interpolate({
-        inputRange: [0, 1], outputRange: [-1 * 0.05 * 52, 0]
-      })
+        inputRange: [0, 1], outputRange: [-1 * 0.05 * 52, 0],
+      }),
     });
   }
   popupStyle.transform.push({
-    scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] })
+    scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }),
   });
 
   let buttons;
@@ -195,7 +195,7 @@ const NoteListMenuPopup = () => {
   return (
     <React.Fragment>
       <TouchableWithoutFeedback onPress={onNoteListMenuCancelBtnClick}>
-        <View style={tailwind('absolute inset-0 opacity-25 bg-black')}></View>
+        <View style={tailwind('absolute inset-0 opacity-25 bg-black')} />
       </TouchableWithoutFeedback>
       <Animated.View style={[tailwind('absolute mt-1 rounded-md shadow-lg bg-white'), popupStyle]}>
         <View style={tailwind('py-1')}>

@@ -63,13 +63,13 @@ const NoteListTopBar = (props) => {
         menuBtnAnimObj.current = null;
       }
     };
-  }, [status]);
+  }, [status, menuBtnAnim]);
 
   if (safeAreaWidth < LG_WIDTH && isBulkEditing) return <NoteListTopBarBulkEdit />;
 
   let title;
   if (didFetch) title = <Text style={tailwind('text-lg font-medium leading-6 text-gray-900')} numberOfLines={1} ellipsizeMode="tail">{getListNameDisplayName(listName, listNameMap)}</Text>;
-  else title = <View style={tailwind('bg-gray-300 w-20 h-6 rounded-md')}></View>;
+  else title = <View style={tailwind('bg-gray-300 w-20 h-6 rounded-md')} />;
 
   const menuBtnSvg = (
     <Svg width={20} height={20} style={tailwind('py-2 rounded-full text-gray-500 font-normal')} viewBox="0 0 20 20" fill="currentColor">
@@ -84,9 +84,9 @@ const NoteListTopBar = (props) => {
       transform: [{
         rotate: menuBtnAnim.interpolate(
           { inputRange: [0, 1], outputRange: ['0deg', '360deg'] }
-        )
+        ),
       }],
-    }
+    };
 
     innerMenuBtn = (
       <React.Fragment>
@@ -101,14 +101,14 @@ const NoteListTopBar = (props) => {
   } else if (status === SYNC_ROLLBACK) {
     innerMenuBtn = (
       <React.Fragment>
-        <View style={tailwind('absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full')}></View>
+        <View style={tailwind('absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full')} />
         {menuBtnSvg}
       </React.Fragment>
     );
   } else if (status === SHOW_SYNCED) {
     innerMenuBtn = (
       <React.Fragment>
-        <View style={tailwind('absolute top-1 right-2 w-2 h-2 bg-green-600 rounded-full')}></View>
+        <View style={tailwind('absolute top-1 right-2 w-2 h-2 bg-green-600 rounded-full')} />
         {menuBtnSvg}
       </React.Fragment>
     );

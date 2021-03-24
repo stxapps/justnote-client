@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   ScrollView, View, Text, TouchableOpacity, TouchableWithoutFeedback, Animated,
   BackHandler,
@@ -30,15 +30,15 @@ const MoveToPopup = () => {
   const didClick = useRef(false);
   const dispatch = useDispatch();
 
-  const onMoveToCancelBtnClick = () => {
+  const onMoveToCancelBtnClick = useCallback(() => {
     if (didClick.current) return;
     dispatch(updatePopup(MOVE_TO_POPUP, false, null));
     didClick.current = true;
-  };
+  }, [dispatch]);
 
-  const onMoveToItemBtnClick = (listName) => {
+  const onMoveToItemBtnClick = (selectedListName) => {
     if (didClick.current) return;
-    dispatch(moveNotes(listName));
+    dispatch(moveNotes(selectedListName));
     onMoveToCancelBtnClick();
     didClick.current = true;
   };
@@ -49,11 +49,11 @@ const MoveToPopup = () => {
     }
   };
 
-  const registerPopupBackHandler = (isShown) => {
-    if (isShown) {
+  const registerPopupBackHandler = useCallback((doRegister) => {
+    if (doRegister) {
       if (!popupBackHandler.current) {
         popupBackHandler.current = BackHandler.addEventListener(
-          "hardwareBackPress",
+          'hardwareBackPress',
           () => {
             onMoveToCancelBtnClick();
             return true;
@@ -66,13 +66,13 @@ const MoveToPopup = () => {
         popupBackHandler.current = null;
       }
     }
-  };
+  }, [onMoveToCancelBtnClick]);
 
   useEffect(() => {
     if (isShown && popupSize) {
       Animated.timing(popupAnim, { toValue: 1, ...popupFMV.visible }).start();
     }
-  }, [isShown, popupSize]);
+  }, [isShown, popupSize, popupAnim]);
 
   useEffect(() => {
     if (isShown) {
@@ -88,7 +88,7 @@ const MoveToPopup = () => {
     return () => {
       registerPopupBackHandler(false);
     };
-  }, [isShown]);
+  }, [isShown, popupAnim, registerPopupBackHandler]);
 
   if (derivedIsShown !== isShown) {
     if (derivedIsShown && !isShown) setDidCloseAnimEnd(false);
@@ -137,7 +137,7 @@ const MoveToPopup = () => {
     const triggerOffsetY = safeAreaWidth < LG_WIDTH ? 52 : derivedAnchorPosition.height;
     const triggerOffsetWidth = safeAreaWidth < LG_WIDTH ? -8 : -25;
     const triggerOffsets = {
-      x: triggerOffsetX, y: triggerOffsetY, width: triggerOffsetWidth, height: 0
+      x: triggerOffsetX, y: triggerOffsetY, width: triggerOffsetWidth, height: 0,
     };
     const popupPosition = computePosition(layouts, triggerOffsets, 8);
 
@@ -148,28 +148,28 @@ const MoveToPopup = () => {
     if (originClassName === 'origin-top-left') {
       popupStyle.transform.push({
         translateX: popupAnim.interpolate({
-          inputRange: [0, 1], outputRange: [-1 * 0.05 * popupSize.width, 0]
-        })
+          inputRange: [0, 1], outputRange: [-1 * 0.05 * popupSize.width, 0],
+        }),
       });
       popupStyle.transform.push({
         translateY: popupAnim.interpolate({
-          inputRange: [0, 1], outputRange: [-1 * 0.05 * popupSize.height, 0]
-        })
+          inputRange: [0, 1], outputRange: [-1 * 0.05 * popupSize.height, 0],
+        }),
       });
     } else if (originClassName === 'origin-top-right') {
       popupStyle.transform.push({
         translateX: popupAnim.interpolate({
-          inputRange: [0, 1], outputRange: [0.05 * popupSize.width, 0]
-        })
+          inputRange: [0, 1], outputRange: [0.05 * popupSize.width, 0],
+        }),
       });
       popupStyle.transform.push({
         translateY: popupAnim.interpolate({
-          inputRange: [0, 1], outputRange: [-1 * 0.05 * popupSize.height, 0]
-        })
+          inputRange: [0, 1], outputRange: [-1 * 0.05 * popupSize.height, 0],
+        }),
       });
     }
     popupStyle.transform.push({
-      scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] })
+      scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }),
     });
 
     panel = (
@@ -190,7 +190,7 @@ const MoveToPopup = () => {
   return (
     <React.Fragment>
       <TouchableWithoutFeedback onPress={onMoveToCancelBtnClick}>
-        <View style={tailwind('absolute inset-0 opacity-25 bg-black')}></View>
+        <View style={tailwind('absolute inset-0 opacity-25 bg-black')} />
       </TouchableWithoutFeedback>
       { panel}
     </React.Fragment >

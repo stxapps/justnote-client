@@ -32,7 +32,7 @@ const ColsPanel = () => {
   });
 
   const storageKey = COLS_PANEL_STATE;
-  const storedState = useMemo(() => mmkvStorage.getItem(storageKey), []);
+  const storedState = useMemo(() => mmkvStorage.getItem(storageKey), [storageKey]);
   const initialState = {
     isPane1Shown: true,
     isPane3FullScreen: false,
@@ -71,8 +71,8 @@ const ColsPanel = () => {
       },
       onPanResponderRelease: () => {
         console.log('onLeftPanResponderRelease');
-      }
-    })
+      },
+    });
   }, [state.pane1Width, state.pane2Width]);
 
   const rightPanResponder = useMemo(() => {
@@ -94,8 +94,8 @@ const ColsPanel = () => {
       },
       onPanResponderRelease: () => {
         console.log('onRightPanResponderRelease');
-      }
-    })
+      },
+    });
   }, [state.pane1Width, state.pane2Width]);
 
   const viewPanResponder = useMemo(() => {
@@ -108,9 +108,9 @@ const ColsPanel = () => {
         console.log('onViewPanResponderMove');
         console.log(isResizeActive.current, startInfo.current);
         if (isResizeActive.current && startInfo.current) {
-          const mouseX = gestureState.moveX;;
+          const mouseX = gestureState.moveX;
           const delta = mouseX - startInfo.current.mouseX;
-          console.log(`mouseX: ${mouseX}`)
+          console.log(`mouseX: ${mouseX}`);
           if (whichResizer.current === 'l') {
             const _width = Math.max(
               Math.min(startInfo.current.pane1Width + delta, pane1MaxWidth), pane1MinWidth
@@ -135,9 +135,9 @@ const ColsPanel = () => {
           startInfo.current = null;
           whichResizer.current = null;
         }
-      }
-    })
-  }, [state.pane1Width, state.pane2Width]);
+      },
+    });
+  }, [state.pane1Width, state.pane2Width, pane1MaxWidth]);
 
   const onTogglePane1Shown = useCallback(() => {
     setState(prevState => ({ ...prevState, isPane1Shown: !state.isPane1Shown }));
@@ -151,7 +151,7 @@ const ColsPanel = () => {
 
   useEffect(() => {
     mmkvStorage.setItem(storageKey, JSON.stringify(state));
-  }, [state]);
+  }, [storageKey, state]);
 
   const pane1Classes = state.isPane1Shown && !state.isPane3FullScreen ? '' : 'hidden';
   const resizer1Classes = state.isPane1Shown && !state.isPane3FullScreen ? '' : 'hidden';
@@ -185,7 +185,7 @@ const ColsPanel = () => {
           </Svg>
         </TouchableOpacity>}
       </View>
-      <View {...rightPanResponder.panHandlers} style={tailwind(`bg-white border-l border-gray-100 pr-1 overflow-visible ${resizer2Classes}`)}></View>
+      <View {...rightPanResponder.panHandlers} style={tailwind(`bg-white border-l border-gray-100 pr-1 overflow-visible ${resizer2Classes}`)} />
       <View style={tailwind('flex-1 bg-white overflow-hidden')}>
         <NoteEditor note={note} isFullScreen={state.isPane3FullScreen} onToggleFullScreen={onTogglePane3FullScreen} width={editorWidth} />
       </View>

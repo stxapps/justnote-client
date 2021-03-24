@@ -48,7 +48,7 @@ const NoteListItem = (props) => {
     <View style={tailwind('border-b border-gray-200 px-4 py-5 sm:px-6', safeAreaWidth)}>
       {content}
       {(isBusyStatus(note.status) && note.id !== noteId) && renderBusy()}
-      {note.id === noteId && <View style={tailwind(`absolute top-0 right-0 inset-y-0 w-1 ${isConflicted || isDied ? 'bg-red-100' : 'bg-green-600'}`)}></View>}
+      {note.id === noteId && <View style={tailwind(`absolute top-0 right-0 inset-y-0 w-1 ${isConflicted || isDied ? 'bg-red-100' : 'bg-green-600'}`)} />}
     </View>
   );
 };

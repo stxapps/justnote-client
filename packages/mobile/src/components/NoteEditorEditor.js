@@ -43,7 +43,7 @@ const NoteEditorEditor = (props) => {
   return (
     <View style={tailwind('px-3 py-3 flex-1')}>
       <TextInput ref={titleInput} onChange={onTitleInputChange} style={tailwind('w-full flex-grow-0 flex-shrink-0 text-sm text-gray-600 font-normal py-2 px-3 border-gray-300 rounded-md')} placeholder="Note Title" placeholderTextColor="rgba(107, 114, 128, 1)" value={title} editable={note.id === NEW_NOTE || note.status === ADDED} />
-      <View style={tailwind('h-10 border-b border-gray-200 py-3 flex-grow-0 flex-shrink-0 flex items-center justify-between')}></View>
+      <View style={tailwind('h-10 border-b border-gray-200 py-3 flex-grow-0 flex-shrink-0 flex items-center justify-between')} />
       <TextInput onChange={onBodyInputChange} style={tailwind('w-full flex-1 text-sm text-gray-600 font-normal bg-white shadow-sm mt-3 py-2 px-3 border-gray-300 rounded-md')} placeholder="Start writing..." placeholderTextColor="rgba(107, 114, 128, 1)" value={body} editable={note.id === NEW_NOTE || note.status === ADDED} />
     </View>
   );

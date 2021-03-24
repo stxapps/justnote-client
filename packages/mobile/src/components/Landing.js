@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux';
 import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import Svg, { SvgXml, Path } from 'react-native-svg';
 

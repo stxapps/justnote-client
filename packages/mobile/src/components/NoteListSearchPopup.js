@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, TextInput, Animated, BackHandler, Platform, Keyboard,
 } from 'react-native';
@@ -32,16 +32,16 @@ const NoteListSearchPopup = () => {
     searchInput.current.focus();
   };
 
-  const onSearchCancelBtnClick = () => {
+  const onSearchCancelBtnClick = useCallback(() => {
     dispatch(updatePopup(SEARCH_POPUP, false, null));
     Keyboard.dismiss();
-  };
+  }, [dispatch]);
 
-  const registerPopupBackHandler = (isShown) => {
-    if (isShown) {
+  const registerPopupBackHandler = useCallback((doRegister) => {
+    if (doRegister) {
       if (!popupBackHandler.current) {
         popupBackHandler.current = BackHandler.addEventListener(
-          "hardwareBackPress",
+          'hardwareBackPress',
           () => {
             onSearchCancelBtnClick();
             return true;
@@ -54,7 +54,7 @@ const NoteListSearchPopup = () => {
         popupBackHandler.current = null;
       }
     }
-  };
+  }, [onSearchCancelBtnClick]);
 
   useEffect(() => {
     if (isShown) {
@@ -72,7 +72,7 @@ const NoteListSearchPopup = () => {
     return () => {
       registerPopupBackHandler(false);
     };
-  }, [isShown]);
+  }, [isShown, popupAnim, registerPopupBackHandler]);
 
   if (derivedIsShown !== isShown) {
     if (derivedIsShown && !isShown) setDidCloseAnimEnd(false);
@@ -86,8 +86,8 @@ const NoteListSearchPopup = () => {
       { scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) },
       {
         translateY: popupAnim.interpolate({
-          inputRange: [0, 1], outputRange: [-1 * 0.05 * 56, 0]
-        })
+          inputRange: [0, 1], outputRange: [-1 * 0.05 * 56, 0],
+        }),
       },
     ],
   };

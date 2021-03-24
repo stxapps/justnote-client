@@ -12,8 +12,10 @@ const listFPaths = async () => {
     } else if (fpath.startsWith(SETTINGS)) {
       if (!settingsFPath) settingsFPath = fpath;
       else {
-        const dt = parseInt(settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length));
-        const _dt = parseInt(fpath.slice(SETTINGS.length, -1 * DOT_JSON.length));
+        const dt = parseInt(
+          settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10
+        );
+        const _dt = parseInt(fpath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10);
         if (dt < _dt) settingsFPath = fpath;
       }
     } else {
@@ -42,7 +44,7 @@ const batchGetFileWithRetry = async (fpaths, callCount) => {
 
     return [
       ...responses.filter(({ success }) => success),
-      ...(await batchGetFileWithRetry(failedFPaths, callCount + 1))
+      ...(await batchGetFileWithRetry(failedFPaths, callCount + 1)),
     ];
   }
 
@@ -68,7 +70,7 @@ const batchPutFileWithRetry = async (fpaths, contents, callCount) => {
 
     return [
       ...responses.filter(({ success }) => success),
-      ...(await batchPutFileWithRetry(failedFPaths, failedContents, callCount + 1))
+      ...(await batchPutFileWithRetry(failedFPaths, failedContents, callCount + 1)),
     ];
   }
 
@@ -100,7 +102,7 @@ export const batchDeleteFileWithRetry = async (fpaths, callCount) => {
 
     return [
       ...responses.filter(({ success }) => success),
-      ...(await batchDeleteFileWithRetry(failedFPaths, callCount + 1))
+      ...(await batchDeleteFileWithRetry(failedFPaths, callCount + 1)),
     ];
   }
 
@@ -113,9 +115,9 @@ const getFiles = async (fpaths) => {
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
     const _fpaths = fpaths.slice(i, i + N_NOTES);
     const _responses = await batchGetFileWithRetry(_fpaths, 0);
-    responses.push(..._responses.map((response, i) => {
+    responses.push(..._responses.map((response, k) => {
       let content = response.content;
-      if (_fpaths[i].endsWith(INDEX + DOT_JSON) || _fpaths[i].startsWith(SETTINGS)) {
+      if (_fpaths[k].endsWith(INDEX + DOT_JSON) || _fpaths[k].startsWith(SETTINGS)) {
         content = JSON.parse(content);
       }
       return content;

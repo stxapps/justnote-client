@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, TouchableOpacity, TouchableWithoutFeedback, Animated, BackHandler,
 } from 'react-native';
@@ -44,19 +44,19 @@ const NavPanel = () => {
     dispatch(updatePopup(SIDEBAR_POPUP, true));
   };
 
-  const onSidebarCloseBtnClick = () => {
+  const onSidebarCloseBtnClick = useCallback(() => {
     dispatch(updatePopup(SIDEBAR_POPUP, false));
-  };
+  }, [dispatch]);
 
-  const onRightPanelCloseBtnClick = () => {
+  const onRightPanelCloseBtnClick = useCallback(() => {
     dispatch(updateNoteId(null));
-  };
+  }, [dispatch]);
 
-  const registerSidebarBackHandler = (isShown) => {
+  const registerSidebarBackHandler = useCallback((isShown) => {
     if (isShown) {
       if (!sidebarBackHandler.current) {
         sidebarBackHandler.current = BackHandler.addEventListener(
-          "hardwareBackPress",
+          'hardwareBackPress',
           () => {
             onSidebarCloseBtnClick();
             return true;
@@ -69,13 +69,13 @@ const NavPanel = () => {
         sidebarBackHandler.current = null;
       }
     }
-  };
+  }, [onSidebarCloseBtnClick]);
 
-  const registerRightPanelBackHandler = (isShown) => {
+  const registerRightPanelBackHandler = useCallback((isShown) => {
     if (isShown) {
       if (!rightPanelBackHandler.current) {
         rightPanelBackHandler.current = BackHandler.addEventListener(
-          "hardwareBackPress",
+          'hardwareBackPress',
           () => {
             onRightPanelCloseBtnClick();
             return true;
@@ -88,7 +88,7 @@ const NavPanel = () => {
         rightPanelBackHandler.current = null;
       }
     }
-  };
+  }, [onRightPanelCloseBtnClick]);
 
   useEffect(() => {
     if (isSidebarShown) {
@@ -105,7 +105,7 @@ const NavPanel = () => {
     return () => {
       registerSidebarBackHandler(false);
     };
-  }, [isSidebarShown]);
+  }, [isSidebarShown, sidebarAnim, registerSidebarBackHandler]);
 
   useEffect(() => {
     if (note) {
@@ -120,7 +120,7 @@ const NavPanel = () => {
     return () => {
       registerRightPanelBackHandler(false);
     };
-  }, [note]);
+  }, [note, derivedNote, rightPanelAnim, registerRightPanelBackHandler]);
 
   if (derivedIsSidebarShown !== isSidebarShown) {
     setDidSidebarAnimEnd(false);
@@ -138,18 +138,18 @@ const NavPanel = () => {
   const leftPanelStyle = {
     transform: [{
       translateX: sidebarAnim.interpolate({
-        inputRange: [0, 1], outputRange: [0, -1 * (256 /* (max-w-64) */ + insets.left)]
-      })
-    }]
+        inputRange: [0, 1], outputRange: [0, -1 * (256 /* (max-w-64) */ + insets.left)],
+      }),
+    }],
   };
 
   const rightCanvasClassNames = derivedNote === null ? 'hidden relative' : 'absolute inset-0';
   const rightPanelStyle = {
     transform: [{
       translateX: rightPanelAnim.interpolate({
-        inputRange: [0, 1], outputRange: [0, safeAreaWidth + insets.right]
-      })
-    }]
+        inputRange: [0, 1], outputRange: [0, safeAreaWidth + insets.right],
+      }),
+    }],
   };
 
   return (
@@ -159,7 +159,7 @@ const NavPanel = () => {
       {/* Sidebar */}
       <View style={tailwind(leftCanvasClassNames)}>
         <TouchableWithoutFeedback onPress={onSidebarCloseBtnClick}>
-          <Animated.View style={[tailwind('absolute inset-0 bg-white'), leftOverlayStyle]}></Animated.View>
+          <Animated.View style={[tailwind('absolute inset-0 bg-white'), leftOverlayStyle]} />
         </TouchableWithoutFeedback>
         <Animated.View style={[tailwind('absolute top-0 right-0 p-1'), leftOverlayStyle]}>
           <TouchableOpacity onPress={onSidebarCloseBtnClick} style={tailwind('items-center justify-center h-7 w-7 rounded-full')}>

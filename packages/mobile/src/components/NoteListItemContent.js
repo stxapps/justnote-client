@@ -24,10 +24,10 @@ const NoteListItemContent = (props) => {
     if (isBulkEditing) {
       if (!isBusy) {
         if (isSelected) dispatch(deleteSelectedNoteIds([note.id]));
-        else dispatch(addSelectedNoteIds([note.id]))
+        else dispatch(addSelectedNoteIds([note.id]));
       }
     } else {
-      dispatch(updateNoteId(note.id))
+      dispatch(updateNoteId(note.id));
     }
   };
 

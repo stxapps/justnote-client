@@ -166,7 +166,7 @@ export const isEqual = (x, y) => {
     if (x[p] === y[p]) continue;
     // if they have the same strict value or identity then they are equal
 
-    if (typeof (x[p]) !== "object") return false;
+    if (typeof (x[p]) !== 'object') return false;
     // Numbers, Strings, Functions, Booleans must be strictly equal
 
     if (!isEqual(x[p], y[p])) return false;
@@ -349,7 +349,7 @@ export const swapArrayElements = (a, x, y) => (a[x] && a[y] && [
   a[y],
   ...a.slice(x + 1, y),
   a[x],
-  ...a.slice(y + 1)
+  ...a.slice(y + 1),
 ]) || a;
 
 export const getInsertIndex = (listNameObj, oldListNameMap, newListNameMap) => {

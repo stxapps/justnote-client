@@ -49,7 +49,7 @@ export const init = () => async (dispatch, getState) => {
     const config = {
       appDomain: DOMAIN_NAME,
       scopes: ['store_write'],
-      redirectUrl: BLOCKSTACK_AUTH
+      redirectUrl: BLOCKSTACK_AUTH,
     };
     await userSession.createSession(config);
   }
@@ -63,13 +63,13 @@ export const init = () => async (dispatch, getState) => {
     await handlePendingSignIn(e.url)(dispatch, getState);
   });
 
-  Dimensions.addEventListener("change", ({ window }) => {
+  Dimensions.addEventListener('change', ({ window }) => {
     dispatch({
       type: UPDATE_WINDOW_SIZE,
       payload: {
         windowWidth: window.width,
         windowHeight: window.height,
-      }
+      },
     });
   });
 
@@ -88,7 +88,7 @@ export const init = () => async (dispatch, getState) => {
       userImage,
       windowWidth: Dimensions.get('window').width,
       windowHeight: Dimensions.get('window').height,
-    }
+    },
   });
 };
 
@@ -100,7 +100,7 @@ const handlePendingSignIn = (url) => async (dispatch, getState) => {
   // As handle pending sign in takes time, show loading first.
   dispatch({
     type: UPDATE_HANDLING_SIGN_IN,
-    payload: true
+    payload: true,
   });
 
   const { param: { authResponse } } = separateUrlAndParam(url, 'authResponse');
@@ -122,14 +122,14 @@ const handlePendingSignIn = (url) => async (dispatch, getState) => {
         isUserSignedIn: true,
         username: userData.username,
         image: getUserImageUrl(userData),
-      }
+      },
     });
   }
 
   // Stop show loading
   dispatch({
     type: UPDATE_HANDLING_SIGN_IN,
-    payload: false
+    payload: false,
   });
 };
 
@@ -143,7 +143,7 @@ export const signUp = () => async (dispatch, getState) => {
     // As handle pending sign in takes time, show loading first.
     dispatch({
       type: UPDATE_HANDLING_SIGN_IN,
-      payload: true
+      payload: true,
     });
 
     try {
@@ -164,14 +164,14 @@ export const signUp = () => async (dispatch, getState) => {
           isUserSignedIn: true,
           username: userData.username,
           image: getUserImageUrl(userData),
-        }
+        },
       });
     }
 
     // Stop show loading
     dispatch({
       type: UPDATE_HANDLING_SIGN_IN,
-      payload: false
+      payload: false,
     });
   } else {
     throw new Error(`Invalid Platform.OS: ${Platform.OS}`);
@@ -187,7 +187,7 @@ export const signIn = () => async (dispatch, getState) => {
     // As handle pending sign in takes time, show loading first.
     dispatch({
       type: UPDATE_HANDLING_SIGN_IN,
-      payload: true
+      payload: true,
     });
 
     try {
@@ -208,14 +208,14 @@ export const signIn = () => async (dispatch, getState) => {
           isUserSignedIn: true,
           username: userData.username,
           image: getUserImageUrl(userData),
-        }
+        },
       });
     }
 
     // Stop show loading
     dispatch({
       type: UPDATE_HANDLING_SIGN_IN,
-      payload: false
+      payload: false,
     });
   } else {
     throw new Error(`Invalid Platform.OS: ${Platform.OS}`);
@@ -240,7 +240,7 @@ export const changeListName = (listName) => async (dispatch, getState) => {
   dispatch({
     type: UPDATE_LIST_NAME,
     payload: listName,
-  })
+  });
 
   dispatch(clearSelectedNoteIds());
 };
@@ -296,7 +296,7 @@ export const deleteSelectedNoteIds = (ids) => {
 
 export const clearSelectedNoteIds = () => {
   return {
-    type: CLEAR_SELECTED_NOTE_IDS
+    type: CLEAR_SELECTED_NOTE_IDS,
   };
 };
 
@@ -723,9 +723,8 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
 export const mergeNotes = (selectedId) => async (dispatch, getState) => {
 
   const addedDT = Date.now();
-  const listName = getState().display.listName;
   const noteId = getState().display.noteId;
-  const conflictedNote = getState().conflictedNotes[listName][noteId];
+  const conflictedNote = getState().conflictedNotes[getState().display.listName][noteId];
 
   let toListName, toNote;
   const fromNotes = {};
@@ -737,7 +736,7 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
     if (note.id === selectedId) {
       toListName = listName;
       toNote = {
-        parentIds: conflictedNote.notes.map(note => note.id),
+        parentIds: conflictedNote.notes.map(n => n.id),
         id: `${addedDT}${randomString(4)}`,
         title: note.title, body: note.body, media: note.media,
         updatedDT: addedDT,
@@ -794,7 +793,7 @@ export const addListNames = (newNames) => async (dispatch, getState) => {
     ...settings.listNameMap.map(listNameObj => {
       return { listName: listNameObj.listName, displayName: listNameObj.displayName };
     }),
-    ...listNameObjs
+    ...listNameObjs,
   ];
 
   const payload = { settingsFPath, listNameObjs };
@@ -936,7 +935,7 @@ export const updateDeletingListName = (listName) => {
   return {
     type: UPDATE_DELETING_LIST_NAME,
     payload: listName,
-  }
+  };
 };
 
 export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
@@ -947,13 +946,13 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
   const settings = { ...getState().settings };
 
   const listNameObjs = settings.listNameMap.filter(obj => {
-    return listNames.includes(obj.listName)
+    return listNames.includes(obj.listName);
   });
 
   settings.listNameMap = [
     ...settings.listNameMap.map(listNameObj => {
       return { listName: listNameObj.listName, displayName: listNameObj.displayName };
-    })
+    }),
   ];
 
   const diedAddingListNameObjs = listNameObjs.filter(obj => {
@@ -1062,7 +1061,7 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
 export const cancelDiedListNames = (listNames) => {
   return {
     type: CANCEL_DIED_LIST_NAMES,
-    payload: { listNames }
+    payload: { listNames },
   };
 };
 
@@ -1109,7 +1108,7 @@ export const updateSettings = (updatedValues) => async (dispatch, getState) => {
 export const updateUpdateSettingsProgress = (progress) => {
   return {
     type: UPDATE_UPDATE_SETTINGS_PROGRESS,
-    payload: progress
+    payload: progress,
   };
 };
 
@@ -1130,7 +1129,7 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
     let { noteFPaths, settingsFPath } = getState().serverFPaths;
     if (doForceServerListFPaths || !noteFPaths) {
       ({ noteFPaths, settingsFPath } = await serverApi.listFPaths());
-    };
+    }
     const { noteIds, conflictedIds } = dataApi.listNoteIds(noteFPaths);
 
     const leafFPaths = [];
@@ -1140,10 +1139,10 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
     }
 
     const {
-      noteFPaths: _noteFPaths, settingsFPath: _settingsFPath
+      noteFPaths: _noteFPaths, settingsFPath: _settingsFPath,
     } = await dataApi.listFPaths();
     const {
-      noteIds: _noteIds, conflictedIds: _conflictedIds
+      noteIds: _noteIds, conflictedIds: _conflictedIds,
     } = dataApi.listNoteIds(_noteFPaths);
 
     const _leafFPaths = [];
@@ -1154,7 +1153,7 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
 
     const allNoteFPaths = [...new Set([...noteFPaths, ..._noteFPaths])];
     const {
-      noteIds: allNoteIds, conflictedIds: allConflictedIds
+      noteIds: allNoteIds, conflictedIds: allConflictedIds,
     } = dataApi.listNoteIds(allNoteFPaths);
 
     const allLeafFPaths = [];
@@ -1182,9 +1181,9 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
     await serverApi.putFiles(fpaths, contents);
 
     // 2. Server side: loop used to be leaves in server and set to empty
-    fpaths = [], contents = [];
+    fpaths = []; contents = [];
     for (const fpath of leafFPaths) {
-      if (allLeafFPaths.includes(fpath)) continue
+      if (allLeafFPaths.includes(fpath)) continue;
 
       let content;
       if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
@@ -1197,7 +1196,7 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
     await serverApi.putFiles(fpaths, contents);
 
     // 3. Local side: download all fpaths
-    fpaths = [], contents = [];
+    fpaths = []; contents = [];
     const gFPaths = [];
     for (const fpath of noteFPaths) {
       if (_noteFPaths.includes(fpath)) continue;
@@ -1219,7 +1218,7 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
     await dataApi.putFiles([...fpaths, ...gFPaths], [...contents, ...gContents]);
 
     // 4. Local side: loop used to be leaves in local and set to empty
-    fpaths = [], contents = [];
+    fpaths = []; contents = [];
     for (const fpath of _leafFPaths) {
       if (allLeafFPaths.includes(fpath)) continue;
 
@@ -1238,8 +1237,12 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
     //           2 - upload from device to server
     let syncSettingsAction;
     if (settingsFPath && _settingsFPath) {
-      const dt = parseInt(settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length));
-      const _dt = parseInt(_settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length));
+      const dt = parseInt(
+        settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10
+      );
+      const _dt = parseInt(
+        _settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10
+      );
 
       if (dt > _dt) syncSettingsAction = 1;
       else if (dt < _dt) syncSettingsAction = 2;
@@ -1276,7 +1279,7 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
         serverFPaths: { noteFPaths: allNoteFPaths, settingsFPath: syncSettingsFPath },
         updateAction,
         haveUpdate,
-      }
+      },
     });
   } catch (e) {
     dispatch({ type: SYNC_ROLLBACK });
@@ -1381,7 +1384,7 @@ export const exportAllData = () => async (dispatch, getState) => {
 export const updateExportAllDataProgress = (progress) => {
   return {
     type: UPDATE_EXPORT_ALL_DATA_PROGRESS,
-    payload: progress
+    payload: progress,
   };
 };
 
@@ -1397,7 +1400,7 @@ const deleteAllDataLoop = async (dispatch, noteIds, total, doneCount) => {
 
   const contents = [];
   for (let i = 0; i < fpaths.length; i++) {
-    if (fpaths[i].endsWith(INDEX + DOT_JSON)) contents.push({ title: '', body: '' })
+    if (fpaths[i].endsWith(INDEX + DOT_JSON)) contents.push({ title: '', body: '' });
     else contents.push('');
   }
 
@@ -1458,11 +1461,11 @@ export const deleteAllData = () => async (dispatch, getState) => {
 
   let allNoteIds, _settingsFPath;
   try {
-    const { noteFPaths, settingsFPath } = await dataApi.listFPaths();
+    const { noteFPaths, settingsFPath: sFPaths } = await dataApi.listFPaths();
     const { noteIds, conflictedIds } = dataApi.listNoteIds(noteFPaths);
 
     allNoteIds = [...noteIds, ...conflictedIds];
-    _settingsFPath = settingsFPath;
+    _settingsFPath = sFPaths;
   } catch (e) {
     dispatch(updateDeleteAllDataProgress({
       total: -1,
@@ -1503,6 +1506,6 @@ export const deleteAllData = () => async (dispatch, getState) => {
 export const updateDeleteAllDataProgress = (progress) => {
   return {
     type: UPDATE_DELETE_ALL_DATA_PROGRESS,
-    payload: progress
+    payload: progress,
   };
 };

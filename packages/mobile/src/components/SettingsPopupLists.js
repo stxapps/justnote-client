@@ -86,23 +86,23 @@ const _ListNameEditor = (props) => {
   const dispatch = useDispatch();
 
   const onAddBtnClick = () => {
-    setState(state => ({ ...state, mode: MODE_EDIT, value: '', msg: '' }));
+    setState(s => ({ ...s, mode: MODE_EDIT, value: '', msg: '' }));
     input.current.focus();
   };
 
   const onEditBtnClick = () => {
-    setState(state => (
-      { ...state, mode: MODE_EDIT, value: listNameObj.displayName, msg: '' }
+    setState(s => (
+      { ...s, mode: MODE_EDIT, value: listNameObj.displayName, msg: '' }
     ));
     input.current.focus();
   };
 
   const onInputFocus = () => {
-    setState(state => ({ ...state, mode: MODE_EDIT }));
+    setState(s => ({ ...s, mode: MODE_EDIT }));
   };
 
   const onInputChange = (e) => {
-    setState(state => ({ ...state, value: e.nativeEvent.text, msg: '' }));
+    setState(s => ({ ...s, value: e.nativeEvent.text, msg: '' }));
   };
 
   const onInputKeyPress = () => {
@@ -143,15 +143,15 @@ const _ListNameEditor = (props) => {
 
     const listNameValidatedResult = validateDisplayName(state.value);
     if (listNameValidatedResult !== VALID_LIST_NAME) {
-      setState(state => (
-        { ...state, mode: MODE_EDIT, msg: LIST_NAME_MSGS[listNameValidatedResult] }
+      setState(s => (
+        { ...s, mode: MODE_EDIT, msg: LIST_NAME_MSGS[listNameValidatedResult] }
       ));
       input.current.focus();
       return;
     }
 
     dispatch(addListNames([state.value]));
-    setState(state => ({ ...state, ...initialState }));
+    setState(s => ({ ...s, ...initialState }));
     input.current.blur();
     didClick.current = true;
   };
@@ -163,15 +163,15 @@ const _ListNameEditor = (props) => {
 
     const listNameValidatedResult = validateDisplayName(state.value);
     if (listNameValidatedResult !== VALID_LIST_NAME) {
-      setState(state => (
-        { ...state, mode: MODE_EDIT, msg: LIST_NAME_MSGS[listNameValidatedResult] }
+      setState(s => (
+        { ...s, mode: MODE_EDIT, msg: LIST_NAME_MSGS[listNameValidatedResult] }
       ));
       input.current.focus();
       return;
     }
 
     dispatch(updateListNames([listNameObj.listName], [state.value]));
-    setState(state => ({ ...state, ...initialState, value: state.value }));
+    setState(s => ({ ...s, ...initialState, value: state.value }));
     input.current.blur();
     didClick.current = true;
   };
@@ -182,13 +182,13 @@ const _ListNameEditor = (props) => {
 
   const onCancelBtnClick = () => {
     const value = listNameObj ? listNameObj.displayName : '';
-    setState(state => ({ ...state, mode: MODE_VIEW, value, msg: '' }));
+    setState(s => ({ ...s, mode: MODE_VIEW, value, msg: '' }));
     input.current.blur();
   };
 
   const onDeleteBtnClick = () => {
     if (didClick.current) return;
-    setState(state => ({ ...state, isCheckingCanDelete: true }));
+    setState(s => ({ ...s, isCheckingCanDelete: true }));
     didClick.current = true;
   };
 
@@ -223,7 +223,7 @@ const _ListNameEditor = (props) => {
   };
 
   useEffect(() => {
-    if (listNameObj) setState(state => ({ ...state, value: listNameObj.displayName }));
+    if (listNameObj) setState(s => ({ ...s, value: listNameObj.displayName }));
 
     if (prevListNameObj.current && listNameObj) {
       if (
@@ -248,8 +248,8 @@ const _ListNameEditor = (props) => {
         const canDeletes = await dataApi.canDeleteListNames([listNameObj.listName]);
         const canDelete = canDeletes[0];
         if (!canDelete) {
-          setState(state => ({
-            ...state,
+          setState(s => ({
+            ...s,
             msg: LIST_NAME_MSGS[IN_USE_LIST_NAME],
             isCheckingCanDelete: false,
           }));
@@ -259,12 +259,12 @@ const _ListNameEditor = (props) => {
 
         dispatch(updateDeletingListName(listNameObj.listName));
         dispatch(updatePopup(CONFIRM_DELETE_POPUP, true));
-        setState(state => ({ ...state, msg: '', isCheckingCanDelete: false }));
+        setState(s => ({ ...s, msg: '', isCheckingCanDelete: false }));
         didClick.current = false;
       }
-    }
+    };
     deleteListName();
-  }, [state.isCheckingCanDelete, listNameObj, dispatch])
+  }, [state.isCheckingCanDelete, listNameObj, dispatch]);
 
   const isBusy = (listNameObj && isBusyStatus(listNameObj.status)) || state.isCheckingCanDelete;
   const doRetry = listNameObj && isDiedStatus(listNameObj.status);
@@ -287,7 +287,7 @@ const _ListNameEditor = (props) => {
   } else {
     if (listNameObj && [MY_NOTES, TRASH, ARCHIVE].includes(listNameObj.listName)) {
       deleteBtn = (
-        <View style={tailwind('flex-grow-0 flex-shrink-0 w-8 h-10')}></View>
+        <View style={tailwind('flex-grow-0 flex-shrink-0 w-8 h-10')} />
       );
     } else {
       deleteBtn = (

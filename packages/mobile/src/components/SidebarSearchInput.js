@@ -15,11 +15,11 @@ const SidebarSearchInput = () => {
 
   const onSearchInputChange = (e) => {
     dispatch(updateSearchString(e.nativeEvent.text));
-  }
+  };
 
   const onSearchClearBtnClick = () => {
     dispatch(updateSearchString(''));
-  }
+  };
 
   const searchClearBtnClasses = searchString.length === 0 ? 'hidden relative' : 'flex absolute';
   const searchInputStyle = Platform.OS === 'ios' ? { height: 36 } : { paddingTop: 4, paddingBottom: 4 };

@@ -41,7 +41,7 @@ const settingsReducer = (state = initialState, action) => {
     });
 
     for (const processingListNameObj of processingListNameObjs) {
-      const i = getInsertIndex(processingListNameObj, state.listNameMap, newState.listNameMap)
+      const i = getInsertIndex(processingListNameObj, state.listNameMap, newState.listNameMap);
       if (i >= 0) newState.listNameMap.splice(i, 0, processingListNameObj);
       else newState.listNameMap.push(processingListNameObj);
     }

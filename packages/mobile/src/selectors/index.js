@@ -37,7 +37,7 @@ export const getListNameMap = createSelectorListNameMap(
 export const makeIsNoteIdSelected = () => {
   return createSelector(
     state => state.display.selectedNoteIds,
-    (_, noteId) => noteId,
+    (__, noteId) => noteId,
     (selectedNoteIds, noteId) => {
       return selectedNoteIds.includes(noteId);
     }

@@ -107,7 +107,7 @@ const notesReducer = (state = initialState, action) => {
     const newState = { ...state };
     newState[listName] = _.exclude(newState[listName], ID, fromNote.id);
     newState[listName] = {
-      ...newState[listName], ...toObjAndAddAttrs([{ ...toNote, fromNote }], UPDATING)
+      ...newState[listName], ...toObjAndAddAttrs([{ ...toNote, fromNote }], UPDATING),
     };
 
     return newState;
@@ -244,7 +244,7 @@ const notesReducer = (state = initialState, action) => {
 
     const newState = { ...state };
     newState[toListName] = {
-      ...newState[toListName], ...toObjAndAddAttrs([toNote], ADDED)
+      ...newState[toListName], ...toObjAndAddAttrs([toNote], ADDED),
     };
 
     return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));

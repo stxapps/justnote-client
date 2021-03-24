@@ -9,14 +9,14 @@ module.exports = {
         green: colors.green,
       },
       minWidth: {
-        '28': '7rem',
-        '56': '14rem',
-        '64': '16rem',
+        28: '7rem',
+        56: '14rem',
+        64: '16rem',
       },
       maxWidth: {
-        '48': '12rem',
-        '56': '14rem',
-        '64': '16rem',
+        48: '12rem',
+        56: '14rem',
+        64: '16rem',
       },
     },
   },
@@ -24,4 +24,4 @@ module.exports = {
     extend: {},
   },
   plugins: [],
-}
+};

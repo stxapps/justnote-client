@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   ScrollView, View, Text, TouchableOpacity, TouchableWithoutFeedback, Animated,
   BackHandler,
@@ -54,65 +54,65 @@ const SettingsPopup = () => {
     }
 
     return refViewId === viewId;
-  }
+  };
 
-  const onPopupCloseBtnClick = () => {
+  const onPopupCloseBtnClick = useCallback(() => {
     dispatch(updatePopup(SETTINGS_POPUP, false, null));
-  }
+  }, [dispatch]);
 
   const onSidebarOpenBtnClick = () => {
     setIsSidebarShown(true);
     setDidSidebarAnimEnd(false);
-  }
+  };
 
   const onSidebarCloseBtnClick = () => {
     setIsSidebarShown(false);
     setDidSidebarAnimEnd(false);
-  }
+  };
 
   const onAccountBtnClick = () => {
     setIsSidebarShown(false);
     setDidSidebarAnimEnd(false);
     setViewId(VIEW_ACCOUNT);
-  }
+  };
 
   const onDataBtnClick = () => {
     setIsSidebarShown(false);
     setDidSidebarAnimEnd(false);
     setViewId(VIEW_DATA);
-  }
+  };
 
   const onListsBtnClick = () => {
     setIsSidebarShown(false);
     setDidSidebarAnimEnd(false);
     setViewId(VIEW_LISTS);
-  }
+  };
 
   const onMiscBtnClick = () => {
     setIsSidebarShown(false);
     setDidSidebarAnimEnd(false);
     setViewId(VIEW_MISC);
-  }
+  };
 
   const onToExportAllDataViewBtnClick = () => {
     setViewId(VIEW_DATA_EXPORT);
-  }
+  };
 
   const onToDeleteAllDataViewBtnClick = () => {
     setViewId(VIEW_DATA_DELETE);
-  }
+  };
 
   const onBackToDataViewBtnClick = () => {
     setIsSidebarShown(false);
     setDidSidebarAnimEnd(true);
     setViewId(VIEW_DATA);
-  }
+  };
 
-  const registerPopupBackHandler = (isShown) => {
-    if (isShown) {
+  const registerPopupBackHandler = useCallback((doRegister) => {
+    if (doRegister) {
       if (!popupBackHandler.current) {
         popupBackHandler.current = BackHandler.addEventListener(
-          "hardwareBackPress",
+          'hardwareBackPress',
           () => {
             onPopupCloseBtnClick();
             return true;
@@ -125,7 +125,7 @@ const SettingsPopup = () => {
         popupBackHandler.current = null;
       }
     }
-  };
+  }, [onPopupCloseBtnClick]);
 
   useEffect(() => {
     if (isShown) {
@@ -140,7 +140,7 @@ const SettingsPopup = () => {
     return () => {
       registerPopupBackHandler(false);
     };
-  }, [isShown]);
+  }, [isShown, popupAnim, registerPopupBackHandler]);
 
   useEffect(() => {
     if (isSidebarShown) {
@@ -152,7 +152,7 @@ const SettingsPopup = () => {
         setDidSidebarAnimEnd(true);
       });
     }
-  }, [isSidebarShown]);
+  }, [isSidebarShown, sidebarAnim]);
 
   useEffect(() => {
     if (panelContent.current) {
@@ -190,8 +190,8 @@ const SettingsPopup = () => {
       transform: [{
         translateX: sidebarAnim.interpolate(
           { inputRange: [0, 1], outputRange: [SIDE_BAR_WIDTH * -1, 0] }
-        )
-      }]
+        ),
+      }],
     };
     const sidebarCloseBtnStyle = { opacity: sidebarAnim };
 
@@ -268,7 +268,7 @@ const SettingsPopup = () => {
           {/* Sidebar for mobile */}
           <View style={tailwind(`${sidebarCanvasStyleClasses} md:hidden md:relative`, safeAreaWidth)}>
             <TouchableWithoutFeedback onPress={onSidebarCloseBtnClick}>
-              <Animated.View style={[tailwind('absolute inset-0 bg-gray-100'), sidebarCloseBtnStyle]}></Animated.View>
+              <Animated.View style={[tailwind('absolute inset-0 bg-gray-100'), sidebarCloseBtnStyle]} />
             </TouchableWithoutFeedback>
             <View style={tailwind('absolute top-0 right-0 p-1')}>
               <TouchableOpacity onPress={onPopupCloseBtnClick} style={tailwind('items-center justify-center h-7 w-7 rounded-full')}>
@@ -331,7 +331,7 @@ const SettingsPopup = () => {
     return (
       <View style={[tailwind('absolute inset-0 items-center justify-center'), canvasStyle]}>
         <TouchableWithoutFeedback onPress={onPopupCloseBtnClick}>
-          <View style={tailwind('absolute inset-0 opacity-25 bg-black')}></View>
+          <View style={tailwind('absolute inset-0 opacity-25 bg-black')} />
         </TouchableWithoutFeedback>
         <Animated.View style={[tailwind('w-full max-w-4xl bg-white rounded-lg shadow-xl overflow-hidden'), popupStyle]}>
           {panelWithSidebar}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, TouchableWithoutFeedback, Animated, BackHandler,
 } from 'react-native';
@@ -22,11 +22,11 @@ const ConfirmDeletePopup = () => {
   const didClick = useRef(false);
   const dispatch = useDispatch();
 
-  const onConfirmDeleteCancelBtnClick = () => {
+  const onConfirmDeleteCancelBtnClick = useCallback(() => {
     if (didClick.current) return;
     dispatch(updatePopup(CONFIRM_DELETE_POPUP, false, null));
     didClick.current = true;
-  };
+  }, [dispatch]);
 
   const onConfirmDeleteOkBtnClick = () => {
     if (didClick.current) return;
@@ -38,11 +38,11 @@ const ConfirmDeletePopup = () => {
     didClick.current = true;
   };
 
-  const registerPopupBackHandler = (isShown) => {
-    if (isShown) {
+  const registerPopupBackHandler = useCallback((doRegister) => {
+    if (doRegister) {
       if (!popupBackHandler.current) {
         popupBackHandler.current = BackHandler.addEventListener(
-          "hardwareBackPress",
+          'hardwareBackPress',
           () => {
             onConfirmDeleteCancelBtnClick();
             return true;
@@ -55,7 +55,7 @@ const ConfirmDeletePopup = () => {
         popupBackHandler.current = null;
       }
     }
-  };
+  }, [onConfirmDeleteCancelBtnClick]);
 
   useEffect(() => {
     if (isShown) {
@@ -71,7 +71,7 @@ const ConfirmDeletePopup = () => {
     return () => {
       registerPopupBackHandler(false);
     };
-  }, [isShown]);
+  }, [isShown, popupAnim, registerPopupBackHandler]);
 
   if (derivedIsShown !== isShown) {
     if (derivedIsShown && !isShown) setDidCloseAnimEnd(false);
@@ -85,13 +85,13 @@ const ConfirmDeletePopup = () => {
     opacity: popupAnim,
     transform: [
       { scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) },
-    ]
+    ],
   };
 
   return (
     <View style={[tailwind('absolute inset-0 items-center justify-center'), canvasStyle]}>
       <TouchableWithoutFeedback onPress={onConfirmDeleteCancelBtnClick}>
-        <View style={tailwind('absolute inset-0 opacity-25 bg-black')}></View>
+        <View style={tailwind('absolute inset-0 opacity-25 bg-black')} />
       </TouchableWithoutFeedback>
       <Animated.View style={[tailwind('w-full max-w-48 -mt-8 pt-4 pb-2 rounded-md shadow-lg bg-white'), popupStyle]}>
         <Text style={tailwind('text-base font-normal text-gray-600 text-center')}>Confirm delete?</Text>

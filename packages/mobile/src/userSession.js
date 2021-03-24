@@ -2,8 +2,8 @@
 import RNBlockstackSdk from 'react-native-blockstack';
 
 const hasSession = async () => {
-  const { hasSession } = await RNBlockstackSdk.hasSession();
-  return hasSession;
+  const { hasSession: hs } = await RNBlockstackSdk.hasSession();
+  return hs;
 };
 
 const createSession = async (config) => {

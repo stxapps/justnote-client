@@ -31,7 +31,7 @@ const extractNoteId = (id) => {
     if (/\d/.test(id[i])) break;
   }
 
-  return { dt: parseInt(id.slice(0, i + 1)) };
+  return { dt: parseInt(id.slice(0, i + 1), 10) };
 };
 
 const listFPaths = async () => {
@@ -45,8 +45,10 @@ const listFPaths = async () => {
     } else if (fpath.startsWith(SETTINGS)) {
       if (!settingsFPath) settingsFPath = fpath;
       else {
-        const dt = parseInt(settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length));
-        const _dt = parseInt(fpath.slice(SETTINGS.length, -1 * DOT_JSON.length));
+        const dt = parseInt(
+          settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10
+        );
+        const _dt = parseInt(fpath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10);
         if (dt < _dt) settingsFPath = fpath;
       }
     } else {
@@ -113,9 +115,9 @@ const listNoteIds = (noteFPaths) => {
     const { dt: addedDT } = extractNoteId(rootId);
     const { dt: updatedDT } = extractNoteId(id);
 
-    const leafIds = toLeafIds[rootId];
-    const isConflicted = leafIds.length > 1;
-    const conflictWith = isConflicted ? leafIds : null;
+    const tIds = toLeafIds[rootId];
+    const isConflicted = tIds.length > 1;
+    const conflictWith = isConflicted ? tIds : null;
 
     const fpaths = toFPaths[id];
     const { listName } = extractNoteFPath(fpaths[0]);
@@ -128,7 +130,7 @@ const listNoteIds = (noteFPaths) => {
     else noteIds.push(noteId);
   }
 
-  const conflictWiths = Object.values(toLeafIds).filter(ids => ids.length > 1);
+  const conflictWiths = Object.values(toLeafIds).filter(tIds => tIds.length > 1);
 
   return { noteIds, conflictedIds, conflictWiths };
 };
@@ -151,7 +153,7 @@ const batchGetFileWithRetry = async (fpaths, callCount) => {
 
     return [
       ...responses.filter(({ success }) => success),
-      ...(await batchGetFileWithRetry(failedFPaths, callCount + 1))
+      ...(await batchGetFileWithRetry(failedFPaths, callCount + 1)),
     ];
   }
 
@@ -171,7 +173,7 @@ const toNotes = (noteIds, fpaths, contents) => {
         title = content.title;
         body = content.body;
       } else {
-        media.push({ name: subName, content: content })
+        media.push({ name: subName, content: content });
       }
     }
     notes.push({
@@ -273,7 +275,7 @@ const fetchMore = async (params) => {
   const { noteFPaths } = await listFPaths();
   const { noteIds } = listNoteIds(noteFPaths);
 
-  const namedNoteIds = noteIds.filter(id => id.listName === listName)
+  const namedNoteIds = noteIds.filter(id => id.listName === listName);
   let sortedNoteIds = namedNoteIds.sort((a, b) => a[sortOn] - b[sortOn]);
   if (doDescendingOrder) sortedNoteIds.reverse();
 
@@ -317,7 +319,7 @@ const batchPutFileWithRetry = async (fpaths, contents, callCount) => {
 
     return [
       ...responses.filter(({ success }) => success),
-      ...(await batchPutFileWithRetry(failedFPaths, failedContents, callCount + 1))
+      ...(await batchPutFileWithRetry(failedFPaths, failedContents, callCount + 1)),
     ];
   }
 
@@ -365,7 +367,7 @@ export const batchDeleteFileWithRetry = async (fpaths, callCount) => {
 
     return [
       ...responses.filter(({ success }) => success),
-      ...(await batchDeleteFileWithRetry(failedFPaths, callCount + 1))
+      ...(await batchDeleteFileWithRetry(failedFPaths, callCount + 1)),
     ];
   }
 
@@ -392,7 +394,7 @@ const fetchOldNotesInTrash = async () => {
   // Dummy contents are enough and good for performance
   const contents = [];
   for (let i = 0; i < fpaths.length; i++) {
-    if (fpaths[i].endsWith(INDEX + DOT_JSON)) contents.push({ title: '', body: '' })
+    if (fpaths[i].endsWith(INDEX + DOT_JSON)) contents.push({ title: '', body: '' });
     else contents.push('');
   }
 

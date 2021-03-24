@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, TouchableWithoutFeedback, Animated, Linking, BackHandler,
 } from 'react-native';
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
 import { signOut, updatePopup } from '../actions';
@@ -21,30 +21,30 @@ const SidebarProfilePopup = () => {
   const popupBackHandler = useRef(null);
   const dispatch = useDispatch();
 
-  const onProfileCancelBtnClick = () => {
+  const onProfileCancelBtnClick = useCallback(() => {
     dispatch(updatePopup(PROFILE_POPUP, false, null));
-  };
+  }, [dispatch]);
 
   const onSettingsBtnClick = () => {
     onProfileCancelBtnClick();
     dispatch(updatePopup(SETTINGS_POPUP, true, null));
-  }
+  };
 
   const onSupportBtnClick = () => {
     onProfileCancelBtnClick();
     Linking.openURL(DOMAIN_NAME + '/support');
-  }
+  };
 
   const onSignOutBtnClick = () => {
     onProfileCancelBtnClick();
     dispatch(signOut());
-  }
+  };
 
-  const registerPopupBackHandler = (isShown) => {
-    if (isShown) {
+  const registerPopupBackHandler = useCallback((doRegister) => {
+    if (doRegister) {
       if (!popupBackHandler.current) {
         popupBackHandler.current = BackHandler.addEventListener(
-          "hardwareBackPress",
+          'hardwareBackPress',
           () => {
             onProfileCancelBtnClick();
             return true;
@@ -57,7 +57,7 @@ const SidebarProfilePopup = () => {
         popupBackHandler.current = null;
       }
     }
-  };
+  }, [onProfileCancelBtnClick]);
 
   useEffect(() => {
     if (isShown) {
@@ -72,7 +72,7 @@ const SidebarProfilePopup = () => {
     return () => {
       registerPopupBackHandler(false);
     };
-  }, [isShown]);
+  }, [isShown, popupAnim, registerPopupBackHandler]);
 
   if (derivedIsShown !== isShown) {
     if (derivedIsShown && !isShown) setDidCloseAnimEnd(false);
@@ -96,8 +96,8 @@ const SidebarProfilePopup = () => {
       { scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) },
       {
         translateY: popupAnim.interpolate({
-          inputRange: [0, 1], outputRange: [-1 * 0.05 * 140, 0]
-        })
+          inputRange: [0, 1], outputRange: [-1 * 0.05 * 140, 0],
+        }),
       },
     ],
   };
@@ -105,7 +105,7 @@ const SidebarProfilePopup = () => {
   return (
     <React.Fragment>
       <TouchableWithoutFeedback onPress={onProfileCancelBtnClick}>
-        <View style={tailwind('absolute inset-0 opacity-25 bg-black')}></View>
+        <View style={tailwind('absolute inset-0 opacity-25 bg-black')} />
       </TouchableWithoutFeedback>
       <Animated.View style={[tailwind('absolute mt-1 rounded-md shadow-lg bg-white'), popupStyle]}>
         <View style={tailwind('py-1')}>
