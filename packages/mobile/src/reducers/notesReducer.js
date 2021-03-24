@@ -230,10 +230,11 @@ const notesReducer = (state = initialState, action) => {
   if (action.type === DELETE_OLD_NOTES_IN_TRASH_COMMIT) {
     const { listName, ids } = action.payload;
 
-    if (!state[listName]) return state;
-
-    const newState = { ...state };
-    newState[listName] = _.exclude(state[listName], ID, ids);
+    let newState = state;
+    if (state[listName]) {
+      newState = { ...state };
+      newState[listName] = _.exclude(state[listName], ID, ids);
+    }
 
     return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
   }
@@ -288,6 +289,7 @@ const notesReducer = (state = initialState, action) => {
         newState[k] = {};
       }
     }
+
     return loop(
       newState,
       Cmd.run(sync(false, 1), { args: [Cmd.dispatch, Cmd.getState] })

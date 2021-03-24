@@ -656,9 +656,14 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
   dispatch, getState
 ) => {
 
+  // If null, it's a first call fetch,
+  //   deleteOldNotesInTrash based on settings and always call sync.
+  // If false, it's a subsequence fetch call, no deleteOldNotesInTrash and no sync.
+  if (doDeleteOldNotesInTrash === false) return;
   if (doDeleteOldNotesInTrash === null) {
     doDeleteOldNotesInTrash = getState().settings.doDeleteOldNotesInTrash;
-  }
+  } else throw new Error(`Invalid doDeleteOldNotesInTrash: ${doDeleteOldNotesInTrash}`);
+
   if (!doDeleteOldNotesInTrash) {
     dispatch(sync());
     return;
@@ -1164,7 +1169,7 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
       if (noteFPaths.includes(fpath)) continue;
 
       let content;
-      if (allLeafFPaths.includes(fpath)) content = await dataApi.getFiles([fpath])[0];
+      if (allLeafFPaths.includes(fpath)) content = (await dataApi.getFiles([fpath]))[0];
       else {
         if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
         else content = '';
@@ -1247,7 +1252,7 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
     if (syncSettingsAction === 0) syncSettingsFPath = _settingsFPath;
     else if (syncSettingsAction === 1) {
       // Download from server to device
-      const content = await serverApi.getFiles([settingsFPath])[0];
+      const content = (await serverApi.getFiles([settingsFPath]))[0];
       await dataApi.putFiles([settingsFPath], [content]);
 
       // Delete obsolete version in device
@@ -1256,7 +1261,7 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
       syncSettingsFPath = settingsFPath;
     } else if (syncSettingsAction === 2) {
       // Upload from device to server
-      const content = await dataApi.getFiles([_settingsFPath])[0];
+      const content = (await dataApi.getFiles([_settingsFPath]))[0];
       await serverApi.putFiles([_settingsFPath], [JSON.stringify(content)]);
 
       // Delete obsolete version in server

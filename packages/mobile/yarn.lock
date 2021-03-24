@@ -5951,9 +5951,9 @@ react-native-animated-spinkit@^1.5.2:
   resolved "https://registry.yarnpkg.com/react-native-animated-spinkit/-/react-native-animated-spinkit-1.5.2.tgz#b1c00ecbadf48634273e6a843f8dfbcb7c006186"
   integrity sha512-YCQGR3HzEQvyaAnepiyf/hv88Sta3UIZ2CFZPtFqwu+VbFJfMgjJZniOx4157TuR5AAYajEJP9Fgy+JLIU3jzQ==
 
-"react-native-blockstack@https://gitpkg.now.sh/bracedotto/blockstack-react-native/BlockstackSDK?6d3814e88711af1394d0148586c871cff7038f6e":
+"react-native-blockstack@https://gitpkg.now.sh/bracedotto/blockstack-react-native/BlockstackSDK?e333bd3216453a78428c76b09d5d5e7450681a64":
   version "0.4.6"
-  resolved "https://gitpkg.now.sh/bracedotto/blockstack-react-native/BlockstackSDK?6d3814e88711af1394d0148586c871cff7038f6e#65efe93b15f2d5e2fe7191c360f9e53e75f9219b"
+  resolved "https://gitpkg.now.sh/bracedotto/blockstack-react-native/BlockstackSDK?e333bd3216453a78428c76b09d5d5e7450681a64#f81205e066fdf16a746fc6db238339030c0d9fe0"
 
 react-native-fast-image@^8.3.4:
   version "8.3.4"
@@ -5965,10 +5965,10 @@ react-native-keyboard-manager@^4.0.13-17:
   resolved "https://registry.yarnpkg.com/react-native-keyboard-manager/-/react-native-keyboard-manager-4.0.13-17.tgz#abb4038ad5a404aad087d3ecf69f9a60fd2fb899"
   integrity sha512-otrAg02z1zulqTUL/CyvRzVZDb68v3I30PfdjQlocfVchfn/VOQUeHr/XFAeTo7dv8XBxBzcspYxCzE48fPC+A==
 
-react-native-mmkv-storage@^0.5.3:
-  version "0.5.3"
-  resolved "https://registry.yarnpkg.com/react-native-mmkv-storage/-/react-native-mmkv-storage-0.5.3.tgz#58f30ca921cfd749bd8ca7b7ffc422787db986c1"
-  integrity sha512-6JAD3IYfpdWTiQZWiKSQn4RAjbxVhyziZncvwPY2ToO/o/DiRdW4fce+ZJ755KpfBfG6EcB3is5sX+LXIJqVkA==
+react-native-mmkv-storage@0.4.4:
+  version "0.4.4"
+  resolved "https://registry.yarnpkg.com/react-native-mmkv-storage/-/react-native-mmkv-storage-0.4.4.tgz#deafd63857bfed3facd0e406e01e82eb7a76c1b3"
+  integrity sha512-NuLKc9C0xLPgteQpieGMGbkNm8A0ma8rzfErQKZbS4KLD2bWQ8c1rZ71JgGBiJrCffpDy1BNZt86DZtPl7djXw==
 
 react-native-safe-area-context@^3.1.9:
   version "3.1.9"

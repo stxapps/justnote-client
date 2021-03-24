@@ -37,7 +37,10 @@ const deleteFile = async (path) => {
 const listFiles = async (callback) => {
   const files = await getInstance().indexer.getKeys();
   files.forEach(file => {
-    if ([COLS_PANEL_STATE, 'default', 'boolIndex'].includes(file)) return;
+    if ([
+      COLS_PANEL_STATE,
+      'default', 'boolIndex', 'numberIndex', 'stringIndex', 'arrayIndex', 'mapIndex',
+    ].includes(file)) return;
     callback(file)
   });
   return files.length;

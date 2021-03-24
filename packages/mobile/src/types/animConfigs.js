@@ -33,3 +33,8 @@ export const swapAnimConfig = () => {
     LayoutAnimation.Properties.scaleY
   );
 };
+
+export const rotateAnimConfig = {
+  duration: 1000,
+  useNativeDriver: true,
+};
