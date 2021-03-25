@@ -25,7 +25,7 @@ const NoteListTopBar = (props) => {
   const listNameMap = useSelector(getListNameMap);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const didFetch = useSelector(state => state.display.didFetch);
-  const status = useSelector(state => state.display.status);
+  const syncProgress = useSelector(state => state.display.syncProgress);
   const menuBtn = useRef(null);
   const menuBtnAnim = useRef(new Animated.Value(0)).current;
   const menuBtnAnimObj = useRef(null);
@@ -45,14 +45,14 @@ const NoteListTopBar = (props) => {
   };
 
   useEffect(() => {
-    if (status === SYNC && !menuBtnAnimObj.current) {
+    if (syncProgress.status === SYNC && !menuBtnAnimObj.current) {
       menuBtnAnimObj.current = Animated.loop(
         Animated.timing(menuBtnAnim, { toValue: 1, ...rotateAnimConfig })
       );
       menuBtnAnimObj.current.start();
     }
 
-    if (status !== SYNC && menuBtnAnimObj.current) {
+    if (syncProgress.status !== SYNC && menuBtnAnimObj.current) {
       menuBtnAnimObj.current.stop();
       menuBtnAnimObj.current = null;
     }
@@ -63,7 +63,7 @@ const NoteListTopBar = (props) => {
         menuBtnAnimObj.current = null;
       }
     };
-  }, [status, menuBtnAnim]);
+  }, [syncProgress.status, menuBtnAnim]);
 
   if (safeAreaWidth < LG_WIDTH && isBulkEditing) return <NoteListTopBarBulkEdit />;
 
@@ -78,7 +78,7 @@ const NoteListTopBar = (props) => {
   );
 
   let innerMenuBtn;
-  if (status === SYNC) {
+  if (syncProgress.status === SYNC) {
 
     const innerMenuBtnStyle = {
       transform: [{
@@ -98,17 +98,17 @@ const NoteListTopBar = (props) => {
         {menuBtnSvg}
       </React.Fragment>
     );
-  } else if (status === SYNC_ROLLBACK) {
+  } else if (syncProgress.status === SYNC_ROLLBACK) {
     innerMenuBtn = (
       <React.Fragment>
-        <View style={tailwind('absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full')} />
+        <View style={tailwind('absolute top-1 right-2.5 w-1.5 h-1.5 bg-red-500 rounded-full')} />
         {menuBtnSvg}
       </React.Fragment>
     );
-  } else if (status === SHOW_SYNCED) {
+  } else if (syncProgress.status === SHOW_SYNCED) {
     innerMenuBtn = (
       <React.Fragment>
-        <View style={tailwind('absolute top-1 right-2 w-2 h-2 bg-green-600 rounded-full')} />
+        <View style={tailwind('absolute top-1 right-2.5 w-1.5 h-1.5 bg-green-600 rounded-full')} />
         {menuBtnSvg}
       </React.Fragment>
     );

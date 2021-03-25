@@ -16,6 +16,7 @@
 ** github.com/zadam/trilium
 ** github.com/logseq/logseq
 ** github.com/twitter/TwitterTextEditor
+** www.serenity.re/en/notes
 * Same Name
 ** jusnote.com - The most powerful software for managing the legal practice
 ** justnotepad.com

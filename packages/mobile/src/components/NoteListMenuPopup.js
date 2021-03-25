@@ -6,12 +6,13 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
-import { signOut, updatePopup, updateBulkEdit } from '../actions';
+import { fetch, sync, signOut, updatePopup, updateBulkEdit, updateSyncProgress } from '../actions';
+import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import {
-  DOMAIN_NAME, NOTE_LIST_MENU_POPUP, SETTINGS_POPUP, LG_WIDTH,
+  DOMAIN_NAME, NOTE_LIST_MENU_POPUP, SETTINGS_POPUP, LG_WIDTH, SHOW_SYNCED,
 } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
-import { popupFMV } from '../types/animConfigs';
+import { popupFMV, rotateAnimConfig } from '../types/animConfigs';
 
 const NoteListMenuPopup = () => {
 
@@ -19,16 +20,27 @@ const NoteListMenuPopup = () => {
   const isShown = useSelector(state => state.display.isNoteListMenuPopupShown);
   const anchorPosition = useSelector(state => state.display.noteListMenuPopupPosition);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
+  const syncProgress = useSelector(state => state.display.syncProgress);
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
   const [derivedIsShown, setDerivedIsShown] = useState(isShown);
   const [derivedAnchorPosition, setDerivedAnchorPosition] = useState(anchorPosition);
   const popupAnim = useRef(new Animated.Value(0)).current;
   const popupBackHandler = useRef(null);
+  const syncAnim = useRef(new Animated.Value(0)).current;
+  const syncAnimObj = useRef(null);
   const dispatch = useDispatch();
 
   const onNoteListMenuCancelBtnClick = useCallback(() => {
     dispatch(updatePopup(NOTE_LIST_MENU_POPUP, false, null));
   }, [dispatch]);
+
+  const onSyncBtnClick = () => {
+    onNoteListMenuCancelBtnClick();
+    if (syncProgress.status === SHOW_SYNCED) {
+      dispatch(fetch(false));
+      dispatch(updateSyncProgress({ status: null }));
+    } else dispatch(sync(true, 0));
+  };
 
   const onSelectBtnClick = () => {
     onNoteListMenuCancelBtnClick();
@@ -89,6 +101,27 @@ const NoteListMenuPopup = () => {
     };
   }, [isShown, popupAnim, registerPopupBackHandler]);
 
+  useEffect(() => {
+    if (syncProgress.status === SYNC && !syncAnimObj.current) {
+      syncAnimObj.current = Animated.loop(
+        Animated.timing(syncAnim, { toValue: 1, ...rotateAnimConfig })
+      );
+      syncAnimObj.current.start();
+    }
+
+    if (syncProgress.status !== SYNC && syncAnimObj.current) {
+      syncAnimObj.current.stop();
+      syncAnimObj.current = null;
+    }
+
+    return () => {
+      if (syncAnimObj.current) {
+        syncAnimObj.current.stop();
+        syncAnimObj.current = null;
+      }
+    };
+  }, [syncProgress.status, syncAnim]);
+
   if (derivedIsShown !== isShown) {
     if (derivedIsShown && !isShown) setDidCloseAnimEnd(false);
     setDerivedIsShown(isShown);
@@ -148,6 +181,59 @@ const NoteListMenuPopup = () => {
     scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }),
   });
 
+  let syncBtn;
+  if (syncProgress.status === SYNC) {
+    const syncStyle = {
+      transform: [{
+        rotate: syncAnim.interpolate(
+          { inputRange: [0, 1], outputRange: ['360deg', '0deg'] }
+        ),
+      }],
+    };
+
+    syncBtn = (
+      <View style={tailwind('w-full flex-row items-center px-4 py-3')}>
+        <View style={tailwind('mr-3 w-5 h-5')}>
+          <Animated.View style={[tailwind('w-5 h-5'), syncStyle]}>
+            <Svg width={20} height={20} style={tailwind('text-gray-400 font-normal')} viewBox="0 0 20 20" fill="currentColor">
+              <Path fillRule="evenodd" clipRule="evenodd" d="M4 2C4.26522 2 4.51957 2.10536 4.70711 2.29289C4.89464 2.48043 5 2.73478 5 3V5.101C5.83204 4.25227 6.86643 3.62931 8.00574 3.29078C9.14506 2.95226 10.3518 2.90932 11.5123 3.16601C12.6728 3.42269 13.7488 3.97056 14.6391 4.758C15.5294 5.54544 16.2045 6.54654 16.601 7.667C16.6491 7.79176 16.6717 7.92489 16.6674 8.05854C16.6632 8.19218 16.6322 8.32361 16.5763 8.44506C16.5203 8.56651 16.4406 8.67551 16.3418 8.76561C16.243 8.85571 16.1272 8.92508 16.0011 8.96963C15.875 9.01417 15.7413 9.03298 15.6078 9.02494C15.4744 9.0169 15.3439 8.98217 15.224 8.92282C15.1042 8.86346 14.9975 8.78068 14.9103 8.67937C14.823 8.57806 14.7569 8.46029 14.716 8.333C14.4141 7.47982 13.8865 6.72451 13.1892 6.14758C12.4919 5.57064 11.6512 5.19369 10.7566 5.05688C9.86195 4.92008 8.94698 5.02855 8.10916 5.37074C7.27133 5.71293 6.54204 6.27602 5.999 7H9C9.26522 7 9.51957 7.10536 9.70711 7.29289C9.89464 7.48043 10 7.73478 10 8C10 8.26522 9.89464 8.51957 9.70711 8.70711C9.51957 8.89464 9.26522 9 9 9H4C3.73478 9 3.48043 8.89464 3.29289 8.70711C3.10536 8.51957 3 8.26522 3 8V3C3 2.73478 3.10536 2.48043 3.29289 2.29289C3.48043 2.10536 3.73478 2 4 2ZM4.008 11.057C4.13184 11.0133 4.26308 10.9943 4.39422 11.0013C4.52537 11.0083 4.65386 11.0411 4.77235 11.0977C4.89084 11.1544 4.99701 11.2338 5.0848 11.3315C5.17259 11.4291 5.24028 11.5432 5.284 11.667C5.58586 12.5202 6.11355 13.2755 6.81082 13.8524C7.50809 14.4294 8.34883 14.8063 9.24344 14.9431C10.138 15.0799 11.053 14.9714 11.8908 14.6293C12.7287 14.2871 13.458 13.724 14.001 13H11C10.7348 13 10.4804 12.8946 10.2929 12.7071C10.1054 12.5196 10 12.2652 10 12C10 11.7348 10.1054 11.4804 10.2929 11.2929C10.4804 11.1054 10.7348 11 11 11H16C16.2652 11 16.5196 11.1054 16.7071 11.2929C16.8946 11.4804 17 11.7348 17 12V17C17 17.2652 16.8946 17.5196 16.7071 17.7071C16.5196 17.8946 16.2652 18 16 18C15.7348 18 15.4804 17.8946 15.2929 17.7071C15.1054 17.5196 15 17.2652 15 17V14.899C14.168 15.7477 13.1336 16.3707 11.9943 16.7092C10.8549 17.0477 9.64821 17.0907 8.48772 16.834C7.32723 16.5773 6.25117 16.0294 5.36091 15.242C4.47065 14.4546 3.79548 13.4535 3.399 12.333C3.35526 12.2092 3.33634 12.0779 3.34333 11.9468C3.35031 11.8156 3.38306 11.6871 3.43971 11.5687C3.49635 11.4502 3.57578 11.344 3.67346 11.2562C3.77114 11.1684 3.88516 11.1007 4.009 11.057H4.008Z" />
+            </Svg>
+          </Animated.View>
+        </View>
+        <Text style={tailwind('text-sm font-normal text-gray-700')}>Syncing...</Text>
+      </View >
+    );
+  } else if (syncProgress.status === SYNC_ROLLBACK) {
+    syncBtn = (
+      <TouchableOpacity onPress={onSyncBtnClick} style={tailwind('w-full flex-row items-center px-4 py-3')}>
+        <Svg width={20} height={20} style={tailwind('mr-3 text-red-500 font-normal')} viewBox="0 0 20 20" fill="currentColor">
+          <Path fillRule="evenodd" clipRule="evenodd" d="M18 10C18 12.1217 17.1571 14.1566 15.6569 15.6569C14.1566 17.1571 12.1217 18 10 18C7.87827 18 5.84344 17.1571 4.34315 15.6569C2.84285 14.1566 2 12.1217 2 10C2 7.87827 2.84285 5.84344 4.34315 4.34315C5.84344 2.84285 7.87827 2 10 2C12.1217 2 14.1566 2.84285 15.6569 4.34315C17.1571 5.84344 18 7.87827 18 10ZM11 14C11 14.2652 10.8946 14.5196 10.7071 14.7071C10.5196 14.8946 10.2652 15 10 15C9.73478 15 9.48043 14.8946 9.29289 14.7071C9.10536 14.5196 9 14.2652 9 14C9 13.7348 9.10536 13.4804 9.29289 13.2929C9.48043 13.1054 9.73478 13 10 13C10.2652 13 10.5196 13.1054 10.7071 13.2929C10.8946 13.4804 11 13.7348 11 14ZM10 5C9.73478 5 9.48043 5.10536 9.29289 5.29289C9.10536 5.48043 9 5.73478 9 6V10C9 10.2652 9.10536 10.5196 9.29289 10.7071C9.48043 10.8946 9.73478 11 10 11C10.2652 11 10.5196 10.8946 10.7071 10.7071C10.8946 10.5196 11 10.2652 11 10V6C11 5.73478 10.8946 5.48043 10.7071 5.29289C10.5196 5.10536 10.2652 5 10 5Z" />
+        </Svg>
+        <Text style={tailwind('text-sm font-normal text-red-600')}>Retry Sync</Text>
+        <View style={tailwind('absolute top-2 right-4 w-1.5 h-1.5 bg-red-500 rounded-full')} />
+      </TouchableOpacity>
+    );
+  } else if (syncProgress.status === SHOW_SYNCED) {
+    syncBtn = (
+      <TouchableOpacity onPress={onSyncBtnClick} style={tailwind('w-full flex-row items-center px-4 py-3')}>
+        <Svg width={20} height={20} style={tailwind('mr-3 text-green-600 font-normal')} viewBox="0 0 20 20" fill="currentColor">
+          <Path fillRule="evenodd" clipRule="evenodd" d="M4 2C4.26522 2 4.51957 2.10536 4.70711 2.29289C4.89464 2.48043 5 2.73478 5 3V5.101C5.83204 4.25227 6.86643 3.62931 8.00574 3.29078C9.14506 2.95226 10.3518 2.90932 11.5123 3.16601C12.6728 3.42269 13.7488 3.97056 14.6391 4.758C15.5294 5.54544 16.2045 6.54654 16.601 7.667C16.6491 7.79176 16.6717 7.92489 16.6674 8.05854C16.6632 8.19218 16.6322 8.32361 16.5763 8.44506C16.5203 8.56651 16.4406 8.67551 16.3418 8.76561C16.243 8.85571 16.1272 8.92508 16.0011 8.96963C15.875 9.01417 15.7413 9.03298 15.6078 9.02494C15.4744 9.0169 15.3439 8.98217 15.224 8.92282C15.1042 8.86346 14.9975 8.78068 14.9103 8.67937C14.823 8.57806 14.7569 8.46029 14.716 8.333C14.4141 7.47982 13.8865 6.72451 13.1892 6.14758C12.4919 5.57064 11.6512 5.19369 10.7566 5.05688C9.86195 4.92008 8.94698 5.02855 8.10916 5.37074C7.27133 5.71293 6.54204 6.27602 5.999 7H9C9.26522 7 9.51957 7.10536 9.70711 7.29289C9.89464 7.48043 10 7.73478 10 8C10 8.26522 9.89464 8.51957 9.70711 8.70711C9.51957 8.89464 9.26522 9 9 9H4C3.73478 9 3.48043 8.89464 3.29289 8.70711C3.10536 8.51957 3 8.26522 3 8V3C3 2.73478 3.10536 2.48043 3.29289 2.29289C3.48043 2.10536 3.73478 2 4 2ZM4.008 11.057C4.13184 11.0133 4.26308 10.9943 4.39422 11.0013C4.52537 11.0083 4.65386 11.0411 4.77235 11.0977C4.89084 11.1544 4.99701 11.2338 5.0848 11.3315C5.17259 11.4291 5.24028 11.5432 5.284 11.667C5.58586 12.5202 6.11355 13.2755 6.81082 13.8524C7.50809 14.4294 8.34883 14.8063 9.24344 14.9431C10.138 15.0799 11.053 14.9714 11.8908 14.6293C12.7287 14.2871 13.458 13.724 14.001 13H11C10.7348 13 10.4804 12.8946 10.2929 12.7071C10.1054 12.5196 10 12.2652 10 12C10 11.7348 10.1054 11.4804 10.2929 11.2929C10.4804 11.1054 10.7348 11 11 11H16C16.2652 11 16.5196 11.1054 16.7071 11.2929C16.8946 11.4804 17 11.7348 17 12V17C17 17.2652 16.8946 17.5196 16.7071 17.7071C16.5196 17.8946 16.2652 18 16 18C15.7348 18 15.4804 17.8946 15.2929 17.7071C15.1054 17.5196 15 17.2652 15 17V14.899C14.168 15.7477 13.1336 16.3707 11.9943 16.7092C10.8549 17.0477 9.64821 17.0907 8.48772 16.834C7.32723 16.5773 6.25117 16.0294 5.36091 15.242C4.47065 14.4546 3.79548 13.4535 3.399 12.333C3.35526 12.2092 3.33634 12.0779 3.34333 11.9468C3.35031 11.8156 3.38306 11.6871 3.43971 11.5687C3.49635 11.4502 3.57578 11.344 3.67346 11.2562C3.77114 11.1684 3.88516 11.1007 4.009 11.057H4.008Z" />
+        </Svg>
+        <Text style={tailwind('text-sm font-medium text-green-600')}>Refresh</Text>
+        <View style={tailwind('absolute top-3 right-9 w-1.5 h-1.5 bg-green-600 rounded-full')} />
+      </TouchableOpacity>
+    );
+  } else {
+    syncBtn = (
+      <TouchableOpacity onPress={onSyncBtnClick} style={tailwind('w-full flex-row items-center px-4 py-3')}>
+        <Svg width={20} height={20} style={tailwind('mr-3 text-gray-400 font-normal')} viewBox="0 0 20 20" fill="currentColor">
+          <Path fillRule="evenodd" clipRule="evenodd" d="M4 2C4.26522 2 4.51957 2.10536 4.70711 2.29289C4.89464 2.48043 5 2.73478 5 3V5.101C5.83204 4.25227 6.86643 3.62931 8.00574 3.29078C9.14506 2.95226 10.3518 2.90932 11.5123 3.16601C12.6728 3.42269 13.7488 3.97056 14.6391 4.758C15.5294 5.54544 16.2045 6.54654 16.601 7.667C16.6491 7.79176 16.6717 7.92489 16.6674 8.05854C16.6632 8.19218 16.6322 8.32361 16.5763 8.44506C16.5203 8.56651 16.4406 8.67551 16.3418 8.76561C16.243 8.85571 16.1272 8.92508 16.0011 8.96963C15.875 9.01417 15.7413 9.03298 15.6078 9.02494C15.4744 9.0169 15.3439 8.98217 15.224 8.92282C15.1042 8.86346 14.9975 8.78068 14.9103 8.67937C14.823 8.57806 14.7569 8.46029 14.716 8.333C14.4141 7.47982 13.8865 6.72451 13.1892 6.14758C12.4919 5.57064 11.6512 5.19369 10.7566 5.05688C9.86195 4.92008 8.94698 5.02855 8.10916 5.37074C7.27133 5.71293 6.54204 6.27602 5.999 7H9C9.26522 7 9.51957 7.10536 9.70711 7.29289C9.89464 7.48043 10 7.73478 10 8C10 8.26522 9.89464 8.51957 9.70711 8.70711C9.51957 8.89464 9.26522 9 9 9H4C3.73478 9 3.48043 8.89464 3.29289 8.70711C3.10536 8.51957 3 8.26522 3 8V3C3 2.73478 3.10536 2.48043 3.29289 2.29289C3.48043 2.10536 3.73478 2 4 2ZM4.008 11.057C4.13184 11.0133 4.26308 10.9943 4.39422 11.0013C4.52537 11.0083 4.65386 11.0411 4.77235 11.0977C4.89084 11.1544 4.99701 11.2338 5.0848 11.3315C5.17259 11.4291 5.24028 11.5432 5.284 11.667C5.58586 12.5202 6.11355 13.2755 6.81082 13.8524C7.50809 14.4294 8.34883 14.8063 9.24344 14.9431C10.138 15.0799 11.053 14.9714 11.8908 14.6293C12.7287 14.2871 13.458 13.724 14.001 13H11C10.7348 13 10.4804 12.8946 10.2929 12.7071C10.1054 12.5196 10 12.2652 10 12C10 11.7348 10.1054 11.4804 10.2929 11.2929C10.4804 11.1054 10.7348 11 11 11H16C16.2652 11 16.5196 11.1054 16.7071 11.2929C16.8946 11.4804 17 11.7348 17 12V17C17 17.2652 16.8946 17.5196 16.7071 17.7071C16.5196 17.8946 16.2652 18 16 18C15.7348 18 15.4804 17.8946 15.2929 17.7071C15.1054 17.5196 15 17.2652 15 17V14.899C14.168 15.7477 13.1336 16.3707 11.9943 16.7092C10.8549 17.0477 9.64821 17.0907 8.48772 16.834C7.32723 16.5773 6.25117 16.0294 5.36091 15.242C4.47065 14.4546 3.79548 13.4535 3.399 12.333C3.35526 12.2092 3.33634 12.0779 3.34333 11.9468C3.35031 11.8156 3.38306 11.6871 3.43971 11.5687C3.49635 11.4502 3.57578 11.344 3.67346 11.2562C3.77114 11.1684 3.88516 11.1007 4.009 11.057H4.008Z" />
+        </Svg>
+        <Text style={tailwind('text-sm font-normal text-gray-700')}>Sync</Text>
+      </TouchableOpacity>
+    );
+  }
+
   let buttons;
   if (isBulkEditing) {
     buttons = (
@@ -161,6 +247,7 @@ const NoteListMenuPopup = () => {
   } else {
     buttons = (
       <React.Fragment>
+        {syncBtn}
         <TouchableOpacity onPress={onSelectBtnClick} style={tailwind('w-full flex-row items-center px-4 py-3')}>
           <Svg width={20} height={20} style={tailwind('mr-3 text-gray-400 font-normal')} viewBox="0 0 20 20" fill="currentColor">
             <Path d="M17.414 2.586C17.0389 2.21106 16.5303 2.00043 16 2.00043C15.4697 2.00043 14.9611 2.21106 14.586 2.586L7 10.172V13H9.828L17.414 5.414C17.7889 5.03894 17.9996 4.53033 17.9996 4C17.9996 3.46967 17.7889 2.96106 17.414 2.586Z" />

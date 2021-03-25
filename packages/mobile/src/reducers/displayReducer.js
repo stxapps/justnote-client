@@ -5,7 +5,7 @@ import {
   FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES,
   DELETE_LIST_NAMES, UPDATE_DELETING_LIST_NAME, UPDATE_EDITOR_CONTENT,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
-  UPDATE_UPDATE_SETTINGS_PROGRESS, SYNC, SYNC_COMMIT, SYNC_ROLLBACK, UPDATE_STATUS,
+  UPDATE_UPDATE_SETTINGS_PROGRESS, SYNC, SYNC_COMMIT, SYNC_ROLLBACK, UPDATE_SYNC_PROGRESS,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -41,10 +41,10 @@ const initialState = {
   noteMedia: [],
   didFetch: false,
   listChangedCount: 0,
-  status: null,
+  updateSettingsProgress: null,
+  syncProgress: null,
   exportAllDataProgress: null,
   deleteAllDataProgress: null,
-  updateSettingsProgress: null,
 };
 
 const displayReducer = (state = initialState, action) => {
@@ -239,19 +239,19 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === SYNC) {
-    return { ...state, status: SYNC };
+    return { ...state, syncProgress: { status: SYNC } };
   }
 
   if (action.type === SYNC_COMMIT) {
-    return { ...state, status: null };
+    return { ...state, syncProgress: { status: null } };
   }
 
   if (action.type === SYNC_ROLLBACK) {
-    return { ...state, status: SYNC_ROLLBACK };
+    return { ...state, syncProgress: { status: SYNC_ROLLBACK } };
   }
 
-  if (action.type === UPDATE_STATUS) {
-    return { ...state, status: action.payload };
+  if (action.type === UPDATE_SYNC_PROGRESS) {
+    return { ...state, syncProgress: action.payload };
   }
 
   if (action.type === UPDATE_EXPORT_ALL_DATA_PROGRESS) {

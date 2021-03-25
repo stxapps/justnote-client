@@ -8,7 +8,7 @@ import {
   UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP, UPDATE_SEARCH_STRING,
   UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, CLEAR_SELECTED_NOTE_IDS,
-  UPDATE_STATUS, UPDATE_PAGE_Y_OFFSET,
+  UPDATE_PAGE_Y_OFFSET,
   FETCH, FETCH_COMMIT, FETCH_ROLLBACK,
   FETCH_MORE, FETCH_MORE_COMMIT, FETCH_MORE_ROLLBACK,
   ADD_NOTE, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK,
@@ -27,7 +27,7 @@ import {
   RETRY_DELETE_LIST_NAMES, CANCEL_DIED_LIST_NAMES, UPDATE_EDITOR_CONTENT,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
   UPDATE_UPDATE_SETTINGS_PROGRESS, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
-  UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
+  UPDATE_SYNC_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
@@ -302,10 +302,6 @@ export const clearSelectedNoteIds = () => {
 
 export const updatePageYOffset = (pageYOffset) => {
   return { type: UPDATE_PAGE_Y_OFFSET, payload: pageYOffset };
-};
-
-export const updateStatus = (status) => {
-  return { type: UPDATE_STATUS, payload: status };
 };
 
 export const fetch = (
@@ -1295,6 +1291,8 @@ export const tryUpdateSynced = (updateAction, haveUpdate) => async (
     return;
   }
 
+  if (!haveUpdate) return;
+
   const pageYOffset = getState().window.pageYOffset;
   const isPopupShown = (
     getState().display.isProfilePopupShown ||
@@ -1308,7 +1306,11 @@ export const tryUpdateSynced = (updateAction, haveUpdate) => async (
     return;
   }
 
-  dispatch(updateStatus(SHOW_SYNCED));
+  dispatch(updateSyncProgress({ status: SHOW_SYNCED }));
+};
+
+export const updateSyncProgress = (progress) => {
+  return { type: UPDATE_SYNC_PROGRESS, payload: progress };
 };
 
 const exportAllDataLoop = async (dispatch, fpaths, doneCount) => {
