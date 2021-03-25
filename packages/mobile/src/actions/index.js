@@ -227,7 +227,7 @@ export const signOut = () => async (dispatch, getState) => {
   await userSession.signUserOut();
 
   // clear mmkv storage
-
+  await dataApi.deleteAllFiles();
 
   // clear all user data!
   dispatch({
@@ -1463,11 +1463,11 @@ export const deleteAllData = () => async (dispatch, getState) => {
 
   let allNoteIds, _settingsFPath;
   try {
-    const { noteFPaths, settingsFPath: sFPaths } = await dataApi.listFPaths();
+    const { noteFPaths, settingsFPath: sFPath } = await dataApi.listFPaths();
     const { noteIds, conflictedIds } = dataApi.listNoteIds(noteFPaths);
 
     allNoteIds = [...noteIds, ...conflictedIds];
-    _settingsFPath = sFPaths;
+    _settingsFPath = sFPath;
   } catch (e) {
     dispatch(updateDeleteAllDataProgress({
       total: -1,

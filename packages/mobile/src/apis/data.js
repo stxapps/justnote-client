@@ -54,6 +54,8 @@ const listFPaths = async () => {
     } else {
       throw new Error(`Invalid file path: ${fpath}`);
     }
+
+    return true;
   });
 
   return { noteFPaths, settingsFPath };
@@ -454,10 +456,14 @@ const deleteFiles = async (fpaths) => {
   return responses;
 };
 
+const deleteAllFiles = async () => {
+  await mmkvStorage.deleteAllFiles();
+};
+
 const data = {
   listFPaths, listNoteIds, batchGetFileWithRetry, toNotes,
   fetch, fetchMore, putNotes, fetchOldNotesInTrash, canDeleteListNames,
-  getFiles, putFiles, deleteFiles,
+  getFiles, putFiles, deleteFiles, deleteAllFiles,
 };
 
 export default data;

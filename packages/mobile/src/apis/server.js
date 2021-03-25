@@ -21,6 +21,8 @@ const listFPaths = async () => {
     } else {
       throw new Error(`Invalid file path: ${fpath}`);
     }
+
+    return true;
   });
 
   return { noteFPaths, settingsFPath };

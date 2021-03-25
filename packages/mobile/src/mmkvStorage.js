@@ -34,6 +34,10 @@ const deleteFile = async (path) => {
   return true;
 };
 
+const deleteAllFiles = async () => {
+  await getInstance().clearStore();
+};
+
 const listFiles = async (callback) => {
   const files = await getInstance().indexer.getKeys();
   files.forEach(file => {
@@ -55,6 +59,6 @@ const setItem = (key, value) => {
 };
 
 export default {
-  putFile, getFile, deleteFile, listFiles,
+  putFile, getFile, deleteFile, deleteAllFiles, listFiles,
   getItem, setItem,
 };
