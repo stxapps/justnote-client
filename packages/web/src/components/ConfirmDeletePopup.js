@@ -41,7 +41,7 @@ const ConfirmDeletePopup = () => {
   }, [isShown]);
 
   if (!isShown) return (
-    <AnimatePresence key="AP_CDP"></AnimatePresence>
+    <AnimatePresence key="AP_CDP" />
   );
 
   return (
@@ -49,7 +49,7 @@ const ConfirmDeletePopup = () => {
       <div className="fixed inset-0 overflow-hidden">
         <div className="p-4 flex items-center justify-center" style={{ minHeight: safeAreaHeight }}>
           <div className="fixed inset-0">
-            <motion.button ref={cancelBtn} onClick={onConfirmDeleteCancelBtnClick} className="absolute inset-0 w-full h-full bg-black opacity-25 cursor-default focus:outline-none" variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden"></motion.button>
+            <motion.button ref={cancelBtn} onClick={onConfirmDeleteCancelBtnClick} className="absolute inset-0 w-full h-full bg-black opacity-25 cursor-default focus:outline-none" variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden" />
           </div>
           <motion.div className="relative w-48 -mt-8 pt-4 pb-2 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5" variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="dialog" aria-modal="true" aria-labelledby="modal-headline">
             <p className="text-base text-gray-600 text-center">Confirm delete?</p>

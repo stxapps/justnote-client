@@ -8,6 +8,8 @@ import conflictedNotesReducer from './conflictedNotesReducer';
 import displayReducer from './displayReducer';
 import userReducer from './userReducer';
 import settingsReducer from './settingsReducer';
+import settingsFPathReducer from './settingsFPathReducer';
+import serverFPathsReducer from './serverFPathsReducer';
 
 const reducers = combineReducers({
   window: windowReducer,
@@ -18,6 +20,8 @@ const reducers = combineReducers({
   display: displayReducer,
   user: userReducer,
   settings: settingsReducer,
+  settingsFPath: settingsFPathReducer,
+  serverFPaths: serverFPathsReducer,
 });
 
 export default reducers;

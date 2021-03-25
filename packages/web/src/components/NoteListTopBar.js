@@ -34,7 +34,7 @@ const NoteListTopBar = (props) => {
 
   let title;
   if (didFetch) title = <h1 className="text-lg font-medium leading-6 text-gray-900 truncate">{getListNameDisplayName(listName, listNameMap)}</h1>;
-  else title = <div className="bg-gray-300 w-20 h-6 rounded-md animate-pulse"></div>;
+  else title = <div className="bg-gray-300 w-20 h-6 rounded-md animate-pulse" />;
 
   return (
     <div className="flex-grow-0 flex-shrink-0">

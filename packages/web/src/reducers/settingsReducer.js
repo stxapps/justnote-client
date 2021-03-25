@@ -1,3 +1,6 @@
+import { loop, Cmd } from 'redux-loop';
+
+import { sync } from '../actions';
 import {
   FETCH_COMMIT,
   ADD_LIST_NAMES, ADD_LIST_NAMES_COMMIT, ADD_LIST_NAMES_ROLLBACK,
@@ -10,23 +13,12 @@ import {
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
-  MY_NOTES, TRASH, ARCHIVE,
   ADDED, ADDING, UPDATING, MOVING, DELETING,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
-  SWAP_LEFT, SWAP_RIGHT, ADDED_DT,
+  SWAP_LEFT, SWAP_RIGHT,
 } from '../types/const';
 import { doContainListName, swapArrayElements, getInsertIndex } from '../utils';
-
-export const initialState = {
-  doDeleteOldNotesInTrash: true,
-  sortOn: ADDED_DT,
-  doDescendingOrder: true,
-  listNameMap: [
-    { listName: MY_NOTES, displayName: MY_NOTES, status: ADDED },
-    { listName: TRASH, displayName: TRASH, status: ADDED },
-    { listName: ARCHIVE, displayName: ARCHIVE, status: ADDED },
-  ],
-};
+import { initialSettingsState as initialState } from '../types/initialStates';
 
 const settingsReducer = (state = initialState, action) => {
 
@@ -49,7 +41,9 @@ const settingsReducer = (state = initialState, action) => {
     });
 
     for (const processingListNameObj of processingListNameObjs) {
-      const i = getInsertIndex(processingListNameObj, state.listNameMap, newState.listNameMap)
+      const i = getInsertIndex(
+        processingListNameObj, state.listNameMap, newState.listNameMap
+      );
       if (i >= 0) newState.listNameMap.splice(i, 0, processingListNameObj);
       else newState.listNameMap.push(processingListNameObj);
     }
@@ -92,7 +86,7 @@ const settingsReducer = (state = initialState, action) => {
       return listNameObj;
     });
 
-    return newState;
+    return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
   }
 
   if (action.type === ADD_LIST_NAMES_ROLLBACK) {
@@ -143,7 +137,7 @@ const settingsReducer = (state = initialState, action) => {
       return listNameObj;
     });
 
-    return newState;
+    return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
   }
 
   if (action.type === UPDATE_LIST_NAMES_ROLLBACK) {
@@ -200,7 +194,7 @@ const settingsReducer = (state = initialState, action) => {
       return listNameObj;
     });
 
-    return newState;
+    return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
   }
 
   if (action.type === MOVE_LIST_NAME_ROLLBACK) {
@@ -242,7 +236,7 @@ const settingsReducer = (state = initialState, action) => {
       return !listNames.includes(listNameObj.listName);
     });
 
-    return newState;
+    return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
   }
 
   if (action.type === DELETE_LIST_NAMES_ROLLBACK) {
@@ -380,7 +374,7 @@ const settingsReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_SETTINGS_COMMIT) {
-    // Do nothing
+    return loop(state, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
   }
 
   if (action.type === UPDATE_SETTINGS_ROLLBACK) {

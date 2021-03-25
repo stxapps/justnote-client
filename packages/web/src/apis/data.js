@@ -1,8 +1,10 @@
 import userSession from '../userSession';
-import { SETTINGS_FNAME, N_NOTES, MAX_TRY, TRASH, N_DAYS } from '../types/const';
+import {
+  NOTES, SETTINGS, INDEX, DOT_JSON, N_NOTES, MAX_TRY, TRASH, N_DAYS,
+} from '../types/const';
 
 const createNoteFPath = (listName, fname, subName) => {
-  return `notes/${listName}/${fname}/${subName}`;
+  return `${NOTES}/${listName}/${fname}/${subName}`;
 };
 
 const createNoteFName = (id, parentIds) => {
@@ -29,7 +31,7 @@ const extractNoteId = (id) => {
     if (/\d/.test(id[i])) break;
   }
 
-  return { dt: parseInt(id.slice(0, i + 1)) };
+  return { dt: parseInt(id.slice(0, i + 1), 10) };
 };
 
 const listFPaths = async () => {
@@ -38,10 +40,17 @@ const listFPaths = async () => {
   let settingsFPath = null;
 
   await userSession.listFiles((fpath) => {
-    if (fpath.startsWith('notes')) {
+    if (fpath.startsWith(NOTES)) {
       noteFPaths.push(fpath);
-    } else if (fpath === SETTINGS_FNAME) {
-      settingsFPath = fpath;
+    } else if (fpath.startsWith(SETTINGS)) {
+      if (!settingsFPath) settingsFPath = fpath;
+      else {
+        const dt = parseInt(
+          settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10
+        );
+        const _dt = parseInt(fpath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10);
+        if (dt < _dt) settingsFPath = fpath;
+      }
     } else {
       throw new Error(`Invalid file path: ${fpath}`);
     }
@@ -108,9 +117,9 @@ const listNoteIds = (noteFPaths) => {
     const { dt: addedDT } = extractNoteId(rootId);
     const { dt: updatedDT } = extractNoteId(id);
 
-    const leafIds = toLeafIds[rootId];
-    const isConflicted = leafIds.length > 1;
-    const conflictWith = isConflicted ? leafIds : null;
+    const tIds = toLeafIds[rootId];
+    const isConflicted = tIds.length > 1;
+    const conflictWith = isConflicted ? tIds : null;
 
     const fpaths = toFPaths[id];
     const { listName } = extractNoteFPath(fpaths[0]);
@@ -123,7 +132,7 @@ const listNoteIds = (noteFPaths) => {
     else noteIds.push(noteId);
   }
 
-  const conflictWiths = Object.values(toLeafIds).filter(ids => ids.length > 1);
+  const conflictWiths = Object.values(toLeafIds).filter(tIds => tIds.length > 1);
 
   return { noteIds, conflictedIds, conflictWiths };
 };
@@ -146,7 +155,7 @@ const batchGetFileWithRetry = async (fpaths, callCount) => {
 
     return [
       ...responses.filter(({ success }) => success),
-      ...(await batchGetFileWithRetry(failedFPaths, callCount + 1))
+      ...(await batchGetFileWithRetry(failedFPaths, callCount + 1)),
     ];
   }
 
@@ -162,11 +171,11 @@ const toNotes = (noteIds, fpaths, contents) => {
       const content = contents[fpaths.indexOf(fpath)];
 
       const { subName } = extractNoteFPath(fpath);
-      if (subName === 'index.json') {
+      if (subName === INDEX + DOT_JSON) {
         title = content.title;
         body = content.body;
       } else {
-        media.push({ name: subName, content: content })
+        media.push({ name: subName, content: content });
       }
     }
     notes.push({
@@ -237,7 +246,7 @@ const fetch = async (params) => {
   const contents = [];
   for (let i = 0; i < fpaths.length; i++) {
     let content = responses[i].content;
-    if (fpaths[i].endsWith('index.json')) content = JSON.parse(content);
+    if (fpaths[i].endsWith(INDEX + DOT_JSON)) content = JSON.parse(content);
     contents.push(content);
   }
 
@@ -260,7 +269,7 @@ const fetch = async (params) => {
     settings = JSON.parse(/** @type {string} */(await userSession.getFile(settingsFPath)));
   }
 
-  return { notes, hasMore, conflictedNotes, listNames, settings };
+  return { notes, hasMore, conflictedNotes, listNames, settingsFPath, settings };
 };
 
 const fetchMore = async (params) => {
@@ -270,7 +279,7 @@ const fetchMore = async (params) => {
   const { noteFPaths } = await listFPaths();
   const { noteIds } = listNoteIds(noteFPaths);
 
-  const namedNoteIds = noteIds.filter(id => id.listName === listName)
+  const namedNoteIds = noteIds.filter(id => id.listName === listName);
   let sortedNoteIds = namedNoteIds.sort((a, b) => a[sortOn] - b[sortOn]);
   if (doDescendingOrder) sortedNoteIds.reverse();
 
@@ -287,7 +296,7 @@ const fetchMore = async (params) => {
   const contents = [];
   for (let i = 0; i < fpaths.length; i++) {
     let content = responses[i].content;
-    if (fpaths[i].endsWith('index.json')) content = JSON.parse(content);
+    if (fpaths[i].endsWith(INDEX + DOT_JSON)) content = JSON.parse(content);
     contents.push(content);
   }
 
@@ -316,7 +325,7 @@ const batchPutFileWithRetry = async (fpaths, contents, callCount) => {
 
     return [
       ...responses.filter(({ success }) => success),
-      ...(await batchPutFileWithRetry(failedFPaths, failedContents, callCount + 1))
+      ...(await batchPutFileWithRetry(failedFPaths, failedContents, callCount + 1)),
     ];
   }
 
@@ -330,7 +339,7 @@ const putNotes = async (params) => {
   const fpaths = [], contents = [];
   for (const note of notes) {
     const fname = createNoteFName(note.id, note.parentIds);
-    fpaths.push(createNoteFPath(listName, fname, 'index.json'));
+    fpaths.push(createNoteFPath(listName, fname, INDEX + DOT_JSON));
     contents.push(JSON.stringify({ title: note.title, body: note.body }));
     if (note.media) {
       for (const { name, content } of note.media) {
@@ -344,6 +353,31 @@ const putNotes = async (params) => {
   const publicUrls = responses.map(response => response.publicUrl);
 
   return { fpaths, publicUrls };
+};
+
+export const batchDeleteFileWithRetry = async (fpaths, callCount) => {
+
+  const responses = await Promise.all(
+    fpaths.map((fpath) =>
+      userSession.deleteFile(fpath)
+        .then(() => ({ fpath, success: true }))
+        .catch(error => ({ error, fpath, success: false }))
+    )
+  );
+
+  const failedResponses = responses.filter(({ success }) => !success);
+  const failedFPaths = failedResponses.map(({ fpath }) => fpath);
+
+  if (failedResponses.length) {
+    if (callCount + 1 >= MAX_TRY) throw failedResponses[0].error;
+
+    return [
+      ...responses.filter(({ success }) => success),
+      ...(await batchDeleteFileWithRetry(failedFPaths, callCount + 1)),
+    ];
+  }
+
+  return responses;
 };
 
 const fetchOldNotesInTrash = async () => {
@@ -366,23 +400,12 @@ const fetchOldNotesInTrash = async () => {
   // Dummy contents are enough and good for performance
   const contents = [];
   for (let i = 0; i < fpaths.length; i++) {
-    if (fpaths[i].endsWith('index.json')) contents.push({ title: '', body: '' })
+    if (fpaths[i].endsWith(INDEX + DOT_JSON)) contents.push({ title: '', body: '' });
     else contents.push('');
   }
 
   const notes = toNotes(selectedNoteIds, fpaths, contents);
   return { notes };
-};
-
-const updateSettings = async (settings) => {
-
-  const fPaths = [SETTINGS_FNAME];
-  const contents = [JSON.stringify(settings)];
-
-  const responses = await batchPutFileWithRetry(fPaths, contents, 0);
-  const publicUrls = responses.map(response => response.publicUrl);
-
-  return { publicUrls };
 };
 
 const canDeleteListNames = async (listNames) => {
@@ -400,9 +423,47 @@ const canDeleteListNames = async (listNames) => {
   return canDeletes;
 };
 
+const getFiles = async (fpaths) => {
+
+  const responses = [];
+  for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
+    const _fpaths = fpaths.slice(i, i + N_NOTES);
+    const _responses = await batchGetFileWithRetry(_fpaths, 0);
+    responses.push(..._responses.map(response => response.content));
+  }
+
+  return responses;
+};
+
+const putFiles = async (fpaths, contents) => {
+
+  const responses = [];
+  for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
+    const _fpaths = fpaths.slice(i, i + N_NOTES);
+    const _contents = contents.slice(i, i + N_NOTES);
+    const _responses = await batchPutFileWithRetry(_fpaths, _contents, 0);
+    responses.push(..._responses.map(response => response.publicUrl));
+  }
+
+  return responses;
+};
+
+const deleteFiles = async (fpaths) => {
+
+  const responses = [];
+  for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
+    const _fpaths = fpaths.slice(i, i + N_NOTES);
+    const _responses = await batchDeleteFileWithRetry(_fpaths, 0);
+    responses.push(..._responses.map(response => response.success));
+  }
+
+  return responses;
+};
+
 const data = {
   listFPaths, listNoteIds, batchGetFileWithRetry, toNotes,
-  fetch, fetchMore, putNotes, fetchOldNotesInTrash, updateSettings, canDeleteListNames,
+  fetch, fetchMore, putNotes, fetchOldNotesInTrash, canDeleteListNames,
+  getFiles, putFiles, deleteFiles,
 };
 
 export default data;

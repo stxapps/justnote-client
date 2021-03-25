@@ -59,7 +59,7 @@ const update = (obj, conKey, conValue, updKey, updValue) => {
     if (Array.isArray(conValue)) {
       if (conValue.includes(obj[id][conKey])) {
         newObj[id] = _update(obj[id], updKey, updValue);
-        continue
+        continue;
       }
 
       newObj[id] = { ...obj[id] };

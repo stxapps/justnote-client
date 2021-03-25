@@ -63,7 +63,7 @@ const NoteEditorTopBar = (props) => {
     return (
       <div className="inline-flex items-center px-4 h-full sm:px-1">
         <div className="ball-clip-rotate">
-          <div></div>
+          <div />
         </div>
       </div>
     );

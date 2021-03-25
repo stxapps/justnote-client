@@ -10,11 +10,11 @@ const SidebarSearchInput = () => {
 
   const onSearchInputChange = (e) => {
     dispatch(updateSearchString(e.target.value));
-  }
+  };
 
   const onSearchClearBtnClick = () => {
     dispatch(updateSearchString(''));
-  }
+  };
 
   const searchClearBtnClasses = searchString.length === 0 ? 'hidden' : '';
 

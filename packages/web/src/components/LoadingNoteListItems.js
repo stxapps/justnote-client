@@ -13,13 +13,13 @@ const LoadingNoteListItem = () => {
 
   return (
     <li className="px-4 py-5 sm:px-6">
-      <div style={{ width: titleWidth }} className="h-5 bg-gray-300 rounded-md"></div>
+      <div style={{ width: titleWidth }} className="h-5 bg-gray-300 rounded-md" />
       <div className="mt-1">
         {textIndices.map(i => {
           const textWidth = sample(widths);
           return (
             <div key={i} className="h-5 flex items-center">
-              <div style={{ width: textWidth }} className="h-3 bg-gray-200 rounded"></div>
+              <div style={{ width: textWidth }} className="h-3 bg-gray-200 rounded" />
             </div>
           );
         })}

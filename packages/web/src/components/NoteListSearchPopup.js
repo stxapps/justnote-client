@@ -34,7 +34,7 @@ const NoteListSearchPopup = () => {
   }, [isShown]);
 
   if (!isShown) return (
-    <AnimatePresence key="AP_NL_SearchPopup"></AnimatePresence>
+    <AnimatePresence key="AP_NL_SearchPopup" />
   );
 
   const searchClearBtnClasses = searchString.length === 0 ? 'hidden' : '';

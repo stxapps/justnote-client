@@ -39,52 +39,52 @@ const SettingsPopup = () => {
     }
 
     return refViewId === viewId;
-  }
+  };
 
   const onPopupCloseBtnClick = () => {
     updatePopupUrlHash(SETTINGS_POPUP, false, null);
-  }
+  };
 
   const onSidebarOpenBtnClick = () => {
     setIsSidebarShown(true);
-  }
+  };
 
   const onSidebarCloseBtnClick = () => {
     setIsSidebarShown(false);
-  }
+  };
 
   const onAccountBtnClick = () => {
     setIsSidebarShown(false);
     setViewId(VIEW_ACCOUNT);
-  }
+  };
 
   const onDataBtnClick = () => {
     setIsSidebarShown(false);
     setViewId(VIEW_DATA);
-  }
+  };
 
   const onListsBtnClick = () => {
     setIsSidebarShown(false);
     setViewId(VIEW_LISTS);
-  }
+  };
 
   const onMiscBtnClick = () => {
     setIsSidebarShown(false);
     setViewId(VIEW_MISC);
-  }
+  };
 
   const onToExportAllDataViewBtnClick = () => {
     setViewId(VIEW_DATA_EXPORT);
-  }
+  };
 
   const onToDeleteAllDataViewBtnClick = () => {
     setViewId(VIEW_DATA_DELETE);
-  }
+  };
 
   const onBackToDataViewBtnClick = () => {
     setIsSidebarShown(false);
     setViewId(VIEW_DATA);
-  }
+  };
 
   useEffect(() => {
     if (isShown) cancelBtn.current.focus();
@@ -103,7 +103,7 @@ const SettingsPopup = () => {
   }, [viewId]);
 
   if (!isShown) return (
-    <AnimatePresence key="AP_SP"></AnimatePresence>
+    <AnimatePresence key="AP_SP" />
   );
 
   const _render = (content) => {
@@ -184,7 +184,7 @@ const SettingsPopup = () => {
           {/* Sidebar for mobile */}
           <motion.div className="absolute inset-0 flex md:hidden" variants={canvasFMV} initial={false} animate={isSidebarShown ? 'visible' : 'hidden'}>
             <motion.button onClick={onSidebarCloseBtnClick} className="absolute inset-0 w-full h-full" variants={sideBarOverlayFMV}>
-              <div className="absolute inset-0 bg-gray-100"></div>
+              <div className="absolute inset-0 bg-gray-100" />
             </motion.button>
             <div className="absolute top-0 right-0 p-1">
               <button onClick={onPopupCloseBtnClick} className="flex items-center justify-center h-7 w-7 rounded-full group focus:outline-none focus:ring-2 focus:ring-green-600" aria-label="Close settings popup">
@@ -243,7 +243,7 @@ const SettingsPopup = () => {
         <div className="fixed inset-0 overflow-hidden">
           <div className="p-4 flex items-center justify-center" style={{ minHeight: safeAreaHeight }}>
             <div className="fixed inset-0">
-              <motion.button ref={cancelBtn} onClick={onPopupCloseBtnClick} className="absolute inset-0 w-full h-full bg-black opacity-25 cursor-default focus:outline-none" variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden"></motion.button>
+              <motion.button ref={cancelBtn} onClick={onPopupCloseBtnClick} className="absolute inset-0 w-full h-full bg-black opacity-25 cursor-default focus:outline-none" variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden" />
             </div>
             <motion.div className="w-full max-w-4xl bg-white rounded-lg overflow-hidden shadow-xl" variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="dialog" aria-modal="true" aria-labelledby="modal-headline">
               {panelWithSidebar}

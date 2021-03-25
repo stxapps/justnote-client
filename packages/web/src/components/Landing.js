@@ -81,8 +81,8 @@ const Landing = () => {
           </div>
           <div className="relative">
             <div className="absolute inset-0 flex flex-col" aria-hidden="true">
-              <div className="flex-1"></div>
-              <div className="flex-1 w-full bg-gray-800"></div>
+              <div className="flex-1" />
+              <div className="flex-1 w-full bg-gray-800" />
             </div>
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
               <img className="relative rounded-lg shadow-lg mx-auto" src={mainDesktopInDarkChrome} alt="App screenshot" />
@@ -90,7 +90,7 @@ const Landing = () => {
           </div>
         </div>
         <div className="bg-gray-800">
-          <div className="max-w-7xl mx-auto py-16 pb-0 px-4 sm:py-24 sm:pb-0 sm:px-6 lg:px-8"></div>
+          <div className="max-w-7xl mx-auto py-16 pb-0 px-4 sm:py-24 sm:pb-0 sm:px-6 lg:px-8" />
         </div>
       </div>
       <div className="bg-white overflow-hidden">

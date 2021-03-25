@@ -85,23 +85,23 @@ const _ListNameEditor = (props) => {
   const dispatch = useDispatch();
 
   const onAddBtnClick = () => {
-    setState(state => ({ ...state, mode: MODE_EDIT, value: '', msg: '' }));
+    setState(s => ({ ...s, mode: MODE_EDIT, value: '', msg: '' }));
     input.current.focus();
   };
 
   const onEditBtnClick = () => {
-    setState(state => (
-      { ...state, mode: MODE_EDIT, value: listNameObj.displayName, msg: '' }
+    setState(s => (
+      { ...s, mode: MODE_EDIT, value: listNameObj.displayName, msg: '' }
     ));
     input.current.focus();
   };
 
   const onInputFocus = () => {
-    setState(state => ({ ...state, mode: MODE_EDIT }));
+    setState(s => ({ ...s, mode: MODE_EDIT }));
   };
 
   const onInputChange = (e) => {
-    setState(state => ({ ...state, value: e.target.value, msg: '' }));
+    setState(s => ({ ...s, value: e.target.value, msg: '' }));
   };
 
   const onInputKeyPress = (e) => {
@@ -142,15 +142,15 @@ const _ListNameEditor = (props) => {
 
     const listNameValidatedResult = validateDisplayName(state.value);
     if (listNameValidatedResult !== VALID_LIST_NAME) {
-      setState(state => (
-        { ...state, mode: MODE_EDIT, msg: LIST_NAME_MSGS[listNameValidatedResult] }
+      setState(s => (
+        { ...s, mode: MODE_EDIT, msg: LIST_NAME_MSGS[listNameValidatedResult] }
       ));
       input.current.focus();
       return;
     }
 
     dispatch(addListNames([state.value]));
-    setState(state => ({ ...state, ...initialState }));
+    setState(s => ({ ...s, ...initialState }));
     didClick.current = true;
   };
 
@@ -161,15 +161,15 @@ const _ListNameEditor = (props) => {
 
     const listNameValidatedResult = validateDisplayName(state.value);
     if (listNameValidatedResult !== VALID_LIST_NAME) {
-      setState(state => (
-        { ...state, mode: MODE_EDIT, msg: LIST_NAME_MSGS[listNameValidatedResult] }
+      setState(s => (
+        { ...s, mode: MODE_EDIT, msg: LIST_NAME_MSGS[listNameValidatedResult] }
       ));
       input.current.focus();
       return;
     }
 
     dispatch(updateListNames([listNameObj.listName], [state.value]));
-    setState(state => ({ ...state, ...initialState, value: state.value }));
+    setState(s => ({ ...s, ...initialState, value: state.value }));
     didClick.current = true;
   };
 
@@ -179,13 +179,13 @@ const _ListNameEditor = (props) => {
 
   const onCancelBtnClick = () => {
     const value = listNameObj ? listNameObj.displayName : '';
-    setState(state => ({ ...state, mode: MODE_VIEW, value, msg: '' }));
+    setState(s => ({ ...s, mode: MODE_VIEW, value, msg: '' }));
     input.current.blur();
   };
 
   const onDeleteBtnClick = () => {
     if (didClick.current) return;
-    setState(state => ({ ...state, isCheckingCanDelete: true }));
+    setState(s => ({ ...s, isCheckingCanDelete: true }));
     didClick.current = true;
   };
 
@@ -212,7 +212,7 @@ const _ListNameEditor = (props) => {
   };
 
   useEffect(() => {
-    if (listNameObj) setState(state => ({ ...state, value: listNameObj.displayName }));
+    if (listNameObj) setState(s => ({ ...s, value: listNameObj.displayName }));
 
     if (prevListNameObj.current && listNameObj) {
       if (
@@ -237,8 +237,8 @@ const _ListNameEditor = (props) => {
         const canDeletes = await dataApi.canDeleteListNames([listNameObj.listName]);
         const canDelete = canDeletes[0];
         if (!canDelete) {
-          setState(state => ({
-            ...state,
+          setState(s => ({
+            ...s,
             msg: LIST_NAME_MSGS[IN_USE_LIST_NAME],
             isCheckingCanDelete: false,
           }));
@@ -248,7 +248,7 @@ const _ListNameEditor = (props) => {
 
         dispatch(updateDeletingListName(listNameObj.listName));
         updatePopupUrlHash(CONFIRM_DELETE_POPUP, true);
-        setState(state => ({ ...state, msg: '', isCheckingCanDelete: false }));
+        setState(s => ({ ...s, msg: '', isCheckingCanDelete: false }));
         didClick.current = false;
       }
     }
@@ -263,7 +263,7 @@ const _ListNameEditor = (props) => {
     deleteBtn = (
       <div className="flex-grow-0 flex-shrink-0 flex justify-start items-center w-8 h-10">
         <div className="ball-clip-rotate">
-          <div></div>
+          <div />
         </div>
       </div>
     );
@@ -278,7 +278,7 @@ const _ListNameEditor = (props) => {
   } else {
     if (listNameObj && [MY_NOTES, TRASH, ARCHIVE].includes(listNameObj.listName)) {
       deleteBtn = (
-        <div className="flex-grow-0 flex-shrink-0 w-8 h-10"></div>
+        <div className="flex-grow-0 flex-shrink-0 w-8 h-10" />
       );
     } else {
       deleteBtn = (

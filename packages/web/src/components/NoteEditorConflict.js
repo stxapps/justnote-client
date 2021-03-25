@@ -26,10 +26,10 @@ const NoteEditorConflict = (props) => {
 
     return (
       <React.Fragment>
-        <div className="absolute inset-0 bg-white opacity-25"></div>
+        <div className="absolute inset-0 bg-white opacity-25" />
         <div className="absolute top-1/3 left-1/2 flex justify-center items-center transform -translate-x-1/2 -translate-y-1/2">
           <div className="ball-clip-rotate">
-            <div></div>
+            <div />
           </div>
         </div>
       </React.Fragment>
@@ -38,7 +38,7 @@ const NoteEditorConflict = (props) => {
 
   const renderMergeError = () => {
     if (!(conflictedNote.status === DIED_MERGING)) return (
-      <AnimatePresence key="AP_NEC_mergeError"></AnimatePresence>
+      <AnimatePresence key="AP_NEC_mergeError" />
     );
 
     return (
@@ -87,7 +87,7 @@ const NoteEditorConflict = (props) => {
             </svg>
           </button>
         </div>
-        <div className="w-full h-16"></div>
+        <div className="w-full h-16" />
         <h3 className="pt-5 text-gray-800 text-lg font-medium">{conflictedNote.notes.length} Versions found</h3>
         <p className="text-gray-500 text-sm font-normal">Please choose the correct version of this note.</p>
         <AnimateSharedLayout>

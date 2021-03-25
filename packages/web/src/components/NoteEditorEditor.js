@@ -43,7 +43,7 @@ const NoteEditorEditor = (props) => {
       <input ref={titleInput} onChange={onTitleInputChange} type="text" name="title" id="title" className="focus:ring-green-600 focus:border-green-600 block w-full flex-grow-0 flex-shrink-0 text-sm py-2 px-3 border-gray-300 rounded-md placeholder-gray-500" placeholder="Note Title" value={title} disabled={note.id !== NEW_NOTE && note.status !== ADDED} />
       <div className="h-10 border-b border-gray-200 py-3 flex-grow-0 flex-shrink-0 flex items-center justify-between">
       </div>
-      <textarea onChange={onBodyInputChange} id="body" name="body" className="block w-full flex-1 text-sm shadow-sm mt-3 py-2 px-3 placeholder-gray-500 focus:ring-green-600 focus:border-green-600 border-gray-300 rounded-md" placeholder="Start writing..." value={body} disabled={note.id !== NEW_NOTE && note.status !== ADDED}></textarea>
+      <textarea onChange={onBodyInputChange} id="body" name="body" className="block w-full flex-1 text-sm shadow-sm mt-3 py-2 px-3 placeholder-gray-500 focus:ring-green-600 focus:border-green-600 border-gray-300 rounded-md" placeholder="Start writing..." value={body} disabled={note.id !== NEW_NOTE && note.status !== ADDED} />
     </div>
   );
 };

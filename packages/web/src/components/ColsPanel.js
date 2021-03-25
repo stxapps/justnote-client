@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { NEW_NOTE, NEW_NOTE_OBJ } from '../types/const';
+import { COLS_PANEL_STATE, NEW_NOTE, NEW_NOTE_OBJ } from '../types/const';
 import { throttle } from '../utils';
 
 import { useSafeAreaFrame } from '.';
@@ -39,8 +39,8 @@ const ColsPanel = () => {
     return state.notes[listName][noteId];
   });
 
-  const storageKey = 'colsPanelState';
-  const storedState = useMemo(() => localStorage.getItem(storageKey), []);
+  const storageKey = COLS_PANEL_STATE;
+  const storedState = useMemo(() => localStorage.getItem(storageKey), [storageKey]);
   const initialState = {
     isPane1Shown: true,
     isPane3FullScreen: false,
@@ -180,7 +180,7 @@ const ColsPanel = () => {
 
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(state));
-  }, [state]);
+  }, [storageKey, state]);
 
   const pane1Classes = state.isPane1Shown && !state.isPane3FullScreen ? '' : 'hidden';
   const resizer1Classes = state.isPane1Shown && !state.isPane3FullScreen ? '' : 'hidden';
@@ -210,7 +210,7 @@ const ColsPanel = () => {
           </motion.button>}
         </AnimatePresence>
       </motion.div>
-      <motion.div onMouseDown={onRightResizerMouseDown} onTouchStart={onRightResizerTouchStart} onTouchEnd={onTouchEnd} className={`relative bg-white border-l border-gray-100 pr-1 cursor-resize overflow-visible ${resizer2Classes}`} layout={!isResizeActive}></motion.div >
+      <motion.div onMouseDown={onRightResizerMouseDown} onTouchStart={onRightResizerTouchStart} onTouchEnd={onTouchEnd} className={`relative bg-white border-l border-gray-100 pr-1 cursor-resize overflow-visible ${resizer2Classes}`} layout={!isResizeActive} />
       <motion.div className="flex-1 bg-white overflow-hidden" layout={!isResizeActive}>
         <NoteEditor note={note} isFullScreen={state.isPane3FullScreen} onToggleFullScreen={onTogglePane3FullScreen} />
       </motion.div>

@@ -30,9 +30,9 @@ const MoveToPopup = () => {
     didClick.current = true;
   };
 
-  const onMoveToItemBtnClick = (listName) => {
+  const onMoveToItemBtnClick = (selectedListName) => {
     if (didClick.current) return;
-    dispatch(moveNotes(listName, safeAreaWidth));
+    dispatch(moveNotes(selectedListName, safeAreaWidth));
     onMoveToCancelBtnClick();
     didClick.current = true;
   };
@@ -50,7 +50,7 @@ const MoveToPopup = () => {
   }, [isShown]);
 
   if (!isShown) return (
-    <AnimatePresence key="AP_moveToPopup"></AnimatePresence>
+    <AnimatePresence key="AP_moveToPopup" />
   );
 
   const moveTo = [];
@@ -85,7 +85,7 @@ const MoveToPopup = () => {
     const triggerOffsetY = safeAreaWidth < LG_WIDTH ? 52 : anchorPosition.height;
     const triggerOffsetWidth = safeAreaWidth < LG_WIDTH ? -8 : -25;
     const triggerOffsets = {
-      x: triggerOffsetX, y: triggerOffsetY, width: triggerOffsetWidth, height: 0
+      x: triggerOffsetX, y: triggerOffsetY, width: triggerOffsetWidth, height: 0,
     };
     const popupPosition = computePosition(layouts, triggerOffsets, 8);
 
@@ -108,7 +108,7 @@ const MoveToPopup = () => {
 
   return (
     <AnimatePresence key="AP_moveToPopup">
-      <motion.button key="MTP_cancelBtn" ref={cancelBtn} onClick={onMoveToCancelBtnClick} className="fixed inset-0 w-full h-full bg-black opacity-25 cursor-default focus:outline-none" variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden"></motion.button>
+      <motion.button key="MTP_cancelBtn" ref={cancelBtn} onClick={onMoveToCancelBtnClick} className="fixed inset-0 w-full h-full bg-black opacity-25 cursor-default focus:outline-none" variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden" />
       {panel}
     </AnimatePresence>
   );

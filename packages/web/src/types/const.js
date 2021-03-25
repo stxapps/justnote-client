@@ -51,7 +51,10 @@ export const EDGE = 'EDGE'; // bottom or right of the window
 export const AT_TRIGGER = 'AT_TRIGGER'; // top or left of the trigger
 export const EDGE_TRIGGER = 'EDGE_TRIGGER'; // bottom or right of the trigger
 
-export const SETTINGS_FNAME = 'settings.json';
+export const NOTES = 'notes';
+export const SETTINGS = 'settings';
+export const INDEX = 'index';
+export const DOT_JSON = '.json';
 
 export const N_NOTES = 10;
 export const MAX_TRY = 3;
@@ -73,3 +76,7 @@ export const SWAP_RIGHT = 'SWAP_RIGHT';
 
 export const ADDED_DT = 'addedDT';
 export const UPDATED_DT = 'updatedDT';
+
+export const COLS_PANEL_STATE = 'colsPanelState';
+
+export const SHOW_SYNCED = 'SHOW_SYNCED';

@@ -47,7 +47,7 @@ const NoteEditorRetry = (props) => {
             </svg>
           </button>
         </div>
-        <div className="w-full h-16"></div>
+        <div className="w-full h-16" />
         <h3 className="pt-5 text-gray-800 text-lg font-medium">Problem found</h3>
         <p className="text-gray-500 text-sm font-normal">
           Please wait a moment and try again. If the problem persists, please&nbsp;

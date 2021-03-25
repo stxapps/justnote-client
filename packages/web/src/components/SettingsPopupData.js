@@ -123,7 +123,7 @@ const _SettingsPopupDataExport = (props) => {
       <div className="mt-6 mb-4">
         <div className="flex items-center">
           <div className="ball-clip-rotate">
-            <div></div>
+            <div />
           </div>
           <p className="ml-1 text-base text-gray-500">Exporting...</p>
         </div>
@@ -245,7 +245,7 @@ const _SettingsPopupDataDelete = (props) => {
       <div className="mt-6 mb-4">
         <div className="flex items-center">
           <div className="ball-clip-rotate">
-            <div></div>
+            <div />
           </div>
           <p className="ml-1 text-base text-gray-500">Deleting...</p>
         </div>

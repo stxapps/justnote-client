@@ -52,7 +52,7 @@ const NoteListMenuPopup = () => {
   }, [isShown]);
 
   if (!isShown) return (
-    <AnimatePresence key="AP_NL_MenuPopup"></AnimatePresence>
+    <AnimatePresence key="AP_NL_MenuPopup" />
   );
 
   const popupStyle = {
@@ -112,7 +112,7 @@ const NoteListMenuPopup = () => {
 
   return (
     <AnimatePresence key="AP_NL_MenuPopup">
-      <motion.button key="NL_MenuPopup_cancelBtn" ref={cancelBtn} onClick={onNoteListMenuCancelBtnClick} className="fixed inset-0 w-full h-full bg-black opacity-25 cursor-default focus:outline-none" variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden"></motion.button>
+      <motion.button key="NL_MenuPopup_cancelBtn" ref={cancelBtn} onClick={onNoteListMenuCancelBtnClick} className="fixed inset-0 w-full h-full bg-black opacity-25 cursor-default focus:outline-none" variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden" />
       <motion.div key="NL_MenuPopup_popup" style={popupStyle} className="absolute mt-1 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5" variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
         <div className="py-1">
           {buttons}

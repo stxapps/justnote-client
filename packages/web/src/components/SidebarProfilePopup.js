@@ -20,26 +20,26 @@ const SidebarProfilePopup = () => {
 
   const onSettingsBtnClick = () => {
     updatePopupUrlHash(SETTINGS_POPUP, true, null, true);
-  }
+  };
 
   const onSupportBtnClick = () => {
     const urlObj = new Url(window.location.href, {});
     urlObj.set('pathname', '/support');
     urlObj.set('hash', '');
     window.location.replace(urlObj.toString());
-  }
+  };
 
   const onSignOutBtnClick = () => {
     onProfileCancelBtnClick();
     dispatch(signOut())
-  }
+  };
 
   useEffect(() => {
     if (isShown) cancelBtn.current.focus();
   }, [isShown]);
 
   if (!isShown) return (
-    <AnimatePresence key="AP_Sb_ProfilePopup"></AnimatePresence>
+    <AnimatePresence key="AP_Sb_ProfilePopup" />
   );
 
   const popupStyle = {
@@ -50,7 +50,7 @@ const SidebarProfilePopup = () => {
 
   return (
     <AnimatePresence key="AP_Sb_ProfilePopup">
-      <motion.button key="Sb_ProfilePopup_cancelBtn" ref={cancelBtn} onClick={onProfileCancelBtnClick} className="fixed inset-0 w-full h-full bg-black opacity-25 cursor-default focus:outline-none" variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden"></motion.button>
+      <motion.button key="Sb_ProfilePopup_cancelBtn" ref={cancelBtn} onClick={onProfileCancelBtnClick} className="fixed inset-0 w-full h-full bg-black opacity-25 cursor-default focus:outline-none" variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden" />
       <motion.div key="Sb_ProfilePopup_popup" style={popupStyle} className="absolute origin-top mt-1 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5" variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
         <div className="py-1">
           <button onClick={onSettingsBtnClick} className="group w-full flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-inset" role="menuitem">

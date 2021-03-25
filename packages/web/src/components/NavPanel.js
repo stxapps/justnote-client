@@ -50,7 +50,7 @@ const NavPanel = () => {
       {/* Sidebar */}
       <motion.div className="absolute inset-0 flex overflow-hidden" variants={canvasFMV} initial={false} animate={isSidebarPopupShown ? 'visible' : 'hidden'}>
         <motion.button onClick={onSidebarCloseBtnClick} className="absolute inset-0 w-full h-full" variants={sideBarOverlayFMV}>
-          <div className="absolute inset-0 bg-white"></div>
+          <div className="absolute inset-0 bg-white" />
         </motion.button>
         <div className="absolute top-0 right-0 p-1">
           <button onClick={onSidebarCloseBtnClick} className="flex items-center justify-center h-7 w-7 rounded-full group focus:outline-none focus:ring-2 focus:ring-green-600" aria-label="Close settings popup">

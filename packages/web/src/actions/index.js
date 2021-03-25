@@ -9,13 +9,13 @@ import {
   UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP, UPDATE_SEARCH_STRING,
   UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, CLEAR_SELECTED_NOTE_IDS,
+  UPDATE_PAGE_Y_OFFSET,
   FETCH, FETCH_COMMIT, FETCH_ROLLBACK,
   FETCH_MORE, FETCH_MORE_COMMIT, FETCH_MORE_ROLLBACK,
   ADD_NOTE, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK,
   UPDATE_NOTE, UPDATE_NOTE_COMMIT, UPDATE_NOTE_ROLLBACK,
   MOVE_NOTES, MOVE_NOTES_COMMIT, MOVE_NOTES_ROLLBACK,
-  DELETE_NOTES, DELETE_NOTES_COMMIT, DELETE_NOTES_ROLLBACK,
-  CANCEL_DIED_NOTES,
+  DELETE_NOTES, DELETE_NOTES_COMMIT, DELETE_NOTES_ROLLBACK, CANCEL_DIED_NOTES,
   DELETE_OLD_NOTES_IN_TRASH, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
   DELETE_OLD_NOTES_IN_TRASH_ROLLBACK,
   MERGE_NOTES, MERGE_NOTES_COMMIT, MERGE_NOTES_ROLLBACK,
@@ -25,8 +25,7 @@ import {
   DELETE_LIST_NAMES, DELETE_LIST_NAMES_COMMIT, DELETE_LIST_NAMES_ROLLBACK,
   UPDATE_DELETING_LIST_NAME,
   RETRY_ADD_LIST_NAMES, RETRY_UPDATE_LIST_NAMES, RETRY_MOVE_LIST_NAME,
-  RETRY_DELETE_LIST_NAMES, CANCEL_DIED_LIST_NAMES,
-  UPDATE_EDITOR_CONTENT,
+  RETRY_DELETE_LIST_NAMES, CANCEL_DIED_LIST_NAMES, UPDATE_EDITOR_CONTENT,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
   UPDATE_UPDATE_SETTINGS_PROGRESS,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
@@ -36,7 +35,7 @@ import {
   APP_NAME, APP_ICON_NAME, SEARCH_POPUP, CONFIRM_DELETE_POPUP, SETTINGS_POPUP,
   MY_NOTES, TRASH, ID, NEW_NOTE,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
-  SWAP_LEFT, SWAP_RIGHT, N_NOTES, LG_WIDTH,
+  SWAP_LEFT, SWAP_RIGHT, N_NOTES, SETTINGS, INDEX, DOT_JSON, LG_WIDTH,
 } from '../types/const';
 import {
   throttle, getUserImageUrl,
@@ -44,7 +43,7 @@ import {
   randomString, swapArrayElements,
 } from '../utils';
 import { _ } from '../utils/obj';
-import { initialState as initialSettings } from '../reducers/settingsReducer';
+import { initialSettingsState } from '../types/initialStates';
 
 export const init = () => async (dispatch, getState) => {
 
@@ -68,7 +67,7 @@ export const init = () => async (dispatch, getState) => {
       userImage,
       windowWidth: window.innerWidth,
       windowHeight: window.innerHeight,
-    }
+    },
   });
 
   // Let hash get updated first before add an listener
@@ -84,7 +83,7 @@ export const init = () => async (dispatch, getState) => {
       payload: {
         windowWidth: window.innerWidth,
         windowHeight: window.innerHeight,
-      }
+      },
     });
   }, 16));
 };
@@ -97,7 +96,7 @@ const handlePendingSignIn = () => async (dispatch, getState) => {
   // As handle pending sign in takes time, show loading first.
   dispatch({
     type: UPDATE_HANDLING_SIGN_IN,
-    payload: true
+    payload: true,
   });
 
   try {
@@ -116,7 +115,7 @@ const handlePendingSignIn = () => async (dispatch, getState) => {
   // Stop show loading
   dispatch({
     type: UPDATE_HANDLING_SIGN_IN,
-    payload: false
+    payload: false,
   });
 };
 
@@ -362,11 +361,14 @@ export const updateBulkEditUrlHash = (isBulkEditing, doReplace = false) => {
   updateUrlHash(obj, doReplace);
 };
 
-export const changeListName = (listName) => {
-  return {
+export const changeListName = (listName) => async (dispatch, getState) => {
+
+  dispatch({
     type: UPDATE_LIST_NAME,
     payload: listName,
-  };
+  });
+
+  dispatch(clearSelectedNoteIds());
 };
 
 export const updateNoteId = (id) => {
@@ -420,8 +422,12 @@ export const deleteSelectedNoteIds = (ids) => {
 
 export const clearSelectedNoteIds = () => {
   return {
-    type: CLEAR_SELECTED_NOTE_IDS
+    type: CLEAR_SELECTED_NOTE_IDS,
   };
+};
+
+export const updatePageYOffset = (pageYOffset) => {
+  return { type: UPDATE_PAGE_Y_OFFSET, payload: pageYOffset };
 };
 
 export const fetch = (
@@ -464,7 +470,9 @@ export const fetchMore = () => async (dispatch, getState) => {
   }
 };
 
-export const addNote = (title, body, media, listName = null) => async (dispatch, getState) => {
+export const addNote = (title, body, media, listName = null) => async (
+  dispatch, getState
+) => {
 
   const addedDT = Date.now();
   if (listName === null) listName = getState().display.listName;
@@ -537,7 +545,9 @@ export const saveNote = () => async (dispatch, getState) => {
   }
 };
 
-const _moveNotes = (toListName, ids, fromListName = null) => async (dispatch, getState) => {
+const _moveNotes = (toListName, ids, fromListName = null) => async (
+  dispatch, getState
+) => {
 
   let addedDT = Date.now();
   if (!fromListName) fromListName = getState().display.listName;
@@ -677,6 +687,7 @@ export const retryDiedNotes = (ids, safeAreaWidth) => async (dispatch, getState)
         dispatch({ type: ADD_NOTE_COMMIT, payload });
       } catch (e) {
         dispatch({ type: ADD_NOTE_ROLLBACK, payload: { ...payload, error: e } });
+        return;
       }
     } else if (status === DIED_UPDATING) {
       const fromNote = note.fromNote;
@@ -766,12 +777,22 @@ export const cancelDiedNotes = (ids, listName = null) => async (dispatch, getSta
   });
 };
 
-export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (dispatch, getState) => {
+export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
+  dispatch, getState
+) => {
 
+  // If null, it's a first call fetch,
+  //   deleteOldNotesInTrash based on settings and always call sync.
+  // If false, it's a subsequence fetch call, no deleteOldNotesInTrash and no sync.
+  if (doDeleteOldNotesInTrash === false) return;
   if (doDeleteOldNotesInTrash === null) {
     doDeleteOldNotesInTrash = getState().settings.doDeleteOldNotesInTrash;
+  } else throw new Error(`Invalid doDeleteOldNotesInTrash: ${doDeleteOldNotesInTrash}`);
+
+  if (!doDeleteOldNotesInTrash) {
+    dispatch(sync());
+    return;
   }
-  if (!doDeleteOldNotesInTrash) return;
 
   let addedDT = Date.now();
   const listName = TRASH;
@@ -827,9 +848,8 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (dispatc
 export const mergeNotes = (selectedId) => async (dispatch, getState) => {
 
   const addedDT = Date.now();
-  const listName = getState().display.listName;
   const noteId = getState().display.noteId;
-  const conflictedNote = getState().conflictedNotes[listName][noteId];
+  const conflictedNote = getState().conflictedNotes[getState().display.listName][noteId];
 
   let toListName, toNote;
   const fromNotes = {};
@@ -841,7 +861,7 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
     if (note.id === selectedId) {
       toListName = listName;
       toNote = {
-        parentIds: conflictedNote.notes.map(note => note.id),
+        parentIds: conflictedNote.notes.map(n => n.id),
         id: `${addedDT}${randomString(4)}`,
         title: note.title, body: note.body, media: note.media,
         updatedDT: addedDT,
@@ -892,30 +912,43 @@ export const addListNames = (newNames) => async (dispatch, getState) => {
     i += 1;
   }
 
+  const settingsFPath = `${SETTINGS}${addedDT + i}${DOT_JSON}`;
   const settings = { ...getState().settings };
   settings.listNameMap = [
     ...settings.listNameMap.map(listNameObj => {
       return { listName: listNameObj.listName, displayName: listNameObj.displayName };
     }),
-    ...listNameObjs
+    ...listNameObjs,
   ];
 
-  const payload = { listNameObjs };
+  const payload = { settingsFPath, listNameObjs };
   dispatch({ type: ADD_LIST_NAMES, payload });
 
   try {
-    await dataApi.updateSettings(settings);
-    dispatch({ type: ADD_LIST_NAMES_COMMIT, payload });
+    await dataApi.putFiles([settingsFPath], [settings]);
   } catch (e) {
     dispatch({ type: ADD_LIST_NAMES_ROLLBACK, payload: { ...payload, error: e } });
+    return;
   }
+
+  try {
+    const _settingsFPath = getState().settingsFPath.fpath;
+    if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
+  } catch (e) {
+    console.log('addListNames: deleteFiles with _settingsFPath error: ', e);
+    // error in this step should be fine
+  }
+
+  dispatch({ type: ADD_LIST_NAMES_COMMIT, payload });
 };
 
 export const updateListNames = (listNames, newNames) => async (dispatch, getState) => {
 
+  const addedDT = Date.now();
+
+  const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
   const settings = { ...getState().settings };
   settings.listNameMap = settings.listNameMap.map(listNameObj => {
-
     const i = listNames.indexOf(listNameObj.listName);
     if (i >= 0) {
       return { listName: listNameObj.listName, displayName: newNames[i] };
@@ -924,19 +957,32 @@ export const updateListNames = (listNames, newNames) => async (dispatch, getStat
     return { listName: listNameObj.listName, displayName: listNameObj.displayName };
   });
 
-  const payload = { listNames, newNames };
+  const payload = { settingsFPath, listNames, newNames };
   dispatch({ type: UPDATE_LIST_NAMES, payload });
 
   try {
-    await dataApi.updateSettings(settings);
-    dispatch({ type: UPDATE_LIST_NAMES_COMMIT, payload });
+    await dataApi.putFiles([settingsFPath], [settings]);
   } catch (e) {
     dispatch({ type: UPDATE_LIST_NAMES_ROLLBACK, payload: { ...payload, error: e } });
+    return;
   }
+
+  try {
+    const _settingsFPath = getState().settingsFPath.fpath;
+    if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
+  } catch (e) {
+    console.log('updateListNames: deleteFiles with _settingsFPath error: ', e);
+    // error in this step should be fine
+  }
+
+  dispatch({ type: UPDATE_LIST_NAMES_COMMIT, payload });
 };
 
 export const moveListName = (listName, direction) => async (dispatch, getState) => {
 
+  const addedDT = Date.now();
+
+  const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
   const settings = { ...getState().settings };
   settings.listNameMap = settings.listNameMap.map(listNameObj => {
     return { listName: listNameObj.listName, displayName: listNameObj.displayName };
@@ -955,19 +1001,32 @@ export const moveListName = (listName, direction) => async (dispatch, getState) 
     throw new Error(`Invalid direction: ${direction}`);
   }
 
-  const payload = { listName, direction };
+  const payload = { settingsFPath, listName, direction };
   dispatch({ type: MOVE_LIST_NAME, payload });
 
   try {
-    await dataApi.updateSettings(settings);
-    dispatch({ type: MOVE_LIST_NAME_COMMIT, payload });
+    await dataApi.putFiles([settingsFPath], [settings]);
   } catch (e) {
     dispatch({ type: MOVE_LIST_NAME_ROLLBACK, payload: { ...payload, error: e } });
+    return;
   }
+
+  try {
+    const _settingsFPath = getState().settingsFPath.fpath;
+    if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
+  } catch (e) {
+    console.log('moveListName: deleteFiles with _settingsFPath error: ', e);
+    // error in this step should be fine
+  }
+
+  dispatch({ type: MOVE_LIST_NAME_COMMIT, payload });
 };
 
 export const deleteListNames = (listNames) => async (dispatch, getState) => {
 
+  const addedDT = Date.now();
+
+  const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
   const settings = { ...getState().settings };
   settings.listNameMap = settings.listNameMap.filter(listNameObj => {
     return !listNames.includes(listNameObj.listName);
@@ -976,54 +1035,74 @@ export const deleteListNames = (listNames) => async (dispatch, getState) => {
     return { listName: listNameObj.listName, displayName: listNameObj.displayName };
   });
 
-  const payload = { listNames };
+  const payload = { settingsFPath, listNames };
   dispatch({ type: DELETE_LIST_NAMES, payload });
 
   try {
-    await dataApi.updateSettings(settings);
-    dispatch({ type: DELETE_LIST_NAMES_COMMIT, payload });
+    await dataApi.putFiles([settingsFPath], [settings]);
   } catch (e) {
     dispatch({ type: DELETE_LIST_NAMES_ROLLBACK, payload: { ...payload, error: e } });
+    return;
   }
+
+  try {
+    const _settingsFPath = getState().settingsFPath.fpath;
+    if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
+  } catch (e) {
+    console.log('deleteListNames: deleteFiles with _settingsFPath error: ', e);
+    // error in this step should be fine
+  }
+
+  dispatch({ type: DELETE_LIST_NAMES_COMMIT, payload });
 };
 
 export const updateDeletingListName = (listName) => {
   return {
     type: UPDATE_DELETING_LIST_NAME,
     payload: listName,
-  }
+  };
 };
 
 export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
 
+  const addedDT = Date.now();
+
+  const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
   const settings = { ...getState().settings };
 
   const listNameObjs = settings.listNameMap.filter(obj => {
-    return listNames.includes(obj.listName)
+    return listNames.includes(obj.listName);
   });
 
   settings.listNameMap = [
     ...settings.listNameMap.map(listNameObj => {
       return { listName: listNameObj.listName, displayName: listNameObj.displayName };
-    })
+    }),
   ];
 
   const diedAddingListNameObjs = listNameObjs.filter(obj => {
     return obj.status === DIED_ADDING;
   });
   if (diedAddingListNameObjs.length > 0) {
-    const payload = { listNameObjs: diedAddingListNameObjs };
+    const payload = { settingsFPath, listNameObjs: diedAddingListNameObjs };
     dispatch({ type: RETRY_ADD_LIST_NAMES, payload });
 
     try {
-      await dataApi.updateSettings(settings);
-      dispatch({ type: ADD_LIST_NAMES_COMMIT, payload });
+      await dataApi.putFiles([settingsFPath], [settings]);
     } catch (e) {
-      dispatch({
-        type: ADD_LIST_NAMES_ROLLBACK,
-        payload: { ...payload, error: e },
-      });
+      dispatch({ type: ADD_LIST_NAMES_ROLLBACK, payload: { ...payload, error: e } });
+      return;
     }
+
+    try {
+      const _settingsFPath = getState().settingsFPath.fpath;
+      if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
+    } catch (e) {
+      console.log('retryAddListNames: deleteFiles error: ', e);
+      // error in this step should be fine
+    }
+
+    dispatch({ type: ADD_LIST_NAMES_COMMIT, payload });
   }
 
   const diedUpdatingListNameObjs = listNameObjs.filter(obj => {
@@ -1031,30 +1110,50 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
   });
   if (diedUpdatingListNameObjs.length > 0) {
     const diedUpdatingListNames = diedUpdatingListNameObjs.map(obj => obj.listName);
-    const payload = { listNames: diedUpdatingListNames };
+    const payload = { settingsFPath, listNames: diedUpdatingListNames };
     dispatch({ type: RETRY_UPDATE_LIST_NAMES, payload });
 
     try {
-      await dataApi.updateSettings(settings);
-      dispatch({ type: UPDATE_LIST_NAMES_COMMIT, payload });
+      await dataApi.putFiles([settingsFPath], [settings]);
     } catch (e) {
       dispatch({ type: UPDATE_LIST_NAMES_ROLLBACK, payload: { ...payload, error: e } });
+      return;
     }
+
+    try {
+      const _settingsFPath = getState().settingsFPath.fpath;
+      if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
+    } catch (e) {
+      console.log('retryUpdateListNames: deleteFiles error: ', e);
+      // error in this step should be fine
+    }
+
+    dispatch({ type: UPDATE_LIST_NAMES_COMMIT, payload });
   }
 
   const diedMovingListNameObjs = listNameObjs.filter(obj => {
     return obj.status === DIED_MOVING;
   });
   for (const diedMovingListNameObj of diedMovingListNameObjs) {
-    const payload = { listName: diedMovingListNameObj.listName };
+    const payload = { settingsFPath, listName: diedMovingListNameObj.listName };
     dispatch({ type: RETRY_MOVE_LIST_NAME, payload });
 
     try {
-      await dataApi.updateSettings(settings);
-      dispatch({ type: MOVE_LIST_NAME_COMMIT, payload });
+      await dataApi.putFiles([settingsFPath], [settings]);
     } catch (e) {
       dispatch({ type: MOVE_LIST_NAME_ROLLBACK, payload: { ...payload, error: e } });
+      return;
     }
+
+    try {
+      const _settingsFPath = getState().settingsFPath.fpath;
+      if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
+    } catch (e) {
+      console.log('retryMoveListNames: deleteFiles error: ', e);
+      // error in this step should be fine
+    }
+
+    dispatch({ type: MOVE_LIST_NAME_COMMIT, payload });
   }
 
   const diedDeletingListNameObjs = listNameObjs.filter(obj => {
@@ -1062,22 +1161,32 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
   });
   if (diedDeletingListNameObjs.length > 0) {
     const diedDeletingListNames = diedDeletingListNameObjs.map(obj => obj.listName);
-    const payload = { listNames: diedDeletingListNames };
+    const payload = { settingsFPath, listNames: diedDeletingListNames };
     dispatch({ type: RETRY_DELETE_LIST_NAMES, payload });
 
     try {
-      await dataApi.updateSettings(settings);
-      dispatch({ type: DELETE_LIST_NAMES_COMMIT, payload });
+      await dataApi.putFiles([settingsFPath], [settings]);
     } catch (e) {
       dispatch({ type: DELETE_LIST_NAMES_ROLLBACK, payload: { ...payload, error: e } });
+      return;
     }
+
+    try {
+      const _settingsFPath = getState().settingsFPath.fpath;
+      if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
+    } catch (e) {
+      console.log('retryDeleteListNames: deleteFiles error: ', e);
+      // error in this step should be fine
+    }
+
+    dispatch({ type: DELETE_LIST_NAMES_COMMIT, payload });
   }
 };
 
 export const cancelDiedListNames = (listNames) => {
   return {
     type: CANCEL_DIED_LIST_NAMES,
-    payload: { listNames }
+    payload: { listNames },
   };
 };
 
@@ -1090,29 +1199,59 @@ export const updateEditorContent = (content) => {
 
 export const updateSettings = (updatedValues) => async (dispatch, getState) => {
 
+  const addedDT = Date.now();
+
   const rollbackValues = {};
   for (const k of Object.keys(updatedValues)) {
     rollbackValues[k] = getState().settings[k];
   }
 
+  const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
   const settings = { ...getState().settings, ...updatedValues };
 
-  const payload = { settings, rollbackValues };
+  const payload = { settingsFPath, settings, rollbackValues };
   dispatch({ type: UPDATE_SETTINGS, payload });
 
   try {
-    await dataApi.updateSettings(settings);
-    dispatch({ type: UPDATE_SETTINGS_COMMIT, payload });
+    await dataApi.putFiles([settingsFPath], [settings]);
   } catch (e) {
     dispatch({ type: UPDATE_SETTINGS_ROLLBACK, payload: { ...payload, error: e } });
+    return;
   }
+
+  try {
+    const _settingsFPath = getState().settingsFPath.fpath;
+    if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
+  } catch (e) {
+    console.log('updateListNames: deleteFiles with _settingsFPath error: ', e);
+    // error in this step should be fine
+  }
+
+  dispatch({ type: UPDATE_SETTINGS_COMMIT, payload });
 };
 
 export const updateUpdateSettingsProgress = (progress) => {
   return {
     type: UPDATE_UPDATE_SETTINGS_PROGRESS,
-    payload: progress
+    payload: progress,
   };
+};
+
+/*
+ * updateAction: 0 - normal, update immediately or show notification
+ *               1 - force, update immediately no matter what
+ *               2 - no update even there is a change
+ */
+export const sync = (doForceServerListFPaths = false, updateAction = 0) => async (
+  dispatch, getState
+) => {
+  // Do nothing on web. This is for mobile.
+};
+
+export const tryUpdateSynced = (updateAction, haveUpdate) => async (
+  dispatch, getState
+) => {
+  // Do nothing on web. This is for mobile.
 };
 
 const exportAllDataLoop = async (dispatch, fpaths, doneCount) => {
@@ -1123,7 +1262,7 @@ const exportAllDataLoop = async (dispatch, fpaths, doneCount) => {
   const selectedFPaths = fpaths.slice(doneCount, doneCount + selectedCount);
   const responses = await dataApi.batchGetFileWithRetry(selectedFPaths, 0);
   const data = responses.map((response, i) => {
-    // Export only index.json so safe to JSON.parse all responses.
+    // Export only index.json and settings.json so safe to JSON.parse all responses.
     return { path: selectedFPaths[i], data: JSON.parse(response.content) };
   });
 
@@ -1153,7 +1292,7 @@ export const exportAllData = () => async (dispatch, getState) => {
 
     for (const noteId of [...noteIds, ...conflictedIds]) {
       for (const fpath of noteId.fpaths) {
-        if (fpath.endsWith('index.json')) fpaths.push(fpath);
+        if (fpath.endsWith(INDEX + DOT_JSON)) fpaths.push(fpath);
       }
     }
     if (settingsFPath) fpaths.push(settingsFPath);
@@ -1188,7 +1327,7 @@ export const exportAllData = () => async (dispatch, getState) => {
 export const updateExportAllDataProgress = (progress) => {
   return {
     type: UPDATE_EXPORT_ALL_DATA_PROGRESS,
-    payload: progress
+    payload: progress,
   };
 };
 
@@ -1204,7 +1343,7 @@ const deleteAllDataLoop = async (dispatch, noteIds, total, doneCount) => {
 
   const contents = [];
   for (let i = 0; i < fpaths.length; i++) {
-    if (fpaths[i].endsWith('index.json')) contents.push({ title: '', body: '' });
+    if (fpaths[i].endsWith(INDEX + DOT_JSON)) contents.push({ title: '', body: '' });
     else contents.push('');
   }
 
@@ -1259,13 +1398,16 @@ export const deleteAllData = () => async (dispatch, getState) => {
 
   dispatch(updateDeleteAllDataProgress({ total: 'calculating...', done: 0 }));
 
-  let allNoteIds, settingsFPath;
+  const addedDT = Date.now();
+  const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
+
+  let allNoteIds, _settingsFPath;
   try {
     const { noteFPaths, settingsFPath: sFPath } = await dataApi.listFPaths();
     const { noteIds, conflictedIds } = dataApi.listNoteIds(noteFPaths);
 
     allNoteIds = [...noteIds, ...conflictedIds];
-    settingsFPath = sFPath;
+    _settingsFPath = sFPath;
   } catch (e) {
     dispatch(updateDeleteAllDataProgress({
       total: -1,
@@ -1275,17 +1417,25 @@ export const deleteAllData = () => async (dispatch, getState) => {
     return;
   }
 
-  const total = allNoteIds.length + (settingsFPath ? 1 : 0);
+  const total = allNoteIds.length + (_settingsFPath ? 1 : 0);
   dispatch(updateDeleteAllDataProgress({ total, done: 0 }));
 
   if (total === 0) return;
 
   try {
     if (allNoteIds.length > 0) await deleteAllDataLoop(dispatch, allNoteIds, total, 0);
-    if (settingsFPath) await dataApi.updateSettings(initialSettings);
+    if (_settingsFPath) {
+      await dataApi.putFiles([settingsFPath], [{ ...initialSettingsState }]);
+      try {
+        await dataApi.deleteFiles([_settingsFPath]);
+      } catch (e) {
+        console.log('deleteAllData: deleteFiles with _settingsFPath error: ', e);
+        // error in this step should be fine
+      }
+    }
 
     updatePopupUrlHash(SETTINGS_POPUP, false, null);
-    dispatch({ type: DELETE_ALL_DATA });
+    dispatch({ type: DELETE_ALL_DATA, payload: { settingsFPath } });
   } catch (e) {
     dispatch(updateDeleteAllDataProgress({
       total: -1,
@@ -1299,6 +1449,6 @@ export const deleteAllData = () => async (dispatch, getState) => {
 export const updateDeleteAllDataProgress = (progress) => {
   return {
     type: UPDATE_DELETE_ALL_DATA_PROGRESS,
-    payload: progress
+    payload: progress,
   };
 };

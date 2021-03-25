@@ -25,7 +25,7 @@ const NoteList = (props) => {
   };
 
   const renderMaxError = () => {
-    if (!isMaxErrorShown) return <AnimatePresence key="AP_NL_maxError"></AnimatePresence>;
+    if (!isMaxErrorShown) return <AnimatePresence key="AP_NL_maxError" />;
 
     return (
       <AnimatePresence key="AP_NL_maxError">

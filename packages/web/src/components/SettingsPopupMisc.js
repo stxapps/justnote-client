@@ -24,14 +24,14 @@ const SettingsPopupMisc = (props) => {
 
   const onDoDescendingInputChange = (e) => {
 
-    let doDescendingOrder;
-
     const value = e.target.value;
-    if (value === 'ascending') doDescendingOrder = false;
-    else if (value === 'descending') doDescendingOrder = true;
+
+    let doDescend;
+    if (value === 'ascending') doDescend = false;
+    else if (value === 'descending') doDescend = true;
     else throw new Error(`Invalid value: ${value}`);
 
-    dispatch(updateSettings({ doDescendingOrder }));
+    dispatch(updateSettings({ doDescendingOrder: doDescend }));
   };
 
   const onDiedUpdatingCloseBtnClick = () => {
@@ -112,7 +112,7 @@ const SettingsPopupMisc = (props) => {
           <p id="auto-delete-option-description" className="mt-2.5 text-base text-gray-500 leading-relaxed">Allow old removed notes in Trash to be automatically deleted after 45 days</p>
         </div>
         <span onClick={onDoDeleteBtnClick} role="checkbox" tabIndex={0} aria-checked="true" aria-labelledby="auto-cleanup-option-label" aria-describedby="auto-cleanup-option-description" className={`${doDeleteBtnClassNames} relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600`}>
-          <span aria-hidden="true" className={`${doDeleteBtnInnerClassNames} inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200`}></span>
+          <span aria-hidden="true" className={`${doDeleteBtnInnerClassNames} inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200`} />
         </span>
       </div>
       <div className="mt-8 mb-4 flex flex-col">

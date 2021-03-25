@@ -36,7 +36,7 @@ const NoteListItem = (props) => {
     <li className="relative px-4 py-5 sm:px-6">
       {content}
       {(isBusyStatus(note.status) && note.id !== noteId) && renderBusy()}
-      {note.id === noteId && <div className={`absolute top-0 right-0 inset-y-0 w-1 ${isConflicted || isDied ? 'bg-red-100' : 'bg-green-600'}`}></div>}
+      {note.id === noteId && <div className={`absolute top-0 right-0 inset-y-0 w-1 ${isConflicted || isDied ? 'bg-red-100' : 'bg-green-600'}`} />}
     </li>
   );
 };
