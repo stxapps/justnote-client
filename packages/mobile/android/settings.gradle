@@ -1,3 +1,10 @@
 rootProject.name = 'Justnotecc'
+apply from: '../node_modules/react-native-unimodules/gradle.groovy'; includeUnimodulesProjects()
 apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
 include ':app'
+
+include ":react-native-bridge"
+project(":react-native-bridge").projectDir = file("../node_modules/@wordpress/react-native-bridge/android")
+
+include ":react-native-aztec"
+project(":react-native-aztec").projectDir = file("../node_modules/@wordpress/react-native-aztec/android")

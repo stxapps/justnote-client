@@ -243,7 +243,7 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === SYNC_COMMIT) {
-    return { ...state, syncProgress: { status: null } };
+    return { ...state, syncProgress: null };
   }
 
   if (action.type === SYNC_ROLLBACK) {

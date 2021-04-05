@@ -36,7 +36,7 @@ const NoteListMenuPopup = () => {
 
   const onSyncBtnClick = () => {
     onNoteListMenuCancelBtnClick();
-    if (syncProgress.status === SHOW_SYNCED) {
+    if (syncProgress && syncProgress.status === SHOW_SYNCED) {
       dispatch(fetch(false));
       dispatch(updateSyncProgress({ status: null }));
     } else dispatch(sync(true, 0));
@@ -102,14 +102,14 @@ const NoteListMenuPopup = () => {
   }, [isShown, popupAnim, registerPopupBackHandler]);
 
   useEffect(() => {
-    if (syncProgress.status === SYNC && !syncAnimObj.current) {
+    if (syncProgress && syncProgress.status === SYNC && !syncAnimObj.current) {
       syncAnimObj.current = Animated.loop(
         Animated.timing(syncAnim, { toValue: 1, ...rotateAnimConfig })
       );
       syncAnimObj.current.start();
     }
 
-    if (syncProgress.status !== SYNC && syncAnimObj.current) {
+    if ((!syncProgress || syncProgress.status !== SYNC) && syncAnimObj.current) {
       syncAnimObj.current.stop();
       syncAnimObj.current = null;
     }
@@ -120,7 +120,7 @@ const NoteListMenuPopup = () => {
         syncAnimObj.current = null;
       }
     };
-  }, [syncProgress.status, syncAnim]);
+  }, [syncProgress, syncAnim]);
 
   if (derivedIsShown !== isShown) {
     if (derivedIsShown && !isShown) setDidCloseAnimEnd(false);
@@ -182,7 +182,7 @@ const NoteListMenuPopup = () => {
   });
 
   let syncBtn;
-  if (syncProgress.status === SYNC) {
+  if (syncProgress && syncProgress.status === SYNC) {
     const syncStyle = {
       transform: [{
         rotate: syncAnim.interpolate(
@@ -203,7 +203,7 @@ const NoteListMenuPopup = () => {
         <Text style={tailwind('text-sm font-normal text-gray-700')}>Syncing...</Text>
       </View >
     );
-  } else if (syncProgress.status === SYNC_ROLLBACK) {
+  } else if (syncProgress && syncProgress.status === SYNC_ROLLBACK) {
     syncBtn = (
       <TouchableOpacity onPress={onSyncBtnClick} style={tailwind('w-full flex-row items-center px-4 py-3')}>
         <Svg width={20} height={20} style={tailwind('mr-3 text-red-500 font-normal')} viewBox="0 0 20 20" fill="currentColor">
@@ -213,7 +213,7 @@ const NoteListMenuPopup = () => {
         <View style={tailwind('absolute top-2 right-4 w-1.5 h-1.5 bg-red-500 rounded-full')} />
       </TouchableOpacity>
     );
-  } else if (syncProgress.status === SHOW_SYNCED) {
+  } else if (syncProgress && syncProgress.status === SHOW_SYNCED) {
     syncBtn = (
       <TouchableOpacity onPress={onSyncBtnClick} style={tailwind('w-full flex-row items-center px-4 py-3')}>
         <Svg width={20} height={20} style={tailwind('mr-3 text-green-600 font-normal')} viewBox="0 0 20 20" fill="currentColor">

@@ -45,14 +45,14 @@ const NoteListTopBar = (props) => {
   };
 
   useEffect(() => {
-    if (syncProgress.status === SYNC && !menuBtnAnimObj.current) {
+    if (syncProgress && syncProgress.status === SYNC && !menuBtnAnimObj.current) {
       menuBtnAnimObj.current = Animated.loop(
         Animated.timing(menuBtnAnim, { toValue: 1, ...rotateAnimConfig })
       );
       menuBtnAnimObj.current.start();
     }
 
-    if (syncProgress.status !== SYNC && menuBtnAnimObj.current) {
+    if ((!syncProgress || syncProgress.status !== SYNC) && menuBtnAnimObj.current) {
       menuBtnAnimObj.current.stop();
       menuBtnAnimObj.current = null;
     }
@@ -63,7 +63,7 @@ const NoteListTopBar = (props) => {
         menuBtnAnimObj.current = null;
       }
     };
-  }, [syncProgress.status, menuBtnAnim]);
+  }, [syncProgress, menuBtnAnim]);
 
   if (safeAreaWidth < LG_WIDTH && isBulkEditing) return <NoteListTopBarBulkEdit />;
 
@@ -78,7 +78,7 @@ const NoteListTopBar = (props) => {
   );
 
   let innerMenuBtn;
-  if (syncProgress.status === SYNC) {
+  if (syncProgress && syncProgress.status === SYNC) {
 
     const innerMenuBtnStyle = {
       transform: [{
@@ -98,14 +98,14 @@ const NoteListTopBar = (props) => {
         {menuBtnSvg}
       </React.Fragment>
     );
-  } else if (syncProgress.status === SYNC_ROLLBACK) {
+  } else if (syncProgress && syncProgress.status === SYNC_ROLLBACK) {
     innerMenuBtn = (
       <React.Fragment>
         <View style={tailwind('absolute top-1 right-2.5 w-1.5 h-1.5 bg-red-500 rounded-full')} />
         {menuBtnSvg}
       </React.Fragment>
     );
-  } else if (syncProgress.status === SHOW_SYNCED) {
+  } else if (syncProgress && syncProgress.status === SHOW_SYNCED) {
     innerMenuBtn = (
       <React.Fragment>
         <View style={tailwind('absolute top-1 right-2.5 w-1.5 h-1.5 bg-green-600 rounded-full')} />
