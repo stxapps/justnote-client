@@ -265,37 +265,38 @@
   + require iOS target to 11.0
 - yarn add react-native-animated-spinkit
 - yarn add react-native-keyboard-manager
-- yarn add @wordpress/block-library @wordpress/base-styles
 - yarn add --dev react-native-sass-transformer sass
 - yarn add --dev babel-plugin-react-native-platform-specific-extensions
 - yarn add --dev @babel/plugin-transform-react-jsx
 - yarn add --dev @wordpress/babel-plugin-import-jsx-pragma
 - yarn add @react-native-community/blur
-- yarn add @react-navigation/native @react-navigation/stack
-  + https://reactnavigation.org/docs/getting-started/
 - yarn add react-native-safe-area
-- yarn add react-native-modal
 - yarn add util
+- yarn add react-native-svg
 - yarn add react-native-url-polyfill@1.1.2
 - yarn add core-js@3.8.3
-- yarn add react-native-svg
+- yarn add @react-navigation/routers@5.4.9
+- yarn add @react-navigation/core@5.12.0
+- yarn add @react-navigation/native@5.7.0
+- yarn add @react-navigation/stack@5.6.2
+- yarn add react-native-modal@6.5.0
 - yarn add git+https://github.com/wordpress-mobile/react-native-masked-view.git#f65a51a3320e58404d7f38d967bfd1f42b439ca9
-- yarn add git+https://github.com/wordpress-mobile/react-native-dark-mode.git#f09bf1480e7b34536413ab3300f29e4375edb2c6
 - yarn add git+https://github.com/wordpress-mobile/react-native-gesture-handler.git#b80e959908b383a26d6e35d992d6d529efad0b16
 - yarn add git+https://github.com/wordpress-mobile/react-native-get-random-values.git#f03f2c16414aff4ea76064dcd00a9e3c6efc838d
 - yarn add git+https://github.com/Riglerr/react-native-hr.git#2d01a5cf77212d100e8b99e0310cce5234f977b3
 - yarn add git+https://github.com/wordpress-mobile/react-native-hsv-color-picker
-- yarn add git+https://github.com/wordpress-mobile/react-native-keyboard-aware-scroll-view.git#gb-v0.8.8
+- yarn add git+https://github.com/wordpress-mobile/react-native-keyboard-aware-scroll-view.git#ef97e80a89041e3b8563e7d4dca00f2222180ff4
 - yarn add git+https://github.com/wordpress-mobile/react-native-linear-gradient.git#52bf43077171cff8714ce3e0155f3ebb7f55bc37
 - yarn add git+https://github.com/wordpress-mobile/react-native-reanimated.git#ed48f510fba751cd75da7629e92276166766be91
 - yarn add git+https://github.com/wordpress-mobile/react-native-safe-area-context.git#1e3c0d34f31b59fb79f71ec0b4c39c513f684871
 - yarn add git+https://github.com/wordpress-mobile/react-native-screens.git#b3d907bda2695743f35fd874261dcd27e0912eca
-- yarn add git+https://github.com/wordpress-mobile/react-native-video.git#1b964b107863351ed744fc104d7952bbec3e2d4f
+- yarn add git+https://github.com/wordpress-mobile/react-native-video.git#9bcb723e5755678a69fcb7d0a17145e50a475e9f
 - yarn add git+https://github.com/justnotecc/react-native-slider.git#84463628348f412d95751e17c80fe3c410f41e93
 - yarn add git+https://github.com/iamcco/jsdom-jscore-rn.git#a562f3d57c27c13e5bfc8cf82d496e69a3ba2800
-- yarn add ~/Drive/Workspace/ref/react-native/gutenberg/packages/block-editor
-- yarn add ~/Drive/Workspace/ref/react-native/gutenberg/packages/react-native-aztec
-- yarn add ~/Drive/Workspace/ref/react-native/gutenberg/packages/react-native-bridge
+- yarn add ../../../gutenberg/packages/base-styles
+- yarn add ../../../gutenberg/packages/format-library
+- yarn add ../../../gutenberg/packages/edit-post
+- yarn add ../../../gutenberg/packages/react-native-bridge
   + Must use modified version of react-native-bridge
   + Manually link in MainApplication.js
   + Check for iOS!

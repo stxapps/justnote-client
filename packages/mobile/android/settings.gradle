@@ -8,3 +8,6 @@ project(":react-native-bridge").projectDir = file("../node_modules/@wordpress/re
 
 include ":react-native-aztec"
 project(":react-native-aztec").projectDir = file("../node_modules/@wordpress/react-native-aztec/android")
+
+include ":react-native-gesture-handler"
+project(":react-native-gesture-handler").projectDir = file("../node_modules/react-native-gesture-handler/android")
