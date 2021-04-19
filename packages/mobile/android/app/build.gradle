@@ -1,5 +1,4 @@
 apply plugin: "com.android.application"
-apply from: '../../node_modules/react-native-unimodules/gradle.groovy'
 
 import com.android.build.OutputFile
 
@@ -208,8 +207,6 @@ dependencies {
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
 
-    addUnimodulesDependencies()
-
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'
     }
@@ -230,10 +227,6 @@ dependencies {
     } else {
         implementation jscFlavor
     }
-
-    implementation project(":react-native-bridge")
-    implementation project(":react-native-aztec")
-    implementation project(":react-native-gesture-handler")
 }
 
 // Run this once to be able to run the application with BUCK

@@ -9,7 +9,6 @@ import {
   SafeAreaProvider, initialWindowMetrics, SafeAreaView,
 } from 'react-native-safe-area-context';
 
-import './globals';
 import reducers from './reducers';
 import cache from './utils/cache';
 
