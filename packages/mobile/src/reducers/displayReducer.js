@@ -3,9 +3,10 @@ import {
   UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, CLEAR_SELECTED_NOTE_IDS,
   FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES,
-  DELETE_LIST_NAMES, UPDATE_DELETING_LIST_NAME, UPDATE_EDITOR_CONTENT,
+  DELETE_LIST_NAMES, UPDATE_DELETING_LIST_NAME,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
-  UPDATE_UPDATE_SETTINGS_PROGRESS, SYNC, SYNC_COMMIT, SYNC_ROLLBACK, UPDATE_SYNC_PROGRESS,
+  UPDATE_UPDATE_SETTINGS_PROGRESS, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
+  UPDATE_SYNC_PROGRESS, INCREASE_RESET_NOTE_COUNT,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -14,7 +15,7 @@ import {
   CONFIRM_DELETE_POPUP, SETTINGS_POPUP, MY_NOTES, TRASH, ARCHIVE,
   UPDATING, DIED_UPDATING, MAX_SELECTED_NOTE_IDS,
 } from '../types/const';
-import { isString, doContainListName } from '../utils';
+import { doContainListName } from '../utils';
 
 const initialState = {
   isHandlingSignIn: false,
@@ -36,9 +37,6 @@ const initialState = {
   selectedNoteIds: [],
   isSelectedNoteIdsMaxErrorShown: false,
   deletingListName: null,
-  noteTitle: '',
-  noteBody: '',
-  noteMedia: [],
   didFetch: false,
   listChangedCount: 0,
   updateSettingsProgress: null,
@@ -211,17 +209,6 @@ const displayReducer = (state = initialState, action) => {
     return { ...state, deletingListName: action.payload };
   }
 
-  if (action.type === UPDATE_EDITOR_CONTENT) {
-    const { title, body, media } = action.payload;
-
-    return {
-      ...state,
-      noteTitle: isString(title) ? title : state.noteTitle,
-      noteBody: isString(body) ? body : state.noteBody,
-      noteMedia: Array.isArray(media) ? media : state.noteMedia,
-    };
-  }
-
   if (action.type === UPDATE_SETTINGS) {
     return { ...state, updateSettingsProgress: { status: UPDATING } };
   }
@@ -252,6 +239,10 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_SYNC_PROGRESS) {
     return { ...state, syncProgress: action.payload };
+  }
+
+  if (action.type === INCREASE_RESET_NOTE_COUNT) {
+    return { ...state, isEditorFocused: false };
   }
 
   if (action.type === UPDATE_EXPORT_ALL_DATA_PROGRESS) {

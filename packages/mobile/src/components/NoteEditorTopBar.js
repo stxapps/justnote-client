@@ -6,7 +6,7 @@ import Svg, { Path } from 'react-native-svg';
 import { Circle } from 'react-native-animated-spinkit';
 
 import {
-  updateNoteId, updateEditorFocused, updateEditorContent, saveNote,
+  updateNoteId, increaseSaveNoteCount, increaseResetNoteCount,
 } from '../actions';
 import { NEW_NOTE, ADDED, LG_WIDTH } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
@@ -23,25 +23,20 @@ const NoteEditorTopBar = (props) => {
 
   const onRightPanelCloseBtnClick = () => {
     if (didClick.current) return;
-    dispatch(updateNoteId(null));
+    if (note.id !== NEW_NOTE && isEditorFocused) dispatch(increaseResetNoteCount());
+    else dispatch(updateNoteId(null));
     didClick.current = true;
   };
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;
-
-    let content;
-    if (note.id === NEW_NOTE) content = { title: '', body: '', media: [] };
-    else content = { title: note.title, body: note.body, media: note.media };
-
-    dispatch(updateEditorFocused(false));
-    dispatch(updateEditorContent(content));
+    dispatch(increaseResetNoteCount());
     didClick.current = true;
   };
 
   const onSaveBtnClick = () => {
     if (didClick.current) return;
-    dispatch(saveNote());
+    dispatch(increaseSaveNoteCount());
     didClick.current = true;
   };
 
@@ -90,9 +85,15 @@ const NoteEditorTopBar = (props) => {
         <View style={[tailwind('h-full flex-row justify-between sm:px-3 lg:items-center', safeAreaWidth), style]}>
           <View style={tailwind('flex-row')}>
             <TouchableOpacity onPress={onRightPanelCloseBtnClick} style={tailwind('justify-center px-4 h-full rounded-md bg-white lg:hidden', safeAreaWidth)}>
-              <Svg width={20} height={20} style={tailwind('text-gray-500 font-normal')} viewBox="0 0 20 20" fill="currentColor">
-                <Path fillRule="evenodd" clipRule="evenodd" d="M7.70703 14.707C7.5195 14.8945 7.26519 14.9998 7.00003 14.9998C6.73487 14.9998 6.48056 14.8945 6.29303 14.707L2.29303 10.707C2.10556 10.5195 2.00024 10.2652 2.00024 10C2.00024 9.73488 2.10556 9.48057 2.29303 9.29304L6.29303 5.29304C6.48163 5.11088 6.73423 5.01009 6.99643 5.01237C7.25863 5.01465 7.50944 5.11981 7.69485 5.30522C7.88026 5.49063 7.98543 5.74144 7.9877 6.00364C7.98998 6.26584 7.88919 6.51844 7.70703 6.70704L5.41403 9.00004H17C17.2652 9.00004 17.5196 9.1054 17.7071 9.29293C17.8947 9.48047 18 9.73482 18 10C18 10.2653 17.8947 10.5196 17.7071 10.7071C17.5196 10.8947 17.2652 11 17 11H5.41403L7.70703 13.293C7.8945 13.4806 7.99982 13.7349 7.99982 14C7.99982 14.2652 7.8945 14.5195 7.70703 14.707Z" />
-              </Svg>
+              {note.id !== NEW_NOTE && isEditorFocused ?
+                <Svg width={20} height={20} style={tailwind('text-gray-500 font-normal')} stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                  <Path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </Svg>
+                :
+                <Svg width={20} height={20} style={tailwind('text-gray-500 font-normal')} viewBox="0 0 20 20" fill="currentColor">
+                  <Path fillRule="evenodd" clipRule="evenodd" d="M7.70703 14.707C7.5195 14.8945 7.26519 14.9998 7.00003 14.9998C6.73487 14.9998 6.48056 14.8945 6.29303 14.707L2.29303 10.707C2.10556 10.5195 2.00024 10.2652 2.00024 10C2.00024 9.73488 2.10556 9.48057 2.29303 9.29304L6.29303 5.29304C6.48163 5.11088 6.73423 5.01009 6.99643 5.01237C7.25863 5.01465 7.50944 5.11981 7.69485 5.30522C7.88026 5.49063 7.98543 5.74144 7.9877 6.00364C7.98998 6.26584 7.88919 6.51844 7.70703 6.70704L5.41403 9.00004H17C17.2652 9.00004 17.5196 9.1054 17.7071 9.29293C17.8947 9.48047 18 9.73482 18 10C18 10.2653 17.8947 10.5196 17.7071 10.7071C17.5196 10.8947 17.2652 11 17 11H5.41403L7.70703 13.293C7.8945 13.4806 7.99982 13.7349 7.99982 14C7.99982 14.2652 7.8945 14.5195 7.70703 14.707Z" />
+                </Svg>
+              }
             </TouchableOpacity>
             <TouchableOpacity onPress={onToggleFullScreen} style={tailwind('hidden items-center px-2 py-2 border border-gray-300 shadow-sm rounded-md bg-white lg:flex lg:flex-row', safeAreaWidth)}>
               <Svg width={20} height={20} style={tailwind('text-gray-500 font-normal mr-1')} viewBox="0 0 20 20" fill="currentColor">

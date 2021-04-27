@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { TextInput, Platform } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { WebView } from 'react-native-webview';
 
-import { updateEditorFocused, updateEditorContent } from '../actions';
+import { updateEditorFocused, saveNote } from '../actions';
 import { NEW_NOTE, ADDED } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 
@@ -13,25 +13,15 @@ const NoteEditorEditor = (props) => {
 
   const { note } = props;
   const isFocused = useSelector(state => state.display.isEditorFocused);
-  //const title = useSelector(state => state.display.noteTitle);
-  //const body = useSelector(state => state.display.noteBody);
-  //const media = useSelector(state => state.display.noteMedia);
+  const saveNoteCount = useSelector(state => state.editor.saveNoteCount);
+  const resetNoteCount = useSelector(state => state.editor.resetNoteCount);
   const [isEditorReady, setEditorReady] = useState(false);
   const webView = useRef(null);
   const hackInput = useRef(null);
+  const prevIsFocused = useRef(isFocused);
+  const prevSaveNoteCount = useRef(saveNoteCount);
+  const prevResetNoteCount = useRef(resetNoteCount);
   const dispatch = useDispatch();
-
-  const onTitleInputChange = (value) => {
-    dispatch(updateEditorContent({ title: value }));
-  };
-
-  const onBodyInputChange = (value) => {
-    dispatch(updateEditorContent({ body: value }));
-  };
-
-  const onFocusChange = (isFocused) => {
-    dispatch(updateEditorFocused(isFocused));
-  };
 
   const setData = (title, body) => {
     const escapedTitle = title.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
@@ -39,10 +29,17 @@ const NoteEditorEditor = (props) => {
     webView.current.injectJavaScript("document.querySelector('#titleInput').value = '" + escapedTitle + "'; window.editor.setData('" + escapedBody + "');");
   };
 
+  const setInitData = useCallback(() => {
+    if (note.id === NEW_NOTE) {
+      setData('', '');
+      focusTitleInput();
+    } else setData(note.title, note.body);
+  }, [note.id, note.title, note.body]);
+
   const setEditable = (editable) => {
     const titleDisabled = editable ? 'false' : 'true';
     const isBodyReadOnly = editable ? 'false' : 'true';
-    webView.current.injectJavaScript("document.querySelector('#titleInput').disabled = " + titleDisabled + "; window.editor.isReadOnly = " + isBodyReadOnly + ";");
+    webView.current.injectJavaScript("document.querySelector('#titleInput').disabled = " + titleDisabled + '; window.editor.isReadOnly = ' + isBodyReadOnly + ';');
   };
 
   const focusTitleInput = () => {
@@ -53,35 +50,37 @@ const NoteEditorEditor = (props) => {
     webView.current.injectJavaScript("document.querySelector('#titleInput').focus();");
   };
 
-  const blurBodyInput = () => {
+  const blur = () => {
     hackInput.current.focus();
     hackInput.current.blur();
   };
 
-  const onMessage = e => {
-    const data = e.nativeEvent.data;
-    const [change, to, value] = data.split(':');
+  const onFocus = () => {
+    dispatch(updateEditorFocused(true));
+  };
 
-    if (change === 'data' && to === 'isEditorReady') setEditorReady(value === 'true');
-    else if (change === 'data' && to === 'title') onTitleInputChange(value);
-    else if (change === 'data' && to === 'body') onBodyInputChange(value);
-    else if (change === 'focus' && to === 'webView') onFocusChange(value === 'true');
+  const onGetData = (value) => {
+    const SEP = '_jUSTnOTE-sEpArAtOr_';
+    const [title, body] = value.split(SEP);
+
+    dispatch(saveNote(title, body, []));
+  };
+
+  const onMessage = (e) => {
+    const data = e.nativeEvent.data;
+    const arr = data.split(':');
+    const [change, to, value] = [arr[0], arr[1], arr.slice(2).join(':')];
+
+    if (change === 'focus' && to === 'webView') onFocus();
+    else if (change === 'data' && to === 'webView') onGetData(value);
+    else if (change === 'editor' && to === 'isReady') setEditorReady(value === 'true');
     else throw new Error(`Invalid data: ${data}`);
   };
 
   useEffect(() => {
     if (!isEditorReady) return;
-    if (note.id === NEW_NOTE) {
-      dispatch(updateEditorContent({ title: '', body: '', media: [] }));
-      setData('', '');
-      focusTitleInput();
-    } else {
-      dispatch(updateEditorContent(
-        { title: note.title, body: note.body, media: note.media }
-      ));
-      setData(note.title, note.body);
-    }
-  }, [isEditorReady, note, dispatch]);
+    setInitData();
+  }, [isEditorReady, setInitData]);
 
   useEffect(() => {
     if (!isEditorReady) return;
@@ -90,7 +89,28 @@ const NoteEditorEditor = (props) => {
 
   useEffect(() => {
     if (!isEditorReady) return;
-    if (!isFocused) blurBodyInput();
+    if (saveNoteCount !== prevSaveNoteCount.current) {
+      webView.current.injectJavaScript('window.justnote.getData();');
+      prevSaveNoteCount.current = saveNoteCount;
+    }
+  }, [isEditorReady, saveNoteCount]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+    if (resetNoteCount !== prevResetNoteCount.current) {
+      setInitData();
+      prevResetNoteCount.current = resetNoteCount;
+    }
+  }, [isEditorReady, resetNoteCount, setInitData]);
+
+  useEffect(() => {
+    if (!isEditorReady) {
+      prevIsFocused.current = isFocused;
+      return;
+    }
+
+    if (!isFocused && prevIsFocused.current) blur();
+    prevIsFocused.current = isFocused;
   }, [isEditorReady, isFocused]);
 
   return (
