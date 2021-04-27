@@ -7,7 +7,7 @@ import {
   updateNoteId, updateBulkEdit, addSelectedNoteIds, deleteSelectedNoteIds,
 } from '../actions';
 import { makeIsNoteIdSelected } from '../selectors';
-import { isBusyStatus } from '../utils';
+import { isBusyStatus, stripHtml } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 
 const NoteListItemContent = (props) => {
@@ -50,7 +50,7 @@ const NoteListItemContent = (props) => {
       </View>}
       <View style={tailwind('flex-1')}>
         <Text style={tailwind('text-sm font-semibold text-gray-800')} numberOfLines={1} ellipsizeMode="tail">{note.title}</Text>
-        <Text style={tailwind('text-sm text-gray-500 font-normal mt-1')} numberOfLines={3} ellipsizeMode="tail">{note.body}</Text>
+        <Text style={tailwind('text-sm text-gray-500 font-normal mt-1')} numberOfLines={3} ellipsizeMode="tail">{stripHtml(note.body)}</Text>
       </View>
     </TouchableOpacity>
   );

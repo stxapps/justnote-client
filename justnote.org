@@ -267,6 +267,7 @@
   + require iOS target to 11.0
 - yarn add react-native-animated-spinkit
 - yarn add react-native-keyboard-manager
+- yarn add react-native-webview
 - Android
   + android/gradle/wrapper/gradle-wrapper.properties
     ~ set gradle version in zip fpath

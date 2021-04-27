@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build-css": "create-tailwind-rn tailwind.css src/stylesheets/tailwind.json",
+    "export-ckeditor-as-string": "node bin/export-ckeditor-as-string.js ../../../justnote-editor-in-webview/js/ckeditor.js ../../../justnote-editor-in-webview/css/tailwind.css ../../../justnote-editor-in-webview/css/ckeditor.css ../../../justnote-editor-in-webview/index.html ./src/ckeditor.js",
     "android": "react-native run-android",
     "android-release": "react-native run-android --variant=release",
     "ios-install": "npx pod-install",
@@ -23,6 +24,7 @@
     "react-native-mmkv-storage": "0.4.4",
     "react-native-safe-area-context": "^3.2.0",
     "react-native-svg": "^12.1.0",
+    "react-native-webview": "^11.4.0",
     "react-redux": "^7.2.2",
     "redux": "^4.0.5",
     "redux-loop": "^6.0.1",
