@@ -26,7 +26,7 @@ const NoteEditorEditor = (props) => {
   const setData = (title, body) => {
     const escapedTitle = title.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
     const escapedBody = body.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-    webView.current.injectJavaScript("document.querySelector('#titleInput').value = '" + escapedTitle + "'; window.editor.setData('" + escapedBody + "');");
+    webView.current.injectJavaScript('document.querySelector("#titleInput").value = "' + escapedTitle + '"; window.editor.setData("' + escapedBody + '");');
   };
 
   const setInitData = useCallback(() => {
@@ -39,7 +39,7 @@ const NoteEditorEditor = (props) => {
   const setEditable = (editable) => {
     const titleDisabled = editable ? 'false' : 'true';
     const isBodyReadOnly = editable ? 'false' : 'true';
-    webView.current.injectJavaScript("document.querySelector('#titleInput').disabled = " + titleDisabled + '; window.editor.isReadOnly = ' + isBodyReadOnly + ';');
+    webView.current.injectJavaScript('document.querySelector("#titleInput").disabled = ' + titleDisabled + '; window.editor.isReadOnly = ' + isBodyReadOnly + ';');
   };
 
   const focusTitleInput = () => {
@@ -47,7 +47,7 @@ const NoteEditorEditor = (props) => {
       hackInput.current.focus();
       webView.current.requestFocus();
     }
-    webView.current.injectJavaScript("document.querySelector('#titleInput').focus();");
+    webView.current.injectJavaScript('document.querySelector("#titleInput").focus();');
   };
 
   const blur = () => {
@@ -115,7 +115,7 @@ const NoteEditorEditor = (props) => {
 
   return (
     <React.Fragment>
-      <WebView ref={webView} style={tailwind('flex-1')} source={{ baseUrl: Platform.OS === 'android' ? '' : undefined, html: ckeditor }} originWhiteList={['*']} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} />
+      <WebView ref={webView} style={tailwind('flex-1')} source={{ baseUrl: Platform.OS === 'android' ? '' : undefined, html: ckeditor }} originWhiteList={['*']} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} textZoom={100} />
       <TextInput ref={hackInput} style={tailwind('absolute -top-1 -left-1 w-1 h-1')} />
     </React.Fragment>
   );

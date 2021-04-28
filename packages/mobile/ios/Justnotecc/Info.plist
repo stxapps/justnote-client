@@ -88,5 +88,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>Take a picture for use in your note.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Select a picture for use in your note.</string>
 </dict>
 </plist>
