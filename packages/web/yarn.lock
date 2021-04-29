@@ -1149,6 +1149,16 @@
     sha.js "^2.4.11"
     smart-buffer "^4.1.0"
 
+"@ckeditor/ckeditor5-build-classic@file:../../../ckeditor5/packages/ckeditor5-build-classic":
+  version "27.1.0"
+
+"@ckeditor/ckeditor5-react@^3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@ckeditor/ckeditor5-react/-/ckeditor5-react-3.0.2.tgz#257466959cf5c6e16ed3dd3afe860e4c177dd156"
+  integrity sha512-hOAREzVUp8dwE8vV8qgxIGBOJzaxCm8N2aEhtbCq6QZbGLW9dckdfGKVmbtgEnCQgueVXEUqfDyUIXM6LtXDHA==
+  dependencies:
+    prop-types "^15.7.2"
+
 "@cnakazawa/watch@^1.0.3":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@cnakazawa/watch/-/watch-1.0.4.tgz#f864ae85004d0fcab6f50be9141c4da368d1656a"

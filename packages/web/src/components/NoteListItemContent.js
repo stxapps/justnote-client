@@ -7,7 +7,7 @@ import {
 } from '../actions';
 import { LG_WIDTH } from '../types/const';
 import { makeIsNoteIdSelected } from '../selectors';
-import { isBusyStatus } from '../utils';
+import { isBusyStatus, stripHtml } from '../utils';
 
 import { useSafeAreaFrame } from '.';
 
@@ -118,7 +118,7 @@ const NoteListItemContent = (props) => {
       </div>}
       <div className="flex-1 min-w-0">
         <h3 className="text-sm font-semibold text-gray-800 truncate group-hover:underline">{note.title}</h3>
-        <p className="mt-1 text-sm text-gray-500 line-clamp-3">{note.body}</p>
+        <p className="mt-1 text-sm text-gray-500 line-clamp-3">{stripHtml(note.body)}</p>
       </div>
     </button>
   );

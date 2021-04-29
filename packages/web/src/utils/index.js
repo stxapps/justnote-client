@@ -396,3 +396,12 @@ export const getFormattedDT = (dt) => {
 
   return `${date} ${month} ${year} ${hour}:${min}`;
 };
+
+export const stripHtml = (s) => {
+  const codeRe = /&(nbsp|amp|quot|lt|gt);/g;
+  const codeMap = { 'nbsp': ' ', 'amp': '&', 'quot': '"', 'lt': '<', 'gt': '>' };
+
+  return s
+    .replace(/(<([^>]+)>)/gi, '')
+    .replace(codeRe, (match, entity) => codeMap[entity]);
+};

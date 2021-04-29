@@ -230,6 +230,8 @@
   + Need to remove when @stacks/connect not depends to
 - yarn add reselect
 - yarn add file-saver
+- yarn add @ckeditor/ckeditor5-react
+- yarn add file:../../../ckeditor5/packages/ckeditor5-build-classic
 ** Server steps
 *** s3
 - Set public and enable CORS

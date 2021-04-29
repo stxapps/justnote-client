@@ -25,9 +25,9 @@ import {
   DELETE_LIST_NAMES, DELETE_LIST_NAMES_COMMIT, DELETE_LIST_NAMES_ROLLBACK,
   UPDATE_DELETING_LIST_NAME,
   RETRY_ADD_LIST_NAMES, RETRY_UPDATE_LIST_NAMES, RETRY_MOVE_LIST_NAME,
-  RETRY_DELETE_LIST_NAMES, CANCEL_DIED_LIST_NAMES, UPDATE_EDITOR_CONTENT,
+  RETRY_DELETE_LIST_NAMES, CANCEL_DIED_LIST_NAMES,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
-  UPDATE_UPDATE_SETTINGS_PROGRESS,
+  UPDATE_UPDATE_SETTINGS_PROGRESS, INCREASE_SAVE_NOTE_COUNT, INCREASE_RESET_NOTE_COUNT,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -535,13 +535,13 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
   dispatch({ type: UPDATE_NOTE_COMMIT, payload });
 };
 
-export const saveNote = () => async (dispatch, getState) => {
+export const saveNote = (title, body, media) => async (dispatch, getState) => {
 
-  const { noteId, noteTitle, noteBody, noteMedia } = getState().display;
+  const { noteId } = getState().display;
   if (noteId === NEW_NOTE) {
-    dispatch(addNote(noteTitle, noteBody, noteMedia));
+    dispatch(addNote(title, body, media));
   } else {
-    dispatch(updateNote(noteTitle, noteBody, noteMedia, noteId));
+    dispatch(updateNote(title, body, media, noteId));
   }
 };
 
@@ -1190,13 +1190,6 @@ export const cancelDiedListNames = (listNames) => {
   };
 };
 
-export const updateEditorContent = (content) => {
-  return {
-    type: UPDATE_EDITOR_CONTENT,
-    payload: content,
-  };
-};
-
 export const updateSettings = (updatedValues) => async (dispatch, getState) => {
 
   const addedDT = Date.now();
@@ -1252,6 +1245,14 @@ export const tryUpdateSynced = (updateAction, haveUpdate) => async (
   dispatch, getState
 ) => {
   // Do nothing on web. This is for mobile.
+};
+
+export const increaseSaveNoteCount = () => {
+  return { type: INCREASE_SAVE_NOTE_COUNT };
+};
+
+export const increaseResetNoteCount = () => {
+  return { type: INCREASE_RESET_NOTE_COUNT };
 };
 
 const exportAllDataLoop = async (dispatch, fpaths, doneCount) => {

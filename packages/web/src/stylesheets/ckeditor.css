@@ -1,0 +1,182 @@
+:root {
+  --jn-editor-white: rgb(255, 255, 255);
+
+  --jn-editor-gray-50: rgb(249, 250, 251);
+  --jn-editor-gray-100: rgb(243, 244, 246);
+  --jn-editor-gray-200: rgb(229, 231, 235);
+  --jn-editor-gray-300: rgb(209, 213, 219);
+  --jn-editor-gray-400: rgb(156, 163, 175);
+  --jn-editor-gray-500: rgb(107, 114, 128);
+  --jn-editor-gray-600: rgb(75, 85, 99);
+  --jn-editor-gray-800: rgb(31, 41, 55);
+
+  --jn-editor-blue-300: rgb(147, 197, 253);
+  --jn-editor-blue-400: rgb(96, 165, 250);
+  --jn-editor-blue-700: rgb(29, 78, 216);
+
+  --jn-editor-green-200: rgb(187, 247, 208);
+  --jn-editor-green-300: rgb(134, 239, 172);
+  --jn-editor-green-400: rgb(74, 222, 128);
+  --jn-editor-green-500: rgb(34, 197, 94);
+  --jn-editor-green-600: rgb(22, 163, 74);
+
+  --jn-editor-red-500: rgb(239, 68, 68);
+  --jn-editor-red-600: rgb(220, 38, 38);
+
+  --ck-color-base-foreground: var(--jn-editor-white);
+  --ck-color-base-background: var(--jn-editor-white);
+  --ck-color-base-border: var(--jn-editor-gray-200);
+  --ck-color-base-action: var(--jn-editor-green-400);
+  --ck-color-base-focus: var(--jn-editor-green-600);
+  --ck-color-base-text: var(--jn-editor-gray-600);
+  --ck-color-base-active: var(--jn-editor-gray-500);
+  --ck-color-base-active-focus: var(--jn-editor-gray-600);
+  --ck-color-base-error: var(--jn-editor-red-600);
+
+  --ck-color-focus-border-coordinates: 131, 50%, 43%;
+  --ck-color-focus-border: hsl(var(--ck-color-focus-border-coordinates));
+  --ck-color-focus-outer-shadow: var(--jn-editor-green-200);
+  --ck-color-focus-disabled-shadow: var(--jn-editor-green-300);
+  --ck-color-focus-error-shadow: var(--jn-editor-red-500);
+  --ck-color-text: var(--ck-color-base-text);
+  --ck-color-shadow-drop: hsla(0, 0%, 0%, 0.15);
+  --ck-color-shadow-drop-active: hsla(0, 0%, 0%, 0.2);
+  --ck-color-shadow-inner: hsla(0, 0%, 0%, 0.1);
+
+  --ck-color-button-default-background: transparent;
+  --ck-color-button-default-hover-background: var(--jn-editor-gray-100);
+  --ck-color-button-default-active-background: var(--jn-editor-gray-200) ;
+  --ck-color-button-default-active-shadow: var(--jn-editor-gray-200);
+  --ck-color-button-default-disabled-background: transparent;
+
+  --ck-color-button-on-background: var(--jn-editor-gray-300);
+  --ck-color-button-on-hover-background: var(--jn-editor-gray-300);
+  --ck-color-button-on-active-background: var(--jn-editor-gray-300);
+  --ck-color-button-on-active-shadow: var(--jn-editor-gray-400);
+  --ck-color-button-on-disabled-background: var(--jn-editor-gray-300);
+
+  --ck-color-button-action-background: var(--ck-color-base-action);
+  --ck-color-button-action-hover-background: var(--jn-editor-green-500);
+  --ck-color-button-action-active-background: var(--jn-editor-green-500);
+  --ck-color-button-action-active-shadow: var(--jn-editor-green-500);
+  --ck-color-button-action-disabled-background: var(--jn-editor-green-200);
+  --ck-color-button-action-text: var(--ck-color-base-background);
+
+  --ck-color-button-save: var(--jn-editor-green-600);
+  --ck-color-button-cancel: var(--jn-editor-red-600);
+
+  --ck-color-switch-button-off-background: var(--jn-editor-gray-300);
+  --ck-color-switch-button-off-hover-background: var(--jn-editor-gray-300);
+  --ck-color-switch-button-on-background: var(--ck-color-button-action-background);
+  --ck-color-switch-button-on-hover-background: var(--jn-editor-green-500);
+  --ck-color-switch-button-inner-background: var(--ck-color-base-background);
+  --ck-color-switch-button-inner-shadow: hsla(0, 0%, 0%, 0.1);
+
+  --ck-color-dropdown-panel-background: var(--ck-color-base-background);
+  --ck-color-dropdown-panel-border: var(--ck-color-base-border);
+
+  --ck-color-input-background: var(--ck-color-base-background);
+  --ck-color-input-border: var(--jn-editor-gray-200);
+  --ck-color-input-error-border: var(--ck-color-base-error);
+  --ck-color-input-text: var(--ck-color-base-text);
+  --ck-color-input-disabled-background: var(--jn-editor-gray-50);
+  --ck-color-input-disabled-border: var(--jn-editor-gray-300);
+  --ck-color-input-disabled-text: var(--jn-editor-gray-500);
+
+  --ck-color-list-background: var(--ck-color-base-background);
+  --ck-color-list-button-hover-background: var(--ck-color-button-default-hover-background);
+  --ck-color-list-button-on-background: var(--ck-color-base-active);
+  --ck-color-list-button-on-background-focus: var(--ck-color-base-active-focus);
+  --ck-color-list-button-on-text: var(--ck-color-base-background);
+
+  --ck-color-panel-background: var(--ck-color-base-background);
+  --ck-color-panel-border: var(--ck-color-base-border);
+
+  --ck-color-toolbar-background: var(--ck-color-base-foreground);
+  --ck-color-toolbar-border: var(--ck-color-base-border);
+
+  --ck-color-tooltip-background: var(--ck-color-base-text);
+  --ck-color-tooltip-text: var(--ck-color-base-background);
+
+  --ck-color-engine-placeholder-text: var(--jn-editor-gray-500);
+
+  --ck-color-upload-bar-background: var(--jn-editor-blue-400);
+
+  --ck-color-link-default: var(--jn-editor-blue-700);
+  --ck-color-link-selected-background: var(--jn-editor-blue-300);
+  --ck-color-link-fake-selection: var(--jn-editor-blue-300);
+
+  --ck-color-widget-hover-border: var(--jn-editor-green-600);
+}
+
+.ck.ck-editor__main>.ck-editor__editable {
+  color: var(--jn-editor-gray-800);
+  font-size: 16px;
+}
+
+.ck.ck-editor__main>.ck-editor__editable ul {
+  list-style: disc;
+  padding-left: 40px;
+}
+
+.ck.ck-editor__main>.ck-editor__editable ol {
+  list-style: decimal;
+  padding-left: 40px;
+}
+
+.ck.ck-editor__main>.ck-editor__editable p a {
+  color: var(--jn-editor-blue-700);
+  cursor: pointer;
+}
+
+.ck.ck-editor__main>.ck-editor__editable p a:hover {
+  text-decoration: underline;
+}
+
+.ck.ck-editor__main>.ck-editor__editable:not(.ck-focused) {
+  border-color: transparent;
+}
+
+.ck.ck-editor__editable:not(.ck-editor__nested-editable).ck-focused {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.ck.ck-editor__top .ck-sticky-panel .ck-toolbar {
+  border-top-width: 1px;
+  border-bottom-width: 1px;
+  border-left-width: 0px;
+  border-right-width: 0px;
+}
+
+.ck.ck-sticky-panel .ck-sticky-panel__content_sticky {
+  box-shadow: none;
+}
+
+.ck.ck-button.ck-disabled .ck-button__icon, a.ck.ck-button.ck-disabled .ck-button__icon {
+  opacity: 1;
+}
+
+/*
+ * Apply only on web, not mobile (in-webview).
+ * As scroll happens on div, not window, listenTo in stickyPanelView doesn't work.
+ * Need to fix it here.
+ * ref: https://stackoverflow.com/questions/52512665/how-to-disable-sticky-toolbar-in-classic-editor-when-page-is-scrolled
+ */
+.ck.ck-editor__top {
+  z-index: var(--ck-z-modal);
+  position: sticky;
+  position: -webkit-sticky;
+  top: -1px;
+}
+
+.ck.ck-sticky-panel__placeholder {
+  display : none !important;
+}
+
+.ck.ck-sticky-panel .ck-sticky-panel__content_sticky {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+}
+/* End */
