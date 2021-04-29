@@ -6,6 +6,7 @@ import { WebView } from 'react-native-webview';
 import { updateEditorFocused, saveNote } from '../actions';
 import { NEW_NOTE, ADDED } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
+import cache from '../utils/cache';
 
 const ckeditor = require('../ckeditor');
 
@@ -55,18 +56,18 @@ const NoteEditorEditor = (props) => {
     hackInput.current.blur();
   };
 
-  const onFocus = () => {
+  const onFocus = useCallback(() => {
     dispatch(updateEditorFocused(true));
-  };
+  }, [dispatch]);
 
-  const onGetData = (value) => {
+  const onGetData = useCallback((value) => {
     const SEP = '_jUSTnOTE-sEpArAtOr_';
     const [title, body] = value.split(SEP);
 
     dispatch(saveNote(title, body, []));
-  };
+  }, [dispatch]);
 
-  const onMessage = (e) => {
+  const onMessage = useCallback((e) => {
     const data = e.nativeEvent.data;
     const arr = data.split(':');
     const [change, to, value] = [arr[0], arr[1], arr.slice(2).join(':')];
@@ -75,7 +76,7 @@ const NoteEditorEditor = (props) => {
     else if (change === 'data' && to === 'webView') onGetData(value);
     else if (change === 'editor' && to === 'isReady') setEditorReady(value === 'true');
     else throw new Error(`Invalid data: ${data}`);
-  };
+  }, [onFocus, onGetData]);
 
   useEffect(() => {
     if (!isEditorReady) return;
@@ -115,7 +116,7 @@ const NoteEditorEditor = (props) => {
 
   return (
     <React.Fragment>
-      <WebView ref={webView} style={tailwind('flex-1')} source={{ baseUrl: Platform.OS === 'android' ? '' : undefined, html: ckeditor }} originWhiteList={['*']} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} textZoom={100} />
+      <WebView ref={webView} style={tailwind('flex-1')} source={cache('NEE_webView_source', { baseUrl: Platform.OS === 'android' ? '' : undefined, html: ckeditor })} originWhiteList={cache('NEE_webView_originWhiteList', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} textZoom={100} />
       <TextInput ref={hackInput} style={tailwind('absolute -top-1 -left-1 w-1 h-1')} />
     </React.Fragment>
   );

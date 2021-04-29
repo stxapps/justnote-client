@@ -410,15 +410,13 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
   dispatch({ type: UPDATE_NOTE_COMMIT, payload });
 };
 
-export const saveNote = (noteTitle, noteBody, noteMedia) => async (
-  dispatch, getState
-) => {
+export const saveNote = (title, body, media) => async (dispatch, getState) => {
 
   const { noteId } = getState().display;
   if (noteId === NEW_NOTE) {
-    dispatch(addNote(noteTitle, noteBody, noteMedia));
+    dispatch(addNote(title, body, media));
   } else {
-    dispatch(updateNote(noteTitle, noteBody, noteMedia, noteId));
+    dispatch(updateNote(title, body, media, noteId));
   }
 };
 
@@ -1460,7 +1458,9 @@ const deleteAllDataLoop = async (dispatch, noteIds, total, doneCount) => {
 export const deleteAllData = () => async (dispatch, getState) => {
 
   dispatch(updateDeleteAllDataProgress({ total: 'calculating...', done: 0 }));
-  dispatch(sync(true, 2));
+
+  // Need to manually call it to wait for it properly!
+  await sync(true, 2)(dispatch, getState);
 
   const addedDT = Date.now();
   const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;

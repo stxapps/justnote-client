@@ -30,7 +30,8 @@ const NoteEditorTopBar = (props) => {
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;
-    dispatch(increaseResetNoteCount());
+    if (note.id !== NEW_NOTE && isEditorFocused) dispatch(increaseResetNoteCount());
+    else dispatch(updateNoteId(null));
     didClick.current = true;
   };
 
@@ -43,7 +44,7 @@ const NoteEditorTopBar = (props) => {
   const renderFocusedCommands = () => {
     return (
       <React.Fragment>
-        <TouchableOpacity onPress={onCancelBtnClick} style={tailwind('hidden border border-white bg-white px-2 py-2 rounded-md shadow-sm lg:flex', safeAreaWidth)}>
+        <TouchableOpacity onPress={onCancelBtnClick} style={tailwind('hidden border border-white bg-white px-2 py-2 rounded-md lg:flex', safeAreaWidth)}>
           <Text style={tailwind('text-sm text-gray-500 font-normal')}>Cancel</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={onSaveBtnClick} style={tailwind('flex-row items-center h-full pl-1 pr-1 border border-white bg-white sm:pl-2 lg:px-2 lg:py-2 lg:border-gray-300 lg:rounded-md lg:shadow-sm lg:ml-3', safeAreaWidth)}>
