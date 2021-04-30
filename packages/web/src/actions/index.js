@@ -25,14 +25,18 @@ import {
   DELETE_LIST_NAMES, DELETE_LIST_NAMES_COMMIT, DELETE_LIST_NAMES_ROLLBACK,
   UPDATE_DELETING_LIST_NAME,
   RETRY_ADD_LIST_NAMES, RETRY_UPDATE_LIST_NAMES, RETRY_MOVE_LIST_NAME,
-  RETRY_DELETE_LIST_NAMES, CANCEL_DIED_LIST_NAMES,
+  RETRY_DELETE_LIST_NAMES, CANCEL_DIED_LIST_NAMES, UPDATE_DISCARD_ACTION,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
-  UPDATE_UPDATE_SETTINGS_PROGRESS, INCREASE_SAVE_NOTE_COUNT, INCREASE_RESET_NOTE_COUNT,
+  UPDATE_UPDATE_SETTINGS_PROGRESS, INCREASE_SAVE_NOTE_COUNT,
+  INCREASE_DISCARD_NOTE_COUNT, INCREASE_CONFIRM_DISCARD_NOTE_COUNT,
+  INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT, INCREASE_UPDATE_NOTE_ID_COUNT,
+  INCREASE_CHANGE_LIST_NAME_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
-  APP_NAME, APP_ICON_NAME, SEARCH_POPUP, CONFIRM_DELETE_POPUP, SETTINGS_POPUP,
+  APP_NAME, APP_ICON_NAME, SEARCH_POPUP, SETTINGS_POPUP,
+  CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP,
   MY_NOTES, TRASH, ID, NEW_NOTE,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
   SWAP_LEFT, SWAP_RIGHT, N_NOTES, SETTINGS, INDEX, DOT_JSON, LG_WIDTH,
@@ -285,6 +289,21 @@ export const onUrlHashChange = (oldUrl, newUrl, dispatch, getState) => {
     dispatch(updatePopup(CONFIRM_DELETE_POPUP, true, null));
   }
 
+  // confirm discard popup
+  if ('cdip' in oldHashObj && 'cdip' in newHashObj) {
+    if (oldHashObj['cdip'] === newHashObj['cdip']) {
+      // something else changed, do nothing here.
+    } else {
+      throw new Error(`Shouldn't reach here!`);
+    }
+  } else if ('cdip' in oldHashObj && !('cdip' in newHashObj)) {
+    // Close confirm discard popup
+    dispatch(updatePopup(CONFIRM_DISCARD_POPUP, false, null));
+  } else if (!('cdip' in oldHashObj) && 'cdip' in newHashObj) {
+    // Open confirm discard popup
+    dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true, null));
+  }
+
   // is bulk editing?
   if ('ibe' in oldHashObj && 'ibe' in newHashObj) {
     if (oldHashObj['ibe'] === newHashObj['ibe']) {
@@ -312,7 +331,7 @@ export const updateUrlHash = (q, doReplace = false) => {
   } else window.location.hash = updatedHash;
 };
 
-export const updateNoteIdUrlHash = (id) => {
+const _updateNoteIdUrlHash = (id) => {
   if (!id) {
     window.history.back();
     return;
@@ -320,6 +339,29 @@ export const updateNoteIdUrlHash = (id) => {
 
   const obj = { n: id };
   updateUrlHash(obj);
+};
+
+export const updateNoteIdUrlHash = (
+  id, doGetIdFromState = false, doCheckEditing = false
+) => {
+  if (!doGetIdFromState && !doCheckEditing) {
+    _updateNoteIdUrlHash(id);
+    return;
+  }
+
+  return async (dispatch, getState) => {
+    // id can be both null and non-null so need doGetIdFromState, can't just check if.
+    if (doGetIdFromState) id = getState().display.updatingNoteId;
+    if (doCheckEditing) {
+      const isEditorFocused = getState().display.isEditorFocused;
+      if (isEditorFocused) {
+        dispatch(increaseUpdateNoteIdUrlHashCount(id));
+        return;
+      }
+    }
+
+    _updateNoteIdUrlHash(id);
+  };
 };
 
 export const updatePopupUrlHash = (id, isShown, anchorPosition, doReplace = false) => {
@@ -332,6 +374,7 @@ export const updatePopupUrlHash = (id, isShown, anchorPosition, doReplace = fals
   let obj;
   if (id === SEARCH_POPUP) obj = { sp: true };
   else if (id === CONFIRM_DELETE_POPUP) obj = { cdp: true };
+  else if (id === CONFIRM_DISCARD_POPUP) obj = { cdip: true };
   else {
     obj = {
       p: id,
@@ -361,20 +404,49 @@ export const updateBulkEditUrlHash = (isBulkEditing, doReplace = false) => {
   updateUrlHash(obj, doReplace);
 };
 
-export const changeListName = (listName) => async (dispatch, getState) => {
+export const changeListName = (listName, doCheckEditing) => async (
+  dispatch, getState
+) => {
+
+  if (!listName) listName = getState().display.changingListName;
+  if (!listName) throw new Error(`Invalid listName: ${listName}`);
+
+  if (doCheckEditing) {
+    const isEditorFocused = getState().display.isEditorFocused;
+    if (isEditorFocused) {
+      dispatch(increaseChangeListNameCount(listName));
+      return;
+    }
+  }
 
   dispatch({
     type: UPDATE_LIST_NAME,
     payload: listName,
   });
-
-  dispatch(clearSelectedNoteIds());
 };
 
-export const updateNoteId = (id) => {
+const _updateNoteId = (id) => {
   return {
     type: UPDATE_NOTE_ID,
     payload: id,
+  };
+};
+
+export const updateNoteId = (id, doGetIdFromState = false, doCheckEditing = false) => {
+  if (!doGetIdFromState && !doCheckEditing) return _updateNoteId(id);
+
+  return async (dispatch, getState) => {
+    // id can be both null and non-null so need doGetIdFromState, can't just check if.
+    if (doGetIdFromState) id = getState().display.updatingNoteId;
+    if (doCheckEditing) {
+      const isEditorFocused = getState().display.isEditorFocused;
+      if (isEditorFocused) {
+        dispatch(increaseUpdateNoteIdCount(id));
+        return;
+      }
+    }
+
+    dispatch(_updateNoteId(id));
   };
 };
 
@@ -1190,6 +1262,13 @@ export const cancelDiedListNames = (listNames) => {
   };
 };
 
+export const updateDiscardAction = (discardAction) => {
+  return {
+    type: UPDATE_DISCARD_ACTION,
+    payload: discardAction,
+  };
+};
+
 export const updateSettings = (updatedValues) => async (dispatch, getState) => {
 
   const addedDT = Date.now();
@@ -1251,8 +1330,37 @@ export const increaseSaveNoteCount = () => {
   return { type: INCREASE_SAVE_NOTE_COUNT };
 };
 
-export const increaseResetNoteCount = () => {
-  return { type: INCREASE_RESET_NOTE_COUNT };
+export const increaseDiscardNoteCount = () => {
+  return { type: INCREASE_DISCARD_NOTE_COUNT };
+};
+
+export const increaseConfirmDiscardNoteCount = () => {
+  return { type: INCREASE_CONFIRM_DISCARD_NOTE_COUNT };
+};
+
+export const increaseUpdateNoteIdUrlHashCount = (id) => {
+  return {
+    type: INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
+    payload: id,
+  };
+};
+
+export const increaseUpdateNoteIdCount = (id) => {
+  return {
+    type: INCREASE_UPDATE_NOTE_ID_COUNT,
+    payload: id,
+  };
+};
+
+export const increaseChangeListNameCount = (listName) => {
+  return {
+    type: INCREASE_CHANGE_LIST_NAME_COUNT,
+    payload: listName,
+  };
+};
+
+export const increaseUpdateEditorWidthCount = () => {
+  return { type: INCREASE_UPDATE_EDITOR_WIDTH_COUNT };
 };
 
 const exportAllDataLoop = async (dispatch, fpaths, doneCount) => {

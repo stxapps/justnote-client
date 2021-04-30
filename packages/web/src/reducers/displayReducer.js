@@ -3,16 +3,16 @@ import {
   UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, CLEAR_SELECTED_NOTE_IDS,
   FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES,
-  DELETE_LIST_NAMES, UPDATE_DELETING_LIST_NAME,
+  DELETE_LIST_NAMES, UPDATE_DELETING_LIST_NAME, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
+  INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT, UPDATE_DISCARD_ACTION,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
-  UPDATE_UPDATE_SETTINGS_PROGRESS, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
-  UPDATE_SYNC_PROGRESS, INCREASE_RESET_NOTE_COUNT,
+  UPDATE_UPDATE_SETTINGS_PROGRESS, SYNC, SYNC_COMMIT, SYNC_ROLLBACK, UPDATE_SYNC_PROGRESS,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   PROFILE_POPUP, NOTE_LIST_MENU_POPUP, MOVE_TO_POPUP, SIDEBAR_POPUP, SEARCH_POPUP,
-  CONFIRM_DELETE_POPUP, SETTINGS_POPUP, MY_NOTES, TRASH, ARCHIVE,
+  SETTINGS_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, MY_NOTES, TRASH, ARCHIVE,
   UPDATING, DIED_UPDATING, MAX_SELECTED_NOTE_IDS,
 } from '../types/const';
 import { doContainListName } from '../utils';
@@ -29,8 +29,9 @@ const initialState = {
   moveToPopupPosition: null,
   isSidebarPopupShown: false,
   isSearchPopupShown: false,
-  isConfirmDeletePopupShown: false,
   isSettingsPopupShown: false,
+  isConfirmDeletePopupShown: false,
+  isConfirmDiscardPopupShown: false,
   searchString: '',
   isBulkEditing: false,
   isEditorFocused: false,
@@ -39,6 +40,9 @@ const initialState = {
   deletingListName: null,
   didFetch: false,
   listChangedCount: 0,
+  updatingNoteId: null,
+  changingListName: null,
+  discardAction: null,
   updateSettingsProgress: null,
   syncProgress: null,
   exportAllDataProgress: null,
@@ -60,12 +64,14 @@ const displayReducer = (state = initialState, action) => {
       isEditorFocused: false,
       selectedNoteIds: [],
       isSelectedNoteIdsMaxErrorShown: false,
+      changingListName: null,
     };
   }
 
   if (action.type === UPDATE_NOTE_ID) {
     const newState = { ...state, isEditorFocused: false };
     newState.noteId = state.noteId === action.payload ? null : action.payload;
+    newState.updatingNoteId = null;
     return newState;
   }
 
@@ -105,16 +111,26 @@ const displayReducer = (state = initialState, action) => {
       return { ...state, isSearchPopupShown: isShown, searchString: '' };
     }
 
+    if (id === SETTINGS_POPUP) {
+      return {
+        ...state, isSettingsPopupShown: isShown,
+      };
+    }
+
     if (action.payload.id === CONFIRM_DELETE_POPUP) {
       const newState = { ...state, isConfirmDeletePopupShown: isShown };
       if (!isShown) newState.deletingListName = null;
       return newState;
     }
 
-    if (id === SETTINGS_POPUP) {
-      return {
-        ...state, isSettingsPopupShown: isShown,
-      };
+    if (action.payload.id === CONFIRM_DISCARD_POPUP) {
+      const newState = { ...state, isConfirmDiscardPopupShown: isShown };
+      if (!isShown) {
+        newState.updatingNoteId = null;
+        newState.changingListName = null;
+        newState.discardAction = null;
+      }
+      return newState;
     }
 
     throw new Error(`Invalid type: ${action.type} and payload: ${action.payload}`);
@@ -209,6 +225,21 @@ const displayReducer = (state = initialState, action) => {
     return { ...state, deletingListName: action.payload };
   }
 
+  if (
+    action.type === INCREASE_UPDATE_NOTE_ID_COUNT ||
+    action.type === INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT
+  ) {
+    return { ...state, updatingNoteId: action.payload };
+  }
+
+  if (action.type === INCREASE_CHANGE_LIST_NAME_COUNT) {
+    return { ...state, changingListName: action.payload };
+  }
+
+  if (action.type === UPDATE_DISCARD_ACTION) {
+    return { ...state, discardAction: action.payload };
+  }
+
   if (action.type === UPDATE_SETTINGS) {
     return { ...state, updateSettingsProgress: { status: UPDATING } };
   }
@@ -239,10 +270,6 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_SYNC_PROGRESS) {
     return { ...state, syncProgress: action.payload };
-  }
-
-  if (action.type === INCREASE_RESET_NOTE_COUNT) {
-    return { ...state, isEditorFocused: false };
   }
 
   if (action.type === UPDATE_EXPORT_ALL_DATA_PROGRESS) {

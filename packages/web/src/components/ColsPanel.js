@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { increaseUpdateEditorWidthCount } from '../actions';
 import { COLS_PANEL_STATE, NEW_NOTE, NEW_NOTE_OBJ } from '../types/const';
 import { throttle } from '../utils';
 
@@ -58,6 +59,8 @@ const ColsPanel = () => {
   const [isResizeActive, setIsResizeActive] = useState(false);
   const startInfo = useRef(null);
   const whichResizer = useRef(null);
+
+  const dispatch = useDispatch();
 
   const _onLeftResizerTouchStart = (event) => {
     unFocus(document, window);
@@ -162,6 +165,10 @@ const ColsPanel = () => {
     });
   }, [state.isPane3FullScreen]);
 
+  const onPane3AnimEnd = useCallback(() => {
+    dispatch(increaseUpdateEditorWidthCount());
+  }, [dispatch]);
+
   useEffect(() => {
 
     const _onMouseMove = throttle(onMouseMove, 16);
@@ -211,7 +218,7 @@ const ColsPanel = () => {
         </AnimatePresence>
       </motion.div>
       <motion.div onMouseDown={onRightResizerMouseDown} onTouchStart={onRightResizerTouchStart} onTouchEnd={onTouchEnd} className={`relative bg-white border-l border-gray-100 pr-1 cursor-resize overflow-visible ${resizer2Classes}`} layout={!isResizeActive} />
-      <motion.div className="flex-1 bg-white overflow-hidden" layout={!isResizeActive}>
+      <motion.div className="flex-1 bg-white overflow-hidden" layout={!isResizeActive} onLayoutAnimationComplete={onPane3AnimEnd}>
         <NoteEditor note={note} isFullScreen={state.isPane3FullScreen} onToggleFullScreen={onTogglePane3FullScreen} />
       </motion.div>
     </div >

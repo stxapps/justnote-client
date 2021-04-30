@@ -3,8 +3,15 @@ import { useSelector, useDispatch } from 'react-redux';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ckeditor from '@ckeditor/ckeditor5-build-classic';
 
-import { updateEditorFocused, saveNote } from '../actions';
-import { NEW_NOTE, ADDED } from '../types/const';
+import {
+  updatePopupUrlHash, updateEditorFocused, saveNote, updateDiscardAction,
+  updateNoteIdUrlHash, updateNoteId, changeListName,
+} from '../actions';
+import {
+  CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT,
+  DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
+  DISCARD_ACTION_CHANGE_LIST_NAME, NEW_NOTE, ADDED,
+} from '../types/const';
 
 import '../stylesheets/ckeditor.css';
 
@@ -12,24 +19,34 @@ const NoteEditorEditor = (props) => {
 
   const { note } = props;
   const saveNoteCount = useSelector(state => state.editor.saveNoteCount);
-  const resetNoteCount = useSelector(state => state.editor.resetNoteCount);
+  const discardNoteCount = useSelector(state => state.editor.discardNoteCount);
+  const confirmDiscardNoteCount = useSelector(
+    state => state.editor.confirmDiscardNoteCount
+  );
+  const updateNoteIdUrlHashCount = useSelector(
+    state => state.editor.updateNoteIdUrlHashCount
+  );
+  const updateNoteIdCount = useSelector(state => state.editor.updateNoteIdCount);
+  const changeListNameCount = useSelector(state => state.editor.changeListNameCount);
+  const updateEditorWidthCount = useSelector(
+    state => state.editor.updateEditorWidthCount
+  );
   const [isEditorReady, setEditorReady] = useState(false);
   const titleInput = useRef(null);
   const bodyEditor = useRef(null);
   const prevSaveNoteCount = useRef(saveNoteCount);
-  const prevResetNoteCount = useRef(resetNoteCount);
+  const prevDiscardNoteCount = useRef(discardNoteCount);
+  const prevConfirmDiscardNoteCount = useRef(confirmDiscardNoteCount);
+  const prevUpdateNoteIdUrlHashCount = useRef(updateNoteIdUrlHashCount);
+  const prevUpdateNoteIdCount = useRef(updateNoteIdCount);
+  const prevChangeListNameCount = useRef(changeListNameCount);
+  const prevUpdateEditorWidthCount = useRef(updateEditorWidthCount);
   const dispatch = useDispatch();
 
-  const setData = (title, body) => {
-    titleInput.current.value = title;
-    bodyEditor.current.setData(body);
-  };
-
   const setInitData = useCallback(() => {
-    if (note.id === NEW_NOTE) {
-      setData('', '');
-      focusTitleInput();
-    } else setData(note.title, note.body);
+    titleInput.current.value = note.title;
+    bodyEditor.current.setData(note.body);
+    if (note.id === NEW_NOTE) focusTitleInput();
   }, [note.id, note.title, note.body]);
 
   const focusTitleInput = () => {
@@ -44,10 +61,75 @@ const NoteEditorEditor = (props) => {
     const title = titleInput.current.value;
     const body = bodyEditor.current.getData();
 
+    if (title === '' && body === '') {
+      dispatch(updateEditorFocused(false));
+      setTimeout(() => {
+        dispatch(updateEditorFocused(true));
+        focusTitleInput();
+      }, 1);
+      return;
+    }
+
     dispatch(saveNote(title, body, []));
   }, [dispatch]);
 
+  const onDiscardNote = useCallback((doCheckEditing) => {
+    if (doCheckEditing) {
+      const title = titleInput.current.value;
+      const body = bodyEditor.current.getData();
+
+      if (note.title !== title || note.body !== body) {
+        dispatch(updateDiscardAction(DISCARD_ACTION_CANCEL_EDIT));
+        updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
+        return;
+      }
+    }
+
+    dispatch(updateEditorFocused(false));
+    setInitData();
+  }, [note.title, note.body, setInitData, dispatch]);
+
+  const onUpdateNoteIdUrlHash = useCallback(() => {
+    const title = titleInput.current.value;
+    const body = bodyEditor.current.getData();
+
+    if (note.title !== title || note.body !== body) {
+      dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH));
+      updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
+      return;
+    }
+
+    dispatch(updateNoteIdUrlHash(null, true, false));
+  }, [note.title, note.body, dispatch]);
+
+  const onUpdateNoteId = useCallback(() => {
+    const title = titleInput.current.value;
+    const body = bodyEditor.current.getData();
+
+    if (note.title !== title || note.body !== body) {
+      dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_NOTE_ID));
+      updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
+      return;
+    }
+
+    dispatch(updateNoteId(null, true, false));
+  }, [note.title, note.body, dispatch]);
+
+  const onChangeListName = useCallback(() => {
+    const title = titleInput.current.value;
+    const body = bodyEditor.current.getData();
+
+    if (note.title !== title || note.body !== body) {
+      dispatch(updateDiscardAction(DISCARD_ACTION_CHANGE_LIST_NAME));
+      updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
+      return;
+    }
+
+    dispatch(changeListName(null, false));
+  }, [note.title, note.body, dispatch]);
+
   const onReady = useCallback((editor) => {
+    window.editor = editor;
     bodyEditor.current = editor;
     setEditorReady(true);
   }, [setEditorReady]);
@@ -67,11 +149,70 @@ const NoteEditorEditor = (props) => {
 
   useEffect(() => {
     if (!isEditorReady) return;
-    if (resetNoteCount !== prevResetNoteCount.current) {
-      setInitData();
-      prevResetNoteCount.current = resetNoteCount;
+    if (discardNoteCount !== prevDiscardNoteCount.current) {
+      onDiscardNote(true);
+      prevDiscardNoteCount.current = discardNoteCount;
     }
-  }, [isEditorReady, resetNoteCount, setInitData]);
+  }, [isEditorReady, discardNoteCount, onDiscardNote]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+    if (confirmDiscardNoteCount !== prevConfirmDiscardNoteCount.current) {
+      onDiscardNote(false);
+      prevConfirmDiscardNoteCount.current = confirmDiscardNoteCount;
+    }
+  }, [isEditorReady, confirmDiscardNoteCount, onDiscardNote]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+    if (updateNoteIdUrlHashCount !== prevUpdateNoteIdUrlHashCount.current) {
+      onUpdateNoteIdUrlHash();
+      prevUpdateNoteIdUrlHashCount.current = updateNoteIdUrlHashCount;
+    }
+  }, [isEditorReady, updateNoteIdUrlHashCount, onUpdateNoteIdUrlHash]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+    if (updateNoteIdCount !== prevUpdateNoteIdCount.current) {
+      onUpdateNoteId();
+      prevUpdateNoteIdCount.current = updateNoteIdCount;
+    }
+  }, [isEditorReady, updateNoteIdCount, onUpdateNoteId]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+    if (changeListNameCount !== prevChangeListNameCount.current) {
+      onChangeListName();
+      prevChangeListNameCount.current = changeListNameCount;
+    }
+  }, [isEditorReady, changeListNameCount, onChangeListName]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+    if (updateEditorWidthCount !== prevUpdateEditorWidthCount.current) {
+      bodyEditor.current.ui.view.toolbar.maxWidth = '9999px';
+      bodyEditor.current.ui.view.toolbar.maxWidth = 'auto';
+      prevUpdateEditorWidthCount.current = updateEditorWidthCount;
+    }
+  }, [isEditorReady, updateEditorWidthCount]);
+
+  useEffect(() => {
+    const beforeUnloadListener = (e) => {
+      if (!isEditorReady) return;
+
+      const title = titleInput.current.value;
+      const body = bodyEditor.current.getData();
+      if (note.title !== title || note.body !== body) {
+        e.preventDefault();
+        return e.returnValue = 'It looks like your note hasn\'t been saved. Do you want to leave this site and discard your changes?';
+      }
+    };
+
+    window.addEventListener('beforeunload', beforeUnloadListener, { capture: true });
+    return () => {
+      window.removeEventListener('beforeunload', beforeUnloadListener, { capture: true });
+    };
+  }, [isEditorReady, note.title, note.body]);
 
   const editorConfig = useMemo(() => {
     return {

@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import {
-  updateNoteIdUrlHash, updateNoteId, increaseSaveNoteCount, increaseResetNoteCount,
+  updateNoteIdUrlHash, updateNoteId, increaseSaveNoteCount, increaseDiscardNoteCount,
 } from '../actions';
 import { NEW_NOTE, ADDED, LG_WIDTH } from '../types/const';
 
@@ -14,20 +14,23 @@ const NoteEditorTopBar = (props) => {
   const { note, isFullScreen, onToggleFullScreen } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const isEditorFocused = useSelector(state => state.display.isEditorFocused);
+  const isConfirmDiscardPopupShown = useSelector(
+    state => state.display.isConfirmDiscardPopupShown
+  );
   const didClick = useRef(false);
   const dispatch = useDispatch();
 
   const onRightPanelCloseBtnClick = () => {
     if (didClick.current) return;
-    if (note.id !== NEW_NOTE && isEditorFocused) dispatch(increaseResetNoteCount());
-    else updateNoteIdUrlHash(null);
+    if (note.id !== NEW_NOTE && isEditorFocused) dispatch(increaseDiscardNoteCount());
+    else dispatch(updateNoteIdUrlHash(null, false, true));
     didClick.current = true;
   };
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;
-    if (note.id !== NEW_NOTE && isEditorFocused) dispatch(increaseResetNoteCount());
-    else dispatch(updateNoteId(null));
+    if (note.id !== NEW_NOTE && isEditorFocused) dispatch(increaseDiscardNoteCount());
+    else dispatch(updateNoteId(null, false, true));
     didClick.current = true;
   };
 
@@ -67,7 +70,7 @@ const NoteEditorTopBar = (props) => {
 
   useEffect(() => {
     didClick.current = false;
-  }, [note, isEditorFocused]);
+  }, [note, isEditorFocused, isConfirmDiscardPopupShown]);
 
   const style = safeAreaWidth < LG_WIDTH ? {} : { minWidth: 496 };
 

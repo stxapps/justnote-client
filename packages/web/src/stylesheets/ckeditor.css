@@ -164,7 +164,7 @@
  * ref: https://stackoverflow.com/questions/52512665/how-to-disable-sticky-toolbar-in-classic-editor-when-page-is-scrolled
  */
 .ck.ck-editor__top {
-  z-index: var(--ck-z-modal);
+  z-index: auto;
   position: sticky;
   position: -webkit-sticky;
   top: -1px;

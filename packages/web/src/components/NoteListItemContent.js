@@ -54,7 +54,7 @@ const NoteListItemContent = (props) => {
           }
         } else {
           if (safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(note.id);
-          else dispatch(updateNoteId(note.id));
+          else dispatch(updateNoteId(note.id, false, true));
         }
       }
       clickPressTimer.current = null;
@@ -91,7 +91,7 @@ const NoteListItemContent = (props) => {
           }
         } else {
           if (safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(note.id);
-          else dispatch(updateNoteId(note.id));
+          else dispatch(updateNoteId(note.id, false, true));
         }
       }
       touchPressTimer.current = null;
