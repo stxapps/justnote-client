@@ -80,7 +80,8 @@ const NoteListItemContent = (props) => {
     }
   };
 
-  const onTouchPressRelease = () => {
+  const onTouchPressRelease = (e) => {
+    e.preventDefault();
     if (touchPressTimer.current) {
       clearTimeout(touchPressTimer.current);
       if (!isLongPress.current) {

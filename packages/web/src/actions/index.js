@@ -672,6 +672,7 @@ export const moveNotes = (toListName, safeAreaWidth) => async (dispatch, getStat
   else dispatch(updateNoteId(null));
 
   if (isBulkEditing) {
+    if (selectedNoteIds.length === 0) return;
     dispatch(_moveNotes(toListName, selectedNoteIds));
     updateBulkEditUrlHash(false);
   } else {
@@ -733,6 +734,7 @@ export const deleteNotes = (safeAreaWidth) => async (dispatch, getState) => {
   else dispatch(updateNoteId(null));
 
   if (isBulkEditing) {
+    if (selectedNoteIds.length === 0) return;
     dispatch(_deleteNotes(selectedNoteIds));
     updateBulkEditUrlHash(false);
   } else {
