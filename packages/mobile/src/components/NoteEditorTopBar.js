@@ -6,7 +6,7 @@ import Svg, { Path } from 'react-native-svg';
 import { Circle } from 'react-native-animated-spinkit';
 
 import {
-  updateNoteId, increaseSaveNoteCount, increaseResetNoteCount,
+  updateNoteId, increaseSaveNoteCount, increaseDiscardNoteCount,
 } from '../actions';
 import { NEW_NOTE, ADDED, LG_WIDTH } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
@@ -18,20 +18,23 @@ const NoteEditorTopBar = (props) => {
   const { note, isFullScreen, onToggleFullScreen, width } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const isEditorFocused = useSelector(state => state.display.isEditorFocused);
+  const isConfirmDiscardPopupShown = useSelector(
+    state => state.display.isConfirmDiscardPopupShown
+  );
   const didClick = useRef(false);
   const dispatch = useDispatch();
 
   const onRightPanelCloseBtnClick = () => {
     if (didClick.current) return;
-    if (note.id !== NEW_NOTE && isEditorFocused) dispatch(increaseResetNoteCount());
-    else dispatch(updateNoteId(null));
+    if (note.id !== NEW_NOTE && isEditorFocused) dispatch(increaseDiscardNoteCount());
+    else dispatch(updateNoteId(null, false, true));
     didClick.current = true;
   };
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;
-    if (note.id !== NEW_NOTE && isEditorFocused) dispatch(increaseResetNoteCount());
-    else dispatch(updateNoteId(null));
+    if (note.id !== NEW_NOTE && isEditorFocused) dispatch(increaseDiscardNoteCount());
+    else dispatch(updateNoteId(null, false, true));
     didClick.current = true;
   };
 
@@ -69,7 +72,7 @@ const NoteEditorTopBar = (props) => {
 
   useEffect(() => {
     didClick.current = false;
-  }, [note, isEditorFocused]);
+  }, [note, isEditorFocused, isConfirmDiscardPopupShown]);
 
   const style = {
     width: safeAreaWidth < LG_WIDTH ? Math.max(180, width) : Math.max(496, width),

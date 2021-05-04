@@ -24,10 +24,13 @@ import {
   DELETE_LIST_NAMES, DELETE_LIST_NAMES_COMMIT, DELETE_LIST_NAMES_ROLLBACK,
   UPDATE_DELETING_LIST_NAME,
   RETRY_ADD_LIST_NAMES, RETRY_UPDATE_LIST_NAMES, RETRY_MOVE_LIST_NAME,
-  RETRY_DELETE_LIST_NAMES, CANCEL_DIED_LIST_NAMES,
+  RETRY_DELETE_LIST_NAMES, CANCEL_DIED_LIST_NAMES, UPDATE_DISCARD_ACTION,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
   UPDATE_UPDATE_SETTINGS_PROGRESS, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
-  UPDATE_SYNC_PROGRESS, INCREASE_SAVE_NOTE_COUNT, INCREASE_RESET_NOTE_COUNT,
+  UPDATE_SYNC_PROGRESS, INCREASE_SAVE_NOTE_COUNT,
+  INCREASE_DISCARD_NOTE_COUNT, INCREASE_CONFIRM_DISCARD_NOTE_COUNT,
+  INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT, INCREASE_UPDATE_NOTE_ID_COUNT,
+  INCREASE_CHANGE_LIST_NAME_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -236,20 +239,49 @@ export const signOut = () => async (dispatch, getState) => {
   });
 };
 
-export const changeListName = (listName) => async (dispatch, getState) => {
+export const changeListName = (listName, doCheckEditing) => async (
+  dispatch, getState
+) => {
+
+  if (!listName) listName = getState().display.changingListName;
+  if (!listName) throw new Error(`Invalid listName: ${listName}`);
+
+  if (doCheckEditing) {
+    const isEditorFocused = getState().display.isEditorFocused;
+    if (isEditorFocused) {
+      dispatch(increaseChangeListNameCount(listName));
+      return;
+    }
+  }
 
   dispatch({
     type: UPDATE_LIST_NAME,
     payload: listName,
   });
-
-  dispatch(clearSelectedNoteIds());
 };
 
-export const updateNoteId = (id) => {
+const _updateNoteId = (id) => {
   return {
     type: UPDATE_NOTE_ID,
     payload: id,
+  };
+};
+
+export const updateNoteId = (id, doGetIdFromState = false, doCheckEditing = false) => {
+  if (!doGetIdFromState && !doCheckEditing) return _updateNoteId(id);
+
+  return async (dispatch, getState) => {
+    // id can be both null and non-null so need doGetIdFromState, can't just check if.
+    if (doGetIdFromState) id = getState().display.updatingNoteId;
+    if (doCheckEditing) {
+      const isEditorFocused = getState().display.isEditorFocused;
+      if (isEditorFocused) {
+        dispatch(increaseUpdateNoteIdCount(id));
+        return;
+      }
+    }
+
+    dispatch(_updateNoteId(id));
   };
 };
 
@@ -474,6 +506,7 @@ export const moveNotes = (toListName) => async (dispatch, getState) => {
   dispatch(updateNoteId(null));
 
   if (isBulkEditing) {
+    if (selectedNoteIds.length === 0) return;
     dispatch(_moveNotes(toListName, selectedNoteIds));
     dispatch(updateBulkEdit(false));
   } else {
@@ -534,6 +567,7 @@ export const deleteNotes = () => async (dispatch, getState) => {
   dispatch(updateNoteId(null));
 
   if (isBulkEditing) {
+    if (selectedNoteIds.length === 0) return;
     dispatch(_deleteNotes(selectedNoteIds));
     dispatch(updateBulkEdit(false));
   } else {
@@ -1062,6 +1096,13 @@ export const cancelDiedListNames = (listNames) => {
   };
 };
 
+export const updateDiscardAction = (discardAction) => {
+  return {
+    type: UPDATE_DISCARD_ACTION,
+    payload: discardAction,
+  };
+};
+
 export const updateSettings = (updatedValues) => async (dispatch, getState) => {
 
   const addedDT = Date.now();
@@ -1311,8 +1352,37 @@ export const increaseSaveNoteCount = () => {
   return { type: INCREASE_SAVE_NOTE_COUNT };
 };
 
-export const increaseResetNoteCount = () => {
-  return { type: INCREASE_RESET_NOTE_COUNT };
+export const increaseDiscardNoteCount = () => {
+  return { type: INCREASE_DISCARD_NOTE_COUNT };
+};
+
+export const increaseConfirmDiscardNoteCount = () => {
+  return { type: INCREASE_CONFIRM_DISCARD_NOTE_COUNT };
+};
+
+export const increaseUpdateNoteIdUrlHashCount = (id) => {
+  return {
+    type: INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
+    payload: id,
+  };
+};
+
+export const increaseUpdateNoteIdCount = (id) => {
+  return {
+    type: INCREASE_UPDATE_NOTE_ID_COUNT,
+    payload: id,
+  };
+};
+
+export const increaseChangeListNameCount = (listName) => {
+  return {
+    type: INCREASE_CHANGE_LIST_NAME_COUNT,
+    payload: listName,
+  };
+};
+
+export const increaseUpdateEditorWidthCount = () => {
+  return { type: INCREASE_UPDATE_EDITOR_WIDTH_COUNT };
 };
 
 const exportAllDataLoop = async (dispatch, fpaths, doneCount) => {

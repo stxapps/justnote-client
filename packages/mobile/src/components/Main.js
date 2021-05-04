@@ -8,8 +8,9 @@ import NavPanel from './NavPanel';
 import SidebarProfilePopup from './SidebarProfilePopup';
 import NoteListMenuPopup from './NoteListMenuPopup';
 import MoveToPopup from './MoveToPopup';
-import ConfirmDeletePopup from './ConfirmDeletePopup';
 import SettingsPopup from './SettingsPopup';
+import ConfirmDeletePopup from './ConfirmDeletePopup';
+import ConfirmDiscardPopup from './ConfirmDiscardPopup';
 
 const Main = () => {
 
@@ -24,6 +25,7 @@ const Main = () => {
       <MoveToPopup />
       <SettingsPopup />
       <ConfirmDeletePopup />
+      <ConfirmDiscardPopup />
     </React.Fragment>
   );
 };

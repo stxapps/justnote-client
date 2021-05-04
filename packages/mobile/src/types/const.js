@@ -23,15 +23,16 @@ export const TRASH = 'Trash';
 export const ARCHIVE = 'Archive';
 
 export const NEW_NOTE = 'NEW_NOTE';
-export const NEW_NOTE_OBJ = { id: NEW_NOTE };
+export const NEW_NOTE_OBJ = { id: NEW_NOTE, title: '', body: '', media: [] };
 
 export const PROFILE_POPUP = 'PROFILE_POPUP';
 export const NOTE_LIST_MENU_POPUP = 'NOTE_LIST_MENU_POPUP';
 export const MOVE_TO_POPUP = 'MOVE_TO_POPUP';
 export const SIDEBAR_POPUP = 'SIDEBAR_POPUP';
 export const SEARCH_POPUP = 'SEARCH_POPUP';
-export const CONFIRM_DELETE_POPUP = 'CONFIRM_DELETE_POPUP';
 export const SETTINGS_POPUP = 'SETTINGS_POPUP';
+export const CONFIRM_DELETE_POPUP = 'CONFIRM_DELETE_POPUP';
+export const CONFIRM_DISCARD_POPUP = 'CONFIRM_DISCARD_POPUP';
 
 export const ADDED = 'ADDED';
 export const ADDING = 'ADDING';
@@ -80,3 +81,8 @@ export const UPDATED_DT = 'updatedDT';
 export const COLS_PANEL_STATE = 'colsPanelState';
 
 export const SHOW_SYNCED = 'SHOW_SYNCED';
+
+export const DISCARD_ACTION_CANCEL_EDIT = 0;
+export const DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH = 1;
+export const DISCARD_ACTION_UPDATE_NOTE_ID = 2;
+export const DISCARD_ACTION_CHANGE_LIST_NAME = 3;

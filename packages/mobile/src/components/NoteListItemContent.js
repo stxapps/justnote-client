@@ -27,7 +27,7 @@ const NoteListItemContent = (props) => {
         else dispatch(addSelectedNoteIds([note.id]));
       }
     } else {
-      dispatch(updateNoteId(note.id));
+      dispatch(updateNoteId(note.id, false, true));
     }
   };
 

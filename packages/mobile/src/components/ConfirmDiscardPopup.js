@@ -6,17 +6,22 @@ import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaFrame, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { updatePopup, deleteNotes, deleteListNames } from '../actions';
-import { CONFIRM_DELETE_POPUP } from '../types/const';
+import {
+  updatePopup, increaseConfirmDiscardNoteCount, updateNoteId, changeListName,
+} from '../actions';
+import {
+  CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_NOTE_ID,
+  DISCARD_ACTION_CHANGE_LIST_NAME,
+} from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import { dialogFMV } from '../types/animConfigs';
 
-const ConfirmDeletePopup = () => {
+const ConfirmDiscardPopup = () => {
 
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const insets = useSafeAreaInsets();
-  const isShown = useSelector(state => state.display.isConfirmDeletePopupShown);
-  const deletingListName = useSelector(state => state.display.deletingListName);
+  const isShown = useSelector(state => state.display.isConfirmDiscardPopupShown);
+  const discardAction = useSelector(state => state.display.discardAction);
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
   const [derivedIsShown, setDerivedIsShown] = useState(isShown);
   const popupAnim = useRef(new Animated.Value(0)).current;
@@ -24,19 +29,22 @@ const ConfirmDeletePopup = () => {
   const didClick = useRef(false);
   const dispatch = useDispatch();
 
-  const onConfirmDeleteCancelBtnClick = useCallback(() => {
+  const onConfirmDiscardCancelBtnClick = useCallback(() => {
     if (didClick.current) return;
-    dispatch(updatePopup(CONFIRM_DELETE_POPUP, false, null));
+    dispatch(updatePopup(CONFIRM_DISCARD_POPUP, false, null));
     didClick.current = true;
   }, [dispatch]);
 
-  const onConfirmDeleteOkBtnClick = () => {
+  const onConfirmDiscardOkBtnClick = () => {
     if (didClick.current) return;
-
-    if (deletingListName) dispatch(deleteListNames([deletingListName]));
-    else dispatch(deleteNotes());
-    onConfirmDeleteCancelBtnClick();
-
+    if (discardAction === DISCARD_ACTION_CANCEL_EDIT) {
+      dispatch(increaseConfirmDiscardNoteCount());
+    } else if (discardAction === DISCARD_ACTION_UPDATE_NOTE_ID) {
+      dispatch(updateNoteId(null, true, false));
+    } else if (discardAction === DISCARD_ACTION_CHANGE_LIST_NAME) {
+      dispatch(changeListName(null, false));
+    } else throw new Error(`Invalid discard action: ${discardAction}`);
+    onConfirmDiscardCancelBtnClick();
     didClick.current = true;
   };
 
@@ -46,7 +54,7 @@ const ConfirmDeletePopup = () => {
         popupBackHandler.current = BackHandler.addEventListener(
           'hardwareBackPress',
           () => {
-            onConfirmDeleteCancelBtnClick();
+            onConfirmDiscardCancelBtnClick();
             return true;
           }
         );
@@ -57,7 +65,7 @@ const ConfirmDeletePopup = () => {
         popupBackHandler.current = null;
       }
     }
-  }, [onConfirmDeleteCancelBtnClick]);
+  }, [onConfirmDiscardCancelBtnClick]);
 
   useEffect(() => {
     if (isShown) {
@@ -92,7 +100,7 @@ const ConfirmDeletePopup = () => {
 
   return (
     <View style={[tailwind('absolute inset-0 items-center justify-end pt-4 px-4 pb-20 sm:justify-center sm:p-0', safeAreaWidth), canvasStyle]}>
-      <TouchableWithoutFeedback onPress={onConfirmDeleteCancelBtnClick}>
+      <TouchableWithoutFeedback onPress={onConfirmDiscardCancelBtnClick}>
         <View style={tailwind('absolute inset-0 opacity-25 bg-black')} />
       </TouchableWithoutFeedback>
       <Animated.View style={[tailwind('w-full max-w-lg bg-white rounded-lg px-4 pt-5 pb-4 shadow-xl sm:my-8 sm:p-6', safeAreaWidth), popupStyle]}>
@@ -103,19 +111,19 @@ const ConfirmDeletePopup = () => {
             </Svg>
           </View>
           <View style={tailwind('flex-grow flex-shrink mt-3 sm:mt-0 sm:ml-4', safeAreaWidth)}>
-            <Text style={tailwind('text-lg font-medium text-gray-900 text-center sm:text-left', safeAreaWidth)}>Confirm delete?</Text>
+            <Text style={tailwind('text-lg font-medium text-gray-900 text-center sm:text-left', safeAreaWidth)}>Discard unsaved changes</Text>
             <View style={tailwind('mt-2')}>
               <Text style={tailwind('text-sm text-gray-500 font-normal text-center sm:text-left', safeAreaWidth)}>
-                Are you sure you want to permanently delete? This action cannot be undone.
+                Are you sure you want to discard your unsaved changes to your note? All of your changes will be permanently deleted. This action cannot be undone.
               </Text>
             </View>
           </View>
         </View>
         <View style={tailwind('mt-5 sm:mt-4 sm:ml-10 sm:pl-4 sm:flex-row', safeAreaWidth)}>
-          <TouchableOpacity onPress={onConfirmDeleteOkBtnClick} style={tailwind('w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 sm:w-auto', safeAreaWidth)}>
-            <Text style={tailwind('text-base font-medium text-white text-center sm:text-sm', safeAreaWidth)}>Delete</Text>
+          <TouchableOpacity onPress={onConfirmDiscardOkBtnClick} style={tailwind('w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 sm:w-auto', safeAreaWidth)}>
+            <Text style={tailwind('text-base font-medium text-white text-center sm:text-sm', safeAreaWidth)}>Discard</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={onConfirmDeleteCancelBtnClick} style={tailwind('mt-3 w-full rounded-md border border-gray-300 px-4 py-2 bg-white shadow-sm sm:mt-0 sm:ml-3 sm:w-auto', safeAreaWidth)}>
+          <TouchableOpacity onPress={onConfirmDiscardCancelBtnClick} style={tailwind('mt-3 w-full rounded-md border border-gray-300 px-4 py-2 bg-white shadow-sm sm:mt-0 sm:ml-3 sm:w-auto', safeAreaWidth)}>
             <Text style={tailwind('text-base font-medium text-gray-700 text-center sm:text-sm', safeAreaWidth)}>Cancel</Text>
           </TouchableOpacity>
         </View>
@@ -124,4 +132,4 @@ const ConfirmDeletePopup = () => {
   );
 };
 
-export default React.memo(ConfirmDeletePopup);
+export default React.memo(ConfirmDiscardPopup);
