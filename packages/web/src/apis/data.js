@@ -283,7 +283,7 @@ const fetchMore = async (params) => {
   let sortedNoteIds = namedNoteIds.sort((a, b) => a[sortOn] - b[sortOn]);
   if (doDescendingOrder) sortedNoteIds.reverse();
 
-  const indexes = ids.map(id => sortedNoteIds.indexOf(id));
+  const indexes = ids.map(id => sortedNoteIds.findIndex(noteId => noteId.id === id));
   const maxIndex = Math.max(...indexes);
 
   const filteredNoteIds = sortedNoteIds.slice(maxIndex + 1);
@@ -301,7 +301,7 @@ const fetchMore = async (params) => {
   }
 
   const notes = toNotes(selectedNoteIds, fpaths, contents);
-  const hasMore = namedNoteIds.length > N_NOTES;
+  const hasMore = filteredNoteIds.length > N_NOTES;
 
   return { notes, hasMore };
 };

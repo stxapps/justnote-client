@@ -129,7 +129,6 @@ const NoteEditorEditor = (props) => {
   }, [note.title, note.body, dispatch]);
 
   const onReady = useCallback((editor) => {
-    window.editor = editor;
     bodyEditor.current = editor;
     setEditorReady(true);
   }, [setEditorReady]);
