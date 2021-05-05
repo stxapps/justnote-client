@@ -1,12 +1,17 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 
-import { signUp, signIn } from '../actions';
+import { signUp } from '../actions';
 
-import logoShort from '../images/logo-short.svg';
+import TopBar from './TopBar';
+import Footer from './Footer';
+
 import logoFull from '../images/logo-full.svg';
 
 import mainDesktopInDarkChrome from '../images/main-desktop-in-dark-chrome.png';
+import mainDesktopInDarkChrome2x from '../images/main-desktop-in-dark-chrome@2x.png';
+import mainDesktopInDarkChrome3x from '../images/main-desktop-in-dark-chrome@3x.png';
+
 import creator from '../images/creator.jpg';
 
 const Landing = () => {
@@ -38,28 +43,7 @@ const Landing = () => {
             </div>
           </div>
           <div className="relative pt-6 pb-16 sm:pb-24">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6">
-              <nav className="relative flex items-center justify-between sm:h-10 md:justify-center" aria-label="Global">
-                <div className="flex items-center flex-1 md:absolute md:inset-y-0 md:left-0">
-                  <div className="flex items-center justify-between w-full md:w-auto">
-                    <div>
-                      <span className="sr-only">Justnote</span>
-                      <img className="h-8 w-auto sm:h-10" src={logoShort} alt="" />
-                    </div>
-                    <div className="-mr-2 flex items-center md:hidden">
-                      <button onClick={() => dispatch(signIn())} type="button" className="bg-white rounded-md shadow px-4 py-2 border border-transparent text-base font-medium text-green-600 hover:text-green-500 inline-flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500" id="main-menu" aria-haspopup="true">
-                        Sign in
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <div className="hidden md:absolute md:flex md:items-center md:justify-end md:inset-y-0 md:right-0">
-                  <button onClick={() => dispatch(signIn())} type="button" className="bg-white rounded-md shadow px-4 py-2 border border-transparent text-base font-medium text-green-600 hover:text-green-500 inline-flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500" id="main-menu" aria-haspopup="true">
-                    Sign in
-                  </button>
-                </div>
-              </nav>
-            </div>
+            <TopBar />
             <div className="mt-16 mx-auto max-w-7xl px-4 sm:mt-24 sm:px-6">
               <div className="text-center">
                 <h1 className="text-3xl tracking-tight font-extrabold text-gray-900 sm:text-4xl md:text-5xl">
@@ -84,8 +68,8 @@ const Landing = () => {
               <div className="flex-1" />
               <div className="flex-1 w-full bg-gray-800" />
             </div>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6">
-              <img className="relative rounded-lg shadow-lg mx-auto" src={mainDesktopInDarkChrome} alt="App screenshot" />
+            <div className="max-w-4xl mx-auto px-4 sm:px-6">
+              <img className="relative rounded-lg shadow-lg mx-auto" src={mainDesktopInDarkChrome} srcSet={`${mainDesktopInDarkChrome} 1x, ${mainDesktopInDarkChrome2x} 2x, ${mainDesktopInDarkChrome3x} 3x`} alt="App screenshot" />
             </div>
           </div>
         </div>
@@ -113,7 +97,7 @@ const Landing = () => {
                     Simple
                   </dt>
                   <dd className="mt-2 text-base text-gray-500">
-                    Justnote is a simple note taking app. We use everything you’re familiar with so that you can start using Justnote right away, no learning required.
+                    Justnote is a simple note taking app, yet powerful enough. Our WYSIWYG rich text editor comes with features like bold, underline, font color, and background color.
                   </dd>
                 </div>
               </div>
@@ -129,7 +113,7 @@ const Landing = () => {
                     Fast
                   </dt>
                   <dd className="mt-2 text-base text-gray-500">
-                    You can take a note easily and quickly. Justnote is your quick note taking app where you use it for your to-do list, reminders, grocery list, memo, etc.
+                    You can take a note easily and quickly. Justnote is your quick note taking app where you use it for your to-do lists, reminders, shopping lists, memos, thoughts, etc.
                   </dd>
                 </div>
               </div>
@@ -144,7 +128,7 @@ const Landing = () => {
                     Ubiquitous
                   </dt>
                   <dd className="mt-2 text-base text-gray-500">
-                    Justnote is available on all platforms - web, iOS, and Android. You can use Justnote on your desktop PC, laptop, tablet, and mobile devices.
+                    Justnote is available on web, iOS, and Android. You can use Justnote on any of your devices. All your notes are synced across your devices automatically.
                   </dd>
                 </div>
               </div>
@@ -159,7 +143,7 @@ const Landing = () => {
                     Privacy focused
                   </dt>
                   <dd className="mt-2 text-base text-gray-500">
-                    Your identity lives in blockchain and only you can manage it. All your data are encrypted and only you can decrypt them and see the content inside.
+                    Your identity lives in blockchain and only you can control it. All your data are encrypted and only your private key can decrypt them and see the content inside.
                   </dd>
                 </div>
               </div>
@@ -292,11 +276,10 @@ const Landing = () => {
               <div className="lg:self-center">
                 <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
                   <span className="block">Ready to dive in?</span>
-                  <span className="block">Start using for free today.</span>
                 </h2>
                 <p className="mt-4 text-lg leading-6 text-green-200">Let’s try Justnote - a simple, fast, and privacy-focused note taking app that you will love.</p>
                 <button onClick={() => dispatch(signUp())} className="mt-8 bg-white border border-transparent rounded-md shadow px-6 py-3 inline-flex items-center text-base font-medium text-green-600 hover:bg-green-50">
-                  Get started for free
+                  Get started now
                   <svg style={{ marginTop: '0.125rem' }} className="ml-2 w-1.5" viewBox="0 0 6 10" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path fillRule="evenodd" clipRule="evenodd" d="M0.29289 9.7071C-0.09763 9.3166 -0.09763 8.6834 0.29289 8.2929L3.5858 5L0.29289 1.70711C-0.09763 1.31658 -0.09763 0.68342 0.29289 0.29289C0.68342 -0.09763 1.31658 -0.09763 1.70711 0.29289L5.7071 4.29289C6.0976 4.68342 6.0976 5.3166 5.7071 5.7071L1.70711 9.7071C1.31658 10.0976 0.68342 10.0976 0.29289 9.7071Z" />
                   </svg>
@@ -309,49 +292,7 @@ const Landing = () => {
           </div>
         </div>
       </div>
-      <footer className="bg-white">
-        <div className="max-w-7xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
-          <nav className="-mx-5 -my-2 flex flex-wrap justify-center" aria-label="Footer">
-            <div className="px-5 py-2">
-              <a href="/about" className="text-base text-gray-500 hover:text-gray-900">
-                About
-              </a>
-            </div>
-            <div className="px-5 py-2">
-              <a href="/terms" className="text-base text-gray-500 hover:text-gray-900">
-                Terms
-              </a>
-            </div>
-            <div className="px-5 py-2">
-              <a href="/privacy" className="text-base text-gray-500 hover:text-gray-900">
-                Privacy
-              </a>
-            </div>
-            <div className="px-5 py-2">
-              <a href="/support" className="text-base text-gray-500 hover:text-gray-900">
-                Support
-              </a>
-            </div>
-          </nav>
-          <div className="mt-8 flex justify-center space-x-6">
-            <a href="https://twitter.com/justnotecc" className="text-gray-400 hover:text-gray-500">
-              <span className="sr-only">Twitter</span>
-              <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
-              </svg>
-            </a>
-            <a href="https://github.com/justnotecc" className="text-gray-400 hover:text-gray-500">
-              <span className="sr-only">GitHub</span>
-              <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
-              </svg>
-            </a>
-          </div>
-          <p className="mt-8 text-center text-base text-gray-400">
-            &copy; 2021 Justnote. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </React.Fragment>
   );
 };
