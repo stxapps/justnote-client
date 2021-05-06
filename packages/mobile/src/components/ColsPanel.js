@@ -8,6 +8,7 @@ import mmkvStorage from '../mmkvStorage';
 import { COLS_PANEL_STATE, NEW_NOTE, NEW_NOTE_OBJ } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 
+import Loading from './Loading';
 import Sidebar from './Sidebar';
 import NoteList from './NoteList';
 import NoteEditor from './NoteEditor';
@@ -31,25 +32,18 @@ const ColsPanel = () => {
     return state.notes[listName][noteId];
   });
 
-  const storageKey = COLS_PANEL_STATE;
-  const storedState = useMemo(() => mmkvStorage.getItem(storageKey), [storageKey]);
-  const initialState = {
+  const [state, setState] = useState({
     isPane1Shown: true,
     isPane3FullScreen: false,
     pane1Width: pane1DefaultWidth,
     pane2Width: safeAreaWidth * 0.25,
-  };
-  if (storedState) {
-    const s = JSON.parse(storedState);
-    initialState.isPane1Shown = s.isPane1Shown;
-    initialState.pane1Width = s.pane1Width;
-    initialState.pane2Width = s.pane2Width;
-  }
-  const [state, setState] = useState({ ...initialState });
+  });
+  const [didGetState, setDidGetState] = useState(false);
 
   const isResizeActive = useRef(false);
   const startInfo = useRef(null);
   const whichResizer = useRef(null);
+  const prevDidGetState = useRef(didGetState);
 
   const leftPanResponder = useMemo(() => {
     return PanResponder.create({
@@ -150,8 +144,30 @@ const ColsPanel = () => {
   }, [state.isPane3FullScreen]);
 
   useEffect(() => {
-    mmkvStorage.setItem(storageKey, JSON.stringify(state));
-  }, [storageKey, state]);
+    const getState = async () => {
+      const storedState = await mmkvStorage.getItem(COLS_PANEL_STATE);
+      if (storedState) {
+        const s = JSON.parse(storedState);
+        setState(prevState => ({
+          ...prevState,
+          isPane1Shown: s.isPane1Shown,
+          pane1Width: s.pane1Width,
+          pane2Width: s.pane2Width,
+        }));
+      }
+      setDidGetState(true);
+    };
+    getState();
+  }, []);
+
+  useEffect(() => {
+    if (didGetState && prevDidGetState.current) {
+      mmkvStorage.setItem(COLS_PANEL_STATE, JSON.stringify(state));
+    }
+    prevDidGetState.current = didGetState;
+  }, [didGetState, state]);
+
+  if (!didGetState) return <Loading />;
 
   const pane1Classes = state.isPane1Shown && !state.isPane3FullScreen ? '' : 'hidden';
   const resizer1Classes = state.isPane1Shown && !state.isPane3FullScreen ? '' : 'hidden';

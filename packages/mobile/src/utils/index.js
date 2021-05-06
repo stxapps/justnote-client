@@ -402,6 +402,7 @@ export const stripHtml = (s) => {
   const codeMap = { 'nbsp': ' ', 'amp': '&', 'quot': '"', 'lt': '<', 'gt': '>' };
 
   return s
-    .replace(/(<([^>]+)>)/gi, '')
-    .replace(codeRe, (match, entity) => codeMap[entity]);
+    .replace(/(<([^>]+)>)/gi, ' ')
+    .replace(codeRe, (match, entity) => codeMap[entity])
+    .replace(/\s\s+/g, ' ');
 };

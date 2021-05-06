@@ -43,19 +43,21 @@ const listFiles = async (callback) => {
   files.forEach(file => {
     if ([
       COLS_PANEL_STATE,
-      'default', 'boolIndex', 'numberIndex', 'stringIndex', 'arrayIndex', 'mapIndex',
+      'default',
+      'boolIndex', 'numberIndex', 'stringIndex', 'arrayIndex', 'mapIndex',
+      'boolsIndex', 'numbersIndex', 'stringsIndex', 'arraysIndex', 'mapsIndex',
     ].includes(file)) return;
     callback(file);
   });
   return files.length;
 };
 
-const getItem = (key) => {
-  return getInstance().getString(key);
+const getItem = async (key) => {
+  return await getInstance().getStringAsync(key);
 };
 
-const setItem = (key, value) => {
-  getInstance().setString(key, value);
+const setItem = async (key, value) => {
+  await getInstance().setStringAsync(key, value);
 };
 
 export default {

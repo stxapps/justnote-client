@@ -1,7 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import Svg, { SvgXml, Path } from 'react-native-svg';
+import Svg, { SvgXml, Path, Circle } from 'react-native-svg';
 import FastImage from 'react-native-fast-image';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
@@ -19,6 +19,8 @@ const Sidebar = () => {
 
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const didFetch = useSelector(state => state.display.didFetch);
+  const username = useSelector(state => state.user.username);
+  const userImage = useSelector(state => state.user.image);
   const profileBtn = useRef(null);
   const dispatch = useDispatch();
 
@@ -35,6 +37,33 @@ const Sidebar = () => {
     dispatch(updateNoteId(NEW_NOTE));
   };
 
+  const derivedUsername = useMemo(() => {
+    const suffixes = ['.id', '.id.blockstack', '.id.stx'];
+
+    let name = username || 'My Username';
+    for (const suffix of suffixes) {
+      if (name.endsWith(suffix)) name = name.slice(0, -1 * suffix.length);
+    }
+
+    return name;
+  }, [username]);
+
+  const derivedUserImage = useMemo(() => {
+    if (userImage) {
+      return (
+        <FastImage style={tailwind('w-10 h-10 bg-gray-300 rounded-full overflow-hidden flex-shrink-0')} source={{ uri: userImage }} />
+      );
+    }
+
+    return (
+      <Svg width={40} height={40} style={tailwind('text-gray-200 font-normal flex-shrink-0')} viewBox="0 0 96 96" fill="currentColor">
+        <Circle cx="48" cy="48" r="48" />
+        <Path d="M82.5302 81.3416C73.8015 90.3795 61.5571 96 47.9999 96C34.9627 96 23.1394 90.8024 14.4893 82.3663C18.2913 78.3397 22.7793 74.9996 27.7572 72.5098C34.3562 69.2093 41.6342 67.4938 49.0126 67.5C62.0922 67.5 73.9409 72.7881 82.5302 81.3416Z" fill="#A0AEC0" />
+        <Path d="M57.9629 57.4535C60.3384 55.0781 61.6729 51.8562 61.6729 48.4968C61.6729 45.1374 60.3384 41.9156 57.9629 39.5401C55.5875 37.1647 52.3656 35.8302 49.0062 35.8302C45.6468 35.8302 42.425 37.1647 40.0495 39.5401C37.6741 41.9156 36.3396 45.1374 36.3396 48.4968C36.3396 51.8562 37.6741 55.0781 40.0495 57.4535C42.425 59.829 45.6468 61.1635 49.0062 61.1635C52.3656 61.1635 55.5875 59.829 57.9629 57.4535Z" fill="#A0AEC0" />
+      </Svg>
+    );
+  }, [userImage]);
+
   const listNames = didFetch ? <SidebarListNames /> : <LoadingSidebarListNames />;
 
   return (
@@ -48,9 +77,9 @@ const Sidebar = () => {
           <TouchableOpacity ref={profileBtn} onPress={onProfileBtnClick} style={tailwind('w-full bg-gray-100 rounded-md px-3.5 py-2 text-sm font-medium text-gray-700')}>
             <View style={tailwind('flex-row w-full justify-between items-center')}>
               <View style={tailwind('flex-1 flex-row items-center justify-between')}>
-                <FastImage style={tailwind('w-10 h-10 bg-gray-300 rounded-full flex-shrink-0')} source={{ uri: 'https://images.unsplash.com/photo-1502685104226-ee32379fefbe?ixlib=rb-1.2.1&ixqx=c2MT4LynBj&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80' }} />
+                {derivedUserImage}
                 <View style={tailwind('ml-3 flex-1')}>
-                  <Text style={tailwind('text-gray-900 text-sm font-medium text-center')} numberOfLines={1} ellipsizeMode="tail">Jessy Schwarz</Text>
+                  <Text style={tailwind('text-gray-900 text-sm font-medium text-center')} numberOfLines={1} ellipsizeMode="tail">{derivedUsername}</Text>
                 </View>
               </View>
               <Svg width={20} height={20} style={tailwind('flex-shrink-0 text-gray-400 font-normal')} viewBox="0 0 20 20" fill="currentColor">
