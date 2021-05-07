@@ -407,14 +407,17 @@ const fetchOldNotesInTrash = async () => {
 const canDeleteListNames = async (listNames) => {
 
   const { noteFPaths } = await listFPaths();
+  const { noteIds, conflictedIds } = listNoteIds(noteFPaths);
 
-  let inUseListNames = noteFPaths.map(fpath => extractNoteFPath(fpath).listName);
-  inUseListNames = [...new Set(inUseListNames)];
+  const inUseListNames = new Set();
+  for (const noteId of [...noteIds, ...conflictedIds]) {
+    for (const fpath of noteId.fpaths) {
+      inUseListNames.add(extractNoteFPath(fpath).listName);
+    }
+  }
 
   const canDeletes = [];
-  for (const listName of listNames) {
-    canDeletes.push(!inUseListNames.includes(listName));
-  }
+  for (const listName of listNames) canDeletes.push(!inUseListNames.has(listName));
 
   return canDeletes;
 };
