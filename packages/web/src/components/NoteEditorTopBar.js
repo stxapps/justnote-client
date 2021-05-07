@@ -80,7 +80,7 @@ const NoteEditorTopBar = (props) => {
   else commands = isEditorFocused ? renderFocusedCommands() : <NoteCommands />;
 
   return (
-    <div className="border-b border-gray-200 w-full h-16 overflow-x-auto">
+    <div className="flex-grow-0 flex-shrink-0 border-b border-gray-200 w-full h-16 overflow-x-auto">
       <div style={style} className="w-full h-full flex justify-between sm:px-3 lg:items-center">
         <div className="flex">
           <button onClick={onRightPanelCloseBtnClick} type="button" className="group inline-flex items-center px-4 h-full text-sm rounded-md text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-inset lg:hidden">

@@ -398,7 +398,9 @@ export const updateBulkEditUrlHash = (isBulkEditing, doReplace = false) => {
 
   const obj = {
     ibe: true,
-    p: null, ppt: null, ppr: null, ppb: null, ppl: null, ppw: null, pph: null,
+    p: null,
+    ppx: null, ppy: null, ppw: null, pph: null,
+    ppt: null, ppr: null, ppb: null, ppl: null,
   };
   updateUrlHash(obj, doReplace);
 };

@@ -21,7 +21,7 @@ const NoteListTopBarBulkEdit = () => {
   };
 
   return (
-    <View style={tailwind('border-b border-gray-200 w-full h-16')}>
+    <View style={tailwind('flex-grow-0 flex-shrink-0 border-b border-gray-200 w-full h-16')}>
       <View style={tailwind('w-full h-full flex-row justify-between sm:pl-3 sm:pr-6', safeAreaWidth)}>
         <TouchableOpacity onPress={onBulkEditCancelBtnClick} style={tailwind('h-full justify-center px-4')}>
           <Svg width={24} height={24} style={tailwind('text-gray-500 font-normal')} viewBox="0 0 24 24" fill="currentColor">

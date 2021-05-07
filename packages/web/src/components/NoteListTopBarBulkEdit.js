@@ -15,7 +15,7 @@ const NoteListTopBarBulkEdit = () => {
   };
 
   return (
-    <div className="border-b border-gray-200 w-full h-16">
+    <div className="flex-grow-0 flex-shrink-0 border-b border-gray-200 w-full h-16">
       <div className="w-full h-full flex justify-between sm:pl-3 sm:pr-6">
         <button onClick={onBulkEditCancelBtnClick} className="h-full px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-600">
           <span className="sr-only">Cancel bulk edit</span>

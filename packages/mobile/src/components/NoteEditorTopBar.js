@@ -84,7 +84,7 @@ const NoteEditorTopBar = (props) => {
   else commands = isEditorFocused ? renderFocusedCommands() : <NoteCommands />;
 
   return (
-    <View style={tailwind('border-b border-gray-200 w-full h-16')}>
+    <View style={tailwind('flex-grow-0 flex-shrink-0 border-b border-gray-200 w-full h-16')}>
       <ScrollView horizontal={true}>
         <View style={[tailwind('h-full flex-row justify-between sm:px-3 lg:items-center', safeAreaWidth), style]}>
           <View style={tailwind('flex-row')}>
