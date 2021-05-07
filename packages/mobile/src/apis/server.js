@@ -134,7 +134,12 @@ const putFiles = async (fpaths, contents) => {
   const responses = [];
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
     const _fpaths = fpaths.slice(i, i + N_NOTES);
-    const _contents = contents.slice(i, i + N_NOTES);
+    const _contents = contents.slice(i, i + N_NOTES).map((content, k) => {
+      if (_fpaths[k].endsWith(INDEX + DOT_JSON) || _fpaths[k].startsWith(SETTINGS)) {
+        content = JSON.stringify(content);
+      }
+      return content;
+    });
     const _responses = await batchPutFileWithRetry(_fpaths, _contents, 0);
     responses.push(..._responses.map(response => response.publicUrl));
   }

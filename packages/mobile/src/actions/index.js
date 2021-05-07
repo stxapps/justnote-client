@@ -1204,7 +1204,6 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
         if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
         else content = '';
       }
-      if (!isString(content)) content = JSON.stringify(content);
 
       fpaths.push(fpath);
       contents.push(content);
@@ -1219,7 +1218,6 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
       let content;
       if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
       else content = '';
-      if (!isString(content)) content = JSON.stringify(content);
 
       fpaths.push(fpath);
       contents.push(content);
@@ -1296,7 +1294,7 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
     } else if (syncSettingsAction === 2) {
       // Upload from device to server
       const content = (await dataApi.getFiles([_settingsFPath]))[0];
-      await serverApi.putFiles([_settingsFPath], [JSON.stringify(content)]);
+      await serverApi.putFiles([_settingsFPath], [content]);
 
       // Delete obsolete version in server
       if (settingsFPath) await serverApi.deleteFiles([settingsFPath]);

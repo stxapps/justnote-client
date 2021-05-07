@@ -143,7 +143,7 @@ const NoteListMenuPopup = () => {
   if (safeAreaWidth < LG_WIDTH) {
     popupStyle.right = safeAreaWidth - derivedAnchorPosition.right + 16;
     if (isBulkEditing) {
-      console.log('NoteListMenuPopup: should not reach here for safeAreaWidth < LG_WIDTH and isBulkEditing = true.');
+      throw new Error('NoteListMenuPopup: should not reach here for safeAreaWidth < LG_WIDTH and isBulkEditing = true.');
     } else {
       popupStyle.transform.push({
         translateX: popupAnim.interpolate({

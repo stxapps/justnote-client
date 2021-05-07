@@ -192,12 +192,11 @@ export const handleUrlHash = () => {
   if (urlObj.hash !== '') {
     urlObj.set('hash', '');
     window.location.replace(urlObj.toString());
-    console.log(`Set hash to empty in handleHash.`);
   }
 };
 
 export const onUrlHashChange = (oldUrl, newUrl, dispatch, getState) => {
-  console.log('onUrlHashChange called.', oldUrl, newUrl);
+
   const oldUrlObj = new Url(oldUrl, {});
   const oldHashObj = urlHashToObj(oldUrlObj.hash);
 

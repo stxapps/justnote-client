@@ -49,10 +49,7 @@ const ColsPanel = () => {
     return PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: (_, gestureState) => {
-        console.log('onLeftPanResponderGrant', gestureState);
-
         isResizeActive.current = true;
-        console.log(`pane1Width: ${state.pane1Width}, pane2Width: ${state.pane2Width}`);
         startInfo.current = {
           mouseX: gestureState.moveX,
           pane1Width: state.pane1Width,
@@ -61,10 +58,10 @@ const ColsPanel = () => {
         whichResizer.current = 'l';
       },
       onPanResponderMove: () => {
-        console.log('onLeftPanResponderMove');
+
       },
       onPanResponderRelease: () => {
-        console.log('onLeftPanResponderRelease');
+
       },
     });
   }, [state.pane1Width, state.pane2Width]);
@@ -73,8 +70,6 @@ const ColsPanel = () => {
     return PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: (_, gestureState) => {
-        console.log('onRightPanResponderGrant');
-
         isResizeActive.current = true;
         startInfo.current = {
           mouseX: gestureState.moveX,
@@ -84,10 +79,10 @@ const ColsPanel = () => {
         whichResizer.current = 'r';
       },
       onPanResponderMove: () => {
-        console.log('onRightPanResponderMove');
+
       },
       onPanResponderRelease: () => {
-        console.log('onRightPanResponderRelease');
+
       },
     });
   }, [state.pane1Width, state.pane2Width]);
@@ -96,15 +91,13 @@ const ColsPanel = () => {
     return PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: () => {
-        console.log('onViewPanResponderGrant');
+
       },
       onPanResponderMove: (_, gestureState) => {
-        console.log('onViewPanResponderMove');
-        console.log(isResizeActive.current, startInfo.current);
         if (isResizeActive.current && startInfo.current) {
           const mouseX = gestureState.moveX;
           const delta = mouseX - startInfo.current.mouseX;
-          console.log(`mouseX: ${mouseX}`);
+
           if (whichResizer.current === 'l') {
             const _width = Math.max(
               Math.min(startInfo.current.pane1Width + delta, pane1MaxWidth), pane1MinWidth
@@ -123,7 +116,6 @@ const ColsPanel = () => {
         }
       },
       onPanResponderRelease: () => {
-        console.log('onViewPanResponderRelease');
         if (isResizeActive.current) {
           isResizeActive.current = false;
           startInfo.current = null;
