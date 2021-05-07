@@ -25,14 +25,14 @@ const NoteListItems = () => {
     if (!flatList.current) return;
 
     const scrollHeight = Math.max(
-      flatList.current.clientHeight,
       flatList.current.scrollHeight,
       flatList.current.offsetHeight,
+      flatList.current.clientHeight,
     );
-    const windowHeight = Math.max(
-      flatList.current.innerHeight, flatList.current.offsetHeight,
+    const windowHeight = Math.min(
+      flatList.current.offsetHeight, flatList.current.clientHeight,
     );
-    const windowBottom = windowHeight + flatList.current.pageYOffset;
+    const windowBottom = windowHeight + flatList.current.scrollTop;
 
     if (windowBottom > (scrollHeight * 0.96)) dispatch(fetchMore());
   }, 16);
@@ -119,7 +119,14 @@ const NoteListItems = () => {
 
   const renderFetchingMore = () => {
     return (
-      <div>Fetching more...</div>
+      <div className="flex justify-center items-center my-6">
+        <div className="lds-ellipsis">
+          <div className="bg-gray-500"></div>
+          <div className="bg-gray-500"></div>
+          <div className="bg-gray-500"></div>
+          <div className="bg-gray-500"></div>
+        </div>
+      </div>
     );
   };
 

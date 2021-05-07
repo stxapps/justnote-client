@@ -1,10 +1,11 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence, AnimateSharedLayout } from 'framer-motion';
 
 import { updateNoteIdUrlHash, mergeNotes } from '../actions';
 import { MERGING, DIED_MERGING, LG_WIDTH } from '../types/const';
-import { getFormattedDT } from '../utils';
+import { getListNameMap } from '../selectors';
+import { getListNameDisplayName, getFormattedDT } from '../utils';
 import { slideYFMV, popupFMV } from '../types/animConfigs';
 
 import { useSafeAreaFrame } from '.';
@@ -103,6 +104,7 @@ const NoteEditorConflict = (props) => {
 const _ConflictItem = (props) => {
 
   const { listName, note, status } = props;
+  const listNameMap = useSelector(getListNameMap);
   const [isOpen, setIsOpen] = useState(false);
   const didClick = useRef(false);
   const dispatch = useDispatch();
@@ -146,7 +148,7 @@ const _ConflictItem = (props) => {
             {arrowSvg}
             <div className="ml-1">
               <div className="text-sm font-medium text-gray-800 text-left">Last update on {updatedDTStr}</div>
-              <div className="mt-1 text-sm text-gray-600 text-left">In {listName}</div>
+              <div className="mt-1 text-sm text-gray-600 text-left">In {getListNameDisplayName(listName, listNameMap)}</div>
             </div>
           </button>
         </div>

@@ -3,6 +3,7 @@ import { FlatList, View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
+import { Flow } from 'react-native-animated-spinkit';
 
 import { updatePageYOffset, fetchMore } from '../actions';
 import { MY_NOTES, TRASH, ARCHIVE } from '../types/const';
@@ -136,7 +137,9 @@ const NoteListItems = () => {
 
   const renderFetchingMore = useCallback(() => {
     return (
-      <Text style={tailwind('')}>Fetching more...</Text>
+      <View style={tailwind('my-6 py-2 flex-row justify-center w-full')}>
+        <Flow size={48} color="rgba(107, 114, 128, 1)" />
+      </View>
     );
   }, []);
 

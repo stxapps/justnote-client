@@ -2,14 +2,15 @@ import React, { useState, useRef, useMemo, useEffect } from 'react';
 import {
   ScrollView, View, Text, TouchableOpacity, Animated, Linking,
 } from 'react-native';
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { Circle } from 'react-native-animated-spinkit';
 
 import { updateNoteId, mergeNotes } from '../actions';
 import { MERGING, DIED_MERGING, LG_WIDTH } from '../types/const';
-import { getFormattedDT } from '../utils';
+import { getListNameMap } from '../selectors';
+import { getListNameDisplayName, getFormattedDT } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 import { popupFMV } from '../types/animConfigs';
 
@@ -116,6 +117,7 @@ const _ConflictItem = (props) => {
 
   const { listName, note, status } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
+  const listNameMap = useSelector(getListNameMap);
   const [isOpen, setIsOpen] = useState(false);
   const didClick = useRef(false);
   const dispatch = useDispatch();
@@ -159,7 +161,7 @@ const _ConflictItem = (props) => {
             {arrowSvg}
             <View style={tailwind('ml-1')}>
               <Text style={tailwind('text-sm font-medium text-gray-800 text-left')}>Last update on {updatedDTStr}</Text>
-              <Text style={tailwind('mt-1 text-sm text-gray-600 font-normal text-left')}>In {listName}</Text>
+              <Text style={tailwind('mt-1 text-sm text-gray-600 font-normal text-left')}>In {getListNameDisplayName(listName, listNameMap)}</Text>
             </View>
           </TouchableOpacity>
         </View>
