@@ -327,5 +327,23 @@
 - No username: piece garlic material chronic dad possible beauty jealous elephant cage still rule
 - No username: open below advance dolphin wolf man never useless maximum clock proof bike
 - No username: angry juice scatter parrot spider remind tuna crash giggle section isolate film
+* test cases
+- web, mobile
+- PC, laptop, tablet, phone
+- features
+  + Landing, About, Terms, Privacy, Support
+  + Main
+  + List notes, fetch more
+  + New note, edit note, move note, delete note
+  + Bulk edit: move notes, permanently delete notes
+  + Search
+  + Sync, Conflict notes
+  + List list names, change list name
+  + New list name, edit list name, move list name, delete list name
+  + Popups: ConfirmDelete, ConfirmDiscard, MoveTo, ListMenu, Profile
+  + Settings
 * servers
-- 
+** test server
+- https://d2kp6vvq64w651.cloudfront.net
+** prod
+- https://justnote.cc
