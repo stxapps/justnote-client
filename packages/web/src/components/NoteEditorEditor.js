@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ckeditor from '@ckeditor/ckeditor5-build-classic';
+import ckeditor from '@ckeditor/ckeditor5-build-decoupled-document';
 
 import {
   updatePopupUrlHash, updateEditorFocused, saveNote, updateDiscardAction,
@@ -12,7 +12,7 @@ import {
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
   DISCARD_ACTION_CHANGE_LIST_NAME, NEW_NOTE, ADDED,
 } from '../types/const';
-import { isNoteBodyEqual } from '../utils';
+import { isNoteBodyEqual, isMobile as _isMobile } from '../utils';
 
 import '../stylesheets/ckeditor.css';
 
@@ -35,6 +35,8 @@ const NoteEditorEditor = (props) => {
   const [isEditorReady, setEditorReady] = useState(false);
   const titleInput = useRef(null);
   const bodyEditor = useRef(null);
+  const bodyTopToolbar = useRef(null);
+  const bodyBottomToolbar = useRef(null);
   const prevSaveNoteCount = useRef(saveNoteCount);
   const prevDiscardNoteCount = useRef(discardNoteCount);
   const prevConfirmDiscardNoteCount = useRef(confirmDiscardNoteCount);
@@ -43,6 +45,8 @@ const NoteEditorEditor = (props) => {
   const prevChangeListNameCount = useRef(changeListNameCount);
   const prevUpdateEditorWidthCount = useRef(updateEditorWidthCount);
   const dispatch = useDispatch();
+
+  const isMobile = useMemo(() => _isMobile(), []);
 
   const setInitData = useCallback(() => {
     titleInput.current.value = note.title;
@@ -130,9 +134,19 @@ const NoteEditorEditor = (props) => {
   }, [note.title, note.body, dispatch]);
 
   const onReady = useCallback((editor) => {
+    if (isMobile) {
+      bodyBottomToolbar.current.appendChild(editor.ui.view.toolbar.element);
+
+      const groupedItemsDropdown = editor.ui.view.toolbar._behavior.groupedItemsDropdown;
+      if (groupedItemsDropdown) groupedItemsDropdown.panelPosition = 'nw';
+    } else {
+      bodyTopToolbar.current.appendChild(editor.ui.view.toolbar.element);
+      document.documentElement.style.setProperty('--ck-font-size-base', '13px');
+    }
+
     bodyEditor.current = editor;
     setEditorReady(true);
-  }, [setEditorReady]);
+  }, [isMobile, setEditorReady]);
 
   useEffect(() => {
     if (!isEditorReady) return;
@@ -216,6 +230,7 @@ const NoteEditorEditor = (props) => {
 
   const editorConfig = useMemo(() => {
     return {
+      placeholder: 'Start writing...',
       removePlugins: ['Autoformat'],
       fontColor: {
         colors: [
@@ -233,6 +248,7 @@ const NoteEditorEditor = (props) => {
           { color: 'rgb(255, 255, 255)', label: 'White', hasBorder: true },
         ],
         columns: 6,
+        documentColors: 0,
       },
       fontBackgroundColor: {
         colors: [
@@ -250,17 +266,22 @@ const NoteEditorEditor = (props) => {
           { color: 'rgb(255, 255, 255)', label: 'White', hasBorder: true },
         ],
         columns: 6,
+        documentColors: 0,
       },
-      placeholder: 'Start writing...',
     };
   }, []);
 
   return (
-    <div className="flex-1 overflow-x-hidden">
-      <div className="px-1.5 py-1.5">
-        <input ref={titleInput} onFocus={onFocus} type="text" name="titleInput" id="titleInput" className="block w-full text-lg text-gray-800 font-normal px-1.5 py-1.5 placeholder-gray-500 border-0 focus:outline-none focus:ring-0" placeholder="Note Title" autoComplete="off" disabled={note.id !== NEW_NOTE && note.status !== ADDED} />
+    <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-grow flex-shrink overflow-x-hidden overflow-y-auto">
+        <div className={`px-1.5 py-1.5 ${isMobile ? 'border-b border-gray-200' : ''}`}>
+          <input ref={titleInput} onFocus={onFocus} type="text" name="titleInput" id="titleInput" className="block w-full text-lg text-gray-800 font-normal px-1.5 py-1.5 placeholder-gray-500 border-0 focus:outline-none focus:ring-0" placeholder="Note Title" autoComplete="off" disabled={note.id !== NEW_NOTE && note.status !== ADDED} />
+        </div>
+        <div ref={bodyTopToolbar} className="sticky -top-px"></div>
+        <CKEditor editor={ckeditor} config={editorConfig} disabled={note.id !== NEW_NOTE && note.status !== ADDED} onReady={onReady} onFocus={onFocus} />
+        <div className={`h-28 ${isMobile ? '' : 'hidden'}`}></div>
       </div>
-      <CKEditor editor={ckeditor} config={editorConfig} disabled={note.id !== NEW_NOTE && note.status !== ADDED} onReady={onReady} onFocus={onFocus} />
+      <div ref={bodyBottomToolbar} className="flex-grow-0 flex-shrink-0"></div>
     </div>
   );
 };

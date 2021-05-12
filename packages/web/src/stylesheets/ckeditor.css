@@ -107,33 +107,35 @@
   --ck-color-link-fake-selection: var(--jn-editor-blue-300);
 
   --ck-color-widget-hover-border: var(--jn-editor-green-600);
+
+  --ck-font-size-base: 15px;
 }
 
-.ck.ck-editor__main>.ck-editor__editable {
+.ck.ck-editor__editable {
   color: var(--jn-editor-gray-800);
   font-size: 16px;
 }
 
-.ck.ck-editor__main>.ck-editor__editable ul {
+.ck.ck-editor__editable ul {
   list-style: disc;
   padding-left: 40px;
 }
 
-.ck.ck-editor__main>.ck-editor__editable ol {
+.ck.ck-editor__editable ol {
   list-style: decimal;
   padding-left: 40px;
 }
 
-.ck.ck-editor__main>.ck-editor__editable p a {
+.ck.ck-editor__editable p a {
   color: var(--jn-editor-blue-700);
   cursor: pointer;
 }
 
-.ck.ck-editor__main>.ck-editor__editable p a:hover {
+.ck.ck-editor__editable p a:hover {
   text-decoration: underline;
 }
 
-.ck.ck-editor__main>.ck-editor__editable:not(.ck-focused) {
+.ck.ck-editor__editable:not(.ck-focused) {
   border-color: transparent;
 }
 
@@ -142,45 +144,26 @@
   box-shadow: none;
 }
 
-.ck.ck-editor__top .ck-sticky-panel .ck-toolbar {
+.ck.ck-toolbar {
   border-top-width: 1px;
   border-bottom-width: 1px;
   border-left-width: 0px;
   border-right-width: 0px;
 }
 
-.ck.ck-sticky-panel .ck-sticky-panel__content_sticky {
-  box-shadow: none;
-}
-
 .ck.ck-button.ck-disabled .ck-button__icon, a.ck.ck-button.ck-disabled .ck-button__icon {
   opacity: 1;
 }
 
-/*
- * Apply only on web, not mobile (in-webview).
- * As scroll happens on div, not window, listenTo in stickyPanelView doesn't work.
- * Need to fix it here.
- * ref: https://stackoverflow.com/questions/52512665/how-to-disable-sticky-toolbar-in-classic-editor-when-page-is-scrolled
- */
-.ck.ck-editor {
-  z-index: 0;
+.ck.ck-dropdown.ck-font-size-dropdown .ck.ck-dropdown__panel {
+  max-width: none;
 }
 
-.ck.ck-editor__top {
-  z-index: var(--ck-z-modal);
-  position: sticky;
-  position: -webkit-sticky;
-  top: -1px;
+.ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list {
+  display: flex;
+  flex-direction: row;
 }
 
-.ck.ck-sticky-panel__placeholder {
-  display : none !important;
+.ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list .ck.ck-list__item {
+  min-width: auto;
 }
-
-.ck.ck-sticky-panel .ck-sticky-panel__content_sticky {
-  position: static !important;
-  width: auto !important;
-  height: auto !important;
-}
-/* End */

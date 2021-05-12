@@ -231,7 +231,7 @@
 - yarn add reselect
 - yarn add file-saver
 - yarn add @ckeditor/ckeditor5-react
-- yarn add file:../../../ckeditor5/packages/ckeditor5-build-classic
+- yarn add file:../../../ckeditor5/packages/ckeditor5-build-decoupled-document
 ** Server steps
 *** s3
 - Set public and enable CORS
@@ -332,7 +332,7 @@
 - PC, laptop, tablet, phone
 - features
   + Landing, About, Terms, Privacy, Support
-  + Main
+  + Main, ColsPanel, NavPanel, Sidebar, RightPanel
   + List notes, fetch more
   + New note, edit note, move note, delete note
   + Bulk edit: move notes, permanently delete notes
