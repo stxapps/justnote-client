@@ -12,6 +12,7 @@ import {
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
   DISCARD_ACTION_CHANGE_LIST_NAME, NEW_NOTE, ADDED,
 } from '../types/const';
+import { isNoteBodyEqual } from '../utils';
 
 import '../stylesheets/ckeditor.css';
 
@@ -78,7 +79,7 @@ const NoteEditorEditor = (props) => {
       const title = titleInput.current.value;
       const body = bodyEditor.current.getData();
 
-      if (note.title !== title || note.body !== body) {
+      if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
         dispatch(updateDiscardAction(DISCARD_ACTION_CANCEL_EDIT));
         updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
         return;
@@ -93,7 +94,7 @@ const NoteEditorEditor = (props) => {
     const title = titleInput.current.value;
     const body = bodyEditor.current.getData();
 
-    if (note.title !== title || note.body !== body) {
+    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
       dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH));
       updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
       return;
@@ -106,7 +107,7 @@ const NoteEditorEditor = (props) => {
     const title = titleInput.current.value;
     const body = bodyEditor.current.getData();
 
-    if (note.title !== title || note.body !== body) {
+    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
       dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_NOTE_ID));
       updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
       return;
@@ -119,7 +120,7 @@ const NoteEditorEditor = (props) => {
     const title = titleInput.current.value;
     const body = bodyEditor.current.getData();
 
-    if (note.title !== title || note.body !== body) {
+    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
       dispatch(updateDiscardAction(DISCARD_ACTION_CHANGE_LIST_NAME));
       updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
       return;
@@ -201,7 +202,7 @@ const NoteEditorEditor = (props) => {
 
       const title = titleInput.current.value;
       const body = bodyEditor.current.getData();
-      if (note.title !== title || note.body !== body) {
+      if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
         e.preventDefault();
         return e.returnValue = 'It looks like your note hasn\'t been saved. Do you want to leave this site and discard your changes?';
       }

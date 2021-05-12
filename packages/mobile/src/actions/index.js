@@ -41,7 +41,7 @@ import {
   SWAP_LEFT, SWAP_RIGHT, N_NOTES, SETTINGS, INDEX, DOT_JSON, SHOW_SYNCED,
 } from '../types/const';
 import {
-  separateUrlAndParam, getUserImageUrl, randomString, swapArrayElements, isString,
+  separateUrlAndParam, getUserImageUrl, randomString, swapArrayElements,
 } from '../utils';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';

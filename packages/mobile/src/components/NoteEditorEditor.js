@@ -11,6 +11,7 @@ import {
   CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_NOTE_ID,
   DISCARD_ACTION_CHANGE_LIST_NAME, NEW_NOTE, ADDED,
 } from '../types/const';
+import { isNoteBodyEqual } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 import cache from '../utils/cache';
 
@@ -93,7 +94,7 @@ const NoteEditorEditor = (props) => {
 
   const onDiscardNote = useCallback((doCheckEditing, title = null, body = null) => {
     if (doCheckEditing) {
-      if (note.title !== title || note.body !== body) {
+      if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
         dispatch(updateDiscardAction(DISCARD_ACTION_CANCEL_EDIT));
         dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
         return;
@@ -105,7 +106,7 @@ const NoteEditorEditor = (props) => {
   }, [note.title, note.body, setInitData, dispatch]);
 
   const onUpdateNoteId = useCallback((title, body) => {
-    if (note.title !== title || note.body !== body) {
+    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
       dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_NOTE_ID));
       dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
       return;
@@ -115,7 +116,7 @@ const NoteEditorEditor = (props) => {
   }, [note.title, note.body, dispatch]);
 
   const onChangeListName = useCallback((title, body) => {
-    if (note.title !== title || note.body !== body) {
+    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
       dispatch(updateDiscardAction(DISCARD_ACTION_CHANGE_LIST_NAME));
       dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
       return;

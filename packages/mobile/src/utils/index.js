@@ -406,3 +406,14 @@ export const stripHtml = (s) => {
     .replace(codeRe, (match, entity) => codeMap[entity])
     .replace(/\s\s+/g, ' ');
 };
+
+export const isNoteBodyEqual = (s1, s2) => {
+  // Remove spaces in rgb(r, g, b)
+  const pattern = /rgb\((\d+),\s*(\d+),\s*(\d+)\)/gi;
+  const substitute = 'rgb($1,$2,$3)';
+
+  s1 = s1.replace(pattern, substitute);
+  s2 = s2.replace(pattern, substitute);
+
+  return s1 === s2;
+};
