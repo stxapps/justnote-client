@@ -32,7 +32,9 @@ const ConfirmDiscardPopup = () => {
     if (discardAction === DISCARD_ACTION_CANCEL_EDIT) {
       dispatch(increaseConfirmDiscardNoteCount());
     } else if (discardAction === DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH) {
-      dispatch(updateNoteIdUrlHash(null, true, false));
+      // As this and closing discard popup both call window.history.back(),
+      //   need to be in different js clock cycle.
+      setTimeout(() => dispatch(updateNoteIdUrlHash(null, true, false)), 100);
     } else if (discardAction === DISCARD_ACTION_UPDATE_NOTE_ID) {
       dispatch(updateNoteId(null, true, false));
     } else if (discardAction === DISCARD_ACTION_CHANGE_LIST_NAME) {

@@ -50,7 +50,7 @@ const NoteEditorTopBar = (props) => {
         <TouchableOpacity onPress={onCancelBtnClick} style={tailwind('hidden border border-white bg-white px-2 py-2 rounded-md lg:flex', safeAreaWidth)}>
           <Text style={tailwind('text-sm text-gray-500 font-normal')}>Cancel</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={onSaveBtnClick} style={tailwind('flex-row items-center h-full pl-1 pr-1 border border-white bg-white sm:pl-2 lg:px-2 lg:py-2 lg:border-gray-300 lg:rounded-md lg:shadow-sm lg:ml-3', safeAreaWidth)}>
+        <TouchableOpacity onPress={onSaveBtnClick} style={tailwind('flex-row items-center h-full pl-1 pr-1 border border-white bg-white lg:px-2 lg:py-2 lg:border-gray-300 lg:rounded-md lg:shadow-sm lg:ml-3', safeAreaWidth)}>
           <View style={tailwind('p-2 rounded lg:p-0', safeAreaWidth)}>
             <Svg width={20} height={20} style={tailwind('text-green-600 font-normal')} viewBox="0 0 20 20" fill="currentColor">
               <Path fillRule="evenodd" clipRule="evenodd" d="M16.7069 5.29303C16.8944 5.48056 16.9997 5.73487 16.9997 6.00003C16.9997 6.26519 16.8944 6.5195 16.7069 6.70703L8.70692 14.707C8.51939 14.8945 8.26508 14.9998 7.99992 14.9998C7.73475 14.9998 7.48045 14.8945 7.29292 14.707L3.29292 10.707C3.11076 10.5184 3.00997 10.2658 3.01224 10.0036C3.01452 9.74143 3.11969 9.49062 3.3051 9.30521C3.49051 9.1198 3.74132 9.01464 4.00352 9.01236C4.26571 9.01008 4.51832 9.11087 4.70692 9.29303L7.99992 12.586L15.2929 5.29303C15.4804 5.10556 15.7348 5.00024 15.9999 5.00024C16.2651 5.00024 16.5194 5.10556 16.7069 5.29303Z" />
@@ -64,7 +64,7 @@ const NoteEditorTopBar = (props) => {
 
   const renderLoading = () => {
     return (
-      <View style={tailwind('justify-center px-4 h-full sm:px-1', safeAreaWidth)}>
+      <View style={tailwind('justify-center px-4 h-full lg:px-1', safeAreaWidth)}>
         <Circle size={20} color="rgba(107, 114, 128, 1)" />
       </View>
     );
@@ -86,7 +86,7 @@ const NoteEditorTopBar = (props) => {
   return (
     <View style={tailwind('flex-grow-0 flex-shrink-0 border-b border-gray-200 w-full h-16')}>
       <ScrollView horizontal={true}>
-        <View style={[tailwind('h-full flex-row justify-between sm:px-3 lg:items-center', safeAreaWidth), style]}>
+        <View style={[tailwind('h-full flex-row justify-between lg:px-3 lg:items-center', safeAreaWidth), style]}>
           <View style={tailwind('flex-row')}>
             <TouchableOpacity onPress={onRightPanelCloseBtnClick} style={tailwind('justify-center px-4 h-full rounded-md bg-white lg:hidden', safeAreaWidth)}>
               {note.id !== NEW_NOTE && isEditorFocused ?

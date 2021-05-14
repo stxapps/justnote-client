@@ -44,7 +44,7 @@ import {
 import {
   throttle, getUserImageUrl,
   extractUrl, separateUrlAndParam, getUrlPathQueryHash, urlHashToObj, objToUrlHash,
-  randomString, swapArrayElements,
+  randomString, swapArrayElements, isIPadIPhoneIPod,
 } from '../utils';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
@@ -81,15 +81,29 @@ export const init = () => async (dispatch, getState) => {
     });
   }, 1);
 
-  window.addEventListener('resize', throttle(() => {
-    dispatch({
-      type: UPDATE_WINDOW_SIZE,
-      payload: {
-        windowWidth: window.innerWidth,
-        windowHeight: window.innerHeight,
-      },
-    });
-  }, 16));
+  if (isIPadIPhoneIPod()) {
+    // @ts-ignore
+    window.visualViewport.addEventListener('resize', throttle(() => {
+      dispatch({
+        type: UPDATE_WINDOW_SIZE,
+        payload: {
+          windowWidth: window.innerWidth,
+          // @ts-ignore
+          windowHeight: window.visualViewport.height,
+        },
+      });
+    }, 16));
+  } else {
+    window.addEventListener('resize', throttle(() => {
+      dispatch({
+        type: UPDATE_WINDOW_SIZE,
+        payload: {
+          windowWidth: window.innerWidth,
+          windowHeight: window.innerHeight,
+        },
+      });
+    }, 16));
+  }
 };
 
 const handlePendingSignIn = () => async (dispatch, getState) => {

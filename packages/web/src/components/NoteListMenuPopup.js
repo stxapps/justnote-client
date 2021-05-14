@@ -44,7 +44,10 @@ const NoteListMenuPopup = () => {
 
   const onExitBtnClick = () => {
     onNoteListMenuCancelBtnClick();
-    updateBulkEditUrlHash(false);
+
+    // As this and closing menu popup both call window.history.back(),
+    //   need to be in different js clock cycle.
+    setTimeout(() => updateBulkEditUrlHash(false), 100);
   };
 
   useEffect(() => {

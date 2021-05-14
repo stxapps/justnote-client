@@ -139,6 +139,11 @@ const NoteEditorEditor = (props) => {
 
       const groupedItemsDropdown = editor.ui.view.toolbar._behavior.groupedItemsDropdown;
       if (groupedItemsDropdown) groupedItemsDropdown.panelPosition = 'nw';
+
+      const toolbarItems = editor.ui.view.toolbar.items;
+      toolbarItems.get(3).panelPosition = 'nme';
+      toolbarItems.get(4).panelPosition = 'nme';
+      toolbarItems.get(5).panelPosition = 'nmw';
     } else {
       bodyTopToolbar.current.appendChild(editor.ui.view.toolbar.element);
       document.documentElement.style.setProperty('--ck-font-size-base', '13px');
@@ -273,11 +278,11 @@ const NoteEditorEditor = (props) => {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="flex-grow flex-shrink overflow-x-hidden overflow-y-auto">
+      <div className="flex-grow flex-shrink overflow-x-hidden overflow-y-auto z-0">
         <div className={`px-1.5 py-1.5 ${isMobile ? 'border-b border-gray-200' : ''}`}>
           <input ref={titleInput} onFocus={onFocus} type="text" name="titleInput" id="titleInput" className="block w-full text-lg text-gray-800 font-normal px-1.5 py-1.5 placeholder-gray-500 border-0 focus:outline-none focus:ring-0" placeholder="Note Title" autoComplete="off" disabled={note.id !== NEW_NOTE && note.status !== ADDED} />
         </div>
-        <div ref={bodyTopToolbar} className="sticky -top-px"></div>
+        <div ref={bodyTopToolbar} className="sticky -top-px z-10"></div>
         <CKEditor editor={ckeditor} config={editorConfig} disabled={note.id !== NEW_NOTE && note.status !== ADDED} onReady={onReady} onFocus={onFocus} />
         <div className={`h-28 ${isMobile ? '' : 'hidden'}`}></div>
       </div>

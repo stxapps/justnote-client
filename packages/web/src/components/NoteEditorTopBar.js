@@ -46,7 +46,7 @@ const NoteEditorTopBar = (props) => {
         <button onClick={onCancelBtnClick} type="button" className="hidden border border-white text-sm bg-white focus:outline-none px-2 py-2 rounded-md focus:ring-2 focus:ring-green-600 text-gray-500 hover:text-gray-600 hover:bg-gray-50 lg:inline">
           Cancel
         </button>
-        <button onClick={onSaveBtnClick} type="button" className="group inline-flex items-center h-full pl-1 pr-1 border border-white text-sm bg-white focus:outline-none sm:pl-2 lg:px-2 lg:py-2 lg:border-gray-300 lg:rounded-md lg:shadow-sm lg:focus:ring-2 lg:focus:ring-green-600 text-gray-500 hover:text-gray-600 lg:hover:bg-gray-50 lg:ml-3">
+        <button onClick={onSaveBtnClick} type="button" className="group inline-flex items-center h-full pl-1 pr-1 border border-white text-sm bg-white focus:outline-none lg:px-2 lg:py-2 lg:border-gray-300 lg:rounded-md lg:shadow-sm lg:focus:ring-2 lg:focus:ring-green-600 text-gray-500 hover:text-gray-600 lg:hover:bg-gray-50 lg:ml-3">
           <div className="p-2 rounded group-hover:bg-gray-200 group-focus:ring-2 group-focus:ring-green-600 lg:p-0 lg:group-hover:bg-transparent lg:group-focus:ring-transparent">
             <svg className="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <path fillRule="evenodd" clipRule="evenodd" d="M16.7069 5.29303C16.8944 5.48056 16.9997 5.73487 16.9997 6.00003C16.9997 6.26519 16.8944 6.5195 16.7069 6.70703L8.70692 14.707C8.51939 14.8945 8.26508 14.9998 7.99992 14.9998C7.73475 14.9998 7.48045 14.8945 7.29292 14.707L3.29292 10.707C3.11076 10.5184 3.00997 10.2658 3.01224 10.0036C3.01452 9.74143 3.11969 9.49062 3.3051 9.30521C3.49051 9.1198 3.74132 9.01464 4.00352 9.01236C4.26571 9.01008 4.51832 9.11087 4.70692 9.29303L7.99992 12.586L15.2929 5.29303C15.4804 5.10556 15.7348 5.00024 15.9999 5.00024C16.2651 5.00024 16.5194 5.10556 16.7069 5.29303Z" />
@@ -60,7 +60,7 @@ const NoteEditorTopBar = (props) => {
 
   const renderLoading = () => {
     return (
-      <div className="inline-flex items-center px-4 h-full sm:px-1">
+      <div className="inline-flex items-center px-4 h-full lg:px-1">
         <div className="ball-clip-rotate">
           <div />
         </div>
@@ -81,7 +81,7 @@ const NoteEditorTopBar = (props) => {
 
   return (
     <div className="flex-grow-0 flex-shrink-0 border-b border-gray-200 w-full h-16 overflow-x-auto">
-      <div style={style} className="w-full h-full flex justify-between sm:px-3 lg:items-center">
+      <div style={style} className="w-full h-full flex justify-between lg:px-3 lg:items-center">
         <div className="flex">
           <button onClick={onRightPanelCloseBtnClick} type="button" className="group inline-flex items-center px-4 h-full text-sm rounded-md text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-inset lg:hidden">
             {note.id !== NEW_NOTE && isEditorFocused ?

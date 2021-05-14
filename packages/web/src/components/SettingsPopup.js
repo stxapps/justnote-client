@@ -182,7 +182,7 @@ const SettingsPopup = () => {
             </div>
           </div>
           {/* Sidebar for mobile */}
-          <motion.div className="absolute inset-0 flex md:hidden" variants={canvasFMV} initial={false} animate={isSidebarShown ? 'visible' : 'hidden'}>
+          <motion.div className="absolute inset-0 rounded-lg overflow-hidden flex md:hidden" variants={canvasFMV} initial={false} animate={isSidebarShown ? 'visible' : 'hidden'}>
             <motion.button onClick={onSidebarCloseBtnClick} className="absolute inset-0 w-full h-full" variants={sideBarOverlayFMV}>
               <div className="absolute inset-0 bg-gray-100" />
             </motion.button>
@@ -193,7 +193,7 @@ const SettingsPopup = () => {
                 </svg>
               </button>
             </div>
-            <motion.div className="relative flex-1 flex flex-col max-w-56 w-full bg-white" variants={sideBarFMV}>
+            <motion.div className="relative flex-1 flex flex-col max-w-56 w-full bg-white rounded-l-lg" variants={sideBarFMV}>
               <div className="pt-5 pb-4 pl-2 flex-1 h-0 overflow-y-auto">
                 <div className="px-4 flex-shrink-0 flex items-center">
                   <h2 className="text-xl font-medium text-gray-800 leading-6">Settings</h2>

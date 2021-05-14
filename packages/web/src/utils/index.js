@@ -418,15 +418,23 @@ export const isNoteBodyEqual = (s1, s2) => {
   return s1 === s2;
 };
 
+export const isIPadIPhoneIPod = () => {
+  const ua = navigator.userAgent;
+  if (/iPad|iPhone|iPod/.test(ua)) {
+    return true;
+  }
+  if (/Mac OS X/.test(ua) && /Safari/.test(ua) && !/Chrome/.test(ua) && !/Firefox/.test(ua)) {
+    return true;
+  }
+  return false;
+};
+
 export const isMobile = () => {
   const ua = navigator.userAgent;
   if (/android/i.test(ua)) {
     return true;
   }
-  if (/iPad|iPhone|iPod/.test(ua)) {
-    return true;
-  }
-  if (/Mac OS X/.test(ua) && /Safari/.test(ua) && !/Chrome/.test(ua) && !/Firefox/.test(ua)) {
+  if (isIPadIPhoneIPod()) {
     return true;
   }
   if (/windows phone/i.test(ua)) {
