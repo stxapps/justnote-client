@@ -15,7 +15,7 @@ const NoteListItemError = (props) => {
 
   const onContentBtnClick = () => {
     if (safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(note.id);
-    else dispatch(updateNoteId(note.id));
+    else dispatch(updateNoteId(note.id, false, true));
   };
 
   let title, body;

@@ -23,7 +23,7 @@ const Sidebar = () => {
   };
 
   const onAddBtnClick = () => {
-    dispatch(updateNoteId(NEW_NOTE));
+    dispatch(updateNoteId(NEW_NOTE, false, true));
   };
 
   const derivedUsername = useMemo(() => {

@@ -13,7 +13,7 @@ const NoteListItemError = (props) => {
   const dispatch = useDispatch();
 
   const onContentBtnClick = () => {
-    dispatch(updateNoteId(note.id));
+    dispatch(updateNoteId(note.id, false, true));
   };
 
   let title, body;
