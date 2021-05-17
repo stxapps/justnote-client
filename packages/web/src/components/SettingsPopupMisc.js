@@ -10,6 +10,7 @@ const SettingsPopupMisc = (props) => {
   const doDeleteOldNotesInTrash = useSelector(state => state.settings.doDeleteOldNotesInTrash);
   const sortOn = useSelector(state => state.settings.sortOn);
   const doDescendingOrder = useSelector(state => state.settings.doDescendingOrder);
+  const doAlertScreenRotation = useSelector(state => state.settings.doAlertScreenRotation);
   const updateSettingsProgress = useSelector(state => state.settings.updateSettingsProgress);
   const dispatch = useDispatch();
 
@@ -23,7 +24,6 @@ const SettingsPopupMisc = (props) => {
   };
 
   const onDoDescendingInputChange = (e) => {
-
     const value = e.target.value;
 
     let doDescend;
@@ -32,6 +32,10 @@ const SettingsPopupMisc = (props) => {
     else throw new Error(`Invalid value: ${value}`);
 
     dispatch(updateSettings({ doDescendingOrder: doDescend }));
+  };
+
+  const onDoAlertBtnClick = () => {
+    dispatch(updateSettings({ doAlertScreenRotation: !doAlertScreenRotation }));
   };
 
   const onDiedUpdatingCloseBtnClick = () => {
@@ -98,6 +102,9 @@ const SettingsPopupMisc = (props) => {
   const descendingBtnClassNames = doDescendingOrder ? 'bg-green-100 border-green-200' : 'border-gray-200';
   const descendingBtnInnerClassNames = doDescendingOrder ? 'text-green-800' : 'text-gray-700';
 
+  const doAlertBtnClassNames = doAlertScreenRotation ? 'bg-green-600' : 'bg-gray-200';
+  const doAlertBtnInnerClassNames = doAlertScreenRotation ? 'translate-x-5' : 'translate-x-0';
+
   return (
     <div className="p-4 relative md:p-6 md:pt-4">
       <div className="border-b border-gray-200 md:hidden">
@@ -108,17 +115,17 @@ const SettingsPopupMisc = (props) => {
       </div>
       <div className="mt-6 flex items-center justify-between space-x-4 md:mt-0">
         <div className="flex flex-col">
-          <h4 id="auto-delete-option-label" className="text-base text-gray-800 font-medium leading-none">Auto Cleanup</h4>
-          <p id="auto-delete-option-description" className="mt-2.5 text-base text-gray-500 leading-relaxed">Allow old removed notes in Trash to be automatically deleted after 45 days</p>
+          <h4 className="text-base text-gray-800 font-medium leading-none">Auto Cleanup</h4>
+          <p className="mt-2.5 text-base text-gray-500 leading-relaxed">Allow old removed notes in Trash to be automatically deleted after 45 days</p>
         </div>
         <span onClick={onDoDeleteBtnClick} role="checkbox" tabIndex={0} aria-checked="true" aria-labelledby="auto-cleanup-option-label" aria-describedby="auto-cleanup-option-description" className={`${doDeleteBtnClassNames} relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600`}>
           <span aria-hidden="true" className={`${doDeleteBtnInnerClassNames} inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200`} />
         </span>
       </div>
       <div className="mt-8 mb-4 flex flex-col">
-        <h4 id="auto-delete-option-label" className="text-base text-gray-800 font-medium leading-none">List Order On</h4>
+        <h4 className="text-base text-gray-800 font-medium leading-none">List Order On</h4>
         <div className="sm:flex sm:items-start sm:justify-between sm:space-x-4">
-          <p id="auto-delete-option-description" className="mt-2.5 flex-grow flex-shrink text-base text-gray-500 leading-relaxed">Choose whether your notes are sorted on <span className="font-semibold">added date</span> or <span className="font-semibold">updated date</span> when you browse your notes.</p>
+          <p className="mt-2.5 flex-grow flex-shrink text-base text-gray-500 leading-relaxed">Choose whether your notes are sorted on <span className="font-semibold">added date</span> or <span className="font-semibold">updated date</span> when you browse your notes.</p>
           <div className="mx-auto mt-2.5 w-full max-w-48 bg-white rounded-md shadow-sm -space-y-px sm:mt-1 sm:flex-grow-0 sm:flex-shrink-0 sm:w-48 sm:max-w-none">
             <div className={`${addedDTBtnClassNames} p-4 relative flex border rounded-tl-md rounded-tr-md`}>
               <div className="flex items-center h-5">
@@ -140,9 +147,9 @@ const SettingsPopupMisc = (props) => {
         </div>
       </div>
       <div className="mt-8 mb-4 flex flex-col">
-        <h4 id="auto-delete-option-label" className="text-base text-gray-800 font-medium leading-none">List Order Direction</h4>
+        <h4 className="text-base text-gray-800 font-medium leading-none">List Order Direction</h4>
         <div className="sm:flex sm:items-start sm:justify-between sm:space-x-4">
-          <p id="auto-delete-option-description" className="mt-2.5 flex-grow flex-shrink text-base text-gray-500 leading-relaxed">Choose whether your notes are sorted in <span className="font-semibold">ascending order</span> (i.e. notes you create first appear first) or <span className="font-semibold">descending order</span> (i.e. notes you create last appear first) when you browse your notes.</p>
+          <p className="mt-2.5 flex-grow flex-shrink text-base text-gray-500 leading-relaxed">Choose whether your notes are sorted in <span className="font-semibold">ascending order</span> (i.e. notes you create first appear first) or <span className="font-semibold">descending order</span> (i.e. notes you create last appear first) when you browse your notes.</p>
           <div className="mx-auto mt-2.5 w-full max-w-48 bg-white rounded-md shadow-sm -space-y-px sm:mt-1 sm:flex-grow-0 sm:flex-shrink-0 sm:w-48 sm:max-w-none">
             <div className={`${ascendingBtnClassNames} p-4 relative flex border rounded-tl-md rounded-tr-md`}>
               <div className="flex items-center h-5">
@@ -162,6 +169,15 @@ const SettingsPopupMisc = (props) => {
             </div>
           </div>
         </div>
+      </div>
+      <div className="mt-8 mb-4 flex items-center justify-between space-x-4">
+        <div className="flex flex-col">
+          <h4 className="text-base text-gray-800 font-medium leading-none">Screen Rotation Warning</h4>
+          <p className="mt-2.5 text-base text-gray-500 leading-relaxed">Show a warning when rotating screen on iPad/Tablet as on these devices, screen rotation is not fully supported. Please do not rotate your iPad/Tablet while editing your note, new changes to your note will be lost. We are sorry for the inconvenience.</p>
+        </div>
+        <span onClick={onDoAlertBtnClick} role="checkbox" tabIndex={0} aria-checked="true" aria-labelledby="auto-cleanup-option-label" aria-describedby="auto-cleanup-option-description" className={`${doAlertBtnClassNames} relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600`}>
+          <span aria-hidden="true" className={`${doAlertBtnInnerClassNames} inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200`} />
+        </span>
       </div>
       {renderUpdateSettingsProgress()}
     </div>

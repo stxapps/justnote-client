@@ -12,7 +12,8 @@ import {
 } from '../types/actionTypes';
 import {
   PROFILE_POPUP, NOTE_LIST_MENU_POPUP, MOVE_TO_POPUP, SIDEBAR_POPUP, SEARCH_POPUP,
-  SETTINGS_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, MY_NOTES, TRASH, ARCHIVE,
+  SETTINGS_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP,
+  ALERT_SCREEN_ROTATION_POPUP, MY_NOTES, TRASH, ARCHIVE,
   UPDATING, DIED_UPDATING, MAX_SELECTED_NOTE_IDS,
 } from '../types/const';
 import { doContainListName } from '../utils';
@@ -32,6 +33,7 @@ const initialState = {
   isSettingsPopupShown: false,
   isConfirmDeletePopupShown: false,
   isConfirmDiscardPopupShown: false,
+  isAlertScreenRotationPopupShown: false,
   searchString: '',
   isBulkEditing: false,
   isEditorFocused: false,
@@ -112,9 +114,7 @@ const displayReducer = (state = initialState, action) => {
     }
 
     if (id === SETTINGS_POPUP) {
-      return {
-        ...state, isSettingsPopupShown: isShown,
-      };
+      return { ...state, isSettingsPopupShown: isShown };
     }
 
     if (action.payload.id === CONFIRM_DELETE_POPUP) {
@@ -131,6 +131,10 @@ const displayReducer = (state = initialState, action) => {
         newState.discardAction = null;
       }
       return newState;
+    }
+
+    if (action.payload.id === ALERT_SCREEN_ROTATION_POPUP) {
+      return { ...state, isAlertScreenRotationPopupShown: isShown };
     }
 
     throw new Error(`Invalid type: ${action.type} and payload: ${action.payload}`);

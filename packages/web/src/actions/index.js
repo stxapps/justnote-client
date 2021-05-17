@@ -36,7 +36,7 @@ import {
 } from '../types/actionTypes';
 import {
   APP_NAME, APP_ICON_NAME, SEARCH_POPUP, SETTINGS_POPUP,
-  CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP,
+  CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, ALERT_SCREEN_ROTATION_POPUP,
   MY_NOTES, TRASH, ID, NEW_NOTE,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
   SWAP_LEFT, SWAP_RIGHT, N_NOTES, SETTINGS, INDEX, DOT_JSON, LG_WIDTH,
@@ -81,9 +81,13 @@ export const init = () => async (dispatch, getState) => {
     });
   }, 1);
 
+  let prevWidth = window.innerWidth;
   if (isIPadIPhoneIPod()) {
     // @ts-ignore
     window.visualViewport.addEventListener('resize', throttle(() => {
+      handleScreenRotation(prevWidth)(dispatch, getState);
+      prevWidth = window.innerWidth;
+
       dispatch({
         type: UPDATE_WINDOW_SIZE,
         payload: {
@@ -95,6 +99,9 @@ export const init = () => async (dispatch, getState) => {
     }, 16));
   } else {
     window.addEventListener('resize', throttle(() => {
+      handleScreenRotation(prevWidth)(dispatch, getState);
+      prevWidth = window.innerWidth;
+
       dispatch({
         type: UPDATE_WINDOW_SIZE,
         payload: {
@@ -135,6 +142,23 @@ const handlePendingSignIn = () => async (dispatch, getState) => {
     type: UPDATE_HANDLING_SIGN_IN,
     payload: false,
   });
+};
+
+const handleScreenRotation = (prevWidth) => (dispatch, getState) => {
+  if (!getState().settings.doAlertScreenRotation) return;
+
+  const toLg = prevWidth < LG_WIDTH && window.innerWidth >= LG_WIDTH;
+  const fromLg = prevWidth >= LG_WIDTH && window.innerWidth < LG_WIDTH;
+  if (!toLg && !fromLg) return;
+
+  dispatch(updatePopup(ALERT_SCREEN_ROTATION_POPUP, true, null));
+  if (fromLg) {
+    const noteId = getState().display.noteId;
+    if (noteId) {
+      dispatch(updateNoteId(null));
+      setTimeout(() => updateNoteIdUrlHash(noteId), 100);
+    }
+  }
 };
 
 export const signUp = () => async (dispatch, getState) => {

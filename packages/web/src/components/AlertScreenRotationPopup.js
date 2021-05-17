@@ -2,34 +2,27 @@ import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { updatePopupUrlHash, deleteNotes, deleteListNames } from '../actions';
-import { CONFIRM_DELETE_POPUP, SM_WIDTH } from '../types/const';
+import { updatePopup } from '../actions';
+import { ALERT_SCREEN_ROTATION_POPUP, SM_WIDTH } from '../types/const';
 import { dialogBgFMV, dialogFMV } from '../types/animConfigs';
 
 import { useSafeAreaFrame } from '.';
 
-const ConfirmDeletePopup = () => {
+const AlertScreenRotationPopup = () => {
 
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
-  const isShown = useSelector(state => state.display.isConfirmDeletePopupShown);
-  const deletingListName = useSelector(state => state.display.deletingListName);
+  const isShown = useSelector(state => state.display.isAlertScreenRotationPopupShown);
   const cancelBtn = useRef(null);
   const didClick = useRef(false);
   const dispatch = useDispatch();
 
-  const onConfirmDeleteCancelBtnClick = () => {
-    if (didClick.current) return;
-    updatePopupUrlHash(CONFIRM_DELETE_POPUP, false, null);
-    didClick.current = true;
+  const onCancelBtnClick = () => {
+    // Do nothing
   };
 
-  const onConfirmDeleteOkBtnClick = () => {
+  const onOkBtnClick = () => {
     if (didClick.current) return;
-
-    if (deletingListName) dispatch(deleteListNames([deletingListName]));
-    else dispatch(deleteNotes(safeAreaWidth));
-    onConfirmDeleteCancelBtnClick();
-
+    dispatch(updatePopup(ALERT_SCREEN_ROTATION_POPUP, false, null));
     didClick.current = true;
   };
 
@@ -41,18 +34,18 @@ const ConfirmDeletePopup = () => {
   }, [isShown]);
 
   if (!isShown) return (
-    <AnimatePresence key="AP_CDP" />
+    <AnimatePresence key="AP_AScreenRotationP" />
   );
 
   const spanStyle = {};
   if (safeAreaWidth >= SM_WIDTH) spanStyle.height = safeAreaHeight;
 
   return (
-    <AnimatePresence key="AP_CDP">
+    <AnimatePresence key="AP_AScreenRotationP">
       <div className="fixed inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div style={{ minHeight: safeAreaHeight }} className="flex items-end justify-center pt-4 px-4 pb-20 text-center sm:block sm:p-0">
           <div className="fixed inset-0" aria-hidden="true">
-            <motion.button ref={cancelBtn} onClick={onConfirmDeleteCancelBtnClick} className="absolute inset-0 w-full h-full bg-black bg-opacity-25 cursor-default focus:outline-none" variants={dialogBgFMV} initial="hidden" animate="visible" exit="hidden" />
+            <motion.button ref={cancelBtn} onClick={onCancelBtnClick} className="absolute inset-0 w-full h-full bg-black bg-opacity-25 cursor-default focus:outline-none" variants={dialogBgFMV} initial="hidden" animate="visible" exit="hidden" />
           </div>
           <span style={spanStyle} className="hidden sm:inline-block sm:align-middle" aria-hidden="true">&#8203;</span>
           <motion.div className="relative inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6" variants={dialogFMV} initial="hidden" animate="visible" exit="hidden">
@@ -63,17 +56,15 @@ const ConfirmDeletePopup = () => {
                 </svg>
               </div>
               <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">Confirm delete?</h3>
+                <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">Screen rotation</h3>
                 <div className="mt-2">
-                  <p className="text-sm text-gray-500">
-                    Are you sure you want to permanently delete? This action cannot be undone.
-                  </p>
+                  <p className="text-sm text-gray-500">Screen rotation is not fully supported. Please do not rotate your device while editing your note, new changes to your note will be lost. We are sorry for the inconvenience.</p>
+                  <p className="text-sm text-gray-500 mt-3">(You can choose to not show this warning again in Settings -&gt; Misc.)</p>
                 </div>
               </div>
             </div>
             <div className="mt-5 sm:mt-4 sm:ml-10 sm:pl-4 sm:flex">
-              <button onClick={onConfirmDeleteOkBtnClick} type="button" className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:w-auto sm:text-sm">Delete</button>
-              <button onClick={onConfirmDeleteCancelBtnClick} type="button" className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 px-4 py-2 bg-white text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancel</button>
+              <button onClick={onOkBtnClick} type="button" className="w-full inline-flex justify-center rounded-md border border-gray-300 px-4 py-2 bg-white text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 sm:w-auto sm:text-sm">OK</button>
             </div>
           </motion.div>
         </div>
@@ -82,4 +73,4 @@ const ConfirmDeletePopup = () => {
   );
 };
 
-export default React.memo(ConfirmDeletePopup);
+export default React.memo(AlertScreenRotationPopup);

@@ -9,12 +9,15 @@ import {
 import {
   CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT,
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
-  DISCARD_ACTION_CHANGE_LIST_NAME,
+  DISCARD_ACTION_CHANGE_LIST_NAME, SM_WIDTH,
 } from '../types/const';
 import { dialogBgFMV, dialogFMV } from '../types/animConfigs';
 
+import { useSafeAreaFrame } from '.';
+
 const ConfirmDiscardPopup = () => {
 
+  const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
   const isShown = useSelector(state => state.display.isConfirmDiscardPopupShown);
   const discardAction = useSelector(state => state.display.discardAction);
   const cancelBtn = useRef(null);
@@ -55,14 +58,17 @@ const ConfirmDiscardPopup = () => {
     <AnimatePresence key="AP_CDiscardP" />
   );
 
+  const spanStyle = {};
+  if (safeAreaWidth >= SM_WIDTH) spanStyle.height = safeAreaHeight;
+
   return (
     <AnimatePresence key="AP_CDiscardP">
       <div className="fixed inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div style={{ minHeight: safeAreaHeight }} className="flex items-end justify-center pt-4 px-4 pb-20 text-center sm:block sm:p-0">
           <div className="fixed inset-0" aria-hidden="true">
             <motion.button ref={cancelBtn} onClick={onConfirmDiscardCancelBtnClick} className="absolute inset-0 w-full h-full bg-black bg-opacity-25 cursor-default focus:outline-none" variants={dialogBgFMV} initial="hidden" animate="visible" exit="hidden" />
           </div>
-          <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+          <span style={spanStyle} className="hidden sm:inline-block sm:align-middle" aria-hidden="true">&#8203;</span>
           <motion.div className="relative inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6" variants={dialogFMV} initial="hidden" animate="visible" exit="hidden">
             <div className="sm:flex sm:items-start">
               <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">

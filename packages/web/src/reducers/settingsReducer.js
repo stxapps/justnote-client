@@ -27,7 +27,7 @@ const settingsReducer = (state = initialState, action) => {
     const { listNames, doFetchSettings, settings } = action.payload;
     if (!doFetchSettings) return state;
 
-    const newState = settings ? settings : { ...initialState };
+    const newState = settings ? { ...initialState, ...settings } : { ...initialState };
     newState.listNameMap = newState.listNameMap.map(listNameObj => {
       return { ...listNameObj, status: ADDED };
     });
