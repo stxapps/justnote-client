@@ -19,9 +19,11 @@ const NoteList = (props) => {
   const { onSidebarOpenBtnClick } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const notes = useSelector(getNotes);
+  const listName = useSelector(state => state.display.listName);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const isMaxErrorShown = useSelector(state => state.display.isSelectedNoteIdsMaxErrorShown);
   const didFetch = useSelector(state => state.display.didFetch);
+  const fetchedListNames = useRef([]); // BUG alert: delete all data, this is not cleared!
   const maxErrorAnim = useRef(new Animated.Value(0)).current;
   const bulkEditBackHandler = useRef(null);
   const dispatch = useDispatch();
@@ -77,7 +79,10 @@ const NoteList = (props) => {
   };
 
   useEffect(() => {
-    if (!notes) dispatch(fetch(didFetch ? false : null, !didFetch));
+    if (!fetchedListNames.current.includes(listName)) {
+      dispatch(fetch(didFetch ? false : null, !didFetch));
+      fetchedListNames.current.push(listName);
+    }
   }, [notes, didFetch, dispatch]);
 
   useEffect(() => {

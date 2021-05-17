@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -15,9 +15,11 @@ const NoteList = (props) => {
 
   const { onSidebarOpenBtnClick } = props;
   const notes = useSelector(getNotes);
+  const listName = useSelector(state => state.display.listName);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const isMaxErrorShown = useSelector(state => state.display.isSelectedNoteIdsMaxErrorShown);
   const didFetch = useSelector(state => state.display.didFetch);
+  const fetchedListNames = useRef([]); // BUG alert: delete all data, this is not cleared!
   const dispatch = useDispatch();
 
   const onAddBtnClick = () => {
@@ -48,8 +50,11 @@ const NoteList = (props) => {
   };
 
   useEffect(() => {
-    if (!notes) dispatch(fetch(didFetch ? false : null, !didFetch));
-  }, [notes, didFetch, dispatch]);
+    if (!fetchedListNames.current.includes(listName)) {
+      dispatch(fetch(didFetch ? false : null, !didFetch));
+      fetchedListNames.current.push(listName);
+    }
+  }, [listName, didFetch, dispatch]);
 
   const noteListItems = notes ? <NoteListItems /> : <LoadingNoteListItems />;
 
