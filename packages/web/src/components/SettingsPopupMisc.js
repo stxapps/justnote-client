@@ -170,7 +170,7 @@ const SettingsPopupMisc = (props) => {
           </div>
         </div>
       </div>
-      <div className="mt-8 mb-4 flex items-center justify-between space-x-4">
+      <div className="mt-8 mb-4 flex items-center justify-between space-x-4 lg:mt-10">
         <div className="flex flex-col">
           <h4 className="text-base text-gray-800 font-medium leading-none">Screen Rotation Warning</h4>
           <p className="mt-2.5 text-base text-gray-500 leading-relaxed">Show a warning when rotating screen on iPad/Tablet as on these devices, screen rotation is not fully supported. Please do not rotate your iPad/Tablet while editing your note, new changes to your note will be lost. We are sorry for the inconvenience.</p>

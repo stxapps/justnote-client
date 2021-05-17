@@ -191,7 +191,7 @@ const SettingsPopupAccount = (props) => {
           </View>
         </View>
       </View>
-      <View style={tailwind('mt-8 mb-4 flex-row items-center justify-between', safeAreaWidth)}>
+      <View style={tailwind('mt-8 mb-4 flex-row items-center justify-between lg:mt-10', safeAreaWidth)}>
         <View style={tailwind('flex-grow flex-shrink')}>
           <Text style={tailwind('text-xl text-gray-800 font-medium leading-5')}>Screen Rotation Warning</Text>
           <Text style={tailwind('mt-2 text-base text-gray-700 font-normal leading-6.5')}>Show a warning when rotating screen on iPad/Tablet as on these devices, screen rotation is not fully supported. Please do not rotate your iPad/Tablet while editing your note, new changes to your note will be lost. We are sorry for the inconvenience.</Text>

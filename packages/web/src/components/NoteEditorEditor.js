@@ -284,7 +284,7 @@ const NoteEditorEditor = (props) => {
         </div>
         <div ref={bodyTopToolbar} className="sticky -top-px z-10"></div>
         <CKEditor editor={ckeditor} config={editorConfig} disabled={note.id !== NEW_NOTE && note.status !== ADDED} onReady={onReady} onFocus={onFocus} />
-        <div className={`h-28 ${isMobile ? '' : 'hidden'}`}></div>
+        <div className="h-28"></div>
       </div>
       <div ref={bodyBottomToolbar} className="flex-grow-0 flex-shrink-0"></div>
     </div>
