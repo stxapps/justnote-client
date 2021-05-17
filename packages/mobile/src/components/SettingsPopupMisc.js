@@ -15,6 +15,7 @@ const SettingsPopupAccount = (props) => {
   const doDeleteOldNotesInTrash = useSelector(state => state.settings.doDeleteOldNotesInTrash);
   const sortOn = useSelector(state => state.settings.sortOn);
   const doDescendingOrder = useSelector(state => state.settings.doDescendingOrder);
+  const doAlertScreenRotation = useSelector(state => state.settings.doAlertScreenRotation);
   const updateSettingsProgress = useSelector(state => state.settings.updateSettingsProgress);
   const dispatch = useDispatch();
 
@@ -27,13 +28,16 @@ const SettingsPopupAccount = (props) => {
   };
 
   const onDoDescendingInputChange = (value) => {
-
     let doDescend;
     if (value === 'ascending') doDescend = false;
     else if (value === 'descending') doDescend = true;
     else throw new Error(`Invalid value: ${value}`);
 
     dispatch(updateSettings({ doDescendingOrder: doDescend }));
+  };
+
+  const onDoAlertBtnClick = () => {
+    dispatch(updateSettings({ doAlertScreenRotation: !doAlertScreenRotation }));
   };
 
   const onDiedUpdatingCloseBtnClick = () => {
@@ -185,6 +189,15 @@ const SettingsPopupAccount = (props) => {
               </TouchableOpacity>
             </View>
           </View>
+        </View>
+      </View>
+      <View style={tailwind('mt-8 mb-4 flex-row items-center justify-between', safeAreaWidth)}>
+        <View style={tailwind('flex-grow flex-shrink')}>
+          <Text style={tailwind('text-xl text-gray-800 font-medium leading-5')}>Screen Rotation Warning</Text>
+          <Text style={tailwind('mt-2 text-base text-gray-700 font-normal leading-6.5')}>Show a warning when rotating screen on iPad/Tablet as on these devices, screen rotation is not fully supported. Please do not rotate your iPad/Tablet while editing your note, new changes to your note will be lost. We are sorry for the inconvenience.</Text>
+        </View>
+        <View style={tailwind('ml-4 flex-grow-0 flex-shrink-0 w-11 h-6')}>
+          <Switch onValueChange={onDoAlertBtnClick} value={doAlertScreenRotation} thumbColor={Platform.OS === 'android' ? doAlertScreenRotation ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} />
         </View>
       </View>
       {renderUpdateSettingsProgress()}

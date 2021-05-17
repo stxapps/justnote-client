@@ -35,10 +35,10 @@ import {
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
-  DOMAIN_NAME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH,
+  DOMAIN_NAME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH, ALERT_SCREEN_ROTATION_POPUP,
   MY_NOTES, TRASH, ID, NEW_NOTE,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
-  SWAP_LEFT, SWAP_RIGHT, N_NOTES, SETTINGS, INDEX, DOT_JSON, SHOW_SYNCED,
+  SWAP_LEFT, SWAP_RIGHT, N_NOTES, SETTINGS, INDEX, DOT_JSON, LG_WIDTH, SHOW_SYNCED,
 } from '../types/const';
 import {
   separateUrlAndParam, getUserImageUrl, randomString, swapArrayElements,
@@ -67,7 +67,11 @@ export const init = () => async (dispatch, getState) => {
     await handlePendingSignIn(e.url)(dispatch, getState);
   });
 
+  let prevWidth = window.innerWidth;
   Dimensions.addEventListener('change', ({ window }) => {
+    handleScreenRotation(prevWidth, window.width)(dispatch, getState);
+    prevWidth = window.width;
+
     dispatch({
       type: UPDATE_WINDOW_SIZE,
       payload: {
@@ -135,6 +139,16 @@ const handlePendingSignIn = (url) => async (dispatch, getState) => {
     type: UPDATE_HANDLING_SIGN_IN,
     payload: false,
   });
+};
+
+const handleScreenRotation = (prevWidth, width) => (dispatch, getState) => {
+  if (!getState().settings.doAlertScreenRotation) return;
+
+  const toLg = prevWidth < LG_WIDTH && width >= LG_WIDTH;
+  const fromLg = prevWidth >= LG_WIDTH && width < LG_WIDTH;
+  if (!toLg && !fromLg) return;
+
+  dispatch(updatePopup(ALERT_SCREEN_ROTATION_POPUP, true, null));
 };
 
 export const signUp = () => async (dispatch, getState) => {
