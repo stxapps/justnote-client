@@ -44,7 +44,7 @@ import {
 import {
   throttle, getUserImageUrl,
   extractUrl, separateUrlAndParam, getUrlPathQueryHash, urlHashToObj, objToUrlHash,
-  randomString, swapArrayElements, isIPadIPhoneIPod,
+  randomString, swapArrayElements, isIPadIPhoneIPod, isBusyStatus,
 } from '../utils';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
@@ -111,6 +111,34 @@ export const init = () => async (dispatch, getState) => {
       });
     }, 16));
   }
+
+  window.addEventListener('beforeunload', (e) => {
+    const notes = getState().notes;
+    for (const listName in notes) {
+      for (const noteId in notes[listName]) {
+        if (isBusyStatus(notes[listName][noteId].status)) {
+          e.preventDefault();
+          return e.returnValue = 'It looks like your note hasn\'t been saved. Do you want to leave this site and discard your changes?';
+        }
+      }
+    }
+
+    const conflictedNotes = getState().conflictedNotes;
+    for (const listName in conflictedNotes) {
+      for (const noteId in conflictedNotes[listName]) {
+        if (isBusyStatus(conflictedNotes[listName][noteId].status)) {
+          e.preventDefault();
+          return e.returnValue = 'It looks like your selection on conflicted notes hasn\'t been saved. Do you want to leave this site and discard your changes?';
+        }
+      }
+    }
+
+    const updateSettingsProgress = getState().display.updateSettingsProgress;
+    if (updateSettingsProgress && isBusyStatus(updateSettingsProgress.status)) {
+      e.preventDefault();
+      return e.returnValue = 'It looks like your changes to the settings hasn\'t been saved. Do you want to leave this site and discard your changes?';
+    }
+  }, { capture: true });
 };
 
 const handlePendingSignIn = () => async (dispatch, getState) => {

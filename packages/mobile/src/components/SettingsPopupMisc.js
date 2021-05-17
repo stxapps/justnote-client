@@ -16,7 +16,7 @@ const SettingsPopupAccount = (props) => {
   const sortOn = useSelector(state => state.settings.sortOn);
   const doDescendingOrder = useSelector(state => state.settings.doDescendingOrder);
   const doAlertScreenRotation = useSelector(state => state.settings.doAlertScreenRotation);
-  const updateSettingsProgress = useSelector(state => state.settings.updateSettingsProgress);
+  const updateSettingsProgress = useSelector(state => state.display.updateSettingsProgress);
   const dispatch = useDispatch();
 
   const onDoDeleteBtnClick = () => {
