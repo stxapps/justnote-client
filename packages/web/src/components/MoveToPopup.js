@@ -32,7 +32,9 @@ const MoveToPopup = () => {
 
   const onMoveToItemBtnClick = (selectedListName) => {
     if (didClick.current) return;
-    dispatch(moveNotes(selectedListName, safeAreaWidth));
+    // As this and closing discard popup both call window.history.back(),
+    //   need to be in different js clock cycle.
+    setTimeout(() => dispatch(moveNotes(selectedListName, safeAreaWidth)), 100);
     onMoveToCancelBtnClick();
     didClick.current = true;
   };

@@ -27,13 +27,13 @@ const _SettingsPopupData = (props) => {
         <p className="mt-2.5 text-base text-gray-500 leading-relaxed">With your Stacks identity, you can have your own data server called Gaia to store all your data from apps you use with your Stacks identity. You just need to specify your server’s information in Stacks blockchain. Justnote stores all your data in the server specified in the blockchain. For more details, please visit <a className="underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 rounded" href="https://docs.blockstack.org/data-storage/overview">Stacks Gaia</a> and <a className="underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 rounded" href="https://docs.blockstack.org/storage-hubs/overview">Stacks Gaia hubs</a>.</p>
       </div>
       <div className="mt-8">
-        <button onClick={onToExportAllDataViewBtnClick} className="focus:outline-none focus:ring-2 focus:ring-green-600 rounded">
+        <button onClick={onToExportAllDataViewBtnClick} className="w-full text-left focus:outline-none focus:ring-2 focus:ring-green-600 rounded">
           <h4 className="text-base text-gray-800 font-medium underline hover:text-gray-900">Export All Data</h4>
         </button>
         <p className="mt-2.5 text-base text-gray-500 leading-relaxed">Export all your data from server to your device in a text file.</p>
       </div>
       <div className="mt-8 mb-4">
-        <button onClick={onToDeleteAllDataViewBtnClick} className="focus:outline-none focus:ring-2 focus:ring-green-600 rounded">
+        <button onClick={onToDeleteAllDataViewBtnClick} className="w-full text-left focus:outline-none focus:ring-2 focus:ring-green-600 rounded">
           <h4 className="text-base text-gray-800 font-medium underline hover:text-gray-900">Delete All Data</h4>
         </button>
         <p className="mt-2.5 text-base text-gray-500 leading-relaxed">Delete all your data including but not limited to all your saved notes in all lists, all your created lists, and all your settings.</p>

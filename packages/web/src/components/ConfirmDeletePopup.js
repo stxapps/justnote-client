@@ -27,7 +27,11 @@ const ConfirmDeletePopup = () => {
     if (didClick.current) return;
 
     if (deletingListName) dispatch(deleteListNames([deletingListName]));
-    else dispatch(deleteNotes(safeAreaWidth));
+    else {
+      // As this and closing discard popup both call window.history.back(),
+      //   need to be in different js clock cycle.
+      setTimeout(() => dispatch(deleteNotes(safeAreaWidth)), 100);
+    }
     onConfirmDeleteCancelBtnClick();
 
     didClick.current = true;

@@ -127,7 +127,7 @@ const SettingsPopupAccount = (props) => {
           <Switch onValueChange={onDoDeleteBtnClick} value={doDeleteOldNotesInTrash} thumbColor={Platform.OS === 'android' ? doDeleteOldNotesInTrash ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} />
         </View>
       </View>
-      <View style={tailwind('mt-8 mb-4')}>
+      <View style={tailwind('mt-10')}>
         <Text style={tailwind('text-base text-gray-800 font-medium leading-6')}>List Order Direction</Text>
         <View style={tailwind('sm:flex-row sm:items-start sm:justify-between', safeAreaWidth)}>
           <View style={tailwind('mt-2.5 sm:flex-grow sm:flex-shrink', safeAreaWidth)}>
@@ -159,7 +159,7 @@ const SettingsPopupAccount = (props) => {
           </View>
         </View>
       </View>
-      <View style={tailwind('mt-8 mb-4')}>
+      <View style={tailwind('mt-10')}>
         <Text style={tailwind('text-base text-gray-800 font-medium leading-6')}>List Order Direction</Text>
         <View style={tailwind('sm:flex-row sm:items-start sm:justify-between', safeAreaWidth)}>
           <View style={tailwind('mt-2.5 sm:flex-grow sm:flex-shrink', safeAreaWidth)}>
@@ -191,7 +191,7 @@ const SettingsPopupAccount = (props) => {
           </View>
         </View>
       </View>
-      <View style={tailwind('mt-8 mb-4 flex-row items-center justify-between lg:mt-10', safeAreaWidth)}>
+      <View style={tailwind('mt-10 mb-4 flex-row items-center justify-between')}>
         <View style={tailwind('flex-grow flex-shrink')}>
           <Text style={tailwind('text-xl text-gray-800 font-medium leading-5')}>Screen Rotation Warning</Text>
           <Text style={tailwind('mt-2 text-base text-gray-700 font-normal leading-6.5')}>Show a warning when rotating screen on iPad/Tablet as on these devices, screen rotation is not fully supported. Please do not rotate your iPad/Tablet while editing your note, new changes to your note will be lost. We are sorry for the inconvenience.</Text>

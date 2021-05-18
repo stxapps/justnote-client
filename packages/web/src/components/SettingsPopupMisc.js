@@ -122,7 +122,7 @@ const SettingsPopupMisc = (props) => {
           <span aria-hidden="true" className={`${doDeleteBtnInnerClassNames} inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200`} />
         </span>
       </div>
-      <div className="mt-8 mb-4 flex flex-col">
+      <div className="mt-10 flex flex-col">
         <h4 className="text-base text-gray-800 font-medium leading-none">List Order On</h4>
         <div className="sm:flex sm:items-start sm:justify-between sm:space-x-4">
           <p className="mt-2.5 flex-grow flex-shrink text-base text-gray-500 leading-relaxed">Choose whether your notes are sorted on <span className="font-semibold">added date</span> or <span className="font-semibold">updated date</span> when you browse your notes.</p>
@@ -146,7 +146,7 @@ const SettingsPopupMisc = (props) => {
           </div>
         </div>
       </div>
-      <div className="mt-8 mb-4 flex flex-col">
+      <div className="mt-10 flex flex-col">
         <h4 className="text-base text-gray-800 font-medium leading-none">List Order Direction</h4>
         <div className="sm:flex sm:items-start sm:justify-between sm:space-x-4">
           <p className="mt-2.5 flex-grow flex-shrink text-base text-gray-500 leading-relaxed">Choose whether your notes are sorted in <span className="font-semibold">ascending order</span> (i.e. notes you create first appear first) or <span className="font-semibold">descending order</span> (i.e. notes you create last appear first) when you browse your notes.</p>
@@ -170,7 +170,7 @@ const SettingsPopupMisc = (props) => {
           </div>
         </div>
       </div>
-      <div className="mt-8 mb-4 flex items-center justify-between space-x-4 lg:mt-10">
+      <div className="mt-10 mb-4 flex items-center justify-between space-x-4">
         <div className="flex flex-col">
           <h4 className="text-base text-gray-800 font-medium leading-none">Screen Rotation Warning</h4>
           <p className="mt-2.5 text-base text-gray-500 leading-relaxed">Show a warning when rotating screen on iPad/Tablet as on these devices, screen rotation is not fully supported. Please do not rotate your iPad/Tablet while editing your note, new changes to your note will be lost. We are sorry for the inconvenience.</p>
