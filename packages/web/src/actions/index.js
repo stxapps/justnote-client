@@ -1395,6 +1395,10 @@ export const tryUpdateSynced = (updateAction, haveUpdate) => async (
   // Do nothing on web. This is for mobile.
 };
 
+export const updateSynced = () => async (dispatch, getState) => {
+  // Do nothing on web. This is for mobile.
+};
+
 export const increaseSaveNoteCount = () => {
   return { type: INCREASE_SAVE_NOTE_COUNT };
 };

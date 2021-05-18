@@ -27,7 +27,7 @@ import {
   RETRY_DELETE_LIST_NAMES, CANCEL_DIED_LIST_NAMES, UPDATE_DISCARD_ACTION,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
   UPDATE_UPDATE_SETTINGS_PROGRESS, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
-  UPDATE_SYNC_PROGRESS, INCREASE_SAVE_NOTE_COUNT,
+  UPDATE_SYNC_PROGRESS, UPDATE_SYNCED, INCREASE_SAVE_NOTE_COUNT,
   INCREASE_DISCARD_NOTE_COUNT, INCREASE_CONFIRM_DISCARD_NOTE_COUNT,
   INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT, INCREASE_UPDATE_NOTE_ID_COUNT,
   INCREASE_CHANGE_LIST_NAME_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
@@ -266,6 +266,11 @@ export const changeListName = (listName, doCheckEditing) => async (
       dispatch(increaseChangeListNameCount(listName));
       return;
     }
+  }
+
+  const syncProgress = getState().display.syncProgress;
+  if (syncProgress && syncProgress.status === SHOW_SYNCED) {
+    dispatch({ type: UPDATE_SYNCED });
   }
 
   dispatch({
@@ -1334,7 +1339,7 @@ export const tryUpdateSynced = (updateAction, haveUpdate) => async (
 ) => {
   if (updateAction === 2) return;
   if (updateAction === 1) {
-    dispatch(fetch(false));
+    dispatch(updateSynced());
     return;
   }
 
@@ -1349,15 +1354,16 @@ export const tryUpdateSynced = (updateAction, haveUpdate) => async (
     getState().display.isSearchPopupShown
   );
   if (pageYOffset === 0 && !isPopupShown) {
-    dispatch(fetch(false));
+    dispatch(updateSynced());
     return;
   }
 
-  dispatch(updateSyncProgress({ status: SHOW_SYNCED }));
+  dispatch({ type: UPDATE_SYNC_PROGRESS, payload: { status: SHOW_SYNCED } });
 };
 
-export const updateSyncProgress = (progress) => {
-  return { type: UPDATE_SYNC_PROGRESS, payload: progress };
+export const updateSynced = () => async (dispatch, getState) => {
+  dispatch({ type: UPDATE_SYNCED });
+  dispatch(fetch(false));
 };
 
 export const increaseSaveNoteCount = () => {

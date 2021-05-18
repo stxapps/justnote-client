@@ -6,7 +6,6 @@ import Svg, { Path } from 'react-native-svg';
 
 import { updateBulkEdit, updateNoteId, fetch } from '../actions';
 import { NEW_NOTE, MAX_SELECTED_NOTE_IDS } from '../types/const';
-import { getNotes } from '../selectors';
 import { tailwind } from '../stylesheets/tailwind';
 import { popupFMV } from '../types/animConfigs';
 
@@ -18,12 +17,11 @@ const NoteList = (props) => {
 
   const { onSidebarOpenBtnClick } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
-  const notes = useSelector(getNotes);
   const listName = useSelector(state => state.display.listName);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const isMaxErrorShown = useSelector(state => state.display.isSelectedNoteIdsMaxErrorShown);
   const didFetch = useSelector(state => state.display.didFetch);
-  const fetchedListNames = useRef([]); // BUG alert: delete all data, this is not cleared!
+  const fetchedListNames = useSelector(state => state.display.fetchedListNames);
   const maxErrorAnim = useRef(new Animated.Value(0)).current;
   const bulkEditBackHandler = useRef(null);
   const dispatch = useDispatch();
@@ -79,11 +77,10 @@ const NoteList = (props) => {
   };
 
   useEffect(() => {
-    if (!fetchedListNames.current.includes(listName)) {
+    if (!fetchedListNames.includes(listName)) {
       dispatch(fetch(didFetch ? false : null, !didFetch));
-      fetchedListNames.current.push(listName);
     }
-  }, [notes, didFetch, dispatch]);
+  }, [listName, fetchedListNames, didFetch, dispatch]);
 
   useEffect(() => {
     registerBulkEditBackHandler(isBulkEditing);
@@ -100,7 +97,7 @@ const NoteList = (props) => {
     }
   }, [isMaxErrorShown, maxErrorAnim]);
 
-  const noteListItems = notes ? <NoteListItems /> : <LoadingNoteListItems />;
+  const noteListItems = fetchedListNames.includes(listName) ? <NoteListItems /> : <LoadingNoteListItems />;
 
   return (
     <View style={[tailwind('w-full min-w-64 h-full'), { elevation: 0 }]}>

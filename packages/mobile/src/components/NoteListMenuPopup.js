@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
-import { fetch, sync, signOut, updatePopup, updateBulkEdit, updateSyncProgress } from '../actions';
+import { sync, updateSynced, signOut, updatePopup, updateBulkEdit } from '../actions';
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import {
   DOMAIN_NAME, NOTE_LIST_MENU_POPUP, SETTINGS_POPUP, LG_WIDTH, SHOW_SYNCED,
@@ -36,10 +36,8 @@ const NoteListMenuPopup = () => {
 
   const onSyncBtnClick = () => {
     onNoteListMenuCancelBtnClick();
-    if (syncProgress && syncProgress.status === SHOW_SYNCED) {
-      dispatch(fetch(false));
-      dispatch(updateSyncProgress({ status: null }));
-    } else dispatch(sync(true, 0));
+    if (syncProgress && syncProgress.status === SHOW_SYNCED) dispatch(updateSynced());
+    else dispatch(sync(true, 0));
   };
 
   const onSelectBtnClick = () => {

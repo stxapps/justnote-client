@@ -1,10 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from "framer-motion"
 
 import { updateNoteIdUrlHash, fetch } from '../actions';
 import { NEW_NOTE, MAX_SELECTED_NOTE_IDS } from '../types/const';
-import { getNotes } from '../selectors';
 import { popupFMV } from '../types/animConfigs';
 
 import NoteListTopBar from './NoteListTopBar';
@@ -14,12 +13,11 @@ import LoadingNoteListItems from './LoadingNoteListItems';
 const NoteList = (props) => {
 
   const { onSidebarOpenBtnClick } = props;
-  const notes = useSelector(getNotes);
   const listName = useSelector(state => state.display.listName);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const isMaxErrorShown = useSelector(state => state.display.isSelectedNoteIdsMaxErrorShown);
   const didFetch = useSelector(state => state.display.didFetch);
-  const fetchedListNames = useRef([]); // BUG alert: delete all data, this is not cleared!
+  const fetchedListNames = useSelector(state => state.display.fetchedListNames);
   const dispatch = useDispatch();
 
   const onAddBtnClick = () => {
@@ -50,13 +48,12 @@ const NoteList = (props) => {
   };
 
   useEffect(() => {
-    if (!fetchedListNames.current.includes(listName)) {
+    if (!fetchedListNames.includes(listName)) {
       dispatch(fetch(didFetch ? false : null, !didFetch));
-      fetchedListNames.current.push(listName);
     }
-  }, [listName, didFetch, dispatch]);
+  }, [listName, fetchedListNames, didFetch, dispatch]);
 
-  const noteListItems = notes ? <NoteListItems /> : <LoadingNoteListItems />;
+  const noteListItems = fetchedListNames.includes(listName) ? <NoteListItems /> : <LoadingNoteListItems />;
 
   return (
     <div className="relative w-full min-w-64 h-full flex flex-col">

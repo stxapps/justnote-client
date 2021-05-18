@@ -6,7 +6,8 @@ import {
   DELETE_LIST_NAMES, UPDATE_DELETING_LIST_NAME, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
   INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT, UPDATE_DISCARD_ACTION,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
-  UPDATE_UPDATE_SETTINGS_PROGRESS, SYNC, SYNC_COMMIT, SYNC_ROLLBACK, UPDATE_SYNC_PROGRESS,
+  UPDATE_UPDATE_SETTINGS_PROGRESS, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
+  UPDATE_SYNC_PROGRESS, UPDATE_SYNCED,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -41,6 +42,7 @@ const initialState = {
   isSelectedNoteIdsMaxErrorShown: false,
   deletingListName: null,
   didFetch: false,
+  fetchedListNames: [],
   listChangedCount: 0,
   updatingNoteId: null,
   changingListName: null,
@@ -182,8 +184,12 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === FETCH_COMMIT) {
-
-    const newState = { ...state, didFetch: true };
+    const { listName } = action.payload;
+    const newState = {
+      ...state,
+      didFetch: true,
+      fetchedListNames: [...state.fetchedListNames, listName],
+    };
 
     // Make sure listName is in listNameMap, if not, set to My Notes.
     const { listNames, doFetchSettings, settings } = action.payload;
@@ -276,6 +282,10 @@ const displayReducer = (state = initialState, action) => {
     return { ...state, syncProgress: action.payload };
   }
 
+  if (action.type === UPDATE_SYNCED) {
+    return { ...state, syncProgress: null, fetchedListNames: [] };
+  }
+
   if (action.type === UPDATE_EXPORT_ALL_DATA_PROGRESS) {
     return { ...state, exportAllDataProgress: action.payload };
   }
@@ -285,7 +295,7 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === DELETE_ALL_DATA) {
-    return { ...initialState, didFetch: true };
+    return { ...initialState, didFetch: true, fetchedListNames: [MY_NOTES] };
   }
 
   if (action.type === RESET_STATE) {
