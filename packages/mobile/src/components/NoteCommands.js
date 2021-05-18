@@ -70,14 +70,14 @@ const NoteCommands = (props) => {
 
   return (
     <React.Fragment>
-      {isArchiveBtnShown && <TouchableOpacity onPress={onArchiveBtnClick} style={tailwind(`flex-row items-center h-full pl-1 pr-1 border border-white bg-white sm:pl-2 lg:px-2 lg:py-2 lg:border-gray-300 lg:rounded-md lg:shadow-sm ${btnClassNames}`, safeAreaWidth)}>
+      {isArchiveBtnShown && <TouchableOpacity onPress={onArchiveBtnClick} style={[tailwind(`flex-row items-center h-full pl-1 pr-1 border border-white bg-white sm:pl-2 lg:px-2 lg:py-2 lg:border-gray-300 lg:rounded-md lg:shadow-sm ${btnClassNames}`, safeAreaWidth), { maxWidth: 128 }]}>
         <View style={tailwind('p-2 rounded lg:p-0', safeAreaWidth)}>
           <Svg width={20} height={20} style={tailwind(`font-normal ${textClassNames}`)} viewBox="0 0 20 20" fill="currentColor">
             <Path d="M4 3C3.46957 3 2.96086 3.21071 2.58579 3.58579C2.21071 3.96086 2 4.46957 2 5C2 5.53043 2.21071 6.03914 2.58579 6.41421C2.96086 6.78929 3.46957 7 4 7H16C16.5304 7 17.0391 6.78929 17.4142 6.41421C17.7893 6.03914 18 5.53043 18 5C18 4.46957 17.7893 3.96086 17.4142 3.58579C17.0391 3.21071 16.5304 3 16 3H4Z" />
             <Path fillRule="evenodd" clipRule="evenodd" d="M3 8H17V15C17 15.5304 16.7893 16.0391 16.4142 16.4142C16.0391 16.7893 15.5304 17 15 17H5C4.46957 17 3.96086 16.7893 3.58579 16.4142C3.21071 16.0391 3 15.5304 3 15V8ZM8 11C8 10.7348 8.10536 10.4804 8.29289 10.2929C8.48043 10.1054 8.73478 10 9 10H11C11.2652 10 11.5196 10.1054 11.7071 10.2929C11.8946 10.4804 12 10.7348 12 11C12 11.2652 11.8946 11.5196 11.7071 11.7071C11.5196 11.8946 11.2652 12 11 12H9C8.73478 12 8.48043 11.8946 8.29289 11.7071C8.10536 11.5196 8 11.2652 8 11Z" />
           </Svg>
         </View>
-        <Text style={tailwind(`hidden text-sm font-normal lg:ml-1 lg:flex ${textClassNames}`, safeAreaWidth)}>{getListNameDisplayName(ARCHIVE, listNameMap)}</Text>
+        <Text style={tailwind(`hidden text-sm font-normal lg:ml-1 lg:flex ${textClassNames}`, safeAreaWidth)} numberOfLines={1} ellipsizeMode="tail">{getListNameDisplayName(ARCHIVE, listNameMap)}</Text>
       </TouchableOpacity>}
       {isRemoveBtnShown && <TouchableOpacity onPress={onRemoveBtnClick} style={tailwind(`flex-row items-center h-full pl-1 pr-1 border border-white bg-white sm:pl-2 lg:px-2 lg:py-2 lg:border-gray-300 lg:rounded-md lg:shadow-sm ${btnClassNames}`, safeAreaWidth)}>
         <View style={tailwind('p-2 rounded lg:p-0', safeAreaWidth)}>
