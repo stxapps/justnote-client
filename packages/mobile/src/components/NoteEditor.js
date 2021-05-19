@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Text } from 'react-native';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { View, Text, Keyboard, Platform } from 'react-native';
 import { useSelector } from 'react-redux';
+import { useSafeAreaFrame, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { isDiedStatus } from '../utils';
@@ -15,7 +16,39 @@ import NoteEditorRetry from './NoteEditorRetry';
 const NoteEditor = (props) => {
 
   const { note, isFullScreen, onToggleFullScreen, width } = props;
+  const { height: safeAreaHeight } = useSafeAreaFrame();
+  const insets = useSafeAreaInsets();
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const keyboardWillShowListener = useRef(null);
+  const keyboardWillHideListener = useRef(null);
+
+  const style = useMemo(() => {
+    if (Platform.OS === 'android') return tailwind('w-full h-full bg-white');
+    else if (Platform.OS === 'ios') {
+      let height = safeAreaHeight - insets.top - insets.bottom;
+      if (keyboardHeight > 0) height = height + insets.bottom - keyboardHeight;
+      return [tailwind('w-full bg-white'), { height }];
+    } else throw new Error(`Invalid Platform.OS: ${Platform.OS}`);
+  }, [safeAreaHeight, insets, keyboardHeight]);
+
+  useEffect(() => {
+    if (Platform.OS === 'ios') {
+      keyboardWillShowListener.current = Keyboard.addListener('keyboardWillShow', (e) => {
+        setKeyboardHeight(e.endCoordinates.height);
+      });
+      keyboardWillHideListener.current = Keyboard.addListener('keyboardWillHide', () => {
+        setKeyboardHeight(0);
+      });
+    }
+
+    return () => {
+      if (Platform.OS === 'ios') {
+        keyboardWillShowListener.current.remove();
+        keyboardWillHideListener.current.remove();
+      }
+    };
+  }, []);
 
   if (isBulkEditing) return <NoteEditorBulkEdit width={width} />;
   if (!note) {
@@ -38,9 +71,9 @@ const NoteEditor = (props) => {
   if (isDiedStatus(note.status)) return <NoteEditorRetry note={note} />;
 
   return (
-    <View style={tailwind('w-full h-full bg-white')}>
+    <View style={style}>
       <NoteEditorTopBar note={note} isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} width={width} />
-      <NoteEditorEditor note={note} width={width} />
+      <NoteEditorEditor note={note} />
     </View>
   );
 };

@@ -404,7 +404,8 @@ export const stripHtml = (s) => {
   return s
     .replace(/(<([^>]+)>)/gi, ' ')
     .replace(codeRe, (match, entity) => codeMap[entity])
-    .replace(/\s\s+/g, ' ');
+    .replace(/\s\s+/g, ' ')
+    .trim();
 };
 
 export const isNoteBodyEqual = (s1, s2) => {

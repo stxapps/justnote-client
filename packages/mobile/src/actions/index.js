@@ -67,7 +67,7 @@ export const init = () => async (dispatch, getState) => {
     await handlePendingSignIn(e.url)(dispatch, getState);
   });
 
-  let prevWidth = window.innerWidth;
+  let prevWidth = Dimensions.get('window').width;
   Dimensions.addEventListener('change', ({ window }) => {
     handleScreenRotation(prevWidth, window.width)(dispatch, getState);
     prevWidth = window.width;
