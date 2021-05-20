@@ -53,7 +53,7 @@ const NoteEditorConflict = (props) => {
                 </svg>
               </div>
               <div className="ml-3">
-                <h3 className="text-sm text-red-800 font-medium text-left">Oops..., something went wrong!</h3>
+                <h3 className="text-base text-red-800 font-medium text-left lg:text-sm">Oops..., something went wrong!</h3>
                 <p className="mt-2.5 text-sm text-red-700">
                   Please wait a moment and try again.<br />If the problem persists, please&nbsp;
                   <a className="underline hover:text-red-900 focus:outline-none focus:shadow-outline" href="/support">
@@ -147,7 +147,7 @@ const _ConflictItem = (props) => {
           <button onClick={onOpenBtnClick} type="button" className="w-full flex pt-3 pl-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-inset rounded-lg">
             {arrowSvg}
             <div className="ml-1">
-              <div className="text-sm font-medium text-gray-800 text-left">Last update on {updatedDTStr}</div>
+              <div className="text-base font-medium text-gray-800 text-left lg:text-sm">Last update on {updatedDTStr}</div>
               <div className="mt-1 text-sm text-gray-600 text-left">In {getListNameDisplayName(listName, listNameMap)}</div>
             </div>
           </button>

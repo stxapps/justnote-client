@@ -113,7 +113,13 @@
 
 .ck.ck-editor__editable {
   color: var(--jn-editor-gray-800);
-  font-size: 16px;
+  font-size: 17px;
+}
+
+@media (min-width: 1024px) {
+  .ck.ck-editor__editable {
+    font-size: 16px;
+  }
 }
 
 .ck.ck-editor__editable ul {

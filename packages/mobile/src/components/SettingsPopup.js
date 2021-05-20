@@ -286,7 +286,7 @@ const SettingsPopup = () => {
                   <Svg style={tailwind('mr-2 text-gray-400 font-normal')} width={20} height={20} viewBox="0 0 20 20" fill="currentColor">
                     <Path fillRule="evenodd" clipRule="evenodd" d="M18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10ZM12 7C12 8.10457 11.1046 9 10 9C8.89543 9 8 8.10457 8 7C8 5.89543 8.89543 5 10 5C11.1046 5 12 5.89543 12 7ZM9.99993 11C7.98239 11 6.24394 12.195 5.45374 13.9157C6.55403 15.192 8.18265 16 9.99998 16C11.8173 16 13.4459 15.1921 14.5462 13.9158C13.756 12.195 12.0175 11 9.99993 11Z" />
                   </Svg>
-                  <Text style={tailwind('text-sm text-gray-500 font-medium leading-5')}>Account</Text>
+                  <Text style={tailwind('text-base text-gray-500 font-medium leading-5')}>Account</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={onDataBtnClick} style={tailwind('mt-1 px-2 py-2 flex-row items-center w-full rounded-md')}>
                   <Svg style={tailwind('mr-2 text-gray-400 font-normal')} width={20} height={20} viewBox="0 0 20 20" fill="currentColor">
@@ -294,13 +294,13 @@ const SettingsPopup = () => {
                     <Path fillRule="evenodd" clipRule="evenodd" d="M3 10C3 9.44772 3.44772 9 4 9H16C16.5523 9 17 9.44772 17 10C17 10.5523 16.5523 11 16 11H4C3.44772 11 3 10.5523 3 10Z" />
                     <Path fillRule="evenodd" clipRule="evenodd" d="M3 15C3 14.4477 3.44772 14 4 14H16C16.5523 14 17 14.4477 17 15C17 15.5523 16.5523 16 16 16H4C3.44772 16 3 15.5523 3 15Z" />
                   </Svg>
-                  <Text style={tailwind('text-sm text-gray-500 font-medium leading-5')}>Data</Text>
+                  <Text style={tailwind('text-base text-gray-500 font-medium leading-5')}>Data</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={onListsBtnClick} style={tailwind('mt-1 px-2 py-2 flex-row items-center w-full rounded-md')}>
                   <Svg style={tailwind('mr-2 text-gray-400 font-normal')} width={20} height={20} viewBox="0 0 20 20" fill="currentColor">
                     <Path d="M2 6C2 4.89543 2.89543 4 4 4H9L11 6H16C17.1046 6 18 6.89543 18 8V14C18 15.1046 17.1046 16 16 16H4C2.89543 16 2 15.1046 2 14V6Z" />
                   </Svg>
-                  <Text style={tailwind('text-sm text-gray-500 font-medium leading-5')}>Lists</Text>
+                  <Text style={tailwind('text-base text-gray-500 font-medium leading-5')}>Lists</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={onMiscBtnClick} style={tailwind('mt-1 px-2 py-2 flex-row items-center w-full rounded-md')}>
                   <Svg style={tailwind('mr-2 text-gray-400 font-normal')} width={20} height={20} viewBox="0 0 20 20" fill="currentColor">
@@ -308,7 +308,7 @@ const SettingsPopup = () => {
                     <Path d="M11 4C11 3.44772 10.5523 3 10 3C9.44772 3 9 3.44772 9 4V5.26756C8.4022 5.61337 8 6.25972 8 7C8 7.74028 8.4022 8.38663 9 8.73244V16C9 16.5523 9.44772 17 10 17C10.5523 17 11 16.5523 11 16V8.73244C11.5978 8.38663 12 7.74028 12 7C12 6.25972 11.5978 5.61337 11 5.26756V4Z" />
                     <Path d="M16 3C16.5523 3 17 3.44772 17 4V11.2676C17.5978 11.6134 18 12.2597 18 13C18 13.7403 17.5978 14.3866 17 14.7324V16C17 16.5523 16.5523 17 16 17C15.4477 17 15 16.5523 15 16V14.7324C14.4022 14.3866 14 13.7403 14 13C14 12.2597 14.4022 11.6134 15 11.2676V4C15 3.44772 15.4477 3 16 3Z" />
                   </Svg>
-                  <Text style={tailwind('text-sm text-gray-500 font-medium leading-5')}>Misc.</Text>
+                  <Text style={tailwind('text-base text-gray-500 font-medium leading-5')}>Misc.</Text>
                 </TouchableOpacity>
               </View>
             </Animated.View>

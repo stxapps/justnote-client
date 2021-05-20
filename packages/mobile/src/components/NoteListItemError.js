@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
+import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
 import { updateNoteId } from '../actions';
 import { isDiedStatus } from '../utils';
@@ -10,6 +11,7 @@ import { tailwind } from '../stylesheets/tailwind';
 const NoteListItemError = (props) => {
 
   const { note } = props;
+  const { width: safeAreaWidth } = useSafeAreaFrame();
   const dispatch = useDispatch();
 
   const onContentBtnClick = () => {
@@ -33,7 +35,7 @@ const NoteListItemError = (props) => {
         </Svg>
       </View>
       <View style={tailwind('flex-1')}>
-        <Text style={tailwind('text-sm font-semibold text-red-700')} numberOfLines={1} ellipsizeMode="tail">{title}</Text>
+        <Text style={tailwind('text-base font-semibold text-red-700 lg:text-sm', safeAreaWidth)} numberOfLines={1} ellipsizeMode="tail">{title}</Text>
         <Text style={tailwind('text-sm text-red-600 font-normal mt-1')} numberOfLines={3} ellipsizeMode="tail">{body}</Text>
       </View>
     </TouchableOpacity>

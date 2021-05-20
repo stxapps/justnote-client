@@ -35,7 +35,7 @@ const NoteListItemError = (props) => {
         </svg>
       </div>
       <div className="flex-1 min-w-0">
-        <h3 className="text-sm font-semibold text-red-700 truncate group-hover:underline">{title}</h3>
+        <h3 className="text-base font-semibold text-red-700 truncate group-hover:underline lg:text-sm">{title}</h3>
         <p className="mt-1 text-sm text-red-600 line-clamp-3">{body}</p>
       </div>
     </button>

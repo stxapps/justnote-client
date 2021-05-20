@@ -60,7 +60,7 @@ const SidebarListNames = () => {
     }
 
     return (
-      <button key={listNameObj.listName} onClick={() => onListNameBtnClick(listNameObj.listName)} className={`${btnClassNames} group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full focus:outline-none`}>
+      <button key={listNameObj.listName} onClick={() => onListNameBtnClick(listNameObj.listName)} className={`${btnClassNames} group flex items-center px-2 py-2 text-base font-medium rounded-md w-full focus:outline-none lg:text-sm`}>
         {svg}
         <span className="truncate">{listNameObj.displayName}</span>
       </button>

@@ -1,4 +1,4 @@
-import { Linking, Dimensions, Platform } from 'react-native';
+import { Linking, Dimensions, Platform, AppState } from 'react-native';
 
 import userSession from '../userSession';
 import dataApi from '../apis/data';
@@ -79,6 +79,10 @@ export const init = () => async (dispatch, getState) => {
         windowHeight: window.height,
       },
     });
+  });
+
+  AppState.addEventListener("change", (nextAppState) => {
+    if (nextAppState === 'active') dispatch(sync(false, 0));
   });
 
   const isUserSignedIn = await userSession.isUserSignedIn();

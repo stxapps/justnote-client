@@ -60,7 +60,7 @@ const NoteEditorConflict = (props) => {
               </Svg>
             </View>
             <View style={tailwind('ml-3')}>
-              <Text style={tailwind('text-sm text-red-800 font-medium text-left')}>Oops..., something went wrong!</Text>
+              <Text style={tailwind('text-base text-red-800 font-medium text-left lg:text-sm', safeAreaWidth)}>Oops..., something went wrong!</Text>
               <Text style={tailwind('mt-2.5 text-sm text-red-700 font-normal')}>Please wait a moment and try again.{'\n'}If the problem persists, please <Text onPress={() => Linking.openURL('https://justnote.cc/support')} style={tailwind('text-sm text-red-700 font-normal underline')}>contact us</Text>
                 <Svg width={16} height={16} style={tailwind('mb-2 text-sm text-red-700 font-normal')} viewBox="0 0 20 20" fill="currentColor">
                   <Path d="M11 3C10.4477 3 10 3.44772 10 4C10 4.55228 10.4477 5 11 5H13.5858L7.29289 11.2929C6.90237 11.6834 6.90237 12.3166 7.29289 12.7071C7.68342 13.0976 8.31658 13.0976 8.70711 12.7071L15 6.41421V9C15 9.55228 15.4477 10 16 10C16.5523 10 17 9.55228 17 9V4C17 3.44772 16.5523 3 16 3H11Z" />
@@ -160,7 +160,7 @@ const _ConflictItem = (props) => {
           <TouchableOpacity onPress={onOpenBtnClick} style={tailwind('w-full flex-row pt-3 pl-2 rounded-lg')}>
             {arrowSvg}
             <View style={tailwind('ml-1')}>
-              <Text style={tailwind('text-sm font-medium text-gray-800 text-left')}>Last update on {updatedDTStr}</Text>
+              <Text style={tailwind('text-base font-medium text-gray-800 text-left lg:text-sm', safeAreaWidth)}>Last update on {updatedDTStr}</Text>
               <Text style={tailwind('mt-1 text-sm text-gray-600 font-normal text-left')}>In {getListNameDisplayName(listName, listNameMap)}</Text>
             </View>
           </TouchableOpacity>

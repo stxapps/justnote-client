@@ -65,7 +65,7 @@ const NoteEditorTopBar = (props) => {
   const renderLoading = () => {
     return (
       <View style={tailwind('justify-center px-4 h-full lg:px-1', safeAreaWidth)}>
-        <Circle size={20} color="rgba(107, 114, 128, 1)" />
+        <Circle size={20} color="rgb(107, 114, 128)" />
       </View>
     );
   };

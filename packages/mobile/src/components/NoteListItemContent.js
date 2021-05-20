@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
+import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
 import {
   updateNoteId, updateBulkEdit, addSelectedNoteIds, deleteSelectedNoteIds,
@@ -13,6 +14,7 @@ import { tailwind } from '../stylesheets/tailwind';
 const NoteListItemContent = (props) => {
 
   const { note } = props;
+  const { width: safeAreaWidth } = useSafeAreaFrame();
   const getIsNoteIdSelected = useMemo(makeIsNoteIdSelected, []);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const isSelected = useSelector(state => getIsNoteIdSelected(state, note.id));
@@ -49,7 +51,7 @@ const NoteListItemContent = (props) => {
         </Svg>
       </View>}
       <View style={tailwind('flex-1')}>
-        <Text style={tailwind('text-sm font-semibold text-gray-800')} numberOfLines={1} ellipsizeMode="tail">{note.title}</Text>
+        <Text style={tailwind('text-base font-semibold text-gray-800 lg:text-sm', safeAreaWidth)} numberOfLines={1} ellipsizeMode="tail">{note.title}</Text>
         <Text style={tailwind('text-sm text-gray-500 font-normal mt-1')} numberOfLines={3} ellipsizeMode="tail">{stripHtml(note.body)}</Text>
       </View>
     </TouchableOpacity>

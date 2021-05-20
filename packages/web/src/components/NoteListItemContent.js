@@ -118,7 +118,7 @@ const NoteListItemContent = (props) => {
         </svg>
       </div>}
       <div className="flex-1 min-w-0">
-        <h3 className="text-sm font-semibold text-gray-800 truncate group-hover:underline">{note.title}</h3>
+        <h3 className="text-base font-semibold text-gray-800 truncate group-hover:underline lg:text-sm">{note.title}</h3>
         <p className="mt-1 text-sm text-gray-500 line-clamp-3">{stripHtml(note.body)}</p>
       </div>
     </button>

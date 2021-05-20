@@ -68,7 +68,7 @@ const SidebarListNames = () => {
     return (
       <TouchableOpacity key={listNameObj.listName} onPress={() => onListNameBtnClick(listNameObj.listName)} style={tailwind(`${btnClassNames} flex-row items-center px-2 py-2 rounded-md w-full`)}>
         {svg}
-        <Text style={tailwind(`${textClassNames} text-sm font-medium flex-shrink flex-grow`)} numberOfLines={1} ellipsizeMode="tail">{listNameObj.displayName}</Text>
+        <Text style={tailwind(`${textClassNames} text-base font-medium flex-shrink flex-grow lg:text-sm`, safeAreaWidth)} numberOfLines={1} ellipsizeMode="tail">{listNameObj.displayName}</Text>
       </TouchableOpacity>
     );
   });

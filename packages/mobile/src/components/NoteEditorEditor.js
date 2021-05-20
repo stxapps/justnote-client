@@ -89,8 +89,13 @@ const NoteEditorEditor = (props) => {
       return;
     }
 
+    if (note.title === title && isNoteBodyEqual(note.body, body)) {
+      dispatch(updateEditorFocused(false));
+      return;
+    }
+
     dispatch(saveNote(title, body, []));
-  }, [dispatch]);
+  }, [note.title, note.body, dispatch]);
 
   const onDiscardNote = useCallback((doCheckEditing, title = null, body = null) => {
     if (doCheckEditing) {
