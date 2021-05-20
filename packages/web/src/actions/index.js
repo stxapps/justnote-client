@@ -173,6 +173,7 @@ const handlePendingSignIn = () => async (dispatch, getState) => {
 };
 
 const handleScreenRotation = (prevWidth) => (dispatch, getState) => {
+  if (!getState().user.isUserSignedIn) return;
   if (!getState().settings.doAlertScreenRotation) return;
 
   const toLg = prevWidth < LG_WIDTH && window.innerWidth >= LG_WIDTH;
