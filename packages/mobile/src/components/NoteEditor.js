@@ -71,9 +71,11 @@ const NoteEditor = (props) => {
   if (isDiedStatus(note.status)) return <NoteEditorRetry note={note} />;
 
   return (
-    <View style={style}>
-      <NoteEditorTopBar note={note} isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} width={width} />
-      <NoteEditorEditor note={note} />
+    <View style={tailwind('w-full h-full bg-white')}>
+      <View style={style}>
+        <NoteEditorTopBar note={note} isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} width={width} />
+        <NoteEditorEditor note={note} />
+      </View>
     </View>
   );
 };
