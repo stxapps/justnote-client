@@ -140,20 +140,16 @@ const NoteListMenuPopup = () => {
   };
   if (safeAreaWidth < LG_WIDTH) {
     popupStyle.right = safeAreaWidth - derivedAnchorPosition.right + 16;
-    if (isBulkEditing) {
-      throw new Error('NoteListMenuPopup: should not reach here for safeAreaWidth < LG_WIDTH and isBulkEditing = true.');
-    } else {
-      popupStyle.transform.push({
-        translateX: popupAnim.interpolate({
-          inputRange: [0, 1], outputRange: [0.05 * 148, 0],
-        }),
-      });
-      popupStyle.transform.push({
-        translateY: popupAnim.interpolate({
-          inputRange: [0, 1], outputRange: [-1 * 0.05 * 184, 0],
-        }),
-      });
-    }
+    popupStyle.transform.push({
+      translateX: popupAnim.interpolate({
+        inputRange: [0, 1], outputRange: [0.05 * 148, 0],
+      }),
+    });
+    popupStyle.transform.push({
+      translateY: popupAnim.interpolate({
+        inputRange: [0, 1], outputRange: [-1 * 0.05 * 184, 0],
+      }),
+    });
   } else {
     popupStyle.left = derivedAnchorPosition.left + 16;
     if (isBulkEditing) {

@@ -63,6 +63,9 @@ const NoteEditorEditor = (props) => {
   };
 
   const focusTitleInput = () => {
+    if (Platform.OS === 'ios') {
+      webView.current.injectJavaScript('document.querySelector("#titleInput").blur();');
+    }
     if (Platform.OS === 'android') {
       hackInput.current.focus();
       webView.current.requestFocus();

@@ -46,7 +46,7 @@ const NoteListItemContent = (props) => {
   return (
     <TouchableOpacity activeOpacity={1.0} onPress={onContentBtnClick} onLongPress={onContentBtnLongClick} style={tailwind('w-full rounded-sm flex-row items-center')}>
       {(isBulkEditing && !isBusy) && <View style={tailwind(`w-10 h-10 border mr-3 rounded-full justify-center items-center ${circleClassNames}`)}>
-        <Svg style={tailwind(`w-6 h-6 ${checkClassNames}`)} viewBox="0 0 20 20" fill="currentColor">
+        <Svg style={tailwind(`w-6 h-6 ${checkClassNames} font-normal`)} viewBox="0 0 20 20" fill="currentColor">
           <Path fillRule="evenodd" clipRule="evenodd" d="M16.7071 5.29289C17.0976 5.68342 17.0976 6.31658 16.7071 6.70711L8.70711 14.7071C8.31658 15.0976 7.68342 15.0976 7.29289 14.7071L3.29289 10.7071C2.90237 10.3166 2.90237 9.68342 3.29289 9.29289C3.68342 8.90237 4.31658 8.90237 4.70711 9.29289L8 12.5858L15.2929 5.29289C15.6834 4.90237 16.3166 4.90237 16.7071 5.29289Z" />
         </Svg>
       </View>}
