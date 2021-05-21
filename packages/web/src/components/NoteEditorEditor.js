@@ -55,6 +55,7 @@ const NoteEditorEditor = (props) => {
   }, [note.id, note.title, note.body]);
 
   const focusTitleInput = () => {
+    titleInput.current.blur();
     setTimeout(() => titleInput.current.focus(), 1);
   };
 
