@@ -102,7 +102,10 @@ const _ListNameEditor = (props) => {
   };
 
   const onInputChange = (e) => {
-    setState(s => ({ ...s, value: e.nativeEvent.text, msg: '' }));
+    // Event is reused and will be nullified after the event handler has been called.
+    // https://reactjs.org/docs/legacy-event-pooling.html
+    const text = e.nativeEvent.text;
+    setState(s => ({ ...s, value: text, msg: '' }));
   };
 
   const onInputKeyPress = () => {

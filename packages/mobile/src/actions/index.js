@@ -81,7 +81,7 @@ export const init = () => async (dispatch, getState) => {
     });
   });
 
-  AppState.addEventListener("change", (nextAppState) => {
+  AppState.addEventListener('change', (nextAppState) => {
     if (nextAppState === 'active') dispatch(sync(false, 0));
   });
 
