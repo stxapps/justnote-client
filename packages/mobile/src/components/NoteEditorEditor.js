@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { TextInput, Platform } from 'react-native';
+import { TextInput, Keyboard, Platform } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { WebView } from 'react-native-webview';
 
@@ -43,6 +43,9 @@ const NoteEditorEditor = (props) => {
   const prevUpdateNoteIdCount = useRef(updateNoteIdCount);
   const prevChangeListNameCount = useRef(changeListNameCount);
   const getDataAction = useRef(null);
+  const keyboardHeight = useRef(0);
+  const keyboardDidShowListener = useRef(null);
+  const keyboardDidHideListener = useRef(null);
   const dispatch = useDispatch();
 
   const setData = (title, body) => {
@@ -103,6 +106,7 @@ const NoteEditorEditor = (props) => {
   const onDiscardNote = useCallback((doCheckEditing, title = null, body = null) => {
     if (doCheckEditing) {
       if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+        if (keyboardHeight.current > 0) blur();
         dispatch(updateDiscardAction(DISCARD_ACTION_CANCEL_EDIT));
         dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
         return;
@@ -115,6 +119,7 @@ const NoteEditorEditor = (props) => {
 
   const onUpdateNoteId = useCallback((title, body) => {
     if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+      if (keyboardHeight.current > 0) blur();
       dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_NOTE_ID));
       dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
       return;
@@ -125,6 +130,7 @@ const NoteEditorEditor = (props) => {
 
   const onChangeListName = useCallback((title, body) => {
     if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+      if (keyboardHeight.current > 0) blur();
       dispatch(updateDiscardAction(DISCARD_ACTION_CHANGE_LIST_NAME));
       dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
       return;
@@ -219,6 +225,20 @@ const NoteEditorEditor = (props) => {
     if (!isFocused && prevIsFocused.current) blur();
     prevIsFocused.current = isFocused;
   }, [isEditorReady, isFocused]);
+
+  useEffect(() => {
+    keyboardDidShowListener.current = Keyboard.addListener('keyboardDidShow', (e) => {
+      keyboardHeight.current = e.endCoordinates.height;
+    });
+    keyboardDidHideListener.current = Keyboard.addListener('keyboardDidHide', () => {
+      keyboardHeight.current = 0;
+    });
+
+    return () => {
+      keyboardDidShowListener.current.remove();
+      keyboardDidHideListener.current.remove();
+    };
+  }, []);
 
   return (
     <React.Fragment>

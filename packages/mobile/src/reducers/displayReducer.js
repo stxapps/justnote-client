@@ -127,8 +127,7 @@ const displayReducer = (state = initialState, action) => {
 
     if (action.payload.id === CONFIRM_DISCARD_POPUP) {
       const newState = { ...state, isConfirmDiscardPopupShown: isShown };
-      if (isShown) newState.isEditorFocused = false;
-      else {
+      if (!isShown) {
         newState.updatingNoteId = null;
         newState.changingListName = null;
         newState.discardAction = null;
