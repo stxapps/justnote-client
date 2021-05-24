@@ -6067,9 +6067,9 @@ picomatch@^2.0.4, picomatch@^2.0.5:
   integrity sha512-q0M/9eZHzmr0AulXyPwNfZjtwZ/RBZlbN3K3CErVrk50T2ASYI7Bye0EvekFY3IP1Nt2DHu0re+V2ZHIpMkuWg==
 
 picomatch@^2.2.1:
-  version "2.2.3"
-  resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.2.3.tgz#465547f359ccc206d3c48e46a1bcb89bf7ee619d"
-  integrity sha512-KpELjfwcCDUb9PeigTs2mBJzXUPzAuP2oPcA989He8Rte0+YUAjw1JVedDhuTKPkHjSYzMN3npC9luThGYEKdg==
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.3.0.tgz#f1f061de8f6a4bf022892e2d128234fb98302972"
+  integrity sha512-lY1Q/PiJGC2zOv/z391WOTD+Z02bCgsFfvxoXXf6h7kv9o+WmsmzYqrAwY63sNgOxE4xEdq0WyUnXfKeBrSvYw==
 
 pify@^4.0.1:
   version "4.0.1"
@@ -7411,9 +7411,9 @@ table@^5.2.3:
     slice-ansi "^2.1.0"
     string-width "^3.0.0"
 
-"tailwind-rn@https://github.com/bracedotto/tailwind-rn#bbbb32af7afdca900f8a8ab4f63819b80948e5a2":
+"tailwind-rn@https://github.com/bracedotto/tailwind-rn#8331da648ea06c6762f737600f40a947c3891b93":
   version "3.0.1"
-  resolved "https://github.com/bracedotto/tailwind-rn#bbbb32af7afdca900f8a8ab4f63819b80948e5a2"
+  resolved "https://github.com/bracedotto/tailwind-rn#8331da648ea06c6762f737600f40a947c3891b93"
   dependencies:
     css "^2.2.4"
     css-to-react-native "^3.0.0"
