@@ -208,7 +208,7 @@ const SettingsPopup = () => {
       <View style={{ height: panelHeight }}>
         <View style={tailwind('hidden relative p-1 md:flex md:absolute md:top-0 md:right-0', safeAreaWidth)}>
           <TouchableOpacity onPress={onPopupCloseBtnClick} style={tailwind('items-center justify-center h-7 w-7 rounded-full')}>
-            <Svg style={tailwind('text-base text-gray-500 font-normal')} width={20} height={20} stroke="currentColor" fill="none" viewBox="0 0 24 24">
+            <Svg style={tailwind('text-gray-500 font-normal')} width={20} height={20} stroke="currentColor" fill="none" viewBox="0 0 24 24">
               <Path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </Svg>
           </TouchableOpacity>
@@ -258,7 +258,7 @@ const SettingsPopup = () => {
               {content}
               <View style={tailwind('absolute top-0 right-0 p-1 md:hidden md:relative', safeAreaWidth)}>
                 <TouchableOpacity onPress={onPopupCloseBtnClick} style={tailwind('items-center justify-center h-7 w-7 rounded-full')}>
-                  <Svg style={tailwind('text-base text-gray-500 font-normal')} width={20} height={20} stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                  <Svg style={tailwind('text-gray-500 font-normal')} width={20} height={20} stroke="currentColor" fill="none" viewBox="0 0 24 24">
                     <Path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </Svg>
                 </TouchableOpacity>
@@ -272,7 +272,7 @@ const SettingsPopup = () => {
             </TouchableWithoutFeedback>
             <View style={tailwind('absolute top-0 right-0 p-1')}>
               <TouchableOpacity onPress={onPopupCloseBtnClick} style={tailwind('items-center justify-center h-7 w-7 rounded-full')}>
-                <Svg style={tailwind('text-base text-gray-500 font-normal')} width={20} height={20} stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                <Svg style={tailwind('text-gray-500 font-normal')} width={20} height={20} stroke="currentColor" fill="none" viewBox="0 0 24 24">
                   <Path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </Svg>
               </TouchableOpacity>

@@ -35,7 +35,7 @@
     "shadowOpacity": 1,
     "shadowRadius": 1,
 
-    "elevation": 1
+    "elevation": 0.3
   },
   "shadow": {
     "shadowColor": "rgba(0, 0, 0, 0.1)",
@@ -46,7 +46,7 @@
     "shadowOpacity": 2,
     "shadowRadius": 2,
 
-    "elevation": 1.2
+    "elevation": 0.6
   },
   "shadow-md": {
     "shadowColor": "rgba(0, 0, 0, 0.2)",
@@ -57,7 +57,7 @@
     "shadowOpacity": 3,
     "shadowRadius": 8,
 
-    "elevation": 2.5
+    "elevation": 2
   },
   "shadow-lg": {
     "shadowColor": "rgba(0, 0, 0, 0.2)",

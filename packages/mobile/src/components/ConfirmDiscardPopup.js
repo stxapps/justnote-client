@@ -111,7 +111,7 @@ const ConfirmDiscardPopup = () => {
             </Svg>
           </View>
           <View style={tailwind('flex-grow flex-shrink mt-3 sm:mt-0 sm:ml-4', safeAreaWidth)}>
-            <Text style={tailwind('text-lg font-medium text-gray-900 text-center sm:text-left', safeAreaWidth)}>Discard unsaved changes</Text>
+            <Text style={tailwind('text-lg leading-6 font-medium text-gray-900 text-center sm:text-left', safeAreaWidth)}>Discard unsaved changes</Text>
             <View style={tailwind('mt-2')}>
               <Text style={tailwind('text-sm text-gray-500 font-normal text-center sm:text-left', safeAreaWidth)}>
                 Are you sure you want to discard your unsaved changes to your note? All of your changes will be permanently deleted. This action cannot be undone.

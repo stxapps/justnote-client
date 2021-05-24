@@ -254,7 +254,7 @@ const _ListNameEditor = (props) => {
         setState(s => ({ ...s, msg: '', isCheckingCanDelete: false }));
         didClick.current = false;
       }
-    }
+    };
     deleteListName();
   }, [state.isCheckingCanDelete, listNameObj, dispatch])
 

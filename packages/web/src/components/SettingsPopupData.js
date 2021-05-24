@@ -68,7 +68,7 @@ const _SettingsPopupDataExport = (props) => {
   let actionPanel;
   if (!exportAllDataProgress) {
     actionPanel = (
-      <button onClick={onExportAllDataBtnClick} type="button" className="mt-6 mb-4 px-2 py-2 block group border border-gray-300 text-sm text-gray-500 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600 hover:bg-gray-50 hover:text-gray-700">
+      <button onClick={onExportAllDataBtnClick} type="button" className="mt-6 mb-4 px-2 py-2 block group border border-gray-300 text-sm text-gray-500 rounded-md bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600 hover:bg-gray-50 hover:text-gray-700">
         Export All My Data
       </button>
     );
@@ -188,7 +188,7 @@ const _SettingsPopupDataDelete = (props) => {
   if (!deleteAllDataProgress) {
     actionPanel = (
       <div className="mt-6 mb-4">
-        <button onClick={onDeleteAllDataBtnClick} type="button" className="mt-6 mb-4 px-2 py-2 block group border border-gray-300 text-sm text-gray-500 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600 hover:bg-gray-50 hover:text-gray-700">
+        <button onClick={onDeleteAllDataBtnClick} type="button" className="px-2 py-2 block group border border-gray-300 text-sm text-gray-500 rounded-md bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600 hover:bg-gray-50 hover:text-gray-700">
           Delete All My Data
         </button>
         {isRequiredConfirmShown && <p className="mt-2 text-base text-red-600">Please confirm by checking the box above first.</p>}

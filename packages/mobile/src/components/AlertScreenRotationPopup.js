@@ -71,7 +71,7 @@ const AlertScreenRotationPopup = () => {
             </Svg>
           </View>
           <View style={tailwind('flex-grow flex-shrink mt-3 sm:mt-0 sm:ml-4', safeAreaWidth)}>
-            <Text style={tailwind('text-lg font-medium text-gray-900 text-center sm:text-left', safeAreaWidth)}>Screen rotation</Text>
+            <Text style={tailwind('text-lg leading-6 font-medium text-gray-900 text-center sm:text-left', safeAreaWidth)}>Screen rotation</Text>
             <View style={tailwind('mt-2')}>
               <Text style={tailwind('text-sm text-gray-500 font-normal text-center sm:text-left', safeAreaWidth)}>Screen rotation is not fully supported. Please do not rotate your device while editing your note, new changes to your note will be lost. We are sorry for the inconvenience.</Text>
               <Text style={tailwind('text-sm text-gray-500 mt-3')}>(You can choose to not show this warning again in Settings -&gt; Misc.)</Text>
