@@ -81,6 +81,12 @@ const NoteEditorConflict = (props) => {
   return (
     <div className="relative w-full h-full bg-white overflow-auto">
       <div style={style} className="relative px-4 pb-4 sm:px-6 sm:pb-6">
+        <div className="w-full h-16" />
+        <h3 className="pt-5 text-gray-800 text-lg font-medium">{conflictedNote.notes.length} Versions found</h3>
+        <p className="text-gray-500 text-sm font-normal">Please choose the correct version of this note.</p>
+        <AnimateSharedLayout>
+          {conflictedNote.notes.map((note, i) => <ConflictItem key={note.id} listName={conflictedNote.listNames[i]} note={note} status={conflictedNote.status} />)}
+        </AnimateSharedLayout>
         <div className="absolute top-0 left-0 lg:hidden">
           <button onClick={onRightPanelCloseBtnClick} type="button" className="px-4 py-4 text-sm rounded-md text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-inset">
             <svg className="text-gray-500 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -88,12 +94,6 @@ const NoteEditorConflict = (props) => {
             </svg>
           </button>
         </div>
-        <div className="w-full h-16" />
-        <h3 className="pt-5 text-gray-800 text-lg font-medium">{conflictedNote.notes.length} Versions found</h3>
-        <p className="text-gray-500 text-sm font-normal">Please choose the correct version of this note.</p>
-        <AnimateSharedLayout>
-          {conflictedNote.notes.map((note, i) => <ConflictItem key={note.id} listName={conflictedNote.listNames[i]} note={note} status={conflictedNote.status} />)}
-        </AnimateSharedLayout>
       </div>
       {renderLoading()}
       {renderMergeError()}

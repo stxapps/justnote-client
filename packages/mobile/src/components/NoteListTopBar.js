@@ -90,26 +90,26 @@ const NoteListTopBar = (props) => {
 
     innerMenuBtn = (
       <React.Fragment>
+        {menuBtnSvg}
         <Animated.View style={[tailwind('absolute top-0 left-0 h-full justify-center'), innerMenuBtnStyle]}>
           <Svg width={36} height={36} style={tailwind('text-green-600 font-normal')} viewBox="0 0 100 100" fill="none" stroke="currentColor" preserveAspectRatio="xMidYMid">
             <Circle cx="50" cy="50" strokeWidth="4" r="44" strokeDasharray="226.1946710584651 77.39822368615503" />
           </Svg>
         </Animated.View>
-        {menuBtnSvg}
       </React.Fragment>
     );
   } else if (syncProgress && syncProgress.status === SYNC_ROLLBACK) {
     innerMenuBtn = (
       <React.Fragment>
-        <View style={tailwind('absolute top-1 right-2.5 w-1.5 h-1.5 bg-red-500 rounded-full')} />
         {menuBtnSvg}
+        <View style={tailwind('absolute top-1 right-2.5 w-1.5 h-1.5 bg-red-500 rounded-full')} />
       </React.Fragment>
     );
   } else if (syncProgress && syncProgress.status === SHOW_SYNCED) {
     innerMenuBtn = (
       <React.Fragment>
-        <View style={tailwind('absolute top-1 right-2.5 w-1.5 h-1.5 bg-green-600 rounded-full')} />
         {menuBtnSvg}
+        <View style={tailwind('absolute top-1 right-2.5 w-1.5 h-1.5 bg-green-600 rounded-full')} />
       </React.Fragment>
     );
   } else {

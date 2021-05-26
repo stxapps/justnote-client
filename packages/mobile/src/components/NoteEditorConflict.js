@@ -94,6 +94,10 @@ const NoteEditorConflict = (props) => {
     <View style={tailwind('w-full h-full bg-white')}>
       <ScrollView>
         <View style={[tailwind('px-4 pb-4 sm:px-6 sm:pb-6', safeAreaWidth), style]}>
+          <View style={tailwind('w-full h-16')} />
+          <Text style={tailwind('pt-5 text-gray-800 text-lg font-medium')}>{conflictedNote.notes.length} Versions found</Text>
+          <Text style={tailwind('text-gray-500 text-sm font-normal')}>Please choose the correct version of this note.</Text>
+          {conflictedNote.notes.map((note, i) => <ConflictItem key={note.id} listName={conflictedNote.listNames[i]} note={note} status={conflictedNote.status} />)}
           <View style={tailwind('absolute top-0 left-0 lg:hidden', safeAreaWidth)}>
             <TouchableOpacity onPress={onRightPanelCloseBtnClick} style={tailwind('px-4 py-4 rounded-md bg-white')}>
               <Svg width={20} height={20} style={tailwind('text-gray-500 font-normal')} viewBox="0 0 20 20" fill="currentColor">
@@ -101,10 +105,6 @@ const NoteEditorConflict = (props) => {
               </Svg>
             </TouchableOpacity>
           </View>
-          <View style={tailwind('w-full h-16')} />
-          <Text style={tailwind('pt-5 text-gray-800 text-lg font-medium')}>{conflictedNote.notes.length} Versions found</Text>
-          <Text style={tailwind('text-gray-500 text-sm font-normal')}>Please choose the correct version of this note.</Text>
-          {conflictedNote.notes.map((note, i) => <ConflictItem key={note.id} listName={conflictedNote.listNames[i]} note={note} status={conflictedNote.status} />)}
         </View>
       </ScrollView>
       {renderLoading()}
