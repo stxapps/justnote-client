@@ -1351,14 +1351,24 @@ export const tryUpdateSynced = (updateAction, haveUpdate) => async (
   if (!haveUpdate) return;
 
   const pageYOffset = getState().window.pageYOffset;
+  const noteId = getState().display.noteId;
   const isPopupShown = (
     getState().display.isProfilePopupShown ||
     getState().display.isNoteListMenuPopupShown ||
     getState().display.isMoveToPopupShown ||
     getState().display.isSidebarPopupShown ||
-    getState().display.isSearchPopupShown
+    getState().display.isSearchPopupShown ||
+    getState().display.isSettingsPopupShown ||
+    getState().display.isConfirmDeletePopupShown ||
+    getState().display.isConfirmDiscardPopupShown ||
+    getState().display.isAlertScreenRotationPopupShown
   );
-  if (pageYOffset === 0 && !isPopupShown) {
+  const isBulkEditing = getState().display.isBulkEditing;
+  const isEditorFocused = getState().display.isEditorFocused;
+  if (
+    pageYOffset === 0 && noteId === null && !isPopupShown &&
+    !isBulkEditing && !isEditorFocused
+  ) {
     dispatch(updateSynced());
     return;
   }
