@@ -27,57 +27,57 @@
     "fontFamily": "Inter-Black"
   },
   "shadow-sm": {
-    "shadowColor": "rgba(0, 0, 0, 0.05)",
+    "shadowColor": "#000",
     "shadowOffset": {
       "width": 0,
       "height": 1,
     },
-    "shadowOpacity": 1,
-    "shadowRadius": 1,
+    "shadowOpacity": 0.05,
+    "shadowRadius": 0,
 
     "elevation": 0.3
   },
   "shadow": {
-    "shadowColor": "rgba(0, 0, 0, 0.1)",
+    "shadowColor": "#000",
     "shadowOffset": {
       "width": 0,
       "height": 1,
     },
-    "shadowOpacity": 2,
-    "shadowRadius": 2,
+    "shadowOpacity": 0.15,
+    "shadowRadius": 1,
 
     "elevation": 0.6
   },
   "shadow-md": {
-    "shadowColor": "rgba(0, 0, 0, 0.2)",
+    "shadowColor": "#000",
     "shadowOffset": {
       "width": 0,
       "height": 2,
     },
-    "shadowOpacity": 3,
-    "shadowRadius": 8,
+    "shadowOpacity": 0.2,
+    "shadowRadius": 1.41,
 
-    "elevation": 2
+    "elevation": 2.5
   },
   "shadow-lg": {
-    "shadowColor": "rgba(0, 0, 0, 0.2)",
+    "shadowColor": "#000",
     "shadowOffset": {
       "width": 0,
-      "height": 4,
+      "height": 3,
     },
-    "shadowOpacity": 3,
-    "shadowRadius": 10,
+    "shadowOpacity": 0.29,
+    "shadowRadius": 4.65,
 
     "elevation": 7
   },
   "shadow-xl": {
-    "shadowColor": "rgba(0, 0, 0, 0.25)",
+    "shadowColor": "#000",
     "shadowOffset": {
       "width": 0,
       "height": 6,
     },
-    "shadowOpacity": 4,
-    "shadowRadius": 12,
+    "shadowOpacity": 0.37,
+    "shadowRadius": 7.49,
 
     "elevation": 12
   },
