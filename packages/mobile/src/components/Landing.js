@@ -4,7 +4,7 @@ import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import Svg, { SvgXml, Path } from 'react-native-svg';
 
 import { SM_WIDTH } from '../types/const';
-import { signUp } from '../actions';
+import { signUp, signIn } from '../actions';
 import { tailwind } from '../stylesheets/tailwind';
 import cache from '../utils/cache';
 
@@ -19,10 +19,14 @@ const Landing = () => {
     dispatch(signUp());
   };
 
+  const onSignInBtnClick = () => {
+    dispatch(signIn());
+  };
+
   return (
     <ScrollView contentContainerStyle={tailwind('min-h-full')}>
       <View style={tailwind('items-end justify-center p-4 md:p-6 lg:p-8', windowWidth)}>
-        <TouchableOpacity onPress={onSignUpBtnClick} style={tailwind('bg-white rounded-md shadow px-4 py-2 border border-transparent items-center justify-center')}>
+        <TouchableOpacity onPress={onSignInBtnClick} style={tailwind('bg-white rounded-md shadow px-4 py-2 border border-transparent items-center justify-center')}>
           <Text style={tailwind('text-base font-medium text-green-600')}>Sign in</Text>
         </TouchableOpacity>
       </View>
