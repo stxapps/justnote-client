@@ -97,7 +97,7 @@ const ConfirmDeletePopup = () => {
       </TouchableWithoutFeedback>
       <Animated.View style={[tailwind('w-full max-w-lg bg-white rounded-lg px-4 pt-5 pb-4 shadow-xl sm:my-8 sm:p-6', safeAreaWidth), popupStyle]}>
         <View style={tailwind('items-center sm:flex-row sm:items-start', safeAreaWidth)}>
-          <View style={tailwind('flex-grow-0 flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:h-10 sm:w-10', safeAreaWidth)}>
+          <View style={tailwind('flex-grow-0 flex-shrink-0 items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:h-10 sm:w-10', safeAreaWidth)}>
             <Svg width={24} height={24} style={tailwind('text-red-600 font-normal')} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <Path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </Svg>
