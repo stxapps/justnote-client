@@ -134,7 +134,7 @@ const NoteListTopBar = (props) => {
                 </Svg>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity ref={menuBtn} onPress={onMenuBtnClick} style={tailwind('items-center justify-center pl-2 pr-4 border border-white bg-white')}>
+            <TouchableOpacity ref={menuBtn} onPress={onMenuBtnClick} style={tailwind('items-center justify-center pl-2 pr-4 border border-white h-10 bg-white')}>
               {innerMenuBtn}
             </TouchableOpacity>
           </View>

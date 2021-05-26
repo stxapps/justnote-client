@@ -1189,9 +1189,7 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
 
     const leafFPaths = [];
     for (const noteId of noteIds) leafFPaths.push(...noteId.fpaths);
-    for (const conflictedId of conflictedIds) {
-      for (const noteId of conflictedId.notes) leafFPaths.push(...noteId.fpaths);
-    }
+    for (const noteId of conflictedIds) leafFPaths.push(...noteId.fpaths);
 
     const {
       noteFPaths: _noteFPaths, settingsFPath: _settingsFPath,
@@ -1202,9 +1200,7 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
 
     const _leafFPaths = [];
     for (const noteId of _noteIds) _leafFPaths.push(...noteId.fpaths);
-    for (const conflictedId of _conflictedIds) {
-      for (const noteId of conflictedId.notes) _leafFPaths.push(...noteId.fpaths);
-    }
+    for (const noteId of _conflictedIds) _leafFPaths.push(...noteId.fpaths);
 
     const allNoteFPaths = [...new Set([...noteFPaths, ..._noteFPaths])];
     const {
@@ -1213,9 +1209,7 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
 
     const allLeafFPaths = [];
     for (const noteId of allNoteIds) allLeafFPaths.push(...noteId.fpaths);
-    for (const conflictedId of allConflictedIds) {
-      for (const noteId of conflictedId.notes) allLeafFPaths.push(...noteId.fpaths);
-    }
+    for (const noteId of allConflictedIds) allLeafFPaths.push(...noteId.fpaths);
 
     // 1. Server side: upload all fpaths
     let fpaths = [], contents = [];
