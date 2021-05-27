@@ -187,6 +187,11 @@ const displayReducer = (state = initialState, action) => {
     const { listName } = action.payload;
     const newState = {
       ...state,
+      noteId: null,
+      isBulkEditing: false,
+      isEditorFocused: false,
+      selectedNoteIds: [],
+      isSelectedNoteIdsMaxErrorShown: false,
       didFetch: true,
       fetchedListNames: [...state.fetchedListNames, listName],
     };
