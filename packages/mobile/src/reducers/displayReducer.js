@@ -219,9 +219,14 @@ const displayReducer = (state = initialState, action) => {
     return { ...state, noteId: note.id, isEditorFocused: false };
   }
 
-  if (action.type === UPDATE_NOTE || action.type === MERGE_NOTES_COMMIT) {
+  if (action.type === UPDATE_NOTE) {
     const { toNote } = action.payload;
     return { ...state, noteId: toNote.id, isEditorFocused: false };
+  }
+
+  if (action.type === MERGE_NOTES_COMMIT) {
+    const { toListName, toNote } = action.payload;
+    return { ...state, noteId: state.listName === toListName ? toNote.id : null };
   }
 
   if (action.type === CANCEL_DIED_NOTES) {
