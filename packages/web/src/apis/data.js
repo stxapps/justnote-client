@@ -197,7 +197,7 @@ const toConflictedNotes = (noteIds, conflictWiths, fpaths, contents) => {
   const conflictedNotes = [];
   for (const conflictWith of conflictWiths) {
     const selectedNotes = notes.filter(note => conflictWith.includes(note.id));
-    const sortedNotes = selectedNotes.sort((a, b) => a.addedDT - b.addedDT);
+    const sortedNotes = selectedNotes.sort((a, b) => a.updatedDT - b.updatedDT);
     const sortedListNames = sortedNotes.map(note => {
       return noteIds.find(noteId => noteId.id === note.id).listName;
     });

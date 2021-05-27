@@ -825,7 +825,10 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
     // error in this step should be fine
   }
 
-  dispatch({ type: MERGE_NOTES_COMMIT, payload });
+  toNote['addedDT'] = Math.min(...conflictedNote.notes.map(note => {
+    return note.addedDT ? note.addedDT : addedDT;
+  }));
+  dispatch({ type: MERGE_NOTES_COMMIT, payload: { ...payload, toNote } });
 };
 
 export const addListNames = (newNames) => async (dispatch, getState) => {
