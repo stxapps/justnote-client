@@ -1,6 +1,6 @@
 {
   "name": "justnotecc",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "start-js": "HTTPS=true BROWSER=none react-scripts start",
