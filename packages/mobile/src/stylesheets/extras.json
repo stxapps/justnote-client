@@ -92,6 +92,9 @@
 
     "elevation": 6
   },
+  "elevation-xl": {
+    "elevation": 12
+  },
   "leading-6.5": {
     "lineHeight": 26
   },

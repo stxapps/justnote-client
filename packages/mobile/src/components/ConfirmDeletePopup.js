@@ -91,7 +91,7 @@ const ConfirmDeletePopup = () => {
   };
 
   return (
-    <View style={[tailwind('absolute inset-0 items-center justify-end pt-4 px-4 pb-20 sm:justify-center sm:p-0', safeAreaWidth), canvasStyle]}>
+    <View style={[tailwind('absolute inset-0 items-center justify-end pt-4 px-4 pb-20 elevation-xl sm:justify-center sm:p-0', safeAreaWidth), canvasStyle]}>
       <TouchableWithoutFeedback onPress={onConfirmDeleteCancelBtnClick}>
         <View style={tailwind('absolute inset-0 opacity-25 bg-black')} />
       </TouchableWithoutFeedback>

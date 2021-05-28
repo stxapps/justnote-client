@@ -340,7 +340,7 @@
   + Sync, Conflict notes
   + List list names, change list name
   + New list name, edit list name, move list name, delete list name
-  + Popups: ConfirmDelete, ConfirmDiscard, MoveTo, ListMenu, Profile
+  + Popups: ConfirmDelete, ConfirmDiscard, AlertRotate, MoveTo, ListMenu, Profile
   + Settings
 * servers
 ** test server

@@ -59,7 +59,7 @@ const AlertScreenRotationPopup = () => {
   };
 
   return (
-    <View style={[tailwind('absolute inset-0 items-center justify-end pt-4 px-4 pb-20 sm:justify-center sm:p-0', safeAreaWidth), canvasStyle]}>
+    <View style={[tailwind('absolute inset-0 items-center justify-end pt-4 px-4 pb-20 elevation-xl sm:justify-center sm:p-0', safeAreaWidth), canvasStyle]}>
       <TouchableWithoutFeedback onPress={onCancelBtnClick}>
         <View style={tailwind('absolute inset-0 opacity-25 bg-black')} />
       </TouchableWithoutFeedback>
@@ -74,7 +74,7 @@ const AlertScreenRotationPopup = () => {
             <Text style={tailwind('text-lg leading-6 font-medium text-gray-900 text-center sm:text-left', safeAreaWidth)}>Screen rotation</Text>
             <View style={tailwind('mt-2')}>
               <Text style={tailwind('text-sm text-gray-500 font-normal text-center sm:text-left', safeAreaWidth)}>Screen rotation is not fully supported. Please do not rotate your device while editing your note, new changes to your note will be lost. We are sorry for the inconvenience.</Text>
-              <Text style={tailwind('text-sm text-gray-500 mt-3')}>(You can choose to not show this warning again in Settings -&gt; Misc.)</Text>
+              <Text style={tailwind('text-sm font-normal text-gray-500 mt-3')}>(You can choose to not show this warning again in Settings -&gt; Misc.)</Text>
             </View>
           </View>
         </View>
