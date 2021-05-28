@@ -1180,11 +1180,15 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
   dispatch, getState
 ) => {
 
+  let haveUpdate = false;
+  // Set haveUpdate to true if there is already pending update
+  //   Need to check before dispatching SYNC
+  const syncProgress = getState().display.syncProgress;
+  if (syncProgress && syncProgress.status === SHOW_SYNCED) haveUpdate = true;
+
   dispatch({ type: SYNC });
 
   try {
-    let haveUpdate = false;
-
     let { noteFPaths, settingsFPath } = getState().serverFPaths;
     if (doForceServerListFPaths || !noteFPaths) {
       ({ noteFPaths, settingsFPath } = await serverApi.listFPaths());
