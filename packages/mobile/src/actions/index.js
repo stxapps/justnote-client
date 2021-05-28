@@ -1317,6 +1317,7 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
       if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
 
       syncSettingsFPath = settingsFPath;
+      haveUpdate = true;
     } else if (syncSettingsAction === 2) {
       // Upload from device to server
       const content = (await dataApi.getFiles([_settingsFPath]))[0];
@@ -1387,7 +1388,7 @@ export const updateSynced = (doCheckEditing = false) => async (dispatch, getStat
   }
 
   dispatch({ type: UPDATE_SYNCED });
-  dispatch(fetch(false));
+  dispatch(fetch(false, true));
 };
 
 export const increaseSaveNoteCount = () => {
