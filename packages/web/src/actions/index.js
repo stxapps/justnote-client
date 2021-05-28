@@ -1399,7 +1399,7 @@ export const tryUpdateSynced = (updateAction, haveUpdate) => async (
   // Do nothing on web. This is for mobile.
 };
 
-export const updateSynced = () => async (dispatch, getState) => {
+export const updateSynced = (doCheckEditing = false) => async (dispatch, getState) => {
   // Do nothing on web. This is for mobile.
 };
 

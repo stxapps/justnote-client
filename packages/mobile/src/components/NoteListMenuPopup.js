@@ -36,7 +36,7 @@ const NoteListMenuPopup = () => {
 
   const onSyncBtnClick = () => {
     onNoteListMenuCancelBtnClick();
-    if (syncProgress && syncProgress.status === SHOW_SYNCED) dispatch(updateSynced());
+    if (syncProgress && syncProgress.status === SHOW_SYNCED) dispatch(updateSynced(true));
     else dispatch(sync(true, 0));
   };
 

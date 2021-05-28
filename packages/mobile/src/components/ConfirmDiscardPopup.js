@@ -8,10 +8,11 @@ import { useSafeAreaFrame, useSafeAreaInsets } from 'react-native-safe-area-cont
 
 import {
   updatePopup, increaseConfirmDiscardNoteCount, updateNoteId, changeListName,
+  updateSynced,
 } from '../actions';
 import {
   CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_NOTE_ID,
-  DISCARD_ACTION_CHANGE_LIST_NAME,
+  DISCARD_ACTION_CHANGE_LIST_NAME, DISCARD_ACTION_UPDATE_SYNCED,
 } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import { dialogFMV } from '../types/animConfigs';
@@ -43,6 +44,8 @@ const ConfirmDiscardPopup = () => {
       dispatch(updateNoteId(null, true, false));
     } else if (discardAction === DISCARD_ACTION_CHANGE_LIST_NAME) {
       dispatch(changeListName(null, false));
+    } else if (discardAction === DISCARD_ACTION_UPDATE_SYNCED) {
+      dispatch(updateSynced());
     } else throw new Error(`Invalid discard action: ${discardAction}`);
     onConfirmDiscardCancelBtnClick();
     didClick.current = true;

@@ -36,6 +36,7 @@ import {
 } from '../types/actionTypes';
 import {
   DOMAIN_NAME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH, ALERT_SCREEN_ROTATION_POPUP,
+  CONFIRM_DISCARD_POPUP, DISCARD_ACTION_UPDATE_SYNCED,
   MY_NOTES, TRASH, ID, NEW_NOTE,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
   SWAP_LEFT, SWAP_RIGHT, N_NOTES, SETTINGS, INDEX, DOT_JSON, LG_WIDTH, SHOW_SYNCED,
@@ -1373,7 +1374,14 @@ export const tryUpdateSynced = (updateAction, haveUpdate) => async (
   dispatch({ type: UPDATE_SYNC_PROGRESS, payload: { status: SHOW_SYNCED } });
 };
 
-export const updateSynced = () => async (dispatch, getState) => {
+export const updateSynced = (doCheckEditing = false) => async (dispatch, getState) => {
+  const isEditorFocused = getState().display.isEditorFocused;
+  if (doCheckEditing && isEditorFocused) {
+    dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_SYNCED));
+    dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
+    return;
+  }
+
   dispatch({ type: UPDATE_SYNCED });
   dispatch(fetch(false));
 };
