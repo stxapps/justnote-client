@@ -89,7 +89,7 @@ const ColsPanel = () => {
 
   const viewPanResponder = useMemo(() => {
     return PanResponder.create({
-      onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => isResizeActive.current && startInfo.current,
       onPanResponderGrant: () => {
 
       },

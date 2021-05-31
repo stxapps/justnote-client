@@ -59,7 +59,7 @@ const NoteListSearchPopup = () => {
   useEffect(() => {
     if (isShown) {
       Animated.timing(popupAnim, { toValue: 1, ...popupFMV.visible }).start(() => {
-        searchInput.current.focus();
+        if (searchInput.current) searchInput.current.focus();
       });
     } else {
       Animated.timing(popupAnim, { toValue: 0, ...popupFMV.hidden }).start(() => {

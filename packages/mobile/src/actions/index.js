@@ -70,7 +70,9 @@ export const init = () => async (dispatch, getState) => {
 
   let prevWidth = Dimensions.get('window').width;
   Dimensions.addEventListener('change', ({ window }) => {
-    handleScreenRotation(prevWidth, window.width)(dispatch, getState);
+    if (AppState.currentState === 'active') {
+      handleScreenRotation(prevWidth, window.width)(dispatch, getState);
+    }
     prevWidth = window.width;
 
     dispatch({
