@@ -136,20 +136,27 @@ const ColsPanel = () => {
   }, [state.isPane3FullScreen]);
 
   useEffect(() => {
+    let didMount = true;
     const getState = async () => {
       const storedState = await mmkvStorage.getItem(COLS_PANEL_STATE);
-      if (storedState) {
-        const s = JSON.parse(storedState);
-        setState(prevState => ({
-          ...prevState,
-          isPane1Shown: s.isPane1Shown,
-          pane1Width: s.pane1Width,
-          pane2Width: s.pane2Width,
-        }));
+      if (didMount) {
+        if (storedState) {
+          const s = JSON.parse(storedState);
+          setState(prevState => ({
+            ...prevState,
+            isPane1Shown: s.isPane1Shown,
+            pane1Width: s.pane1Width,
+            pane2Width: s.pane2Width,
+          }));
+        }
+        setDidGetState(true);
       }
-      setDidGetState(true);
     };
     getState();
+
+    return () => {
+      didMount = false;
+    };
   }, []);
 
   useEffect(() => {

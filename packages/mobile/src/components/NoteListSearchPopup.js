@@ -57,19 +57,21 @@ const NoteListSearchPopup = () => {
   }, [onSearchCancelBtnClick]);
 
   useEffect(() => {
+    let didMount = true;
     if (isShown) {
       Animated.timing(popupAnim, { toValue: 1, ...popupFMV.visible }).start(() => {
         if (searchInput.current) searchInput.current.focus();
       });
     } else {
       Animated.timing(popupAnim, { toValue: 0, ...popupFMV.hidden }).start(() => {
-        setDidCloseAnimEnd(true);
+        if (didMount) setDidCloseAnimEnd(true);
       });
       if (searchInput.current) searchInput.current.blur();
     }
 
     registerPopupBackHandler(isShown);
     return () => {
+      didMount = false;
       registerPopupBackHandler(false);
     };
   }, [isShown, popupAnim, registerPopupBackHandler]);
