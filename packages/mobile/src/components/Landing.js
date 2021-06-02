@@ -31,11 +31,11 @@ const Landing = () => {
           <Text style={tailwind('text-base font-medium text-green-600')}>Sign in</Text>
         </TouchableOpacity>
       </View>
-      <View style={cache('L_middleView', [tailwind('max-w-lg self-center flex-1 items-start justify-center p-4 md:p-6 lg:p-8', safeAreaWidth), { minHeight: 256 }])}>
+      <View style={cache('L_middleView', [tailwind('max-w-lg self-center flex-1 items-start justify-center p-6 lg:p-8', safeAreaWidth), { minHeight: 256 }])}>
         <SvgXml width={135} height={40} xml={logoFull} />
         <Text style={tailwind('text-gray-500 text-xl font-normal pt-3')}>A note taking app that you can use it easily, take a note rapidly, and importantly, have full control of your own data.</Text>
       </View>
-      <View style={tailwind('items-center justify-center p-4 md:p-6 lg:p-8', safeAreaWidth)}>
+      <View style={tailwind('items-center justify-center p-6 lg:p-8', safeAreaWidth)}>
         <TouchableOpacity onPress={onSignUpBtnClick} style={tailwind(`flex-row items-center justify-center px-8 py-3 border border-transparent rounded-md shadow bg-green-600 ${safeAreaWidth < SM_WIDTH ? 'w-full' : ''}`)}>
           <Text style={tailwind('text-base font-medium text-white')}>Get started</Text>
           <Svg style={cache('L_signUpArrow', [tailwind('ml-2 text-white font-normal'), { marginTop: 2 }])} width={6} height={10} viewBox="0 0 6 10" fill="currentColor">

@@ -205,7 +205,7 @@ const Landing = () => {
                     </p>
                     <h4 className="mt-7 text-base font-medium text-gray-900 tracking-tight">No lock out from your own data</h4>
                     <p className="mt-3 text-base text-gray-500 text-left">
-                      You can always access your data directly whenever you want as you have fully control of your data storage. Plus, you can manage who can access your data too.
+                      You can always access your data directly whenever you want as you have full control of your data storage. Plus, you can manage who can access your data too.
                     </p>
                   </div>
                 </div>

@@ -31,6 +31,8 @@ const NoteEditorTopBar = (props) => {
     if (didClick.current) return;
     if (note.id !== NEW_NOTE && isEditorFocused) dispatch(increaseDiscardNoteCount());
     else dispatch(updateNoteId(null, false, true));
+
+    if (note.id === NEW_NOTE && isFullScreen) onToggleFullScreen();
     didClick.current = true;
   };
 
