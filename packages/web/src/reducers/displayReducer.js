@@ -1,7 +1,7 @@
 import {
   UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP,
   UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED,
-  ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, CLEAR_SELECTED_NOTE_IDS,
+  ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS,
   FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES,
   DELETE_LIST_NAMES, UPDATE_DELETING_LIST_NAME, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
   INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT, UPDATE_DISCARD_ACTION,
@@ -177,10 +177,6 @@ const displayReducer = (state = initialState, action) => {
     }
     const isShown = selectedNoteIds.length > MAX_SELECTED_NOTE_IDS;
     return { ...state, selectedNoteIds, isSelectedNoteIdsMaxErrorShown: isShown };
-  }
-
-  if (action.type === CLEAR_SELECTED_NOTE_IDS) {
-    return { ...state, selectedNoteIds: [], isSelectedNoteIdsMaxErrorShown: false };
   }
 
   if (action.type === FETCH_COMMIT) {

@@ -7,8 +7,7 @@ import {
   INIT, UPDATE_WINDOW_SIZE, UPDATE_USER, UPDATE_HANDLING_SIGN_IN,
   UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP, UPDATE_SEARCH_STRING,
   UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED,
-  ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, CLEAR_SELECTED_NOTE_IDS,
-  UPDATE_PAGE_Y_OFFSET,
+  ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, UPDATE_PAGE_Y_OFFSET,
   FETCH, FETCH_COMMIT, FETCH_ROLLBACK,
   FETCH_MORE, FETCH_MORE_COMMIT, FETCH_MORE_ROLLBACK,
   ADD_NOTE, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK,
@@ -351,12 +350,6 @@ export const deleteSelectedNoteIds = (ids) => {
   return {
     type: DELETE_SELECTED_NOTE_IDS,
     payload: ids,
-  };
-};
-
-export const clearSelectedNoteIds = () => {
-  return {
-    type: CLEAR_SELECTED_NOTE_IDS,
   };
 };
 
@@ -1174,15 +1167,24 @@ export const updateUpdateSettingsProgress = (progress) => {
 };
 
 /*
+ * _isSyncing: one sync at a time
+ * _newSyncObj: there is a new update and need to sync again
+ *
  * updateAction: 0 - normal, update immediately or show notification
  *               1 - force, update immediately no matter what
  *               2 - no update even there is a change
  */
-export const sync = (doForceServerListFPaths = false, updateAction = 0) => async (
-  dispatch, getState
-) => {
+let _isSyncing = false, _newSyncObj = null;
+export const sync = (
+  doForceServerListFPaths = false, updateAction = 0, haveUpdate = false
+) => async (dispatch, getState) => {
 
-  let haveUpdate = false;
+  if (_isSyncing) {
+    _newSyncObj = { doForceServerListFPaths, updateAction };
+    return;
+  }
+  [_isSyncing, _newSyncObj] = [true, null];
+
   // Set haveUpdate to true if there is already pending update
   //   Need to check before dispatching SYNC
   const syncProgress = getState().display.syncProgress;
@@ -1331,6 +1333,19 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
       syncSettingsFPath = _settingsFPath;
     } else throw new Error(`Invalid syncSettingsAction: ${syncSettingsAction}`);
 
+    if (_newSyncObj) {
+      let _doForce = /** @type boolean */(_newSyncObj.doForceServerListFPaths);
+      if (doForceServerListFPaths) _doForce = false;
+
+      /** @ts-ignore */
+      const _updateAction = Math.min(updateAction, _newSyncObj.updateAction);
+
+      [_isSyncing, _newSyncObj] = [false, null];
+      dispatch(sync(_doForce, _updateAction, haveUpdate));
+      return;
+    }
+
+    [_isSyncing, _newSyncObj] = [false, null];
     dispatch({
       type: SYNC_COMMIT,
       payload: {
@@ -1340,6 +1355,7 @@ export const sync = (doForceServerListFPaths = false, updateAction = 0) => async
       },
     });
   } catch (e) {
+    [_isSyncing, _newSyncObj] = [false, null];
     dispatch({ type: SYNC_ROLLBACK });
   }
 };

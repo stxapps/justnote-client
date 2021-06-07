@@ -60,17 +60,19 @@ const ConfirmDeletePopup = () => {
   }, [onConfirmDeleteCancelBtnClick]);
 
   useEffect(() => {
+    let didMount = true;
     if (isShown) {
       Animated.timing(popupAnim, { toValue: 1, ...dialogFMV.visible }).start();
       didClick.current = false;
     } else {
       Animated.timing(popupAnim, { toValue: 0, ...dialogFMV.hidden }).start(() => {
-        setDidCloseAnimEnd(true);
+        if (didMount) setDidCloseAnimEnd(true);
       });
     }
 
     registerPopupBackHandler(isShown);
     return () => {
+      didMount = false;
       registerPopupBackHandler(false);
     };
   }, [isShown, popupAnim, registerPopupBackHandler]);

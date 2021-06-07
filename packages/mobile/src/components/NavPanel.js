@@ -91,33 +91,37 @@ const NavPanel = () => {
   }, [onRightPanelCloseBtnClick]);
 
   useEffect(() => {
+    let didMount = true;
     if (isSidebarShown) {
       Animated.timing(sidebarAnim, { toValue: 0, ...sidebarFMV.visible }).start(() => {
-        setDidSidebarAnimEnd(true);
+        if (didMount) setDidSidebarAnimEnd(true);
       });
     } else {
       Animated.timing(sidebarAnim, { toValue: 1, ...sidebarFMV.hidden }).start(() => {
-        setDidSidebarAnimEnd(true);
+        if (didMount) setDidSidebarAnimEnd(true);
       });
     }
 
     registerSidebarBackHandler(isSidebarShown);
     return () => {
+      didMount = false;
       registerSidebarBackHandler(false);
     };
   }, [isSidebarShown, sidebarAnim, registerSidebarBackHandler]);
 
   useEffect(() => {
+    let didMount = true;
     if (note) {
       Animated.timing(rightPanelAnim, { toValue: 0, ...sidebarFMV.visible }).start();
     } else {
       Animated.timing(rightPanelAnim, { toValue: 1, ...sidebarFMV.hidden }).start(() => {
-        if (!note && note !== derivedNote) setDerivedNote(note);
+        if (didMount && !note && note !== derivedNote) setDerivedNote(note);
       });
     }
 
     registerRightPanelBackHandler(!!note);
     return () => {
+      didMount = false;
       registerRightPanelBackHandler(false);
     };
   }, [note, derivedNote, rightPanelAnim, registerRightPanelBackHandler]);

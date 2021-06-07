@@ -75,17 +75,21 @@ const MoveToPopup = () => {
   }, [isShown, popupSize, popupAnim]);
 
   useEffect(() => {
+    let didMount = true;
     if (isShown) {
       didClick.current = false;
     } else {
       Animated.timing(popupAnim, { toValue: 0, ...popupFMV.hidden }).start(() => {
-        setPopupSize(null);
-        setDidCloseAnimEnd(true);
+        if (didMount) {
+          setPopupSize(null);
+          setDidCloseAnimEnd(true);
+        }
       });
     }
 
     registerPopupBackHandler(isShown);
     return () => {
+      didMount = false;
       registerPopupBackHandler(false);
     };
   }, [isShown, popupAnim, registerPopupBackHandler]);

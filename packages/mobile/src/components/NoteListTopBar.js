@@ -55,14 +55,8 @@ const NoteListTopBar = (props) => {
     if ((!syncProgress || syncProgress.status !== SYNC) && menuBtnAnimObj.current) {
       menuBtnAnimObj.current.stop();
       menuBtnAnimObj.current = null;
+      menuBtnAnim.setValue(0);
     }
-
-    return () => {
-      if (menuBtnAnimObj.current) {
-        menuBtnAnimObj.current.stop();
-        menuBtnAnimObj.current = null;
-      }
-    };
   }, [syncProgress, menuBtnAnim]);
 
   if (safeAreaWidth < LG_WIDTH && isBulkEditing) return <NoteListTopBarBulkEdit />;

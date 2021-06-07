@@ -128,30 +128,37 @@ const SettingsPopup = () => {
   }, [onPopupCloseBtnClick]);
 
   useEffect(() => {
+    let didMount = true;
     if (isShown) {
       Animated.timing(popupAnim, { toValue: 1, ...popupFMV.visible }).start();
     } else {
       Animated.timing(popupAnim, { toValue: 0, ...popupFMV.hidden }).start(() => {
-        setDidCloseAnimEnd(true);
+        if (didMount) setDidCloseAnimEnd(true);
       });
     }
 
     registerPopupBackHandler(isShown);
     return () => {
+      didMount = false;
       registerPopupBackHandler(false);
     };
   }, [isShown, popupAnim, registerPopupBackHandler]);
 
   useEffect(() => {
+    let didMount = true;
     if (isSidebarShown) {
       Animated.timing(sidebarAnim, { toValue: 1, ...sidebarFMV.visible }).start(() => {
-        setDidSidebarAnimEnd(true);
+        if (didMount) setDidSidebarAnimEnd(true);
       });
     } else {
       Animated.timing(sidebarAnim, { toValue: 0, ...sidebarFMV.hidden }).start(() => {
-        setDidSidebarAnimEnd(true);
+        if (didMount) setDidSidebarAnimEnd(true);
       });
     }
+
+    return () => {
+      didMount = false;
+    };
   }, [isSidebarShown, sidebarAnim]);
 
   useEffect(() => {

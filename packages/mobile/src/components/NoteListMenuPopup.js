@@ -85,16 +85,18 @@ const NoteListMenuPopup = () => {
   }, [onNoteListMenuCancelBtnClick]);
 
   useEffect(() => {
+    let didMount = true;
     if (isShown) {
       Animated.timing(popupAnim, { toValue: 1, ...popupFMV.visible }).start();
     } else {
       Animated.timing(popupAnim, { toValue: 0, ...popupFMV.hidden }).start(() => {
-        setDidCloseAnimEnd(true);
+        if (didMount) setDidCloseAnimEnd(true);
       });
     }
 
     registerPopupBackHandler(isShown);
     return () => {
+      didMount = false;
       registerPopupBackHandler(false);
     };
   }, [isShown, popupAnim, registerPopupBackHandler]);
@@ -110,14 +112,8 @@ const NoteListMenuPopup = () => {
     if ((!syncProgress || syncProgress.status !== SYNC) && syncAnimObj.current) {
       syncAnimObj.current.stop();
       syncAnimObj.current = null;
+      syncAnim.setValue(0);
     }
-
-    return () => {
-      if (syncAnimObj.current) {
-        syncAnimObj.current.stop();
-        syncAnimObj.current = null;
-      }
-    };
   }, [syncProgress, syncAnim]);
 
   if (derivedIsShown !== isShown) {
