@@ -1333,6 +1333,16 @@ export const sync = (
       syncSettingsFPath = _settingsFPath;
     } else throw new Error(`Invalid syncSettingsAction: ${syncSettingsAction}`);
 
+    dispatch({
+      type: SYNC_COMMIT,
+      payload: {
+        serverFPaths: { noteFPaths: allNoteFPaths, settingsFPath: syncSettingsFPath },
+        updateAction,
+        haveUpdate,
+        haveNewSync: _newSyncObj !== null,
+      },
+    });
+
     if (_newSyncObj) {
       let _doForce = /** @type boolean */(_newSyncObj.doForceServerListFPaths);
       if (doForceServerListFPaths) _doForce = false;
@@ -1346,15 +1356,8 @@ export const sync = (
     }
 
     [_isSyncing, _newSyncObj] = [false, null];
-    dispatch({
-      type: SYNC_COMMIT,
-      payload: {
-        serverFPaths: { noteFPaths: allNoteFPaths, settingsFPath: syncSettingsFPath },
-        updateAction,
-        haveUpdate,
-      },
-    });
   } catch (e) {
+    console.log('Sync error: ', e);
     [_isSyncing, _newSyncObj] = [false, null];
     dispatch({ type: SYNC_ROLLBACK });
   }
