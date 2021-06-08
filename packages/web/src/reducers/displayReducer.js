@@ -277,6 +277,7 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === SYNC_COMMIT) {
+    if (action.payload.haveNewSync) return state;
     return { ...state, syncProgress: null };
   }
 
