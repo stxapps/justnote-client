@@ -34,8 +34,8 @@ import {
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
-  DOMAIN_NAME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH, ALERT_SCREEN_ROTATION_POPUP,
-  CONFIRM_DISCARD_POPUP, DISCARD_ACTION_UPDATE_SYNCED,
+  DOMAIN_NAME, APP_URL_SCHEME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH,
+  ALERT_SCREEN_ROTATION_POPUP, CONFIRM_DISCARD_POPUP, DISCARD_ACTION_UPDATE_SYNCED,
   MY_NOTES, TRASH, ID, NEW_NOTE,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
   SWAP_LEFT, SWAP_RIGHT, N_NOTES, SETTINGS, INDEX, DOT_JSON, LG_WIDTH, SHOW_SYNCED,
@@ -54,6 +54,7 @@ export const init = () => async (dispatch, getState) => {
       appDomain: DOMAIN_NAME,
       scopes: ['store_write'],
       redirectUrl: BLOCKSTACK_AUTH,
+      callbackUrlScheme: APP_URL_SCHEME,
     };
     await userSession.createSession(config);
   }
@@ -83,8 +84,11 @@ export const init = () => async (dispatch, getState) => {
     });
   });
 
-  AppState.addEventListener('change', (nextAppState) => {
-    if (nextAppState === 'active') dispatch(sync(false, 0));
+  AppState.addEventListener('change', async (nextAppState) => {
+    if (nextAppState === 'active') {
+      const isUserSignedIn = await userSession.isUserSignedIn();
+      if (isUserSignedIn) dispatch(sync(false, 0));
+    }
   });
 
   const isUserSignedIn = await userSession.isUserSignedIn();
