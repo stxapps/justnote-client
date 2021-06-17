@@ -328,6 +328,7 @@
 - PC, laptop, tablet, phone
 - features
   + Landing, About, Terms, Privacy, Support
+  + Sign up, Sign in
   + Main, ColsPanel, NavPanel, Sidebar, RightPanel
   + List notes, fetch more
   + New note, edit note, move note, delete note
