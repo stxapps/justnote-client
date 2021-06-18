@@ -1376,13 +1376,16 @@ export const updateUpdateSettingsProgress = (progress) => {
 };
 
 /*
+ * _isSyncing: one sync at a time
+ * _newSyncObj: there is a new update and need to sync again
+ *
  * updateAction: 0 - normal, update immediately or show notification
  *               1 - force, update immediately no matter what
  *               2 - no update even there is a change
  */
-export const sync = (doForceServerListFPaths = false, updateAction = 0) => async (
-  dispatch, getState
-) => {
+export const sync = (
+  doForceServerListFPaths = false, updateAction = 0, haveUpdate = false
+) => async (dispatch, getState) => {
   // Do nothing on web. This is for mobile.
 };
 
