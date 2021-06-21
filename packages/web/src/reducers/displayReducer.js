@@ -112,7 +112,9 @@ const displayReducer = (state = initialState, action) => {
     }
 
     if (action.payload.id === SEARCH_POPUP) {
-      return { ...state, isSearchPopupShown: isShown, searchString: '' };
+      const newState = { ...state, isSearchPopupShown: isShown };
+      if (!isShown) newState.searchString = '';
+      return newState;
     }
 
     if (id === SETTINGS_POPUP) {

@@ -316,7 +316,7 @@ const NoteEditorEditor = (props) => {
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="flex-grow flex-shrink overflow-x-hidden overflow-y-auto z-0">
         <div className={`px-1.5 py-1.5 ${isMobile ? 'border-b border-gray-200' : ''}`}>
-          <input ref={titleInput} onFocus={onFocus} type="text" name="titleInput" id="titleInput" className="block w-full text-xl font-normal text-gray-800 px-1.5 py-1.5 placeholder-gray-500 border-0 focus:outline-none focus:ring-0 lg:text-lg" placeholder="Note Title" autoComplete="off" disabled={note.id !== NEW_NOTE && note.status !== ADDED} />
+          <input ref={titleInput} onFocus={onFocus} type="text" name="titleInput" id="titleInput" className="block w-full text-xl font-normal text-gray-800 px-1.5 py-1.5 placeholder-gray-500 border-0 focus:outline-none focus:ring-0 lg:text-lg" placeholder="Note Title" disabled={note.id !== NEW_NOTE && note.status !== ADDED} />
         </div>
         <div ref={bodyTopToolbar} className="sticky -top-px z-10"></div>
         <CKEditor editor={ckeditor} config={editorConfig} disabled={note.id !== NEW_NOTE && note.status !== ADDED} onReady={onReady} onFocus={onFocus} />

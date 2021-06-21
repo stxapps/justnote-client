@@ -324,7 +324,7 @@ const _ListNameEditor = (props) => {
         </Svg>
       </TouchableOpacity>}
       <View style={tailwind('flex-grow flex-shrink')}>
-        <TextInput ref={input} onFocus={onInputFocus} onBlur={onInputBlur} onChange={onInputChange} onSubmitEditing={onInputKeyPress} style={tailwind('px-0 py-1 w-full bg-white text-base leading-5 text-gray-600 font-normal border-0')} placeholder="Create new list" value={state.value} autoCapitalize="none" autoCompleteType="off" autoCorrect={false} editable={!(isBusy || doRetry)} />
+        <TextInput ref={input} onFocus={onInputFocus} onBlur={onInputBlur} onChange={onInputChange} onSubmitEditing={onInputKeyPress} style={tailwind('px-0 py-1 w-full bg-white text-base leading-5 text-gray-600 font-normal border-0')} placeholder="Create new list" value={state.value} editable={!(isBusy || doRetry)} />
         <Text style={[tailwind('absolute left-0 right-0 text-sm text-red-600 font-medium leading-5'), { bottom: -12 }]} numberOfLines={1} ellipsizeMode="tail">{errMsg}</Text>
       </View>
       {state.mode === MODE_EDIT && <TouchableOpacity onPressIn={onOkBtnPress} onPress={onOkBtnClick} style={tailwind('flex-grow-0 flex-shrink-0 justify-center items-center w-10 h-10')}>

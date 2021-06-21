@@ -345,7 +345,7 @@ export const isStringIn = (note, searchString) => {
   let title = note.title.slice(0, MAX_CHARS);
   if (!containUppercase(searchString)) title = title.toLowerCase();
 
-  let body = note.body.slice(0, MAX_CHARS);
+  let body = stripHtml(note.body).slice(0, MAX_CHARS);
   if (!containUppercase(searchString)) body = body.toLowerCase();
 
   const content = title + ' ' + body;

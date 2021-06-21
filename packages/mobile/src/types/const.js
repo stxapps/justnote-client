@@ -63,7 +63,7 @@ export const N_NOTES = 10;
 export const MAX_TRY = 3;
 export const N_DAYS = 45;
 export const MAX_SELECTED_NOTE_IDS = 10;
-export const MAX_CHARS = 150;
+export const MAX_CHARS = 600;
 
 export const ID = 'id';
 export const STATUS = 'status';
