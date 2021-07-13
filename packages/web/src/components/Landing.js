@@ -12,6 +12,14 @@ import mainDesktopInDarkChrome from '../images/main-desktop-in-dark-chrome.png';
 import mainDesktopInDarkChrome2x from '../images/main-desktop-in-dark-chrome@2x.png';
 import mainDesktopInDarkChrome3x from '../images/main-desktop-in-dark-chrome@3x.png';
 
+import ubiquitous from '../images/ubiquitous.png';
+import ubiquitous2x from '../images/ubiquitous@2x.png';
+import ubiquitous3x from '../images/ubiquitous@3x.png';
+import ubiquitous4x from '../images/ubiquitous@4x.png';
+
+import availableOnPlayStore from '../images/available-on-play-store.svg';
+import availableOnAppStore from '../images/available-on-app-store.svg';
+
 import creator from '../images/creator.jpg';
 
 const Landing = () => {
@@ -53,7 +61,7 @@ const Landing = () => {
                   Justnote is a note taking app that you can use it easily, take a note rapidly, and importantly, have full control of your data.
                 </p>
                 <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
-                  <button onClick={() => dispatch(signUp())} className="w-full flex items-center justify-center px-8 py-3 border border-transparent rounded-md shadow text-base font-medium text-white bg-green-600 hover:bg-green-700 sm:w-max md:py-4 md:text-lg md:px-10">
+                  <button onClick={() => dispatch(signUp())} className="w-full flex items-center justify-center px-8 py-3 border border-transparent rounded-md shadow text-base font-medium text-white bg-green-600 hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 sm:w-max md:py-4 md:text-lg md:px-10">
                     Get started
                     <svg style={{ marginTop: '0.125rem' }} className="ml-2 w-1.5" viewBox="0 0 6 10" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                       <path fillRule="evenodd" clipRule="evenodd" d="M0.29289 9.7071C-0.09763 9.3166 -0.09763 8.6834 0.29289 8.2929L3.5858 5L0.29289 1.70711C-0.09763 1.31658 -0.09763 0.68342 0.29289 0.29289C0.68342 -0.09763 1.31658 -0.09763 1.70711 0.29289L5.7071 4.29289C6.0976 4.68342 6.0976 5.3166 5.7071 5.7071L1.70711 9.7071C1.31658 10.0976 0.68342 10.0976 0.29289 9.7071Z" />
@@ -155,7 +163,7 @@ const Landing = () => {
         <div className="mx-auto max-w-md px-4 text-center sm:max-w-3xl sm:px-6 lg:px-8 lg:max-w-7xl">
           <h2 className="text-base font-semibold tracking-wider text-indigo-600 uppercase">Safe & Secure</h2>
           <p className="mt-2 text-3xl font-extrabold text-gray-900 tracking-tight sm:text-4xl">
-            With privacy at heart powered by <a className="underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600" href="https://www.stacks.co">Stacks</a>
+            With privacy at heart powered by <a className="text-indigo-600 rounded hover:underline focus:outline-none focus:ring-2 focus:ring-indigo-500" href="https://www.stacks.co">Stacks</a>
           </p>
           <p className="mt-5 max-w-prose mx-auto text-xl text-gray-500">
             Stacks technology empowers Justnote to be a decentralized app on Bitcoin blockchain so you have true ownership of your identity and your data.
@@ -235,6 +243,26 @@ const Landing = () => {
           </div>
         </div>
       </div>
+      <div className="relative bg-gray-800">
+        <div className="h-64 bg-gray-800 sm:h-72 md:absolute md:left-0 md:h-full md:w-1/2">
+          <img className="w-full h-full object-cover object-top sm:object-contain sm:object-bottom md:object-cover md:ml-3 lg:object-contain lg:ml-0" src={ubiquitous} srcSet={`${ubiquitous} 1x, ${ubiquitous2x} 2x, ${ubiquitous3x} 3x, ${ubiquitous4x} 4x`} alt="" />
+        </div>
+        <div className="relative max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+          <div className="md:ml-auto md:w-1/2 md:pl-10">
+            <h2 className="text-base font-semibold uppercase tracking-wider text-gray-300">Ubiquitous</h2>
+            <p className="mt-2 text-white text-3xl font-extrabold tracking-tight sm:text-4xl">Justnote Mobile</p>
+            <p className="mt-3 text-lg text-gray-300">Take notes on the go. Access your notes, edit them, and create new ones anytime anywhere on your any devices.</p>
+            <div className="flex justify-center mt-8 md:justify-start">
+              <a href="https://apps.apple.com/us/app/id1570111019" className="block group focus:outline-none">
+                <img className="h-12 rounded shadow group-hover:ring group-focus:ring" src={availableOnAppStore} alt="Available on App Store" />
+              </a>
+              <a href="https://play.google.com/store/apps/details?id=com.justnotecc" className="block ml-4 group focus:outline-none">
+                <img className="h-12 rounded shadow group-hover:ring group-focus:ring" src={availableOnPlayStore} alt="Available on Google Play" />
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
       <section className="py-12 bg-white overflow-hidden md:py-20 lg:py-24">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative">
@@ -278,7 +306,7 @@ const Landing = () => {
                   <span className="block">Ready to dive in?</span>
                 </h2>
                 <p className="mt-4 text-lg leading-6 text-green-200">Let’s try Justnote - a simple, fast, and privacy-focused note taking app that you will love.</p>
-                <button onClick={() => dispatch(signUp())} className="mt-8 bg-white border border-transparent rounded-md shadow px-6 py-3 inline-flex items-center text-base font-medium text-green-600 hover:bg-green-50">
+                <button onClick={() => dispatch(signUp())} className="mt-8 bg-white border border-transparent rounded-md shadow px-6 py-3 inline-flex items-center text-base font-medium text-green-600 hover:text-green-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 focus:ring-inset">
                   Get started now
                   <svg style={{ marginTop: '0.125rem' }} className="ml-2 w-1.5" viewBox="0 0 6 10" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path fillRule="evenodd" clipRule="evenodd" d="M0.29289 9.7071C-0.09763 9.3166 -0.09763 8.6834 0.29289 8.2929L3.5858 5L0.29289 1.70711C-0.09763 1.31658 -0.09763 0.68342 0.29289 0.29289C0.68342 -0.09763 1.31658 -0.09763 1.70711 0.29289L5.7071 4.29289C6.0976 4.68342 6.0976 5.3166 5.7071 5.7071L1.70711 9.7071C1.31658 10.0976 0.68342 10.0976 0.29289 9.7071Z" />
