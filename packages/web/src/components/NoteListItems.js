@@ -48,9 +48,9 @@ const NoteListItems = () => {
     if (searchString !== '') {
       return (
         <div className="px-4 py-4 sm:px-6 sm:py-6">
-          <p className="text-base text-gray-600">Your search - <span className="text-lg text-gray-700 font-medium">{searchString}</span> - did not match any notes.</p>
-          <p className="text-base text-gray-600 pt-4 sm:pt-6">Suggestion:</p>
-          <ul className="text-base text-gray-600 pt-2 pl-2 list-disc list-inside">
+          <p className="text-base text-gray-600">Your search - <span className="text-lg text-gray-800 font-medium">{searchString}</span> - did not match any notes.</p>
+          <p className="text-base text-gray-500 pt-4 sm:pt-6">Suggestion:</p>
+          <ul className="text-base text-gray-500 pt-2 pl-2 list-disc list-inside">
             <li>Make sure all words are spelled correctly.</li>
             <li className="pt-1">Try different keywords.</li>
             <li className="pt-1">Try more general keywords.</li>
@@ -106,7 +106,7 @@ const NoteListItems = () => {
   const renderFetchMoreBtn = () => {
     return (
       <div className="my-6 px-4 sm:px-6">
-        <button onClick={onFetchMoreBtnClick} className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-500 bg-white hover:bg-gray-50">More</button>
+        <button onClick={onFetchMoreBtnClick} className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-500 bg-white hover:text-gray-600 hover:border-gray-400 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-offset-2 focus:ring-gray-400">More</button>
       </div>
     );
   };
@@ -115,10 +115,10 @@ const NoteListItems = () => {
     return (
       <div className="flex justify-center items-center my-6">
         <div className="lds-ellipsis">
-          <div className="bg-gray-500"></div>
-          <div className="bg-gray-500"></div>
-          <div className="bg-gray-500"></div>
-          <div className="bg-gray-500"></div>
+          <div className="bg-gray-400"></div>
+          <div className="bg-gray-400"></div>
+          <div className="bg-gray-400"></div>
+          <div className="bg-gray-400"></div>
         </div>
       </div>
     );
@@ -126,7 +126,7 @@ const NoteListItems = () => {
 
   const renderItems = () => {
     return (
-      <div className="mt-6">
+      <div className="mt-5">
         <ul className="-my-5 divide-y divide-gray-200">
           {notes.map(note => <NoteListItem key={note.id} note={note} />)}
         </ul>

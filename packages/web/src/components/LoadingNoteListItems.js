@@ -31,7 +31,7 @@ const LoadingNoteListItem = () => {
 const LoadingNoteListItems = () => {
   return (
     <div className="flex-grow flex-shrink overflow-hidden">
-      <div className="mt-6">
+      <div className="mt-5">
         <ul className="-my-5 divide-y divide-gray-200 animate-pulse">
           <LoadingNoteListItem />
           <LoadingNoteListItem />

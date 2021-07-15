@@ -77,7 +77,7 @@ const ConfirmDiscardPopup = () => {
                 </svg>
               </div>
               <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">Discard unsaved changes</h3>
+                <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">Discard unsaved changes?</h3>
                 <div className="mt-2">
                   <p className="text-sm text-gray-500">
                     Are you sure you want to discard your unsaved changes to your note? All of your changes will be permanently deleted. This action cannot be undone.
@@ -86,8 +86,8 @@ const ConfirmDiscardPopup = () => {
               </div>
             </div>
             <div className="mt-5 sm:mt-4 sm:ml-10 sm:pl-4 sm:flex">
-              <button onClick={onConfirmDiscardOkBtnClick} type="button" className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:w-auto sm:text-sm">Discard</button>
-              <button onClick={onConfirmDiscardCancelBtnClick} type="button" className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 px-4 py-2 bg-white text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancel</button>
+              <button onClick={onConfirmDiscardOkBtnClick} type="button" className="inline-flex justify-center w-full rounded-md border border-red-600 shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:w-auto sm:text-sm">Discard</button>
+              <button onClick={onConfirmDiscardCancelBtnClick} type="button" className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 px-4 py-2 bg-white text-base font-medium text-gray-700 shadow-sm hover:text-gray-900 hover:border-gray-400 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancel</button>
             </div>
           </motion.div>
         </div>

@@ -63,7 +63,7 @@ const Sidebar = () => {
       <div className="h-0 flex-1 flex flex-col">
         {/* User account dropdown */}
         <div className="hidden pl-3 pr-1 mt-6 relative text-left lg:block">
-          <button ref={profileBtn} onClick={onProfileBtnClick} type="button" className="group w-full bg-gray-100 rounded-md px-3.5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-green-600" aria-haspopup="true" aria-expanded="true">
+          <button ref={profileBtn} onClick={onProfileBtnClick} type="button" className="group w-full bg-gray-100 rounded-md px-3.5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:bg-gray-200" aria-haspopup="true" aria-expanded="true">
             <span className="flex w-full justify-between items-center">
               <span className="flex-1 flex min-w-0 items-center justify-between space-x-3">
                 {derivedUserImage}
@@ -71,7 +71,7 @@ const Sidebar = () => {
                   <span className="text-gray-900 text-sm font-medium truncate">{derivedUsername}</span>
                 </span>
               </span>
-              <svg className="flex-shrink-0 h-5 w-5 text-gray-400 group-hover:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <svg className="flex-shrink-0 h-5 w-5 text-gray-400 group-hover:text-gray-500 group-focus:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
             </span>
@@ -81,7 +81,7 @@ const Sidebar = () => {
         <SidebarSearchInput />
         {/* Add Button */}
         <div className="hidden pl-3 pr-1 mt-6 lg:block">
-          <button onClick={onAddBtnClick} type="button" className="py-2 w-full bg-green-600 text-sm font-medium text-white border border-green-600 rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-green-600">
+          <button onClick={onAddBtnClick} type="button" className="py-2 w-full bg-green-600 text-sm font-medium text-white border border-green-600 rounded-md shadow-sm hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-green-600">
             <div className="w-full h-full relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none" aria-hidden="true">
                 <svg className="mr-3 h-4 w-4 text-white" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" fill="currentColor">

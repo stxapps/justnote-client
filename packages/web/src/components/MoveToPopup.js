@@ -67,7 +67,7 @@ const MoveToPopup = () => {
     <div className="py-1">
       {moveTo.map(listNameObj => {
         return (
-          <button key={listNameObj.listName} onClick={() => onMoveToItemBtnClick(listNameObj.listName)} className="block w-full px-4 py-3 text-sm text-left text-gray-700 truncate hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-inset" role="menuitem">
+          <button key={listNameObj.listName} onClick={() => onMoveToItemBtnClick(listNameObj.listName)} className="block w-full px-4 py-3 text-sm text-left text-gray-700 truncate hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900" role="menuitem">
             {listNameObj.displayName}
           </button>
         );
@@ -79,7 +79,9 @@ const MoveToPopup = () => {
   let panel;
   if (popupSize) {
 
-    const maxHeight = getLastHalfHeight(Math.min(256, safeAreaHeight - 16), 44, 4, 4);
+    const maxHeight = getLastHalfHeight(
+      Math.min(256, safeAreaHeight - 16), 44, 4, 0, 0.55
+    );
     const layouts = createLayouts(anchorPosition, {
       width: popupSize.width, height: Math.min(popupSize.height, maxHeight)
     });

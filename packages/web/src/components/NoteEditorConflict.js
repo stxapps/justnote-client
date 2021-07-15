@@ -44,25 +44,21 @@ const NoteEditorConflict = (props) => {
 
     return (
       <AnimatePresence key="AP_NEC_mergeError">
-        <motion.div className="absolute top-0 inset-x-0 flex justify-center items-start" variants={popupFMV} initial="hidden" animate="visible" exit="hidden">
-          <div className="m-4 p-4 bg-red-50 rounded-md">
+        <motion.div className="absolute top-10 inset-x-0 flex justify-center items-start lg:top-0" variants={popupFMV} initial="hidden" animate="visible" exit="hidden">
+          <div className="m-4 p-4 bg-red-50 rounded-md shadow-lg">
             <div className="flex">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <svg className="h-6 w-6 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
               </div>
-              <div className="ml-3">
+              <div className="ml-3 lg:mt-0.5">
                 <h3 className="text-base text-red-800 font-medium text-left lg:text-sm">Oops..., something went wrong!</h3>
-                <p className="mt-2.5 text-sm text-red-700">
-                  Please wait a moment and try again.<br />If the problem persists, please&nbsp;
-                  <a className="underline hover:text-red-900 focus:outline-none focus:shadow-outline" href="/support">
-                    contact us
-                    <svg className="mb-2 inline-block w-4" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M11 3C10.4477 3 10 3.44772 10 4C10 4.55228 10.4477 5 11 5H13.5858L7.29289 11.2929C6.90237 11.6834 6.90237 12.3166 7.29289 12.7071C7.68342 13.0976 8.31658 13.0976 8.70711 12.7071L15 6.41421V9C15 9.55228 15.4477 10 16 10C16.5523 10 17 9.55228 17 9V4C17 3.44772 16.5523 3 16 3H11Z" />
-                      <path d="M5 5C3.89543 5 3 5.89543 3 7V15C3 16.1046 3.89543 17 5 17H13C14.1046 17 15 16.1046 15 15V12C15 11.4477 14.5523 11 14 11C13.4477 11 13 11.4477 13 12V15H5V7H8C8.55228 7 9 6.55228 9 6C9 5.44772 8.55228 5 8 5H5Z" />
-                    </svg>
-                  </a>.
+                <p className="mt-2.5 text-sm text-red-700">Please wait a moment and try again.<br />If the problem persists, please <a className="underline rounded-sm hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-red-700" href="/support">contact us
+                  <svg className="mb-2 inline-block w-4" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 3C10.4477 3 10 3.44772 10 4C10 4.55228 10.4477 5 11 5H13.5858L7.29289 11.2929C6.90237 11.6834 6.90237 12.3166 7.29289 12.7071C7.68342 13.0976 8.31658 13.0976 8.70711 12.7071L15 6.41421V9C15 9.55228 15.4477 10 16 10C16.5523 10 17 9.55228 17 9V4C17 3.44772 16.5523 3 16 3H11Z" />
+                    <path d="M5 5C3.89543 5 3 5.89543 3 7V15C3 16.1046 3.89543 17 5 17H13C14.1046 17 15 16.1046 15 15V12C15 11.4477 14.5523 11 14 11C13.4477 11 13 11.4477 13 12V15H5V7H8C8.55228 7 9 6.55228 9 6C9 5.44772 8.55228 5 8 5H5Z" />
+                  </svg></a>.
                 </p>
               </div>
             </div>
@@ -88,8 +84,8 @@ const NoteEditorConflict = (props) => {
           {conflictedNote.notes.map((note, i) => <ConflictItem key={note.id} listName={conflictedNote.listNames[i]} note={note} status={conflictedNote.status} />)}
         </AnimateSharedLayout>
         <div className="absolute top-0 left-0 lg:hidden">
-          <button onClick={onRightPanelCloseBtnClick} type="button" className="px-4 py-4 text-sm rounded-md text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-inset">
-            <svg className="text-gray-500 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <button onClick={onRightPanelCloseBtnClick} type="button" className="px-4 py-4 text-sm text-gray-500 bg-white hover:text-gray-700 focus:outline-none focus:text-gray-700 focus:bg-gray-200">
+            <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
               <path fillRule="evenodd" clipRule="evenodd" d="M7.70703 14.707C7.5195 14.8945 7.26519 14.9998 7.00003 14.9998C6.73487 14.9998 6.48056 14.8945 6.29303 14.707L2.29303 10.707C2.10556 10.5195 2.00024 10.2652 2.00024 10C2.00024 9.73488 2.10556 9.48057 2.29303 9.29304L6.29303 5.29304C6.48163 5.11088 6.73423 5.01009 6.99643 5.01237C7.25863 5.01465 7.50944 5.11981 7.69485 5.30522C7.88026 5.49063 7.98543 5.74144 7.9877 6.00364C7.98998 6.26584 7.88919 6.51844 7.70703 6.70704L5.41403 9.00004H17C17.2652 9.00004 17.5196 9.1054 17.7071 9.29293C17.8947 9.48047 18 9.73482 18 10C18 10.2653 17.8947 10.5196 17.7071 10.7071C17.5196 10.8947 17.2652 11 17 11H5.41403L7.70703 13.293C7.8945 13.4806 7.99982 13.7349 7.99982 14C7.99982 14.2652 7.8945 14.5195 7.70703 14.707Z" />
             </svg>
           </button>
@@ -144,17 +140,17 @@ const _ConflictItem = (props) => {
     <motion.div className="mt-6 border border-gray-200 rounded-lg" layout={true}>
       <motion.div className={`bg-gray-50 rounded-t-lg ${!isOpen ? 'rounded-b-lg' : ''} sm:flex sm:items-start sm:justify-between`} layout={true}>
         <div className="sm:flex-grow sm:flex-shrink">
-          <button onClick={onOpenBtnClick} type="button" className="w-full flex pt-3 pl-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-inset rounded-lg">
+          <button onClick={onOpenBtnClick} type="button" className="group w-full flex pt-3 pl-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-inset rounded-lg">
             {arrowSvg}
             <div className="ml-1">
-              <div className="text-base font-medium text-gray-800 text-left lg:text-sm">Last update on {updatedDTStr}</div>
+              <div className="text-base font-medium text-gray-800 text-left group-hover:underline lg:text-sm">Last update on {updatedDTStr}</div>
               <div className="mt-1 text-sm text-gray-600 text-left">In {getListNameDisplayName(listName, listNameMap)}</div>
             </div>
           </button>
         </div>
         <div className="py-3 pl-2.5 sm:pl-6 sm:pr-4 sm:flex-grow-0 sm:flex-shrink-0">
-          <button onClick={onChooseBtnClick} type="button" className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm rounded-md text-sm text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-600">
-            <svg className="w-5 h-5 text-gray-500 mr-1" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <button onClick={onChooseBtnClick} type="button" className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm rounded-md text-sm text-gray-500 bg-white hover:text-gray-600 hover:border-gray-400 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-offset-2 focus:ring-gray-400">
+            <svg className="w-5 h-5 mr-1" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
               <path fillRule="evenodd" clipRule="evenodd" d="M16.7069 5.29303C16.8944 5.48056 16.9997 5.73487 16.9997 6.00003C16.9997 6.26519 16.8944 6.5195 16.7069 6.70703L8.70692 14.707C8.51939 14.8945 8.26508 14.9998 7.99992 14.9998C7.73475 14.9998 7.48045 14.8945 7.29292 14.707L3.29292 10.707C3.11076 10.5184 3.00997 10.2658 3.01224 10.0036C3.01452 9.74143 3.11969 9.49062 3.3051 9.30521C3.49051 9.1198 3.74132 9.01464 4.00352 9.01236C4.26571 9.01008 4.51832 9.11087 4.70692 9.29303L7.99992 12.586L15.2929 5.29303C15.4804 5.10556 15.7348 5.00024 15.9999 5.00024C16.2651 5.00024 16.5194 5.10556 16.7069 5.29303Z" />
             </svg>
             Choose

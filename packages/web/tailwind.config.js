@@ -31,10 +31,12 @@ module.exports = {
   variants: {
     extend: {
       textColor: ['group-focus', 'focus-visible'],
-      ringColor: ['group-focus', 'focus-visible'],
-      ringOffsetColor: ['group-focus', 'focus-visible'],
-      ringOffsetWidth: ['group-focus', 'focus-visible'],
-      ringOpacity: ['group-focus', 'focus-visible'],
+      backgroundColor: ['group-focus', 'focus-visible'],
+      borderColor: ['group-focus', 'focus-visible'],
+      ringColor: ['group-hover', 'group-focus', 'hover', 'focus-visible'],
+      ringOffsetColor: ['group-hover', 'group-focus', 'hover', 'focus-visible'],
+      ringOffsetWidth: ['group-hover', 'group-focus', 'hover', 'focus-visible'],
+      ringOpacity: ['group-hover', 'group-focus', 'hover', 'focus-visible'],
       ringWidth: ['group-hover', 'group-focus', 'hover', 'focus-visible'],
     },
   },
