@@ -79,7 +79,7 @@
     "shadowOpacity": 0.18,
     "shadowRadius": 8,
 
-    "elevation": 5
+    "elevation": 4
   },
   "shadow-xl": {
     "shadowColor": "#000",
@@ -90,7 +90,7 @@
     "shadowOpacity": 0.18,
     "shadowRadius": 12,
 
-    "elevation": 8
+    "elevation": 6
   },
   "shadow-inner": {
     "shadowColor": "rgba(0, 0, 0, 0.06)",
