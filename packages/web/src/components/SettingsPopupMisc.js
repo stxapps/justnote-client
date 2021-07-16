@@ -48,7 +48,7 @@ const SettingsPopupMisc = (props) => {
     if (updateSettingsProgress.status === UPDATING) return null;
     if (updateSettingsProgress.status === DIED_UPDATING) {
       return (
-        <div className="absolute top-10 inset-x-0 flex justify-center items-start lg:top-0">
+        <div className="absolute top-10 inset-x-0 flex justify-center items-start md:top-0">
           <div className="m-4 p-4 bg-red-50 rounded-md shadow-lg">
             <div className="flex">
               <div className="flex-shrink-0">
