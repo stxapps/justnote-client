@@ -2,7 +2,6 @@ import React from 'react';
 import { View } from 'react-native';
 import { useSelector } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
 import { isDiedStatus, isBusyStatus } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
@@ -13,7 +12,6 @@ import NoteListItemError from './NoteListItemError';
 const NoteListItem = (props) => {
 
   const { note } = props;
-  const { width: safeAreaWidth } = useSafeAreaFrame();
   const noteId = useSelector(state => state.display.noteId);
 
   const isConflicted = note.id.startsWith('conflict');
@@ -45,7 +43,7 @@ const NoteListItem = (props) => {
   else content = <NoteListItemContent note={note} />;
 
   return (
-    <View style={tailwind('border-b border-gray-200 px-4 py-5 sm:px-6', safeAreaWidth)}>
+    <View style={tailwind('border-b border-gray-200 px-1 py-1')}>
       {content}
       {(isBusyStatus(note.status) && note.id !== noteId) && renderBusy()}
       {note.id === noteId && <View style={tailwind(`absolute top-0 right-0 inset-y-0 w-1 ${isConflicted || isDied ? 'bg-red-100' : 'bg-green-600'}`)} />}

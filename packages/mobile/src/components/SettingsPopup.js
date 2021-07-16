@@ -217,8 +217,8 @@ const SettingsPopup = () => {
           <Text style={tailwind('pb-4 text-xl text-gray-800 font-medium leading-6')}>Settings</Text>
         </View>
         <View style={tailwind('hidden relative p-1 md:flex md:absolute md:top-0 md:right-0', safeAreaWidth)}>
-          <TouchableOpacity onPress={onPopupCloseBtnClick} style={tailwind('items-center justify-center h-7 w-7 rounded-full')}>
-            <Svg style={tailwind('text-gray-500 font-normal')} width={20} height={20} stroke="currentColor" fill="none" viewBox="0 0 24 24">
+          <TouchableOpacity onPress={onPopupCloseBtnClick} style={tailwind('items-center justify-center h-7 w-7')}>
+            <Svg style={tailwind('text-gray-400 font-normal')} width={20} height={20} stroke="currentColor" fill="none" viewBox="0 0 24 24">
               <Path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </Svg>
           </TouchableOpacity>
@@ -264,8 +264,8 @@ const SettingsPopup = () => {
             <ScrollView ref={panelContent} style={tailwind('flex-1')} keyboardShouldPersistTaps="handled">
               {content}
               <View style={tailwind('absolute top-0 right-0 p-1 md:hidden md:relative', safeAreaWidth)}>
-                <TouchableOpacity onPress={onPopupCloseBtnClick} style={tailwind('items-center justify-center h-7 w-7 rounded-full')}>
-                  <Svg style={tailwind('text-gray-500 font-normal')} width={20} height={20} stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                <TouchableOpacity onPress={onPopupCloseBtnClick} style={tailwind('items-center justify-center h-7 w-7')}>
+                  <Svg style={tailwind('text-gray-400 font-normal')} width={20} height={20} stroke="currentColor" fill="none" viewBox="0 0 24 24">
                     <Path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </Svg>
                 </TouchableOpacity>
@@ -278,8 +278,8 @@ const SettingsPopup = () => {
               <Animated.View style={[tailwind('absolute inset-0 bg-gray-100'), sidebarCloseBtnStyle]} />
             </TouchableWithoutFeedback>
             <View style={tailwind('absolute top-0 right-0 p-1')}>
-              <TouchableOpacity onPress={onPopupCloseBtnClick} style={tailwind('items-center justify-center h-7 w-7 rounded-full')}>
-                <Svg style={tailwind('text-gray-500 font-normal')} width={20} height={20} stroke="currentColor" fill="none" viewBox="0 0 24 24">
+              <TouchableOpacity onPress={onPopupCloseBtnClick} style={tailwind('items-center justify-center h-7 w-7')}>
+                <Svg style={tailwind('text-gray-400 font-normal')} width={20} height={20} stroke="currentColor" fill="none" viewBox="0 0 24 24">
                   <Path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </Svg>
               </TouchableOpacity>

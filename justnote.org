@@ -248,7 +248,7 @@
 - every command follows by --profile <name>
 ** Native steps
 - npx react-native init Justnotecc
-- yarn add https://github.com/bracedotto/tailwind-rn#8331da648ea06c6762f737600f40a947c3891b93
+- yarn add https://github.com/bracedotto/tailwind-rn#6047a3e3de6607a6cb5b738ab3392d80aa81fd13
 - yarn add redux react-redux redux-loop
 - yarn add babel-plugin-inline-import --dev
   + Update babel.config.js to work with .svg

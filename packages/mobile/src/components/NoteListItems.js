@@ -64,12 +64,12 @@ const NoteListItems = () => {
     if (searchString !== '') {
       return (
         <View style={tailwind('px-4 py-4 sm:px-6 sm:py-6', safeAreaWidth)}>
-          <Text style={tailwind('text-base text-gray-600 font-normal')}>Your search - <Text style={tailwind('text-lg text-gray-700 font-medium')}>{searchString}</Text> - did not match any notes.</Text>
-          <Text style={tailwind('text-base text-gray-600 font-normal pt-4 sm:pt-6', safeAreaWidth)}>Suggestion:</Text>
+          <Text style={tailwind('text-base text-gray-600 font-normal')}>Your search - <Text style={tailwind('text-lg text-gray-800 font-medium')}>{searchString}</Text> - did not match any notes.</Text>
+          <Text style={tailwind('text-base text-gray-500 font-normal pt-4 sm:pt-6', safeAreaWidth)}>Suggestion:</Text>
           <View style={tailwind('pt-2 pl-2')}>
-            <Text style={tailwind('text-base text-gray-600 font-normal')}>{'\u2022'}  Make sure all words are spelled correctly.</Text>
-            <Text style={tailwind('text-base text-gray-600 font-normal pt-1')}>{'\u2022'}  Try different keywords.</Text>
-            <Text style={tailwind('text-base text-gray-600 font-normal pt-1')}>{'\u2022'}  Try more general keywords.</Text>
+            <Text style={tailwind('text-base text-gray-500 font-normal')}>{'\u2022'}  Make sure all words are spelled correctly.</Text>
+            <Text style={tailwind('text-base text-gray-500 font-normal pt-1')}>{'\u2022'}  Try different keywords.</Text>
+            <Text style={tailwind('text-base text-gray-500 font-normal pt-1')}>{'\u2022'}  Try more general keywords.</Text>
           </View>
         </View>
       );
@@ -122,7 +122,7 @@ const NoteListItems = () => {
   const renderFetchMoreBtn = useCallback(() => {
     return (
       <View style={tailwind('my-6 px-4 sm:px-6', safeAreaWidth)}>
-        <TouchableOpacity onPress={onFetchMoreBtnClick} style={tailwind('w-full px-4 py-2 border border-gray-300 shadow-sm rounded-md bg-white items-center')}>
+        <TouchableOpacity onPress={onFetchMoreBtnClick} style={tailwind('w-full items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white')}>
           <Text style={tailwind('text-sm font-medium text-gray-500')}>More</Text>
         </TouchableOpacity>
       </View>
@@ -132,7 +132,7 @@ const NoteListItems = () => {
   const renderFetchingMore = useCallback(() => {
     return (
       <View style={tailwind('my-6 py-2 flex-row justify-center w-full')}>
-        <Flow size={48} color="rgba(107, 114, 128, 1)" />
+        <Flow size={48} color="rgba(156, 163, 175, 1)" />
       </View>
     );
   }, []);

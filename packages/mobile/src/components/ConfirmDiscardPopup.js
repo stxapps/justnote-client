@@ -116,7 +116,7 @@ const ConfirmDiscardPopup = () => {
             </Svg>
           </View>
           <View style={tailwind('flex-grow flex-shrink mt-3 sm:mt-0 sm:ml-4', safeAreaWidth)}>
-            <Text style={tailwind('text-lg leading-6 font-medium text-gray-900 text-center sm:text-left', safeAreaWidth)}>Discard unsaved changes</Text>
+            <Text style={tailwind('text-lg leading-6 font-medium text-gray-900 text-center sm:text-left', safeAreaWidth)}>Discard unsaved changes?</Text>
             <View style={tailwind('mt-2')}>
               <Text style={tailwind('text-sm text-gray-500 font-normal text-center sm:text-left', safeAreaWidth)}>
                 Are you sure you want to discard your unsaved changes to your note? All of your changes will be permanently deleted. This action cannot be undone.
@@ -125,7 +125,7 @@ const ConfirmDiscardPopup = () => {
           </View>
         </View>
         <View style={tailwind('mt-5 sm:mt-4 sm:ml-10 sm:pl-4 sm:flex-row', safeAreaWidth)}>
-          <TouchableOpacity onPress={onConfirmDiscardOkBtnClick} style={tailwind('w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 sm:w-auto', safeAreaWidth)}>
+          <TouchableOpacity onPress={onConfirmDiscardOkBtnClick} style={tailwind('w-full rounded-md border border-red-600 shadow-sm px-4 py-2 bg-red-600 sm:w-auto', safeAreaWidth)}>
             <Text style={tailwind('text-base font-medium text-white text-center sm:text-sm', safeAreaWidth)}>Discard</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={onConfirmDiscardCancelBtnClick} style={tailwind('mt-3 w-full rounded-md border border-gray-300 px-4 py-2 bg-white shadow-sm sm:mt-0 sm:ml-3 sm:w-auto', safeAreaWidth)}>

@@ -131,7 +131,9 @@ const MoveToPopup = () => {
   let panel;
   if (popupSize) {
 
-    const maxHeight = getLastHalfHeight(Math.min(256, safeAreaHeight - 16), 44, 4, 4);
+    const maxHeight = getLastHalfHeight(
+      Math.min(256, safeAreaHeight - 16), 44, 4, 0, 0.55
+    );
     const layouts = createLayouts(
       derivedAnchorPosition,
       { width: popupSize.width, height: Math.min(popupSize.height, maxHeight) },

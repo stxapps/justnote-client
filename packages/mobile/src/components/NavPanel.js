@@ -166,8 +166,8 @@ const NavPanel = () => {
           <Animated.View style={[tailwind('absolute inset-0 bg-white'), leftOverlayStyle]} />
         </TouchableWithoutFeedback>
         <Animated.View style={[tailwind('absolute top-0 right-0 p-1'), leftOverlayStyle]}>
-          <TouchableOpacity onPress={onSidebarCloseBtnClick} style={tailwind('items-center justify-center h-7 w-7 rounded-full')}>
-            <Svg width={20} height={20} style={tailwind('text-gray-500 font-normal')} stroke="currentColor" fill="none" viewBox="0 0 24 24">
+          <TouchableOpacity onPress={onSidebarCloseBtnClick} style={tailwind('items-center justify-center h-7 w-7')}>
+            <Svg width={20} height={20} style={tailwind('text-gray-400 font-normal')} stroke="currentColor" fill="none" viewBox="0 0 24 24">
               <Path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </Svg>
           </TouchableOpacity>

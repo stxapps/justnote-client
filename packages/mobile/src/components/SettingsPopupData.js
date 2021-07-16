@@ -180,9 +180,9 @@ const _SettingsPopupDataDelete = (props) => {
     };
   }, [deleteAllDataProgress, dispatch]);
 
-  const switchThumbColorOn = 'rgba(22, 163, 74, 1)';
+  const switchThumbColorOn = 'rgba(34, 197, 94, 1)';
   const switchThumbColorOff = 'rgba(243, 244, 246, 1)';
-  const switchTrackColorOn = Platform.OS === 'android' ? 'rgba(187, 247, 208, 1)' : 'rgba(22, 163, 74, 1)';
+  const switchTrackColorOn = Platform.OS === 'android' ? 'rgba(187, 247, 208, 1)' : 'rgba(34, 197, 94, 1)';
   const switchTrackColorOff = 'rgba(156, 163, 175, 1)';
 
   let actionPanel;

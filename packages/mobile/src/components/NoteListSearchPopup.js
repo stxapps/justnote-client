@@ -96,7 +96,7 @@ const NoteListSearchPopup = () => {
   const searchClearBtnClasses = searchString.length === 0 ? 'hidden relative' : 'flex absolute';
 
   return (
-    <Animated.View style={[tailwind('h-14 border-b border-gray-200 flex-row items-center justify-between px-4 sm:px-6 lg:hidden', safeAreaWidth), popupStyle]}>
+    <Animated.View style={[tailwind('h-14 border-b border-gray-200 flex-row items-center justify-between pl-4 pr-2 sm:pl-6 sm:pr-4 lg:hidden', safeAreaWidth), popupStyle]}>
       <View style={tailwind('flex-1 rounded-md bg-white shadow-sm')}>
         <View style={tailwind('absolute inset-y-0 left-0 pl-3 justify-center')}>
           <Svg width={16} height={16} style={tailwind('mr-3 text-gray-400 font-normal')} viewBox="0 0 20 20" fill="currentColor">
@@ -110,7 +110,7 @@ const NoteListSearchPopup = () => {
           </Svg>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity onPress={onSearchCancelBtnClick} style={tailwind('ml-2 px-1 py-1 flex-grow-0 flex-shrink-0 rounded-md')}>
+      <TouchableOpacity onPress={onSearchCancelBtnClick} style={tailwind('ml-2 px-2 py-1.5 flex-grow-0 flex-shrink-0 rounded-md')}>
         <Text style={tailwind('text-sm font-normal text-gray-500')}>Cancel</Text>
       </TouchableOpacity>
     </Animated.View>

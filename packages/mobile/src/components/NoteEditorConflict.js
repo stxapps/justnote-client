@@ -51,15 +51,15 @@ const NoteEditorConflict = (props) => {
     };
 
     return (
-      <View style={tailwind('absolute top-0 inset-x-0 justify-center items-start')}>
-        <Animated.View style={[tailwind('m-4 p-4 bg-red-50 rounded-md'), mergeErrorStyle]}>
+      <View style={tailwind('absolute top-10 inset-x-0 flex-row justify-center items-start lg:top-0', safeAreaWidth)}>
+        <Animated.View style={[tailwind('m-4 p-4 bg-red-50 rounded-md shadow-lg'), mergeErrorStyle]}>
           <View style={tailwind('flex-row')}>
             <View style={tailwind('flex-shrink-0')}>
-              <Svg width={20} height={20} style={tailwind('text-red-400 font-normal')} viewBox="0 0 20 20" fill="currentColor">
+              <Svg width={24} height={24} style={tailwind('text-red-400 font-normal')} viewBox="0 0 20 20" fill="currentColor">
                 <Path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </Svg>
             </View>
-            <View style={tailwind('ml-3')}>
+            <View style={tailwind('ml-3 lg:mt-0.5', safeAreaWidth)}>
               <Text style={tailwind('text-base text-red-800 font-medium text-left lg:text-sm', safeAreaWidth)}>Oops..., something went wrong!</Text>
               <Text style={tailwind('mt-2.5 text-sm text-red-700 font-normal')}>Please wait a moment and try again.{'\n'}If the problem persists, please <Text onPress={() => Linking.openURL('https://justnote.cc/support')} style={tailwind('text-sm text-red-700 font-normal underline')}>contact us</Text>
                 <Svg width={16} height={16} style={tailwind('mb-2 text-red-700 font-normal')} viewBox="0 0 20 20" fill="currentColor">
@@ -99,7 +99,7 @@ const NoteEditorConflict = (props) => {
           <Text style={tailwind('text-gray-500 text-sm font-normal')}>Please choose the correct version of this note.</Text>
           {conflictedNote.notes.map((note, i) => <ConflictItem key={note.id} listName={conflictedNote.listNames[i]} note={note} status={conflictedNote.status} />)}
           <View style={tailwind('absolute top-0 left-0 lg:hidden', safeAreaWidth)}>
-            <TouchableOpacity onPress={onRightPanelCloseBtnClick} style={tailwind('px-4 py-4 rounded-md bg-white')}>
+            <TouchableOpacity onPress={onRightPanelCloseBtnClick} style={tailwind('px-4 py-4 bg-white')}>
               <Svg width={20} height={20} style={tailwind('text-gray-500 font-normal')} viewBox="0 0 20 20" fill="currentColor">
                 <Path fillRule="evenodd" clipRule="evenodd" d="M7.70703 14.707C7.5195 14.8945 7.26519 14.9998 7.00003 14.9998C6.73487 14.9998 6.48056 14.8945 6.29303 14.707L2.29303 10.707C2.10556 10.5195 2.00024 10.2652 2.00024 10C2.00024 9.73488 2.10556 9.48057 2.29303 9.29304L6.29303 5.29304C6.48163 5.11088 6.73423 5.01009 6.99643 5.01237C7.25863 5.01465 7.50944 5.11981 7.69485 5.30522C7.88026 5.49063 7.98543 5.74144 7.9877 6.00364C7.98998 6.26584 7.88919 6.51844 7.70703 6.70704L5.41403 9.00004H17C17.2652 9.00004 17.5196 9.1054 17.7071 9.29293C17.8947 9.48047 18 9.73482 18 10C18 10.2653 17.8947 10.5196 17.7071 10.7071C17.5196 10.8947 17.2652 11 17 11H5.41403L7.70703 13.293C7.8945 13.4806 7.99982 13.7349 7.99982 14C7.99982 14.2652 7.8945 14.5195 7.70703 14.707Z" />
               </Svg>
@@ -170,7 +170,7 @@ const _ConflictItem = (props) => {
             <Svg width={20} height={20} style={tailwind('text-gray-500 font-normal mr-1')} viewBox="0 0 20 20" fill="currentColor">
               <Path fillRule="evenodd" clipRule="evenodd" d="M16.7069 5.29303C16.8944 5.48056 16.9997 5.73487 16.9997 6.00003C16.9997 6.26519 16.8944 6.5195 16.7069 6.70703L8.70692 14.707C8.51939 14.8945 8.26508 14.9998 7.99992 14.9998C7.73475 14.9998 7.48045 14.8945 7.29292 14.707L3.29292 10.707C3.11076 10.5184 3.00997 10.2658 3.01224 10.0036C3.01452 9.74143 3.11969 9.49062 3.3051 9.30521C3.49051 9.1198 3.74132 9.01464 4.00352 9.01236C4.26571 9.01008 4.51832 9.11087 4.70692 9.29303L7.99992 12.586L15.2929 5.29303C15.4804 5.10556 15.7348 5.00024 15.9999 5.00024C16.2651 5.00024 16.5194 5.10556 16.7069 5.29303Z" />
             </Svg>
-            <Text style={tailwind('text-sm text-gray-600 font-normal')}>Choose</Text>
+            <Text style={tailwind('text-sm text-gray-500 font-normal')}>Choose</Text>
           </TouchableOpacity>
         </View>
       </View>

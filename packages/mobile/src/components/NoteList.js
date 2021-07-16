@@ -68,7 +68,7 @@ const NoteList = (props) => {
               </Svg>
             </View>
             <View style={tailwind('ml-3 flex-shrink flex-grow')}>
-              <Text style={tailwind('text-sm text-red-800 font-medium leading-5 text-left')}>To prevent network overload, up to {MAX_SELECTED_NOTE_IDS} items can be selected.</Text>
+              <Text style={tailwind('text-sm text-red-800 font-normal leading-5 text-left')}>To prevent network overload, up to {MAX_SELECTED_NOTE_IDS} items can be selected.</Text>
             </View>
           </View>
         </Animated.View>
