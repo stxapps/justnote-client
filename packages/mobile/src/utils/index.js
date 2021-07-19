@@ -402,8 +402,8 @@ export const getFormattedDT = (dt) => {
   const year = d.getFullYear() % 2000;
   const month = months[d.getMonth()];
   const date = d.getDate();
-  const hour = d.getHours();
-  const min = d.getMinutes();
+  const hour = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
 
   return `${date} ${month} ${year} ${hour}:${min}`;
 };
