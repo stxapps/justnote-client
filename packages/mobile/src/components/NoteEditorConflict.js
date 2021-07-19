@@ -33,7 +33,7 @@ const NoteEditorConflict = (props) => {
 
     return (
       <React.Fragment>
-        <View style={tailwind('absolute inset-0 bg-white opacity-25')} />
+        <View style={tailwind('absolute inset-0 bg-white bg-opacity-25')} />
         <View style={[tailwind('absolute top-1/3 left-1/2 justify-center items-center'), { transform: [{ translateX: -10 }, { translateY: -10 }] }]}>
           <Circle size={20} color="rgba(107, 114, 128, 1)" />
         </View>

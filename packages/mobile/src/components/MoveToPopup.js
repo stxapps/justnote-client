@@ -129,6 +129,7 @@ const MoveToPopup = () => {
 
   let popupClassNames = 'absolute min-w-28 max-w-64 mt-1 rounded-md shadow-lg bg-white';
   let panel;
+  let bgStyle = { opacity: 0 };
   if (popupSize) {
 
     const maxHeight = getLastHalfHeight(
@@ -177,6 +178,8 @@ const MoveToPopup = () => {
     popupStyle.transform.push({
       scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }),
     });
+    /* @ts-ignore */
+    bgStyle = { opacity: popupAnim };
 
     panel = (
       <Animated.View onLayout={onPopupLayout} style={[tailwind(popupClassNames), popupStyle]}>
@@ -196,7 +199,7 @@ const MoveToPopup = () => {
   return (
     <React.Fragment>
       <TouchableWithoutFeedback onPress={onMoveToCancelBtnClick}>
-        <View style={tailwind('absolute inset-0 opacity-25 bg-black')} />
+        <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
       </TouchableWithoutFeedback>
       { panel}
     </React.Fragment >

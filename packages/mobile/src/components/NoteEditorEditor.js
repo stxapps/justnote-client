@@ -66,14 +66,16 @@ const NoteEditorEditor = (props) => {
   };
 
   const focusTitleInput = () => {
-    if (Platform.OS === 'ios') {
-      webView.current.injectJavaScript('document.querySelector("#titleInput").blur();');
-    }
-    if (Platform.OS === 'android') {
-      hackInput.current.focus();
-      webView.current.requestFocus();
-    }
-    webView.current.injectJavaScript('document.querySelector("#titleInput").focus();');
+    setTimeout(() => {
+      if (Platform.OS === 'ios') {
+        webView.current.injectJavaScript('document.querySelector("#titleInput").blur();');
+      }
+      if (Platform.OS === 'android') {
+        hackInput.current.focus();
+        webView.current.requestFocus();
+      }
+      webView.current.injectJavaScript('document.querySelector("#titleInput").focus();');
+    }, 300);
   };
 
   const blur = () => {
@@ -242,7 +244,7 @@ const NoteEditorEditor = (props) => {
 
   return (
     <React.Fragment>
-      <WebView ref={webView} style={tailwind('flex-1')} source={cache('NEE_webView_source', { baseUrl: Platform.OS === 'android' ? '' : undefined, html: ckeditor })} originWhiteList={cache('NEE_webView_originWhiteList', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} textZoom={100} />
+      <WebView ref={webView} style={tailwind('flex-1')} source={cache('NEE_webView_source', { baseUrl: Platform.OS === 'android' ? '' : undefined, html: ckeditor })} originWhiteList={cache('NEE_webView_originWhiteList', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} textZoom={100} androidLayerType="hardware" />
       <TextInput ref={hackInput} style={tailwind('absolute -top-1 -left-1 w-1 h-1')} />
     </React.Fragment>
   );

@@ -25,6 +25,7 @@ export const ARCHIVE = 'Archive';
 
 export const NEW_NOTE = 'NEW_NOTE';
 export const NEW_NOTE_OBJ = { id: NEW_NOTE, title: '', body: '', media: [] };
+export const DUMMY_NOTE_OBJ = { id: null, title: '', body: '', media: [] };
 
 export const PROFILE_POPUP = 'PROFILE_POPUP';
 export const NOTE_LIST_MENU_POPUP = 'NOTE_LIST_MENU_POPUP';

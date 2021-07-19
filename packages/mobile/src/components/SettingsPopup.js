@@ -334,11 +334,12 @@ const SettingsPopup = () => {
         { scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) },
       ],
     };
+    const bgStyle = { opacity: popupAnim };
 
     return (
       <View style={[tailwind('absolute inset-0 items-center justify-center'), canvasStyle]}>
         <TouchableWithoutFeedback onPress={onPopupCloseBtnClick}>
-          <View style={tailwind('absolute inset-0 opacity-25 bg-black')} />
+          <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
         </TouchableWithoutFeedback>
         <Animated.View style={[tailwind('w-full max-w-4xl bg-white rounded-lg shadow-xl overflow-hidden'), popupStyle]}>
           {panelWithSidebar}

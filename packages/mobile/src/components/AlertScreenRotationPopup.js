@@ -62,11 +62,12 @@ const AlertScreenRotationPopup = () => {
       { scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) },
     ],
   };
+  const bgStyle = { opacity: popupAnim };
 
   return (
     <View style={[tailwind('absolute inset-0 items-center justify-end pt-4 px-4 pb-20 elevation-xl sm:justify-center sm:p-0', safeAreaWidth), canvasStyle]}>
       <TouchableWithoutFeedback onPress={onCancelBtnClick}>
-        <View style={tailwind('absolute inset-0 opacity-25 bg-black')} />
+        <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
       </TouchableWithoutFeedback>
       <Animated.View style={[tailwind('w-full max-w-lg bg-white rounded-lg px-4 pt-5 pb-4 shadow-xl sm:my-8 sm:p-6', safeAreaWidth), popupStyle]}>
         <View style={tailwind('items-center sm:flex-row sm:items-start', safeAreaWidth)}>

@@ -170,6 +170,7 @@ const NoteListMenuPopup = () => {
   popupStyle.transform.push({
     scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }),
   });
+  const bgStyle = { opacity: popupAnim };
 
   let syncBtn;
   if (syncProgress && syncProgress.status === SYNC) {
@@ -272,7 +273,7 @@ const NoteListMenuPopup = () => {
   return (
     <React.Fragment>
       <TouchableWithoutFeedback onPress={onNoteListMenuCancelBtnClick}>
-        <View style={tailwind('absolute inset-0 opacity-25 bg-black')} />
+        <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
       </TouchableWithoutFeedback>
       <Animated.View style={[tailwind('absolute mt-1 rounded-md shadow-lg bg-white'), popupStyle]}>
         <View style={tailwind('py-1')}>

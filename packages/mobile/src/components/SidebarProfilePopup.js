@@ -103,11 +103,12 @@ const SidebarProfilePopup = () => {
       },
     ],
   };
+  const bgStyle = { opacity: popupAnim };
 
   return (
     <React.Fragment>
       <TouchableWithoutFeedback onPress={onProfileCancelBtnClick}>
-        <View style={tailwind('absolute inset-0 opacity-25 bg-black')} />
+        <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
       </TouchableWithoutFeedback>
       <Animated.View style={[tailwind('absolute mt-1 rounded-md shadow-lg bg-white'), popupStyle]}>
         <View style={tailwind('py-1')}>
