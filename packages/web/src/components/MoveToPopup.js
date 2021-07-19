@@ -112,7 +112,7 @@ const MoveToPopup = () => {
 
   return (
     <AnimatePresence key="AP_moveToPopup">
-      <motion.button key="MTP_cancelBtn" ref={cancelBtn} onClick={onMoveToCancelBtnClick} className="fixed inset-0 w-full h-full bg-black opacity-25 cursor-default focus:outline-none" variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden" />
+      <motion.button key="MTP_cancelBtn" ref={cancelBtn} onClick={onMoveToCancelBtnClick} className="fixed inset-0 w-full h-full bg-black bg-opacity-25 cursor-default focus:outline-none" variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden" />
       {panel}
     </AnimatePresence>
   );

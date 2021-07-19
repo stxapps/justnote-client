@@ -27,7 +27,7 @@ const NoteEditorConflict = (props) => {
 
     return (
       <React.Fragment>
-        <div className="absolute inset-0 bg-white opacity-25" />
+        <div className="absolute inset-0 bg-white bg-opacity-25" />
         <div className="absolute top-1/3 left-1/2 flex justify-center items-center transform -translate-x-1/2 -translate-y-1/2">
           <div className="ball-clip-rotate">
             <div />

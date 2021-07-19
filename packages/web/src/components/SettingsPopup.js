@@ -243,7 +243,7 @@ const SettingsPopup = () => {
         <div className="fixed inset-0 overflow-hidden">
           <div className="p-4 flex items-center justify-center" style={{ minHeight: safeAreaHeight }}>
             <div className="fixed inset-0">
-              <motion.button ref={cancelBtn} onClick={onPopupCloseBtnClick} className="absolute inset-0 w-full h-full bg-black opacity-25 cursor-default focus:outline-none" variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden" />
+              <motion.button ref={cancelBtn} onClick={onPopupCloseBtnClick} className="absolute inset-0 w-full h-full bg-black bg-opacity-25 cursor-default focus:outline-none" variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden" />
             </div>
             <motion.div className="w-full max-w-4xl bg-white rounded-lg overflow-hidden shadow-xl" variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="dialog" aria-modal="true" aria-labelledby="modal-headline">
               {panelWithSidebar}

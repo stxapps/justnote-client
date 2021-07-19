@@ -1,6 +1,6 @@
 export const popupBgFMV = {
   hidden: { opacity: 0, transition: { ease: 'easeIn', duration: 0.075 }, },
-  visible: { opacity: 0.25, transition: { ease: 'easeOut', duration: 0.1 }, },
+  visible: { opacity: 1, transition: { ease: 'easeOut', duration: 0.1 }, },
 };
 
 export const popupFMV = {
