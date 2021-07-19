@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { TextInput, Keyboard, Platform } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
+import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 
 import {
@@ -9,7 +10,7 @@ import {
 } from '../actions';
 import {
   CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_NOTE_ID,
-  DISCARD_ACTION_CHANGE_LIST_NAME, NEW_NOTE, ADDED,
+  DISCARD_ACTION_CHANGE_LIST_NAME, NEW_NOTE, ADDED, LG_WIDTH,
 } from '../types/const';
 import { isNoteBodyEqual } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
@@ -25,6 +26,7 @@ const GET_DATA_CHANGE_LIST_NAME = 'GET_DATA_CHANGE_LIST_NAME';
 const NoteEditorEditor = (props) => {
 
   const { note } = props;
+  const { width: safeAreaWidth } = useSafeAreaFrame();
   const isFocused = useSelector(state => state.display.isEditorFocused);
   const saveNoteCount = useSelector(state => state.editor.saveNoteCount);
   const discardNoteCount = useSelector(state => state.editor.discardNoteCount);
@@ -75,7 +77,7 @@ const NoteEditorEditor = (props) => {
         webView.current.requestFocus();
       }
       webView.current.injectJavaScript('document.querySelector("#titleInput").focus();');
-    }, 300);
+    }, safeAreaWidth < LG_WIDTH ? 300 : 1);
   };
 
   const blur = () => {
