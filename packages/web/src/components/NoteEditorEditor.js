@@ -12,7 +12,7 @@ import {
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
   DISCARD_ACTION_CHANGE_LIST_NAME, NEW_NOTE, ADDED,
 } from '../types/const';
-import { isNoteBodyEqual, isMobile as _isMobile } from '../utils';
+import { isNoteBodyEqual, isMobile as _isMobile, replaceObjectUrls } from '../utils';
 
 import '../stylesheets/ckeditor.css';
 
@@ -44,15 +44,35 @@ const NoteEditorEditor = (props) => {
   const prevUpdateNoteIdCount = useRef(updateNoteIdCount);
   const prevChangeListNameCount = useRef(changeListNameCount);
   const prevUpdateEditorWidthCount = useRef(updateEditorWidthCount);
+  const objectUrlNames = useRef({});
   const dispatch = useDispatch();
 
   const isMobile = useMemo(() => _isMobile(), []);
 
   const setInitData = useCallback(() => {
     titleInput.current.value = note.title;
-    bodyEditor.current.setData(note.body);
+
+    if (window.CKEditorObjectUrlFiles) {
+      for (const objectUrl in window.CKEditorObjectUrlFiles) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    }
+    window.CKEditorObjectUrlFiles = {};
+    objectUrlNames.current = {};
+
+    let body = note.body;
+    for (const { name, content: file } of note.media) {
+      const objectUrl = URL.createObjectURL(file);
+
+      window.CKEditorObjectUrlFiles[objectUrl] = file;
+      objectUrlNames.current[objectUrl] = name;
+
+      body = body.replaceAll(name, objectUrl);
+    }
+    bodyEditor.current.setData(body);
+
     if (note.id === NEW_NOTE) focusTitleInput();
-  }, [note.id, note.title, note.body]);
+  }, [note.id, note.title, note.body, note.media]);
 
   const focusTitleInput = () => {
     titleInput.current.blur();
@@ -65,7 +85,11 @@ const NoteEditorEditor = (props) => {
 
   const onSaveNote = useCallback(() => {
     const title = titleInput.current.value;
-    const body = bodyEditor.current.getData();
+    const { body, media } = replaceObjectUrls(
+      bodyEditor.current.getData(),
+      window.CKEditorObjectUrlFiles,
+      objectUrlNames.current
+    );
 
     if (title === '' && body === '') {
       dispatch(updateEditorFocused(false));
@@ -81,13 +105,17 @@ const NoteEditorEditor = (props) => {
       return;
     }
 
-    dispatch(saveNote(title, body, []));
+    dispatch(saveNote(title, body, media));
   }, [note.title, note.body, dispatch]);
 
   const onDiscardNote = useCallback((doCheckEditing) => {
     if (doCheckEditing) {
       const title = titleInput.current.value;
-      const body = bodyEditor.current.getData();
+      const { body } = replaceObjectUrls(
+        bodyEditor.current.getData(),
+        window.CKEditorObjectUrlFiles,
+        objectUrlNames.current
+      );
 
       if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
         dispatch(updateDiscardAction(DISCARD_ACTION_CANCEL_EDIT));
@@ -102,7 +130,11 @@ const NoteEditorEditor = (props) => {
 
   const onUpdateNoteIdUrlHash = useCallback(() => {
     const title = titleInput.current.value;
-    const body = bodyEditor.current.getData();
+    const { body } = replaceObjectUrls(
+      bodyEditor.current.getData(),
+      window.CKEditorObjectUrlFiles,
+      objectUrlNames.current
+    );
 
     if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
       dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH));
@@ -115,7 +147,11 @@ const NoteEditorEditor = (props) => {
 
   const onUpdateNoteId = useCallback(() => {
     const title = titleInput.current.value;
-    const body = bodyEditor.current.getData();
+    const { body } = replaceObjectUrls(
+      bodyEditor.current.getData(),
+      window.CKEditorObjectUrlFiles,
+      objectUrlNames.current
+    );
 
     if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
       dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_NOTE_ID));
@@ -128,7 +164,11 @@ const NoteEditorEditor = (props) => {
 
   const onChangeListName = useCallback(() => {
     const title = titleInput.current.value;
-    const body = bodyEditor.current.getData();
+    const { body } = replaceObjectUrls(
+      bodyEditor.current.getData(),
+      window.CKEditorObjectUrlFiles,
+      objectUrlNames.current
+    );
 
     if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
       dispatch(updateDiscardAction(DISCARD_ACTION_CHANGE_LIST_NAME));
@@ -226,7 +266,11 @@ const NoteEditorEditor = (props) => {
       if (!isEditorReady) return;
 
       const title = titleInput.current.value;
-      const body = bodyEditor.current.getData();
+      const { body } = replaceObjectUrls(
+        bodyEditor.current.getData(),
+        window.CKEditorObjectUrlFiles,
+        objectUrlNames.current
+      );
       if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
         e.preventDefault();
         return e.returnValue = 'It looks like your note hasn\'t been saved. Do you want to leave this site and discard your changes?';

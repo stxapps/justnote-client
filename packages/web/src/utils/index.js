@@ -454,3 +454,40 @@ export const isMobile = () => {
   }
   return false;
 };
+
+export const replaceObjectUrls = (body, objectUrlFiles, objectUrlNames) => {
+  const sources = [];
+  for (const match of body.matchAll(/<img.+?src="([^"]*)"[^>]*>/g)) {
+    const src = match[1];
+    if (src.startsWith('blob:')) sources.push(src);
+  }
+
+  const media = [];
+  for (const src of sources) {
+    const file = objectUrlFiles[src];
+    if (!file) {
+      console.log(`replaceObjectUrls: Not found file in objectUrlFiles with src: ${src}`);
+      continue;
+    }
+
+    let name = objectUrlNames[src];
+    if (!name) {
+      name = `${randomString(4)}-${randomString(4)}-${randomString(4)}-${randomString(4)}`;
+
+      let ext;
+      if (file.name.includes('.')) {
+        const _ext = file.name.split('.').slice(-1)[0];
+        if (_ext.length <= 5) ext = _ext;
+      }
+      if (ext) name += `.${ext}`;
+      else {
+        console.log(`replaceObjectUrls: Not found ext from filename: ${file.name} with src: ${src}`);
+      }
+    }
+
+    media.push({ name, content: file });
+    body = body.replaceAll(src, name);
+  }
+
+  return { body, media };
+};

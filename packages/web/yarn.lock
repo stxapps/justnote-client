@@ -1150,7 +1150,7 @@
     smart-buffer "^4.1.0"
 
 "@ckeditor/ckeditor5-build-decoupled-document@file:../../../ckeditor5/packages/ckeditor5-build-decoupled-document":
-  version "27.1.0"
+  version "29.0.0"
 
 "@ckeditor/ckeditor5-react@^3.0.2":
   version "3.0.2"
