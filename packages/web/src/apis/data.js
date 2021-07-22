@@ -324,7 +324,7 @@ const batchPutFileWithRetry = async (fpaths, contents, callCount) => {
 
   const responses = await Promise.all(
     fpaths.map((fpath, i) =>
-      userSession.putFile(fpath, contents[i])
+      userSession.putFile(fpath, contents[i], { dangerouslyIgnoreEtag: true })
         .then(publicUrl => ({ publicUrl, fpath, success: true }))
         .catch(error => ({ error, fpath, content: contents[i], success: false }))
     )
