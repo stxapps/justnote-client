@@ -455,7 +455,7 @@ export const isMobile = () => {
   return false;
 };
 
-export const replaceObjectUrls = (body, objectUrlFiles, objectUrlNames) => {
+export const replaceObjectUrls = (body, objectUrlContents, objectUrlNames) => {
   const sources = [];
   for (const match of body.matchAll(/<img.+?src="([^"]*)"[^>]*>/g)) {
     const src = match[1];
@@ -464,9 +464,14 @@ export const replaceObjectUrls = (body, objectUrlFiles, objectUrlNames) => {
 
   const media = [];
   for (const src of sources) {
-    const file = objectUrlFiles[src];
-    if (!file) {
-      console.log(`replaceObjectUrls: Not found file in objectUrlFiles with src: ${src}`);
+    let fname, content;
+    if (objectUrlContents[src]) ({ fname, content } = objectUrlContents[src]);
+    if (!fname) {
+      console.log(`replaceObjectUrls: Not found fname in objectUrlContents: ${objectUrlContents} with src: ${src}`);
+      continue;
+    }
+    if (!content) {
+      console.log(`replaceObjectUrls: Not found content in objectUrlContents: ${objectUrlContents} with src: ${src}`);
       continue;
     }
 
@@ -475,19 +480,25 @@ export const replaceObjectUrls = (body, objectUrlFiles, objectUrlNames) => {
       name = `${randomString(4)}-${randomString(4)}-${randomString(4)}-${randomString(4)}`;
 
       let ext;
-      if (file.name.includes('.')) {
-        const _ext = file.name.split('.').slice(-1)[0];
+      if (fname.includes('.')) {
+        const _ext = fname.split('.').slice(-1)[0];
         if (_ext.length <= 5) ext = _ext;
       }
       if (ext) name += `.${ext}`;
       else {
-        console.log(`replaceObjectUrls: Not found ext from filename: ${file.name} with src: ${src}`);
+        console.log(`replaceObjectUrls: Not found ext from filename: ${fname} with src: ${src}`);
       }
     }
 
-    media.push({ name, content: file });
+    media.push({ name, content });
     body = body.replaceAll(src, name);
   }
 
   return { body, media };
+};
+
+export const base64ToFile = async (name, content) => {
+  const res = await fetch(content);
+  const blob = await res.blob();
+  return new File([blob], name);
 };

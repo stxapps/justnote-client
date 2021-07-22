@@ -12,7 +12,9 @@ import {
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
   DISCARD_ACTION_CHANGE_LIST_NAME, NEW_NOTE, ADDED,
 } from '../types/const';
-import { isNoteBodyEqual, isMobile as _isMobile, replaceObjectUrls } from '../utils';
+import {
+  isNoteBodyEqual, isMobile as _isMobile, replaceObjectUrls, base64ToFile,
+} from '../utils';
 
 import '../stylesheets/ckeditor.css';
 
@@ -49,22 +51,27 @@ const NoteEditorEditor = (props) => {
 
   const isMobile = useMemo(() => _isMobile(), []);
 
-  const setInitData = useCallback(() => {
+  const setInitData = useCallback(async () => {
     titleInput.current.value = note.title;
 
-    if (window.CKEditorObjectUrlFiles) {
-      for (const objectUrl in window.CKEditorObjectUrlFiles) {
+    if (window.CKEditorObjectUrlContents) {
+      for (const objectUrl in window.CKEditorObjectUrlContents) {
         URL.revokeObjectURL(objectUrl);
       }
     }
-    window.CKEditorObjectUrlFiles = {};
+    window.CKEditorObjectUrlContents = {};
     objectUrlNames.current = {};
 
+    const media = await Promise.all(note.media.map(async ({ name, content }) => {
+      const file = await base64ToFile(name, content);
+      return { name, content, file };
+    }));
+
     let body = note.body;
-    for (const { name, content: file } of note.media) {
+    for (const { name, content, file } of media) {
       const objectUrl = URL.createObjectURL(file);
 
-      window.CKEditorObjectUrlFiles[objectUrl] = file;
+      window.CKEditorObjectUrlContents[objectUrl] = { fname: name, content };
       objectUrlNames.current[objectUrl] = name;
 
       body = body.replaceAll(name, objectUrl);
@@ -87,7 +94,7 @@ const NoteEditorEditor = (props) => {
     const title = titleInput.current.value;
     const { body, media } = replaceObjectUrls(
       bodyEditor.current.getData(),
-      window.CKEditorObjectUrlFiles,
+      window.CKEditorObjectUrlContents,
       objectUrlNames.current
     );
 
@@ -113,7 +120,7 @@ const NoteEditorEditor = (props) => {
       const title = titleInput.current.value;
       const { body } = replaceObjectUrls(
         bodyEditor.current.getData(),
-        window.CKEditorObjectUrlFiles,
+        window.CKEditorObjectUrlContents,
         objectUrlNames.current
       );
 
@@ -132,7 +139,7 @@ const NoteEditorEditor = (props) => {
     const title = titleInput.current.value;
     const { body } = replaceObjectUrls(
       bodyEditor.current.getData(),
-      window.CKEditorObjectUrlFiles,
+      window.CKEditorObjectUrlContents,
       objectUrlNames.current
     );
 
@@ -149,7 +156,7 @@ const NoteEditorEditor = (props) => {
     const title = titleInput.current.value;
     const { body } = replaceObjectUrls(
       bodyEditor.current.getData(),
-      window.CKEditorObjectUrlFiles,
+      window.CKEditorObjectUrlContents,
       objectUrlNames.current
     );
 
@@ -166,7 +173,7 @@ const NoteEditorEditor = (props) => {
     const title = titleInput.current.value;
     const { body } = replaceObjectUrls(
       bodyEditor.current.getData(),
-      window.CKEditorObjectUrlFiles,
+      window.CKEditorObjectUrlContents,
       objectUrlNames.current
     );
 
@@ -268,7 +275,7 @@ const NoteEditorEditor = (props) => {
       const title = titleInput.current.value;
       const { body } = replaceObjectUrls(
         bodyEditor.current.getData(),
-        window.CKEditorObjectUrlFiles,
+        window.CKEditorObjectUrlContents,
         objectUrlNames.current
       );
       if (note.title !== title || !isNoteBodyEqual(note.body, body)) {

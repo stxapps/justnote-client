@@ -247,13 +247,6 @@ const fetch = async (params) => {
   for (let i = 0; i < fpaths.length; i++) {
     let content = responses[i].content;
     if (fpaths[i].endsWith(INDEX + DOT_JSON)) content = JSON.parse(content);
-    if (
-      content &&
-      content.buffer && content.buffer instanceof ArrayBuffer &&
-      content.byteLength && content.byteLength !== undefined
-    ) {
-      content = new File([content], fpaths[i].split('/').slice(-1)[0]);
-    }
     contents.push(content);
   }
 
@@ -304,13 +297,6 @@ const fetchMore = async (params) => {
   for (let i = 0; i < fpaths.length; i++) {
     let content = responses[i].content;
     if (fpaths[i].endsWith(INDEX + DOT_JSON)) content = JSON.parse(content);
-    if (
-      content &&
-      content.buffer && content.buffer instanceof ArrayBuffer &&
-      content.byteLength && content.byteLength !== undefined
-    ) {
-      content = new File([content], fpaths[i].split('/').slice(-1)[0]);
-    }
     contents.push(content);
   }
 
@@ -450,13 +436,6 @@ const getFiles = async (fpaths) => {
       let content = response.content;
       if (_fpaths[k].endsWith(INDEX + DOT_JSON) || _fpaths[k].startsWith(SETTINGS)) {
         content = JSON.parse(content);
-      }
-      if (
-        content &&
-        content.buffer && content.buffer instanceof ArrayBuffer &&
-        content.byteLength && content.byteLength !== undefined
-      ) {
-        content = new File([content], fpaths[i].split('/').slice(-1)[0]);
       }
       return content;
     }));

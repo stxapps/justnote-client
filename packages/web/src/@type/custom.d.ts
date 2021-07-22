@@ -19,5 +19,5 @@ declare module "*.json" {
 }
 
 interface Window {
-  CKEditorObjectUrlFiles?: any;
+  CKEditorObjectUrlContents?: any;
 }
