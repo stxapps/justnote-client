@@ -12,7 +12,7 @@ import {
   CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_NOTE_ID,
   DISCARD_ACTION_CHANGE_LIST_NAME, NEW_NOTE, ADDED, LG_WIDTH,
 } from '../types/const';
-import { isNoteBodyEqual } from '../utils';
+import { isNoteBodyEqual, replaceObjectUrls, splitOnFirst } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 import cache from '../utils/cache';
 
@@ -22,6 +22,8 @@ const GET_DATA_SAVE_NOTE = 'GET_DATA_SAVE_NOTE';
 const GET_DATA_DISCARD_NOTE = 'GET_DATA_DISCARD_NOTE';
 const GET_DATA_UPDATE_NOTE_ID = 'GET_DATA_UPDATE_NOTE_ID';
 const GET_DATA_CHANGE_LIST_NAME = 'GET_DATA_CHANGE_LIST_NAME';
+
+const SEP = '_jUSTnOTE-sEpArAtOr_';
 
 const NoteEditorEditor = (props) => {
 
@@ -44,22 +46,30 @@ const NoteEditorEditor = (props) => {
   const prevConfirmDiscardNoteCount = useRef(confirmDiscardNoteCount);
   const prevUpdateNoteIdCount = useRef(updateNoteIdCount);
   const prevChangeListNameCount = useRef(changeListNameCount);
+  const objectUrlContents = useRef({});
+  const objectUrlNames = useRef({});
   const getDataAction = useRef(null);
   const keyboardHeight = useRef(0);
   const keyboardDidShowListener = useRef(null);
   const keyboardDidHideListener = useRef(null);
   const dispatch = useDispatch();
 
-  const setData = (title, body) => {
-    const escapedTitle = title.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-    const escapedBody = body.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-    webView.current.injectJavaScript('document.querySelector("#titleInput").value = "' + escapedTitle + '"; window.editor.setData("' + escapedBody + '");');
-  };
+  const setInitData = useCallback(async () => {
 
-  const setInitData = useCallback(() => {
-    setData(note.title, note.body);
+    webView.current.injectJavaScript('window.justnote.clearNoteMedia();');
+
+    for (const { name, content } of note.media) {
+      const escapedName = name.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      const escapedContent = content.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      webView.current.injectJavaScript('window.justnote.addNoteMedia("' + escapedName + '", "' + escapedContent + '");');
+    }
+
+    const escapedTitle = note.title.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const escapedBody = note.body.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    webView.current.injectJavaScript('window.justnote.setData("' + escapedTitle + '", "' + escapedBody + '");');
+
     if (note.id === NEW_NOTE) focusTitleInput();
-  }, [note.id, note.title, note.body]);
+  }, [note.id, note.title, note.body, note.media]);
 
   const setEditable = (editable) => {
     const titleDisabled = editable ? 'false' : 'true';
@@ -89,7 +99,7 @@ const NoteEditorEditor = (props) => {
     dispatch(updateEditorFocused(true));
   }, [dispatch]);
 
-  const onSaveNote = useCallback((title, body) => {
+  const onSaveNote = useCallback((title, body, media) => {
     if (title === '' && body === '') {
       dispatch(updateEditorFocused(false));
       setTimeout(() => {
@@ -104,7 +114,7 @@ const NoteEditorEditor = (props) => {
       return;
     }
 
-    dispatch(saveNote(title, body, []));
+    dispatch(saveNote(title, body, media));
   }, [note.title, note.body, dispatch]);
 
   const onDiscardNote = useCallback((doCheckEditing, title = null, body = null) => {
@@ -144,11 +154,16 @@ const NoteEditorEditor = (props) => {
   }, [note.title, note.body, dispatch]);
 
   const onGetData = useCallback((value) => {
-    const SEP = '_jUSTnOTE-sEpArAtOr_';
-    const [title, body] = value.split(SEP);
+
+    const [title, _body] = splitOnFirst(value, SEP);
+    const { body, media } = replaceObjectUrls(
+      _body,
+      objectUrlContents.current,
+      objectUrlNames.current
+    );
 
     const action = getDataAction.current;
-    if (action === GET_DATA_SAVE_NOTE) onSaveNote(title, body);
+    if (action === GET_DATA_SAVE_NOTE) onSaveNote(title, body, media);
     else if (action === GET_DATA_DISCARD_NOTE) onDiscardNote(true, title, body);
     else if (action === GET_DATA_UPDATE_NOTE_ID) onUpdateNoteId(title, body);
     else if (action === GET_DATA_CHANGE_LIST_NAME) onChangeListName(title, body);
@@ -157,11 +172,22 @@ const NoteEditorEditor = (props) => {
 
   const onMessage = useCallback((e) => {
     const data = e.nativeEvent.data;
-    const arr = data.split(':');
-    const [change, to, value] = [arr[0], arr[1], arr.slice(2).join(':')];
+    const [change, rest] = splitOnFirst(data, ':');
+    const [to, value] = splitOnFirst(rest, ':');
 
     if (change === 'focus' && to === 'webView') onFocus();
-    else if (change === 'data' && to === 'webView') onGetData(value);
+    else if (change === 'clear' && to === 'objectUrlContents') {
+      objectUrlContents.current = {};
+    } else if (change === 'add' && to === 'objectUrlContents') {
+      const [objectUrl, rest] = splitOnFirst(value, SEP);
+      const [fname, content] = splitOnFirst(rest, SEP);
+      objectUrlContents.current[objectUrl] = { fname, content };
+    } else if (change === 'clear' && to === 'objectUrlNames') {
+      objectUrlNames.current = {};
+    } else if (change === 'add' && to === 'objectUrlNames') {
+      const [objectUrl, name] = splitOnFirst(value, SEP);
+      objectUrlNames.current[objectUrl] = name;
+    } else if (change === 'data' && to === 'webView') onGetData(value);
     else if (change === 'editor' && to === 'isReady') setEditorReady(value === 'true');
     else throw new Error(`Invalid data: ${data}`);
   }, [onFocus, onGetData]);

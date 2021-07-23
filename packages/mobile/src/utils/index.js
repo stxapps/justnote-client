@@ -454,3 +454,58 @@ export const isMobile = () => {
   }
   return false;
 };
+
+export const replaceObjectUrls = (body, objectUrlContents, objectUrlNames) => {
+  const sources = [];
+  for (const match of body.matchAll(/<img.+?src="([^"]*)"[^>]*>/g)) {
+    const src = match[1];
+    if (src.startsWith('blob:')) sources.push(src);
+  }
+
+  const media = [];
+  for (const src of sources) {
+    let fname, content;
+    if (objectUrlContents[src]) ({ fname, content } = objectUrlContents[src]);
+    if (!fname) {
+      console.log(`replaceObjectUrls: Not found fname in objectUrlContents: ${objectUrlContents} with src: ${src}`);
+      continue;
+    }
+    if (!content) {
+      console.log(`replaceObjectUrls: Not found content in objectUrlContents: ${objectUrlContents} with src: ${src}`);
+      continue;
+    }
+
+    let name = objectUrlNames[src];
+    if (!name) {
+      name = `${randomString(4)}-${randomString(4)}-${randomString(4)}-${randomString(4)}`;
+
+      let ext;
+      if (fname.includes('.')) {
+        const _ext = fname.split('.').slice(-1)[0];
+        if (_ext.length <= 5) ext = _ext;
+      }
+      if (ext) name += `.${ext}`;
+      else {
+        console.log(`replaceObjectUrls: Not found ext from filename: ${fname} with src: ${src}`);
+      }
+    }
+
+    media.push({ name, content });
+    body = body.split(src).join(name);
+  }
+
+  return { body, media };
+};
+
+export const base64ToFile = async (name, content) => {
+  const res = await fetch(content);
+  const blob = await res.blob();
+  return new File([blob], name);
+};
+
+export const splitOnFirst = (str, sep) => {
+  const i = str.indexOf(sep);
+  if (i < 0) return [str, ''];
+
+  return [str.slice(0, i), str.slice(i + sep.length)];
+};

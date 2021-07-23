@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build-css": "create-tailwind-rn tailwind.css src/stylesheets/tailwind.json",
-    "export-ckeditor-as-string": "node bin/export-ckeditor-as-string.js ../../../justnote-editor-in-webview/js/ckeditor.js ../../../justnote-editor-in-webview/css/tailwind.css ../../../justnote-editor-in-webview/css/ckeditor.css ../../../justnote-editor-in-webview/index.html ./src/ckeditor.js",
+    "export-ckeditor-as-string": "node bin/export-ckeditor-as-string.js ../../../justnote-editor-in-webview/core-js/minified.js ../../../justnote-editor-in-webview/js/ckeditor.js ../../../justnote-editor-in-webview/css/tailwind.css ../../../justnote-editor-in-webview/css/ckeditor.css ../../../justnote-editor-in-webview/index.html ./src/ckeditor.js",
     "android": "react-native run-android",
     "android-release": "react-native run-android --variant=release",
     "ios-install": "npx pod-install",
@@ -15,6 +15,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "core-js": "^3.15.2",
     "react": "16.13.1",
     "react-native": "0.63.4",
     "react-native-animated-spinkit": "^1.5.2",

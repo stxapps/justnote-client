@@ -270,6 +270,7 @@
 - yarn add react-native-animated-spinkit
 - yarn add react-native-keyboard-manager
 - yarn add react-native-webview
+- yarn add core-js
 - Android
   + android/gradle/wrapper/gradle-wrapper.properties
     ~ set gradle version in zip fpath

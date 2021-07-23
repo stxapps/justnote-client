@@ -491,7 +491,7 @@ export const replaceObjectUrls = (body, objectUrlContents, objectUrlNames) => {
     }
 
     media.push({ name, content });
-    body = body.replaceAll(src, name);
+    body = body.split(src).join(name);
   }
 
   return { body, media };
@@ -501,4 +501,11 @@ export const base64ToFile = async (name, content) => {
   const res = await fetch(content);
   const blob = await res.blob();
   return new File([blob], name);
+};
+
+export const splitOnFirst = (str, sep) => {
+  const i = str.indexOf(sep);
+  if (i < 0) return [str, ''];
+
+  return [str.slice(0, i), str.slice(i + sep.length)];
 };
