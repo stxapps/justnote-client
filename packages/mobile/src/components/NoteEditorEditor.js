@@ -56,17 +56,17 @@ const NoteEditorEditor = (props) => {
 
   const setInitData = useCallback(async () => {
 
-    webView.current.injectJavaScript('window.justnote.clearNoteMedia();');
+    webView.current.injectJavaScript('window.justnote.clearNoteMedia(); true;');
 
     for (const { name, content } of note.media) {
       const escapedName = name.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
       const escapedContent = content.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-      webView.current.injectJavaScript('window.justnote.addNoteMedia("' + escapedName + '", "' + escapedContent + '");');
+      webView.current.injectJavaScript('window.justnote.addNoteMedia("' + escapedName + '", "' + escapedContent + '"); true;');
     }
 
     const escapedTitle = note.title.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
     const escapedBody = note.body.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-    webView.current.injectJavaScript('window.justnote.setData("' + escapedTitle + '", "' + escapedBody + '");');
+    webView.current.injectJavaScript('window.justnote.setData("' + escapedTitle + '", "' + escapedBody + '"); true;');
 
     if (note.id === NEW_NOTE) focusTitleInput();
   }, [note.id, note.title, note.body, note.media]);
@@ -74,19 +74,19 @@ const NoteEditorEditor = (props) => {
   const setEditable = (editable) => {
     const titleDisabled = editable ? 'false' : 'true';
     const isBodyReadOnly = editable ? 'false' : 'true';
-    webView.current.injectJavaScript('document.querySelector("#titleInput").disabled = ' + titleDisabled + '; window.editor.isReadOnly = ' + isBodyReadOnly + ';');
+    webView.current.injectJavaScript('document.querySelector("#titleInput").disabled = ' + titleDisabled + '; window.editor.isReadOnly = ' + isBodyReadOnly + '; true;');
   };
 
   const focusTitleInput = () => {
     setTimeout(() => {
       if (Platform.OS === 'ios') {
-        webView.current.injectJavaScript('document.querySelector("#titleInput").blur();');
+        webView.current.injectJavaScript('document.querySelector("#titleInput").blur(); true;');
       }
       if (Platform.OS === 'android') {
         hackInput.current.focus();
         webView.current.requestFocus();
       }
-      webView.current.injectJavaScript('document.querySelector("#titleInput").focus();');
+      webView.current.injectJavaScript('document.querySelector("#titleInput").focus(); true;');
     }, safeAreaWidth < LG_WIDTH ? 300 : 1);
   };
 
@@ -206,7 +206,7 @@ const NoteEditorEditor = (props) => {
     if (!isEditorReady) return;
     if (saveNoteCount !== prevSaveNoteCount.current) {
       getDataAction.current = GET_DATA_SAVE_NOTE;
-      webView.current.injectJavaScript('window.justnote.getData();');
+      webView.current.injectJavaScript('window.justnote.getData(); true;');
       prevSaveNoteCount.current = saveNoteCount;
     }
   }, [isEditorReady, saveNoteCount]);
@@ -215,7 +215,7 @@ const NoteEditorEditor = (props) => {
     if (!isEditorReady) return;
     if (discardNoteCount !== prevDiscardNoteCount.current) {
       getDataAction.current = GET_DATA_DISCARD_NOTE;
-      webView.current.injectJavaScript('window.justnote.getData();');
+      webView.current.injectJavaScript('window.justnote.getData(); true;');
       prevDiscardNoteCount.current = discardNoteCount;
     }
   }, [isEditorReady, discardNoteCount]);
@@ -232,7 +232,7 @@ const NoteEditorEditor = (props) => {
     if (!isEditorReady) return;
     if (updateNoteIdCount !== prevUpdateNoteIdCount.current) {
       getDataAction.current = GET_DATA_UPDATE_NOTE_ID;
-      webView.current.injectJavaScript('window.justnote.getData();');
+      webView.current.injectJavaScript('window.justnote.getData(); true;');
       prevUpdateNoteIdCount.current = updateNoteIdCount;
     }
   }, [isEditorReady, updateNoteIdCount]);
@@ -241,7 +241,7 @@ const NoteEditorEditor = (props) => {
     if (!isEditorReady) return;
     if (changeListNameCount !== prevChangeListNameCount.current) {
       getDataAction.current = GET_DATA_CHANGE_LIST_NAME;
-      webView.current.injectJavaScript('window.justnote.getData();');
+      webView.current.injectJavaScript('window.justnote.getData(); true;');
       prevChangeListNameCount.current = changeListNameCount;
     }
   }, [isEditorReady, changeListNameCount]);
