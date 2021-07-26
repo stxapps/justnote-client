@@ -419,13 +419,30 @@ export const stripHtml = (s) => {
     .trim();
 };
 
+const sortClassNamesInBody = (body) => {
+  const subs = [];
+  for (const match of body.matchAll(/<[^\s]+\s+class="([^"]+)"[^>]*>/g)) {
+    const from = match[1];
+    const classNames = from.trim().replace(/\s\s+/g, ' ').split(' ').sort();
+    const to = classNames.join(' ');
+    subs.push({ from, to });
+  }
+
+  for (const { from, to } of subs) body = body.split(from).join(to);
+
+  return body;
+};
+
 export const isNoteBodyEqual = (s1, s2) => {
   // Remove spaces in rgb(r, g, b)
   const pattern = /rgb\((\d+),\s*(\d+),\s*(\d+)\)/gi;
   const substitute = 'rgb($1,$2,$3)';
-
   s1 = s1.replace(pattern, substitute);
   s2 = s2.replace(pattern, substitute);
+
+  // Sort class names before comparing
+  s1 = sortClassNamesInBody(s1);
+  s2 = sortClassNamesInBody(s2);
 
   return s1 === s2;
 };

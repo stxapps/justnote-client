@@ -173,3 +173,11 @@
 .ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list .ck.ck-list__item {
   min-width: auto;
 }
+
+.ck.ck-blurred .ck-widget_selected, .ck.ck-blurred .ck-widget_selected:hover {
+  outline: none;
+}
+
+.ck.ck-blurred .ck-widget__type-around {
+  display: none;
+}
