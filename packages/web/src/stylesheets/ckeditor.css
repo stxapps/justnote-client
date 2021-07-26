@@ -174,8 +174,12 @@
   min-width: auto;
 }
 
-.ck.ck-blurred .ck-widget_selected, .ck.ck-blurred .ck-widget_selected:hover {
-  outline: none;
+.ck.ck-blurred .ck-widget:hover {
+  outline-color: transparent;
+}
+
+.ck.ck-editor__editable.ck-blurred .ck-widget.ck-widget_selected, .ck.ck-editor__editable.ck-blurred .ck-widget.ck-widget_selected:hover {
+  outline-color: transparent;
 }
 
 .ck.ck-blurred .ck-widget__type-around {
