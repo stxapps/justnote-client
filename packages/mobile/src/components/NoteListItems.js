@@ -40,9 +40,9 @@ const NoteListItems = () => {
     return _data;
   }, [notes, hasMore, isFetchingMore]);
 
-  const onScrollEnd = (e) => {
+  const onScrollEnd = useCallback((e) => {
     updatePageYOffset(e.nativeEvent.contentOffset.y);
-  };
+  }, []);
 
   const onFetchMoreBtnClick = useCallback(() => {
     dispatch(fetchMore());

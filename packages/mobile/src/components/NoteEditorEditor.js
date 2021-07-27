@@ -54,30 +54,7 @@ const NoteEditorEditor = (props) => {
   const keyboardDidHideListener = useRef(null);
   const dispatch = useDispatch();
 
-  const setInitData = useCallback(async () => {
-
-    webView.current.injectJavaScript('window.justnote.clearNoteMedia(); true;');
-
-    for (const { name, content } of note.media) {
-      const escapedName = name.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-      const escapedContent = content.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-      webView.current.injectJavaScript('window.justnote.addNoteMedia("' + escapedName + '", "' + escapedContent + '"); true;');
-    }
-
-    const escapedTitle = note.title.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-    const escapedBody = note.body.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-    webView.current.injectJavaScript('window.justnote.setData("' + escapedTitle + '", "' + escapedBody + '"); true;');
-
-    if (note.id === NEW_NOTE) focusTitleInput();
-  }, [note.id, note.title, note.body, note.media]);
-
-  const setEditable = (editable) => {
-    const titleDisabled = editable ? 'false' : 'true';
-    const isBodyReadOnly = editable ? 'false' : 'true';
-    webView.current.injectJavaScript('document.querySelector("#titleInput").disabled = ' + titleDisabled + '; window.editor.isReadOnly = ' + isBodyReadOnly + '; true;');
-  };
-
-  const focusTitleInput = () => {
+  const focusTitleInput = useCallback(() => {
     setTimeout(() => {
       if (Platform.OS === 'ios') {
         webView.current.injectJavaScript('document.querySelector("#titleInput").blur(); true;');
@@ -88,6 +65,29 @@ const NoteEditorEditor = (props) => {
       }
       webView.current.injectJavaScript('document.querySelector("#titleInput").focus(); true;');
     }, safeAreaWidth < LG_WIDTH ? 300 : 1);
+  }, [safeAreaWidth]);
+
+  const setInitData = useCallback(() => {
+    const escapedTitle = note.title.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    webView.current.injectJavaScript('window.justnote.setTitle("' + escapedTitle + '"); true;');
+
+    webView.current.injectJavaScript('window.justnote.clearNoteMedia(); true;');
+    for (const { name, content } of note.media) {
+      const escapedName = name.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      const escapedContent = content.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      webView.current.injectJavaScript('window.justnote.addNoteMedia("' + escapedName + '", "' + escapedContent + '"); true;');
+    }
+
+    const escapedBody = note.body.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    webView.current.injectJavaScript('window.justnote.setBody("' + escapedBody + '"); true;');
+
+    if (note.id === NEW_NOTE) focusTitleInput();
+  }, [note.id, note.title, note.body, note.media, focusTitleInput]);
+
+  const setEditable = (editable) => {
+    const titleDisabled = editable ? 'false' : 'true';
+    const isBodyReadOnly = editable ? 'false' : 'true';
+    webView.current.injectJavaScript('document.querySelector("#titleInput").disabled = ' + titleDisabled + '; window.editor.isReadOnly = ' + isBodyReadOnly + '; true;');
   };
 
   const blur = () => {
@@ -115,7 +115,7 @@ const NoteEditorEditor = (props) => {
     }
 
     dispatch(saveNote(title, body, media));
-  }, [note.title, note.body, dispatch]);
+  }, [note.title, note.body, focusTitleInput, dispatch]);
 
   const onDiscardNote = useCallback((doCheckEditing, title = null, body = null) => {
     if (doCheckEditing) {
@@ -172,15 +172,15 @@ const NoteEditorEditor = (props) => {
 
   const onMessage = useCallback((e) => {
     const data = e.nativeEvent.data;
-    const [change, rest] = splitOnFirst(data, ':');
-    const [to, value] = splitOnFirst(rest, ':');
+    const [change, rest1] = splitOnFirst(data, ':');
+    const [to, value] = splitOnFirst(rest1, ':');
 
     if (change === 'focus' && to === 'webView') onFocus();
     else if (change === 'clear' && to === 'objectUrlContents') {
       objectUrlContents.current = {};
     } else if (change === 'add' && to === 'objectUrlContents') {
-      const [objectUrl, rest] = splitOnFirst(value, SEP);
-      const [fname, content] = splitOnFirst(rest, SEP);
+      const [objectUrl, rest2] = splitOnFirst(value, SEP);
+      const [fname, content] = splitOnFirst(rest2, SEP);
       objectUrlContents.current[objectUrl] = { fname, content };
     } else if (change === 'clear' && to === 'objectUrlNames') {
       objectUrlNames.current = {};

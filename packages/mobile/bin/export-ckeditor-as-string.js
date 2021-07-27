@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const coreJsPath = process.argv[2]
+const coreJsPath = process.argv[2];
 const ckeditorJsPath = process.argv[3];
 const tailwindCssPath = process.argv[4];
 const ckeditorCssPath = process.argv[5];

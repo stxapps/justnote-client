@@ -18,9 +18,9 @@ const NoteListItemContent = (props) => {
   const getIsNoteIdSelected = useMemo(makeIsNoteIdSelected, []);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const isSelected = useSelector(state => getIsNoteIdSelected(state, note.id));
+  const body = useMemo(() => stripHtml(note.body), [note.body]);
+  const isBusy = useMemo(() => isBusyStatus(note.status), [note.status]);
   const dispatch = useDispatch();
-
-  const isBusy = isBusyStatus(note.status);
 
   const onContentBtnClick = () => {
     if (isBulkEditing) {
@@ -52,7 +52,7 @@ const NoteListItemContent = (props) => {
       </View>}
       <View style={tailwind('flex-1')}>
         <Text style={tailwind('text-base font-semibold text-gray-800 lg:text-sm', safeAreaWidth)} numberOfLines={1} ellipsizeMode="tail">{note.title}</Text>
-        <Text style={tailwind('text-sm text-gray-500 font-normal mt-1')} numberOfLines={3} ellipsizeMode="tail">{stripHtml(note.body)}</Text>
+        <Text style={tailwind('text-sm text-gray-500 font-normal mt-1')} numberOfLines={3} ellipsizeMode="tail">{body}</Text>
       </View>
     </TouchableOpacity>
   );

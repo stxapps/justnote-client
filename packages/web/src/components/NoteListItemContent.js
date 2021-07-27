@@ -18,12 +18,12 @@ const NoteListItemContent = (props) => {
   const getIsNoteIdSelected = useMemo(makeIsNoteIdSelected, []);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const isSelected = useSelector(state => getIsNoteIdSelected(state, note.id));
+  const body = useMemo(() => stripHtml(note.body), [note.body]);
+  const isBusy = useMemo(() => isBusyStatus(note.status), [note.status]);
   const clickPressTimer = useRef(null);
   const touchPressTimer = useRef(null);
   const isLongPress = useRef(false);
   const dispatch = useDispatch();
-
-  const isBusy = isBusyStatus(note.status);
 
   const onClickPress = () => {
     clickPressTimer.current = setTimeout(() => {
@@ -119,7 +119,7 @@ const NoteListItemContent = (props) => {
       </div>}
       <div className="flex-1 min-w-0">
         <h3 className="text-base font-semibold text-gray-800 truncate group-hover:underline lg:text-sm">{note.title}</h3>
-        <p className="mt-1 text-sm text-gray-500 line-clamp-3">{stripHtml(note.body)}</p>
+        <p className="mt-1 text-sm text-gray-500 line-clamp-3">{body}</p>
       </div>
     </button>
   );

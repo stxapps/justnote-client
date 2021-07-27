@@ -514,12 +514,6 @@ export const replaceObjectUrls = (body, objectUrlContents, objectUrlNames) => {
   return { body, media };
 };
 
-export const base64ToFile = async (name, content) => {
-  const res = await fetch(content);
-  const blob = await res.blob();
-  return new File([blob], name);
-};
-
 export const splitOnFirst = (str, sep) => {
   const i = str.indexOf(sep);
   if (i < 0) return [str, ''];

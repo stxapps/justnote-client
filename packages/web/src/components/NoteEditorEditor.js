@@ -12,11 +12,17 @@ import {
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
   DISCARD_ACTION_CHANGE_LIST_NAME, NEW_NOTE, ADDED,
 } from '../types/const';
-import {
-  isNoteBodyEqual, isMobile as _isMobile, replaceObjectUrls, base64ToFile,
-} from '../utils';
+import { isNoteBodyEqual, isMobile as _isMobile, replaceObjectUrls } from '../utils';
 
 import '../stylesheets/ckeditor.css';
+
+const base64ToFile = async (name, content) => {
+  // File is only available in web, not in ReactNative NodeJs
+  //   so declare this function here, not in utils
+  const res = await fetch(content);
+  const blob = await res.blob();
+  return new File([blob], name);
+};
 
 const NoteEditorEditor = (props) => {
 
@@ -51,6 +57,11 @@ const NoteEditorEditor = (props) => {
 
   const isMobile = useMemo(() => _isMobile(), []);
 
+  const focusTitleInput = () => {
+    titleInput.current.blur();
+    setTimeout(() => titleInput.current.focus(), 1);
+  };
+
   const setInitData = useCallback(async () => {
     titleInput.current.value = note.title;
 
@@ -80,11 +91,6 @@ const NoteEditorEditor = (props) => {
 
     if (note.id === NEW_NOTE) focusTitleInput();
   }, [note.id, note.title, note.body, note.media]);
-
-  const focusTitleInput = () => {
-    titleInput.current.blur();
-    setTimeout(() => titleInput.current.focus(), 1);
-  };
 
   const onFocus = useCallback(() => {
     dispatch(updateEditorFocused(true));
