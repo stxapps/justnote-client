@@ -46,7 +46,6 @@ import {
   randomString, swapArrayElements, isIPadIPhoneIPod, isBusyStatus,
 } from '../utils';
 import { _ } from '../utils/obj';
-import { resizeImage } from '../utils/image';
 import { initialSettingsState } from '../types/initialStates';
 
 export const init = () => async (dispatch, getState) => {
@@ -677,11 +676,6 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
 };
 
 export const saveNote = (title, body, media) => async (dispatch, getState) => {
-
-  media = await Promise.all(media.map(async ({ name, content }) => {
-    const resizedContent = await resizeImage(name, content);
-    return { name, content: resizedContent };
-  }));
 
   const { noteId } = getState().display;
   if (noteId === NEW_NOTE) {

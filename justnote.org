@@ -271,8 +271,6 @@
 - yarn add react-native-keyboard-manager
 - yarn add react-native-webview
 - yarn add core-js
-- yarn add react-native-image-resizer
-- yarn add react-native-file-access
 - Android
   + android/gradle/wrapper/gradle-wrapper.properties
     ~ set gradle version in zip fpath
