@@ -1,9 +1,10 @@
 import {
   UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP,
-  UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED,
+  UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS,
   FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES,
-  DELETE_LIST_NAMES, UPDATE_DELETING_LIST_NAME, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
+  DELETE_LIST_NAMES, UPDATE_DELETING_LIST_NAME,
+  INCREASE_SAVE_NOTE_COUNT, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
   INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT, UPDATE_DISCARD_ACTION,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
   UPDATE_UPDATE_SETTINGS_PROGRESS, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
@@ -38,6 +39,7 @@ const initialState = {
   searchString: '',
   isBulkEditing: false,
   isEditorFocused: false,
+  isEditorBusy: false,
   selectedNoteIds: [],
   isSelectedNoteIdsMaxErrorShown: false,
   deletingListName: null,
@@ -66,6 +68,7 @@ const displayReducer = (state = initialState, action) => {
       listChangedCount: state.listChangedCount + 1,
       noteId: null,
       isEditorFocused: false,
+      isEditorBusy: false,
       selectedNoteIds: [],
       isSelectedNoteIdsMaxErrorShown: false,
       changingListName: null,
@@ -73,7 +76,7 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_NOTE_ID) {
-    const newState = { ...state, isEditorFocused: false };
+    const newState = { ...state, isEditorFocused: false, isEditorBusy: false };
     newState.noteId = state.noteId === action.payload ? null : action.payload;
     newState.updatingNoteId = null;
     return newState;
@@ -161,6 +164,10 @@ const displayReducer = (state = initialState, action) => {
     return { ...state, isEditorFocused: action.payload };
   }
 
+  if (action.type === UPDATE_EDITOR_BUSY) {
+    return { ...state, isEditorBusy: action.payload };
+  }
+
   if (action.type === ADD_SELECTED_NOTE_IDS) {
     const selectedNoteIds = [...state.selectedNoteIds];
     for (const noteId of action.payload) {
@@ -188,6 +195,7 @@ const displayReducer = (state = initialState, action) => {
       noteId: null,
       isBulkEditing: false,
       isEditorFocused: false,
+      isEditorBusy: false,
       selectedNoteIds: [],
       isSelectedNoteIdsMaxErrorShown: false,
       didFetch: true,
@@ -214,12 +222,12 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === ADD_NOTE) {
     const { note } = action.payload;
-    return { ...state, noteId: note.id, isEditorFocused: false };
+    return { ...state, noteId: note.id, isEditorBusy: false };
   }
 
   if (action.type === UPDATE_NOTE) {
     const { toNote } = action.payload;
-    return { ...state, noteId: toNote.id, isEditorFocused: false };
+    return { ...state, noteId: toNote.id, isEditorBusy: false };
   }
 
   if (action.type === MERGE_NOTES_COMMIT) {
@@ -241,6 +249,10 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_DELETING_LIST_NAME) {
     return { ...state, deletingListName: action.payload };
+  }
+
+  if (action.type === INCREASE_SAVE_NOTE_COUNT) {
+    return { ...state, isEditorFocused: false, isEditorBusy: true };
   }
 
   if (

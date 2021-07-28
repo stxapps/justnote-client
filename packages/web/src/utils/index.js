@@ -501,7 +501,7 @@ export const replaceObjectUrls = (body, objectUrlContents, objectUrlNames) => {
         const _ext = fname.split('.').slice(-1)[0];
         if (_ext.length <= 5) ext = _ext;
       }
-      if (ext) name += `.${ext}`;
+      if (ext) name += `.${ext.toLowerCase()}`;
       else {
         console.log(`replaceObjectUrls: Not found ext from filename: ${fname} with src: ${src}`);
       }

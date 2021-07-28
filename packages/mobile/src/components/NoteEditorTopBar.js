@@ -18,6 +18,7 @@ const NoteEditorTopBar = (props) => {
   const { note, isFullScreen, onToggleFullScreen, width } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const isEditorFocused = useSelector(state => state.display.isEditorFocused);
+  const isEditorBusy = useSelector(state => state.display.isEditorBusy);
   const isConfirmDiscardPopupShown = useSelector(
     state => state.display.isConfirmDiscardPopupShown
   );
@@ -82,7 +83,7 @@ const NoteEditorTopBar = (props) => {
 
   let commands;
   if (note.id === NEW_NOTE) commands = isEditorFocused ? renderFocusedCommands() : null;
-  else if (note.status !== ADDED) commands = renderLoading();
+  else if (note.status !== ADDED || isEditorBusy) commands = renderLoading();
   else commands = isEditorFocused ? renderFocusedCommands() : <NoteCommands />;
 
   return (

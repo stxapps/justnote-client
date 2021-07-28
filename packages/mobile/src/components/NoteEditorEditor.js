@@ -5,7 +5,7 @@ import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 
 import {
-  updatePopup, updateEditorFocused, saveNote, updateDiscardAction,
+  updatePopup, updateEditorFocused, updateEditorBusy, saveNote, updateDiscardAction,
   updateNoteId, changeListName,
 } from '../actions';
 import {
@@ -30,6 +30,7 @@ const NoteEditorEditor = (props) => {
   const { note } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const isFocused = useSelector(state => state.display.isEditorFocused);
+  const isEditorBusy = useSelector(state => state.editor.isEditorBusy);
   const saveNoteCount = useSelector(state => state.editor.saveNoteCount);
   const discardNoteCount = useSelector(state => state.editor.discardNoteCount);
   const confirmDiscardNoteCount = useSelector(
@@ -101,7 +102,7 @@ const NoteEditorEditor = (props) => {
 
   const onSaveNote = useCallback((title, body, media) => {
     if (title === '' && body === '') {
-      dispatch(updateEditorFocused(false));
+      dispatch(updateEditorBusy(false));
       setTimeout(() => {
         dispatch(updateEditorFocused(true));
         focusTitleInput();
@@ -110,7 +111,7 @@ const NoteEditorEditor = (props) => {
     }
 
     if (note.title === title && isNoteBodyEqual(note.body, body)) {
-      dispatch(updateEditorFocused(false));
+      dispatch(updateEditorBusy(false));
       return;
     }
 
@@ -199,8 +200,8 @@ const NoteEditorEditor = (props) => {
 
   useEffect(() => {
     if (!isEditorReady) return;
-    setEditable(note.id === NEW_NOTE || note.status === ADDED);
-  }, [isEditorReady, note.id, note.status]);
+    setEditable((note.id === NEW_NOTE || note.status === ADDED) || isEditorBusy);
+  }, [isEditorReady, note.id, note.status, isEditorBusy]);
 
   useEffect(() => {
     if (!isEditorReady) return;

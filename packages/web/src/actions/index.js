@@ -7,7 +7,7 @@ import dataApi from '../apis/data';
 import {
   INIT, UPDATE_WINDOW_SIZE, UPDATE_USER, UPDATE_HANDLING_SIGN_IN,
   UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP, UPDATE_SEARCH_STRING,
-  UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED,
+  UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, UPDATE_PAGE_Y_OFFSET,
   FETCH, FETCH_COMMIT, FETCH_ROLLBACK,
   FETCH_MORE, FETCH_MORE_COMMIT, FETCH_MORE_ROLLBACK,
@@ -46,6 +46,7 @@ import {
   randomString, swapArrayElements, isIPadIPhoneIPod, isBusyStatus,
 } from '../utils';
 import { _ } from '../utils/obj';
+import { resizeImage } from '../utils/image';
 import { initialSettingsState } from '../types/initialStates';
 
 export const init = () => async (dispatch, getState) => {
@@ -545,6 +546,13 @@ export const updateEditorFocused = (isFocused) => {
   };
 };
 
+export const updateEditorBusy = (isBusy) => {
+  return {
+    type: UPDATE_EDITOR_BUSY,
+    payload: isBusy,
+  };
+};
+
 export const addSelectedNoteIds = (ids) => {
   return {
     type: ADD_SELECTED_NOTE_IDS,
@@ -669,6 +677,11 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
 };
 
 export const saveNote = (title, body, media) => async (dispatch, getState) => {
+
+  media = await Promise.all(media.map(async ({ name, content }) => {
+    const resizedContent = await resizeImage(name, content);
+    return { name, content: resizedContent };
+  }));
 
   const { noteId } = getState().display;
   if (noteId === NEW_NOTE) {
