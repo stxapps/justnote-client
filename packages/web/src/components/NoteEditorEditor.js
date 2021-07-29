@@ -12,16 +12,16 @@ import {
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
   DISCARD_ACTION_CHANGE_LIST_NAME, NEW_NOTE, ADDED,
 } from '../types/const';
-import { isNoteBodyEqual, isMobile as _isMobile, replaceObjectUrls } from '../utils';
+import {
+  isString, isNoteBodyEqual, isMobile as _isMobile, replaceObjectUrls,
+} from '../utils';
 
 import '../stylesheets/ckeditor.css';
 
-const base64ToFile = async (name, content) => {
-  // File is only available in web, not in ReactNative NodeJs
-  //   so declare this function here, not in utils
+const dataUrlToBlob = async (content) => {
   const res = await fetch(content);
   const blob = await res.blob();
-  return new File([blob], name);
+  return blob;
 };
 
 const NoteEditorEditor = (props) => {
@@ -74,14 +74,17 @@ const NoteEditorEditor = (props) => {
     window.CKEditorObjectUrlContents = {};
     objectUrlNames.current = {};
 
-    const media = await Promise.all(note.media.map(async ({ name, content }) => {
-      const file = await base64ToFile(name, content);
-      return { name, content, file };
+    const _media = note.media.filter(({ content }) => {
+      return isString(content) && content.startsWith('data:');
+    });
+    const media = await Promise.all(_media.map(async ({ name, content }) => {
+      const blob = await dataUrlToBlob(content);
+      return { name, content, blob };
     }));
 
     let body = note.body;
-    for (const { name, content, file } of media) {
-      const objectUrl = URL.createObjectURL(file);
+    for (const { name, content, blob } of media) {
+      const objectUrl = URL.createObjectURL(blob);
 
       window.CKEditorObjectUrlContents[objectUrl] = { fname: name, content };
       objectUrlNames.current[objectUrl] = name;
@@ -196,18 +199,26 @@ const NoteEditorEditor = (props) => {
   const onReady = useCallback((editor) => {
     if (isMobile) {
       bodyBottomToolbar.current.appendChild(editor.ui.view.toolbar.element);
+    } else {
+      bodyTopToolbar.current.appendChild(editor.ui.view.toolbar.element);
+    }
 
-      const groupedItemsDropdown = editor.ui.view.toolbar._behavior.groupedItemsDropdown;
+    const groupedItemsDropdown = editor.ui.view.toolbar._behavior.groupedItemsDropdown;
+    const toolbarItems = editor.ui.view.toolbar.items;
+
+    if (isMobile) {
       if (groupedItemsDropdown) groupedItemsDropdown.panelPosition = 'nw';
 
-      const toolbarItems = editor.ui.view.toolbar.items;
       toolbarItems.get(3).panelPosition = 'nme';
       toolbarItems.get(4).panelPosition = 'nme';
       toolbarItems.get(5).panelPosition = 'nmw';
     } else {
-      bodyTopToolbar.current.appendChild(editor.ui.view.toolbar.element);
       document.documentElement.style.setProperty('--ck-font-size-base', '13px');
     }
+
+    toolbarItems.get(8).on('done', () => {
+      if (groupedItemsDropdown) groupedItemsDropdown.set('isOpen', false);
+    });
 
     bodyEditor.current = editor;
     setEditorReady(true);
