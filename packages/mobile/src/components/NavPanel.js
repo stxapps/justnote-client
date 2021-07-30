@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
-  View, TouchableOpacity, TouchableWithoutFeedback, Animated, BackHandler,
+  View, TouchableOpacity, TouchableWithoutFeedback, Animated, BackHandler, PanResponder,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -38,7 +38,89 @@ const NavPanel = () => {
   const rightPanelAnim = useRef(new Animated.Value(1)).current;
   const rightPanelBackHandler = useRef(null);
 
+  const isEditorFocused = useSelector(state => state.display.isEditorFocused);
   const dispatch = useDispatch();
+
+  const shouldSetPanResponder = useCallback((_, gestureState) => {
+    if (gestureState.numberActiveTouches > 1) return false;
+
+    const maxX = (safeAreaWidth + insets.left + insets.right) * 0.25;
+    const isSwipingX = Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
+    if (!isSidebarShown && derivedNote === null) {
+      if (gestureState.moveX > maxX) return false;
+      return isSwipingX && gestureState.dx > 5;
+    } else if (isSidebarShown) {
+      return isSwipingX && gestureState.dx < -1
+    } else if (derivedNote !== null && !isEditorFocused) {
+      if (gestureState.moveX > maxX) return false;
+      return isSwipingX && gestureState.dx > 5;
+    }
+
+    return false;
+  }, [isSidebarShown, derivedNote, isEditorFocused, safeAreaWidth, insets]);
+
+  const onPanResponderGrant = useCallback(() => {
+    if (!isSidebarShown && derivedNote === null) {
+      dispatch(updatePopup(SIDEBAR_POPUP, true));
+    }
+  }, [isSidebarShown, derivedNote, dispatch]);
+
+  const onPanResponderMove = useCallback((_, gestureState) => {
+    const width = safeAreaWidth + insets.left + insets.right;
+
+    if (isSidebarShown) {
+      const moveRatio = Math.abs(Math.min(0, gestureState.dx) / width);
+      sidebarAnim.setValue(moveRatio);
+    } else if (derivedNote !== null && !isEditorFocused) {
+      const moveRatio = Math.abs(Math.max(0, gestureState.dx) / width);
+      rightPanelAnim.setValue(moveRatio);
+    }
+  }, [
+    isSidebarShown, derivedNote, isEditorFocused, safeAreaWidth, insets,
+    sidebarAnim, rightPanelAnim
+  ]);
+
+  const onPanResponderRelease = useCallback((_, gestureState) => {
+    if (isSidebarShown) {
+      if (gestureState.dx > -40) {
+        Animated.timing(
+          sidebarAnim, { toValue: 0, ...sidebarFMV.visible, duration: 200 }
+        ).start();
+      } else {
+        Animated.timing(
+          sidebarAnim, { toValue: 1, ...sidebarFMV.visible, duration: 200 }
+        ).start(() => {
+          dispatch(updatePopup(SIDEBAR_POPUP, false));
+        });
+      }
+    } else if (derivedNote !== null && !isEditorFocused) {
+      if (gestureState.dx < 40) {
+        Animated.timing(
+          rightPanelAnim, { toValue: 0, ...sidebarFMV.visible, duration: 200 }
+        ).start();
+      } else {
+        Animated.timing(
+          rightPanelAnim, { toValue: 1, ...sidebarFMV.hidden, duration: 200 }
+        ).start(() => {
+          dispatch(updateNoteId(null));
+        });
+      }
+    }
+  }, [
+    isSidebarShown, derivedNote, isEditorFocused, dispatch, sidebarAnim, rightPanelAnim,
+  ]);
+
+  const viewPanResponder = useMemo(() => {
+    return PanResponder.create({
+      onStartShouldSetPanResponder: shouldSetPanResponder,
+      onMoveShouldSetPanResponder: shouldSetPanResponder,
+      onPanResponderGrant: onPanResponderGrant,
+      onPanResponderMove: onPanResponderMove,
+      onPanResponderRelease: onPanResponderRelease,
+    });
+  }, [
+    shouldSetPanResponder, onPanResponderGrant, onPanResponderMove, onPanResponderRelease,
+  ]);
 
   const onSidebarOpenBtnClick = () => {
     dispatch(updatePopup(SIDEBAR_POPUP, true));
@@ -157,7 +239,7 @@ const NavPanel = () => {
   };
 
   return (
-    <View style={tailwind('flex-1 bg-white')}>
+    <View {...viewPanResponder.panHandlers} style={tailwind('flex-1 bg-white')}>
       {/* Main panel */}
       <NoteList onSidebarOpenBtnClick={onSidebarOpenBtnClick} />
       {/* Sidebar */}
