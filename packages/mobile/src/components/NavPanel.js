@@ -39,6 +39,7 @@ const NavPanel = () => {
   const rightPanelBackHandler = useRef(null);
 
   const isEditorFocused = useSelector(state => state.display.isEditorFocused);
+  const didSwipeToOpenSidebar = useRef(false);
   const dispatch = useDispatch();
 
   const shouldSetPanResponder = useCallback((_, gestureState) => {
@@ -46,42 +47,43 @@ const NavPanel = () => {
 
     const maxX = (safeAreaWidth + insets.left + insets.right) * 0.25;
     const isSwipingX = Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
+
+    didSwipeToOpenSidebar.current = false;
     if (!isSidebarShown && derivedNote === null) {
       if (gestureState.moveX > maxX) return false;
-      return isSwipingX && gestureState.dx > 5;
+      if (isSwipingX && gestureState.dx > 5) {
+        didSwipeToOpenSidebar.current = true;
+        dispatch(updatePopup(SIDEBAR_POPUP, true));
+        return true;
+      }
+      return false;
     } else if (isSidebarShown) {
-      return isSwipingX && gestureState.dx < -1
+      return isSwipingX && gestureState.dx < -1;
     } else if (derivedNote !== null && !isEditorFocused) {
       if (gestureState.moveX > maxX) return false;
       return isSwipingX && gestureState.dx > 5;
     }
 
     return false;
-  }, [isSidebarShown, derivedNote, isEditorFocused, safeAreaWidth, insets]);
-
-  const onPanResponderGrant = useCallback(() => {
-    if (!isSidebarShown && derivedNote === null) {
-      dispatch(updatePopup(SIDEBAR_POPUP, true));
-    }
-  }, [isSidebarShown, derivedNote, dispatch]);
+  }, [isSidebarShown, derivedNote, isEditorFocused, safeAreaWidth, insets, dispatch]);
 
   const onPanResponderMove = useCallback((_, gestureState) => {
     const width = safeAreaWidth + insets.left + insets.right;
 
-    if (isSidebarShown) {
+    if (isSidebarShown && !didSwipeToOpenSidebar.current) {
       const moveRatio = Math.abs(Math.min(0, gestureState.dx) / width);
       sidebarAnim.setValue(moveRatio);
     } else if (derivedNote !== null && !isEditorFocused) {
-      const moveRatio = Math.abs(Math.max(0, gestureState.dx) / width);
+      const moveRatio = Math.max(0, gestureState.dx) / width;
       rightPanelAnim.setValue(moveRatio);
     }
   }, [
     isSidebarShown, derivedNote, isEditorFocused, safeAreaWidth, insets,
-    sidebarAnim, rightPanelAnim
+    sidebarAnim, rightPanelAnim,
   ]);
 
   const onPanResponderRelease = useCallback((_, gestureState) => {
-    if (isSidebarShown) {
+    if (isSidebarShown && !didSwipeToOpenSidebar.current) {
       if (gestureState.dx > -40) {
         Animated.timing(
           sidebarAnim, { toValue: 0, ...sidebarFMV.visible, duration: 200 }
@@ -114,13 +116,10 @@ const NavPanel = () => {
     return PanResponder.create({
       onStartShouldSetPanResponder: shouldSetPanResponder,
       onMoveShouldSetPanResponder: shouldSetPanResponder,
-      onPanResponderGrant: onPanResponderGrant,
       onPanResponderMove: onPanResponderMove,
       onPanResponderRelease: onPanResponderRelease,
     });
-  }, [
-    shouldSetPanResponder, onPanResponderGrant, onPanResponderMove, onPanResponderRelease,
-  ]);
+  }, [shouldSetPanResponder, onPanResponderMove, onPanResponderRelease]);
 
   const onSidebarOpenBtnClick = () => {
     dispatch(updatePopup(SIDEBAR_POPUP, true));
