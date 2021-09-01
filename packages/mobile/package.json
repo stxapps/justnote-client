@@ -17,7 +17,7 @@
   "dependencies": {
     "core-js": "^3.15.2",
     "react": "16.13.1",
-    "react-native": "0.63.4",
+    "react-native": "0.64.1",
     "react-native-animated-spinkit": "^1.5.2",
     "react-native-blockstack": "https://gitpkg.now.sh/bracedotto/blockstack-react-native/BlockstackSDK?e3b45ca539d81c557d6a5d549eb3d0a3e9a1af5c",
     "react-native-fast-image": "^8.3.4",
