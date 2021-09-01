@@ -289,7 +289,7 @@ const Landing = () => {
                     <svg className="hidden md:block mx-1 h-5 w-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M11 0h3L9 20H6l5-20z" />
                     </svg>
-                    <div className="text-base font-medium text-gray-500">Creator, Justnote</div>
+                    <div className="text-base font-medium text-gray-500">Creator</div>
                   </div>
                 </div>
               </footer>

@@ -209,7 +209,6 @@
 - yarn add tailwindcss postcss postcss-cli autoprefixer
 - yarn add @tailwindcss/forms @tailwindcss/typography @tailwindcss/aspect-ratio @tailwindcss/line-clamp
 - npx tailwindcss init
-- yarn add npm-run-all
 - yarn add redux react-redux redux-loop
 - yarn add @welldone-software/why-did-you-render
 - Fix dev server crash because of Emacs temp/lock file
