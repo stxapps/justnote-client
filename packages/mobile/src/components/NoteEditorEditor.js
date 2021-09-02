@@ -3,6 +3,7 @@ import { TextInput, Keyboard, Platform } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
+import { Dirs, FileSystem } from 'react-native-file-access';
 
 import {
   updatePopup, updateEditorFocused, updateEditorBusy, saveNote, updateDiscardAction,
@@ -12,7 +13,7 @@ import {
   CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_NOTE_ID,
   DISCARD_ACTION_CHANGE_LIST_NAME, NEW_NOTE, ADDED, LG_WIDTH,
 } from '../types/const';
-import { isNoteBodyEqual, replaceObjectUrls, splitOnFirst } from '../utils';
+import { isNoteBodyEqual, replaceObjectUrls, splitOnFirst, getFileExt } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 import cache from '../utils/cache';
 
@@ -48,7 +49,9 @@ const NoteEditorEditor = (props) => {
   const prevUpdateNoteIdCount = useRef(updateNoteIdCount);
   const prevChangeListNameCount = useRef(changeListNameCount);
   const objectUrlContents = useRef({});
+  const objectUrlFiles = useRef({});
   const objectUrlNames = useRef({});
+  const imagesDir = useRef(null);
   const getDataAction = useRef(null);
   const keyboardHeight = useRef(0);
   const keyboardDidShowListener = useRef(null);
@@ -69,6 +72,10 @@ const NoteEditorEditor = (props) => {
   }, [safeAreaWidth]);
 
   const setInitData = useCallback(() => {
+    const dir = Dirs.DocumentDir;
+    const escapedDir = dir.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    webView.current.injectJavaScript('window.justnote.setDir("' + escapedDir + '"); true;');
+
     const escapedTitle = note.title.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
     webView.current.injectJavaScript('window.justnote.setTitle("' + escapedTitle + '"); true;');
 
@@ -160,6 +167,7 @@ const NoteEditorEditor = (props) => {
     const { body, media } = replaceObjectUrls(
       _body,
       objectUrlContents.current,
+      objectUrlFiles.current,
       objectUrlNames.current
     );
 
@@ -171,7 +179,7 @@ const NoteEditorEditor = (props) => {
     else throw new Error(`Invalid getDataAction: ${getDataAction.current}`);
   }, [onSaveNote, onDiscardNote, onUpdateNoteId, onChangeListName]);
 
-  const onMessage = useCallback((e) => {
+  const onMessage = useCallback(async (e) => {
     const data = e.nativeEvent.data;
     const [change, rest1] = splitOnFirst(data, ':');
     const [to, value] = splitOnFirst(rest1, ':');
@@ -183,6 +191,27 @@ const NoteEditorEditor = (props) => {
       const [objectUrl, rest2] = splitOnFirst(value, SEP);
       const [fname, content] = splitOnFirst(rest2, SEP);
       objectUrlContents.current[objectUrl] = { fname, content };
+    } else if (change === 'clear' && to === 'objectUrlFiles') {
+      objectUrlFiles.current = {};
+    } else if (change === 'add' && to === 'objectUrlFiles') {
+      const [objectUrl, rest2] = splitOnFirst(value, SEP);
+      const [fname, content] = splitOnFirst(rest2, SEP);
+
+      if (imagesDir.current) {
+        let fpart = imagesDir.current + objectUrl.split('/').pop();
+        const ext = getFileExt(fname);
+        if (ext) fpart += `.${ext}`;
+
+        await FileSystem.writeFile(Dirs.DocumentDir + '/' + fpart, content, 'base64');
+
+        objectUrlFiles.current[objectUrl] = { fname, content: 'file://' + fpart };
+      } else {
+        objectUrlFiles.current[objectUrl] = { fname, content };
+      }
+    } else if (change === 'include' && to === 'objectUrlFiles') {
+      const [fileUrl, rest2] = splitOnFirst(value, SEP);
+      const [fname, content] = splitOnFirst(rest2, SEP);
+      objectUrlFiles.current[fileUrl] = { fname, content };
     } else if (change === 'clear' && to === 'objectUrlNames') {
       objectUrlNames.current = {};
     } else if (change === 'add' && to === 'objectUrlNames') {
@@ -258,6 +287,21 @@ const NoteEditorEditor = (props) => {
   }, [isEditorReady, isFocused]);
 
   useEffect(() => {
+    const makeImagesDir = async () => {
+      try {
+        const _imagesDir = 'images/';
+        const doExist = await FileSystem.exists(Dirs.DocumentDir + '/' + _imagesDir);
+        if (!doExist) await FileSystem.mkdir(Dirs.DocumentDir + '/' + _imagesDir);
+        imagesDir.current = _imagesDir;
+      } catch (e) {
+        console.log('Can\'t make images dir with error: ', e);
+      };
+    };
+
+    makeImagesDir();
+  }, []);
+
+  useEffect(() => {
     keyboardDidShowListener.current = Keyboard.addListener('keyboardDidShow', (e) => {
       keyboardHeight.current = e.endCoordinates.height;
     });
@@ -273,7 +317,7 @@ const NoteEditorEditor = (props) => {
 
   return (
     <React.Fragment>
-      <WebView ref={webView} style={tailwind('flex-1')} source={cache('NEE_webView_source', { baseUrl: Platform.OS === 'android' ? '' : undefined, html: ckeditor })} originWhiteList={cache('NEE_webView_originWhiteList', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} textZoom={100} androidLayerType="hardware" />
+      <WebView ref={webView} style={tailwind('flex-1')} source={cache('NEE_webView_source', { baseUrl: Platform.OS === 'android' ? '' : undefined, html: ckeditor })} originWhiteList={cache('NEE_webView_originWhiteList', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} textZoom={100} androidLayerType="hardware" allowFileAccess={true} />
       <TextInput ref={hackInput} style={tailwind('absolute -top-1 -left-1 w-1 h-1')} />
     </React.Fragment>
   );

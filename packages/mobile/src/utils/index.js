@@ -471,23 +471,40 @@ export const isMobile = () => {
   return false;
 };
 
-export const replaceObjectUrls = (body, objectUrlContents, objectUrlNames) => {
+export const replaceObjectUrls = (
+  body, objectUrlContents, objectUrlFiles, objectUrlNames
+) => {
   const sources = [];
   for (const match of body.matchAll(/<img.+?src="([^"]*)"[^>]*>/g)) {
     const src = match[1];
-    if (src.startsWith('blob:')) sources.push(src);
+    if (src.startsWith('blob:') || src.startsWith('file:')) sources.push(src);
   }
 
   const media = [];
   for (const src of sources) {
     let fname, content;
-    if (objectUrlContents[src]) ({ fname, content } = objectUrlContents[src]);
-    if (!fname) {
-      console.log(`replaceObjectUrls: Not found fname in objectUrlContents: ${objectUrlContents} with src: ${src}`);
-      continue;
-    }
-    if (!content) {
-      console.log(`replaceObjectUrls: Not found content in objectUrlContents: ${objectUrlContents} with src: ${src}`);
+    if (objectUrlContents[src]) {
+      ({ fname, content } = objectUrlContents[src]);
+      if (!fname) {
+        console.log(`replaceObjectUrls: Not found fname in objectUrlContents: ${objectUrlContents} with src: ${src}`);
+        continue;
+      }
+      if (!content) {
+        console.log(`replaceObjectUrls: Not found content in objectUrlContents: ${objectUrlContents} with src: ${src}`);
+        continue;
+      }
+    } else if (objectUrlFiles[src]) {
+      ({ fname, content } = objectUrlFiles[src]);
+      if (!fname) {
+        console.log(`replaceObjectUrls: Not found fname in objectUrlFiles: ${objectUrlFiles} with src: ${src}`);
+        continue;
+      }
+      if (!content) {
+        console.log(`replaceObjectUrls: Not found content in objectUrlFiles: ${objectUrlFiles} with src: ${src}`);
+        continue;
+      }
+    } else {
+      console.log(`replaceObjectUrls: Not found src: ${src} in both objectUrlContents: ${objectUrlContents} and objectUrlFiles: ${objectUrlFiles}`);
       continue;
     }
 
@@ -495,14 +512,13 @@ export const replaceObjectUrls = (body, objectUrlContents, objectUrlNames) => {
     if (!name) {
       name = `${randomString(4)}-${randomString(4)}-${randomString(4)}-${randomString(4)}`;
 
-      let ext;
-      if (fname.includes('.')) {
-        const _ext = fname.split('.').slice(-1)[0];
-        if (_ext.length <= 5) ext = _ext;
-      }
-      if (ext) name += `.${ext.toLowerCase()}`;
+      if (content.startsWith('file://')) name += '.lnk';
       else {
-        console.log(`replaceObjectUrls: Not found ext from filename: ${fname} with src: ${src}`);
+        const ext = getFileExt(fname);
+        if (ext) name += `.${ext}`;
+        else {
+          console.log(`replaceObjectUrls: Not found ext from filename: ${fname} with src: ${src}`);
+        }
       }
     }
 
@@ -518,4 +534,12 @@ export const splitOnFirst = (str, sep) => {
   if (i < 0) return [str, ''];
 
   return [str.slice(0, i), str.slice(i + sep.length)];
+};
+
+export const getFileExt = (fname) => {
+  if (fname.includes('.')) {
+    const ext = fname.split('.').pop();
+    if (ext.length <= 5) return ext.toLowerCase();
+  }
+  return null;
 };
