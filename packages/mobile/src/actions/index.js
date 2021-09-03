@@ -27,21 +27,25 @@ import {
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
   UPDATE_UPDATE_SETTINGS_PROGRESS, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
   UPDATE_SYNC_PROGRESS, UPDATE_SYNCED, INCREASE_SAVE_NOTE_COUNT,
-  INCREASE_DISCARD_NOTE_COUNT, INCREASE_CONFIRM_DISCARD_NOTE_COUNT,
-  INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT, INCREASE_UPDATE_NOTE_ID_COUNT,
-  INCREASE_CHANGE_LIST_NAME_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
+  INCREASE_DISCARD_NOTE_COUNT, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
+  INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
+  INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT,
+  INCREASE_BLUR_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   DOMAIN_NAME, APP_URL_SCHEME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH,
-  ALERT_SCREEN_ROTATION_POPUP, CONFIRM_DISCARD_POPUP, DISCARD_ACTION_UPDATE_SYNCED,
-  MY_NOTES, TRASH, ID, NEW_NOTE,
+  ALERT_SCREEN_ROTATION_POPUP, CONFIRM_DISCARD_POPUP,
+  DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_NOTE_ID,
+  DISCARD_ACTION_CHANGE_LIST_NAME, DISCARD_ACTION_UPDATE_SYNCED,
+  MY_NOTES, TRASH, ID, NEW_NOTE, NEW_NOTE_OBJ,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
   SWAP_LEFT, SWAP_RIGHT, N_NOTES, SETTINGS, INDEX, DOT_JSON, LG_WIDTH, SHOW_SYNCED,
 } from '../types/const';
 import {
   separateUrlAndParam, getUserImageUrl, randomString, swapArrayElements,
+  isNoteBodyEqual,
 } from '../utils';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
@@ -290,6 +294,22 @@ export const changeListName = (listName, doCheckEditing) => async (
   });
 };
 
+export const onChangeListName = (title, body, keyboardHeight) => async (
+  dispatch, getState
+) => {
+  const { listName, noteId } = getState().display;
+  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
+
+  if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+    if (keyboardHeight > 0) dispatch(increaseBlurCount());
+    dispatch(updateDiscardAction(DISCARD_ACTION_CHANGE_LIST_NAME));
+    dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
+    return;
+  }
+
+  dispatch(changeListName(null, false));
+};
+
 const _updateNoteId = (id) => {
   return {
     type: UPDATE_NOTE_ID,
@@ -313,6 +333,22 @@ export const updateNoteId = (id, doGetIdFromState = false, doCheckEditing = fals
 
     dispatch(_updateNoteId(id));
   };
+};
+
+export const onUpdateNoteId = (title, body, keyboardHeight) => async (
+  dispatch, getState
+) => {
+  const { listName, noteId } = getState().display;
+  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
+
+  if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+    if (keyboardHeight > 0) dispatch(increaseBlurCount());
+    dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_NOTE_ID));
+    dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
+    return;
+  }
+
+  dispatch(updateNoteId(null, true, false));
 };
 
 export const updatePopup = (id, isShown, anchorPosition) => {
@@ -475,12 +511,44 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
 
 export const saveNote = (title, body, media) => async (dispatch, getState) => {
 
-  const { noteId } = getState().display;
-  if (noteId === NEW_NOTE) {
-    dispatch(addNote(title, body, media));
-  } else {
-    dispatch(updateNote(title, body, media, noteId));
+  const { listName, noteId } = getState().display;
+  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
+
+  if (title === '' && body === '') {
+    dispatch(updateEditorBusy(false));
+    setTimeout(() => {
+      dispatch(increaseFocusTitleCount());
+    }, 1);
+    return;
   }
+
+  if (note.title === title && isNoteBodyEqual(note.body, body)) {
+    dispatch(updateEditorBusy(false));
+    return;
+  }
+
+  if (noteId === NEW_NOTE) dispatch(addNote(title, body, media));
+  else dispatch(updateNote(title, body, media, noteId));
+};
+
+export const discardNote = (
+  doCheckEditing, title = null, body = null, keyboardHeight = null
+) => async (dispatch, getState) => {
+
+  const { listName, noteId } = getState().display;
+  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
+
+  if (doCheckEditing) {
+    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+      if (keyboardHeight > 0) dispatch(increaseBlurCount());
+      dispatch(updateDiscardAction(DISCARD_ACTION_CANCEL_EDIT));
+      dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
+      return;
+    }
+  }
+
+  dispatch(updateEditorFocused(false));
+  dispatch(increaseSetInitDataCount());
 };
 
 const _moveNotes = (toListName, ids, fromListName = null) => async (
@@ -1431,10 +1499,6 @@ export const increaseDiscardNoteCount = () => {
   return { type: INCREASE_DISCARD_NOTE_COUNT };
 };
 
-export const increaseConfirmDiscardNoteCount = () => {
-  return { type: INCREASE_CONFIRM_DISCARD_NOTE_COUNT };
-};
-
 export const increaseUpdateNoteIdUrlHashCount = (id) => {
   return {
     type: INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
@@ -1454,6 +1518,18 @@ export const increaseChangeListNameCount = (listName) => {
     type: INCREASE_CHANGE_LIST_NAME_COUNT,
     payload: listName,
   };
+};
+
+export const increaseFocusTitleCount = () => {
+  return { type: INCREASE_FOCUS_TITLE_COUNT };
+};
+
+export const increaseSetInitDataCount = () => {
+  return { type: INCREASE_SET_INIT_DATA_COUNT };
+};
+
+export const increaseBlurCount = () => {
+  return { type: INCREASE_BLUR_COUNT };
 };
 
 export const increaseUpdateEditorWidthCount = () => {

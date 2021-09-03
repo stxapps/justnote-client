@@ -6,14 +6,10 @@ import { WebView } from 'react-native-webview';
 import { Dirs, FileSystem } from 'react-native-file-access';
 
 import {
-  updatePopup, updateEditorFocused, updateEditorBusy, saveNote, updateDiscardAction,
-  updateNoteId, changeListName,
+  updateEditorFocused, saveNote, discardNote, onUpdateNoteId, onChangeListName,
 } from '../actions';
-import {
-  CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_NOTE_ID,
-  DISCARD_ACTION_CHANGE_LIST_NAME, NEW_NOTE, ADDED, LG_WIDTH,
-} from '../types/const';
-import { isNoteBodyEqual, replaceObjectUrls, splitOnFirst, getFileExt } from '../utils';
+import { NEW_NOTE, ADDED, LG_WIDTH } from '../types/const';
+import { replaceObjectUrls, splitOnFirst, getFileExt } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 import cache from '../utils/cache';
 
@@ -34,20 +30,22 @@ const NoteEditorEditor = (props) => {
   const isEditorBusy = useSelector(state => state.editor.isEditorBusy);
   const saveNoteCount = useSelector(state => state.editor.saveNoteCount);
   const discardNoteCount = useSelector(state => state.editor.discardNoteCount);
-  const confirmDiscardNoteCount = useSelector(
-    state => state.editor.confirmDiscardNoteCount
-  );
   const updateNoteIdCount = useSelector(state => state.editor.updateNoteIdCount);
   const changeListNameCount = useSelector(state => state.editor.changeListNameCount);
+  const focusTitleCount = useSelector(state => state.editor.focusTitleCount);
+  const setInitDataCount = useSelector(state => state.editor.setInitDataCount);
+  const blurCount = useSelector(state => state.editor.blurCount);
   const [isEditorReady, setEditorReady] = useState(false);
   const webView = useRef(null);
   const hackInput = useRef(null);
   const prevIsFocused = useRef(isFocused);
   const prevSaveNoteCount = useRef(saveNoteCount);
   const prevDiscardNoteCount = useRef(discardNoteCount);
-  const prevConfirmDiscardNoteCount = useRef(confirmDiscardNoteCount);
   const prevUpdateNoteIdCount = useRef(updateNoteIdCount);
   const prevChangeListNameCount = useRef(changeListNameCount);
+  const prevFocusTitleCount = useRef(focusTitleCount);
+  const prevSetInitDataCount = useRef(setInitDataCount);
+  const prevBlurCount = useRef(blurCount);
   const objectUrlContents = useRef({});
   const objectUrlFiles = useRef({});
   const objectUrlNames = useRef({});
@@ -107,60 +105,6 @@ const NoteEditorEditor = (props) => {
     dispatch(updateEditorFocused(true));
   }, [dispatch]);
 
-  const onSaveNote = useCallback((title, body, media) => {
-    if (title === '' && body === '') {
-      dispatch(updateEditorBusy(false));
-      setTimeout(() => {
-        dispatch(updateEditorFocused(true));
-        focusTitleInput();
-      }, 1);
-      return;
-    }
-
-    if (note.title === title && isNoteBodyEqual(note.body, body)) {
-      dispatch(updateEditorBusy(false));
-      return;
-    }
-
-    dispatch(saveNote(title, body, media));
-  }, [note.title, note.body, focusTitleInput, dispatch]);
-
-  const onDiscardNote = useCallback((doCheckEditing, title = null, body = null) => {
-    if (doCheckEditing) {
-      if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
-        if (keyboardHeight.current > 0) blur();
-        dispatch(updateDiscardAction(DISCARD_ACTION_CANCEL_EDIT));
-        dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
-        return;
-      }
-    }
-
-    dispatch(updateEditorFocused(false));
-    setInitData();
-  }, [note.title, note.body, setInitData, dispatch]);
-
-  const onUpdateNoteId = useCallback((title, body) => {
-    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
-      if (keyboardHeight.current > 0) blur();
-      dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_NOTE_ID));
-      dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
-      return;
-    }
-
-    dispatch(updateNoteId(null, true, false));
-  }, [note.title, note.body, dispatch]);
-
-  const onChangeListName = useCallback((title, body) => {
-    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
-      if (keyboardHeight.current > 0) blur();
-      dispatch(updateDiscardAction(DISCARD_ACTION_CHANGE_LIST_NAME));
-      dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
-      return;
-    }
-
-    dispatch(changeListName(null, false));
-  }, [note.title, note.body, dispatch]);
-
   const onGetData = useCallback((value) => {
 
     const [title, _body] = splitOnFirst(value, SEP);
@@ -172,12 +116,16 @@ const NoteEditorEditor = (props) => {
     );
 
     const action = getDataAction.current;
-    if (action === GET_DATA_SAVE_NOTE) onSaveNote(title, body, media);
-    else if (action === GET_DATA_DISCARD_NOTE) onDiscardNote(true, title, body);
-    else if (action === GET_DATA_UPDATE_NOTE_ID) onUpdateNoteId(title, body);
-    else if (action === GET_DATA_CHANGE_LIST_NAME) onChangeListName(title, body);
-    else throw new Error(`Invalid getDataAction: ${getDataAction.current}`);
-  }, [onSaveNote, onDiscardNote, onUpdateNoteId, onChangeListName]);
+    if (action === GET_DATA_SAVE_NOTE) {
+      dispatch(saveNote(title, body, media));
+    } else if (action === GET_DATA_DISCARD_NOTE) {
+      dispatch(discardNote(true, title, body, keyboardHeight.current));
+    } else if (action === GET_DATA_UPDATE_NOTE_ID) {
+      dispatch(onUpdateNoteId(title, body, keyboardHeight.current));
+    } else if (action === GET_DATA_CHANGE_LIST_NAME) {
+      dispatch(onChangeListName(title, body, keyboardHeight.current));
+    } else throw new Error(`Invalid getDataAction: ${getDataAction.current}`);
+  }, [dispatch]);
 
   const onMessage = useCallback(async (e) => {
     const data = e.nativeEvent.data;
@@ -252,14 +200,6 @@ const NoteEditorEditor = (props) => {
 
   useEffect(() => {
     if (!isEditorReady) return;
-    if (confirmDiscardNoteCount !== prevConfirmDiscardNoteCount.current) {
-      onDiscardNote(false);
-      prevConfirmDiscardNoteCount.current = confirmDiscardNoteCount;
-    }
-  }, [isEditorReady, confirmDiscardNoteCount, onDiscardNote]);
-
-  useEffect(() => {
-    if (!isEditorReady) return;
     if (updateNoteIdCount !== prevUpdateNoteIdCount.current) {
       getDataAction.current = GET_DATA_UPDATE_NOTE_ID;
       webView.current.injectJavaScript('window.justnote.getData(); true;');
@@ -275,6 +215,44 @@ const NoteEditorEditor = (props) => {
       prevChangeListNameCount.current = changeListNameCount;
     }
   }, [isEditorReady, changeListNameCount]);
+
+  useEffect(() => {
+    /*
+      Why needs focusTitleCount and just can't use isFocused!
+
+      Focus flow:
+        1.1 User clicks on titleInput or bodyEditor
+        1.2 Or programatically call focusTitleInput
+        2. When titleInput or bodyEditor get focused, event listener onFocus is called
+        3. onFocus dispatches updateEditorFocused(true)
+      Blur flow:
+        1.1 User clicks save, cancel, or back buttons
+        1.2 An action dispatches updateEditorFocused(false)
+        1.3 When isFocused is changed from true to false, blur is called
+        2.1 Or programatically call blur i.e. just showing discard confirm
+     */
+    if (!isEditorReady) return;
+    if (focusTitleCount !== prevFocusTitleCount.current) {
+      focusTitleInput();
+      prevFocusTitleCount.current = focusTitleCount;
+    }
+  }, [isEditorReady, focusTitleCount, focusTitleInput]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+    if (setInitDataCount !== prevSetInitDataCount.current) {
+      setInitData();
+      prevSetInitDataCount.current = setInitDataCount;
+    }
+  }, [isEditorReady, setInitDataCount, setInitData]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+    if (blurCount !== prevBlurCount.current) {
+      blur();
+      prevBlurCount.current = blurCount;
+    }
+  }, [isEditorReady, blurCount]);
 
   useEffect(() => {
     if (!isEditorReady) {
@@ -295,7 +273,7 @@ const NoteEditorEditor = (props) => {
         imagesDir.current = _imagesDir;
       } catch (e) {
         console.log('Can\'t make images dir with error: ', e);
-      };
+      }
     };
 
     makeImagesDir();

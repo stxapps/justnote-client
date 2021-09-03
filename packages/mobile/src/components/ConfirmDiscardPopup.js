@@ -7,8 +7,7 @@ import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaFrame, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
-  updatePopup, increaseConfirmDiscardNoteCount, updateNoteId, changeListName,
-  updateSynced,
+  updatePopup, discardNote, updateNoteId, changeListName, updateSynced,
 } from '../actions';
 import {
   CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_NOTE_ID,
@@ -39,7 +38,7 @@ const ConfirmDiscardPopup = () => {
   const onConfirmDiscardOkBtnClick = () => {
     if (didClick.current) return;
     if (discardAction === DISCARD_ACTION_CANCEL_EDIT) {
-      dispatch(increaseConfirmDiscardNoteCount());
+      dispatch(discardNote(false));
     } else if (discardAction === DISCARD_ACTION_UPDATE_NOTE_ID) {
       dispatch(updateNoteId(null, true, false));
     } else if (discardAction === DISCARD_ACTION_CHANGE_LIST_NAME) {
