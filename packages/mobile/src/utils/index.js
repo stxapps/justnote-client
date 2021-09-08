@@ -1,7 +1,7 @@
 import Url from 'url-parse';
 
 import {
-  HTTP, MAX_CHARS,
+  HTTP, MAX_CHARS, CD_ROOT,
   ADDING, UPDATING, MOVING, DELETING, MERGING,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, DIED_MERGING,
   VALID_URL, NO_URL, ASK_CONFIRM_URL,
@@ -510,10 +510,10 @@ export const replaceObjectUrls = (
 
     let name = objectUrlNames[src];
     if (!name) {
-      name = `${randomString(4)}-${randomString(4)}-${randomString(4)}-${randomString(4)}`;
-
-      if (content.startsWith('file://')) name += '.lnk';
+      if (fname.startsWith(CD_ROOT + '/')) name = fname;
       else {
+        name = `${randomString(4)}-${randomString(4)}-${randomString(4)}-${randomString(4)}`;
+
         const ext = getFileExt(fname);
         if (ext) name += `.${ext}`;
         else {
@@ -542,4 +542,32 @@ export const getFileExt = (fname) => {
     if (ext.length <= 5) return ext.toLowerCase();
   }
   return null;
+};
+
+export const getUnusedFPaths = (media, savingFPaths, noteMedia) => {
+  const fpaths = [];
+
+  if (savingFPaths) {
+    for (const fpath of savingFPaths) {
+      const isFound = media.some(m => m.name === fpath);
+      if (!isFound) fpaths.push(fpath);
+    }
+  }
+
+  if (noteMedia) {
+    for (const { name } of noteMedia) {
+      if (!name.startsWith(CD_ROOT + '/')) continue;
+
+      const isFound = media.some(m => m.name === name);
+      if (!isFound) fpaths.push(name);
+    }
+  }
+
+  return fpaths;
+};
+
+export const getStaticFPath = (fpath) => {
+  fpath = fpath.slice(fpath.indexOf(CD_ROOT + '/'));
+  fpath = fpath.slice((CD_ROOT + '/').length);
+  return fpath;
 };

@@ -55,7 +55,9 @@ export const EDGE = 'EDGE'; // bottom or right of the window
 export const AT_TRIGGER = 'AT_TRIGGER'; // top or left of the trigger
 export const EDGE_TRIGGER = 'EDGE_TRIGGER'; // bottom or right of the trigger
 
+export const CD_ROOT = 'cdroot';
 export const NOTES = 'notes';
+export const IMAGES = 'images';
 export const SETTINGS = 'settings';
 export const INDEX = 'index';
 export const DOT_JSON = '.json';

@@ -7,8 +7,9 @@ import { Dirs, FileSystem } from 'react-native-file-access';
 
 import {
   updateEditorFocused, saveNote, discardNote, onUpdateNoteId, onChangeListName,
+  addSavingFPaths,
 } from '../actions';
-import { NEW_NOTE, ADDED, LG_WIDTH } from '../types/const';
+import { NEW_NOTE, ADDED, LG_WIDTH, CD_ROOT } from '../types/const';
 import { replaceObjectUrls, splitOnFirst, getFileExt } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 import cache from '../utils/cache';
@@ -70,12 +71,20 @@ const NoteEditorEditor = (props) => {
   }, [safeAreaWidth]);
 
   const setInitData = useCallback(() => {
+    const escapedTitle = note.title.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    webView.current.injectJavaScript('window.justnote.setTitle("' + escapedTitle + '"); true;');
+
     const dir = Dirs.DocumentDir;
     const escapedDir = dir.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
     webView.current.injectJavaScript('window.justnote.setDir("' + escapedDir + '"); true;');
 
-    const escapedTitle = note.title.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-    webView.current.injectJavaScript('window.justnote.setTitle("' + escapedTitle + '"); true;');
+    for (const objectUrl of Object.keys(objectUrlFiles.current)) {
+      if (!objectUrl.startsWith('blob:')) continue;
+
+      const escapedObjectUrl = objectUrl.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      webView.current.injectJavaScript('window.justnote.revokeObjectUrl("' + escapedObjectUrl + '"); true;');
+    }
+    objectUrlFiles.current = {};
 
     webView.current.injectJavaScript('window.justnote.clearNoteMedia(); true;');
     for (const { name, content } of note.media) {
@@ -105,6 +114,26 @@ const NoteEditorEditor = (props) => {
     dispatch(updateEditorFocused(true));
   }, [dispatch]);
 
+  const onAddObjectUrlFiles = useCallback(async (objectUrl, fname, content) => {
+    if (imagesDir.current) {
+      let fpart = imagesDir.current + objectUrl.split('/').pop();
+      const ext = getFileExt(fname);
+      if (ext) fpart += `.${ext}`;
+
+      try {
+        await FileSystem.writeFile(Dirs.DocumentDir + '/' + fpart, content, 'base64');
+
+        const cfpart = CD_ROOT + '/' + fpart;
+        dispatch(addSavingFPaths([cfpart]));
+        objectUrlFiles.current[objectUrl] = { fname: cfpart, content: '' };
+      } catch (e) {
+        objectUrlFiles.current[objectUrl] = { fname, content };
+      }
+    } else {
+      objectUrlFiles.current[objectUrl] = { fname, content };
+    }
+  }, [dispatch]);
+
   const onGetData = useCallback((value) => {
 
     const [title, _body] = splitOnFirst(value, SEP);
@@ -132,30 +161,18 @@ const NoteEditorEditor = (props) => {
     const [change, rest1] = splitOnFirst(data, ':');
     const [to, value] = splitOnFirst(rest1, ':');
 
-    if (change === 'focus' && to === 'webView') onFocus();
-    else if (change === 'clear' && to === 'objectUrlContents') {
+    if (change === 'focus' && to === 'webView') {
+      onFocus();
+    } else if (change === 'clear' && to === 'objectUrlContents') {
       objectUrlContents.current = {};
     } else if (change === 'add' && to === 'objectUrlContents') {
       const [objectUrl, rest2] = splitOnFirst(value, SEP);
       const [fname, content] = splitOnFirst(rest2, SEP);
       objectUrlContents.current[objectUrl] = { fname, content };
-    } else if (change === 'clear' && to === 'objectUrlFiles') {
-      objectUrlFiles.current = {};
     } else if (change === 'add' && to === 'objectUrlFiles') {
       const [objectUrl, rest2] = splitOnFirst(value, SEP);
       const [fname, content] = splitOnFirst(rest2, SEP);
-
-      if (imagesDir.current) {
-        let fpart = imagesDir.current + objectUrl.split('/').pop();
-        const ext = getFileExt(fname);
-        if (ext) fpart += `.${ext}`;
-
-        await FileSystem.writeFile(Dirs.DocumentDir + '/' + fpart, content, 'base64');
-
-        objectUrlFiles.current[objectUrl] = { fname, content: 'file://' + fpart };
-      } else {
-        objectUrlFiles.current[objectUrl] = { fname, content };
-      }
+      onAddObjectUrlFiles(objectUrl, fname, content);
     } else if (change === 'include' && to === 'objectUrlFiles') {
       const [fileUrl, rest2] = splitOnFirst(value, SEP);
       const [fname, content] = splitOnFirst(rest2, SEP);
@@ -165,10 +182,12 @@ const NoteEditorEditor = (props) => {
     } else if (change === 'add' && to === 'objectUrlNames') {
       const [objectUrl, name] = splitOnFirst(value, SEP);
       objectUrlNames.current[objectUrl] = name;
-    } else if (change === 'data' && to === 'webView') onGetData(value);
-    else if (change === 'editor' && to === 'isReady') setEditorReady(value === 'true');
-    else throw new Error(`Invalid data: ${data}`);
-  }, [onFocus, onGetData]);
+    } else if (change === 'data' && to === 'webView') {
+      onGetData(value);
+    } else if (change === 'editor' && to === 'isReady') {
+      setEditorReady(value === 'true');
+    } else throw new Error(`Invalid data: ${data}`);
+  }, [onFocus, onAddObjectUrlFiles, onGetData]);
 
   useEffect(() => {
     if (!isEditorReady) return;

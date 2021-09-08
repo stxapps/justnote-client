@@ -5,6 +5,7 @@ import { SYNC_COMMIT, DELETE_ALL_DATA, RESET_STATE } from '../types/actionTypes'
 
 export const initialState = {
   noteFPaths: null,
+  staticFPaths: null,
   settingsFPath: null,
 };
 
@@ -15,6 +16,7 @@ const serverFPathsReducer = (state = initialState, action) => {
     const newState = {
       ...state,
       noteFPaths: serverFPaths.noteFPaths,
+      staticFPaths: serverFPaths.staticFPaths,
       settingsFPath: serverFPaths.settingsFPath,
     };
 
