@@ -3,20 +3,24 @@ import { useSelector, useDispatch } from 'react-redux';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ckeditor from '@ckeditor/ckeditor5-build-decoupled-document';
 
+import { Dirs, FileSystem } from '../fileSystem';
 import {
-  updatePopupUrlHash, updateEditorFocused, updateEditorBusy, saveNote,
-  updateDiscardAction, updateNoteIdUrlHash, updateNoteId, changeListName,
+  updateEditorFocused, saveNote, discardNote, onUpdateNoteIdUrlHash, onUpdateNoteId,
+  onChangeListName, addSavingFPaths,
 } from '../actions';
-import {
-  CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT,
-  DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
-  DISCARD_ACTION_CHANGE_LIST_NAME, NEW_NOTE, ADDED,
-} from '../types/const';
+import { NEW_NOTE, ADDED, CD_ROOT } from '../types/const';
 import {
   isString, isNoteBodyEqual, isMobile as _isMobile, replaceObjectUrls,
+  getFileExt, isArrayBuffer,
 } from '../utils';
 
 import '../stylesheets/ckeditor.css';
+
+const GET_DATA_SAVE_NOTE = 'GET_DATA_SAVE_NOTE';
+const GET_DATA_DISCARD_NOTE = 'GET_DATA_DISCARD_NOTE';
+const GET_DATA_UPDATE_NOTE_ID_URL_HASH = 'GET_DATA_UPDATE_NOTE_ID_URL_HASH';
+const GET_DATA_UPDATE_NOTE_ID = 'GET_DATA_UPDATE_NOTE_ID';
+const GET_DATA_CHANGE_LIST_NAME = 'GET_DATA_CHANGE_LIST_NAME';
 
 const dataUrlToBlob = async (content) => {
   const res = await fetch(content);
@@ -30,14 +34,13 @@ const NoteEditorEditor = (props) => {
   const isEditorBusy = useSelector(state => state.editor.isEditorBusy);
   const saveNoteCount = useSelector(state => state.editor.saveNoteCount);
   const discardNoteCount = useSelector(state => state.editor.discardNoteCount);
-  const confirmDiscardNoteCount = useSelector(
-    state => state.editor.confirmDiscardNoteCount
-  );
   const updateNoteIdUrlHashCount = useSelector(
     state => state.editor.updateNoteIdUrlHashCount
   );
   const updateNoteIdCount = useSelector(state => state.editor.updateNoteIdCount);
   const changeListNameCount = useSelector(state => state.editor.changeListNameCount);
+  const focusTitleCount = useSelector(state => state.editor.focusTitleCount);
+  const setInitDataCount = useSelector(state => state.editor.setInitDataCount);
   const updateEditorWidthCount = useSelector(
     state => state.editor.updateEditorWidthCount
   );
@@ -48,12 +51,17 @@ const NoteEditorEditor = (props) => {
   const bodyBottomToolbar = useRef(null);
   const prevSaveNoteCount = useRef(saveNoteCount);
   const prevDiscardNoteCount = useRef(discardNoteCount);
-  const prevConfirmDiscardNoteCount = useRef(confirmDiscardNoteCount);
   const prevUpdateNoteIdUrlHashCount = useRef(updateNoteIdUrlHashCount);
   const prevUpdateNoteIdCount = useRef(updateNoteIdCount);
   const prevChangeListNameCount = useRef(changeListNameCount);
+  const prevFocusTitleCount = useRef(focusTitleCount);
+  const prevSetInitDataCount = useRef(setInitDataCount);
   const prevUpdateEditorWidthCount = useRef(updateEditorWidthCount);
+  const objectUrlContents = useRef({});
+  const objectUrlFiles = useRef({});
   const objectUrlNames = useRef({});
+  const imagesDir = useRef('images/');
+  const getDataAction = useRef(null);
   const dispatch = useDispatch();
 
   const isMobile = useMemo(() => _isMobile(), []);
@@ -63,17 +71,21 @@ const NoteEditorEditor = (props) => {
     setTimeout(() => titleInput.current.focus(), 1);
   };
 
-  const setInitData = useCallback(async () => {
-    titleInput.current.value = note.title;
-
-    if (window.CKEditorObjectUrlContents) {
-      for (const objectUrl in window.CKEditorObjectUrlContents) {
-        URL.revokeObjectURL(objectUrl);
-      }
+  const clearNoteMedia = () => {
+    for (const objectUrl in objectUrlContents.current) {
+      URL.revokeObjectURL(objectUrl);
     }
-    window.CKEditorObjectUrlContents = {};
-    objectUrlNames.current = {};
+    objectUrlContents.current = {};
 
+    for (const objectUrl in objectUrlFiles.current) {
+      URL.revokeObjectURL(objectUrl);
+    }
+    objectUrlFiles.current = {};
+
+    objectUrlNames.current = {};
+  };
+
+  const replaceWithContents = useCallback(async (body) => {
     const _media = note.media.filter(({ content }) => {
       return isString(content) && content.startsWith('data:');
     });
@@ -82,119 +94,100 @@ const NoteEditorEditor = (props) => {
       return { name, content, blob };
     }));
 
-    let body = note.body;
     for (const { name, content, blob } of media) {
       const objectUrl = URL.createObjectURL(blob);
 
-      window.CKEditorObjectUrlContents[objectUrl] = { fname: name, content };
+      objectUrlContents.current[objectUrl] = { fname: name, content };
       objectUrlNames.current[objectUrl] = name;
 
       body = body.replaceAll(name, objectUrl);
     }
+
+    return body;
+  }, [note.media]);
+
+  const replaceWithFiles = useCallback(async (body) => {
+    const media = note.media.filter(({ name }) => {
+      return isString(name) && name.startsWith(CD_ROOT + '/');
+    });
+
+    for (const { name, content } of media) {
+      const fpath = name.replace(CD_ROOT + '/', Dirs.DocumentDir + '/');
+      const file = await FileSystem.readFile(fpath);
+      if (!isArrayBuffer(file)) continue;
+
+      const blob = new Blob([file]);
+      const objectUrl = URL.createObjectURL(blob);
+
+      objectUrlFiles.current[objectUrl] = { fname: name, content };
+      objectUrlNames.current[objectUrl] = name;
+
+      body = body.replaceAll(name, objectUrl);
+    }
+
+    return body;
+  }, [note.media]);
+
+  const setInitData = useCallback(async () => {
+    titleInput.current.value = note.title;
+
+    clearNoteMedia();
+
+    let body = await replaceWithContents(note.body);
+    body = replaceWithFiles(body);
     bodyEditor.current.setData(body);
 
     if (note.id === NEW_NOTE) focusTitleInput();
-  }, [note.id, note.title, note.body, note.media]);
+  }, [note.id, note.title, note.body, replaceWithContents, replaceWithFiles]);
 
   const onFocus = useCallback(() => {
     dispatch(updateEditorFocused(true));
   }, [dispatch]);
 
-  const onSaveNote = useCallback(() => {
+  const onAddObjectUrlFiles = useCallback(async (objectUrl, fname, content) => {
+    if (imagesDir.current) {
+      let fpart = imagesDir.current + objectUrl.split('/').pop();
+      const ext = getFileExt(fname);
+      if (ext) fpart += `.${ext}`;
+
+      try {
+        await FileSystem.writeFile(Dirs.DocumentDir + '/' + fpart, content, 'blob');
+
+        const cfpart = CD_ROOT + '/' + fpart;
+        dispatch(addSavingFPaths([cfpart]));
+        objectUrlFiles.current[objectUrl] = { fname: cfpart, content: '' };
+      } catch (e) {
+        console.log(`NoteEditorEditor: onAddObjectUrlFiles with fpart: ${fpart} error: `, e);
+        objectUrlFiles.current[objectUrl] = { fname, content };
+      }
+    } else {
+      objectUrlFiles.current[objectUrl] = { fname, content };
+    }
+  }, [dispatch]);
+
+  const onGetData = useCallback(() => {
+
     const title = titleInput.current.value;
     const { body, media } = replaceObjectUrls(
       bodyEditor.current.getData(),
-      window.CKEditorObjectUrlContents,
+      objectUrlContents.current,
+      objectUrlFiles.current,
       objectUrlNames.current
     );
 
-    if (title === '' && body === '') {
-      dispatch(updateEditorBusy(false));
-      setTimeout(() => {
-        dispatch(updateEditorFocused(true));
-        focusTitleInput();
-      }, 1);
-      return;
-    }
-
-    if (note.title === title && isNoteBodyEqual(note.body, body)) {
-      dispatch(updateEditorBusy(false));
-      return;
-    }
-
-    dispatch(saveNote(title, body, media));
-  }, [note.title, note.body, dispatch]);
-
-  const onDiscardNote = useCallback((doCheckEditing) => {
-    if (doCheckEditing) {
-      const title = titleInput.current.value;
-      const { body } = replaceObjectUrls(
-        bodyEditor.current.getData(),
-        window.CKEditorObjectUrlContents,
-        objectUrlNames.current
-      );
-
-      if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
-        dispatch(updateDiscardAction(DISCARD_ACTION_CANCEL_EDIT));
-        updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
-        return;
-      }
-    }
-
-    dispatch(updateEditorFocused(false));
-    setInitData();
-  }, [note.title, note.body, setInitData, dispatch]);
-
-  const onUpdateNoteIdUrlHash = useCallback(() => {
-    const title = titleInput.current.value;
-    const { body } = replaceObjectUrls(
-      bodyEditor.current.getData(),
-      window.CKEditorObjectUrlContents,
-      objectUrlNames.current
-    );
-
-    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
-      dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH));
-      updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
-      return;
-    }
-
-    dispatch(updateNoteIdUrlHash(null, true, false));
-  }, [note.title, note.body, dispatch]);
-
-  const onUpdateNoteId = useCallback(() => {
-    const title = titleInput.current.value;
-    const { body } = replaceObjectUrls(
-      bodyEditor.current.getData(),
-      window.CKEditorObjectUrlContents,
-      objectUrlNames.current
-    );
-
-    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
-      dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_NOTE_ID));
-      updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
-      return;
-    }
-
-    dispatch(updateNoteId(null, true, false));
-  }, [note.title, note.body, dispatch]);
-
-  const onChangeListName = useCallback(() => {
-    const title = titleInput.current.value;
-    const { body } = replaceObjectUrls(
-      bodyEditor.current.getData(),
-      window.CKEditorObjectUrlContents,
-      objectUrlNames.current
-    );
-
-    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
-      dispatch(updateDiscardAction(DISCARD_ACTION_CHANGE_LIST_NAME));
-      updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
-      return;
-    }
-
-    dispatch(changeListName(null, false));
-  }, [note.title, note.body, dispatch]);
+    const action = getDataAction.current;
+    if (action === GET_DATA_SAVE_NOTE) {
+      dispatch(saveNote(title, body, media));
+    } else if (action === GET_DATA_DISCARD_NOTE) {
+      dispatch(discardNote(true, title, body));
+    } else if (action === GET_DATA_UPDATE_NOTE_ID_URL_HASH) {
+      dispatch(onUpdateNoteIdUrlHash(title, body));
+    } else if (action === GET_DATA_UPDATE_NOTE_ID) {
+      dispatch(onUpdateNoteId(title, body));
+    } else if (action === GET_DATA_CHANGE_LIST_NAME) {
+      dispatch(onChangeListName(title, body));
+    } else throw new Error(`Invalid getDataAction: ${getDataAction.current}`);
+  }, [dispatch]);
 
   const onReady = useCallback((editor) => {
     if (isMobile) {
@@ -220,9 +213,11 @@ const NoteEditorEditor = (props) => {
       if (groupedItemsDropdown) groupedItemsDropdown.set('isOpen', false);
     });
 
+    window.JustNoteReactWebApp = { addObjectUrlFiles: onAddObjectUrlFiles };
+
     bodyEditor.current = editor;
     setEditorReady(true);
-  }, [isMobile, setEditorReady]);
+  }, [isMobile, onAddObjectUrlFiles, setEditorReady]);
 
   useEffect(() => {
     if (!isEditorReady) return;
@@ -232,50 +227,76 @@ const NoteEditorEditor = (props) => {
   useEffect(() => {
     if (!isEditorReady) return;
     if (saveNoteCount !== prevSaveNoteCount.current) {
-      onSaveNote();
+      getDataAction.current = GET_DATA_SAVE_NOTE;
+      onGetData();
       prevSaveNoteCount.current = saveNoteCount;
     }
-  }, [isEditorReady, saveNoteCount, onSaveNote]);
+  }, [isEditorReady, saveNoteCount, onGetData]);
 
   useEffect(() => {
     if (!isEditorReady) return;
     if (discardNoteCount !== prevDiscardNoteCount.current) {
-      onDiscardNote(true);
+      getDataAction.current = GET_DATA_DISCARD_NOTE;
+      onGetData();
       prevDiscardNoteCount.current = discardNoteCount;
     }
-  }, [isEditorReady, discardNoteCount, onDiscardNote]);
-
-  useEffect(() => {
-    if (!isEditorReady) return;
-    if (confirmDiscardNoteCount !== prevConfirmDiscardNoteCount.current) {
-      onDiscardNote(false);
-      prevConfirmDiscardNoteCount.current = confirmDiscardNoteCount;
-    }
-  }, [isEditorReady, confirmDiscardNoteCount, onDiscardNote]);
+  }, [isEditorReady, discardNoteCount, onGetData]);
 
   useEffect(() => {
     if (!isEditorReady) return;
     if (updateNoteIdUrlHashCount !== prevUpdateNoteIdUrlHashCount.current) {
-      onUpdateNoteIdUrlHash();
+      getDataAction.current = GET_DATA_UPDATE_NOTE_ID_URL_HASH;
+      onGetData();
       prevUpdateNoteIdUrlHashCount.current = updateNoteIdUrlHashCount;
     }
-  }, [isEditorReady, updateNoteIdUrlHashCount, onUpdateNoteIdUrlHash]);
+  }, [isEditorReady, updateNoteIdUrlHashCount, onGetData]);
 
   useEffect(() => {
     if (!isEditorReady) return;
     if (updateNoteIdCount !== prevUpdateNoteIdCount.current) {
-      onUpdateNoteId();
+      getDataAction.current = GET_DATA_UPDATE_NOTE_ID;
+      onGetData();
       prevUpdateNoteIdCount.current = updateNoteIdCount;
     }
-  }, [isEditorReady, updateNoteIdCount, onUpdateNoteId]);
+  }, [isEditorReady, updateNoteIdCount, onGetData]);
 
   useEffect(() => {
     if (!isEditorReady) return;
     if (changeListNameCount !== prevChangeListNameCount.current) {
-      onChangeListName();
+      getDataAction.current = GET_DATA_CHANGE_LIST_NAME;
+      onGetData();
       prevChangeListNameCount.current = changeListNameCount;
     }
-  }, [isEditorReady, changeListNameCount, onChangeListName]);
+  }, [isEditorReady, changeListNameCount, onGetData]);
+
+  useEffect(() => {
+    /*
+      Why needs focusTitleCount and just can't use isFocused!
+
+      Focus flow:
+        1.1 User clicks on titleInput or bodyEditor
+        1.2 Or programatically call focusTitleInput
+        2. When titleInput or bodyEditor get focused, event listener onFocus is called
+        3. onFocus dispatches updateEditorFocused(true)
+      Blur flow:
+        1.1 User clicks save, cancel, or back buttons
+        1.2 An action dispatches updateEditorFocused(false)
+        1.3 Blur is called automatically when the element loses its focus
+     */
+    if (!isEditorReady) return;
+    if (focusTitleCount !== prevFocusTitleCount.current) {
+      focusTitleInput();
+      prevFocusTitleCount.current = focusTitleCount;
+    }
+  }, [isEditorReady, focusTitleCount]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+    if (setInitDataCount !== prevSetInitDataCount.current) {
+      setInitData();
+      prevSetInitDataCount.current = setInitDataCount;
+    }
+  }, [isEditorReady, setInitDataCount, setInitData]);
 
   useEffect(() => {
     if (!isEditorReady) return;
@@ -293,7 +314,8 @@ const NoteEditorEditor = (props) => {
       const title = titleInput.current.value;
       const { body } = replaceObjectUrls(
         bodyEditor.current.getData(),
-        window.CKEditorObjectUrlContents,
+        objectUrlContents.current,
+        objectUrlFiles.current,
         objectUrlNames.current
       );
       if (note.title !== title || !isNoteBodyEqual(note.body, body)) {

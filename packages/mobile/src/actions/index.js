@@ -39,7 +39,7 @@ import {
 } from '../types/actionTypes';
 import {
   DOMAIN_NAME, APP_URL_SCHEME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH,
-  ALERT_SCREEN_ROTATION_POPUP, CONFIRM_DISCARD_POPUP,
+  CONFIRM_DISCARD_POPUP, ALERT_SCREEN_ROTATION_POPUP,
   DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_NOTE_ID,
   DISCARD_ACTION_CHANGE_LIST_NAME, DISCARD_ACTION_UPDATE_SYNCED,
   MY_NOTES, TRASH, ID, NEW_NOTE, NEW_NOTE_OBJ,
@@ -737,11 +737,12 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       try {
         await dataApi.putNotes({ listName, notes: [note] });
-        dispatch({ type: ADD_NOTE_COMMIT, payload });
       } catch (e) {
         dispatch({ type: ADD_NOTE_ROLLBACK, payload: { ...payload, error: e } });
         return;
       }
+
+      dispatch({ type: ADD_NOTE_COMMIT, payload });
     } else if (status === DIED_UPDATING) {
       const fromNote = note.fromNote;
       const toNote = note;

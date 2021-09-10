@@ -19,5 +19,5 @@ declare module "*.json" {
 }
 
 interface Window {
-  CKEditorObjectUrlContents?: any;
+  JustNoteReactWebApp?: any;
 }

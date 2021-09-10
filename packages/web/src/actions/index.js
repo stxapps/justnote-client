@@ -2,8 +2,10 @@ import { showConnect, authenticate } from '@stacks/connect';
 import Url from 'url-parse';
 import { saveAs } from 'file-saver';
 
+import { Dirs } from '../fileSystem';
 import userSession from '../userSession';
 import dataApi from '../apis/data';
+import fileApi from '../apis/file';
 import {
   INIT, UPDATE_WINDOW_SIZE, UPDATE_USER, UPDATE_HANDLING_SIGN_IN,
   UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP, UPDATE_SEARCH_STRING,
@@ -27,23 +29,28 @@ import {
   RETRY_DELETE_LIST_NAMES, CANCEL_DIED_LIST_NAMES, UPDATE_DISCARD_ACTION,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
   UPDATE_UPDATE_SETTINGS_PROGRESS, INCREASE_SAVE_NOTE_COUNT,
-  INCREASE_DISCARD_NOTE_COUNT, INCREASE_CONFIRM_DISCARD_NOTE_COUNT,
-  INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT, INCREASE_UPDATE_NOTE_ID_COUNT,
-  INCREASE_CHANGE_LIST_NAME_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
+  INCREASE_DISCARD_NOTE_COUNT, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
+  INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
+  INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT,
+  INCREASE_BLUR_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
+  CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   APP_NAME, APP_ICON_NAME, SEARCH_POPUP, SETTINGS_POPUP,
   CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, ALERT_SCREEN_ROTATION_POPUP,
-  MY_NOTES, TRASH, ID, NEW_NOTE,
+  DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH,
+  DISCARD_ACTION_UPDATE_NOTE_ID, DISCARD_ACTION_CHANGE_LIST_NAME,
+  MY_NOTES, TRASH, ID, NEW_NOTE, NEW_NOTE_OBJ,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
-  SWAP_LEFT, SWAP_RIGHT, N_NOTES, SETTINGS, INDEX, DOT_JSON, LG_WIDTH,
+  SWAP_LEFT, SWAP_RIGHT, N_NOTES, CD_ROOT, SETTINGS, INDEX, DOT_JSON,
+  LG_WIDTH,
 } from '../types/const';
 import {
-  throttle, getUserImageUrl,
-  extractUrl, separateUrlAndParam, getUrlPathQueryHash, urlHashToObj, objToUrlHash,
-  randomString, swapArrayElements, isIPadIPhoneIPod, isBusyStatus,
+  throttle, extractUrl, getUrlPathQueryHash, urlHashToObj, objToUrlHash,
+  separateUrlAndParam, getUserImageUrl, randomString, swapArrayElements,
+  isIPadIPhoneIPod, isBusyStatus, isNoteBodyEqual, getStaticFPath, deriveFPaths,
 } from '../utils';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
@@ -247,6 +254,9 @@ export const signOut = () => async (dispatch, getState) => {
 
   userSession.signUserOut();
 
+  // clear file storage
+  await fileApi.deleteAllFiles();
+
   // clear all user data!
   dispatch({
     type: RESET_STATE,
@@ -429,6 +439,19 @@ export const updateNoteIdUrlHash = (
   };
 };
 
+export const onUpdateNoteIdUrlHash = (title, body) => async (dispatch, getState) => {
+  const { listName, noteId } = getState().display;
+  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
+
+  if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+    dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH));
+    updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
+    return;
+  }
+
+  dispatch(updateNoteIdUrlHash(null, true, false));
+};
+
 export const updatePopupUrlHash = (id, isShown, anchorPosition, doReplace = false) => {
   if (!isShown) {
     window.history.back();
@@ -492,6 +515,19 @@ export const changeListName = (listName, doCheckEditing) => async (
   });
 };
 
+export const onChangeListName = (title, body) => async (dispatch, getState) => {
+  const { listName, noteId } = getState().display;
+  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
+
+  if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+    dispatch(updateDiscardAction(DISCARD_ACTION_CHANGE_LIST_NAME));
+    updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
+    return;
+  }
+
+  dispatch(changeListName(null, false));
+};
+
 const _updateNoteId = (id) => {
   return {
     type: UPDATE_NOTE_ID,
@@ -515,6 +551,19 @@ export const updateNoteId = (id, doGetIdFromState = false, doCheckEditing = fals
 
     dispatch(_updateNoteId(id));
   };
+};
+
+export const onUpdateNoteId = (title, body) => async (dispatch, getState) => {
+  const { listName, noteId } = getState().display;
+  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
+
+  if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+    dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_NOTE_ID));
+    updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
+    return;
+  }
+
+  dispatch(updateNoteId(null, true, false));
 };
 
 export const updatePopup = (id, isShown, anchorPosition) => {
@@ -570,6 +619,31 @@ export const updatePageYOffset = (pageYOffset) => {
   return { type: UPDATE_PAGE_Y_OFFSET, payload: pageYOffset };
 };
 
+const fetchStaticFiles = async (notes, conflictedNotes) => {
+  const fpaths = [];
+  for (const note of notes) {
+    if (note.media) {
+      for (const { name } of note.media) {
+        if (name.includes(CD_ROOT + '/')) fpaths.push(getStaticFPath(name));
+      }
+    }
+  }
+  if (conflictedNotes) {
+    for (const conflictedNote of conflictedNotes) {
+      for (const note of conflictedNote.notes) {
+        if (note.media) {
+          for (const { name } of note.media) {
+            if (name.includes(CD_ROOT + '/')) fpaths.push(getStaticFPath(name));
+          }
+        }
+      }
+    }
+  }
+
+  const contents = await dataApi.getFiles(fpaths);
+  await fileApi.writeFiles(fpaths, contents);
+};
+
 export const fetch = (
   doDeleteOldNotesInTrash, doFetchSettings = false
 ) => async (dispatch, getState) => {
@@ -585,6 +659,9 @@ export const fetch = (
       listName, sortOn, doDescendingOrder, doDeleteOldNotesInTrash, doFetchSettings,
     };
     const fetched = await dataApi.fetch(params);
+
+    await fetchStaticFiles(fetched.notes, fetched.conflictedNotes);
+
     dispatch({ type: FETCH_COMMIT, payload: { ...params, ...fetched } });
   } catch (e) {
     dispatch({ type: FETCH_ROLLBACK, payload: e });
@@ -604,6 +681,9 @@ export const fetchMore = () => async (dispatch, getState) => {
   try {
     const params = { listName, ids, sortOn, doDescendingOrder };
     const fetched = await dataApi.fetchMore(params);
+
+    await fetchStaticFiles(fetched.notes, null);
+
     dispatch({ type: FETCH_MORE_COMMIT, payload: { ...params, ...fetched } });
   } catch (e) {
     dispatch({ type: FETCH_MORE_ROLLBACK, payload: { ...payload, error: e } });
@@ -625,15 +705,35 @@ export const addNote = (title, body, media, listName = null) => async (
     updatedDT: addedDT,
   };
 
+  const savingFPaths = getState().editor.savingFPaths;
+  const { usedFPaths, localUnusedFPaths } = deriveFPaths(media, null, savingFPaths);
+
   const payload = { listName, note };
   dispatch({ type: ADD_NOTE, payload });
 
   try {
-    await dataApi.putNotes({ listName, notes: [note] });
-    dispatch({ type: ADD_NOTE_COMMIT, payload });
+    const usedContents = await fileApi.readFiles(usedFPaths, Dirs.DocumentDir);
+    await dataApi.putFiles(usedFPaths, usedContents);
   } catch (e) {
     dispatch({ type: ADD_NOTE_ROLLBACK, payload: { ...payload, error: e } });
+    return;
   }
+
+  try {
+    await dataApi.putNotes({ listName, notes: [note] });
+  } catch (e) {
+    dispatch({ type: ADD_NOTE_ROLLBACK, payload: { ...payload, error: e } });
+    return;
+  }
+
+  try {
+    await fileApi.deleteFiles(localUnusedFPaths, Dirs.DocumentDir);
+  } catch (e) {
+    console.log(`addNote: deleteFiles with ${localUnusedFPaths} error: `, e);
+    // error in this step should be fine
+  }
+
+  dispatch({ type: ADD_NOTE_COMMIT, payload });
 };
 
 export const updateNote = (title, body, media, id) => async (dispatch, getState) => {
@@ -655,8 +755,21 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
     media: note.media ? note.media.map(m => ({ name: m.name, content: '' })) : null,
   };
 
+  const savingFPaths = getState().editor.savingFPaths;
+  const {
+    usedFPaths, serverUnusedFPaths, localUnusedFPaths
+  } = deriveFPaths(media, note.media, savingFPaths);
+
   const payload = { listName, fromNote, toNote };
   dispatch({ type: UPDATE_NOTE, payload });
+
+  try {
+    const usedContents = await fileApi.readFiles(usedFPaths, Dirs.DocumentDir);
+    await dataApi.putFiles(usedFPaths, usedContents);
+  } catch (e) {
+    dispatch({ type: UPDATE_NOTE_ROLLBACK, payload: { ...payload, error: e } });
+    return;
+  }
 
   try {
     await dataApi.putNotes({ listName, notes: [toNote] });
@@ -672,17 +785,62 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
     // error in this step should be fine
   }
 
+  try {
+    await dataApi.deleteFiles(serverUnusedFPaths);
+  } catch (e) {
+    console.log(`updateNote: dataApi.deleteFiles with ${serverUnusedFPaths} error: `, e);
+    // error in this step should be fine
+  }
+
+  try {
+    await fileApi.deleteFiles(localUnusedFPaths, Dirs.DocumentDir);
+  } catch (e) {
+    console.log(`updateNote: fileApi.deleteFiles with ${localUnusedFPaths} error: `, e);
+    // error in this step should be fine
+  }
+
   dispatch({ type: UPDATE_NOTE_COMMIT, payload });
 };
 
 export const saveNote = (title, body, media) => async (dispatch, getState) => {
 
-  const { noteId } = getState().display;
-  if (noteId === NEW_NOTE) {
-    dispatch(addNote(title, body, media));
-  } else {
-    dispatch(updateNote(title, body, media, noteId));
+  const { listName, noteId } = getState().display;
+  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
+
+  if (title === '' && body === '') {
+    dispatch(updateEditorBusy(false));
+    setTimeout(() => {
+      dispatch(increaseFocusTitleCount());
+    }, 1);
+    return;
   }
+
+  if (note.title === title && isNoteBodyEqual(note.body, body)) {
+    dispatch(updateEditorBusy(false));
+    return;
+  }
+
+  if (noteId === NEW_NOTE) dispatch(addNote(title, body, media));
+  else dispatch(updateNote(title, body, media, noteId));
+};
+
+export const discardNote = (doCheckEditing, title = null, body = null) => async (
+  dispatch, getState
+) => {
+
+  const { listName, noteId } = getState().display;
+  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
+
+  if (doCheckEditing) {
+    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+      dispatch(updateDiscardAction(DISCARD_ACTION_CANCEL_EDIT));
+      updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
+      return;
+    }
+  }
+
+  dispatch(updateEditorFocused(false));
+  dispatch(increaseSetInitDataCount());
 };
 
 const _moveNotes = (toListName, ids, fromListName = null) => async (
@@ -732,10 +890,11 @@ const _moveNotes = (toListName, ids, fromListName = null) => async (
   dispatch({ type: MOVE_NOTES_COMMIT, payload });
 };
 
-export const moveNotes = (toListName, safeAreaWidth) => async (dispatch, getState) => {
+export const moveNotes = (toListName) => async (dispatch, getState) => {
 
   const { noteId, isBulkEditing, selectedNoteIds } = getState().display;
 
+  const safeAreaWidth = getState().window.width;
   if (safeAreaWidth < LG_WIDTH && !isBulkEditing) updateNoteIdUrlHash(null);
   else dispatch(updateNoteId(null));
 
@@ -774,6 +933,13 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
     return fromNote;
   });
 
+  const unusedFPaths = [];
+  for (const note of fromNotes) {
+    for (const { name } of note.media) {
+      if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
+    }
+  }
+
   const payload = { listName, ids };
   dispatch({ type: DELETE_NOTES, payload });
 
@@ -791,13 +957,28 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
     // error in this step should be fine
   }
 
+  try {
+    await dataApi.deleteFiles(unusedFPaths);
+  } catch (e) {
+    console.log(`deleteNotes: dataApi.deleteFiles with ${unusedFPaths} error: `, e);
+    // error in this step should be fine
+  }
+
+  try {
+    await fileApi.deleteFiles(unusedFPaths, Dirs.DocumentDir);
+  } catch (e) {
+    console.log(`deleteNotes: fileApi.deleteFiles with ${unusedFPaths} error: `, e);
+    // error in this step should be fine
+  }
+
   dispatch({ type: DELETE_NOTES_COMMIT, payload });
 };
 
-export const deleteNotes = (safeAreaWidth) => async (dispatch, getState) => {
+export const deleteNotes = () => async (dispatch, getState) => {
 
   const { noteId, isBulkEditing, selectedNoteIds } = getState().display;
 
+  const safeAreaWidth = getState().window.width;
   if (safeAreaWidth < LG_WIDTH && !isBulkEditing) updateNoteIdUrlHash(null);
   else dispatch(updateNoteId(null));
 
@@ -810,9 +991,11 @@ export const deleteNotes = (safeAreaWidth) => async (dispatch, getState) => {
   }
 };
 
-export const retryDiedNotes = (ids, safeAreaWidth) => async (dispatch, getState) => {
+export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
+  let addedDT = Date.now();
   const listName = getState().display.listName;
+
   for (const id of ids) {
     // DIED_ADDING -> try add this note again
     // DIED_UPDATING -> try update this note again
@@ -821,22 +1004,46 @@ export const retryDiedNotes = (ids, safeAreaWidth) => async (dispatch, getState)
     const note = getState().notes[listName][id];
     const { status } = note;
     if (status === DIED_ADDING) {
+      // Don't delete files in savingFPaths as they might not for this note.
+      const { usedFPaths } = deriveFPaths(note.media, null, null);
+
       const payload = { listName, note };
       dispatch({ type: ADD_NOTE, payload });
 
       try {
-        await dataApi.putNotes({ listName, notes: [note] });
-        dispatch({ type: ADD_NOTE_COMMIT, payload });
+        const usedContents = await fileApi.readFiles(usedFPaths, Dirs.DocumentDir);
+        await dataApi.putFiles(usedFPaths, usedContents);
       } catch (e) {
         dispatch({ type: ADD_NOTE_ROLLBACK, payload: { ...payload, error: e } });
         return;
       }
+
+      try {
+        await dataApi.putNotes({ listName, notes: [note] });
+      } catch (e) {
+        dispatch({ type: ADD_NOTE_ROLLBACK, payload: { ...payload, error: e } });
+        return;
+      }
+
+      dispatch({ type: ADD_NOTE_COMMIT, payload });
     } else if (status === DIED_UPDATING) {
       const fromNote = note.fromNote;
       const toNote = note;
 
+      const {
+        usedFPaths, serverUnusedFPaths, localUnusedFPaths,
+      } = deriveFPaths(toNote.media, fromNote.media, null);
+
       const payload = { listName, fromNote, toNote };
       dispatch({ type: UPDATE_NOTE, payload });
+
+      try {
+        const usedContents = await fileApi.readFiles(usedFPaths, Dirs.DocumentDir);
+        await dataApi.putFiles(usedFPaths, usedContents);
+      } catch (e) {
+        dispatch({ type: UPDATE_NOTE_ROLLBACK, payload: { ...payload, error: e } });
+        return;
+      }
 
       try {
         await dataApi.putNotes({ listName, notes: [toNote] });
@@ -849,6 +1056,20 @@ export const retryDiedNotes = (ids, safeAreaWidth) => async (dispatch, getState)
         await dataApi.putNotes({ listName, notes: [fromNote] });
       } catch (e) {
         console.log('updateNote: putNotes with fromNote error: ', e);
+        // error in this step should be fine
+      }
+
+      try {
+        await dataApi.deleteFiles(serverUnusedFPaths);
+      } catch (e) {
+        console.log(`updateNote: dataApi.deleteFiles with ${serverUnusedFPaths} error: `, e);
+        // error in this step should be fine
+      }
+
+      try {
+        await fileApi.deleteFiles(localUnusedFPaths, Dirs.DocumentDir);
+      } catch (e) {
+        console.log(`updateNote: fileApi.deleteFiles with ${localUnusedFPaths} error: `, e);
         // error in this step should be fine
       }
 
@@ -878,9 +1099,27 @@ export const retryDiedNotes = (ids, safeAreaWidth) => async (dispatch, getState)
 
       dispatch({ type: MOVE_NOTES_COMMIT, payload });
     } else if (status === DIED_DELETING) {
-      const { fromNote } = note;
-      const toNote = note;
+      const toNote = {
+        ...note,
+        parentIds: [note.id],
+        id: `deleted${addedDT}${randomString(4)}`,
+        title: '', body: '', media: [],
+        updatedDT: addedDT,
+      };
+      addedDT += 1;
 
+      const fromNote = {
+        ...note,
+        title: '', body: '',
+        media: note.media ? note.media.map(m => ({ name: m.name, content: '' })) : null,
+      };
+
+      const unusedFPaths = [];
+      for (const { name } of fromNote.media) {
+        if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
+      }
+
+      const safeAreaWidth = getState().window.width;
       if (safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(null);
       else dispatch(updateNoteId(null));
 
@@ -898,6 +1137,20 @@ export const retryDiedNotes = (ids, safeAreaWidth) => async (dispatch, getState)
         await dataApi.putNotes({ listName, notes: [fromNote] });
       } catch (e) {
         console.log('deleteNotes: putNotes with fromNotes error: ', e);
+        // error in this step should be fine
+      }
+
+      try {
+        await dataApi.deleteFiles(unusedFPaths);
+      } catch (e) {
+        console.log(`deleteNotes: dataApi.deleteFiles with ${unusedFPaths} error: `, e);
+        // error in this step should be fine
+      }
+
+      try {
+        await fileApi.deleteFiles(unusedFPaths, Dirs.DocumentDir);
+      } catch (e) {
+        console.log(`deleteNotes: fileApi.deleteFiles with ${unusedFPaths} error: `, e);
         // error in this step should be fine
       }
 
@@ -967,6 +1220,13 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
     return fromNote;
   });
 
+  const unusedFPaths = [];
+  for (const note of fromNotes) {
+    for (const { name } of note.media) {
+      if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
+    }
+  }
+
   const payload = { listName, ids: _.extract(fromNotes, ID) };
   dispatch({ type: DELETE_OLD_NOTES_IN_TRASH, payload });
 
@@ -981,6 +1241,20 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
     await dataApi.putNotes({ listName, notes: fromNotes });
   } catch (e) {
     console.log('deleteOldNotesInTrash: putNotes with fromNotes error: ', e);
+    // error in this step should be fine
+  }
+
+  try {
+    await dataApi.deleteFiles(unusedFPaths);
+  } catch (e) {
+    console.log(`deleteNotes: dataApi.deleteFiles with ${unusedFPaths} error: `, e);
+    // error in this step should be fine
+  }
+
+  try {
+    await fileApi.deleteFiles(unusedFPaths, Dirs.DocumentDir);
+  } catch (e) {
+    console.log(`deleteOldNotesInTrash: deleteFiles with ${unusedFPaths} error: `, e);
     // error in this step should be fine
   }
 
@@ -1018,8 +1292,24 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
     });
   }
 
+  const noteMedia = [];
+  for (const notes of Object.values(fromNotes)) {
+    for (const note of notes) noteMedia.push(...note.media);
+  }
+  const {
+    usedFPaths, serverUnusedFPaths, localUnusedFPaths,
+  } = deriveFPaths(toNote.media, noteMedia, null);
+
   const payload = { conflictedNote, toListName, toNote };
   dispatch({ type: MERGE_NOTES, payload });
+
+  try {
+    const usedContents = await fileApi.readFiles(usedFPaths, Dirs.DocumentDir);
+    await dataApi.putFiles(usedFPaths, usedContents);
+  } catch (e) {
+    dispatch({ type: MERGE_NOTES_ROLLBACK, payload: { ...payload, error: e } });
+    return;
+  }
 
   try {
     await dataApi.putNotes({ listName: toListName, notes: [toNote] });
@@ -1034,6 +1324,20 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
     }
   } catch (e) {
     console.log('mergeNote: putNotes with fromNotes error: ', e);
+    // error in this step should be fine
+  }
+
+  try {
+    await dataApi.deleteFiles(serverUnusedFPaths);
+  } catch (e) {
+    console.log(`mergeNote: dataApi.deleteFiles with ${serverUnusedFPaths} error: `, e);
+    // error in this step should be fine
+  }
+
+  try {
+    await fileApi.deleteFiles(localUnusedFPaths, Dirs.DocumentDir);
+  } catch (e) {
+    console.log(`mergeNote: fileApi.deleteFiles with ${localUnusedFPaths} error: `, e);
     // error in this step should be fine
   }
 
@@ -1414,10 +1718,6 @@ export const increaseDiscardNoteCount = () => {
   return { type: INCREASE_DISCARD_NOTE_COUNT };
 };
 
-export const increaseConfirmDiscardNoteCount = () => {
-  return { type: INCREASE_CONFIRM_DISCARD_NOTE_COUNT };
-};
-
 export const increaseUpdateNoteIdUrlHashCount = (id) => {
   return {
     type: INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
@@ -1439,8 +1739,35 @@ export const increaseChangeListNameCount = (listName) => {
   };
 };
 
+export const increaseFocusTitleCount = () => {
+  return { type: INCREASE_FOCUS_TITLE_COUNT };
+};
+
+export const increaseSetInitDataCount = () => {
+  return { type: INCREASE_SET_INIT_DATA_COUNT };
+};
+
+export const increaseBlurCount = () => {
+  return { type: INCREASE_BLUR_COUNT };
+};
+
 export const increaseUpdateEditorWidthCount = () => {
   return { type: INCREASE_UPDATE_EDITOR_WIDTH_COUNT };
+};
+
+export const clearSavingFPaths = () => async (dispatch, getState) => {
+  const savingFPaths = getState().editor.savingFPaths;
+  try {
+    await fileApi.deleteFiles(savingFPaths, Dirs.DocumentDir);
+  } catch (e) {
+    console.log(`clearSavingFiles: deleteFiles with ${savingFPaths} error: `, e);
+    // error in this step should be fine
+  }
+  dispatch({ type: CLEAR_SAVING_FPATHS });
+};
+
+export const addSavingFPaths = (fpaths) => {
+  return { type: ADD_SAVING_FPATHS, payload: fpaths };
 };
 
 const exportAllDataLoop = async (dispatch, fpaths, doneCount) => {
@@ -1590,12 +1917,15 @@ export const deleteAllData = () => async (dispatch, getState) => {
   const addedDT = Date.now();
   const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
 
-  let allNoteIds, _settingsFPath;
+  let allNoteIds, _staticFPaths, _settingsFPath;
   try {
-    const { noteFPaths, settingsFPath: sFPath } = await dataApi.listFPaths();
+    const {
+      noteFPaths, staticFPaths, settingsFPath: sFPath,
+    } = await dataApi.listFPaths();
     const { noteIds, conflictedIds } = dataApi.listNoteIds(noteFPaths);
 
     allNoteIds = [...noteIds, ...conflictedIds];
+    _staticFPaths = staticFPaths;
     _settingsFPath = sFPath;
   } catch (e) {
     dispatch(updateDeleteAllDataProgress({
@@ -1613,6 +1943,7 @@ export const deleteAllData = () => async (dispatch, getState) => {
 
   try {
     if (allNoteIds.length > 0) await deleteAllDataLoop(dispatch, allNoteIds, total, 0);
+    if (_staticFPaths) await dataApi.deleteFiles(_staticFPaths);
     if (_settingsFPath) {
       await dataApi.putFiles([settingsFPath], [{ ...initialSettingsState }]);
       try {
@@ -1622,6 +1953,7 @@ export const deleteAllData = () => async (dispatch, getState) => {
         // error in this step should be fine
       }
     }
+    await fileApi.deleteAllFiles();
 
     updatePopupUrlHash(SETTINGS_POPUP, false, null);
     dispatch({ type: DELETE_ALL_DATA, payload: { settingsFPath } });

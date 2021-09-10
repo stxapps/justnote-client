@@ -127,6 +127,7 @@ const NoteEditorEditor = (props) => {
         dispatch(addSavingFPaths([cfpart]));
         objectUrlFiles.current[objectUrl] = { fname: cfpart, content: '' };
       } catch (e) {
+        console.log(`NoteEditorEditor: onAddObjectUrlFiles with fpart: ${fpart} error: `, e);
         objectUrlFiles.current[objectUrl] = { fname, content };
       }
     } else {

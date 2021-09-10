@@ -3,8 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import {
-  updatePopupUrlHash, increaseConfirmDiscardNoteCount, updateNoteIdUrlHash, updateNoteId,
-  changeListName,
+  updatePopupUrlHash, discardNote, updateNoteIdUrlHash, updateNoteId,
+  changeListName, clearSavingFPaths
 } from '../actions';
 import {
   CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT,
@@ -32,8 +32,9 @@ const ConfirmDiscardPopup = () => {
 
   const onConfirmDiscardOkBtnClick = () => {
     if (didClick.current) return;
+
     if (discardAction === DISCARD_ACTION_CANCEL_EDIT) {
-      dispatch(increaseConfirmDiscardNoteCount());
+      dispatch(discardNote(false));
     } else if (discardAction === DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH) {
       // As this and closing discard popup both call window.history.back(),
       //   need to be in different js clock cycle.
@@ -43,6 +44,9 @@ const ConfirmDiscardPopup = () => {
     } else if (discardAction === DISCARD_ACTION_CHANGE_LIST_NAME) {
       dispatch(changeListName(null, false));
     } else throw new Error(`Invalid discard action: ${discardAction}`);
+
+    dispatch(clearSavingFPaths());
+
     onConfirmDiscardCancelBtnClick();
     didClick.current = true;
   };

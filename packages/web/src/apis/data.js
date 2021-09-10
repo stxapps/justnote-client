@@ -1,7 +1,8 @@
 import userSession from '../userSession';
 import {
-  NOTES, SETTINGS, INDEX, DOT_JSON, N_NOTES, MAX_TRY, TRASH, N_DAYS,
+  NOTES, IMAGES, SETTINGS, INDEX, DOT_JSON, N_NOTES, MAX_TRY, TRASH, N_DAYS,
 } from '../types/const';
+import { splitOnFirst } from '../utils';
 
 const createNoteFPath = (listName, fname, subName) => {
   return `${NOTES}/${listName}/${fname}/${subName}`;
@@ -13,7 +14,9 @@ const createNoteFName = (id, parentIds) => {
 };
 
 const extractNoteFPath = (fpath) => {
-  let [listName, fname, subName] = fpath.split('/').slice(1);
+  const rest1 = splitOnFirst(fpath, '/')[1];
+  const [listName, rest2] = splitOnFirst(rest1, '/');
+  const [fname, subName] = splitOnFirst(rest2, '/');
   return { listName, fname, subName };
 };
 
@@ -37,11 +40,14 @@ const extractNoteId = (id) => {
 const listFPaths = async () => {
 
   const noteFPaths = [];
+  const staticFPaths = [];
   let settingsFPath = null;
 
   await userSession.listFiles((fpath) => {
     if (fpath.startsWith(NOTES)) {
       noteFPaths.push(fpath);
+    } else if (fpath.startsWith(IMAGES)) {
+      staticFPaths.push(fpath);
     } else if (fpath.startsWith(SETTINGS)) {
       if (!settingsFPath) settingsFPath = fpath;
       else {
@@ -52,13 +58,13 @@ const listFPaths = async () => {
         if (dt < _dt) settingsFPath = fpath;
       }
     } else {
-      throw new Error(`Invalid file path: ${fpath}`);
+      console.log(`Invalid file path: ${fpath}`);
     }
 
     return true;
   });
 
-  return { noteFPaths, settingsFPath };
+  return { noteFPaths, staticFPaths, settingsFPath };
 };
 
 const listNoteIds = (noteFPaths) => {

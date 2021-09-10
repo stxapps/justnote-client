@@ -30,7 +30,7 @@ const ConfirmDeletePopup = () => {
     else {
       // As this and closing discard popup both call window.history.back(),
       //   need to be in different js clock cycle.
-      setTimeout(() => dispatch(deleteNotes(safeAreaWidth)), 100);
+      setTimeout(() => dispatch(deleteNotes()), 100);
     }
     onConfirmDeleteCancelBtnClick();
 

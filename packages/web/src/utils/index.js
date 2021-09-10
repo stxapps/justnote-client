@@ -1,7 +1,7 @@
 import Url from 'url-parse';
 
 import {
-  HTTP, MAX_CHARS,
+  HTTP, MAX_CHARS, CD_ROOT,
   ADDING, UPDATING, MOVING, DELETING, MERGING,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, DIED_MERGING,
   VALID_URL, NO_URL, ASK_CONFIRM_URL,
@@ -152,6 +152,13 @@ export const isObject = val => {
 
 export const isString = val => {
   return typeof val === 'string' || val instanceof String;
+};
+
+export const isArrayBuffer = val => {
+  return (
+    (typeof ArrayBuffer === 'function') &&
+    (val instanceof ArrayBuffer || toString.call(val) === '[object ArrayBuffer]')
+  );
 };
 
 export const isEqual = (x, y) => {
@@ -471,38 +478,54 @@ export const isMobile = () => {
   return false;
 };
 
-export const replaceObjectUrls = (body, objectUrlContents, objectUrlNames) => {
+export const replaceObjectUrls = (
+  body, objectUrlContents, objectUrlFiles, objectUrlNames
+) => {
   const sources = [];
   for (const match of body.matchAll(/<img.+?src="([^"]*)"[^>]*>/g)) {
     const src = match[1];
-    if (src.startsWith('blob:')) sources.push(src);
+    if (src.startsWith('blob:') || src.startsWith('file:')) sources.push(src);
   }
 
   const media = [];
   for (const src of sources) {
     let fname, content;
-    if (objectUrlContents[src]) ({ fname, content } = objectUrlContents[src]);
-    if (!fname) {
-      console.log(`replaceObjectUrls: Not found fname in objectUrlContents: ${objectUrlContents} with src: ${src}`);
-      continue;
-    }
-    if (!content) {
-      console.log(`replaceObjectUrls: Not found content in objectUrlContents: ${objectUrlContents} with src: ${src}`);
+    if (objectUrlContents[src]) {
+      ({ fname, content } = objectUrlContents[src]);
+      if (!fname) {
+        console.log(`replaceObjectUrls: Not found fname in objectUrlContents: ${objectUrlContents} with src: ${src}`);
+        continue;
+      }
+      if (!content) {
+        console.log(`replaceObjectUrls: Not found content in objectUrlContents: ${objectUrlContents} with src: ${src}`);
+        continue;
+      }
+    } else if (objectUrlFiles[src]) {
+      ({ fname, content } = objectUrlFiles[src]);
+      if (!fname) {
+        console.log(`replaceObjectUrls: Not found fname in objectUrlFiles: ${objectUrlFiles} with src: ${src}`);
+        continue;
+      }
+      if (!content) {
+        console.log(`replaceObjectUrls: Not found content in objectUrlFiles: ${objectUrlFiles} with src: ${src}`);
+        continue;
+      }
+    } else {
+      console.log(`replaceObjectUrls: Not found src: ${src} in both objectUrlContents: ${objectUrlContents} and objectUrlFiles: ${objectUrlFiles}`);
       continue;
     }
 
     let name = objectUrlNames[src];
     if (!name) {
-      name = `${randomString(4)}-${randomString(4)}-${randomString(4)}-${randomString(4)}`;
-
-      let ext;
-      if (fname.includes('.')) {
-        const _ext = fname.split('.').slice(-1)[0];
-        if (_ext.length <= 5) ext = _ext;
-      }
-      if (ext) name += `.${ext.toLowerCase()}`;
+      if (fname.startsWith(CD_ROOT + '/')) name = fname;
       else {
-        console.log(`replaceObjectUrls: Not found ext from filename: ${fname} with src: ${src}`);
+        name = `${randomString(4)}-${randomString(4)}-${randomString(4)}-${randomString(4)}`;
+
+        const ext = getFileExt(fname);
+        if (ext) name += `.${ext}`;
+        else {
+          console.log(`replaceObjectUrls: Not found ext from filename: ${fname} with src: ${src}`);
+        }
       }
     }
 
@@ -518,4 +541,48 @@ export const splitOnFirst = (str, sep) => {
   if (i < 0) return [str, ''];
 
   return [str.slice(0, i), str.slice(i + sep.length)];
+};
+
+export const getFileExt = (fname) => {
+  if (fname.includes('.')) {
+    const ext = fname.split('.').pop();
+    if (ext.length <= 5) return ext.toLowerCase();
+  }
+  return null;
+};
+
+export const getStaticFPath = (fpath) => {
+  fpath = fpath.slice(fpath.indexOf(CD_ROOT + '/'));
+  fpath = fpath.slice((CD_ROOT + '/').length);
+  return fpath;
+};
+
+export const deriveFPaths = (media, noteMedia, savingFPaths) => {
+  const usedFPaths = [], serverUnusedFPaths = [], localUnusedFPaths = [];
+
+  for (const { name } of media) {
+    if (!name.startsWith(CD_ROOT + '/')) continue;
+    if (noteMedia && noteMedia.some(m => m.name === name)) continue;
+    usedFPaths.push(getStaticFPath(name));
+  }
+
+  if (noteMedia) {
+    for (const { name } of noteMedia) {
+      if (!name.startsWith(CD_ROOT + '/')) continue;
+      if (media.some(m => m.name === name)) continue;
+
+      const staticFPath = getStaticFPath(name);
+      serverUnusedFPaths.push(staticFPath);
+      localUnusedFPaths.push(staticFPath);
+    }
+  }
+
+  if (savingFPaths) {
+    for (const fpath of savingFPaths) {
+      if (media.some(m => m.name === fpath)) continue;
+      localUnusedFPaths.push(getStaticFPath(fpath));
+    }
+  }
+
+  return { usedFPaths, serverUnusedFPaths, localUnusedFPaths };
 };

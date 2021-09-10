@@ -154,6 +154,13 @@ export const isString = val => {
   return typeof val === 'string' || val instanceof String;
 };
 
+export const isArrayBuffer = val => {
+  return (
+    (typeof ArrayBuffer === 'function') &&
+    (val instanceof ArrayBuffer || toString.call(val) === '[object ArrayBuffer]')
+  );
+};
+
 export const isEqual = (x, y) => {
   if (x === y) return true;
   // if both x and y are null or undefined and exactly the same
