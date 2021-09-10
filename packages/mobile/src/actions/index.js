@@ -49,7 +49,7 @@ import {
 } from '../types/const';
 import {
   separateUrlAndParam, getUserImageUrl, randomString, swapArrayElements,
-  isNoteBodyEqual, getUnusedFPaths, getStaticFPath,
+  isNoteBodyEqual, getStaticFPath, deriveFPaths,
 } from '../utils';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
@@ -467,7 +467,7 @@ export const addNote = (title, body, media, listName = null) => async (
   };
 
   const savingFPaths = getState().editor.savingFPaths;
-  const unusedFPaths = getUnusedFPaths(media, savingFPaths, null);
+  const { localUnusedFPaths } = deriveFPaths(media, null, savingFPaths);
 
   const payload = { listName, note };
   dispatch({ type: ADD_NOTE, payload });
@@ -480,9 +480,9 @@ export const addNote = (title, body, media, listName = null) => async (
   }
 
   try {
-    await fileApi.deleteFiles(unusedFPaths, Dirs.DocumentDir);
+    await fileApi.deleteFiles(localUnusedFPaths, Dirs.DocumentDir);
   } catch (e) {
-    console.log(`addNote: deleteFiles with ${unusedFPaths} error: `, e);
+    console.log(`addNote: deleteFiles with ${localUnusedFPaths} error: `, e);
     // error in this step should be fine
   }
 
@@ -509,7 +509,7 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
   };
 
   const savingFPaths = getState().editor.savingFPaths;
-  const unusedFPaths = getUnusedFPaths(media, savingFPaths, note.media);
+  const { localUnusedFPaths } = deriveFPaths(media, note.media, savingFPaths);
 
   const payload = { listName, fromNote, toNote };
   dispatch({ type: UPDATE_NOTE, payload });
@@ -523,15 +523,9 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
 
   try {
     await dataApi.putNotes({ listName, notes: [fromNote] });
+    await fileApi.deleteFiles(localUnusedFPaths, Dirs.DocumentDir);
   } catch (e) {
-    console.log('updateNote: putNotes with fromNote error: ', e);
-    // error in this step should be fine
-  }
-
-  try {
-    await fileApi.deleteFiles(unusedFPaths, Dirs.DocumentDir);
-  } catch (e) {
-    console.log(`updateNote: deleteFiles with ${unusedFPaths} error: `, e);
+    console.log('updateNote: error: ', e);
     // error in this step should be fine
   }
 
@@ -671,7 +665,7 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
   const unusedFPaths = [];
   for (const note of fromNotes) {
     for (const { name } of note.media) {
-      if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(name);
+      if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
     }
   }
 
@@ -687,15 +681,9 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
 
   try {
     await dataApi.putNotes({ listName, notes: fromNotes });
-  } catch (e) {
-    console.log('deleteNotes: putNotes with fromNotes error: ', e);
-    // error in this step should be fine
-  }
-
-  try {
     await fileApi.deleteFiles(unusedFPaths, Dirs.DocumentDir);
   } catch (e) {
-    console.log(`deleteNotes: deleteFiles with ${unusedFPaths} error: `, e);
+    console.log('deleteNotes: error: ', e);
     // error in this step should be fine
   }
 
@@ -747,7 +735,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       const fromNote = note.fromNote;
       const toNote = note;
 
-      const unusedFPaths = getUnusedFPaths(toNote.media, null, fromNote.media);
+      const { localUnusedFPaths } = deriveFPaths(toNote.media, fromNote.media, null);
 
       const payload = { listName, fromNote, toNote };
       dispatch({ type: UPDATE_NOTE, payload });
@@ -761,15 +749,9 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       try {
         await dataApi.putNotes({ listName, notes: [fromNote] });
+        await fileApi.deleteFiles(localUnusedFPaths, Dirs.DocumentDir);
       } catch (e) {
-        console.log('updateNote: putNotes with fromNote error: ', e);
-        // error in this step should be fine
-      }
-
-      try {
-        await fileApi.deleteFiles(unusedFPaths, Dirs.DocumentDir);
-      } catch (e) {
-        console.log(`updateNote: deleteFiles with ${unusedFPaths} error: `, e);
+        console.log('updateNote: error: ', e);
         // error in this step should be fine
       }
 
@@ -816,7 +798,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       const unusedFPaths = [];
       for (const { name } of fromNote.media) {
-        if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(name);
+        if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
       }
 
       dispatch(updateNoteId(null));
@@ -833,15 +815,9 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       try {
         await dataApi.putNotes({ listName, notes: [fromNote] });
-      } catch (e) {
-        console.log('deleteNotes: putNotes with fromNotes error: ', e);
-        // error in this step should be fine
-      }
-
-      try {
         await fileApi.deleteFiles(unusedFPaths, Dirs.DocumentDir);
       } catch (e) {
-        console.log(`deleteNotes: deleteFiles with ${unusedFPaths} error: `, e);
+        console.log('deleteNotes: error: ', e);
         // error in this step should be fine
       }
 
@@ -914,7 +890,7 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
   const unusedFPaths = [];
   for (const note of fromNotes) {
     for (const { name } of note.media) {
-      if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(name);
+      if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
     }
   }
 
@@ -930,15 +906,9 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
 
   try {
     await dataApi.putNotes({ listName, notes: fromNotes });
-  } catch (e) {
-    console.log('deleteOldNotesInTrash: putNotes with fromNotes error: ', e);
-    // error in this step should be fine
-  }
-
-  try {
     await fileApi.deleteFiles(unusedFPaths, Dirs.DocumentDir);
   } catch (e) {
-    console.log(`deleteOldNotesInTrash: deleteFiles with ${unusedFPaths} error: `, e);
+    console.log('deleteOldNotesInTrash: error: ', e);
     // error in this step should be fine
   }
 
@@ -980,7 +950,7 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
   for (const notes of Object.values(fromNotes)) {
     for (const note of notes) noteMedia.push(...note.media);
   }
-  const unusedFPaths = getUnusedFPaths(toNote.media, null, noteMedia);
+  const { localUnusedFPaths } = deriveFPaths(toNote.media, noteMedia, null);
 
   const payload = { conflictedNote, toListName, toNote };
   dispatch({ type: MERGE_NOTES, payload });
@@ -996,15 +966,9 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
     for (const [_listName, _notes] of Object.entries(fromNotes)) {
       await dataApi.putNotes({ listName: _listName, notes: _notes });
     }
+    await fileApi.deleteFiles(localUnusedFPaths, Dirs.DocumentDir);
   } catch (e) {
-    console.log('mergeNote: putNotes with fromNotes error: ', e);
-    // error in this step should be fine
-  }
-
-  try {
-    await fileApi.deleteFiles(unusedFPaths, Dirs.DocumentDir);
-  } catch (e) {
-    console.log(`mergeNote: deleteFiles with ${unusedFPaths} error: `, e);
+    console.log('mergeNote: error: ', e);
     // error in this step should be fine
   }
 
@@ -1867,12 +1831,15 @@ export const deleteAllData = () => async (dispatch, getState) => {
   const addedDT = Date.now();
   const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
 
-  let allNoteIds, _settingsFPath;
+  let allNoteIds, _staticFPaths, _settingsFPath;
   try {
-    const { noteFPaths, settingsFPath: sFPath } = await dataApi.listFPaths();
+    const {
+      noteFPaths, staticFPaths, settingsFPath: sFPath,
+    } = await dataApi.listFPaths();
     const { noteIds, conflictedIds } = dataApi.listNoteIds(noteFPaths);
 
     allNoteIds = [...noteIds, ...conflictedIds];
+    _staticFPaths = staticFPaths;
     _settingsFPath = sFPath;
   } catch (e) {
     dispatch(updateDeleteAllDataProgress({
@@ -1899,7 +1866,7 @@ export const deleteAllData = () => async (dispatch, getState) => {
         // error in this step should be fine
       }
     }
-    await fileApi.deleteAllFiles();
+    await fileApi.deleteFiles(_staticFPaths, Dirs.DocumentDir);
 
     dispatch({ type: DELETE_ALL_DATA, payload: { settingsFPath } });
   } catch (e) {

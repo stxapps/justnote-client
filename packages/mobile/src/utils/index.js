@@ -551,30 +551,38 @@ export const getFileExt = (fname) => {
   return null;
 };
 
-export const getUnusedFPaths = (media, savingFPaths, noteMedia) => {
-  const fpaths = [];
+export const getStaticFPath = (fpath) => {
+  fpath = fpath.slice(fpath.indexOf(CD_ROOT + '/'));
+  fpath = fpath.slice((CD_ROOT + '/').length);
+  return fpath;
+};
 
-  if (savingFPaths) {
-    for (const fpath of savingFPaths) {
-      const isFound = media.some(m => m.name === fpath);
-      if (!isFound) fpaths.push(fpath);
-    }
+export const deriveFPaths = (media, noteMedia, savingFPaths) => {
+  const usedFPaths = [], serverUnusedFPaths = [], localUnusedFPaths = [];
+
+  for (const { name } of media) {
+    if (!name.startsWith(CD_ROOT + '/')) continue;
+    if (noteMedia && noteMedia.some(m => m.name === name)) continue;
+    usedFPaths.push(getStaticFPath(name));
   }
 
   if (noteMedia) {
     for (const { name } of noteMedia) {
       if (!name.startsWith(CD_ROOT + '/')) continue;
+      if (media.some(m => m.name === name)) continue;
 
-      const isFound = media.some(m => m.name === name);
-      if (!isFound) fpaths.push(name);
+      const staticFPath = getStaticFPath(name);
+      serverUnusedFPaths.push(staticFPath);
+      localUnusedFPaths.push(staticFPath);
     }
   }
 
-  return fpaths;
-};
+  if (savingFPaths) {
+    for (const fpath of savingFPaths) {
+      if (media.some(m => m.name === fpath)) continue;
+      localUnusedFPaths.push(getStaticFPath(fpath));
+    }
+  }
 
-export const getStaticFPath = (fpath) => {
-  fpath = fpath.slice(fpath.indexOf(CD_ROOT + '/'));
-  fpath = fpath.slice((CD_ROOT + '/').length);
-  return fpath;
+  return { usedFPaths, serverUnusedFPaths, localUnusedFPaths };
 };
