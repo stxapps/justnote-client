@@ -112,7 +112,7 @@ const NoteEditorEditor = (props) => {
     });
 
     for (const { name, content } of media) {
-      let file = await fileApi.readFile(name);
+      let file = await fileApi.getFile(name);
       if (isUint8Array(file)) file = new Blob([file]);
       if (!isBlob(file)) continue;
 
@@ -158,7 +158,7 @@ const NoteEditorEditor = (props) => {
       if (ext) fpart += `.${ext}`;
 
       try {
-        await fileApi.writeFile(fpart, content);
+        await fileApi.putFile(fpart, content);
 
         const cfpart = CD_ROOT + '/' + fpart;
         dispatch(addSavingFPaths([cfpart]));

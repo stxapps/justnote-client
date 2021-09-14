@@ -623,11 +623,11 @@ export const updatePageYOffset = (pageYOffset) => {
 };
 
 const fetchStaticFiles = async (notes, conflictedNotes) => {
-  const fpaths = [];
+  const _fpaths = [];
   for (const note of notes) {
     if (note.media) {
       for (const { name } of note.media) {
-        if (name.startsWith(CD_ROOT + '/')) fpaths.push(getStaticFPath(name));
+        if (name.startsWith(CD_ROOT + '/')) _fpaths.push(getStaticFPath(name));
       }
     }
   }
@@ -636,15 +636,15 @@ const fetchStaticFiles = async (notes, conflictedNotes) => {
       for (const note of conflictedNote.notes) {
         if (note.media) {
           for (const { name } of note.media) {
-            if (name.startsWith(CD_ROOT + '/')) fpaths.push(getStaticFPath(name));
+            if (name.startsWith(CD_ROOT + '/')) _fpaths.push(getStaticFPath(name));
           }
         }
       }
     }
   }
 
-  const contents = await dataApi.getFiles(fpaths, true);
-  await fileApi.writeFiles(fpaths, contents);
+  const { fpaths, contents } = await dataApi.getFiles(_fpaths, true);
+  await fileApi.putFiles(fpaths, contents);
 };
 
 export const fetch = (
@@ -715,13 +715,15 @@ export const addNote = (title, body, media, listName = null) => async (
   dispatch({ type: ADD_NOTE, payload });
 
   try {
-    const usedContents = await fileApi.readFiles(usedFPaths);
-    await dataApi.putFiles(usedFPaths, usedContents);
+    const usedFiles = await fileApi.getFiles(usedFPaths);
+    await dataApi.putFiles(usedFiles.fpaths, usedFiles.contents);
     await dataApi.putNotes({ listName, notes: [note] });
   } catch (e) {
     dispatch({ type: ADD_NOTE_ROLLBACK, payload: { ...payload, error: e } });
     return;
   }
+
+  dispatch({ type: ADD_NOTE_COMMIT, payload });
 
   try {
     fileApi.deleteFiles(localUnusedFPaths);
@@ -729,8 +731,6 @@ export const addNote = (title, body, media, listName = null) => async (
     console.log(`addNote: deleteFiles with ${localUnusedFPaths} error: `, e);
     // error in this step should be fine
   }
-
-  dispatch({ type: ADD_NOTE_COMMIT, payload });
 };
 
 export const updateNote = (title, body, media, id) => async (dispatch, getState) => {
@@ -763,13 +763,15 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
   dispatch({ type: UPDATE_NOTE, payload });
 
   try {
-    const usedContents = await fileApi.readFiles(usedFPaths);
-    await dataApi.putFiles(usedFPaths, usedContents);
+    const usedFiles = await fileApi.getFiles(usedFPaths);
+    await dataApi.putFiles(usedFiles.fpaths, usedFiles.contents);
     await dataApi.putNotes({ listName, notes: [toNote] });
   } catch (e) {
     dispatch({ type: UPDATE_NOTE_ROLLBACK, payload: { ...payload, error: e } });
     return;
   }
+
+  dispatch({ type: UPDATE_NOTE_COMMIT, payload });
 
   try {
     dataApi.putNotes({ listName, notes: [fromNote] });
@@ -779,8 +781,6 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
     console.log('updateNote: error: ', e);
     // error in this step should be fine
   }
-
-  dispatch({ type: UPDATE_NOTE_COMMIT, payload });
 };
 
 export const saveNote = (title, body, media) => async (dispatch, getState) => {
@@ -863,14 +863,14 @@ const _moveNotes = (toListName, ids, fromListName = null) => async (
     return;
   }
 
+  dispatch({ type: MOVE_NOTES_COMMIT, payload });
+
   try {
     dataApi.putNotes({ listName: fromListName, notes: fromNotes });
   } catch (e) {
     console.log('moveNotes: putNotes with fromNotes error: ', e);
     // error in this step should be fine
   }
-
-  dispatch({ type: MOVE_NOTES_COMMIT, payload });
 };
 
 export const moveNotes = (toListName) => async (dispatch, getState) => {
@@ -935,6 +935,8 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
     return;
   }
 
+  dispatch({ type: DELETE_NOTES_COMMIT, payload });
+
   try {
     dataApi.putNotes({ listName, notes: fromNotes });
     dataApi.deleteFiles(unusedFPaths);
@@ -943,8 +945,6 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
     console.log('deleteNotes: error: ', e);
     // error in this step should be fine
   }
-
-  dispatch({ type: DELETE_NOTES_COMMIT, payload });
 };
 
 export const deleteNotes = () => async (dispatch, getState) => {
@@ -984,8 +984,8 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       dispatch({ type: ADD_NOTE, payload });
 
       try {
-        const usedContents = await fileApi.readFiles(usedFPaths);
-        await dataApi.putFiles(usedFPaths, usedContents);
+        const usedFiles = await fileApi.getFiles(usedFPaths);
+        await dataApi.putFiles(usedFiles.fpaths, usedFiles.contents);
         await dataApi.putNotes({ listName, notes: [note] });
       } catch (e) {
         dispatch({ type: ADD_NOTE_ROLLBACK, payload: { ...payload, error: e } });
@@ -1005,13 +1005,15 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       dispatch({ type: UPDATE_NOTE, payload });
 
       try {
-        const usedContents = await fileApi.readFiles(usedFPaths);
-        await dataApi.putFiles(usedFPaths, usedContents);
+        const usedFiles = await fileApi.getFiles(usedFPaths);
+        await dataApi.putFiles(usedFiles.fpaths, usedFiles.contents);
         await dataApi.putNotes({ listName, notes: [toNote] });
       } catch (e) {
         dispatch({ type: UPDATE_NOTE_ROLLBACK, payload: { ...payload, error: e } });
         return;
       }
+
+      dispatch({ type: UPDATE_NOTE_COMMIT, payload });
 
       try {
         dataApi.putNotes({ listName, notes: [fromNote] });
@@ -1021,8 +1023,6 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
         console.log('updateNote: error: ', e);
         // error in this step should be fine
       }
-
-      dispatch({ type: UPDATE_NOTE_COMMIT, payload });
     } else if (status === DIED_MOVING) {
       const { fromListName, fromNote } = note;
       const [toListName, toNote] = [listName, note];
@@ -1039,14 +1039,14 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
         return;
       }
 
+      dispatch({ type: MOVE_NOTES_COMMIT, payload });
+
       try {
         dataApi.putNotes({ listName: fromListName, notes: [fromNote] });
       } catch (e) {
         console.log('moveNotes: putNotes with fromNote error: ', e);
         // error in this step should be fine
       }
-
-      dispatch({ type: MOVE_NOTES_COMMIT, payload });
     } else if (status === DIED_DELETING) {
       const toNote = {
         ...note,
@@ -1084,6 +1084,8 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
         return;
       }
 
+      dispatch({ type: DELETE_NOTES_COMMIT, payload });
+
       try {
         dataApi.putNotes({ listName, notes: [fromNote] });
         dataApi.deleteFiles(unusedFPaths);
@@ -1092,8 +1094,6 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
         console.log('deleteNotes: error: ', e);
         // error in this step should be fine
       }
-
-      dispatch({ type: DELETE_NOTES_COMMIT, payload });
     } else {
       throw new Error(`Invalid status: ${status} of id: ${id}`);
     }
@@ -1178,6 +1178,8 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
     return;
   }
 
+  dispatch({ type: DELETE_OLD_NOTES_IN_TRASH_COMMIT, payload });
+
   try {
     dataApi.putNotes({ listName, notes: fromNotes });
     dataApi.deleteFiles(unusedFPaths);
@@ -1186,8 +1188,6 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
     console.log('deleteOldNotesInTrash: error: ', e);
     // error in this step should be fine
   }
-
-  dispatch({ type: DELETE_OLD_NOTES_IN_TRASH_COMMIT, payload });
 };
 
 export const mergeNotes = (selectedId) => async (dispatch, getState) => {
@@ -1233,13 +1233,18 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
   dispatch({ type: MERGE_NOTES, payload });
 
   try {
-    const usedContents = await fileApi.readFiles(usedFPaths);
-    await dataApi.putFiles(usedFPaths, usedContents);
+    const usedFiles = await fileApi.getFiles(usedFPaths);
+    await dataApi.putFiles(usedFiles.fpaths, usedFiles.contents);
     await dataApi.putNotes({ listName: toListName, notes: [toNote] });
   } catch (e) {
     dispatch({ type: MERGE_NOTES_ROLLBACK, payload: { ...payload, error: e } });
     return;
   }
+
+  toNote['addedDT'] = Math.min(...conflictedNote.notes.map(note => {
+    return note.addedDT ? note.addedDT : addedDT;
+  }));
+  dispatch({ type: MERGE_NOTES_COMMIT, payload: { ...payload, toNote } });
 
   try {
     for (const [_listName, _notes] of Object.entries(fromNotes)) {
@@ -1251,11 +1256,6 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
     console.log('mergeNote: error: ', e);
     // error in this step should be fine
   }
-
-  toNote['addedDT'] = Math.min(...conflictedNote.notes.map(note => {
-    return note.addedDT ? note.addedDT : addedDT;
-  }));
-  dispatch({ type: MERGE_NOTES_COMMIT, payload: { ...payload, toNote } });
 };
 
 export const addListNames = (newNames) => async (dispatch, getState) => {
@@ -1291,6 +1291,8 @@ export const addListNames = (newNames) => async (dispatch, getState) => {
     return;
   }
 
+  dispatch({ type: ADD_LIST_NAMES_COMMIT, payload });
+
   try {
     const _settingsFPath = getState().settingsFPath.fpath;
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
@@ -1298,8 +1300,6 @@ export const addListNames = (newNames) => async (dispatch, getState) => {
     console.log('addListNames: deleteFiles with _settingsFPath error: ', e);
     // error in this step should be fine
   }
-
-  dispatch({ type: ADD_LIST_NAMES_COMMIT, payload });
 };
 
 export const updateListNames = (listNames, newNames) => async (dispatch, getState) => {
@@ -1327,6 +1327,8 @@ export const updateListNames = (listNames, newNames) => async (dispatch, getStat
     return;
   }
 
+  dispatch({ type: UPDATE_LIST_NAMES_COMMIT, payload });
+
   try {
     const _settingsFPath = getState().settingsFPath.fpath;
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
@@ -1334,8 +1336,6 @@ export const updateListNames = (listNames, newNames) => async (dispatch, getStat
     console.log('updateListNames: deleteFiles with _settingsFPath error: ', e);
     // error in this step should be fine
   }
-
-  dispatch({ type: UPDATE_LIST_NAMES_COMMIT, payload });
 };
 
 export const moveListName = (listName, direction) => async (dispatch, getState) => {
@@ -1371,6 +1371,8 @@ export const moveListName = (listName, direction) => async (dispatch, getState) 
     return;
   }
 
+  dispatch({ type: MOVE_LIST_NAME_COMMIT, payload });
+
   try {
     const _settingsFPath = getState().settingsFPath.fpath;
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
@@ -1378,8 +1380,6 @@ export const moveListName = (listName, direction) => async (dispatch, getState) 
     console.log('moveListName: deleteFiles with _settingsFPath error: ', e);
     // error in this step should be fine
   }
-
-  dispatch({ type: MOVE_LIST_NAME_COMMIT, payload });
 };
 
 export const deleteListNames = (listNames) => async (dispatch, getState) => {
@@ -1405,6 +1405,8 @@ export const deleteListNames = (listNames) => async (dispatch, getState) => {
     return;
   }
 
+  dispatch({ type: DELETE_LIST_NAMES_COMMIT, payload });
+
   try {
     const _settingsFPath = getState().settingsFPath.fpath;
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
@@ -1412,8 +1414,6 @@ export const deleteListNames = (listNames) => async (dispatch, getState) => {
     console.log('deleteListNames: deleteFiles with _settingsFPath error: ', e);
     // error in this step should be fine
   }
-
-  dispatch({ type: DELETE_LIST_NAMES_COMMIT, payload });
 };
 
 export const updateDeletingListName = (listName) => {
@@ -1454,6 +1454,8 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
       return;
     }
 
+    dispatch({ type: ADD_LIST_NAMES_COMMIT, payload });
+
     try {
       const _settingsFPath = getState().settingsFPath.fpath;
       if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
@@ -1461,8 +1463,6 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
       console.log('retryAddListNames: deleteFiles error: ', e);
       // error in this step should be fine
     }
-
-    dispatch({ type: ADD_LIST_NAMES_COMMIT, payload });
   }
 
   const diedUpdatingListNameObjs = listNameObjs.filter(obj => {
@@ -1480,6 +1480,8 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
       return;
     }
 
+    dispatch({ type: UPDATE_LIST_NAMES_COMMIT, payload });
+
     try {
       const _settingsFPath = getState().settingsFPath.fpath;
       if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
@@ -1487,8 +1489,6 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
       console.log('retryUpdateListNames: deleteFiles error: ', e);
       // error in this step should be fine
     }
-
-    dispatch({ type: UPDATE_LIST_NAMES_COMMIT, payload });
   }
 
   const diedMovingListNameObjs = listNameObjs.filter(obj => {
@@ -1505,6 +1505,8 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
       return;
     }
 
+    dispatch({ type: MOVE_LIST_NAME_COMMIT, payload });
+
     try {
       const _settingsFPath = getState().settingsFPath.fpath;
       if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
@@ -1512,8 +1514,6 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
       console.log('retryMoveListNames: deleteFiles error: ', e);
       // error in this step should be fine
     }
-
-    dispatch({ type: MOVE_LIST_NAME_COMMIT, payload });
   }
 
   const diedDeletingListNameObjs = listNameObjs.filter(obj => {
@@ -1531,6 +1531,8 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
       return;
     }
 
+    dispatch({ type: DELETE_LIST_NAMES_COMMIT, payload });
+
     try {
       const _settingsFPath = getState().settingsFPath.fpath;
       if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
@@ -1538,8 +1540,6 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
       console.log('retryDeleteListNames: deleteFiles error: ', e);
       // error in this step should be fine
     }
-
-    dispatch({ type: DELETE_LIST_NAMES_COMMIT, payload });
   }
 };
 
@@ -1579,6 +1579,8 @@ export const updateSettings = (updatedValues) => async (dispatch, getState) => {
     return;
   }
 
+  dispatch({ type: UPDATE_SETTINGS_COMMIT, payload });
+
   try {
     const _settingsFPath = getState().settingsFPath.fpath;
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
@@ -1586,8 +1588,6 @@ export const updateSettings = (updatedValues) => async (dispatch, getState) => {
     console.log('updateListNames: deleteFiles with _settingsFPath error: ', e);
     // error in this step should be fine
   }
-
-  dispatch({ type: UPDATE_SETTINGS_COMMIT, payload });
 };
 
 export const updateUpdateSettingsProgress = (progress) => {
@@ -1688,9 +1688,9 @@ const exportAllDataLoop = async (dispatch, fpaths, doneCount) => {
   const selectedCount = Math.min(fpaths.length - doneCount, N_NOTES);
   const selectedFPaths = fpaths.slice(doneCount, doneCount + selectedCount);
   const responses = await dataApi.batchGetFileWithRetry(selectedFPaths, 0);
-  const data = responses.map((response, i) => {
+  const data = responses.map((response) => {
     // Export only index.json and settings.json so safe to JSON.parse all responses.
-    return { path: selectedFPaths[i], data: JSON.parse(response.content) };
+    return { path: response.fpath, data: JSON.parse(response.content) };
   });
 
   doneCount = doneCount + selectedCount;

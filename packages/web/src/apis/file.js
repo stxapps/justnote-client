@@ -1,7 +1,7 @@
 import { Dirs, FileSystem } from '../fileSystem';
 import { CD_ROOT } from '../types/const';
 
-const readFile = async (fpath, dir = Dirs.DocumentDir) => {
+const getFile = async (fpath, dir = Dirs.DocumentDir) => {
   if (fpath.includes(CD_ROOT + '/')) {
     fpath = fpath.slice(fpath.indexOf(CD_ROOT + '/'));
     fpath = fpath.replace(CD_ROOT + '/', dir + '/');
@@ -13,16 +13,16 @@ const readFile = async (fpath, dir = Dirs.DocumentDir) => {
   return content;
 };
 
-const readFiles = async (fpaths, dir = Dirs.DocumentDir) => {
+const getFiles = async (fpaths, dir = Dirs.DocumentDir) => {
   const contents = [];
   for (let fpath of fpaths) {
-    const content = await readFile(fpath, dir)
+    const content = await getFile(fpath, dir)
     contents.push(content);
   }
-  return contents;
+  return { fpaths, contents };
 };
 
-const writeFile = async (fpath, content, dir = Dirs.DocumentDir) => {
+const putFile = async (fpath, content, dir = Dirs.DocumentDir) => {
   if (fpath.includes(CD_ROOT + '/')) {
     fpath = fpath.slice(fpath.indexOf(CD_ROOT + '/'));
     fpath = fpath.replace(CD_ROOT + '/', dir + '/');
@@ -30,12 +30,12 @@ const writeFile = async (fpath, content, dir = Dirs.DocumentDir) => {
     fpath = dir + '/' + fpath;
   }
 
-  await FileSystem.writeFile(fpath, content);
+  await FileSystem.putFile(fpath, content);
 };
 
-const writeFiles = async (fpaths, contents, dir = Dirs.DocumentDir) => {
+const putFiles = async (fpaths, contents, dir = Dirs.DocumentDir) => {
   for (let i = 0; i < fpaths.length; i++) {
-    await writeFile(fpaths[i], contents[i], dir);
+    await putFile(fpaths[i], contents[i], dir);
   }
 };
 
@@ -63,6 +63,6 @@ const deleteAllFiles = async () => {
   await FileSystem.unlinkAll();
 };
 
-const file = { readFile, readFiles, writeFile, writeFiles, deleteFiles, deleteAllFiles };
+const file = { getFile, getFiles, putFile, putFiles, deleteFiles, deleteAllFiles };
 
 export default file;

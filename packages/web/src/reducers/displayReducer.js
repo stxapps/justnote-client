@@ -15,7 +15,7 @@ import {
 import {
   PROFILE_POPUP, NOTE_LIST_MENU_POPUP, MOVE_TO_POPUP, SIDEBAR_POPUP, SEARCH_POPUP,
   SETTINGS_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP,
-  ALERT_SCREEN_ROTATION_POPUP, MY_NOTES, TRASH, ARCHIVE,
+  ALERT_SCREEN_ROTATION_POPUP, NEW_NOTE, MY_NOTES, TRASH, ARCHIVE,
   UPDATING, DIED_UPDATING, MAX_SELECTED_NOTE_IDS,
 } from '../types/const';
 import { doContainListName } from '../utils';
@@ -192,9 +192,9 @@ const displayReducer = (state = initialState, action) => {
     const { listName } = action.payload;
     const newState = {
       ...state,
-      noteId: null,
+      noteId: state.noteId === NEW_NOTE ? NEW_NOTE : null,
       isBulkEditing: false,
-      isEditorFocused: false,
+      isEditorFocused: state.noteId === NEW_NOTE ? true : false,
       isEditorBusy: false,
       selectedNoteIds: [],
       isSelectedNoteIdsMaxErrorShown: false,
