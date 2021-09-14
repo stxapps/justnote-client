@@ -30,7 +30,7 @@ const putFile = async (fpath, content, dir = Dirs.DocumentDir) => {
     fpath = dir + '/' + fpath;
   }
 
-  await FileSystem.putFile(fpath, content);
+  await FileSystem.writeFile(fpath, content);
 };
 
 const putFiles = async (fpaths, contents, dir = Dirs.DocumentDir) => {
