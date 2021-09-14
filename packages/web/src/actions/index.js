@@ -728,7 +728,7 @@ export const addNote = (title, body, media, listName = null) => async (
   try {
     fileApi.deleteFiles(localUnusedFPaths);
   } catch (e) {
-    console.log(`addNote: deleteFiles with ${localUnusedFPaths} error: `, e);
+    console.log(`addNote: error: `, e);
     // error in this step should be fine
   }
 };
@@ -868,7 +868,7 @@ const _moveNotes = (toListName, ids, fromListName = null) => async (
   try {
     dataApi.putNotes({ listName: fromListName, notes: fromNotes });
   } catch (e) {
-    console.log('moveNotes: putNotes with fromNotes error: ', e);
+    console.log('moveNotes: error: ', e);
     // error in this step should be fine
   }
 };
@@ -994,14 +994,20 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       dispatch({ type: ADD_NOTE_COMMIT, payload });
     } else if (status === DIED_UPDATING) {
-      const fromNote = note.fromNote;
+      const fromNote = {
+        ...note.fromNote,
+        title: '', body: '',
+        media: note.fromNote.media ? note.fromNote.media
+          .filter(m => !m.name.startsWith(CD_ROOT + '/'))
+          .map(m => ({ name: m.name, content: '' })) : null,
+      }
       const toNote = note;
 
       const {
         usedFPaths, serverUnusedFPaths, localUnusedFPaths,
-      } = deriveFPaths(toNote.media, fromNote.media, null);
+      } = deriveFPaths(toNote.media, note.fromNote.media, null);
 
-      const payload = { listName, fromNote, toNote };
+      const payload = { listName, fromNote: note.fromNote, toNote };
       dispatch({ type: UPDATE_NOTE, payload });
 
       try {
@@ -1024,11 +1030,18 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
         // error in this step should be fine
       }
     } else if (status === DIED_MOVING) {
-      const { fromListName, fromNote } = note;
+      const { fromListName } = note;
+      const fromNote = {
+        ...note.fromNote,
+        title: '', body: '',
+        media: note.fromNote.media ? note.fromNote.media
+          .filter(m => !m.name.startsWith(CD_ROOT + '/'))
+          .map(m => ({ name: m.name, content: '' })) : null,
+      }
       const [toListName, toNote] = [listName, note];
 
       const payload = {
-        fromListName, fromNotes: [fromNote], toListName, toNotes: [toNote],
+        fromListName, fromNotes: [note.fromNote], toListName, toNotes: [toNote],
       };
       dispatch({ type: MOVE_NOTES, payload });
 
@@ -1044,7 +1057,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       try {
         dataApi.putNotes({ listName: fromListName, notes: [fromNote] });
       } catch (e) {
-        console.log('moveNotes: putNotes with fromNote error: ', e);
+        console.log('moveNotes: error: ', e);
         // error in this step should be fine
       }
     } else if (status === DIED_DELETING) {
@@ -1135,7 +1148,7 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
   try {
     ({ notes: oldNotes } = await dataApi.fetchOldNotesInTrash());
   } catch (e) {
-    console.log('deleteOldNotesInTrash: fetchOldNotesInTrash error: ', e);
+    console.log('deleteOldNotesInTrash: error: ', e);
     return;
   }
 
@@ -1297,7 +1310,7 @@ export const addListNames = (newNames) => async (dispatch, getState) => {
     const _settingsFPath = getState().settingsFPath.fpath;
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
   } catch (e) {
-    console.log('addListNames: deleteFiles with _settingsFPath error: ', e);
+    console.log('addListNames: error: ', e);
     // error in this step should be fine
   }
 };
@@ -1333,7 +1346,7 @@ export const updateListNames = (listNames, newNames) => async (dispatch, getStat
     const _settingsFPath = getState().settingsFPath.fpath;
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
   } catch (e) {
-    console.log('updateListNames: deleteFiles with _settingsFPath error: ', e);
+    console.log('updateListNames: error: ', e);
     // error in this step should be fine
   }
 };
@@ -1377,7 +1390,7 @@ export const moveListName = (listName, direction) => async (dispatch, getState) 
     const _settingsFPath = getState().settingsFPath.fpath;
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
   } catch (e) {
-    console.log('moveListName: deleteFiles with _settingsFPath error: ', e);
+    console.log('moveListName: error: ', e);
     // error in this step should be fine
   }
 };
@@ -1411,7 +1424,7 @@ export const deleteListNames = (listNames) => async (dispatch, getState) => {
     const _settingsFPath = getState().settingsFPath.fpath;
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
   } catch (e) {
-    console.log('deleteListNames: deleteFiles with _settingsFPath error: ', e);
+    console.log('deleteListNames: error: ', e);
     // error in this step should be fine
   }
 };
@@ -1460,7 +1473,7 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
       const _settingsFPath = getState().settingsFPath.fpath;
       if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
     } catch (e) {
-      console.log('retryAddListNames: deleteFiles error: ', e);
+      console.log('retryAddListNames: error: ', e);
       // error in this step should be fine
     }
   }
@@ -1486,7 +1499,7 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
       const _settingsFPath = getState().settingsFPath.fpath;
       if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
     } catch (e) {
-      console.log('retryUpdateListNames: deleteFiles error: ', e);
+      console.log('retryUpdateListNames: error: ', e);
       // error in this step should be fine
     }
   }
@@ -1511,7 +1524,7 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
       const _settingsFPath = getState().settingsFPath.fpath;
       if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
     } catch (e) {
-      console.log('retryMoveListNames: deleteFiles error: ', e);
+      console.log('retryMoveListNames: error: ', e);
       // error in this step should be fine
     }
   }
@@ -1537,7 +1550,7 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
       const _settingsFPath = getState().settingsFPath.fpath;
       if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
     } catch (e) {
-      console.log('retryDeleteListNames: deleteFiles error: ', e);
+      console.log('retryDeleteListNames: error: ', e);
       // error in this step should be fine
     }
   }
@@ -1585,7 +1598,7 @@ export const updateSettings = (updatedValues) => async (dispatch, getState) => {
     const _settingsFPath = getState().settingsFPath.fpath;
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
   } catch (e) {
-    console.log('updateListNames: deleteFiles with _settingsFPath error: ', e);
+    console.log('updateListNames: error: ', e);
     // error in this step should be fine
   }
 };
@@ -1671,7 +1684,7 @@ export const clearSavingFPaths = () => async (dispatch, getState) => {
   try {
     await fileApi.deleteFiles(savingFPaths);
   } catch (e) {
-    console.log(`clearSavingFiles: deleteFiles with ${savingFPaths} error: `, e);
+    console.log(`clearSavingFiles: error: `, e);
     // error in this step should be fine
   }
   dispatch({ type: CLEAR_SAVING_FPATHS });
@@ -1810,7 +1823,7 @@ const deleteAllDataLoop = async (dispatch, noteIds, total, doneCount) => {
       await dataApi.putNotes({ listName: _listName, notes: _notes });
     }
   } catch (e) {
-    console.log('deleteAllDataLoop: putNotes with fromNotes error: ', e);
+    console.log('deleteAllDataLoop: error: ', e);
     // error in this step should be fine
   }
 
@@ -1865,7 +1878,7 @@ export const deleteAllData = () => async (dispatch, getState) => {
       try {
         await dataApi.deleteFiles([_settingsFPath]);
       } catch (e) {
-        console.log('deleteAllData: deleteFiles with _settingsFPath error: ', e);
+        console.log('deleteAllData: error: ', e);
         // error in this step should be fine
       }
     }
