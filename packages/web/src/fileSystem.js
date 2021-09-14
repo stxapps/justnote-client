@@ -4,7 +4,7 @@ const readFile = async (path) => {
   return files[path];
 };
 
-const writeFile = async (path, content, encoding) => {
+const writeFile = async (path, content) => {
   files[path] = content;
 };
 

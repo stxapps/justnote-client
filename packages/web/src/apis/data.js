@@ -143,7 +143,9 @@ const listNoteIds = (noteFPaths) => {
   return { noteIds, conflictedIds, conflictWiths };
 };
 
-const batchGetFileWithRetry = async (fpaths, callCount) => {
+const batchGetFileWithRetry = async (
+  fpaths, callCount, dangerouslyIgnoreError = false
+) => {
 
   const responses = await Promise.all(
     fpaths.map(fpath =>
@@ -157,11 +159,16 @@ const batchGetFileWithRetry = async (fpaths, callCount) => {
   const failedFPaths = failedResponses.map(({ fpath }) => fpath);
 
   if (failedResponses.length) {
-    if (callCount + 1 >= MAX_TRY) throw failedResponses[0].error;
+    if (callCount + 1 >= MAX_TRY) {
+      if (dangerouslyIgnoreError) return responses;
+      throw failedResponses[0].error;
+    }
 
     return [
       ...responses.filter(({ success }) => success),
-      ...(await batchGetFileWithRetry(failedFPaths, callCount + 1)),
+      ...(await batchGetFileWithRetry(
+        failedFPaths, callCount + 1, dangerouslyIgnoreError
+      )),
     ];
   }
 
@@ -432,14 +439,14 @@ const canDeleteListNames = async (listNames) => {
   return canDeletes;
 };
 
-const getFiles = async (fpaths) => {
+const getFiles = async (fpaths, dangerouslyIgnoreError = false) => {
 
   const responses = [];
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
     const _fpaths = fpaths.slice(i, i + N_NOTES);
-    const _responses = await batchGetFileWithRetry(_fpaths, 0);
+    const _responses = await batchGetFileWithRetry(_fpaths, 0, dangerouslyIgnoreError);
     responses.push(..._responses.map((response, k) => {
-      let content = response.content;
+      let content = response.content || null;
       if (_fpaths[k].endsWith(INDEX + DOT_JSON) || _fpaths[k].startsWith(SETTINGS)) {
         content = JSON.parse(content);
       }

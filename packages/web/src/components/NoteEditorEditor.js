@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ckeditor from '@ckeditor/ckeditor5-build-decoupled-document';
 
-import { Dirs, FileSystem } from '../fileSystem';
+import fileApi from '../apis/file';
 import {
   updateEditorFocused, saveNote, discardNote, onUpdateNoteIdUrlHash, onUpdateNoteId,
   onChangeListName, addSavingFPaths,
@@ -11,7 +11,7 @@ import {
 import { NEW_NOTE, ADDED, CD_ROOT } from '../types/const';
 import {
   isString, isNoteBodyEqual, isMobile as _isMobile, replaceObjectUrls,
-  getFileExt, isArrayBuffer,
+  getFileExt, isUint8Array, isBlob,
 } from '../utils';
 
 import '../stylesheets/ckeditor.css';
@@ -112,12 +112,11 @@ const NoteEditorEditor = (props) => {
     });
 
     for (const { name, content } of media) {
-      const fpath = name.replace(CD_ROOT + '/', Dirs.DocumentDir + '/');
-      const file = await FileSystem.readFile(fpath);
-      if (!isArrayBuffer(file)) continue;
+      let file = await fileApi.readFile(name);
+      if (isUint8Array(file)) file = new Blob([file]);
+      if (!isBlob(file)) continue;
 
-      const blob = new Blob([file]);
-      const objectUrl = URL.createObjectURL(blob);
+      const objectUrl = URL.createObjectURL(file);
 
       objectUrlFiles.current[objectUrl] = { fname: name, content };
       objectUrlNames.current[objectUrl] = name;
@@ -134,8 +133,16 @@ const NoteEditorEditor = (props) => {
     clearNoteMedia();
 
     let body = await replaceWithContents(note.body);
-    body = replaceWithFiles(body);
-    bodyEditor.current.setData(body);
+    body = await replaceWithFiles(body);
+    try {
+      bodyEditor.current.setData(body);
+    } catch (e) {
+      // Got Uncaught TypeError: Cannot read properties of null (reading 'model')
+      //   after dispatching UPDATE_NOTE_ROLLBACK
+      //   guess because CKEditor.setData still working on updated version
+      //   then suddenly got upmounted.
+      console.log('NoteEditorEditor.setInitData: ckeditor.setData error ', e);
+    }
 
     if (note.id === NEW_NOTE) focusTitleInput();
   }, [note.id, note.title, note.body, replaceWithContents, replaceWithFiles]);
@@ -151,7 +158,7 @@ const NoteEditorEditor = (props) => {
       if (ext) fpart += `.${ext}`;
 
       try {
-        await FileSystem.writeFile(Dirs.DocumentDir + '/' + fpart, content, 'blob');
+        await fileApi.writeFile(fpart, content);
 
         const cfpart = CD_ROOT + '/' + fpart;
         dispatch(addSavingFPaths([cfpart]));
@@ -213,7 +220,7 @@ const NoteEditorEditor = (props) => {
       if (groupedItemsDropdown) groupedItemsDropdown.set('isOpen', false);
     });
 
-    window.JustNoteReactWebApp = { addObjectUrlFiles: onAddObjectUrlFiles };
+    window.JustnoteReactWebApp = { addObjectUrlFiles: onAddObjectUrlFiles };
 
     bodyEditor.current = editor;
     setEditorReady(true);

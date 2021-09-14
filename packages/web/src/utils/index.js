@@ -154,11 +154,12 @@ export const isString = val => {
   return typeof val === 'string' || val instanceof String;
 };
 
-export const isArrayBuffer = val => {
-  return (
-    (typeof ArrayBuffer === 'function') &&
-    (val instanceof ArrayBuffer || toString.call(val) === '[object ArrayBuffer]')
-  );
+export const isUint8Array = val => {
+  return val instanceof Uint8Array || toString.call(val) === '[object Uint8Array]';
+};
+
+export const isBlob = val => {
+  return val instanceof Blob || toString.call(val) === '[object Blob]';
 };
 
 export const isEqual = (x, y) => {
@@ -496,7 +497,7 @@ export const replaceObjectUrls = (
         console.log(`replaceObjectUrls: Not found fname in objectUrlContents: ${objectUrlContents} with src: ${src}`);
         continue;
       }
-      if (!content) {
+      if (!isString(content)) {
         console.log(`replaceObjectUrls: Not found content in objectUrlContents: ${objectUrlContents} with src: ${src}`);
         continue;
       }
@@ -506,7 +507,7 @@ export const replaceObjectUrls = (
         console.log(`replaceObjectUrls: Not found fname in objectUrlFiles: ${objectUrlFiles} with src: ${src}`);
         continue;
       }
-      if (!content) {
+      if (!isString(content)) {
         console.log(`replaceObjectUrls: Not found content in objectUrlFiles: ${objectUrlFiles} with src: ${src}`);
         continue;
       }
