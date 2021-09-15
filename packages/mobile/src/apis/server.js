@@ -33,13 +33,15 @@ const listFPaths = async () => {
   return { noteFPaths, staticFPaths, settingsFPath };
 };
 
-const batchGetFileWithRetry = async (fpaths, callCount) => {
+const batchGetFileWithRetry = async (
+  fpaths, callCount, dangerouslyIgnoreError = false
+) => {
 
   const responses = await Promise.all(
     fpaths.map(fpath =>
       userSession.getFile(fpath)
         .then(content => ({ content, fpath, success: true }))
-        .catch(error => ({ error, fpath, success: false }))
+        .catch(error => ({ content: null, fpath, success: false, error }))
     )
   );
 
@@ -47,11 +49,16 @@ const batchGetFileWithRetry = async (fpaths, callCount) => {
   const failedFPaths = failedResponses.map(({ fpath }) => fpath);
 
   if (failedResponses.length) {
-    if (callCount + 1 >= MAX_TRY) throw failedResponses[0].error;
+    if (callCount + 1 >= MAX_TRY) {
+      if (dangerouslyIgnoreError) return responses;
+      throw failedResponses[0].error;
+    }
 
     return [
       ...responses.filter(({ success }) => success),
-      ...(await batchGetFileWithRetry(failedFPaths, callCount + 1)),
+      ...(await batchGetFileWithRetry(
+        failedFPaths, callCount + 1, dangerouslyIgnoreError
+      )),
     ];
   }
 
@@ -91,6 +98,10 @@ export const batchDeleteFileWithRetry = async (fpaths, callCount) => {
       userSession.deleteFile(fpath)
         .then(() => ({ fpath, success: true }))
         .catch(error => {
+          // BUG ALERT
+          // Treat not found error as not an error as local data might be out-dated.
+          //   i.e. user tries to delete a not-existing file, it's ok.
+          // Anyway, if the file should be there, this will hide the real error!
           if (error.message &&
             (error.message.includes('does_not_exist') ||
               error.message.includes('file_not_found'))) {
@@ -116,27 +127,27 @@ export const batchDeleteFileWithRetry = async (fpaths, callCount) => {
   return responses;
 };
 
-const getFiles = async (fpaths) => {
+const getFiles = async (_fpaths, dangerouslyIgnoreError = false) => {
 
-  const responses = [];
-  for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
-    const _fpaths = fpaths.slice(i, i + N_NOTES);
-    const _responses = await batchGetFileWithRetry(_fpaths, 0);
-    responses.push(..._responses.map((response, k) => {
-      let content = response.content;
-      if (_fpaths[k].endsWith(INDEX + DOT_JSON) || _fpaths[k].startsWith(SETTINGS)) {
+  const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
+  for (let i = 0, j = _fpaths.length; i < j; i += N_NOTES) {
+    const selectedFPaths = _fpaths.slice(i, i + N_NOTES);
+    const responses = await batchGetFileWithRetry(
+      selectedFPaths, 0, dangerouslyIgnoreError
+    );
+    fpaths.push(...responses.map(({ fpath }) => fpath));
+    contents.push(...responses.map(({ fpath, content }) => {
+      if (fpath.endsWith(INDEX + DOT_JSON) || fpath.startsWith(SETTINGS)) {
         content = JSON.parse(content);
       }
       return content;
     }));
   }
 
-  return responses;
+  return { fpaths, contents };
 };
 
 const putFiles = async (fpaths, contents) => {
-
-  const responses = [];
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
     const _fpaths = fpaths.slice(i, i + N_NOTES);
     const _contents = contents.slice(i, i + N_NOTES).map((content, k) => {
@@ -145,23 +156,15 @@ const putFiles = async (fpaths, contents) => {
       }
       return content;
     });
-    const _responses = await batchPutFileWithRetry(_fpaths, _contents, 0);
-    responses.push(..._responses.map(response => response.publicUrl));
+    await batchPutFileWithRetry(_fpaths, _contents, 0);
   }
-
-  return responses;
 };
 
 const deleteFiles = async (fpaths) => {
-
-  const responses = [];
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
     const _fpaths = fpaths.slice(i, i + N_NOTES);
-    const _responses = await batchDeleteFileWithRetry(_fpaths, 0);
-    responses.push(..._responses.map(response => response.success));
+    await batchDeleteFileWithRetry(_fpaths, 0);
   }
-
-  return responses;
 };
 
 const server = { listFPaths, getFiles, putFiles, deleteFiles };

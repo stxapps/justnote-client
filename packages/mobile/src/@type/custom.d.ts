@@ -19,5 +19,5 @@ declare module "*.json" {
 }
 
 interface Window {
-  JustNoteReactWebApp?: any;
+  JustnoteReactWebApp?: any;
 }

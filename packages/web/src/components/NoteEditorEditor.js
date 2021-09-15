@@ -10,8 +10,7 @@ import {
 } from '../actions';
 import { NEW_NOTE, ADDED, CD_ROOT } from '../types/const';
 import {
-  isString, isNoteBodyEqual, isMobile as _isMobile, replaceObjectUrls,
-  getFileExt, isUint8Array, isBlob,
+  isString, isNoteBodyEqual, isMobile as _isMobile, replaceObjectUrls, getFileExt,
 } from '../utils';
 
 import '../stylesheets/ckeditor.css';
@@ -26,6 +25,14 @@ const dataUrlToBlob = async (content) => {
   const res = await fetch(content);
   const blob = await res.blob();
   return blob;
+};
+
+export const isUint8Array = val => {
+  return val instanceof Uint8Array || toString.call(val) === '[object Uint8Array]';
+};
+
+export const isBlob = val => {
+  return val instanceof Blob || toString.call(val) === '[object Blob]';
 };
 
 const NoteEditorEditor = (props) => {

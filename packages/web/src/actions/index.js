@@ -49,7 +49,8 @@ import {
 import {
   throttle, extractUrl, getUrlPathQueryHash, urlHashToObj, objToUrlHash,
   separateUrlAndParam, getUserImageUrl, randomString, swapArrayElements,
-  isIPadIPhoneIPod, isBusyStatus, isNoteBodyEqual, getStaticFPath, deriveFPaths,
+  isNoteBodyEqual, clearNoteData, getStaticFPath, deriveFPaths,
+  isIPadIPhoneIPod, isBusyStatus,
 } from '../utils';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
@@ -728,7 +729,7 @@ export const addNote = (title, body, media, listName = null) => async (
   try {
     fileApi.deleteFiles(localUnusedFPaths);
   } catch (e) {
-    console.log(`addNote: error: `, e);
+    console.log('addNote error: ', e);
     // error in this step should be fine
   }
 };
@@ -746,13 +747,7 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
     title, body, media,
     updatedDT: addedDT,
   };
-  const fromNote = {
-    ...note,
-    title: '', body: '',
-    media: note.media ? note.media
-      .filter(m => !m.name.startsWith(CD_ROOT + '/'))
-      .map(m => ({ name: m.name, content: '' })) : null,
-  };
+  const fromNote = clearNoteData(note);
 
   const savingFPaths = getState().editor.savingFPaths;
   const {
@@ -778,7 +773,7 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
     dataApi.deleteFiles(serverUnusedFPaths);
     fileApi.deleteFiles(localUnusedFPaths);
   } catch (e) {
-    console.log('updateNote: error: ', e);
+    console.log('updateNote error: ', e);
     // error in this step should be fine
   }
 };
@@ -842,16 +837,7 @@ const _moveNotes = (toListName, ids, fromListName = null) => async (
     addedDT += 1;
     return toNote;
   });
-  const fromNotes = notes.map(note => {
-    const fromNote = {
-      ...note,
-      title: '', body: '',
-      media: note.media ? note.media
-        .filter(m => !m.name.startsWith(CD_ROOT + '/'))
-        .map(m => ({ name: m.name, content: '' })) : null,
-    };
-    return fromNote;
-  });
+  const fromNotes = notes.map(note => clearNoteData(note));
 
   const payload = { fromListName, fromNotes: notes, toListName, toNotes };
   dispatch({ type: MOVE_NOTES, payload });
@@ -868,7 +854,7 @@ const _moveNotes = (toListName, ids, fromListName = null) => async (
   try {
     dataApi.putNotes({ listName: fromListName, notes: fromNotes });
   } catch (e) {
-    console.log('moveNotes: error: ', e);
+    console.log('moveNotes error: ', e);
     // error in this step should be fine
   }
 };
@@ -907,16 +893,7 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
     addedDT += 1;
     return toNote;
   });
-  const fromNotes = notes.map(note => {
-    const fromNote = {
-      ...note,
-      title: '', body: '',
-      media: note.media ? note.media
-        .filter(m => !m.name.startsWith(CD_ROOT + '/'))
-        .map(m => ({ name: m.name, content: '' })) : null,
-    };
-    return fromNote;
-  });
+  const fromNotes = notes.map(note => clearNoteData(note));
 
   const unusedFPaths = [];
   for (const note of notes) {
@@ -942,7 +919,7 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
     dataApi.deleteFiles(unusedFPaths);
     fileApi.deleteFiles(unusedFPaths);
   } catch (e) {
-    console.log('deleteNotes: error: ', e);
+    console.log('deleteNotes error: ', e);
     // error in this step should be fine
   }
 };
@@ -994,14 +971,8 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       dispatch({ type: ADD_NOTE_COMMIT, payload });
     } else if (status === DIED_UPDATING) {
-      const fromNote = {
-        ...note.fromNote,
-        title: '', body: '',
-        media: note.fromNote.media ? note.fromNote.media
-          .filter(m => !m.name.startsWith(CD_ROOT + '/'))
-          .map(m => ({ name: m.name, content: '' })) : null,
-      }
       const toNote = note;
+      const fromNote = clearNoteData(note.fromNote);
 
       const {
         usedFPaths, serverUnusedFPaths, localUnusedFPaths,
@@ -1026,19 +997,12 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
         dataApi.deleteFiles(serverUnusedFPaths);
         fileApi.deleteFiles(localUnusedFPaths);
       } catch (e) {
-        console.log('updateNote: error: ', e);
+        console.log('updateNote error: ', e);
         // error in this step should be fine
       }
     } else if (status === DIED_MOVING) {
-      const { fromListName } = note;
-      const fromNote = {
-        ...note.fromNote,
-        title: '', body: '',
-        media: note.fromNote.media ? note.fromNote.media
-          .filter(m => !m.name.startsWith(CD_ROOT + '/'))
-          .map(m => ({ name: m.name, content: '' })) : null,
-      }
-      const [toListName, toNote] = [listName, note];
+      const [toListName, toNote, fromListName] = [listName, note, note.fromListName];
+      const fromNote = clearNoteData(note.fromNote);
 
       const payload = {
         fromListName, fromNotes: [note.fromNote], toListName, toNotes: [toNote],
@@ -1057,7 +1021,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       try {
         dataApi.putNotes({ listName: fromListName, notes: [fromNote] });
       } catch (e) {
-        console.log('moveNotes: error: ', e);
+        console.log('moveNotes error: ', e);
         // error in this step should be fine
       }
     } else if (status === DIED_DELETING) {
@@ -1070,13 +1034,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       };
       addedDT += 1;
 
-      const fromNote = {
-        ...note,
-        title: '', body: '',
-        media: note.media ? note.media
-          .filter(m => !m.name.startsWith(CD_ROOT + '/'))
-          .map(m => ({ name: m.name, content: '' })) : null,
-      };
+      const fromNote = clearNoteData(note);
 
       const unusedFPaths = [];
       for (const { name } of note.media) {
@@ -1104,7 +1062,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
         dataApi.deleteFiles(unusedFPaths);
         fileApi.deleteFiles(unusedFPaths);
       } catch (e) {
-        console.log('deleteNotes: error: ', e);
+        console.log('deleteNotes error: ', e);
         // error in this step should be fine
       }
     } else {
@@ -1148,7 +1106,7 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
   try {
     ({ notes: oldNotes } = await dataApi.fetchOldNotesInTrash());
   } catch (e) {
-    console.log('deleteOldNotesInTrash: error: ', e);
+    console.log('deleteOldNotesInTrash error: ', e);
     return;
   }
 
@@ -1163,16 +1121,7 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
     addedDT += 1;
     return toNote;
   });
-  const fromNotes = oldNotes.map(note => {
-    const fromNote = {
-      ...note,
-      title: '', body: '',
-      media: note.media ? note.media
-        .filter(m => !m.name.startsWith(CD_ROOT + '/'))
-        .map(m => ({ name: m.name, content: '' })) : null,
-    };
-    return fromNote;
-  });
+  const fromNotes = oldNotes.map(note => clearNoteData(note));
 
   const unusedFPaths = [];
   for (const note of oldNotes) {
@@ -1198,7 +1147,7 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
     dataApi.deleteFiles(unusedFPaths);
     fileApi.deleteFiles(unusedFPaths);
   } catch (e) {
-    console.log('deleteOldNotesInTrash: error: ', e);
+    console.log('deleteOldNotesInTrash error: ', e);
     // error in this step should be fine
   }
 };
@@ -1227,13 +1176,7 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
     }
 
     if (!fromNotes[listName]) fromNotes[listName] = [];
-    fromNotes[listName].push({
-      ...note,
-      title: '', body: '',
-      media: note.media ? note.media
-        .filter(m => !m.name.startsWith(CD_ROOT + '/'))
-        .map(m => ({ name: m.name, content: '' })) : null,
-    });
+    fromNotes[listName].push(clearNoteData(note));
 
     noteMedia.push(...note.media);
   }
@@ -1266,7 +1209,7 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
     dataApi.deleteFiles(serverUnusedFPaths);
     fileApi.deleteFiles(localUnusedFPaths);
   } catch (e) {
-    console.log('mergeNote: error: ', e);
+    console.log('mergeNote error: ', e);
     // error in this step should be fine
   }
 };
@@ -1310,7 +1253,7 @@ export const addListNames = (newNames) => async (dispatch, getState) => {
     const _settingsFPath = getState().settingsFPath.fpath;
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
   } catch (e) {
-    console.log('addListNames: error: ', e);
+    console.log('addListNames error: ', e);
     // error in this step should be fine
   }
 };
@@ -1346,7 +1289,7 @@ export const updateListNames = (listNames, newNames) => async (dispatch, getStat
     const _settingsFPath = getState().settingsFPath.fpath;
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
   } catch (e) {
-    console.log('updateListNames: error: ', e);
+    console.log('updateListNames error: ', e);
     // error in this step should be fine
   }
 };
@@ -1390,7 +1333,7 @@ export const moveListName = (listName, direction) => async (dispatch, getState) 
     const _settingsFPath = getState().settingsFPath.fpath;
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
   } catch (e) {
-    console.log('moveListName: error: ', e);
+    console.log('moveListName error: ', e);
     // error in this step should be fine
   }
 };
@@ -1424,7 +1367,7 @@ export const deleteListNames = (listNames) => async (dispatch, getState) => {
     const _settingsFPath = getState().settingsFPath.fpath;
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
   } catch (e) {
-    console.log('deleteListNames: error: ', e);
+    console.log('deleteListNames error: ', e);
     // error in this step should be fine
   }
 };
@@ -1473,7 +1416,7 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
       const _settingsFPath = getState().settingsFPath.fpath;
       if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
     } catch (e) {
-      console.log('retryAddListNames: error: ', e);
+      console.log('retryAddListNames error: ', e);
       // error in this step should be fine
     }
   }
@@ -1499,7 +1442,7 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
       const _settingsFPath = getState().settingsFPath.fpath;
       if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
     } catch (e) {
-      console.log('retryUpdateListNames: error: ', e);
+      console.log('retryUpdateListNames error: ', e);
       // error in this step should be fine
     }
   }
@@ -1524,7 +1467,7 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
       const _settingsFPath = getState().settingsFPath.fpath;
       if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
     } catch (e) {
-      console.log('retryMoveListNames: error: ', e);
+      console.log('retryMoveListNames error: ', e);
       // error in this step should be fine
     }
   }
@@ -1550,7 +1493,7 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
       const _settingsFPath = getState().settingsFPath.fpath;
       if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
     } catch (e) {
-      console.log('retryDeleteListNames: error: ', e);
+      console.log('retryDeleteListNames error: ', e);
       // error in this step should be fine
     }
   }
@@ -1598,7 +1541,7 @@ export const updateSettings = (updatedValues) => async (dispatch, getState) => {
     const _settingsFPath = getState().settingsFPath.fpath;
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
   } catch (e) {
-    console.log('updateListNames: error: ', e);
+    console.log('updateListNames error: ', e);
     // error in this step should be fine
   }
 };
@@ -1684,7 +1627,7 @@ export const clearSavingFPaths = () => async (dispatch, getState) => {
   try {
     await fileApi.deleteFiles(savingFPaths);
   } catch (e) {
-    console.log(`clearSavingFiles: error: `, e);
+    console.log('clearSavingFiles error: ', e);
     // error in this step should be fine
   }
   dispatch({ type: CLEAR_SAVING_FPATHS });
@@ -1806,12 +1749,7 @@ const deleteAllDataLoop = async (dispatch, noteIds, total, doneCount) => {
     addedDT += 1;
 
     if (!fromNotes[noteId.listName]) fromNotes[noteId.listName] = [];
-    fromNotes[noteId.listName].push({
-      ...note,
-      media: note.media ? note.media
-        .filter(m => !m.name.startsWith(CD_ROOT + '/'))
-        .map(m => ({ name: m.name, content: '' })) : null,
-    });
+    fromNotes[noteId.listName].push(clearNoteData(note));
   }
 
   for (const [_listName, _notes] of Object.entries(toNotes)) {
@@ -1823,7 +1761,7 @@ const deleteAllDataLoop = async (dispatch, noteIds, total, doneCount) => {
       await dataApi.putNotes({ listName: _listName, notes: _notes });
     }
   } catch (e) {
-    console.log('deleteAllDataLoop: error: ', e);
+    console.log('deleteAllDataLoop error: ', e);
     // error in this step should be fine
   }
 
@@ -1878,7 +1816,7 @@ export const deleteAllData = () => async (dispatch, getState) => {
       try {
         await dataApi.deleteFiles([_settingsFPath]);
       } catch (e) {
-        console.log('deleteAllData: error: ', e);
+        console.log('deleteAllData error: ', e);
         // error in this step should be fine
       }
     }

@@ -16,7 +16,7 @@ const getFile = async (fpath, dir = Dirs.DocumentDir) => {
 const getFiles = async (fpaths, dir = Dirs.DocumentDir) => {
   const contents = [];
   for (let fpath of fpaths) {
-    const content = await getFile(fpath, dir)
+    const content = await getFile(fpath, dir);
     contents.push(content);
   }
   return { fpaths, contents };

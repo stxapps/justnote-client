@@ -5,6 +5,7 @@ import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { Dirs, FileSystem } from 'react-native-file-access';
 
+import fileApi from '../apis/file';
 import {
   updateEditorFocused, saveNote, discardNote, onUpdateNoteId, onChangeListName,
   addSavingFPaths,
@@ -121,7 +122,7 @@ const NoteEditorEditor = (props) => {
       if (ext) fpart += `.${ext}`;
 
       try {
-        await FileSystem.writeFile(Dirs.DocumentDir + '/' + fpart, content, 'base64');
+        await fileApi.putFile(fpart, content);
 
         const cfpart = CD_ROOT + '/' + fpart;
         dispatch(addSavingFPaths([cfpart]));

@@ -55,7 +55,11 @@ const notesReducer = (state = initialState, action) => {
     }
 
     const { listName, notes, doDeleteOldNotesInTrash } = action.payload;
-    if (listName in newState) newState[listName] = toObjAndAddAttrs(notes, ADDED);
+    if (listName in newState) {
+      const processingNotes = _.exclude(state[listName], STATUS, ADDED);
+      const fetchedNotes = toObjAndAddAttrs(notes, ADDED);
+      newState[listName] = { ...processingNotes, ...fetchedNotes };
+    }
 
     return loop(
       newState,
@@ -212,12 +216,16 @@ const notesReducer = (state = initialState, action) => {
       // DIED_MOVING -> remove this note and add back fromNote
       // DIED_DELETING -> just set status to ADDED
       const status = state[listName][id].status;
-      if ([DIED_ADDING].includes(status)) {
+      if (status === DIED_ADDING) {
         continue;
-      } else if ([DIED_UPDATING, DIED_MOVING].includes(status)) {
+      } else if (status === DIED_UPDATING) {
         const fromNote = state[listName][id].fromNote;
         newState[listName][fromNote.id] = { ...fromNote, status: ADDED };
-      } else if ([DIED_DELETING].includes(status)) {
+      } else if (status === DIED_MOVING) {
+        const fromListName = state[listName][id].fromListName;
+        const fromNote = state[listName][id].fromNote;
+        newState[fromListName][fromNote.id] = { ...fromNote, status: ADDED };
+      } else if (status === DIED_DELETING) {
         newState[listName][id] = { ...state[listName][id], status: ADDED };
       } else {
         throw new Error(`Invalid status: ${status} of note id: ${id}`);

@@ -143,13 +143,15 @@ const listNoteIds = (noteFPaths) => {
   return { noteIds, conflictedIds, conflictWiths };
 };
 
-const batchGetFileWithRetry = async (fpaths, callCount) => {
+const batchGetFileWithRetry = async (
+  fpaths, callCount, dangerouslyIgnoreError = false
+) => {
 
   const responses = await Promise.all(
     fpaths.map(fpath =>
       mmkvStorage.getFile(fpath)
         .then(content => ({ content, fpath, success: true }))
-        .catch(error => ({ error, fpath, success: false }))
+        .catch(error => ({ content: null, fpath, success: false, error }))
     )
   );
 
@@ -157,11 +159,16 @@ const batchGetFileWithRetry = async (fpaths, callCount) => {
   const failedFPaths = failedResponses.map(({ fpath }) => fpath);
 
   if (failedResponses.length) {
-    if (callCount + 1 >= MAX_TRY) throw failedResponses[0].error;
+    if (callCount + 1 >= MAX_TRY) {
+      if (dangerouslyIgnoreError) return responses;
+      throw failedResponses[0].error;
+    }
 
     return [
       ...responses.filter(({ success }) => success),
-      ...(await batchGetFileWithRetry(failedFPaths, callCount + 1)),
+      ...(await batchGetFileWithRetry(
+        failedFPaths, callCount + 1, dangerouslyIgnoreError
+      )),
     ];
   }
 
@@ -244,14 +251,15 @@ const fetch = async (params) => {
     return selectedConflictWiths.some(conflictWith => conflictWith.includes(noteId.id));
   });
 
-  const fpaths = [];
-  for (const id of selectedNoteIds) fpaths.push(...id.fpaths);
-  for (const id of selectedConflictedIds) fpaths.push(...id.fpaths);
+  const _fpaths = [];
+  for (const id of selectedNoteIds) _fpaths.push(...id.fpaths);
+  for (const id of selectedConflictedIds) _fpaths.push(...id.fpaths);
 
-  const responses = await batchGetFileWithRetry(fpaths, 0);
-  const contents = [];
-  for (let i = 0; i < fpaths.length; i++) {
-    contents.push(responses[i].content);
+  const responses = await batchGetFileWithRetry(_fpaths, 0);
+  const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
+  for (let { fpath, content } of responses) {
+    fpaths.push(fpath);
+    contents.push(content);
   }
 
   const notes = toNotes(selectedNoteIds, fpaths, contents);
@@ -293,13 +301,14 @@ const fetchMore = async (params) => {
   const filteredNoteIds = sortedNoteIds.slice(maxIndex + 1);
   const selectedNoteIds = filteredNoteIds.slice(0, N_NOTES);
 
-  const fpaths = [];
-  for (const id of selectedNoteIds) fpaths.push(...id.fpaths);
+  const _fpaths = [];
+  for (const id of selectedNoteIds) _fpaths.push(...id.fpaths);
 
-  const responses = await batchGetFileWithRetry(fpaths, 0);
-  const contents = [];
-  for (let i = 0; i < fpaths.length; i++) {
-    contents.push(responses[i].content);
+  const responses = await batchGetFileWithRetry(_fpaths, 0);
+  const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
+  for (let { fpath, content } of responses) {
+    fpaths.push(fpath);
+    contents.push(content);
   }
 
   const notes = toNotes(selectedNoteIds, fpaths, contents);
@@ -335,7 +344,6 @@ const batchPutFileWithRetry = async (fpaths, contents, callCount) => {
 };
 
 const putNotes = async (params) => {
-
   const { listName, notes } = params;
 
   const fpaths = [], contents = [];
@@ -351,10 +359,7 @@ const putNotes = async (params) => {
     }
   }
 
-  const responses = await batchPutFileWithRetry(fpaths, contents, 0);
-  const publicUrls = responses.map(response => response.publicUrl);
-
-  return { fpaths, publicUrls };
+  await batchPutFileWithRetry(fpaths, contents, 0);
 };
 
 export const batchDeleteFileWithRetry = async (fpaths, callCount) => {
@@ -363,7 +368,18 @@ export const batchDeleteFileWithRetry = async (fpaths, callCount) => {
     fpaths.map((fpath) =>
       mmkvStorage.deleteFile(fpath)
         .then(() => ({ fpath, success: true }))
-        .catch(error => ({ error, fpath, success: false }))
+        .catch(error => {
+          // BUG ALERT
+          // Treat not found error as not an error as local data might be out-dated.
+          //   i.e. user tries to delete a not-existing file, it's ok.
+          // Anyway, if the file should be there, this will hide the real error!
+          if (error.message &&
+            (error.message.includes('does_not_exist') ||
+              error.message.includes('file_not_found'))) {
+            return { fpath, success: true };
+          }
+          return { error, fpath, success: false };
+        })
     )
   );
 
@@ -394,7 +410,7 @@ const fetchOldNotesInTrash = async () => {
 
     return days > N_DAYS;
   });
-  const selectedNoteIds = oldNoteIds.slice(N_NOTES);
+  const selectedNoteIds = oldNoteIds.slice(0, N_NOTES);
 
   const fpaths = [];
   for (const id of selectedNoteIds) fpaths.push(...id.fpaths);
@@ -428,41 +444,34 @@ const canDeleteListNames = async (listNames) => {
   return canDeletes;
 };
 
-const getFiles = async (fpaths) => {
+const getFiles = async (_fpaths, dangerouslyIgnoreError = false) => {
 
-  const responses = [];
-  for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
-    const _fpaths = fpaths.slice(i, i + N_NOTES);
-    const _responses = await batchGetFileWithRetry(_fpaths, 0);
-    responses.push(..._responses.map(response => response.content));
+  const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
+  for (let i = 0, j = _fpaths.length; i < j; i += N_NOTES) {
+    const selectedFPaths = _fpaths.slice(i, i + N_NOTES);
+    const responses = await batchGetFileWithRetry(
+      selectedFPaths, 0, dangerouslyIgnoreError
+    );
+    fpaths.push(...responses.map(({ fpath }) => fpath));
+    contents.push(...responses.map(({ content }) => content));
   }
 
-  return responses;
+  return { fpaths, contents };
 };
 
 const putFiles = async (fpaths, contents) => {
-
-  const responses = [];
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
     const _fpaths = fpaths.slice(i, i + N_NOTES);
     const _contents = contents.slice(i, i + N_NOTES);
-    const _responses = await batchPutFileWithRetry(_fpaths, _contents, 0);
-    responses.push(..._responses.map(response => response.publicUrl));
+    await batchPutFileWithRetry(_fpaths, _contents, 0);
   }
-
-  return responses;
 };
 
 const deleteFiles = async (fpaths) => {
-
-  const responses = [];
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
     const _fpaths = fpaths.slice(i, i + N_NOTES);
-    const _responses = await batchDeleteFileWithRetry(_fpaths, 0);
-    responses.push(..._responses.map(response => response.success));
+    await batchDeleteFileWithRetry(_fpaths, 0);
   }
-
-  return responses;
 };
 
 const deleteAllFiles = async () => {

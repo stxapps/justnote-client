@@ -154,14 +154,6 @@ export const isString = val => {
   return typeof val === 'string' || val instanceof String;
 };
 
-export const isUint8Array = val => {
-  return val instanceof Uint8Array || toString.call(val) === '[object Uint8Array]';
-};
-
-export const isBlob = val => {
-  return val instanceof Blob || toString.call(val) === '[object Blob]';
-};
-
 export const isEqual = (x, y) => {
   if (x === y) return true;
   // if both x and y are null or undefined and exactly the same
@@ -452,6 +444,16 @@ export const isNoteBodyEqual = (s1, s2) => {
   s2 = sortClassNamesInBody(s2);
 
   return s1 === s2;
+};
+
+export const clearNoteData = (note) => {
+  return {
+    ...note,
+    title: '', body: '',
+    media: note.media ? note.media
+      .filter(m => !m.name.startsWith(CD_ROOT + '/'))
+      .map(m => ({ name: m.name, content: '' })) : null,
+  };
 };
 
 export const isIPadIPhoneIPod = () => {

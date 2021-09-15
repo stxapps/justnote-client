@@ -154,13 +154,6 @@ export const isString = val => {
   return typeof val === 'string' || val instanceof String;
 };
 
-export const isArrayBuffer = val => {
-  return (
-    (typeof ArrayBuffer === 'function') &&
-    (val instanceof ArrayBuffer || toString.call(val) === '[object ArrayBuffer]')
-  );
-};
-
 export const isEqual = (x, y) => {
   if (x === y) return true;
   // if both x and y are null or undefined and exactly the same
@@ -453,6 +446,16 @@ export const isNoteBodyEqual = (s1, s2) => {
   return s1 === s2;
 };
 
+export const clearNoteData = (note) => {
+  return {
+    ...note,
+    title: '', body: '',
+    media: note.media ? note.media
+      .filter(m => !m.name.startsWith(CD_ROOT + '/'))
+      .map(m => ({ name: m.name, content: '' })) : null,
+  };
+};
+
 export const isIPadIPhoneIPod = () => {
   const ua = navigator.userAgent;
   if (/iPad|iPhone|iPod/.test(ua)) {
@@ -496,7 +499,7 @@ export const replaceObjectUrls = (
         console.log(`replaceObjectUrls: Not found fname in objectUrlContents: ${objectUrlContents} with src: ${src}`);
         continue;
       }
-      if (!content) {
+      if (!isString(content)) {
         console.log(`replaceObjectUrls: Not found content in objectUrlContents: ${objectUrlContents} with src: ${src}`);
         continue;
       }
@@ -506,7 +509,7 @@ export const replaceObjectUrls = (
         console.log(`replaceObjectUrls: Not found fname in objectUrlFiles: ${objectUrlFiles} with src: ${src}`);
         continue;
       }
-      if (!content) {
+      if (!isString(content)) {
         console.log(`replaceObjectUrls: Not found content in objectUrlFiles: ${objectUrlFiles} with src: ${src}`);
         continue;
       }
