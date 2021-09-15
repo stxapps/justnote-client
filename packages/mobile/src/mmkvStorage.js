@@ -18,15 +18,10 @@ const putFile = async (path, content) => {
 };
 
 const getFile = async (path) => {
-  try {
-    if (path.endsWith(INDEX + DOT_JSON) || path.startsWith(SETTINGS)) {
-      return await getInstance().getMapAsync(path);
-    }
-    return await getInstance().getStringAsync(path);
-  } catch (e) {
-    console.log('getFile error: ', e);
-    return null;
+  if (path.endsWith(INDEX + DOT_JSON) || path.startsWith(SETTINGS)) {
+    return await getInstance().getMapAsync(path);
   }
+  return await getInstance().getStringAsync(path);
 };
 
 const deleteFile = async (path) => {

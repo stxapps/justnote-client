@@ -40,7 +40,7 @@ const putFiles = async (fpaths, contents, dir = Dirs.DocumentDir) => {
 };
 
 const deleteFiles = async (fpaths, dir = Dirs.DocumentDir) => {
-  let _e;
+  let _error;
   for (let fpath of fpaths) {
     if (fpath.includes(CD_ROOT + '/')) {
       fpath = fpath.slice(fpath.indexOf(CD_ROOT + '/'));
@@ -51,12 +51,17 @@ const deleteFiles = async (fpaths, dir = Dirs.DocumentDir) => {
 
     try {
       await FileSystem.unlink(fpath);
-    } catch (e) {
-      console.log(`apis/file.deleteFiles: with fpath: ${fpath}, error: `, e);
-      _e = e;
+    } catch (error) {
+      console.log(`apis/file.deleteFiles: with fpath: ${fpath}, error: `, error);
+      if (error.message &&
+        (error.message.includes('does_not_exist') ||
+          error.message.includes('file_not_found'))) {
+        continue;
+      }
+      _error = error;
     }
   }
-  if (_e) throw _e;
+  if (_error) throw _error;
 };
 
 const deleteAllFiles = async () => {

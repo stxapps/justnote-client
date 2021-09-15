@@ -1357,8 +1357,10 @@ export const sync = (
       if (noteFPaths.includes(fpath)) continue;
 
       let content;
-      if (allLeafFPaths.includes(fpath)) content = (await dataApi.getFiles([fpath]))[0];
-      else {
+      if (allLeafFPaths.includes(fpath)) {
+        // No order guarantee but this is just one file
+        content = (await dataApi.getFiles([fpath])).contents[0];
+      } else {
         if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
         else content = '';
       }
@@ -1371,8 +1373,8 @@ export const sync = (
           allLeafStaticFPaths.includes(staticFPath) &&
           !staticFPaths.includes(staticFPath)
         ) {
-          fpaths.push(staticFPath);
-          contents.push('file://' + staticFPath);
+          fpaths.push('file://' + staticFPath);
+          contents.push('');
         }
       }
     }
@@ -1434,8 +1436,9 @@ export const sync = (
       fpaths.push(fpath);
       contents.push(content);
     }
+    // No order guarantee btw _gFPaths and gContents
     const { fpath: gFPaths, contents: gContents } = await serverApi.getFiles(_gFPaths);
-    await serverApi.getFiles(gStaticFPaths);
+    await serverApi.getFiles(gStaticFPaths, true);
     await dataApi.putFiles([...fpaths, ...gFPaths], [...contents, ...gContents]);
 
     // 4. Local side: loop used to be leaves in local and set to empty
@@ -1487,7 +1490,9 @@ export const sync = (
     if (syncSettingsAction === 0) syncSettingsFPath = _settingsFPath;
     else if (syncSettingsAction === 1) {
       // Download from server to device
-      const content = (await serverApi.getFiles([settingsFPath]))[0];
+
+      // No order guarantee but this is just one file
+      const content = (await serverApi.getFiles([settingsFPath])).contents[0];
       await dataApi.putFiles([settingsFPath], [content]);
 
       // Delete obsolete version in device
@@ -1497,7 +1502,9 @@ export const sync = (
       haveUpdate = true;
     } else if (syncSettingsAction === 2) {
       // Upload from device to server
-      const content = (await dataApi.getFiles([_settingsFPath]))[0];
+
+      // No order guarantee but this is just one file
+      const content = (await dataApi.getFiles([_settingsFPath])).contents[0];
       await serverApi.putFiles([_settingsFPath], [content]);
 
       // Delete obsolete version in server
