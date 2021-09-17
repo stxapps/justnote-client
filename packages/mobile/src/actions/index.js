@@ -969,6 +969,8 @@ export const addListNames = (newNames) => async (dispatch, getState) => {
     ...listNameObjs,
   ];
 
+  const _settingsFPath = getState().settingsFPath.fpath;
+
   const payload = { settingsFPath, listNameObjs };
   dispatch({ type: ADD_LIST_NAMES, payload });
 
@@ -982,7 +984,6 @@ export const addListNames = (newNames) => async (dispatch, getState) => {
   dispatch({ type: ADD_LIST_NAMES_COMMIT, payload });
 
   try {
-    const _settingsFPath = getState().settingsFPath.fpath;
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
   } catch (e) {
     console.log('addListNames error: ', e);
@@ -1005,6 +1006,8 @@ export const updateListNames = (listNames, newNames) => async (dispatch, getStat
     return { listName: listNameObj.listName, displayName: listNameObj.displayName };
   });
 
+  const _settingsFPath = getState().settingsFPath.fpath;
+
   const payload = { settingsFPath, listNames, newNames };
   dispatch({ type: UPDATE_LIST_NAMES, payload });
 
@@ -1018,7 +1021,6 @@ export const updateListNames = (listNames, newNames) => async (dispatch, getStat
   dispatch({ type: UPDATE_LIST_NAMES_COMMIT, payload });
 
   try {
-    const _settingsFPath = getState().settingsFPath.fpath;
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
   } catch (e) {
     console.log('updateListNames error: ', e);
@@ -1049,6 +1051,8 @@ export const moveListName = (listName, direction) => async (dispatch, getState) 
     throw new Error(`Invalid direction: ${direction}`);
   }
 
+  const _settingsFPath = getState().settingsFPath.fpath;
+
   const payload = { settingsFPath, listName, direction };
   dispatch({ type: MOVE_LIST_NAME, payload });
 
@@ -1062,7 +1066,6 @@ export const moveListName = (listName, direction) => async (dispatch, getState) 
   dispatch({ type: MOVE_LIST_NAME_COMMIT, payload });
 
   try {
-    const _settingsFPath = getState().settingsFPath.fpath;
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
   } catch (e) {
     console.log('moveListName error: ', e);
@@ -1083,6 +1086,8 @@ export const deleteListNames = (listNames) => async (dispatch, getState) => {
     return { listName: listNameObj.listName, displayName: listNameObj.displayName };
   });
 
+  const _settingsFPath = getState().settingsFPath.fpath;
+
   const payload = { settingsFPath, listNames };
   dispatch({ type: DELETE_LIST_NAMES, payload });
 
@@ -1096,7 +1101,6 @@ export const deleteListNames = (listNames) => async (dispatch, getState) => {
   dispatch({ type: DELETE_LIST_NAMES_COMMIT, payload });
 
   try {
-    const _settingsFPath = getState().settingsFPath.fpath;
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
   } catch (e) {
     console.log('deleteListNames error: ', e);
@@ -1132,6 +1136,8 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
     return obj.status === DIED_ADDING;
   });
   if (diedAddingListNameObjs.length > 0) {
+    const _settingsFPath = getState().settingsFPath.fpath;
+
     const payload = { settingsFPath, listNameObjs: diedAddingListNameObjs };
     dispatch({ type: RETRY_ADD_LIST_NAMES, payload });
 
@@ -1145,7 +1151,6 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
     dispatch({ type: ADD_LIST_NAMES_COMMIT, payload });
 
     try {
-      const _settingsFPath = getState().settingsFPath.fpath;
       if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
     } catch (e) {
       console.log('retryAddListNames error: ', e);
@@ -1157,6 +1162,8 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
     return obj.status === DIED_UPDATING;
   });
   if (diedUpdatingListNameObjs.length > 0) {
+    const _settingsFPath = getState().settingsFPath.fpath;
+
     const diedUpdatingListNames = diedUpdatingListNameObjs.map(obj => obj.listName);
     const payload = { settingsFPath, listNames: diedUpdatingListNames };
     dispatch({ type: RETRY_UPDATE_LIST_NAMES, payload });
@@ -1171,7 +1178,6 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
     dispatch({ type: UPDATE_LIST_NAMES_COMMIT, payload });
 
     try {
-      const _settingsFPath = getState().settingsFPath.fpath;
       if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
     } catch (e) {
       console.log('retryUpdateListNames error: ', e);
@@ -1183,6 +1189,8 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
     return obj.status === DIED_MOVING;
   });
   for (const diedMovingListNameObj of diedMovingListNameObjs) {
+    const _settingsFPath = getState().settingsFPath.fpath;
+
     const payload = { settingsFPath, listName: diedMovingListNameObj.listName };
     dispatch({ type: RETRY_MOVE_LIST_NAME, payload });
 
@@ -1196,7 +1204,6 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
     dispatch({ type: MOVE_LIST_NAME_COMMIT, payload });
 
     try {
-      const _settingsFPath = getState().settingsFPath.fpath;
       if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
     } catch (e) {
       console.log('retryMoveListNames error: ', e);
@@ -1208,6 +1215,8 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
     return obj.status === DIED_DELETING;
   });
   if (diedDeletingListNameObjs.length > 0) {
+    const _settingsFPath = getState().settingsFPath.fpath;
+
     const diedDeletingListNames = diedDeletingListNameObjs.map(obj => obj.listName);
     const payload = { settingsFPath, listNames: diedDeletingListNames };
     dispatch({ type: RETRY_DELETE_LIST_NAMES, payload });
@@ -1222,7 +1231,6 @@ export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
     dispatch({ type: DELETE_LIST_NAMES_COMMIT, payload });
 
     try {
-      const _settingsFPath = getState().settingsFPath.fpath;
       if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
     } catch (e) {
       console.log('retryDeleteListNames error: ', e);
@@ -1257,6 +1265,8 @@ export const updateSettings = (updatedValues) => async (dispatch, getState) => {
   const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
   const settings = { ...getState().settings, ...updatedValues };
 
+  const _settingsFPath = getState().settingsFPath.fpath;
+
   const payload = { settingsFPath, settings, rollbackValues };
   dispatch({ type: UPDATE_SETTINGS, payload });
 
@@ -1270,7 +1280,6 @@ export const updateSettings = (updatedValues) => async (dispatch, getState) => {
   dispatch({ type: UPDATE_SETTINGS_COMMIT, payload });
 
   try {
-    const _settingsFPath = getState().settingsFPath.fpath;
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
   } catch (e) {
     console.log('updateListNames error: ', e);
@@ -1437,7 +1446,7 @@ export const sync = (
       contents.push(content);
     }
     // No order guarantee btw _gFPaths and gContents
-    const { fpath: gFPaths, contents: gContents } = await serverApi.getFiles(_gFPaths);
+    const { fpaths: gFPaths, contents: gContents } = await serverApi.getFiles(_gFPaths);
     await serverApi.getFiles(gStaticFPaths, true);
     await dataApi.putFiles([...fpaths, ...gFPaths], [...contents, ...gContents]);
 

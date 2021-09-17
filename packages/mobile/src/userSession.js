@@ -1,5 +1,6 @@
 // @ts-ignore
 import RNBlockstackSdk from 'react-native-blockstack';
+import { Dirs } from 'react-native-file-access';
 
 const hasSession = async () => {
   const { hasSession: hs } = await RNBlockstackSdk.hasSession();
@@ -38,12 +39,14 @@ const loadUserData = async () => {
   return await RNBlockstackSdk.loadUserData();
 };
 
-const putFile = async (path, content, options = { encrypt: true }) => {
+const putFileOptions = { encrypt: true, dir: Dirs.DocumentDir };
+const putFile = async (path, content, options = putFileOptions) => {
   const { fileUrl } = await RNBlockstackSdk.putFile(path, content, options);
   return fileUrl;
 };
 
-const getFile = async (path, options = { decrypt: true }) => {
+const getFileOptions = { decrypt: true, dir: Dirs.DocumentDir };
+const getFile = async (path, options = getFileOptions) => {
   const result = await RNBlockstackSdk.getFile(path, options);
   return result.fileContents || result.fileContentsEncoded;
 };

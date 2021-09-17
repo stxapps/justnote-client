@@ -369,15 +369,7 @@ export const batchDeleteFileWithRetry = async (fpaths, callCount) => {
       mmkvStorage.deleteFile(fpath)
         .then(() => ({ fpath, success: true }))
         .catch(error => {
-          // BUG ALERT
-          // Treat not found error as not an error as local data might be out-dated.
-          //   i.e. user tries to delete a not-existing file, it's ok.
-          // Anyway, if the file should be there, this will hide the real error!
-          if (error.message &&
-            (error.message.includes('does_not_exist') ||
-              error.message.includes('file_not_found'))) {
-            return { fpath, success: true };
-          }
+          // For MMKV, there is no error when does_not_exist or file_not_found
           return { error, fpath, success: false };
         })
     )

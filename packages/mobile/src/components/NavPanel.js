@@ -130,7 +130,7 @@ const NavPanel = () => {
   }, [dispatch]);
 
   const onRightPanelCloseBtnClick = useCallback(() => {
-    dispatch(updateNoteId(null));
+    dispatch(updateNoteId(null, false, true));
   }, [dispatch]);
 
   const registerSidebarBackHandler = useCallback((isShown) => {

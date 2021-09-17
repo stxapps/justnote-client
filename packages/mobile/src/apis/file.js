@@ -1,6 +1,6 @@
 import { Dirs, FileSystem } from 'react-native-file-access';
 
-import { CD_ROOT } from '../types/const';
+import { CD_ROOT, BASE64 } from '../types/const';
 
 const getFile = async (fpath, dir = Dirs.DocumentDir) => {
   if (fpath.includes(CD_ROOT + '/')) {
@@ -23,12 +23,17 @@ const getFiles = async (fpaths, dir = Dirs.DocumentDir) => {
   return { fpaths, contents };
 };
 
-const putFile = async (fpath, content, dir = Dirs.DocumentDir, encoding = 'base64') => {
+const putFile = async (fpath, content, dir = Dirs.DocumentDir, encoding = BASE64) => {
   if (fpath.includes(CD_ROOT + '/')) {
     fpath = fpath.slice(fpath.indexOf(CD_ROOT + '/'));
     fpath = fpath.replace(CD_ROOT + '/', dir + '/');
   } else {
     fpath = dir + '/' + fpath;
+  }
+
+  if (encoding = BASE64) {
+    const i = content.indexOf(',');
+    if (i >= 0) content = content.slice(i + 1);
   }
 
   /* @ts-ignore */
@@ -42,7 +47,6 @@ const putFiles = async (fpaths, contents, dir = Dirs.DocumentDir) => {
 };
 
 const deleteFiles = async (fpaths, dir = Dirs.DocumentDir) => {
-  let _error;
   for (let fpath of fpaths) {
     if (fpath.includes(CD_ROOT + '/')) {
       fpath = fpath.slice(fpath.indexOf(CD_ROOT + '/'));
@@ -54,16 +58,13 @@ const deleteFiles = async (fpaths, dir = Dirs.DocumentDir) => {
     try {
       await FileSystem.unlink(fpath);
     } catch (error) {
-      console.log(`apis/file.deleteFiles: with fpath: ${fpath}, error: `, error);
-      if (error.message &&
-        (error.message.includes('does_not_exist') ||
-          error.message.includes('file_not_found'))) {
-        continue;
-      }
-      _error = error;
+      // BUG ALERT
+      // Treat not found error as not an error as local data might be out-dated.
+      //   i.e. user tries to delete a not-existing file, it's ok.
+      // Anyway, if the file should be there, this will hide the real error!
+      console.log('fileApi.deleteFiles error: ', error);
     }
   }
-  if (_error) throw _error;
 };
 
 const deleteAllFiles = async () => {
