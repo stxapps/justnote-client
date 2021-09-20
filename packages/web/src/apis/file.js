@@ -40,7 +40,6 @@ const putFiles = async (fpaths, contents, dir = Dirs.DocumentDir) => {
 };
 
 const deleteFiles = async (fpaths, dir = Dirs.DocumentDir) => {
-  let _error;
   for (let fpath of fpaths) {
     if (fpath.includes(CD_ROOT + '/')) {
       fpath = fpath.slice(fpath.indexOf(CD_ROOT + '/'));
@@ -52,16 +51,13 @@ const deleteFiles = async (fpaths, dir = Dirs.DocumentDir) => {
     try {
       await FileSystem.unlink(fpath);
     } catch (error) {
-      console.log(`apis/file.deleteFiles: with fpath: ${fpath}, error: `, error);
-      if (error.message &&
-        (error.message.includes('does_not_exist') ||
-          error.message.includes('file_not_found'))) {
-        continue;
-      }
-      _error = error;
+      // BUG ALERT
+      // Treat not found error as not an error as local data might be out-dated.
+      //   i.e. user tries to delete a not-existing file, it's ok.
+      // Anyway, if the file should be there, this will hide the real error!
+      console.log('fileApi.deleteFiles error: ', error);
     }
   }
-  if (_error) throw _error;
 };
 
 const deleteAllFiles = async () => {
