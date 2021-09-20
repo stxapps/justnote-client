@@ -48,7 +48,8 @@ const putFile = async (path, content, options = putFileOptions) => {
 const getFileOptions = { decrypt: true, dir: Dirs.DocumentDir };
 const getFile = async (path, options = getFileOptions) => {
   const result = await RNBlockstackSdk.getFile(path, options);
-  return result.fileContents || result.fileContentsEncoded;
+  if ('fileContentsEncoded' in result) return result.fileContentsEncoded;
+  return result.fileContents;
 };
 
 const deleteFile = async (path, options = { wasSigned: false }) => {
