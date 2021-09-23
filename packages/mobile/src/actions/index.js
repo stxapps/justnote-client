@@ -43,7 +43,7 @@ import {
   DISCARD_ACTION_CHANGE_LIST_NAME, DISCARD_ACTION_UPDATE_SYNCED,
   MY_NOTES, TRASH, ID, NEW_NOTE, NEW_NOTE_OBJ,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
-  SWAP_LEFT, SWAP_RIGHT, N_NOTES, CD_ROOT, SETTINGS, INDEX, DOT_JSON,
+  SWAP_LEFT, SWAP_RIGHT, N_NOTES, CD_ROOT, IMAGES, SETTINGS, INDEX, DOT_JSON,
   LG_WIDTH, SHOW_SYNCED,
 } from '../types/const';
 import {
@@ -266,7 +266,7 @@ export const signOut = () => async (dispatch, getState) => {
   await dataApi.deleteAllFiles();
 
   // clear file storage
-  await fileApi.deleteAllFiles();
+  await fileApi.deleteAllFiles(IMAGES);
 
   // clear all user data!
   dispatch({

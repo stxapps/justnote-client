@@ -3,14 +3,14 @@ import { TextInput, Keyboard, Platform } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
-import { Dirs, FileSystem } from 'react-native-file-access';
+import { Dirs } from 'react-native-file-access';
 
 import fileApi from '../apis/file';
 import {
   updateEditorFocused, saveNote, discardNote, onUpdateNoteId, onChangeListName,
   addSavingFPaths,
 } from '../actions';
-import { NEW_NOTE, ADDED, LG_WIDTH, CD_ROOT } from '../types/const';
+import { NEW_NOTE, ADDED, LG_WIDTH, IMAGES, CD_ROOT, UTF8 } from '../types/const';
 import { replaceObjectUrls, splitOnFirst, getFileExt } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 import cache from '../utils/cache';
@@ -23,6 +23,7 @@ const GET_DATA_UPDATE_NOTE_ID = 'GET_DATA_UPDATE_NOTE_ID';
 const GET_DATA_CHANGE_LIST_NAME = 'GET_DATA_CHANGE_LIST_NAME';
 
 const SEP = '_jUSTnOTE-sEpArAtOr_';
+const HTML_FNAME = 'ckeditor.html';
 
 const NoteEditorEditor = (props) => {
 
@@ -37,6 +38,7 @@ const NoteEditorEditor = (props) => {
   const focusTitleCount = useSelector(state => state.editor.focusTitleCount);
   const setInitDataCount = useSelector(state => state.editor.setInitDataCount);
   const blurCount = useSelector(state => state.editor.blurCount);
+  const [isHtmlReady, setHtmlReady] = useState(Platform.OS === 'ios' ? false : true);
   const [isEditorReady, setEditorReady] = useState(false);
   const webView = useRef(null);
   const hackInput = useRef(null);
@@ -117,7 +119,7 @@ const NoteEditorEditor = (props) => {
 
   const onAddObjectUrlFiles = useCallback(async (objectUrl, fname, content) => {
     if (imagesDir.current) {
-      let fpart = imagesDir.current + objectUrl.split('/').pop();
+      let fpart = imagesDir.current + '/' + objectUrl.split('/').pop();
       const ext = getFileExt(fname);
       if (ext) fpart += `.${ext}`;
 
@@ -286,12 +288,28 @@ const NoteEditorEditor = (props) => {
   }, [isEditorReady, isFocused]);
 
   useEffect(() => {
+    const writeHtml = async () => {
+      await fileApi.putFile(HTML_FNAME, ckeditor, Dirs.DocumentDir, UTF8);
+      setHtmlReady(true);
+    };
+
+    const deleteHtml = () => {
+      fileApi.deleteFile(HTML_FNAME);
+    };
+
+    if (Platform.OS === 'ios') writeHtml();
+
+    return () => {
+      if (Platform.OS === 'ios') deleteHtml();
+    };
+  }, []);
+
+  useEffect(() => {
     const makeImagesDir = async () => {
       try {
-        const _imagesDir = 'images/';
-        const doExist = await FileSystem.exists(Dirs.DocumentDir + '/' + _imagesDir);
-        if (!doExist) await FileSystem.mkdir(Dirs.DocumentDir + '/' + _imagesDir);
-        imagesDir.current = _imagesDir;
+        const doExist = await fileApi.exists(IMAGES);
+        if (!doExist) await fileApi.mkdir(IMAGES);
+        imagesDir.current = IMAGES;
       } catch (e) {
         console.log('Can\'t make images dir with error: ', e);
       }
@@ -314,9 +332,15 @@ const NoteEditorEditor = (props) => {
     };
   }, []);
 
+  if (Platform.OS === 'ios' && !isHtmlReady) return null;
+
   return (
     <React.Fragment>
-      <WebView ref={webView} style={tailwind('flex-1')} source={cache('NEE_webView_source', { baseUrl: Platform.OS === 'android' ? '' : undefined, html: ckeditor })} originWhiteList={cache('NEE_webView_originWhiteList', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} textZoom={100} androidLayerType="hardware" allowFileAccess={true} />
+      {Platform.OS === 'ios' ?
+        <WebView ref={webView} style={tailwind('flex-1')} source={cache('NEE_webView_source_ios', { uri: Dirs.DocumentDir + '/' + HTML_FNAME })} originWhitelist={cache('NEE_webView_originWhitelist_ios', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} textZoom={100} allowFileAccessFromFileURLs={true} allowUniversalAccessFromFileURLs={true} allowingReadAccessToURL={Dirs.DocumentDir} cacheEnabled={false} />
+        :
+        <WebView ref={webView} style={tailwind('flex-1')} source={cache('NEE_webView_source', { baseUrl: '', html: ckeditor })} originWhitelist={cache('NEE_webView_originWhitelist', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} textZoom={100} androidLayerType="hardware" allowFileAccess={true} cacheEnabled={false} />
+      }
       <TextInput ref={hackInput} style={tailwind('absolute -top-1 -left-1 w-1 h-1')} />
     </React.Fragment>
   );

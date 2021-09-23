@@ -261,7 +261,7 @@
 - yarn add url-parse
 - yarn add react-native-safe-area-context
 - yarn add react-native-svg
-- yarn add 'https://gitpkg.now.sh/bracedotto/blockstack-react-native/BlockstackSDK?f9c87be6f642964be760e9f6a7b4af15f79116dd'
+- yarn add 'https://gitpkg.now.sh/bracedotto/blockstack-react-native/BlockstackSDK?cad4d6b85620850ac6cc505e07bffd2fee779aca'
 - yarn add reselect
 - yarn add react-native-fast-image
 - yarn add react-native-mmkv-storage (use 0.4.4 for now to be able to debug)

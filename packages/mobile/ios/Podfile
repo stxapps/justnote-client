@@ -6,7 +6,7 @@ platform :ios, '11.0'
 target 'Justnotecc' do
 
   pod 'PromisesObjC', :modular_headers => true
-  pod 'Blockstack', :git => 'https://github.com/bracedotto/blockstack-ios.git', :commit => 'a1ec115'
+  pod 'Blockstack', :git => 'https://github.com/bracedotto/blockstack-ios.git', :commit => '03ba01f'
 
   config = use_native_modules!
 
