@@ -168,7 +168,8 @@ const NoteListItems = () => {
         onEndReachedThreshold={0.9}
         removeClippedSubviews={false}
         onScrollEndDrag={onScrollEnd}
-        onMomentumScrollEnd={onScrollEnd} />
+        onMomentumScrollEnd={onScrollEnd}
+        overScrollMode="always" />
     </View>
   );
 };
