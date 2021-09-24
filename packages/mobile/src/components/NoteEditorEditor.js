@@ -8,7 +8,7 @@ import { Dirs } from 'react-native-file-access';
 import fileApi from '../apis/file';
 import {
   updateEditorFocused, saveNote, discardNote, onUpdateNoteId, onChangeListName,
-  addSavingFPaths,
+  addSavingObjectUrls, deleteSavingObjectUrls, addSavingFPaths,
 } from '../actions';
 import { NEW_NOTE, ADDED, LG_WIDTH, IMAGES, CD_ROOT, UTF8 } from '../types/const';
 import { replaceObjectUrls, splitOnFirst, getFileExt } from '../utils';
@@ -117,25 +117,29 @@ const NoteEditorEditor = (props) => {
     dispatch(updateEditorFocused(true));
   }, [dispatch]);
 
-  const onAddObjectUrlFiles = useCallback(async (objectUrl, fname, content) => {
-    if (imagesDir.current) {
-      let fpart = imagesDir.current + '/' + objectUrl.split('/').pop();
-      const ext = getFileExt(fname);
-      if (ext) fpart += `.${ext}`;
+  const onAddObjectUrlFiles = useCallback((objectUrl, fname, content) => {
+    dispatch(addSavingObjectUrls([objectUrl]));
+    setTimeout(async () => {
+      if (imagesDir.current) {
+        let fpart = imagesDir.current + '/' + objectUrl.split('/').pop();
+        const ext = getFileExt(fname);
+        if (ext) fpart += `.${ext}`;
 
-      try {
-        await fileApi.putFile(fpart, content);
+        try {
+          await fileApi.putFile(fpart, content);
 
-        const cfpart = CD_ROOT + '/' + fpart;
-        dispatch(addSavingFPaths([cfpart]));
-        objectUrlFiles.current[objectUrl] = { fname: cfpart, content: '' };
-      } catch (e) {
-        console.log(`NoteEditorEditor: onAddObjectUrlFiles with fpart: ${fpart} error: `, e);
+          const cfpart = CD_ROOT + '/' + fpart;
+          dispatch(addSavingFPaths([cfpart]));
+          objectUrlFiles.current[objectUrl] = { fname: cfpart, content: '' };
+        } catch (e) {
+          console.log(`NoteEditorEditor: onAddObjectUrlFiles with fpart: ${fpart} error: `, e);
+          objectUrlFiles.current[objectUrl] = { fname, content };
+        }
+      } else {
         objectUrlFiles.current[objectUrl] = { fname, content };
       }
-    } else {
-      objectUrlFiles.current[objectUrl] = { fname, content };
-    }
+      dispatch(deleteSavingObjectUrls([objectUrl]));
+    }, 1);
   }, [dispatch]);
 
   const onGetData = useCallback((value) => {

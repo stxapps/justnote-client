@@ -3,7 +3,8 @@ import {
   INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT, INCREASE_UPDATE_NOTE_ID_COUNT,
   INCREASE_CHANGE_LIST_NAME_COUNT, INCREASE_FOCUS_TITLE_COUNT,
   INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
-  CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS, ADD_NOTE_COMMIT, UPDATE_NOTE_COMMIT,
+  ADD_SAVING_OBJ_URLS, DELETE_SAVING_OBJ_URLS, CLEAR_SAVING_FPATHS,
+  ADD_SAVING_FPATHS, ADD_NOTE_COMMIT, UPDATE_NOTE_COMMIT,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 
@@ -17,6 +18,7 @@ const initialState = {
   setInitDataCount: 0,
   blurCount: 0,
   updateEditorWidthCount: 0,
+  savingObjectUrls: [],
   savingFPaths: [],
 };
 
@@ -56,6 +58,18 @@ const editorReducer = (state = initialState, action) => {
 
   if (action.type === INCREASE_UPDATE_EDITOR_WIDTH_COUNT) {
     return { ...state, updateEditorWidthCount: state.updateEditorWidthCount + 1 };
+  }
+
+  if (action.type === ADD_SAVING_OBJ_URLS) {
+    const urls = action.payload;
+    const savingObjectUrls = [...new Set([...state.savingObjectUrls, ...urls])];
+    return { ...state, savingObjectUrls };
+  }
+
+  if (action.type === DELETE_SAVING_OBJ_URLS) {
+    const urls = action.payload;
+    const savingObjectUrls = state.savingObjectUrls.filter(url => !urls.includes(url));
+    return { ...state, savingObjectUrls };
   }
 
   if (action.type === CLEAR_SAVING_FPATHS) {
