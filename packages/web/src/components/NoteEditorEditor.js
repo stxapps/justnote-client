@@ -8,7 +8,7 @@ import {
   updateEditorFocused, saveNote, discardNote, onUpdateNoteIdUrlHash, onUpdateNoteId,
   onChangeListName, addSavingFPaths,
 } from '../actions';
-import { NEW_NOTE, ADDED, CD_ROOT } from '../types/const';
+import { NEW_NOTE, ADDED, IMAGES, CD_ROOT } from '../types/const';
 import {
   isString, isNoteBodyEqual, isMobile as _isMobile, replaceObjectUrls, getFileExt,
 } from '../utils';
@@ -67,7 +67,7 @@ const NoteEditorEditor = (props) => {
   const objectUrlContents = useRef({});
   const objectUrlFiles = useRef({});
   const objectUrlNames = useRef({});
-  const imagesDir = useRef('images/');
+  const imagesDir = useRef(IMAGES);
   const getDataAction = useRef(null);
   const dispatch = useDispatch();
 
@@ -160,7 +160,7 @@ const NoteEditorEditor = (props) => {
 
   const onAddObjectUrlFiles = useCallback(async (objectUrl, fname, content) => {
     if (imagesDir.current) {
-      let fpart = imagesDir.current + objectUrl.split('/').pop();
+      let fpart = imagesDir.current + '/' + objectUrl.split('/').pop();
       const ext = getFileExt(fname);
       if (ext) fpart += `.${ext}`;
 
