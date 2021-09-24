@@ -32,7 +32,7 @@ import {
   INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
   INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT,
   INCREASE_BLUR_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
-  CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS,
+  ADD_SAVING_OBJ_URLS, DELETE_SAVING_OBJ_URLS, CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -782,8 +782,9 @@ export const saveNote = (title, body, media) => async (dispatch, getState) => {
 
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
+  const savingObjectUrls = getState().editor.savingObjectUrls;
 
-  if (title === '' && body === '') {
+  if ((title === '' && body === '') || savingObjectUrls.length > 0) {
     dispatch(updateEditorBusy(false));
     setTimeout(() => {
       dispatch(increaseFocusTitleCount());
@@ -1629,6 +1630,14 @@ export const increaseBlurCount = () => {
 
 export const increaseUpdateEditorWidthCount = () => {
   return { type: INCREASE_UPDATE_EDITOR_WIDTH_COUNT };
+};
+
+export const addSavingObjectUrls = (urls) => {
+  return { type: ADD_SAVING_OBJ_URLS, payload: urls };
+};
+
+export const deleteSavingObjectUrls = (urls) => {
+  return { type: DELETE_SAVING_OBJ_URLS, payload: urls };
 };
 
 export const clearSavingFPaths = () => async (dispatch, getState) => {

@@ -62,6 +62,7 @@ export const SETTINGS = 'settings';
 export const INDEX = 'index';
 export const DOT_JSON = '.json';
 export const BASE64 = 'base64';
+export const UTF8 = 'utf8';
 
 export const N_NOTES = 10;
 export const MAX_TRY = 3;
