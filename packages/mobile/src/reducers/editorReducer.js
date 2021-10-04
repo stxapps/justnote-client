@@ -4,7 +4,7 @@ import {
   INCREASE_CHANGE_LIST_NAME_COUNT, INCREASE_FOCUS_TITLE_COUNT,
   INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
   ADD_SAVING_OBJ_URLS, DELETE_SAVING_OBJ_URLS, CLEAR_SAVING_FPATHS,
-  ADD_SAVING_FPATHS, ADD_NOTE_COMMIT, UPDATE_NOTE_COMMIT,
+  ADD_SAVING_FPATHS, ADD_NOTE_COMMIT, UPDATE_NOTE_COMMIT, UPDATE_EDITOR_SCROLL_ENABLED,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 
@@ -20,6 +20,7 @@ const initialState = {
   updateEditorWidthCount: 0,
   savingObjectUrls: [],
   savingFPaths: [],
+  isScrollEnabled: true,
 };
 
 const editorReducer = (state = initialState, action) => {
@@ -82,6 +83,10 @@ const editorReducer = (state = initialState, action) => {
 
   if (action.type === ADD_NOTE_COMMIT || action.type === UPDATE_NOTE_COMMIT) {
     return { ...state, savingFPaths: [] };
+  }
+
+  if (action.type === UPDATE_EDITOR_SCROLL_ENABLED) {
+    return { ...state, isScrollEnabled: action.payload };
   }
 
   if (action.type === DELETE_ALL_DATA || action.type === RESET_STATE) {

@@ -38,6 +38,7 @@ const NoteEditorEditor = (props) => {
   const focusTitleCount = useSelector(state => state.editor.focusTitleCount);
   const setInitDataCount = useSelector(state => state.editor.setInitDataCount);
   const blurCount = useSelector(state => state.editor.blurCount);
+  const isScrollEnabled = useSelector(state => state.editor.isScrollEnabled);
   const [isHtmlReady, setHtmlReady] = useState(Platform.OS === 'ios' ? false : true);
   const [isEditorReady, setEditorReady] = useState(false);
   const webView = useRef(null);
@@ -50,6 +51,7 @@ const NoteEditorEditor = (props) => {
   const prevFocusTitleCount = useRef(focusTitleCount);
   const prevSetInitDataCount = useRef(setInitDataCount);
   const prevBlurCount = useRef(blurCount);
+  const prevIsScrollEnabled = useRef(isScrollEnabled);
   const objectUrlContents = useRef({});
   const objectUrlFiles = useRef({});
   const objectUrlNames = useRef({});
@@ -292,6 +294,16 @@ const NoteEditorEditor = (props) => {
     if (!isFocused && prevIsFocused.current) blur();
     prevIsFocused.current = isFocused;
   }, [isEditorReady, isFocused]);
+
+  useEffect(() => {
+    if (!isEditorReady) {
+      prevIsScrollEnabled.current = isScrollEnabled;
+      return;
+    }
+
+    webView.current.injectJavaScript('window.justnote.setScrollEnabled(' + isScrollEnabled + '); true;');
+    prevIsScrollEnabled.current = isScrollEnabled;
+  }, [isEditorReady, isScrollEnabled]);
 
   useEffect(() => {
     const writeHtml = async () => {

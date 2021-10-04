@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
-import { updateNoteId, updatePopup } from '../actions';
+import { updateNoteId, updatePopup, updateEditorScrollEnabled } from '../actions';
 import { NEW_NOTE, NEW_NOTE_OBJ, SIDEBAR_POPUP } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import { sidebarFMV } from '../types/animConfigs';
@@ -61,7 +61,11 @@ const NavPanel = () => {
       return isSwipingX && gestureState.dx < -1;
     } else if (derivedNote !== null && !isEditorFocused) {
       if (gestureState.moveX > maxX) return false;
-      return isSwipingX && gestureState.dx > 5;
+      if (isSwipingX && gestureState.dx > 5) {
+        dispatch(updateEditorScrollEnabled(false));
+        return true;
+      }
+      return false;
     }
 
     return false;
@@ -107,6 +111,7 @@ const NavPanel = () => {
           dispatch(updateNoteId(null));
         });
       }
+      dispatch(updateEditorScrollEnabled(true));
     }
   }, [
     isSidebarShown, derivedNote, isEditorFocused, dispatch, sidebarAnim, rightPanelAnim,
