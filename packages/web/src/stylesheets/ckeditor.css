@@ -109,6 +109,7 @@
   --ck-color-widget-hover-border: var(--jn-editor-green-600);
 
   --ck-font-size-base: 15px;
+  --ck-toolbar-dropdown-max-width: 96vw;
 }
 
 .ck.ck-editor__editable {
