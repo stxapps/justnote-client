@@ -33,6 +33,7 @@ import {
   INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT,
   INCREASE_BLUR_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
   ADD_SAVING_OBJ_URLS, DELETE_SAVING_OBJ_URLS, CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS,
+  UPDATE_EDITOR_SCROLL_ENABLED,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -1653,6 +1654,10 @@ export const clearSavingFPaths = () => async (dispatch, getState) => {
 
 export const addSavingFPaths = (fpaths) => {
   return { type: ADD_SAVING_FPATHS, payload: fpaths };
+};
+
+export const updateEditorScrollEnabled = (enabled) => {
+  return { type: UPDATE_EDITOR_SCROLL_ENABLED, payload: enabled };
 };
 
 const exportAllDataLoop = async (dispatch, fpaths, doneCount) => {
