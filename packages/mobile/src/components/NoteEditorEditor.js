@@ -74,6 +74,8 @@ const NoteEditorEditor = (props) => {
   }, [safeAreaWidth]);
 
   const setInitData = useCallback(() => {
+    webView.current.injectJavaScript('window.justnote.scrollTo(0, 0); true;');
+
     const escapedTitle = note.title.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
     webView.current.injectJavaScript('window.justnote.setTitle("' + escapedTitle + '"); true;');
 

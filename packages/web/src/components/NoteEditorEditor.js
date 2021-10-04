@@ -52,6 +52,7 @@ const NoteEditorEditor = (props) => {
     state => state.editor.updateEditorWidthCount
   );
   const [isEditorReady, setEditorReady] = useState(false);
+  const scrollView = useRef(null);
   const titleInput = useRef(null);
   const bodyEditor = useRef(null);
   const bodyTopToolbar = useRef(null);
@@ -135,6 +136,7 @@ const NoteEditorEditor = (props) => {
   }, [note.media]);
 
   const setInitData = useCallback(async () => {
+    scrollView.current.scrollTo(0, 0);
     titleInput.current.value = note.title;
 
     clearNoteMedia();
@@ -419,7 +421,7 @@ const NoteEditorEditor = (props) => {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="flex-grow flex-shrink overflow-x-hidden overflow-y-auto z-0">
+      <div ref={scrollView} className="flex-grow flex-shrink overflow-x-hidden overflow-y-auto z-0">
         <div className={`px-1.5 py-1.5 ${isMobile ? 'border-b border-gray-200' : ''}`}>
           <input ref={titleInput} onFocus={onFocus} type="text" name="titleInput" id="titleInput" className="block w-full text-xl font-normal text-gray-800 px-1.5 py-1.5 placeholder-gray-500 border-0 focus:outline-none focus:ring-0 lg:text-lg" placeholder="Note Title" disabled={(note.id !== NEW_NOTE && note.status !== ADDED) || isEditorBusy} />
         </div>

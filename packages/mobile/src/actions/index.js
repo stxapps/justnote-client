@@ -94,7 +94,10 @@ export const init = () => async (dispatch, getState) => {
   AppState.addEventListener('change', async (nextAppState) => {
     if (nextAppState === 'active') {
       const isUserSignedIn = await userSession.isUserSignedIn();
-      if (isUserSignedIn) dispatch(sync(false, 0));
+      if (isUserSignedIn) {
+        const interval = (Date.now() - _lastSyncDT) / 1000 / 60 / 60;
+        dispatch(sync(interval > 1, 0));
+      }
     }
   });
 
@@ -1303,7 +1306,7 @@ export const updateUpdateSettingsProgress = (progress) => {
  *               1 - force, update immediately no matter what
  *               2 - no update even there is a change
  */
-let _isSyncing = false, _newSyncObj = null;
+let _isSyncing = false, _newSyncObj = null, _lastSyncDT = 0;
 export const sync = (
   doForceServerListFPaths = false, updateAction = 0, haveUpdate = false
 ) => async (dispatch, getState) => {
@@ -1549,7 +1552,7 @@ export const sync = (
       return;
     }
 
-    [_isSyncing, _newSyncObj] = [false, null];
+    [_isSyncing, _newSyncObj, _lastSyncDT] = [false, null, Date.now()];
   } catch (e) {
     console.log('Sync error: ', e);
     [_isSyncing, _newSyncObj] = [false, null];

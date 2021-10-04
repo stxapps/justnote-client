@@ -46,7 +46,7 @@ const NavPanel = () => {
     if (gestureState.numberActiveTouches > 1) return false;
 
     const maxX = (safeAreaWidth + insets.left + insets.right) * 0.25;
-    const isSwipingX = Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
+    const isSwipingX = Math.abs(gestureState.dx) > Math.abs(gestureState.dy) * 2;
 
     didSwipeToOpenSidebar.current = false;
     if (!isSidebarShown && derivedNote === null) {

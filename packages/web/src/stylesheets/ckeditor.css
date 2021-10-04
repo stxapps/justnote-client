@@ -185,3 +185,18 @@
 .ck.ck-blurred .ck-widget__type-around {
   display: none;
 }
+
+.ck-content .todo-list .todo-list__label>input {
+  top: -1px;
+  left: -22px;
+  margin-right: -8px;
+}
+
+.ck-content .todo-list .todo-list__label>input:focus {
+  outline-color: transparent;
+  box-shadow: none;
+}
+
+.ck-content .todo-list .todo-list__label>input:checked {
+  background-color: transparent;
+}
