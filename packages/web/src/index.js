@@ -26,7 +26,6 @@ if (getUrlPathQueryHash(window.location.href).startsWith(BLOCKSTACK_AUTH.slice(1
     document.getElementById('root')
   );
 } else {
-  /** @ts-ignore */
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
   const store = createStore(
     /** @type {any} */(reducers),

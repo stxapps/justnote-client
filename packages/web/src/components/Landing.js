@@ -163,7 +163,7 @@ const Landing = () => {
         <div className="mx-auto max-w-md px-4 text-center sm:max-w-3xl sm:px-6 lg:px-8 lg:max-w-7xl">
           <h2 className="text-base font-semibold tracking-wider text-indigo-600 uppercase">Safe & Secure</h2>
           <p className="mt-2 text-3xl font-extrabold text-gray-900 tracking-tight sm:text-4xl">
-            With privacy at heart powered by <a className="text-indigo-600 rounded hover:underline focus:outline-none focus:ring-2 focus:ring-indigo-500" href="https://www.stacks.co">Stacks</a>
+            With privacy at heart powered by <a className="text-indigo-600 rounded hover:underline focus:outline-none focus:ring-2 focus:ring-indigo-500" href="https://www.stacks.co" target="_blank" rel="noreferrer">Stacks</a>
           </p>
           <p className="mt-5 max-w-prose mx-auto text-xl text-gray-500">
             Stacks technology empowers Justnote to be a decentralized app on Bitcoin blockchain so you have true ownership of your identity and your data.
@@ -253,10 +253,10 @@ const Landing = () => {
             <p className="mt-2 text-white text-3xl font-extrabold tracking-tight sm:text-4xl">Justnote Mobile</p>
             <p className="mt-3 text-lg text-gray-300">Take notes on the go. Access your notes, edit them, and create new ones anytime anywhere on your any devices.</p>
             <div className="flex justify-center mt-8 md:justify-start">
-              <a href="https://apps.apple.com/us/app/id1570111019" className="block group focus:outline-none">
+              <a className="block group focus:outline-none" href="https://apps.apple.com/us/app/id1570111019" target="_blank" rel="noreferrer">
                 <img className="h-12 rounded shadow group-hover:ring group-focus:ring" src={availableOnAppStore} alt="Available on App Store" />
               </a>
-              <a href="https://play.google.com/store/apps/details?id=com.justnotecc" className="block ml-4 group focus:outline-none">
+              <a className="block ml-4 group focus:outline-none" href="https://play.google.com/store/apps/details?id=com.justnotecc" target="_blank" rel="noreferrer">
                 <img className="h-12 rounded shadow group-hover:ring group-focus:ring" src={availableOnPlayStore} alt="Available on Google Play" />
               </a>
             </div>
