@@ -209,8 +209,7 @@
 - yarn add tailwindcss postcss postcss-cli autoprefixer
 - yarn add @tailwindcss/forms @tailwindcss/typography @tailwindcss/aspect-ratio @tailwindcss/line-clamp
 - npx tailwindcss init
-- yarn add redux react-redux redux-loop
-- yarn add @welldone-software/why-did-you-render
+- yarn add redux react-redux redux-loop reselect
 - Fix dev server crash because of Emacs temp/lock file
   + github.com/facebook/create-react-app/issues/9056#issuecomment-744168146
   + stackoverflow.com/questions/62567370/reactjs-local-server-crashes-after-editing-file-in-emacs-even-without-saving/62571200#62571200
@@ -220,19 +219,14 @@
 - Font
   + Config in tailwind.config.js
   + Add font-face in layer: base in tailwind.css
+- yarn add @stacks/auth @stacks/storage @stacks/wallet-sdk @stacks/connect
 - yarn add url-parse
 - yarn add framer-motion
-- yarn add @stacks/auth @stacks/storage @stacks/connect
-  + @stacks/auth still has delete etag bug!, need to update to newer version
-  + @stacks/connect still depends on blockstack, not @stacks/auth, need to update to newer version
-- yarn add blockstack --dev
-  + Need to remove when @stacks/connect not depends to
-- yarn add reselect
+- yarn add @welldone-software/why-did-you-render
 - yarn add file-saver
 - yarn add @ckeditor/ckeditor5-react
 - yarn add file:../../../ckeditor5/packages/ckeditor5-build-decoupled-document
-- yarn add @types/node @types/react @types/react-dom @types/jest @types/react-redux
-- yarn add @types/url-parse @types/file-saver
+- yarn add @types/node @types/react @types/react-dom @types/jest @types/react-redux @types/url-parse @types/file-saver
 ** Server steps
 *** s3
 - Set public and enable CORS
