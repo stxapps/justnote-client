@@ -5,9 +5,10 @@
   "scripts": {
     "start": "HTTPS=true BROWSER=none react-scripts start",
     "build-css-dev": "postcss tailwind.css -o src/stylesheets/tailwind.css",
+    "patch-js": "node bin/patch.js",
     "build-css": "postcss tailwind.css -o src/stylesheets/tailwind.css --env production",
     "build-js": "react-scripts build",
-    "build": "yarn run build-css && yarn run build-js",
+    "build": "yarn run patch-js && yarn run build-css && yarn run build-js",
     "test": "react-scripts test",
     "deploy-test": "aws s3 sync build/static s3://test-justnote-web/static --size-only --delete --acl public-read --cache-control max-age=31536000 --profile justnote && aws s3 sync build s3://test-justnote-web --exclude static/* --size-only --delete --acl public-read --profile justnote && aws s3 cp build/.well-known/apple-app-site-association s3://test-justnote-web/.well-known/apple-app-site-association --acl public-read --content-type application/json --profile justnote && aws s3 cp build/service-worker.js s3://test-justnote-web/service-worker.js --acl public-read --cache-control no-cache --profile justnote && aws s3 cp build/index.html s3://test-justnote-web/index.html --acl public-read --cache-control no-cache --profile justnote && aws cloudfront create-invalidation --distribution-id E16T92AA3CQF3P --paths /index.html /.well-known/* --profile justnote",
     "deploy-prod": "aws s3 sync build/static s3://justnote-web/static --size-only --delete --acl public-read --cache-control max-age=31536000 --profile justnote && aws s3 sync build s3://justnote-web --exclude static/* --size-only --delete --acl public-read --profile justnote && aws s3 cp build/.well-known/apple-app-site-association s3://justnote-web/.well-known/apple-app-site-association --acl public-read --content-type application/json --profile justnote && aws s3 cp build/service-worker.js s3://justnote-web/service-worker.js --acl public-read --cache-control no-cache --profile justnote && aws s3 cp build/index.html s3://justnote-web/index.html --acl public-read --cache-control no-cache --profile justnote && aws cloudfront create-invalidation --distribution-id E1G6UHDXNDOUN --paths /index.html /.well-known/* --profile justnote",
@@ -16,7 +17,10 @@
   "dependencies": {
     "@ckeditor/ckeditor5-build-decoupled-document": "file:../../../ckeditor5/packages/ckeditor5-build-decoupled-document",
     "@ckeditor/ckeditor5-react": "^3.0.3",
-    "@stacks/connect": "4.3.15",
+    "@stacks/auth": "^2.0.1",
+    "@stacks/connect": "^6.2.0",
+    "@stacks/storage": "^2.0.1",
+    "@stacks/wallet-sdk": "^2.0.1",
     "@tailwindcss/aspect-ratio": "^0.3.0",
     "@tailwindcss/forms": "^0.3.4",
     "@tailwindcss/line-clamp": "^0.2.2",
@@ -33,7 +37,6 @@
     "@types/url-parse": "^1.4.4",
     "@welldone-software/why-did-you-render": "^6.2.1",
     "autoprefixer": "^10.4.0",
-    "blockstack": "^21.1.1",
     "file-saver": "^2.0.5",
     "framer-motion": "4.1.17",
     "postcss": "^8.3.11",
@@ -70,6 +73,8 @@
   "browserslist": {
     "production": [
       ">0.2%",
+      "not ie <= 99",
+      "not android <= 4.4.4",
       "not dead",
       "not op_mini all"
     ],

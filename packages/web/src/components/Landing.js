@@ -1,10 +1,12 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
 
-import { signUp } from '../actions';
+import { updatePopupUrlHash } from '../actions';
+import { SIGN_UP_POPUP } from '../types/const';
 
 import TopBar from './TopBar';
 import Footer from './Footer';
+import SignUpPopup from './SignUpPopup';
+import SignInPopup from './SignInPopup';
 
 import logoFull from '../images/logo-full.svg';
 
@@ -24,7 +26,9 @@ import creator from '../images/creator.jpg';
 
 const Landing = () => {
 
-  const dispatch = useDispatch();
+  const onSignUpBtnClick = () => {
+    updatePopupUrlHash(SIGN_UP_POPUP, true);
+  };
 
   return (
     <React.Fragment>
@@ -61,7 +65,7 @@ const Landing = () => {
                   Justnote is a note taking app that you can use it easily, take a note rapidly, and importantly, have full control of your data.
                 </p>
                 <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
-                  <button onClick={() => dispatch(signUp())} className="w-full flex items-center justify-center px-8 py-3 border border-transparent rounded-md shadow text-base font-medium text-white bg-green-600 hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 sm:w-max md:py-4 md:text-lg md:px-10">
+                  <button onClick={onSignUpBtnClick} className="w-full flex items-center justify-center px-8 py-3 border border-transparent rounded-md shadow text-base font-medium text-white bg-green-600 hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 sm:w-max md:py-4 md:text-lg md:px-10">
                     Get started
                     <svg style={{ marginTop: '0.125rem' }} className="ml-2 w-1.5" viewBox="0 0 6 10" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                       <path fillRule="evenodd" clipRule="evenodd" d="M0.29289 9.7071C-0.09763 9.3166 -0.09763 8.6834 0.29289 8.2929L3.5858 5L0.29289 1.70711C-0.09763 1.31658 -0.09763 0.68342 0.29289 0.29289C0.68342 -0.09763 1.31658 -0.09763 1.70711 0.29289L5.7071 4.29289C6.0976 4.68342 6.0976 5.3166 5.7071 5.7071L1.70711 9.7071C1.31658 10.0976 0.68342 10.0976 0.29289 9.7071Z" />
@@ -188,11 +192,11 @@ const Landing = () => {
                     </div>
                     <h3 className="mt-8 text-lg font-medium text-gray-900 tracking-tight">Identity</h3>
                     <p className="mt-5 text-base text-gray-500 text-left">
-                      Your identity lives in blockchain and only you with your secret key can access it and control it.
+                      Your identity lives in blockchain and only you with your Secret Key can access it and control it.
                     </p>
                     <h4 className="mt-7 text-base font-medium text-gray-900 tracking-tight">No ban on your owned identity</h4>
                     <p className="mt-3 text-base text-gray-500 text-left">
-                      Your identity cannot be locked, banned, or deleted by anyone as your secret key is required to make a change to your identity in the blockchain.
+                      Your identity cannot be locked, banned, or deleted by anyone as your Secret Key is required to make a change to your identity in the blockchain.
                     </p>
                   </div>
                 </div>
@@ -209,7 +213,7 @@ const Landing = () => {
                     </div>
                     <h3 className="mt-8 text-lg font-medium text-gray-900 tracking-tight">Data Storage</h3>
                     <p className="mt-5 text-base text-gray-500 text-left">
-                      Your data lives in a storage of your choice and only you with your secret key can change it.
+                      Your data lives in a storage of your choice and only you with your Secret Key can change it.
                     </p>
                     <h4 className="mt-7 text-base font-medium text-gray-900 tracking-tight">No lock out from your own data</h4>
                     <p className="mt-3 text-base text-gray-500 text-left">
@@ -230,7 +234,7 @@ const Landing = () => {
                     </div>
                     <h3 className="mt-8 text-lg font-medium text-gray-900 tracking-tight">Encryption</h3>
                     <p className="mt-5 text-base text-gray-500 text-left">
-                      Everything is encrypted  and only you with your secret key can see the content inside.
+                      Everything is encrypted  and only you with your Secret Key can see the content inside.
                     </p>
                     <h4 className="mt-7 text-base font-medium text-gray-900 tracking-tight">No targeted ads and No data breach risk</h4>
                     <p className="mt-3 text-base text-gray-500 text-left">
@@ -306,7 +310,7 @@ const Landing = () => {
                   <span className="block">Ready to dive in?</span>
                 </h2>
                 <p className="mt-4 text-lg leading-6 text-green-200">Let’s try Justnote - a simple, fast, and privacy-focused note taking app that you will love.</p>
-                <button onClick={() => dispatch(signUp())} className="mt-8 bg-white border border-transparent rounded-md shadow px-6 py-3 inline-flex items-center text-base font-medium text-green-600 hover:text-green-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 focus:ring-inset">
+                <button onClick={onSignUpBtnClick} className="mt-8 bg-white border border-transparent rounded-md shadow px-6 py-3 inline-flex items-center text-base font-medium text-green-600 hover:text-green-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 focus:ring-inset">
                   Get started now
                   <svg style={{ marginTop: '0.125rem' }} className="ml-2 w-1.5" viewBox="0 0 6 10" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path fillRule="evenodd" clipRule="evenodd" d="M0.29289 9.7071C-0.09763 9.3166 -0.09763 8.6834 0.29289 8.2929L3.5858 5L0.29289 1.70711C-0.09763 1.31658 -0.09763 0.68342 0.29289 0.29289C0.68342 -0.09763 1.31658 -0.09763 1.70711 0.29289L5.7071 4.29289C6.0976 4.68342 6.0976 5.3166 5.7071 5.7071L1.70711 9.7071C1.31658 10.0976 0.68342 10.0976 0.29289 9.7071Z" />
@@ -321,6 +325,8 @@ const Landing = () => {
         </div>
       </div>
       <Footer />
+      <SignUpPopup />
+      <SignInPopup />
     </React.Fragment>
   );
 };

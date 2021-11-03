@@ -13,9 +13,9 @@ import {
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
-  PROFILE_POPUP, NOTE_LIST_MENU_POPUP, MOVE_TO_POPUP, SIDEBAR_POPUP, SEARCH_POPUP,
-  SETTINGS_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP,
-  ALERT_SCREEN_ROTATION_POPUP, NEW_NOTE, MY_NOTES, TRASH, ARCHIVE,
+  SIGN_UP_POPUP, SIGN_IN_POPUP, PROFILE_POPUP, NOTE_LIST_MENU_POPUP, MOVE_TO_POPUP,
+  SIDEBAR_POPUP, SEARCH_POPUP, SETTINGS_POPUP, CONFIRM_DELETE_POPUP,
+  CONFIRM_DISCARD_POPUP, ALERT_SCREEN_ROTATION_POPUP, NEW_NOTE, MY_NOTES, TRASH, ARCHIVE,
   UPDATING, DIED_UPDATING, MAX_SELECTED_NOTE_IDS,
 } from '../types/const';
 import { doContainListName } from '../utils';
@@ -24,6 +24,8 @@ const initialState = {
   isHandlingSignIn: false,
   listName: MY_NOTES,
   noteId: null,
+  isSignUpPopupShown: false,
+  isSignInPopupShown: false,
   isProfilePopupShown: false,
   profilePopupPosition: null,
   isNoteListMenuPopupShown: false,
@@ -85,6 +87,14 @@ const displayReducer = (state = initialState, action) => {
   if (action.type === UPDATE_POPUP) {
 
     const { id, isShown, anchorPosition } = action.payload;
+
+    if (id === SIGN_UP_POPUP) {
+      return { ...state, isSignUpPopupShown: isShown };
+    }
+
+    if (id === SIGN_IN_POPUP) {
+      return { ...state, isSignInPopupShown: isShown };
+    }
 
     if (id === PROFILE_POPUP) {
       return {

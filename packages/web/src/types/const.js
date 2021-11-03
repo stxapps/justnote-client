@@ -1,10 +1,11 @@
 export const DOMAIN_NAME = 'https://justnote.cc';
-export const APP_URL_SCHEME = 'justnotecc';
-export const APP_DOMAIN_NAME = 'justnotecc://app';
-export const BLOCKSTACK_AUTH = '/blockstack-auth';
 
 export const APP_NAME = 'Justnote';
 export const APP_ICON_NAME = 'logo192.png';
+export const APP_SCOPES = ['store_write']
+export const APP_URL_SCHEME = 'justnotecc';
+export const APP_DOMAIN_NAME = 'justnotecc://app';
+export const BLOCKSTACK_AUTH = '/blockstack-auth';
 
 export const HTTP = 'http://';
 export const HTTPS = 'https://';
@@ -27,6 +28,8 @@ export const NEW_NOTE = 'NEW_NOTE';
 export const NEW_NOTE_OBJ = { id: NEW_NOTE, title: '', body: '', media: [] };
 export const DUMMY_NOTE_OBJ = { id: null, title: '', body: '', media: [] };
 
+export const SIGN_UP_POPUP = 'SIGN_UP_POPUP';
+export const SIGN_IN_POPUP = 'SIGN_IN_POPUP';
 export const PROFILE_POPUP = 'PROFILE_POPUP';
 export const NOTE_LIST_MENU_POPUP = 'NOTE_LIST_MENU_POPUP';
 export const MOVE_TO_POPUP = 'MOVE_TO_POPUP';

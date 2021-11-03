@@ -1,4 +1,3 @@
-import { showConnect, authenticate } from '@stacks/connect';
 import Url from 'url-parse';
 import { saveAs } from 'file-saver';
 
@@ -38,17 +37,16 @@ import {
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
-  APP_NAME, APP_ICON_NAME, SEARCH_POPUP, SETTINGS_POPUP,
-  CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, ALERT_SCREEN_ROTATION_POPUP,
-  DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH,
-  DISCARD_ACTION_UPDATE_NOTE_ID, DISCARD_ACTION_CHANGE_LIST_NAME,
-  MY_NOTES, TRASH, ID, NEW_NOTE, NEW_NOTE_OBJ,
+  SEARCH_POPUP, SETTINGS_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP,
+  ALERT_SCREEN_ROTATION_POPUP, DISCARD_ACTION_CANCEL_EDIT,
+  DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
+  DISCARD_ACTION_CHANGE_LIST_NAME, MY_NOTES, TRASH, ID, NEW_NOTE, NEW_NOTE_OBJ,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
   SWAP_LEFT, SWAP_RIGHT, N_NOTES, CD_ROOT, SETTINGS, INDEX, DOT_JSON,
   LG_WIDTH,
 } from '../types/const';
 import {
-  throttle, extractUrl, getUrlPathQueryHash, urlHashToObj, objToUrlHash,
+  throttle, extractUrl, urlHashToObj, objToUrlHash,
   separateUrlAndParam, getUserImageUrl, randomString, swapArrayElements,
   isNoteBodyEqual, clearNoteData, getStaticFPath, deriveFPaths,
   isIPadIPhoneIPod, isBusyStatus,
@@ -197,60 +195,6 @@ const handleScreenRotation = (prevWidth) => (dispatch, getState) => {
   }
 };
 
-export const signUp = () => async (dispatch, getState) => {
-
-  const authOptions = {
-    redirectTo: '/' + getUrlPathQueryHash(window.location.href),
-    appDetails: {
-      name: APP_NAME,
-      icon: extractUrl(window.location.href).origin + '/' + APP_ICON_NAME,
-    },
-    onFinish: ({ userSession }) => {
-
-      const userData = userSession.loadUserData();
-      dispatch({
-        type: UPDATE_USER,
-        payload: {
-          isUserSignedIn: true,
-          username: userData.username,
-          image: getUserImageUrl(userData),
-        },
-      });
-    },
-    sendToSignIn: false,
-    userSession: /** @type any */(userSession),
-  };
-
-  showConnect(authOptions);
-};
-
-export const signIn = () => async (dispatch, getState) => {
-
-  const authOptions = {
-    redirectTo: '/' + getUrlPathQueryHash(window.location.href),
-    appDetails: {
-      name: APP_NAME,
-      icon: extractUrl(window.location.href).origin + '/' + APP_ICON_NAME,
-    },
-    finished: ({ userSession }) => {
-
-      const userData = userSession.loadUserData();
-      dispatch({
-        type: UPDATE_USER,
-        payload: {
-          isUserSignedIn: true,
-          username: userData.username,
-          image: getUserImageUrl(userData),
-        },
-      });
-    },
-    sendToSignIn: true,
-    userSession: /** @type any */(userSession),
-  };
-
-  authenticate(authOptions);
-};
-
 export const signOut = () => async (dispatch, getState) => {
 
   userSession.signUserOut();
@@ -262,6 +206,22 @@ export const signOut = () => async (dispatch, getState) => {
   dispatch({
     type: RESET_STATE,
   });
+};
+
+export const updateUserData = (data) => async (dispatch, getState) => {
+  userSession.updateUserData(data);
+
+  if (userSession.isUserSignedIn()) {
+    const userData = userSession.loadUserData();
+    dispatch({
+      type: UPDATE_USER,
+      payload: {
+        isUserSignedIn: true,
+        username: userData.username,
+        image: getUserImageUrl(userData),
+      },
+    });
+  }
 };
 
 export const handleUrlHash = () => {
