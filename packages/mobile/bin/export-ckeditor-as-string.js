@@ -7,9 +7,9 @@ const ckeditorCssPath = process.argv[5];
 const htmlPath = process.argv[6];
 const outputPath = process.argv[7];
 
-const readLines = (path) => {
+const readLines = (fpath) => {
 
-  const text = fs.readFileSync(path, 'utf-8');
+  const text = fs.readFileSync(fpath, 'utf-8');
   const lines = text.split('\n')
     .filter(line => {
       const i = line.indexOf('//');

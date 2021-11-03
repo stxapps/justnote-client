@@ -11,11 +11,13 @@ import {
   addSavingObjectUrls, deleteSavingObjectUrls, addSavingFPaths,
 } from '../actions';
 import { NEW_NOTE, ADDED, LG_WIDTH, IMAGES, CD_ROOT, UTF8 } from '../types/const';
-import { replaceObjectUrls, splitOnFirst, getFileExt } from '../utils';
+import {
+  replaceObjectUrls, splitOnFirst, escapeDoubleQuotes, getFileExt,
+} from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 import cache from '../utils/cache';
 
-const ckeditor = require('../ckeditor');
+const ckeditor = require('../../ckeditor');
 
 const GET_DATA_SAVE_NOTE = 'GET_DATA_SAVE_NOTE';
 const GET_DATA_DISCARD_NOTE = 'GET_DATA_DISCARD_NOTE';
@@ -78,29 +80,29 @@ const NoteEditorEditor = (props) => {
   const setInitData = useCallback(() => {
     webView.current.injectJavaScript('window.justnote.scrollTo(0, 0); true;');
 
-    const escapedTitle = note.title.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const escapedTitle = escapeDoubleQuotes(note.title);
     webView.current.injectJavaScript('window.justnote.setTitle("' + escapedTitle + '"); true;');
 
     const dir = Dirs.DocumentDir;
-    const escapedDir = dir.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const escapedDir = escapeDoubleQuotes(dir);
     webView.current.injectJavaScript('window.justnote.setDir("' + escapedDir + '"); true;');
 
     for (const objectUrl of Object.keys(objectUrlFiles.current)) {
       if (!objectUrl.startsWith('blob:')) continue;
 
-      const escapedObjectUrl = objectUrl.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      const escapedObjectUrl = escapeDoubleQuotes(objectUrl);
       webView.current.injectJavaScript('window.justnote.revokeObjectUrl("' + escapedObjectUrl + '"); true;');
     }
     objectUrlFiles.current = {};
 
     webView.current.injectJavaScript('window.justnote.clearNoteMedia(); true;');
     for (const { name, content } of note.media) {
-      const escapedName = name.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-      const escapedContent = content.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      const escapedName = escapeDoubleQuotes(name);
+      const escapedContent = escapeDoubleQuotes(content);
       webView.current.injectJavaScript('window.justnote.addNoteMedia("' + escapedName + '", "' + escapedContent + '"); true;');
     }
 
-    const escapedBody = note.body.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const escapedBody = escapeDoubleQuotes(note.body);
     webView.current.injectJavaScript('window.justnote.setBody("' + escapedBody + '"); true;');
 
     if (note.id === NEW_NOTE) focusTitleInput();

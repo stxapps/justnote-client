@@ -1718,8 +1718,8 @@ export const exportAllData = () => async (dispatch, getState) => {
   try {
     const data = await exportAllDataLoop(dispatch, fpaths, 0);
 
-    var blob = new Blob([JSON.stringify(data)], { type: "text/plain;charset=utf-8" });
-    saveAs(blob, "justnote-data.txt");
+    var blob = new Blob([JSON.stringify(data)], { type: 'text/plain;charset=utf-8' });
+    saveAs(blob, 'justnote-data.txt');
   } catch (e) {
     dispatch(updateExportAllDataProgress({
       total: -1,

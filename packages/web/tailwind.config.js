@@ -15,9 +15,6 @@ module.exports = {
       colors: {
         green: colors.green,
       },
-      cursor: {
-        resize: 'col-resize',
-      },
       minWidth: {
         '28': '7rem',
         '56': '14rem',
@@ -27,6 +24,9 @@ module.exports = {
         '48': '12rem',
         '56': '14rem',
         '64': '16rem',
+      },
+      cursor: {
+        resize: 'col-resize',
       },
     },
   },
@@ -48,4 +48,4 @@ module.exports = {
     require('@tailwindcss/typography'),
     require('@tailwindcss/line-clamp'),
   ],
-}
+};

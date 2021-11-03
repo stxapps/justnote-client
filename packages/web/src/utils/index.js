@@ -546,6 +546,10 @@ export const splitOnFirst = (str, sep) => {
   return [str.slice(0, i), str.slice(i + sep.length)];
 };
 
+export const escapeDoubleQuotes = (s) => {
+  return s.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+};
+
 export const getFileExt = (fname) => {
   if (fname.includes('.')) {
     const ext = fname.split('.').pop();
