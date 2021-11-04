@@ -19,7 +19,7 @@ const SidebarSearchInput = () => {
   const searchClearBtnClasses = searchString.length === 0 ? 'hidden' : '';
 
   return (
-    <div className="hidden pl-3 pr-1 mt-5 lg:block">
+    <div className="hidden pl-3 pr-1 mt-6 lg:block">
       <label htmlFor="search" className="sr-only">Search</label>
       <div className="mt-1 relative rounded-md bg-white shadow-sm">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none" aria-hidden="true">

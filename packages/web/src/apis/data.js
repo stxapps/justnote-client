@@ -160,7 +160,10 @@ const batchGetFileWithRetry = async (
 
   if (failedResponses.length) {
     if (callCount + 1 >= MAX_TRY) {
-      if (dangerouslyIgnoreError) return responses;
+      if (dangerouslyIgnoreError) {
+        console.log('batchGetFileWithRetry error: ', failedResponses[0].error);
+        return responses;
+      }
       throw failedResponses[0].error;
     }
 
