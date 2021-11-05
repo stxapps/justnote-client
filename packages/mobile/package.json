@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build-css": "create-tailwind-rn tailwind.css src/stylesheets/tailwind.json",
+    "export-stacks-access-as-string": "node bin/export-stacks-access-as-string.js ../../../stacks-access-in-webview .",
     "export-ckeditor-as-string": "node bin/export-ckeditor-as-string.js ../../../justnote-editor-in-webview/core-js/minified.js ../../../justnote-editor-in-webview/js/ckeditor.js ../../../justnote-editor-in-webview/css/tailwind.css ../../../justnote-editor-in-webview/css/ckeditor.css ../../../justnote-editor-in-webview/index.html ./ckeditor.js",
     "android": "react-native run-android",
     "android-release": "react-native run-android --variant=release",

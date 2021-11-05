@@ -72,8 +72,10 @@ const Sidebar = () => {
         <SvgXml width={135} height={40} xml={logoFull} />
       </View>
       <View style={tailwind('flex-1')}>
-        {/* User account dropdown */}
-        <View style={tailwind('hidden pl-3 pr-1 mt-6 lg:flex', safeAreaWidth)}>
+        {/* User account dropdown
+              No lg:block here and mt-6 on SidebarSearchInput instead of mt-5
+              as no use profileBtn for now */}
+        <View style={tailwind('hidden pl-3 pr-1 mt-6', safeAreaWidth)}>
           <TouchableOpacity ref={profileBtn} onPress={onProfileBtnClick} style={tailwind('w-full bg-gray-100 rounded-md px-3.5 py-2 text-sm font-medium text-gray-700')}>
             <View style={tailwind('flex-row w-full justify-between items-center')}>
               <View style={tailwind('flex-1 flex-row items-center justify-between')}>

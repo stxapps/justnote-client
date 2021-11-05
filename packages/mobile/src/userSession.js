@@ -17,14 +17,6 @@ const isUserSignedIn = async () => {
   return signedIn;
 };
 
-const signUp = async () => {
-  return await RNBlockstackSdk.signUp();
-};
-
-const signIn = async () => {
-  return await RNBlockstackSdk.signIn();
-};
-
 const handlePendingSignIn = async (authResponse) => {
   const { loaded } = await RNBlockstackSdk.handlePendingSignIn(authResponse);
   return loaded;
@@ -33,6 +25,11 @@ const handlePendingSignIn = async (authResponse) => {
 const signUserOut = async () => {
   const { signedOut } = await RNBlockstackSdk.signUserOut();
   return signedOut;
+};
+
+const updateUserData = async (userData) => {
+  const { updated } = await RNBlockstackSdk.updateUserData(userData);
+  return updated;
 };
 
 const loadUserData = async () => {
@@ -65,6 +62,6 @@ const listFiles = async (callback) => {
 
 export default {
   hasSession, createSession,
-  isUserSignedIn, signUp, signIn, handlePendingSignIn, signUserOut, loadUserData,
-  putFile, getFile, deleteFile, listFiles,
+  isUserSignedIn, handlePendingSignIn, signUserOut,
+  updateUserData, loadUserData, putFile, getFile, deleteFile, listFiles,
 };

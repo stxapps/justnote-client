@@ -1,4 +1,4 @@
-import { Linking, Dimensions, Platform, AppState } from 'react-native';
+import { Linking, Dimensions, AppState } from 'react-native';
 
 import userSession from '../userSession';
 import dataApi from '../apis/data';
@@ -33,7 +33,7 @@ import {
   INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT,
   INCREASE_BLUR_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
   ADD_SAVING_OBJ_URLS, DELETE_SAVING_OBJ_URLS, CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS,
-  UPDATE_EDITOR_SCROLL_ENABLED,
+  UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_STACKS_ACCESS,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -173,95 +173,6 @@ const handleScreenRotation = (prevWidth, width) => (dispatch, getState) => {
   dispatch(updatePopup(ALERT_SCREEN_ROTATION_POPUP, true, null));
 };
 
-export const signUp = () => async (dispatch, getState) => {
-  // On Android, signUp and signIn will always lead to handlePendingSignIn.
-  // On iOS, signUp and signIn will always return a promise.
-  if (Platform.OS === 'android') {
-    await userSession.signUp();
-  } else if (Platform.OS === 'ios') {
-
-    // As handle pending sign in takes time, show loading first.
-    dispatch({
-      type: UPDATE_HANDLING_SIGN_IN,
-      payload: true,
-    });
-
-    try {
-      await userSession.signUp();
-    } catch (e) {
-      // All errors thrown by signIn have the same next steps
-      //   - Invalid token
-      //   - Already signed in with the same account
-      //   - Already signed in with different account
-    }
-
-    const isUserSignedIn = await userSession.isUserSignedIn();
-    if (isUserSignedIn) {
-      const userData = await userSession.loadUserData();
-      dispatch({
-        type: UPDATE_USER,
-        payload: {
-          isUserSignedIn: true,
-          username: userData.username,
-          image: getUserImageUrl(userData),
-        },
-      });
-    }
-
-    // Stop show loading
-    dispatch({
-      type: UPDATE_HANDLING_SIGN_IN,
-      payload: false,
-    });
-  } else {
-    throw new Error(`Invalid Platform.OS: ${Platform.OS}`);
-  }
-};
-
-export const signIn = () => async (dispatch, getState) => {
-
-  if (Platform.OS === 'android') {
-    await userSession.signIn();
-  } else if (Platform.OS === 'ios') {
-
-    // As handle pending sign in takes time, show loading first.
-    dispatch({
-      type: UPDATE_HANDLING_SIGN_IN,
-      payload: true,
-    });
-
-    try {
-      await userSession.signIn();
-    } catch (e) {
-      // All errors thrown by signIn have the same next steps
-      //   - Invalid token
-      //   - Already signed in with the same account
-      //   - Already signed in with different account
-    }
-
-    const isUserSignedIn = await userSession.isUserSignedIn();
-    if (isUserSignedIn) {
-      const userData = await userSession.loadUserData();
-      dispatch({
-        type: UPDATE_USER,
-        payload: {
-          isUserSignedIn: true,
-          username: userData.username,
-          image: getUserImageUrl(userData),
-        },
-      });
-    }
-
-    // Stop show loading
-    dispatch({
-      type: UPDATE_HANDLING_SIGN_IN,
-      payload: false,
-    });
-  } else {
-    throw new Error(`Invalid Platform.OS: ${Platform.OS}`);
-  }
-};
-
 export const signOut = () => async (dispatch, getState) => {
 
   await userSession.signUserOut();
@@ -276,6 +187,23 @@ export const signOut = () => async (dispatch, getState) => {
   dispatch({
     type: RESET_STATE,
   });
+};
+
+export const updateUserData = (data) => async (dispatch, getState) => {
+  await userSession.updateUserData(data);
+
+  const isUserSignedIn = await userSession.isUserSignedIn();
+  if (isUserSignedIn) {
+    const userData = await userSession.loadUserData();
+    dispatch({
+      type: UPDATE_USER,
+      payload: {
+        isUserSignedIn: true,
+        username: userData.username,
+        image: getUserImageUrl(userData),
+      },
+    });
+  }
 };
 
 export const changeListName = (listName, doCheckEditing) => async (
@@ -1680,6 +1608,10 @@ export const addSavingFPaths = (fpaths) => {
 
 export const updateEditorScrollEnabled = (enabled) => {
   return { type: UPDATE_EDITOR_SCROLL_ENABLED, payload: enabled };
+};
+
+export const updateStacksAccess = (data) => {
+  return { type: UPDATE_STACKS_ACCESS, payload: data };
 };
 
 const exportAllDataLoop = async (dispatch, fpaths, doneCount) => {

@@ -25,7 +25,7 @@ const SidebarSearchInput = () => {
   const searchInputClasses = Platform.OS === 'ios' ? 'py-2.5' : 'py-1';
 
   return (
-    <View style={tailwind('hidden pl-3 pr-1 mt-5 lg:flex', safeAreaWidth)}>
+    <View style={tailwind('hidden pl-3 pr-1 mt-6 lg:flex', safeAreaWidth)}>
       <View style={tailwind('mt-1 rounded-md bg-white shadow-sm')}>
         <View style={tailwind('absolute inset-y-0 left-0 pl-3 justify-center')}>
           <Svg width={16} height={16} style={tailwind('mr-3 text-gray-400 font-normal')} viewBox="0 0 20 20" fill="currentColor">
