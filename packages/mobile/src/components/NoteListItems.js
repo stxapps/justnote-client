@@ -41,7 +41,7 @@ const NoteListItems = () => {
   }, [notes, hasMore, isFetchingMore]);
 
   const onScrollEnd = useCallback((e) => {
-    updatePageYOffset(e.nativeEvent.contentOffset.y);
+    dispatch(updatePageYOffset(e.nativeEvent.contentOffset.y));
   }, []);
 
   const onFetchMoreBtnClick = useCallback(() => {
