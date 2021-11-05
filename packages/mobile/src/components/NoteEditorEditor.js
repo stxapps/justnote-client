@@ -203,6 +203,10 @@ const NoteEditorEditor = (props) => {
     } else throw new Error(`Invalid data: ${data}`);
   }, [onFocus, onAddObjectUrlFiles, onGetData]);
 
+  const onContentProcessDidTerminate = useCallback(() => {
+    webView.current.reload();
+  }, []);
+
   useEffect(() => {
     if (!isEditorReady) return;
     setInitData();
@@ -357,9 +361,9 @@ const NoteEditorEditor = (props) => {
   return (
     <React.Fragment>
       {Platform.OS === 'ios' ?
-        <WebView ref={webView} style={tailwind('flex-1')} source={cache('NEE_webView_source_ios', { uri: Dirs.DocumentDir + '/' + HTML_FNAME })} originWhitelist={cache('NEE_webView_originWhitelist_ios', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} textZoom={100} allowFileAccessFromFileURLs={true} allowUniversalAccessFromFileURLs={true} allowingReadAccessToURL={Dirs.DocumentDir} cacheEnabled={false} />
+        <WebView ref={webView} style={tailwind('flex-1')} source={cache('NEE_webView_source_ios', { uri: Dirs.DocumentDir + '/' + HTML_FNAME })} originWhitelist={cache('NEE_webView_originWhitelist_ios', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} textZoom={100} allowFileAccessFromFileURLs={true} allowUniversalAccessFromFileURLs={true} allowingReadAccessToURL={Dirs.DocumentDir} cacheEnabled={false} onContentProcessDidTerminate={onContentProcessDidTerminate} />
         :
-        <WebView ref={webView} style={tailwind('flex-1')} source={cache('NEE_webView_source', { baseUrl: '', html: ckeditor })} originWhitelist={cache('NEE_webView_originWhitelist', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} textZoom={100} androidLayerType="hardware" allowFileAccess={true} cacheEnabled={false} />
+        <WebView ref={webView} style={tailwind('flex-1')} source={cache('NEE_webView_source', { baseUrl: '', html: ckeditor })} originWhitelist={cache('NEE_webView_originWhitelist', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} textZoom={100} androidLayerType="hardware" allowFileAccess={true} cacheEnabled={false} onContentProcessDidTerminate={onContentProcessDidTerminate} />
       }
       <TextInput ref={hackInput} style={tailwind('absolute -top-1 -left-1 w-1 h-1')} />
     </React.Fragment>
