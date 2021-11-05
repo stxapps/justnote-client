@@ -243,29 +243,27 @@
 - every command follows by --profile <name>
 ** Native steps
 - npx react-native init Justnotecc
-- yarn add https://github.com/bracedotto/tailwind-rn#6047a3e3de6607a6cb5b738ab3392d80aa81fd13
-- yarn add redux react-redux redux-loop
-- yarn add babel-plugin-inline-import --dev
-  + Update babel.config.js to work with .svg
-- yarn add @welldone-software/why-did-you-render --dev
-- Font
-  + Create react-native.config.js
-  + Run npx react-native link
-  + medium.com/@mehrankhandev/ultimate-guide-to-use-custom-fonts-in-react-native-77fcdf859cf4
-- yarn add url-parse
+- yarn add redux react-redux redux-loop reselect
+- yarn add react-native-fast-image react-native-svg url-parse
 - yarn add react-native-safe-area-context
-- yarn add react-native-svg
-- yarn add 'https://gitpkg.now.sh/bracedotto/blockstack-react-native/BlockstackSDK?cad4d6b85620850ac6cc505e07bffd2fee779aca'
-- yarn add reselect
-- yarn add react-native-fast-image
+- yarn add react-native-keyboard-manager
+- yarn add react-native-animated-spinkit
+- yarn add react-native-webview
+- yarn add react-native-file-access
 - yarn add react-native-mmkv-storage (use 0.4.4 for now to be able to debug)
   + Add pickFirst in build.gradle
   + Add proguard rules
   + require iOS target to 11.0
-- yarn add react-native-animated-spinkit
-- yarn add react-native-keyboard-manager
-- yarn add react-native-webview
-- yarn add core-js
+- yarn add https://github.com/bracedotto/tailwind-rn#6047a3e3de6607a6cb5b738ab3392d80aa81fd13
+- yarn add 'https://gitpkg.now.sh/bracedotto/blockstack-react-native/BlockstackSDK?f928cd0381ac81b13b2c51fee1abf510ff8e8e95'
+- yarn add babel-plugin-inline-import --dev
+  + Update babel.config.js to work with .svg
+- yarn add @welldone-software/why-did-you-render --dev
+- yarn add typescript --dev
+- Font
+  + Create react-native.config.js
+  + Run npx react-native link
+  + medium.com/@mehrankhandev/ultimate-guide-to-use-custom-fonts-in-react-native-77fcdf859cf4
 - Android
   + android/gradle/wrapper/gradle-wrapper.properties
     ~ set gradle version in zip fpath

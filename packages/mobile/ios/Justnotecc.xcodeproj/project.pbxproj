@@ -3,41 +3,35 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* JustnoteccTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* JustnoteccTests.m */; };
+		0BC7197F13B546509E1E73B2 /* Inter-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = B8D0E7DB53784459BA91B77C /* Inter-Regular.otf */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		20667560E8714827BF1231B0 /* Inter-SemiBoldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = F085AA2AF73848E08A3923E6 /* Inter-SemiBoldItalic.otf */; };
-		246A185CCB514EB19C71F7C0 /* Inter-Thin.otf in Resources */ = {isa = PBXBuildFile; fileRef = C4C8571BD8534CF48C962675 /* Inter-Thin.otf */; };
-		2D02E4BC1E0B4A80006451C7 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
-		2D02E4BD1E0B4A84006451C7 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		2DCD954D1E0B4F2C00145EB5 /* JustnoteccTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* JustnoteccTests.m */; };
-		350C3331514D40A5B92C36D7 /* Inter-Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = C2FE60D7E6A642DA83653FD0 /* Inter-Italic.otf */; };
-		436380B7AFFE45B641F631EC /* libPods-Justnotecc-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EBE969BD3791867533E69999 /* libPods-Justnotecc-tvOS.a */; };
-		4A8A7E5D167E819EAC8494A0 /* libPods-Justnotecc-JustnoteccTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FA91620D0C5FC17A45C001CE /* libPods-Justnotecc-JustnoteccTests.a */; };
-		4E54F76E43634E1291AB37A6 /* Inter-Black.otf in Resources */ = {isa = PBXBuildFile; fileRef = 8789E3B5DAAA4BF9BB7359F7 /* Inter-Black.otf */; };
-		5577D9DF96BE412DB88177A8 /* Inter-ThinItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 77CF8C0C28FF43D18AB098C2 /* Inter-ThinItalic.otf */; };
-		651B26C7E5394C81AA4FA02A /* Inter-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 77EB5D1364DA498497F9FBA6 /* Inter-Medium.otf */; };
-		6E32F96A37AF40FD9F21E09C /* Inter-ExtraBoldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2D576E05B15B446496B6E0C1 /* Inter-ExtraBoldItalic.otf */; };
-		790081FD180442668EBAF74E /* Inter-ExtraBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 0644E5FAE5AA484C8356B03C /* Inter-ExtraBold.otf */; };
-		816DD88D918347F4B6504061 /* Inter-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 64E6767C20BC42E5BFB06196 /* Inter-Regular.otf */; };
+		25116571772F41D8B9B96042 /* Inter-Black.otf in Resources */ = {isa = PBXBuildFile; fileRef = 0AB42F43606A4BA0BF884788 /* Inter-Black.otf */; };
+		312E8D19D28946858D8029E4 /* Inter-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 530FDA1838004A6CA55CBFCD /* Inter-Bold.otf */; };
+		4A25FDE600EC48BB989B2D9A /* Inter-BoldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 43116B76834E4182B898D45D /* Inter-BoldItalic.otf */; };
+		55EA152548CB94A31E0BC507 /* libPods-Justnotecc-JustnoteccTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F860EC83455BAF9B90FB3E39 /* libPods-Justnotecc-JustnoteccTests.a */; };
+		6ABBE91DE24C47C599994450 /* Inter-Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 9B5DF3E2DE7C4361BEC25F56 /* Inter-Italic.otf */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		8802F5CB5B994E8085613CA4 /* Inter-BlackItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 8714153D77E2423EB1D79833 /* Inter-BlackItalic.otf */; };
-		89B46614F2D7436190502DE9 /* Inter-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = C0C365448E9B417E846EF364 /* Inter-SemiBold.otf */; };
-		8C0723062697BA705547DB6A /* libPods-Justnotecc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E27CEB07F7D874C3D27FF00 /* libPods-Justnotecc.a */; };
-		8F083D2C577940C1BF54BB4E /* Inter-BoldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 5F01EFCD9E8746FA834C36F5 /* Inter-BoldItalic.otf */; };
-		962273C990EF42D08782799F /* Inter-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = 506559B551A046159763B753 /* Inter-Light.otf */; };
-		AE5914096562414F8EBBBA86 /* Inter-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 065E71F00B5646118CD049B5 /* Inter-Bold.otf */; };
-		B668EBA1A38242F2846DC1BB /* Inter-ExtraLightItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = B3BA83CC76334717939FD5D1 /* Inter-ExtraLightItalic.otf */; };
-		BCED4BE0E3BF4C948B7F738D /* Inter-MediumItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 581E96D82E3A487AB265E4F9 /* Inter-MediumItalic.otf */; };
-		E702B4A5B65B4EDF979E20B9 /* Inter-ExtraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = E617D3564F7549D8B8243833 /* Inter-ExtraLight.otf */; };
-		EF72EFC396D65007BC665584 /* libPods-Justnotecc-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BCC62199B3CDC329984E9C50 /* libPods-Justnotecc-tvOSTests.a */; };
-		F91DA9417F0C44869AD2D602 /* Inter-LightItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = A2CC4EA8587847E8BB2BC324 /* Inter-LightItalic.otf */; };
+		85F4B78450B044CCBCCE32D7 /* Inter-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 1BF87389C84342D694E2A8AC /* Inter-SemiBold.otf */; };
+		8D25339D4BAF4D0F9412B159 /* Inter-ThinItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 20F9E40B1A8846ACB7A0BBE2 /* Inter-ThinItalic.otf */; };
+		8D7F781FBE514136BDF731F1 /* Inter-BlackItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 5F146E1ADF504B728F72C71E /* Inter-BlackItalic.otf */; };
+		8DFE1BEB5B0D420188660472 /* Inter-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = F2CCD2FFB16F4956BCA07EA3 /* Inter-Light.otf */; };
+		8DFF152056D64A94A68F1190 /* Inter-ExtraBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 43F1F0DAB1454B87B1ADCB16 /* Inter-ExtraBold.otf */; };
+		A4AB8E10F09844978FE78E86 /* Inter-SemiBoldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = ED200794C75A4D14AE357DE8 /* Inter-SemiBoldItalic.otf */; };
+		AB993080B97080752D4DCC4F /* libPods-Justnotecc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CD7A271862A43B0D38ACBE29 /* libPods-Justnotecc.a */; };
+		B315DFB9E02E4FB3934DC8B9 /* Inter-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = C718B316C13C480F941FD3EB /* Inter-Medium.otf */; };
+		C829611E810F404C9DBF2FB9 /* Inter-MediumItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 342F55237AF7418AB564E279 /* Inter-MediumItalic.otf */; };
+		C882BDE42EE64D85AB8D6000 /* Inter-ExtraLightItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = BB1D66E7A18846BDACE9CE38 /* Inter-ExtraLightItalic.otf */; };
+		CBD5A1C989FC41F2BC07865D /* Inter-Thin.otf in Resources */ = {isa = PBXBuildFile; fileRef = A63728A5992F4B78A1C1B132 /* Inter-Thin.otf */; };
+		DE916D0F3B8E410D91C9C8F5 /* Inter-LightItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 72DD8E02D22842558FD73F76 /* Inter-LightItalic.otf */; };
+		DF2B1756BFCF4E4087650640 /* Inter-ExtraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = F1278E4192B74BDAB4D8DF28 /* Inter-ExtraLight.otf */; };
+		F736271CBBE8458CA817F92C /* Inter-ExtraBoldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 1FBC63DFA0854DC689B9BF3E /* Inter-ExtraBoldItalic.otf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,62 +42,45 @@
 			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
 			remoteInfo = Justnotecc;
 		};
-		2D02E4911E0B4A5D006451C7 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 2D02E47A1E0B4A5D006451C7;
-			remoteInfo = "Justnotecc-tvOS";
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		008F07F21AC5B25A0029DE68 /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
 		00E356EE1AD99517003FC87E /* JustnoteccTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JustnoteccTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* JustnoteccTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JustnoteccTests.m; sourceTree = "<group>"; };
-		0644E5FAE5AA484C8356B03C /* Inter-ExtraBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraBold.otf"; path = "../src/fonts/Inter/Inter-ExtraBold.otf"; sourceTree = "<group>"; };
-		065E71F00B5646118CD049B5 /* Inter-Bold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Bold.otf"; path = "../src/fonts/Inter/Inter-Bold.otf"; sourceTree = "<group>"; };
+		049803CA2733ECBC00C89235 /* Justnotecc.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = Justnotecc.entitlements; path = Justnotecc/Justnotecc.entitlements; sourceTree = "<group>"; };
+		0AB42F43606A4BA0BF884788 /* Inter-Black.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Black.otf"; path = "../src/fonts/Inter/Inter-Black.otf"; sourceTree = "<group>"; };
+		0E24341C7A23956080E46903 /* Pods-Justnotecc-JustnoteccTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Justnotecc-JustnoteccTests.debug.xcconfig"; path = "Target Support Files/Pods-Justnotecc-JustnoteccTests/Pods-Justnotecc-JustnoteccTests.debug.xcconfig"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* Justnotecc.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Justnotecc.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Justnotecc/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Justnotecc/AppDelegate.m; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Justnotecc/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Justnotecc/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Justnotecc/main.m; sourceTree = "<group>"; };
-		22B765BBA7D5576CE5C6AFFE /* Pods-Justnotecc-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Justnotecc-tvOS.debug.xcconfig"; path = "Target Support Files/Pods-Justnotecc-tvOS/Pods-Justnotecc-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
-		23A62982B986D8A510D670D5 /* Pods-Justnotecc.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Justnotecc.release.xcconfig"; path = "Target Support Files/Pods-Justnotecc/Pods-Justnotecc.release.xcconfig"; sourceTree = "<group>"; };
-		2D02E47B1E0B4A5D006451C7 /* Justnotecc-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Justnotecc-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		2D02E4901E0B4A5D006451C7 /* Justnotecc-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Justnotecc-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		2D576E05B15B446496B6E0C1 /* Inter-ExtraBoldItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraBoldItalic.otf"; path = "../src/fonts/Inter/Inter-ExtraBoldItalic.otf"; sourceTree = "<group>"; };
-		506559B551A046159763B753 /* Inter-Light.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Light.otf"; path = "../src/fonts/Inter/Inter-Light.otf"; sourceTree = "<group>"; };
-		581E96D82E3A487AB265E4F9 /* Inter-MediumItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-MediumItalic.otf"; path = "../src/fonts/Inter/Inter-MediumItalic.otf"; sourceTree = "<group>"; };
-		5B5E3EB825C3E4F20000F85A /* Justnotecc.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = Justnotecc.entitlements; path = Justnotecc/Justnotecc.entitlements; sourceTree = "<group>"; };
-		5F01EFCD9E8746FA834C36F5 /* Inter-BoldItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-BoldItalic.otf"; path = "../src/fonts/Inter/Inter-BoldItalic.otf"; sourceTree = "<group>"; };
-		64E6767C20BC42E5BFB06196 /* Inter-Regular.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Regular.otf"; path = "../src/fonts/Inter/Inter-Regular.otf"; sourceTree = "<group>"; };
-		67B3410BC00E6558A828C1A5 /* Pods-Justnotecc-JustnoteccTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Justnotecc-JustnoteccTests.debug.xcconfig"; path = "Target Support Files/Pods-Justnotecc-JustnoteccTests/Pods-Justnotecc-JustnoteccTests.debug.xcconfig"; sourceTree = "<group>"; };
-		77CF8C0C28FF43D18AB098C2 /* Inter-ThinItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ThinItalic.otf"; path = "../src/fonts/Inter/Inter-ThinItalic.otf"; sourceTree = "<group>"; };
-		77EB5D1364DA498497F9FBA6 /* Inter-Medium.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Medium.otf"; path = "../src/fonts/Inter/Inter-Medium.otf"; sourceTree = "<group>"; };
-		7E27CEB07F7D874C3D27FF00 /* libPods-Justnotecc.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Justnotecc.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1BF87389C84342D694E2A8AC /* Inter-SemiBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-SemiBold.otf"; path = "../src/fonts/Inter/Inter-SemiBold.otf"; sourceTree = "<group>"; };
+		1FBC63DFA0854DC689B9BF3E /* Inter-ExtraBoldItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraBoldItalic.otf"; path = "../src/fonts/Inter/Inter-ExtraBoldItalic.otf"; sourceTree = "<group>"; };
+		20F9E40B1A8846ACB7A0BBE2 /* Inter-ThinItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ThinItalic.otf"; path = "../src/fonts/Inter/Inter-ThinItalic.otf"; sourceTree = "<group>"; };
+		2D63ABC5CBAE9FEDC5EC56DE /* Pods-Justnotecc.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Justnotecc.debug.xcconfig"; path = "Target Support Files/Pods-Justnotecc/Pods-Justnotecc.debug.xcconfig"; sourceTree = "<group>"; };
+		342F55237AF7418AB564E279 /* Inter-MediumItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-MediumItalic.otf"; path = "../src/fonts/Inter/Inter-MediumItalic.otf"; sourceTree = "<group>"; };
+		43116B76834E4182B898D45D /* Inter-BoldItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-BoldItalic.otf"; path = "../src/fonts/Inter/Inter-BoldItalic.otf"; sourceTree = "<group>"; };
+		43F1F0DAB1454B87B1ADCB16 /* Inter-ExtraBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraBold.otf"; path = "../src/fonts/Inter/Inter-ExtraBold.otf"; sourceTree = "<group>"; };
+		44750C159A2D56825B829BCF /* Pods-Justnotecc-JustnoteccTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Justnotecc-JustnoteccTests.release.xcconfig"; path = "Target Support Files/Pods-Justnotecc-JustnoteccTests/Pods-Justnotecc-JustnoteccTests.release.xcconfig"; sourceTree = "<group>"; };
+		530FDA1838004A6CA55CBFCD /* Inter-Bold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Bold.otf"; path = "../src/fonts/Inter/Inter-Bold.otf"; sourceTree = "<group>"; };
+		5F146E1ADF504B728F72C71E /* Inter-BlackItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-BlackItalic.otf"; path = "../src/fonts/Inter/Inter-BlackItalic.otf"; sourceTree = "<group>"; };
+		72DD8E02D22842558FD73F76 /* Inter-LightItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-LightItalic.otf"; path = "../src/fonts/Inter/Inter-LightItalic.otf"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Justnotecc/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		8714153D77E2423EB1D79833 /* Inter-BlackItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-BlackItalic.otf"; path = "../src/fonts/Inter/Inter-BlackItalic.otf"; sourceTree = "<group>"; };
-		8789E3B5DAAA4BF9BB7359F7 /* Inter-Black.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Black.otf"; path = "../src/fonts/Inter/Inter-Black.otf"; sourceTree = "<group>"; };
-		A2CC4EA8587847E8BB2BC324 /* Inter-LightItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-LightItalic.otf"; path = "../src/fonts/Inter/Inter-LightItalic.otf"; sourceTree = "<group>"; };
-		A790671A9A0307EA1581CF73 /* Pods-Justnotecc-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Justnotecc-tvOSTests.release.xcconfig"; path = "Target Support Files/Pods-Justnotecc-tvOSTests/Pods-Justnotecc-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
-		B3BA83CC76334717939FD5D1 /* Inter-ExtraLightItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraLightItalic.otf"; path = "../src/fonts/Inter/Inter-ExtraLightItalic.otf"; sourceTree = "<group>"; };
-		B5133F2CFD55B9D9C8F9CC9A /* Pods-Justnotecc.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Justnotecc.debug.xcconfig"; path = "Target Support Files/Pods-Justnotecc/Pods-Justnotecc.debug.xcconfig"; sourceTree = "<group>"; };
-		BCC62199B3CDC329984E9C50 /* libPods-Justnotecc-tvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Justnotecc-tvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C0C365448E9B417E846EF364 /* Inter-SemiBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-SemiBold.otf"; path = "../src/fonts/Inter/Inter-SemiBold.otf"; sourceTree = "<group>"; };
-		C2FE60D7E6A642DA83653FD0 /* Inter-Italic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Italic.otf"; path = "../src/fonts/Inter/Inter-Italic.otf"; sourceTree = "<group>"; };
-		C4C8571BD8534CF48C962675 /* Inter-Thin.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Thin.otf"; path = "../src/fonts/Inter/Inter-Thin.otf"; sourceTree = "<group>"; };
-		C572B0199259D92B41E41375 /* Pods-Justnotecc-tvOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Justnotecc-tvOSTests.debug.xcconfig"; path = "Target Support Files/Pods-Justnotecc-tvOSTests/Pods-Justnotecc-tvOSTests.debug.xcconfig"; sourceTree = "<group>"; };
-		E617D3564F7549D8B8243833 /* Inter-ExtraLight.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraLight.otf"; path = "../src/fonts/Inter/Inter-ExtraLight.otf"; sourceTree = "<group>"; };
-		E6B2858C7EFEA96BC1721F3E /* Pods-Justnotecc-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Justnotecc-tvOS.release.xcconfig"; path = "Target Support Files/Pods-Justnotecc-tvOS/Pods-Justnotecc-tvOS.release.xcconfig"; sourceTree = "<group>"; };
-		EBE969BD3791867533E69999 /* libPods-Justnotecc-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Justnotecc-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9B5DF3E2DE7C4361BEC25F56 /* Inter-Italic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Italic.otf"; path = "../src/fonts/Inter/Inter-Italic.otf"; sourceTree = "<group>"; };
+		A63728A5992F4B78A1C1B132 /* Inter-Thin.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Thin.otf"; path = "../src/fonts/Inter/Inter-Thin.otf"; sourceTree = "<group>"; };
+		B8D0E7DB53784459BA91B77C /* Inter-Regular.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Regular.otf"; path = "../src/fonts/Inter/Inter-Regular.otf"; sourceTree = "<group>"; };
+		BB1D66E7A18846BDACE9CE38 /* Inter-ExtraLightItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraLightItalic.otf"; path = "../src/fonts/Inter/Inter-ExtraLightItalic.otf"; sourceTree = "<group>"; };
+		C718B316C13C480F941FD3EB /* Inter-Medium.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Medium.otf"; path = "../src/fonts/Inter/Inter-Medium.otf"; sourceTree = "<group>"; };
+		CC5482C8437C846D4A9443A3 /* Pods-Justnotecc.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Justnotecc.release.xcconfig"; path = "Target Support Files/Pods-Justnotecc/Pods-Justnotecc.release.xcconfig"; sourceTree = "<group>"; };
+		CD7A271862A43B0D38ACBE29 /* libPods-Justnotecc.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Justnotecc.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		ED200794C75A4D14AE357DE8 /* Inter-SemiBoldItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-SemiBoldItalic.otf"; path = "../src/fonts/Inter/Inter-SemiBoldItalic.otf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		ED2971642150620600B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS12.0.sdk/System/Library/Frameworks/JavaScriptCore.framework; sourceTree = DEVELOPER_DIR; };
-		F085AA2AF73848E08A3923E6 /* Inter-SemiBoldItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-SemiBoldItalic.otf"; path = "../src/fonts/Inter/Inter-SemiBoldItalic.otf"; sourceTree = "<group>"; };
-		F46526418FF8B702ECC65BDF /* Pods-Justnotecc-JustnoteccTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Justnotecc-JustnoteccTests.release.xcconfig"; path = "Target Support Files/Pods-Justnotecc-JustnoteccTests/Pods-Justnotecc-JustnoteccTests.release.xcconfig"; sourceTree = "<group>"; };
-		FA91620D0C5FC17A45C001CE /* libPods-Justnotecc-JustnoteccTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Justnotecc-JustnoteccTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F1278E4192B74BDAB4D8DF28 /* Inter-ExtraLight.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraLight.otf"; path = "../src/fonts/Inter/Inter-ExtraLight.otf"; sourceTree = "<group>"; };
+		F2CCD2FFB16F4956BCA07EA3 /* Inter-Light.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Light.otf"; path = "../src/fonts/Inter/Inter-Light.otf"; sourceTree = "<group>"; };
+		F860EC83455BAF9B90FB3E39 /* libPods-Justnotecc-JustnoteccTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Justnotecc-JustnoteccTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -111,7 +88,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4A8A7E5D167E819EAC8494A0 /* libPods-Justnotecc-JustnoteccTests.a in Frameworks */,
+				55EA152548CB94A31E0BC507 /* libPods-Justnotecc-JustnoteccTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -119,23 +96,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8C0723062697BA705547DB6A /* libPods-Justnotecc.a in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		2D02E4781E0B4A5D006451C7 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				436380B7AFFE45B641F631EC /* libPods-Justnotecc-tvOS.a in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		2D02E48D1E0B4A5D006451C7 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				EF72EFC396D65007BC665584 /* libPods-Justnotecc-tvOSTests.a in Frameworks */,
+				AB993080B97080752D4DCC4F /* libPods-Justnotecc.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -162,8 +123,7 @@
 		13B07FAE1A68108700A75B9A /* Justnotecc */ = {
 			isa = PBXGroup;
 			children = (
-				5B5E3EB825C3E4F20000F85A /* Justnotecc.entitlements */,
-				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
+				049803CA2733ECBC00C89235 /* Justnotecc.entitlements */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -174,30 +134,12 @@
 			name = Justnotecc;
 			sourceTree = "<group>";
 		};
-		14422CBC386673C5A814AE6F /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				B5133F2CFD55B9D9C8F9CC9A /* Pods-Justnotecc.debug.xcconfig */,
-				23A62982B986D8A510D670D5 /* Pods-Justnotecc.release.xcconfig */,
-				67B3410BC00E6558A828C1A5 /* Pods-Justnotecc-JustnoteccTests.debug.xcconfig */,
-				F46526418FF8B702ECC65BDF /* Pods-Justnotecc-JustnoteccTests.release.xcconfig */,
-				22B765BBA7D5576CE5C6AFFE /* Pods-Justnotecc-tvOS.debug.xcconfig */,
-				E6B2858C7EFEA96BC1721F3E /* Pods-Justnotecc-tvOS.release.xcconfig */,
-				C572B0199259D92B41E41375 /* Pods-Justnotecc-tvOSTests.debug.xcconfig */,
-				A790671A9A0307EA1581CF73 /* Pods-Justnotecc-tvOSTests.release.xcconfig */,
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				ED2971642150620600B7C4FE /* JavaScriptCore.framework */,
-				7E27CEB07F7D874C3D27FF00 /* libPods-Justnotecc.a */,
-				FA91620D0C5FC17A45C001CE /* libPods-Justnotecc-JustnoteccTests.a */,
-				EBE969BD3791867533E69999 /* libPods-Justnotecc-tvOS.a */,
-				BCC62199B3CDC329984E9C50 /* libPods-Justnotecc-tvOSTests.a */,
+				CD7A271862A43B0D38ACBE29 /* libPods-Justnotecc.a */,
+				F860EC83455BAF9B90FB3E39 /* libPods-Justnotecc-JustnoteccTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -217,8 +159,8 @@
 				00E356EF1AD99517003FC87E /* JustnoteccTests */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				F1C6E63E12234B559EEC866B /* Resources */,
-				14422CBC386673C5A814AE6F /* Pods */,
+				FD676130933048E915D58BA3 /* Pods */,
+				B60E6C4DA1F34C74B5533142 /* Resources */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -230,35 +172,44 @@
 			children = (
 				13B07F961A680F5B00A75B9A /* Justnotecc.app */,
 				00E356EE1AD99517003FC87E /* JustnoteccTests.xctest */,
-				2D02E47B1E0B4A5D006451C7 /* Justnotecc-tvOS.app */,
-				2D02E4901E0B4A5D006451C7 /* Justnotecc-tvOSTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		F1C6E63E12234B559EEC866B /* Resources */ = {
+		B60E6C4DA1F34C74B5533142 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				8789E3B5DAAA4BF9BB7359F7 /* Inter-Black.otf */,
-				8714153D77E2423EB1D79833 /* Inter-BlackItalic.otf */,
-				065E71F00B5646118CD049B5 /* Inter-Bold.otf */,
-				5F01EFCD9E8746FA834C36F5 /* Inter-BoldItalic.otf */,
-				0644E5FAE5AA484C8356B03C /* Inter-ExtraBold.otf */,
-				2D576E05B15B446496B6E0C1 /* Inter-ExtraBoldItalic.otf */,
-				E617D3564F7549D8B8243833 /* Inter-ExtraLight.otf */,
-				B3BA83CC76334717939FD5D1 /* Inter-ExtraLightItalic.otf */,
-				C2FE60D7E6A642DA83653FD0 /* Inter-Italic.otf */,
-				506559B551A046159763B753 /* Inter-Light.otf */,
-				A2CC4EA8587847E8BB2BC324 /* Inter-LightItalic.otf */,
-				77EB5D1364DA498497F9FBA6 /* Inter-Medium.otf */,
-				581E96D82E3A487AB265E4F9 /* Inter-MediumItalic.otf */,
-				64E6767C20BC42E5BFB06196 /* Inter-Regular.otf */,
-				C0C365448E9B417E846EF364 /* Inter-SemiBold.otf */,
-				F085AA2AF73848E08A3923E6 /* Inter-SemiBoldItalic.otf */,
-				C4C8571BD8534CF48C962675 /* Inter-Thin.otf */,
-				77CF8C0C28FF43D18AB098C2 /* Inter-ThinItalic.otf */,
+				0AB42F43606A4BA0BF884788 /* Inter-Black.otf */,
+				5F146E1ADF504B728F72C71E /* Inter-BlackItalic.otf */,
+				530FDA1838004A6CA55CBFCD /* Inter-Bold.otf */,
+				43116B76834E4182B898D45D /* Inter-BoldItalic.otf */,
+				43F1F0DAB1454B87B1ADCB16 /* Inter-ExtraBold.otf */,
+				1FBC63DFA0854DC689B9BF3E /* Inter-ExtraBoldItalic.otf */,
+				F1278E4192B74BDAB4D8DF28 /* Inter-ExtraLight.otf */,
+				BB1D66E7A18846BDACE9CE38 /* Inter-ExtraLightItalic.otf */,
+				9B5DF3E2DE7C4361BEC25F56 /* Inter-Italic.otf */,
+				F2CCD2FFB16F4956BCA07EA3 /* Inter-Light.otf */,
+				72DD8E02D22842558FD73F76 /* Inter-LightItalic.otf */,
+				C718B316C13C480F941FD3EB /* Inter-Medium.otf */,
+				342F55237AF7418AB564E279 /* Inter-MediumItalic.otf */,
+				B8D0E7DB53784459BA91B77C /* Inter-Regular.otf */,
+				1BF87389C84342D694E2A8AC /* Inter-SemiBold.otf */,
+				ED200794C75A4D14AE357DE8 /* Inter-SemiBoldItalic.otf */,
+				A63728A5992F4B78A1C1B132 /* Inter-Thin.otf */,
+				20F9E40B1A8846ACB7A0BBE2 /* Inter-ThinItalic.otf */,
 			);
 			name = Resources;
+			sourceTree = "<group>";
+		};
+		FD676130933048E915D58BA3 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				2D63ABC5CBAE9FEDC5EC56DE /* Pods-Justnotecc.debug.xcconfig */,
+				CC5482C8437C846D4A9443A3 /* Pods-Justnotecc.release.xcconfig */,
+				0E24341C7A23956080E46903 /* Pods-Justnotecc-JustnoteccTests.debug.xcconfig */,
+				44750C159A2D56825B829BCF /* Pods-Justnotecc-JustnoteccTests.release.xcconfig */,
+			);
+			path = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -268,11 +219,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "JustnoteccTests" */;
 			buildPhases = (
-				5E60F4E0A8617893A2E20F6B /* [CP] Check Pods Manifest.lock */,
+				EE03A85AAEA7F5F36923B8CA /* [CP] Check Pods Manifest.lock */,
 				00E356EA1AD99517003FC87E /* Sources */,
 				00E356EB1AD99517003FC87E /* Frameworks */,
 				00E356EC1AD99517003FC87E /* Resources */,
-				9B369C8A4EDE4A3EDCEA066C /* [CP] Copy Pods Resources */,
+				9C6CDC1C5BB0ECEFFC47C285 /* [CP] Embed Pods Frameworks */,
+				3726EC8EA366E3D9ED8D3040 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -288,13 +240,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Justnotecc" */;
 			buildPhases = (
-				73BB0D768B209A3730692523 /* [CP] Check Pods Manifest.lock */,
+				E2B933564133476E3DA6BBEC /* [CP] Check Pods Manifest.lock */,
 				FD10A7F022414F080027D42C /* Start Packager */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				533FA4CAA8F3A6D31E71F40E /* [CP] Copy Pods Resources */,
+				7C6C63F177A6C92395F9D821 /* [CP] Embed Pods Frameworks */,
+				4F2E04294BF476A9CF456C87 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -305,74 +258,25 @@
 			productReference = 13B07F961A680F5B00A75B9A /* Justnotecc.app */;
 			productType = "com.apple.product-type.application";
 		};
-		2D02E47A1E0B4A5D006451C7 /* Justnotecc-tvOS */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 2D02E4BA1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "Justnotecc-tvOS" */;
-			buildPhases = (
-				E064368F5383CB363D7C53E8 /* [CP] Check Pods Manifest.lock */,
-				FD10A7F122414F3F0027D42C /* Start Packager */,
-				2D02E4771E0B4A5D006451C7 /* Sources */,
-				2D02E4781E0B4A5D006451C7 /* Frameworks */,
-				2D02E4791E0B4A5D006451C7 /* Resources */,
-				2D02E4CB1E0B4B27006451C7 /* Bundle React Native Code And Images */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = "Justnotecc-tvOS";
-			productName = "Justnotecc-tvOS";
-			productReference = 2D02E47B1E0B4A5D006451C7 /* Justnotecc-tvOS.app */;
-			productType = "com.apple.product-type.application";
-		};
-		2D02E48F1E0B4A5D006451C7 /* Justnotecc-tvOSTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 2D02E4BB1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "Justnotecc-tvOSTests" */;
-			buildPhases = (
-				309159F5216922B075106897 /* [CP] Check Pods Manifest.lock */,
-				2D02E48C1E0B4A5D006451C7 /* Sources */,
-				2D02E48D1E0B4A5D006451C7 /* Frameworks */,
-				2D02E48E1E0B4A5D006451C7 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				2D02E4921E0B4A5D006451C7 /* PBXTargetDependency */,
-			);
-			name = "Justnotecc-tvOSTests";
-			productName = "Justnotecc-tvOSTests";
-			productReference = 2D02E4901E0B4A5D006451C7 /* Justnotecc-tvOSTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		83CBB9F71A601CBA00E9B192 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1130;
+				LastUpgradeCheck = 1210;
 				TargetAttributes = {
 					00E356ED1AD99517003FC87E = {
 						CreatedOnToolsVersion = 6.2;
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
 					13B07F861A680F5B00A75B9A = {
-						DevelopmentTeam = DZ8XN7425J;
 						LastSwiftMigration = 1120;
-					};
-					2D02E47A1E0B4A5D006451C7 = {
-						CreatedOnToolsVersion = 8.2.1;
-						ProvisioningStyle = Automatic;
-					};
-					2D02E48F1E0B4A5D006451C7 = {
-						CreatedOnToolsVersion = 8.2.1;
-						ProvisioningStyle = Automatic;
-						TestTargetID = 2D02E47A1E0B4A5D006451C7;
 					};
 				};
 			};
 			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "Justnotecc" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 12.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -386,8 +290,6 @@
 			targets = (
 				13B07F861A680F5B00A75B9A /* Justnotecc */,
 				00E356ED1AD99517003FC87E /* JustnoteccTests */,
-				2D02E47A1E0B4A5D006451C7 /* Justnotecc-tvOS */,
-				2D02E48F1E0B4A5D006451C7 /* Justnotecc-tvOSTests */,
 			);
 		};
 /* End PBXProject section */
@@ -406,39 +308,24 @@
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
-				4E54F76E43634E1291AB37A6 /* Inter-Black.otf in Resources */,
-				8802F5CB5B994E8085613CA4 /* Inter-BlackItalic.otf in Resources */,
-				AE5914096562414F8EBBBA86 /* Inter-Bold.otf in Resources */,
-				8F083D2C577940C1BF54BB4E /* Inter-BoldItalic.otf in Resources */,
-				790081FD180442668EBAF74E /* Inter-ExtraBold.otf in Resources */,
-				6E32F96A37AF40FD9F21E09C /* Inter-ExtraBoldItalic.otf in Resources */,
-				E702B4A5B65B4EDF979E20B9 /* Inter-ExtraLight.otf in Resources */,
-				B668EBA1A38242F2846DC1BB /* Inter-ExtraLightItalic.otf in Resources */,
-				350C3331514D40A5B92C36D7 /* Inter-Italic.otf in Resources */,
-				962273C990EF42D08782799F /* Inter-Light.otf in Resources */,
-				F91DA9417F0C44869AD2D602 /* Inter-LightItalic.otf in Resources */,
-				651B26C7E5394C81AA4FA02A /* Inter-Medium.otf in Resources */,
-				BCED4BE0E3BF4C948B7F738D /* Inter-MediumItalic.otf in Resources */,
-				816DD88D918347F4B6504061 /* Inter-Regular.otf in Resources */,
-				89B46614F2D7436190502DE9 /* Inter-SemiBold.otf in Resources */,
-				20667560E8714827BF1231B0 /* Inter-SemiBoldItalic.otf in Resources */,
-				246A185CCB514EB19C71F7C0 /* Inter-Thin.otf in Resources */,
-				5577D9DF96BE412DB88177A8 /* Inter-ThinItalic.otf in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		2D02E4791E0B4A5D006451C7 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				2D02E4BD1E0B4A84006451C7 /* Images.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		2D02E48E1E0B4A5D006451C7 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
+				25116571772F41D8B9B96042 /* Inter-Black.otf in Resources */,
+				8D7F781FBE514136BDF731F1 /* Inter-BlackItalic.otf in Resources */,
+				312E8D19D28946858D8029E4 /* Inter-Bold.otf in Resources */,
+				4A25FDE600EC48BB989B2D9A /* Inter-BoldItalic.otf in Resources */,
+				8DFF152056D64A94A68F1190 /* Inter-ExtraBold.otf in Resources */,
+				F736271CBBE8458CA817F92C /* Inter-ExtraBoldItalic.otf in Resources */,
+				DF2B1756BFCF4E4087650640 /* Inter-ExtraLight.otf in Resources */,
+				C882BDE42EE64D85AB8D6000 /* Inter-ExtraLightItalic.otf in Resources */,
+				6ABBE91DE24C47C599994450 /* Inter-Italic.otf in Resources */,
+				8DFE1BEB5B0D420188660472 /* Inter-Light.otf in Resources */,
+				DE916D0F3B8E410D91C9C8F5 /* Inter-LightItalic.otf in Resources */,
+				B315DFB9E02E4FB3934DC8B9 /* Inter-Medium.otf in Resources */,
+				C829611E810F404C9DBF2FB9 /* Inter-MediumItalic.otf in Resources */,
+				0BC7197F13B546509E1E73B2 /* Inter-Regular.otf in Resources */,
+				85F4B78450B044CCBCCE32D7 /* Inter-SemiBold.otf in Resources */,
+				A4AB8E10F09844978FE78E86 /* Inter-SemiBoldItalic.otf in Resources */,
+				CBD5A1C989FC41F2BC07865D /* Inter-Thin.otf in Resources */,
+				8D25339D4BAF4D0F9412B159 /* Inter-ThinItalic.otf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -457,89 +344,77 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh\n";
+			shellScript = "set -e\n\nexport NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh\n";
 		};
-		2D02E4CB1E0B4B27006451C7 /* Bundle React Native Code And Images */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Bundle React Native Code And Images";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh";
-		};
-		309159F5216922B075106897 /* [CP] Check Pods Manifest.lock */ = {
+		3726EC8EA366E3D9ED8D3040 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Justnotecc-JustnoteccTests/Pods-Justnotecc-JustnoteccTests-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
+			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Justnotecc-tvOSTests-checkManifestLockResult.txt",
+				"${PODS_ROOT}/Target Support Files/Pods-Justnotecc-JustnoteccTests/Pods-Justnotecc-JustnoteccTests-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Justnotecc-JustnoteccTests/Pods-Justnotecc-JustnoteccTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		533FA4CAA8F3A6D31E71F40E /* [CP] Copy Pods Resources */ = {
+		4F2E04294BF476A9CF456C87 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Justnotecc/Pods-Justnotecc-resources.sh",
-				"${PODS_CONFIGURATION_BUILD_DIR}/Blockstack/Blockstack.bundle",
-				"${PODS_ROOT}/IQKeyboardManager/IQKeyboardManager/Resources/IQKeyboardManager.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/React-Core/AccessibilityResources.bundle",
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Justnotecc/Pods-Justnotecc-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Blockstack.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/IQKeyboardManager.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/AccessibilityResources.bundle",
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Justnotecc/Pods-Justnotecc-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Justnotecc/Pods-Justnotecc-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		5E60F4E0A8617893A2E20F6B /* [CP] Check Pods Manifest.lock */ = {
+		7C6C63F177A6C92395F9D821 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Justnotecc/Pods-Justnotecc-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
+			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Justnotecc-JustnoteccTests-checkManifestLockResult.txt",
+				"${PODS_ROOT}/Target Support Files/Pods-Justnotecc/Pods-Justnotecc-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Justnotecc/Pods-Justnotecc-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		73BB0D768B209A3730692523 /* [CP] Check Pods Manifest.lock */ = {
+		9C6CDC1C5BB0ECEFFC47C285 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Justnotecc-JustnoteccTests/Pods-Justnotecc-JustnoteccTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Justnotecc-JustnoteccTests/Pods-Justnotecc-JustnoteccTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Justnotecc-JustnoteccTests/Pods-Justnotecc-JustnoteccTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E2B933564133476E3DA6BBEC /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -561,29 +436,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		9B369C8A4EDE4A3EDCEA066C /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Justnotecc-JustnoteccTests/Pods-Justnotecc-JustnoteccTests-resources.sh",
-				"${PODS_CONFIGURATION_BUILD_DIR}/Blockstack/Blockstack.bundle",
-				"${PODS_ROOT}/IQKeyboardManager/IQKeyboardManager/Resources/IQKeyboardManager.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/React-Core/AccessibilityResources.bundle",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Blockstack.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/IQKeyboardManager.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/AccessibilityResources.bundle",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Justnotecc-JustnoteccTests/Pods-Justnotecc-JustnoteccTests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		E064368F5383CB363D7C53E8 /* [CP] Check Pods Manifest.lock */ = {
+		EE03A85AAEA7F5F36923B8CA /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -598,7 +451,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Justnotecc-tvOS-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-Justnotecc-JustnoteccTests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -606,25 +459,6 @@
 			showEnvVarsInLog = 0;
 		};
 		FD10A7F022414F080027D42C /* Start Packager */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Start Packager";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "export RCT_METRO_PORT=\"${RCT_METRO_PORT:=8081}\"\necho \"export RCT_METRO_PORT=${RCT_METRO_PORT}\" > \"${SRCROOT}/../node_modules/react-native/scripts/.packager.env\"\nif [ -z \"${RCT_NO_LAUNCH_PACKAGER+xxx}\" ] ; then\n  if nc -w 5 -z localhost ${RCT_METRO_PORT} ; then\n    if ! curl -s \"http://localhost:${RCT_METRO_PORT}/status\" | grep -q \"packager-status:running\" ; then\n      echo \"Port ${RCT_METRO_PORT} already in use, packager is either not running or not running correctly\"\n      exit 2\n    fi\n  else\n    open \"$SRCROOT/../node_modules/react-native/scripts/launchPackager.command\" || echo \"Can't start packager automatically\"\n  fi\nfi\n";
-			showEnvVarsInLog = 0;
-		};
-		FD10A7F122414F3F0027D42C /* Start Packager */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -663,23 +497,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		2D02E4771E0B4A5D006451C7 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */,
-				2D02E4BC1E0B4A80006451C7 /* AppDelegate.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		2D02E48C1E0B4A5D006451C7 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				2DCD954D1E0B4F2C00145EB5 /* JustnoteccTests.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -688,17 +505,12 @@
 			target = 13B07F861A680F5B00A75B9A /* Justnotecc */;
 			targetProxy = 00E356F41AD99517003FC87E /* PBXContainerItemProxy */;
 		};
-		2D02E4921E0B4A5D006451C7 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 2D02E47A1E0B4A5D006451C7 /* Justnotecc-tvOS */;
-			targetProxy = 2D02E4911E0B4A5D006451C7 /* PBXContainerItemProxy */;
-		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 67B3410BC00E6558A828C1A5 /* Pods-Justnotecc-JustnoteccTests.debug.xcconfig */;
+			baseConfigurationReference = 0E24341C7A23956080E46903 /* Pods-Justnotecc-JustnoteccTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -706,8 +518,12 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = JustnoteccTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",
@@ -721,13 +537,17 @@
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F46526418FF8B702ECC65BDF /* Pods-Justnotecc-JustnoteccTests.release.xcconfig */;
+			baseConfigurationReference = 44750C159A2D56825B829BCF /* Pods-Justnotecc-JustnoteccTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
 				INFOPLIST_FILE = JustnoteccTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",
@@ -741,7 +561,7 @@
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B5133F2CFD55B9D9C8F9CC9A /* Pods-Justnotecc.debug.xcconfig */;
+			baseConfigurationReference = 2D63ABC5CBAE9FEDC5EC56DE /* Pods-Justnotecc.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -750,7 +570,11 @@
 				DEVELOPMENT_TEAM = DZ8XN7425J;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Justnotecc/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				MARKETING_VERSION = 0.5.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -768,7 +592,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 23A62982B986D8A510D670D5 /* Pods-Justnotecc.release.xcconfig */;
+			baseConfigurationReference = CC5482C8437C846D4A9443A3 /* Pods-Justnotecc.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -776,7 +600,11 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = DZ8XN7425J;
 				INFOPLIST_FILE = Justnotecc/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				MARKETING_VERSION = 0.5.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -788,116 +616,6 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
-			};
-			name = Release;
-		};
-		2D02E4971E0B4A5E006451C7 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 22B765BBA7D5576CE5C6AFFE /* Pods-Justnotecc-tvOS.debug.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_TESTABILITY = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = "Justnotecc-tvOS/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-ObjC",
-					"-lc++",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.Justnotecc-tvOS";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = appletvos;
-				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 10.0;
-			};
-			name = Debug;
-		};
-		2D02E4981E0B4A5E006451C7 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = E6B2858C7EFEA96BC1721F3E /* Pods-Justnotecc-tvOS.release.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = "Justnotecc-tvOS/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-ObjC",
-					"-lc++",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.Justnotecc-tvOS";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = appletvos;
-				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 10.0;
-			};
-			name = Release;
-		};
-		2D02E4991E0B4A5E006451C7 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = C572B0199259D92B41E41375 /* Pods-Justnotecc-tvOSTests.debug.xcconfig */;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_TESTABILITY = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = "Justnotecc-tvOSTests/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-ObjC",
-					"-lc++",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.Justnotecc-tvOSTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = appletvos;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Justnotecc-tvOS.app/Justnotecc-tvOS";
-				TVOS_DEPLOYMENT_TARGET = 10.1;
-			};
-			name = Debug;
-		};
-		2D02E49A1E0B4A5E006451C7 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = A790671A9A0307EA1581CF73 /* Pods-Justnotecc-tvOSTests.release.xcconfig */;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = "Justnotecc-tvOSTests/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-ObjC",
-					"-lc++",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.Justnotecc-tvOSTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = appletvos;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Justnotecc-tvOS.app/Justnotecc-tvOS";
-				TVOS_DEPLOYMENT_TARGET = 10.1;
 			};
 			name = Release;
 		};
@@ -924,6 +642,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -933,6 +652,7 @@
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = i386;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -948,9 +668,13 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
-				LD_RUNPATH_SEARCH_PATHS = "/usr/lib/swift $(inherited)";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					/usr/lib/swift,
+					"$(inherited)",
+				);
 				LIBRARY_SEARCH_PATHS = (
+					"\"$(SDKROOT)/usr/lib/swift\"",
 					"\"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)\"",
 					"\"$(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)\"",
 					"\"$(inherited)\"",
@@ -984,6 +708,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -993,6 +718,7 @@
 				COPY_PHASE_STRIP = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = i386;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1001,9 +727,13 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
-				LD_RUNPATH_SEARCH_PATHS = "/usr/lib/swift $(inherited)";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					/usr/lib/swift,
+					"$(inherited)",
+				);
 				LIBRARY_SEARCH_PATHS = (
+					"\"$(SDKROOT)/usr/lib/swift\"",
 					"\"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)\"",
 					"\"$(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)\"",
 					"\"$(inherited)\"",
@@ -1031,24 +761,6 @@
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
 				13B07F951A680F5B00A75B9A /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		2D02E4BA1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "Justnotecc-tvOS" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				2D02E4971E0B4A5E006451C7 /* Debug */,
-				2D02E4981E0B4A5E006451C7 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		2D02E4BB1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "Justnotecc-tvOSTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				2D02E4991E0B4A5E006451C7 /* Debug */,
-				2D02E49A1E0B4A5E006451C7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
