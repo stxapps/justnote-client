@@ -1,7 +1,7 @@
 export const DOMAIN_NAME = 'https://justnote.cc';
 
 export const APP_NAME = 'Justnote';
-export const APP_ICON_NAME = 'logo64.png';
+export const APP_ICON_NAME = 'logo-for-stacks-access.png';
 export const APP_SCOPES = ['store_write'];
 export const APP_URL_SCHEME = 'justnotecc';
 export const APP_DOMAIN_NAME = 'justnotecc://app';
