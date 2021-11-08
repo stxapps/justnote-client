@@ -204,6 +204,7 @@ const NoteEditorEditor = (props) => {
   }, [onFocus, onAddObjectUrlFiles, onGetData]);
 
   const onContentProcessDidTerminate = useCallback(() => {
+    setEditorReady(false);
     webView.current.reload();
   }, []);
 

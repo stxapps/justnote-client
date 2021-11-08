@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import {
   updatePopupUrlHash, discardNote, updateNoteIdUrlHash, updateNoteId,
-  changeListName, clearSavingFPaths
+  changeListName, clearSavingFPaths,
 } from '../actions';
 import {
   CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT,
