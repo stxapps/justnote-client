@@ -10,7 +10,7 @@ import { getListNameDisplayName } from '../utils';
 
 const NoteCommands = (props) => {
 
-  const { isOnDarkBackground, isLeftAlign } = props;
+  const { isFullScreen, onToggleFullScreen, isOnDarkBackground, isLeftAlign } = props;
   const listName = useSelector(state => state.display.listName);
   const listNameMap = useSelector(getListNameMap);
   const moveToBtn = useRef(null);
@@ -20,27 +20,32 @@ const NoteCommands = (props) => {
   const onArchiveBtnClick = () => {
     if (didClick.current) return;
     dispatch(moveNotes(ARCHIVE));
+    if (isFullScreen) onToggleFullScreen();
     didClick.current = true;
   };
 
   const onRemoveBtnClick = () => {
     if (didClick.current) return;
     dispatch(moveNotes(TRASH));
+    if (isFullScreen) onToggleFullScreen();
     didClick.current = true;
   };
 
   const onRestoreBtnClick = () => {
     if (didClick.current) return;
     dispatch(moveNotes(MY_NOTES));
+    if (isFullScreen) onToggleFullScreen();
     didClick.current = true;
   };
 
   const onDeleteBtnClick = () => {
     updatePopupUrlHash(CONFIRM_DELETE_POPUP, true, null);
+    if (isFullScreen) onToggleFullScreen();
   };
 
   const onMoveToBtnClick = () => {
     updatePopupUrlHash(MOVE_TO_POPUP, true, moveToBtn.current.getBoundingClientRect());
+    if (isFullScreen) onToggleFullScreen();
   };
 
   const rListName = [MY_NOTES, ARCHIVE, TRASH].includes(listName) ? listName : MY_NOTES;

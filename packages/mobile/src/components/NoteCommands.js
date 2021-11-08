@@ -14,7 +14,7 @@ import { tailwind } from '../stylesheets/tailwind';
 
 const NoteCommands = (props) => {
 
-  const { isOnDarkBackground, isLeftAlign } = props;
+  const { isFullScreen, onToggleFullScreen, isOnDarkBackground, isLeftAlign } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const listName = useSelector(state => state.display.listName);
   const listNameMap = useSelector(getListNameMap);
@@ -25,23 +25,27 @@ const NoteCommands = (props) => {
   const onArchiveBtnClick = () => {
     if (didClick.current) return;
     dispatch(moveNotes(ARCHIVE));
+    if (isFullScreen) onToggleFullScreen();
     didClick.current = true;
   };
 
   const onRemoveBtnClick = () => {
     if (didClick.current) return;
     dispatch(moveNotes(TRASH));
+    if (isFullScreen) onToggleFullScreen();
     didClick.current = true;
   };
 
   const onRestoreBtnClick = () => {
     if (didClick.current) return;
     dispatch(moveNotes(MY_NOTES));
+    if (isFullScreen) onToggleFullScreen();
     didClick.current = true;
   };
 
   const onDeleteBtnClick = () => {
     dispatch(updatePopup(CONFIRM_DELETE_POPUP, true, null));
+    if (isFullScreen) onToggleFullScreen();
   };
 
   const onMoveToBtnClick = () => {
@@ -50,6 +54,7 @@ const NoteCommands = (props) => {
         x, y, width, height, top: y, right: x + width, bottom: y + height, left: x,
       };
       dispatch(updatePopup(MOVE_TO_POPUP, true, rect));
+      if (isFullScreen) onToggleFullScreen();
     });
   };
 

@@ -84,7 +84,7 @@ const NoteEditorTopBar = (props) => {
   let commands;
   if (note.id === NEW_NOTE) commands = isEditorFocused ? renderFocusedCommands() : null;
   else if (note.status !== ADDED || isEditorBusy) commands = renderLoading();
-  else commands = isEditorFocused ? renderFocusedCommands() : <NoteCommands />;
+  else commands = isEditorFocused ? renderFocusedCommands() : <NoteCommands isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} />;
 
   return (
     <View style={tailwind('flex-grow-0 flex-shrink-0 border-b border-gray-200 w-full h-16')}>
