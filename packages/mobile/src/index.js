@@ -1,13 +1,14 @@
 //import './wdyr';
 
 import React from 'react';
+import { Text, TextInput, Platform } from 'react-native';
 import { Provider } from 'react-redux';
 import { createStore, compose } from 'redux';
 import { install as installReduxLoop } from 'redux-loop';
-import { Text, TextInput } from 'react-native';
 import {
   SafeAreaProvider, initialWindowMetrics, SafeAreaView,
 } from 'react-native-safe-area-context';
+import KeyboardManager from 'react-native-keyboard-manager';
 
 import reducers from './reducers';
 import cache from './utils/cache';
@@ -28,6 +29,12 @@ const store = createStore(
     installReduxLoop({ ENABLE_THUNK_MIGRATION: true }),
   )
 );
+
+if (Platform.OS === 'ios') {
+  KeyboardManager.setEnable(false);
+  KeyboardManager.setEnableDebugging(false);
+  KeyboardManager.setEnableAutoToolbar(false);
+}
 
 const Root = () => {
   return (

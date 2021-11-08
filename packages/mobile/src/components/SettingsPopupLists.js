@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { Circle } from 'react-native-animated-spinkit';
+import KeyboardManager from 'react-native-keyboard-manager';
 
 import dataApi from '../apis/data';
 import {
@@ -33,7 +34,12 @@ const SettingsPopupLists = (props) => {
   };
 
   useEffect(() => {
-    if (Platform.OS === 'android') Keyboard.dismiss();
+    if (Platform.OS === 'ios') KeyboardManager.setEnable(true);
+
+    return () => {
+      if (Platform.OS === 'ios') KeyboardManager.setEnable(false);
+      if (Platform.OS === 'android') Keyboard.dismiss();
+    };
   }, []);
 
   return (
