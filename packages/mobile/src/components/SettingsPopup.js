@@ -133,7 +133,12 @@ const SettingsPopup = () => {
       Animated.timing(popupAnim, { toValue: 1, ...popupFMV.visible }).start();
     } else {
       Animated.timing(popupAnim, { toValue: 0, ...popupFMV.hidden }).start(() => {
-        if (didMount) setDidCloseAnimEnd(true);
+        if (didMount) {
+          setDidCloseAnimEnd(true);
+          setViewId(VIEW_ACCOUNT);
+          setIsSidebarShown(safeAreaWidth < MD_WIDTH);
+          setDidSidebarAnimEnd(true);
+        }
       });
     }
 
@@ -175,9 +180,6 @@ const SettingsPopup = () => {
     if (derivedIsShown && !isShown) {
       if (didCloseAnimEnd) {
         setDidCloseAnimEnd(false);
-        setViewId(VIEW_ACCOUNT);
-        setIsSidebarShown(safeAreaWidth < MD_WIDTH);
-        setDidSidebarAnimEnd(true);
       }
     }
     setDerivedIsShown(isShown);
