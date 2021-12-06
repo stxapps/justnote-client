@@ -28,7 +28,7 @@ const ConfirmDeletePopup = () => {
 
     if (deletingListName) dispatch(deleteListNames([deletingListName]));
     else {
-      // As this and closing discard popup both call window.history.back(),
+      // As this and closing confirmDelete popup both call window.history.back(),
       //   need to be in different js clock cycle.
       setTimeout(() => dispatch(deleteNotes()), 100);
     }

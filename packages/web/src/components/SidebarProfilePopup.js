@@ -3,8 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import Url from 'url-parse';
 
-import { signOut, updatePopupUrlHash } from '../actions';
-import { PROFILE_POPUP, SETTINGS_POPUP } from '../types/const';
+import { signOut, updatePopupUrlHash, updateSettingsPopup } from '../actions';
+import { PROFILE_POPUP } from '../types/const';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
 
 const SidebarProfilePopup = () => {
@@ -19,7 +19,7 @@ const SidebarProfilePopup = () => {
   };
 
   const onSettingsBtnClick = () => {
-    updatePopupUrlHash(SETTINGS_POPUP, true, null, true);
+    updateSettingsPopup(true);
   };
 
   const onSupportBtnClick = () => {

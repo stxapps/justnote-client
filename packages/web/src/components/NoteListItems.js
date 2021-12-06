@@ -87,7 +87,7 @@ const NoteListItems = () => {
       );
     }
 
-    const textName = listName === ARCHIVE ? `"${displayName}"` : `"Move to... -> ${displayName}"`;
+    const textName = listName === ARCHIVE ? `"${displayName}"` : `"Move to -> ${displayName}"`;
 
     return (
       <div className="mt-32 mb-24 px-4 sm:px-6">

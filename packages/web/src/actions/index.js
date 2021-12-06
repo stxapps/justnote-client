@@ -17,16 +17,13 @@ import {
   DELETE_NOTES, DELETE_NOTES_COMMIT, DELETE_NOTES_ROLLBACK, CANCEL_DIED_NOTES,
   DELETE_OLD_NOTES_IN_TRASH, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
   DELETE_OLD_NOTES_IN_TRASH_ROLLBACK,
-  MERGE_NOTES, MERGE_NOTES_COMMIT, MERGE_NOTES_ROLLBACK,
-  ADD_LIST_NAMES, ADD_LIST_NAMES_COMMIT, ADD_LIST_NAMES_ROLLBACK,
-  UPDATE_LIST_NAMES, UPDATE_LIST_NAMES_COMMIT, UPDATE_LIST_NAMES_ROLLBACK,
-  MOVE_LIST_NAME, MOVE_LIST_NAME_COMMIT, MOVE_LIST_NAME_ROLLBACK,
-  DELETE_LIST_NAMES, DELETE_LIST_NAMES_COMMIT, DELETE_LIST_NAMES_ROLLBACK,
-  UPDATE_DELETING_LIST_NAME,
-  RETRY_ADD_LIST_NAMES, RETRY_UPDATE_LIST_NAMES, RETRY_MOVE_LIST_NAME,
-  RETRY_DELETE_LIST_NAMES, CANCEL_DIED_LIST_NAMES, UPDATE_DISCARD_ACTION,
+  MERGE_NOTES, MERGE_NOTES_COMMIT, MERGE_NOTES_ROLLBACK, UPDATE_FETCHED_SETTINGS,
+  UPDATE_LIST_NAME_EDITORS, ADD_LIST_NAMES, UPDATE_LIST_NAMES, MOVE_LIST_NAME,
+  MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_SELECTING_LIST_NAME,
+  UPDATE_DELETING_LIST_NAME, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, UPDATE_SORT_ON,
+  UPDATE_DO_DESCENDING_ORDER, UPDATE_DO_ALERT_SCREEN_ROTATION,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
-  UPDATE_UPDATE_SETTINGS_PROGRESS, INCREASE_SAVE_NOTE_COUNT,
+  CANCEL_DIED_SETTINGS, UPDATE_DISCARD_ACTION, INCREASE_SAVE_NOTE_COUNT,
   INCREASE_DISCARD_NOTE_COUNT, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
   INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
   INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT,
@@ -42,12 +39,11 @@ import {
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
   DISCARD_ACTION_CHANGE_LIST_NAME, MY_NOTES, TRASH, ID, NEW_NOTE, NEW_NOTE_OBJ,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
-  SWAP_LEFT, SWAP_RIGHT, N_NOTES, CD_ROOT, SETTINGS, INDEX, DOT_JSON,
-  LG_WIDTH,
+  N_NOTES, CD_ROOT, SETTINGS, INDEX, DOT_JSON, LG_WIDTH,
 } from '../types/const';
 import {
-  throttle, extractUrl, urlHashToObj, objToUrlHash,
-  separateUrlAndParam, getUserImageUrl, randomString, swapArrayElements,
+  isEqual, throttle, extractUrl, urlHashToObj, objToUrlHash,
+  separateUrlAndParam, getUserImageUrl, randomString,
   isNoteBodyEqual, clearNoteData, getStaticFPath, deriveFPaths,
   isIPadIPhoneIPod, isBusyStatus,
 } from '../utils';
@@ -88,7 +84,6 @@ export const init = () => async (dispatch, getState) => {
 
   let prevWidth = window.innerWidth;
   if (isIPadIPhoneIPod()) {
-    // @ts-ignore
     window.visualViewport.addEventListener('resize', throttle(() => {
       handleScreenRotation(prevWidth)(dispatch, getState);
       prevWidth = window.innerWidth;
@@ -97,7 +92,6 @@ export const init = () => async (dispatch, getState) => {
         type: UPDATE_WINDOW_SIZE,
         payload: {
           windowWidth: window.innerWidth,
-          // @ts-ignore
           windowHeight: window.visualViewport.height,
         },
       });
@@ -138,8 +132,9 @@ export const init = () => async (dispatch, getState) => {
       }
     }
 
-    const updateSettingsProgress = getState().display.updateSettingsProgress;
-    if (updateSettingsProgress && isBusyStatus(updateSettingsProgress.status)) {
+    const settings = getState().settings;
+    const snapshotSettings = getState().snapshot.settings;
+    if (!isEqual(settings, snapshotSettings)) {
       e.preventDefault();
       return e.returnValue = 'It looks like your changes to the settings hasn\'t been saved. Do you want to leave this site and discard your changes?';
     }
@@ -260,7 +255,7 @@ export const onUrlHashChange = (oldUrl, newUrl, dispatch, getState) => {
     if (oldHashObj['p'] === newHashObj['p']) {
       // something else changed, do nothing here.
     } else {
-      // i.e. from profilePopup to settingsPopup
+      // i.e. from settingsListsMenuPopup to listNamesPopup
       dispatch(updatePopup(oldHashObj['p'], false, null));
 
       let anchorPosition = null;
@@ -308,6 +303,21 @@ export const onUrlHashChange = (oldUrl, newUrl, dispatch, getState) => {
   } else if (!('sp' in oldHashObj) && 'sp' in newHashObj) {
     // Open search popup
     dispatch(updatePopup(SEARCH_POPUP, true, null));
+  }
+
+  // settings popup
+  if ('stp' in oldHashObj && 'stp' in newHashObj) {
+    if (oldHashObj['stp'] === newHashObj['stp']) {
+      // something else changed, do nothing here.
+    } else {
+      throw new Error(`Shouldn't reach here!`);
+    }
+  } else if ('stp' in oldHashObj && !('stp' in newHashObj)) {
+    // Close settings popup
+    dispatch(updatePopup(SETTINGS_POPUP, false, null));
+  } else if (!('stp' in oldHashObj) && 'stp' in newHashObj) {
+    // Open settings popup
+    dispatch(updatePopup(SETTINGS_POPUP, true, null));
   }
 
   // confirm delete popup
@@ -422,6 +432,7 @@ export const updatePopupUrlHash = (id, isShown, anchorPosition, doReplace = fals
   // searchPopup and confirmDeletePopup uses diff key because can display together with others
   let obj;
   if (id === SEARCH_POPUP) obj = { sp: true };
+  else if (id === SETTINGS_POPUP) obj = { stp: true };
   else if (id === CONFIRM_DELETE_POPUP) obj = { cdp: true };
   else if (id === CONFIRM_DISCARD_POPUP) obj = { cdip: true };
   else {
@@ -549,20 +560,6 @@ export const updateBulkEdit = (isBulkEditing) => {
   return {
     type: UPDATE_BULK_EDITING,
     payload: isBulkEditing,
-  };
-};
-
-export const updateEditorFocused = (isFocused) => {
-  return {
-    type: UPDATE_EDITOR_FOCUSED,
-    payload: isFocused,
-  };
-};
-
-export const updateEditorBusy = (isBusy) => {
-  return {
-    type: UPDATE_EDITOR_BUSY,
-    payload: isBusy,
   };
 };
 
@@ -1176,13 +1173,40 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
   }
 };
 
-export const addListNames = (newNames) => async (dispatch, getState) => {
+export const updateFetchedSettings = () => async (dispatch, getState) => {
+  const settings = getState().settings;
+  dispatch({ type: UPDATE_FETCHED_SETTINGS, payload: settings });
+};
+
+export const updateListNameEditors = (listNameEditors) => {
+  return { type: UPDATE_LIST_NAME_EDITORS, payload: listNameEditors };
+};
+
+export const updateSettingsPopup = (isShown) => async (dispatch, getState) => {
+  /*
+    A settings snapshot is made when FETCH_COMMIT and UPDATE_SETTINGS_COMMIT
+    For FETCH_COMMIT, use Redux Loop
+    For UPDATE_SETTINGS_COMMIT, check action type in snapshotReducer
+      as need settings that used to upload to the server, not the current in the state
+
+    Can't make a snapshot when open the popup because
+      1. FETCH_COMMIT might be after the popup is open
+      2. user might open the popup while settings is being updated or rolled back
+  */
+  if (!isShown) dispatch(updateSettings());
+
+  updatePopupUrlHash(SETTINGS_POPUP, isShown, null);
+};
+
+export const addListNames = (newNames) => {
 
   let i = 0;
   const addedDT = Date.now();
 
   const listNameObjs = [];
   for (const newName of newNames) {
+    // If cpu is fast enough, addedDT will be the same for all new names!
+    //    so use a predefined one with added loop index.
     const id = `${addedDT + i}-${randomString(4)}`;
     const listNameObj = { listName: id, displayName: newName };
     listNameObjs.push(listNameObj);
@@ -1190,152 +1214,48 @@ export const addListNames = (newNames) => async (dispatch, getState) => {
     i += 1;
   }
 
-  const settingsFPath = `${SETTINGS}${addedDT + i}${DOT_JSON}`;
-  const settings = { ...getState().settings };
-  settings.listNameMap = [
-    ...settings.listNameMap.map(listNameObj => {
-      return { listName: listNameObj.listName, displayName: listNameObj.displayName };
-    }),
-    ...listNameObjs,
-  ];
-
-  const _settingsFPath = getState().settingsFPath.fpath;
-
-  const payload = { settingsFPath, listNameObjs };
-  dispatch({ type: ADD_LIST_NAMES, payload });
-
-  try {
-    await dataApi.putFiles([settingsFPath], [settings]);
-  } catch (e) {
-    dispatch({ type: ADD_LIST_NAMES_ROLLBACK, payload: { ...payload, error: e } });
-    return;
-  }
-
-  dispatch({ type: ADD_LIST_NAMES_COMMIT, payload });
-
-  try {
-    if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
-  } catch (e) {
-    console.log('addListNames error: ', e);
-    // error in this step should be fine
-  }
+  return { type: ADD_LIST_NAMES, payload: listNameObjs };
 };
 
-export const updateListNames = (listNames, newNames) => async (dispatch, getState) => {
-
-  const addedDT = Date.now();
-
-  const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
-  const settings = { ...getState().settings };
-  settings.listNameMap = settings.listNameMap.map(listNameObj => {
-    const i = listNames.indexOf(listNameObj.listName);
-    if (i >= 0) {
-      return { listName: listNameObj.listName, displayName: newNames[i] };
-    }
-
-    return { listName: listNameObj.listName, displayName: listNameObj.displayName };
-  });
-
-  const _settingsFPath = getState().settingsFPath.fpath;
-
-  const payload = { settingsFPath, listNames, newNames };
-  dispatch({ type: UPDATE_LIST_NAMES, payload });
-
-  try {
-    await dataApi.putFiles([settingsFPath], [settings]);
-  } catch (e) {
-    dispatch({ type: UPDATE_LIST_NAMES_ROLLBACK, payload: { ...payload, error: e } });
-    return;
-  }
-
-  dispatch({ type: UPDATE_LIST_NAMES_COMMIT, payload });
-
-  try {
-    if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
-  } catch (e) {
-    console.log('updateListNames error: ', e);
-    // error in this step should be fine
-  }
+export const updateListNames = (listNames, newNames) => {
+  return { type: UPDATE_LIST_NAMES, payload: { listNames, newNames } };
 };
 
-export const moveListName = (listName, direction) => async (dispatch, getState) => {
-
-  const addedDT = Date.now();
-
-  const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
-  const settings = { ...getState().settings };
-  settings.listNameMap = settings.listNameMap.map(listNameObj => {
-    return { listName: listNameObj.listName, displayName: listNameObj.displayName };
-  });
-
-  const i = settings.listNameMap.findIndex(listNameObj => {
-    return listNameObj.listName === listName;
-  });
-  if (i < 0) throw new Error(`Invalid listName: ${listName} and listNameMap: ${settings.listNameMap}`);
-
-  if (direction === SWAP_LEFT) {
-    settings.listNameMap = swapArrayElements(settings.listNameMap, i - 1, i);
-  } else if (direction === SWAP_RIGHT) {
-    settings.listNameMap = swapArrayElements(settings.listNameMap, i, i + 1);
-  } else {
-    throw new Error(`Invalid direction: ${direction}`);
-  }
-
-  const _settingsFPath = getState().settingsFPath.fpath;
-
-  const payload = { settingsFPath, listName, direction };
-  dispatch({ type: MOVE_LIST_NAME, payload });
-
-  try {
-    await dataApi.putFiles([settingsFPath], [settings]);
-  } catch (e) {
-    dispatch({ type: MOVE_LIST_NAME_ROLLBACK, payload: { ...payload, error: e } });
-    return;
-  }
-
-  dispatch({ type: MOVE_LIST_NAME_COMMIT, payload });
-
-  try {
-    if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
-  } catch (e) {
-    console.log('moveListName error: ', e);
-    // error in this step should be fine
-  }
+export const moveListName = (listName, direction) => {
+  return { type: MOVE_LIST_NAME, payload: { listName, direction } };
 };
 
-export const deleteListNames = (listNames) => async (dispatch, getState) => {
+export const moveToListName = (listName, parent) => {
+  return { type: MOVE_TO_LIST_NAME, payload: { listName, parent } };
+};
 
-  const addedDT = Date.now();
+export const deleteListNames = (listNames) => {
+  return { type: DELETE_LIST_NAMES, payload: { listNames } };
+};
 
-  const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
-  const settings = { ...getState().settings };
-  settings.listNameMap = settings.listNameMap.filter(listNameObj => {
-    return !listNames.includes(listNameObj.listName);
-  });
-  settings.listNameMap = settings.listNameMap.map(listNameObj => {
-    return { listName: listNameObj.listName, displayName: listNameObj.displayName };
-  });
+export const updateDoDeleteOldNotesInTrash = (doDeleteOldNotesInTrash) => {
+  return {
+    type: UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, payload: doDeleteOldNotesInTrash,
+  };
+};
 
-  const _settingsFPath = getState().settingsFPath.fpath;
+export const updateSortOn = (sortOn) => {
+  return { type: UPDATE_SORT_ON, payload: sortOn };
+};
 
-  const payload = { settingsFPath, listNames };
-  dispatch({ type: DELETE_LIST_NAMES, payload });
+export const updateDoDescendingOrder = (doDescendingOrder) => {
+  return { type: UPDATE_DO_DESCENDING_ORDER, payload: doDescendingOrder };
+};
 
-  try {
-    await dataApi.putFiles([settingsFPath], [settings]);
-  } catch (e) {
-    dispatch({ type: DELETE_LIST_NAMES_ROLLBACK, payload: { ...payload, error: e } });
-    return;
-  }
+export const updateDoAlertScreenRotation = (doAlertScreenRotation) => {
+  return { type: UPDATE_DO_ALERT_SCREEN_ROTATION, payload: doAlertScreenRotation };
+};
 
-  dispatch({ type: DELETE_LIST_NAMES_COMMIT, payload });
-
-  try {
-    if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
-  } catch (e) {
-    console.log('deleteListNames error: ', e);
-    // error in this step should be fine
-  }
+export const updateSelectingListName = (listName) => {
+  return {
+    type: UPDATE_SELECTING_LIST_NAME,
+    payload: listName,
+  };
 };
 
 export const updateDeletingListName = (listName) => {
@@ -1345,159 +1265,20 @@ export const updateDeletingListName = (listName) => {
   };
 };
 
-export const retryDiedListNames = (listNames) => async (dispatch, getState) => {
+export const updateSettings = () => async (dispatch, getState) => {
+
+  const settings = getState().settings;
+  const snapshotSettings = getState().snapshot.settings;
+  if (isEqual(settings, snapshotSettings)) {
+    dispatch(cancelDiedSettings());
+    return;
+  }
 
   const addedDT = Date.now();
-
   const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
-  const settings = { ...getState().settings };
-
-  const listNameObjs = settings.listNameMap.filter(obj => {
-    return listNames.includes(obj.listName);
-  });
-
-  settings.listNameMap = [
-    ...settings.listNameMap.map(listNameObj => {
-      return { listName: listNameObj.listName, displayName: listNameObj.displayName };
-    }),
-  ];
-
-  const diedAddingListNameObjs = listNameObjs.filter(obj => {
-    return obj.status === DIED_ADDING;
-  });
-  if (diedAddingListNameObjs.length > 0) {
-    const _settingsFPath = getState().settingsFPath.fpath;
-
-    const payload = { settingsFPath, listNameObjs: diedAddingListNameObjs };
-    dispatch({ type: RETRY_ADD_LIST_NAMES, payload });
-
-    try {
-      await dataApi.putFiles([settingsFPath], [settings]);
-    } catch (e) {
-      dispatch({ type: ADD_LIST_NAMES_ROLLBACK, payload: { ...payload, error: e } });
-      return;
-    }
-
-    dispatch({ type: ADD_LIST_NAMES_COMMIT, payload });
-
-    try {
-      if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
-    } catch (e) {
-      console.log('retryAddListNames error: ', e);
-      // error in this step should be fine
-    }
-  }
-
-  const diedUpdatingListNameObjs = listNameObjs.filter(obj => {
-    return obj.status === DIED_UPDATING;
-  });
-  if (diedUpdatingListNameObjs.length > 0) {
-    const _settingsFPath = getState().settingsFPath.fpath;
-
-    const diedUpdatingListNames = diedUpdatingListNameObjs.map(obj => obj.listName);
-    const payload = { settingsFPath, listNames: diedUpdatingListNames };
-    dispatch({ type: RETRY_UPDATE_LIST_NAMES, payload });
-
-    try {
-      await dataApi.putFiles([settingsFPath], [settings]);
-    } catch (e) {
-      dispatch({ type: UPDATE_LIST_NAMES_ROLLBACK, payload: { ...payload, error: e } });
-      return;
-    }
-
-    dispatch({ type: UPDATE_LIST_NAMES_COMMIT, payload });
-
-    try {
-      if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
-    } catch (e) {
-      console.log('retryUpdateListNames error: ', e);
-      // error in this step should be fine
-    }
-  }
-
-  const diedMovingListNameObjs = listNameObjs.filter(obj => {
-    return obj.status === DIED_MOVING;
-  });
-  for (const diedMovingListNameObj of diedMovingListNameObjs) {
-    const _settingsFPath = getState().settingsFPath.fpath;
-
-    const payload = { settingsFPath, listName: diedMovingListNameObj.listName };
-    dispatch({ type: RETRY_MOVE_LIST_NAME, payload });
-
-    try {
-      await dataApi.putFiles([settingsFPath], [settings]);
-    } catch (e) {
-      dispatch({ type: MOVE_LIST_NAME_ROLLBACK, payload: { ...payload, error: e } });
-      return;
-    }
-
-    dispatch({ type: MOVE_LIST_NAME_COMMIT, payload });
-
-    try {
-      if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
-    } catch (e) {
-      console.log('retryMoveListNames error: ', e);
-      // error in this step should be fine
-    }
-  }
-
-  const diedDeletingListNameObjs = listNameObjs.filter(obj => {
-    return obj.status === DIED_DELETING;
-  });
-  if (diedDeletingListNameObjs.length > 0) {
-    const _settingsFPath = getState().settingsFPath.fpath;
-
-    const diedDeletingListNames = diedDeletingListNameObjs.map(obj => obj.listName);
-    const payload = { settingsFPath, listNames: diedDeletingListNames };
-    dispatch({ type: RETRY_DELETE_LIST_NAMES, payload });
-
-    try {
-      await dataApi.putFiles([settingsFPath], [settings]);
-    } catch (e) {
-      dispatch({ type: DELETE_LIST_NAMES_ROLLBACK, payload: { ...payload, error: e } });
-      return;
-    }
-
-    dispatch({ type: DELETE_LIST_NAMES_COMMIT, payload });
-
-    try {
-      if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
-    } catch (e) {
-      console.log('retryDeleteListNames error: ', e);
-      // error in this step should be fine
-    }
-  }
-};
-
-export const cancelDiedListNames = (listNames) => {
-  return {
-    type: CANCEL_DIED_LIST_NAMES,
-    payload: { listNames },
-  };
-};
-
-export const updateDiscardAction = (discardAction) => {
-  return {
-    type: UPDATE_DISCARD_ACTION,
-    payload: discardAction,
-  };
-};
-
-export const updateSettings = (updatedValues) => async (dispatch, getState) => {
-
-  const addedDT = Date.now();
-
-  const rollbackValues = {};
-  for (const k of Object.keys(updatedValues)) {
-    rollbackValues[k] = getState().settings[k];
-  }
-
-  const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
-  const settings = { ...getState().settings, ...updatedValues };
-
   const _settingsFPath = getState().settingsFPath.fpath;
 
-  const payload = { settingsFPath, settings, rollbackValues };
+  const payload = { settingsFPath, settings };
   dispatch({ type: UPDATE_SETTINGS, payload });
 
   try {
@@ -1512,16 +1293,22 @@ export const updateSettings = (updatedValues) => async (dispatch, getState) => {
   try {
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
   } catch (e) {
-    console.log('updateListNames error: ', e);
+    console.log('updateSettings error: ', e);
     // error in this step should be fine
   }
 };
 
-export const updateUpdateSettingsProgress = (progress) => {
-  return {
-    type: UPDATE_UPDATE_SETTINGS_PROGRESS,
-    payload: progress,
-  };
+export const retryDiedSettings = () => async (dispatch, getState) => {
+  dispatch(updateSettings());
+};
+
+export const cancelDiedSettings = () => async (dispatch, getState) => {
+  const { settings } = getState().snapshot;
+  const payload = { settings };
+  dispatch({
+    type: CANCEL_DIED_SETTINGS,
+    payload: payload,
+  });
 };
 
 /*
@@ -1546,6 +1333,27 @@ export const tryUpdateSynced = (updateAction, haveUpdate) => async (
 
 export const updateSynced = (doCheckEditing = false) => async (dispatch, getState) => {
   // Do nothing on web. This is for mobile.
+};
+
+export const updateEditorFocused = (isFocused) => {
+  return {
+    type: UPDATE_EDITOR_FOCUSED,
+    payload: isFocused,
+  };
+};
+
+export const updateEditorBusy = (isBusy) => {
+  return {
+    type: UPDATE_EDITOR_BUSY,
+    payload: isBusy,
+  };
+};
+
+export const updateDiscardAction = (discardAction) => {
+  return {
+    type: UPDATE_DISCARD_ACTION,
+    payload: discardAction,
+  };
 };
 
 export const increaseSaveNoteCount = () => {

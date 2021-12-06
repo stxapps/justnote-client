@@ -1,11 +1,12 @@
 import { createSelectorCreator, defaultMemoize, createSelector } from 'reselect';
 
 import {
-  ADDED, ADDING, UPDATING, MOVING, DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
-  STATUS,
+  ADDED, ADDING, UPDATING, MOVING, DIED_ADDING, DIED_UPDATING, DIED_MOVING,
+  DIED_DELETING, STATUS,
 } from '../types/const';
 import { isObject, isArrayEqual, isEqual, isStringIn } from '../utils';
 import { _ } from '../utils/obj';
+import { initialListNameEditorState } from '../types/initialStates';
 
 const createSelectorListNameMap = createSelectorCreator(
   defaultMemoize,
@@ -26,10 +27,7 @@ const createSelectorListNameMap = createSelectorCreator(
 export const getListNameMap = createSelectorListNameMap(
   state => state,
   (state) => {
-    const listNameMap = [...state.settings.listNameMap.filter(listNameObj => {
-      return [ADDED, ADDING, UPDATING, MOVING, DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING].includes(listNameObj.status);
-    })];
-    return listNameMap;
+    return [...state.settings.listNameMap];
   }
 );
 
@@ -150,3 +148,15 @@ export const getNotes = createSelectorNotes(
     return notes;
   }
 );
+
+/** @return {function(any, any): initialListNameEditorState} */
+export const makeGetListNameEditor = () => {
+  return createSelector(
+    state => state.listNameEditors,
+    (__, key) => key,
+    (listNameEditors, key) => {
+      return { ...initialListNameEditorState, ...listNameEditors[key] };
+    },
+    { memoizeOptions: { resultEqualityCheck: isEqual } },
+  );
+};

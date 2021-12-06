@@ -7,15 +7,14 @@ import {
   MOVE_NOTES, MOVE_NOTES_COMMIT, MOVE_NOTES_ROLLBACK,
   DELETE_NOTES, DELETE_NOTES_COMMIT, DELETE_NOTES_ROLLBACK,
   CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
-  MERGE_NOTES_COMMIT,
-  ADD_LIST_NAMES_COMMIT, DELETE_LIST_NAMES_COMMIT,
+  MERGE_NOTES_COMMIT, UPDATE_SETTINGS, CANCEL_DIED_SETTINGS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   MY_NOTES, TRASH, ARCHIVE, ID, STATUS, ADDED, ADDING, DIED_ADDING,
   UPDATING, DIED_UPDATING, MOVING, DIED_MOVING, DELETING, DIED_DELETING,
 } from '../types/const';
-import { isEqual } from '../utils';
+import { isEqual, getAllListNames } from '../utils';
 import { _ } from '../utils/obj';
 
 const initialState = {
@@ -38,7 +37,7 @@ const notesReducer = (state = initialState, action) => {
     const newState = {};
     if (doFetchSettings) {
       if (settings) {
-        for (const k of settings.listNameMap.map(obj => obj.listName)) {
+        for (const k of getAllListNames(settings.listNameMap)) {
           newState[k] = state[k] || null;
         }
       } else {
@@ -258,33 +257,26 @@ const notesReducer = (state = initialState, action) => {
     return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
   }
 
-  if (action.type === ADD_LIST_NAMES_COMMIT) {
-    const { listNameObjs } = action.payload;
-
-    const newState = { ...state };
-    for (const k of listNameObjs.map(obj => obj.listName)) {
-      newState[k] = state[k] || null;
-    }
-
-    return newState;
-  }
-
-  if (action.type === DELETE_LIST_NAMES_COMMIT) {
-    const { listNames } = action.payload;
+  if (action.type === UPDATE_SETTINGS || action.type === CANCEL_DIED_SETTINGS) {
+    const { settings } = action.payload;
+    const listNames = getAllListNames(settings.listNameMap);
 
     const newState = {};
     for (const listName in state) {
-      if (listNames.includes(listName)) {
+      if (!listNames.includes(listName)) {
         if (
-          state[listName] !== undefined &&
-          state[listName] !== null &&
-          !isEqual(state[listName], {})
-        ) {
-          throw new Error(`notes: ${listName} should be undefined, null, or an empty object.`);
-        }
-        continue;
+          state[listName] === undefined ||
+          state[listName] === null ||
+          isEqual(state[listName], {})
+        ) continue;
+
+        console.log(`notes: ${listName} should be undefined, null, or an empty object.`);
       }
       newState[listName] = state[listName];
+    }
+
+    for (const k of listNames) {
+      if (newState[k] === undefined) newState[k] = null;
     }
 
     return newState;

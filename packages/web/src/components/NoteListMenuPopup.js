@@ -3,8 +3,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import Url from 'url-parse';
 
-import { signOut, updatePopupUrlHash, updateBulkEditUrlHash } from '../actions';
-import { NOTE_LIST_MENU_POPUP, SETTINGS_POPUP, LG_WIDTH } from '../types/const';
+import {
+  signOut, updatePopupUrlHash, updateSettingsPopup, updateBulkEditUrlHash,
+} from '../actions';
+import { NOTE_LIST_MENU_POPUP, LG_WIDTH } from '../types/const';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
 
 import { useSafeAreaFrame } from '.';
@@ -27,7 +29,11 @@ const NoteListMenuPopup = () => {
   };
 
   const onSettingsBtnClick = () => {
-    updatePopupUrlHash(SETTINGS_POPUP, true, null, true);
+    onNoteListMenuCancelBtnClick();
+
+    // As this and showing settings popup both change url hash,
+    //   need to be in different js clock cycle.
+    setTimeout(() => dispatch(updateSettingsPopup(true)), 100);
   };
 
   const onSupportBtnClick = () => {

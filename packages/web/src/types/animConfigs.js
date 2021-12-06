@@ -91,3 +91,9 @@ export const slideYFMV = {
   hidden: { opacity: 0 },
   visible: { opacity: 1 },
 };
+
+export const slideFMV = {
+  type: 'tween',
+  ease: 'easeInOut',
+  duration: 0.3,
+};
