@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { useSelector } from 'react-redux';
 
 import { updatePopupUrlHash } from '../actions';
-import { NOTE_LIST_MENU_POPUP, SEARCH_POPUP, LG_WIDTH } from '../types/const';
+import { NOTE_LIST_MENU_POPUP, SEARCH_POPUP, LG_WIDTH, UPDATING } from '../types/const';
 import { getListNameMap } from '../selectors';
 import { getListNameDisplayName } from '../utils';
 
@@ -18,6 +18,7 @@ const NoteListTopBar = (props) => {
   const listNameMap = useSelector(getListNameMap);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const didFetch = useSelector(state => state.display.didFetch);
+  const settingsStatus = useSelector(state => state.display.settingsStatus);
   const menuBtn = useRef(null);
 
   const onMenuBtnClick = () => {
@@ -35,6 +36,28 @@ const NoteListTopBar = (props) => {
   let title;
   if (didFetch) title = <h1 className="text-lg font-medium leading-6 text-gray-900 truncate">{getListNameDisplayName(listName, listNameMap)}</h1>;
   else title = <div className="bg-gray-300 w-20 h-6 rounded-md animate-pulse" />;
+
+  const menuBtnSvg = (
+    <svg className="w-5 py-2 rounded-full group-focus:bg-gray-200" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 6C9.46957 6 8.96086 5.78929 8.58579 5.41421C8.21071 5.03914 8 4.53043 8 4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2C10.5304 2 11.0391 2.21071 11.4142 2.58579C11.7893 2.96086 12 3.46957 12 4C12 4.53043 11.7893 5.03914 11.4142 5.41421C11.0391 5.78929 10.5304 6 10 6ZM10 12C9.46957 12 8.96086 11.7893 8.58579 11.4142C8.21071 11.0391 8 10.5304 8 10C8 9.46957 8.21071 8.96086 8.58579 8.58579C8.96086 8.21071 9.46957 8 10 8C10.5304 8 11.0391 8.21071 11.4142 8.58579C11.7893 8.96086 12 9.46957 12 10C12 10.5304 11.7893 11.0391 11.4142 11.4142C11.0391 11.7893 10.5304 12 10 12ZM10 18C9.46957 18 8.96086 17.7893 8.58579 17.4142C8.21071 17.0391 8 16.5304 8 16C8 15.4696 8.21071 14.9609 8.58579 14.5858C8.96086 14.2107 9.46957 14 10 14C10.5304 14 11.0391 14.2107 11.4142 14.5858C11.7893 14.9609 12 15.4696 12 16C12 16.5304 11.7893 17.0391 11.4142 17.4142C11.0391 17.7893 10.5304 18 10 18Z" />
+    </svg>
+  );
+
+  let innerMenuBtn;
+  if (settingsStatus === UPDATING) {
+    innerMenuBtn = (
+      <React.Fragment>
+        {menuBtnSvg}
+        <div className="absolute top-0 left-0 h-full flex justify-start items-center lds-rotate">
+          <svg className="w-9 h-9 text-green-600" viewBox="0 0 100 100" fill="none" stroke="currentColor" preserveAspectRatio="xMidYMid" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" strokeWidth="4" r="44" strokeDasharray="226.1946710584651 77.39822368615503" />
+          </svg>
+        </div>
+      </React.Fragment>
+    );
+  } else {
+    innerMenuBtn = menuBtnSvg;
+  }
 
   return (
     <div className="flex-grow-0 flex-shrink-0">
@@ -55,10 +78,8 @@ const NoteListTopBar = (props) => {
                 </svg>
               </div>
             </button>
-            <button ref={menuBtn} onClick={onMenuBtnClick} type="button" className="group inline-flex items-center pl-2 pr-4 border border-white text-sm text-gray-500 bg-white hover:text-gray-700 focus:outline-none focus:text-gray-700">
-              <svg className="w-5 py-2 rounded-full group-focus:bg-gray-200" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <path d="M10 6C9.46957 6 8.96086 5.78929 8.58579 5.41421C8.21071 5.03914 8 4.53043 8 4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2C10.5304 2 11.0391 2.21071 11.4142 2.58579C11.7893 2.96086 12 3.46957 12 4C12 4.53043 11.7893 5.03914 11.4142 5.41421C11.0391 5.78929 10.5304 6 10 6ZM10 12C9.46957 12 8.96086 11.7893 8.58579 11.4142C8.21071 11.0391 8 10.5304 8 10C8 9.46957 8.21071 8.96086 8.58579 8.58579C8.96086 8.21071 9.46957 8 10 8C10.5304 8 11.0391 8.21071 11.4142 8.58579C11.7893 8.96086 12 9.46957 12 10C12 10.5304 11.7893 11.0391 11.4142 11.4142C11.0391 11.7893 10.5304 12 10 12ZM10 18C9.46957 18 8.96086 17.7893 8.58579 17.4142C8.21071 17.0391 8 16.5304 8 16C8 15.4696 8.21071 14.9609 8.58579 14.5858C8.96086 14.2107 9.46957 14 10 14C10.5304 14 11.0391 14.2107 11.4142 14.5858C11.7893 14.9609 12 15.4696 12 16C12 16.5304 11.7893 17.0391 11.4142 17.4142C11.0391 17.7893 10.5304 18 10 18Z" />
-              </svg>
+            <button ref={menuBtn} onClick={onMenuBtnClick} type="button" className="group inline-flex items-center pl-2 pr-4 border border-white text-sm text-gray-500 bg-white relative hover:text-gray-700 focus:outline-none focus:text-gray-700">
+              {innerMenuBtn}
             </button>
           </div>
         </div>

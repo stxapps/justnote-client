@@ -90,3 +90,16 @@
     transform: rotate(360deg) scale(.8);
   }
 }
+
+.lds-rotate {
+  animation: lds-rotate 1s 0s ease-in-out infinite;
+}
+
+@keyframes lds-rotate {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
