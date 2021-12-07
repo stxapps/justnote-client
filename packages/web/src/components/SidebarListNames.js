@@ -1,4 +1,4 @@
-import React, { } from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { changeListName, updatePopupUrlHash } from '../actions';
@@ -9,29 +9,79 @@ import { useSafeAreaFrame } from '.';
 
 const SidebarListNames = () => {
 
+  const listNameMap = useSelector(getListNameMap);
+  const isChildless = listNameMap.every(listNameObj => {
+    return !listNameObj.children || listNameObj.children.length === 0;
+  });
+
+  return (
+    <nav className="pl-3 pr-1 mt-6 overflow-y-auto">
+      <div className="space-y-1.5">
+        {listNameMap.map(listNameObj => {
+          return (
+            <SidebarListName key={listNameObj.listName} listNameObj={listNameObj} level={0} isChildless={isChildless} />
+          );
+        })}
+      </div>
+    </nav>
+  );
+};
+
+const _SidebarListName = (props) => {
+
+  const { listNameObj, level, isChildless } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const listName = useSelector(state => state.display.listName);
-  const listNameMap = useSelector(getListNameMap);
+  const [doExpand, setDoExpand] = useState(false);
   const dispatch = useDispatch();
 
-  const onListNameBtnClick = (selectedListName) => {
-    dispatch(changeListName(selectedListName, true));
+  const onListNameBtnClick = () => {
+    dispatch(changeListName(listNameObj.listName, true));
     if (safeAreaWidth < LG_WIDTH) updatePopupUrlHash(SIDEBAR_POPUP, false, null);
   };
 
-  const buttons = listNameMap.map(listNameObj => {
+  const onExpandBtnClick = () => {
+    setDoExpand(!doExpand);
+  };
 
-    let btnClassNames, svgClassNames;
-    if (listNameObj.listName === listName) {
-      btnClassNames = 'bg-gray-200 text-gray-900';
-      svgClassNames = 'text-gray-500';
+  let btnClassNames, svgClassNames;
+  if (listNameObj.listName === listName) {
+    btnClassNames = 'bg-gray-200 text-gray-900';
+    svgClassNames = 'text-gray-500';
+  } else {
+    btnClassNames = 'text-gray-700 focus:text-gray-900 focus:bg-gray-50 hover:text-gray-900 hover:bg-gray-50';
+    svgClassNames = 'text-gray-400 group-focus:text-gray-500 group-hover:text-gray-500';
+  }
+  svgClassNames += ' flex-grow-0 flex-shrink-0 mr-3 h-5 w-5';
+
+  let expandBtn;
+  if (!isChildless) {
+    if (listNameObj && listNameObj.children && listNameObj.children.length > 0) {
+      const expandSvg = doExpand ? (
+        <svg className="w-3.5" viewBox="0 0 11 7" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path fillRule="evenodd" clipRule="evenodd" d="M0.292787 1.29302C0.480314 1.10555 0.734622 1.00023 0.999786 1.00023C1.26495 1.00023 1.51926 1.10555 1.70679 1.29302L4.99979 4.58602L8.29279 1.29302C8.38503 1.19751 8.49538 1.12133 8.61738 1.06892C8.73939 1.01651 8.87061 0.988924 9.00339 0.98777C9.13616 0.986616 9.26784 1.01192 9.39074 1.0622C9.51364 1.11248 9.62529 1.18673 9.71918 1.28062C9.81307 1.37452 9.88733 1.48617 9.93761 1.60907C9.98789 1.73196 10.0132 1.86364 10.012 1.99642C10.0109 2.1292 9.9833 2.26042 9.93089 2.38242C9.87848 2.50443 9.8023 2.61477 9.70679 2.70702L5.70679 6.70702C5.51926 6.89449 5.26495 6.99981 4.99979 6.99981C4.73462 6.99981 4.48031 6.89449 4.29279 6.70702L0.292787 2.70702C0.105316 2.51949 0 2.26518 0 2.00002C0 1.73486 0.105316 1.48055 0.292787 1.29302V1.29302Z" />
+        </svg>
+      ) : (
+        <svg className="h-3" viewBox="0 0 6 10" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path fillRule="evenodd" clipRule="evenodd" d="M0.292787 9.70698C0.105316 9.51945 0 9.26514 0 8.99998C0 8.73482 0.105316 8.48051 0.292787 8.29298L3.58579 4.99998L0.292787 1.70698C0.110629 1.51838 0.00983372 1.26578 0.0121121 1.00358C0.0143906 0.741382 0.11956 0.49057 0.304968 0.305162C0.490376 0.119753 0.741189 0.0145843 1.00339 0.0123059C1.26558 0.0100274 1.51818 0.110822 1.70679 0.29298L5.70679 4.29298C5.89426 4.48051 5.99957 4.73482 5.99957 4.99998C5.99957 5.26514 5.89426 5.51945 5.70679 5.70698L1.70679 9.70698C1.51926 9.89445 1.26495 9.99977 0.999786 9.99977C0.734622 9.99977 0.480314 9.89445 0.292787 9.70698Z" />
+        </svg>
+      );
+      expandBtn = (
+        <button onClick={onExpandBtnClick} className="flex-grow-0 flex-shrink-0 flex justify-center items-center w-8 h-10 -ml-2.5 rounded group focus:outline-none focus-visible:bg-gray-200 lg:h-9">
+          <div className="w-3.5 h-3.5 flex justify-center items-center text-gray-500 rounded-sm group-hover:text-gray-700">
+            {expandSvg}
+          </div>
+        </button>
+      );
     } else {
-      btnClassNames = 'text-gray-700 focus:text-gray-900 focus:bg-gray-50 hover:text-gray-900 hover:bg-gray-50';
-      svgClassNames = 'text-gray-400 group-focus:text-gray-500 group-hover:text-gray-500';
+      expandBtn = (
+        <div className="flex-grow-0 flex-shrink-0 w-8 h-10 -ml-2.5 lg:h-9" />
+      );
     }
-    svgClassNames += ' flex-grow-0 flex-shrink-0 mr-3 h-5 w-5';
+  }
 
-    let svg;
+  let svg;
+  if (isChildless) {
     if (listNameObj.listName === TRASH) {
       svg = (
         <svg className={svgClassNames} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -59,22 +109,24 @@ const SidebarListNames = () => {
         </svg>
       );
     }
+  }
 
-    return (
-      <button key={listNameObj.listName} onClick={() => onListNameBtnClick(listNameObj.listName)} className={`${btnClassNames} group flex items-center px-2 py-2 text-base font-medium rounded-md w-full focus:outline-none lg:text-sm`}>
-        {svg}
-        <span className="truncate">{listNameObj.displayName}</span>
-      </button>
-    );
-  });
+  const viewStyle = { paddingLeft: 16 * level };
 
   return (
-    <nav className="pl-3 pr-1 mt-6 overflow-y-auto">
-      <div className="space-y-1">
-        {buttons}
+    <React.Fragment>
+      <div style={viewStyle} className="flex justify-start items-center">
+        {expandBtn}
+        <button onClick={onListNameBtnClick} className={`flex-grow flex-shrink min-w-0 ${btnClassNames} group flex items-center px-2 py-2.5 text-base font-medium rounded-md w-full focus:outline-none lg:text-sm lg:py-2`}>
+          {svg}
+          <span className="truncate">{listNameObj.displayName}</span>
+        </button>
       </div>
-    </nav>
+      {doExpand && listNameObj.children.map(child => <SidebarListName key={child.listName} listNameObj={child} level={level + 1} isChildless={isChildless} />)}
+    </React.Fragment>
   );
 };
+
+const SidebarListName = React.memo(_SidebarListName);
 
 export default React.memo(SidebarListNames);
