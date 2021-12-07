@@ -26,8 +26,8 @@ import {
   CANCEL_DIED_SETTINGS, UPDATE_DISCARD_ACTION, INCREASE_SAVE_NOTE_COUNT,
   INCREASE_DISCARD_NOTE_COUNT, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
   INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
-  INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT,
-  INCREASE_BLUR_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
+  INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT,
+  INCREASE_UPDATE_EDITOR_WIDTH_COUNT, INCREASE_RESET_DID_CLICK_COUNT,
   ADD_SAVING_OBJ_URLS, DELETE_SAVING_OBJ_URLS, CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS,
   UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_STACKS_ACCESS,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
@@ -827,7 +827,10 @@ export const moveNotes = (toListName) => async (dispatch, getState) => {
   else dispatch(updateNoteId(null));
 
   if (isBulkEditing) {
-    if (selectedNoteIds.length === 0) return;
+    if (selectedNoteIds.length === 0) {
+      dispatch(increaseResetDidClickCount());
+      return;
+    }
     dispatch(_moveNotes(toListName, selectedNoteIds));
     updateBulkEditUrlHash(false);
   } else {
@@ -1399,6 +1402,10 @@ export const increaseBlurCount = () => {
 
 export const increaseUpdateEditorWidthCount = () => {
   return { type: INCREASE_UPDATE_EDITOR_WIDTH_COUNT };
+};
+
+export const increaseResetDidClickCount = () => {
+  return { type: INCREASE_RESET_DID_CLICK_COUNT };
 };
 
 export const addSavingObjectUrls = (urls) => {

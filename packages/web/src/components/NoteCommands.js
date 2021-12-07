@@ -1,18 +1,22 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { updatePopupUrlHash, moveNotes } from '../actions';
 import {
-  LIST_NAMES_POPUP, CONFIRM_DELETE_POPUP, MY_NOTES, ARCHIVE, TRASH,
+  LIST_NAMES_POPUP, CONFIRM_DELETE_POPUP, MY_NOTES, ARCHIVE, TRASH, LG_WIDTH,
 } from '../types/const';
 import { getListNameMap } from '../selectors';
 import { getListNameDisplayName, getAllListNames } from '../utils';
 
+import { useSafeAreaFrame } from '.';
+
 const NoteCommands = (props) => {
 
   const { isFullScreen, onToggleFullScreen, isOnDarkBackground, isLeftAlign } = props;
+  const { width: safeAreaWidth } = useSafeAreaFrame();
   const listName = useSelector(state => state.display.listName);
   const listNameMap = useSelector(getListNameMap);
+  const resetDidClickCount = useSelector(state => state.display.resetDidClickCount);
   const moveToBtn = useRef(null);
   const didClick = useRef(false);
   const dispatch = useDispatch();
@@ -44,11 +48,35 @@ const NoteCommands = (props) => {
   };
 
   const onMoveToBtnClick = () => {
-    updatePopupUrlHash(
-      LIST_NAMES_POPUP, true, moveToBtn.current.getBoundingClientRect()
-    );
+    const _rect = moveToBtn.current.getBoundingClientRect();
+
+    let rect;
+    if (safeAreaWidth < LG_WIDTH) {
+      const newY = _rect.y + 4;
+      const newWidth = _rect.width - 8;
+      rect = {
+        x: _rect.x, y: newY,
+        width: newWidth, height: _rect.height,
+        top: newY, bottom: _rect.bottom,
+        left: _rect.x, right: _rect.x + newWidth,
+      };
+    } else {
+      const newY = _rect.y - 8;
+      rect = {
+        x: _rect.x, y: newY,
+        width: _rect.width, height: _rect.height,
+        top: newY, bottom: _rect.bottom,
+        left: _rect.x, right: _rect.right,
+      };
+    }
+
+    updatePopupUrlHash(LIST_NAMES_POPUP, true, rect);
     if (isFullScreen) onToggleFullScreen();
   };
+
+  useEffect(() => {
+    didClick.current = false;
+  }, [resetDidClickCount]);
 
   const rListName = [MY_NOTES, ARCHIVE, TRASH].includes(listName) ? listName : MY_NOTES;
 

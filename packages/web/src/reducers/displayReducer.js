@@ -5,7 +5,8 @@ import {
   FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES,
   DELETE_LIST_NAMES, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY,
   INCREASE_SAVE_NOTE_COUNT, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
-  INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT, UPDATE_DISCARD_ACTION,
+  INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
+  UPDATE_DISCARD_ACTION, INCREASE_RESET_DID_CLICK_COUNT,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
   CANCEL_DIED_SETTINGS, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
   UPDATE_SYNC_PROGRESS, UPDATE_SYNCED,
@@ -54,6 +55,7 @@ const initialState = {
   updatingNoteId: null,
   changingListName: null,
   discardAction: null,
+  resetDidClickCount: 0,
   settingsStatus: null,
   syncProgress: null,
   exportAllDataProgress: null,
@@ -298,6 +300,10 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_DISCARD_ACTION) {
     return { ...state, discardAction: action.payload };
+  }
+
+  if (action.type === INCREASE_RESET_DID_CLICK_COUNT) {
+    return { ...state, resetDidClickCount: state.resetDidClickCount + 1 };
   }
 
   if (action.type === UPDATE_SETTINGS) {
