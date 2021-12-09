@@ -21,13 +21,18 @@ const NoteListItems = () => {
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const listName = useSelector(state => state.display.listName);
   const listNameMap = useSelector(getListNameMap);
-  const notes = useSelector(getNotes);
   const searchString = useSelector(state => state.display.searchString);
   const hasMore = useSelector(state => state.hasMoreNotes[listName]);
   const isFetchingMore = useSelector(state => state.isFetchingMoreNotes[listName]);
   const listChangedCount = useSelector(state => state.display.listChangedCount);
   const flatList = useRef(null);
   const dispatch = useDispatch();
+
+  let notes = useSelector(getNotes);
+  if (!notes) {
+    console.log(`Invalid notes: ${notes}. Notes cannot be undefined as in NoteSelector and if notes is null, it should be handled in NoteList, not in NoteListItems.`);
+    notes = [];
+  }
 
   const data = useMemo(() => {
     const _data = [...notes];
@@ -152,8 +157,6 @@ const NoteListItems = () => {
       }, 1);
     }
   }, [listChangedCount]);
-
-  if (!notes) throw new Error(`Invalid notes: ${notes}. Notes cannot be undefined as in NoteSelector and if notes is null, it should be handled in NoteList, not in NoteListItems.`);
 
   return (
     <View style={tailwind('flex-grow flex-shrink')}>

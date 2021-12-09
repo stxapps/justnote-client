@@ -42,10 +42,10 @@ import {
   N_NOTES, CD_ROOT, SETTINGS, INDEX, DOT_JSON, LG_WIDTH,
 } from '../types/const';
 import {
-  isEqual, throttle, extractUrl, urlHashToObj, objToUrlHash,
-  separateUrlAndParam, getUserImageUrl, randomString,
+  throttle, extractUrl, urlHashToObj, objToUrlHash, isIPadIPhoneIPod, isBusyStatus,
+  isEqual, separateUrlAndParam, getUserImageUrl, randomString,
   isNoteBodyEqual, clearNoteData, getStaticFPath, deriveFPaths,
-  isIPadIPhoneIPod, isBusyStatus,
+  getListNameObj, getAllListNames,
 } from '../utils';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
@@ -1232,8 +1232,17 @@ export const moveToListName = (listName, parent) => {
   return { type: MOVE_TO_LIST_NAME, payload: { listName, parent } };
 };
 
-export const deleteListNames = (listNames) => {
-  return { type: DELETE_LIST_NAMES, payload: { listNames } };
+export const deleteListNames = (listNames) => async (dispatch, getState) => {
+  const { listNameMap } = getState().settings;
+
+  const allListNames = [];
+  for (const listName of listNames) {
+    const { listNameObj } = getListNameObj(listName, listNameMap);
+    allListNames.push(listNameObj.listName);
+    allListNames.push(...getAllListNames(listNameObj.children));
+  }
+
+  dispatch({ type: DELETE_LIST_NAMES, payload: { listNames: allListNames } });
 };
 
 export const updateDoDeleteOldNotesInTrash = (doDeleteOldNotesInTrash) => {
