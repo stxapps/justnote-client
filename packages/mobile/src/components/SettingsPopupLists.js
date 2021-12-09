@@ -356,7 +356,7 @@ const _ListNameEditor = (props) => {
           </Svg>
         </TouchableOpacity>}
       </View>
-      {state.doExpand && listNameObj.children.map(child => <ListNameEditor key={child.listName} listNameObj={child} validateDisplayName={validateDisplayName} level={level + 1} />)}
+      {(state.doExpand && listNameObj && listNameObj.children && listNameObj.children.length > 0) && listNameObj.children.map(child => <ListNameEditor key={child.listName} listNameObj={child} validateDisplayName={validateDisplayName} level={level + 1} />)}
     </React.Fragment>
   );
 };
