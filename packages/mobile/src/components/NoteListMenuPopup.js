@@ -6,10 +6,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
-import { sync, updateSynced, signOut, updatePopup, updateBulkEdit } from '../actions';
+import {
+  sync, updateSynced, signOut, updatePopup, updateSettingsPopup, updateBulkEdit,
+} from '../actions';
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import {
-  DOMAIN_NAME, NOTE_LIST_MENU_POPUP, SETTINGS_POPUP, LG_WIDTH, SHOW_SYNCED,
+  DOMAIN_NAME, NOTE_LIST_MENU_POPUP, LG_WIDTH, SHOW_SYNCED,
 } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import { popupFMV, rotateAnimConfig } from '../types/animConfigs';
@@ -47,7 +49,7 @@ const NoteListMenuPopup = () => {
 
   const onSettingsBtnClick = () => {
     onNoteListMenuCancelBtnClick();
-    dispatch(updatePopup(SETTINGS_POPUP, true, null));
+    dispatch(updateSettingsPopup(true));
   };
 
   const onSupportBtnClick = () => {

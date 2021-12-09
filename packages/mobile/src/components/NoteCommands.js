@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
@@ -6,10 +6,10 @@ import Svg, { Path } from 'react-native-svg';
 
 import { updatePopup, moveNotes } from '../actions';
 import {
-  MOVE_TO_POPUP, CONFIRM_DELETE_POPUP, MY_NOTES, ARCHIVE, TRASH,
+  LIST_NAMES_POPUP, CONFIRM_DELETE_POPUP, MY_NOTES, ARCHIVE, TRASH, LG_WIDTH,
 } from '../types/const';
 import { getListNameMap } from '../selectors';
-import { getListNameDisplayName } from '../utils';
+import { getListNameDisplayName, getAllListNames } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 
 const NoteCommands = (props) => {
@@ -18,6 +18,7 @@ const NoteCommands = (props) => {
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const listName = useSelector(state => state.display.listName);
   const listNameMap = useSelector(getListNameMap);
+  const resetDidClickCount = useSelector(state => state.display.resetDidClickCount);
   const moveToBtn = useRef(null);
   const didClick = useRef(false);
   const dispatch = useDispatch();
@@ -50,13 +51,35 @@ const NoteCommands = (props) => {
 
   const onMoveToBtnClick = () => {
     moveToBtn.current.measure((_fx, _fy, width, height, x, y) => {
-      const rect = {
-        x, y, width, height, top: y, right: x + width, bottom: y + height, left: x,
-      };
-      dispatch(updatePopup(MOVE_TO_POPUP, true, rect));
+      let rect;
+      if (safeAreaWidth < LG_WIDTH) {
+        const newX = x + 4, newY = y + 4;
+        const newWidth = width - 12, newHeight = height - 12;
+        rect = {
+          x: newX, y: newY,
+          width: newWidth, height: newHeight,
+          top: newY, bottom: newY + newHeight,
+          left: newX, right: newX + newWidth,
+        };
+      } else {
+        const newY = y - 8;
+        const newHeight = height + 16;
+        rect = {
+          x: x, y: newY,
+          width: width, height: newHeight,
+          top: newY, bottom: newY + newHeight,
+          left: x, right: x + width,
+        };
+      }
+
+      dispatch(updatePopup(LIST_NAMES_POPUP, true, rect));
       if (isFullScreen) onToggleFullScreen();
     });
   };
+
+  useEffect(() => {
+    didClick.current = false;
+  }, [resetDidClickCount]);
 
   const rListName = [MY_NOTES, ARCHIVE, TRASH].includes(listName) ? listName : MY_NOTES;
 
@@ -64,7 +87,7 @@ const NoteCommands = (props) => {
   const isRemoveBtnShown = [MY_NOTES, ARCHIVE].includes(rListName);
   const isRestoreBtnShown = [TRASH].includes(rListName);
   const isDeleteBtnShown = [TRASH].includes(rListName);
-  const isMoveToBtnShown = [ARCHIVE].includes(rListName) || (rListName === MY_NOTES && listNameMap.length > 3);
+  const isMoveToBtnShown = [ARCHIVE].includes(rListName) || (rListName === MY_NOTES && getAllListNames(listNameMap).length > 3);
 
   let btnClassNames, textClassNames;
   if (isOnDarkBackground) textClassNames = 'text-gray-600';
@@ -114,7 +137,7 @@ const NoteCommands = (props) => {
             <Path d="M7 3C6.73478 3 6.48043 3.10536 6.29289 3.29289C6.10536 3.48043 6 3.73478 6 4C6 4.26522 6.10536 4.51957 6.29289 4.70711C6.48043 4.89464 6.73478 5 7 5H13C13.2652 5 13.5196 4.89464 13.7071 4.70711C13.8946 4.51957 14 4.26522 14 4C14 3.73478 13.8946 3.48043 13.7071 3.29289C13.5196 3.10536 13.2652 3 13 3H7ZM4 7C4 6.73478 4.10536 6.48043 4.29289 6.29289C4.48043 6.10536 4.73478 6 5 6H15C15.2652 6 15.5196 6.10536 15.7071 6.29289C15.8946 6.48043 16 6.73478 16 7C16 7.26522 15.8946 7.51957 15.7071 7.70711C15.5196 7.89464 15.2652 8 15 8H5C4.73478 8 4.48043 7.89464 4.29289 7.70711C4.10536 7.51957 4 7.26522 4 7ZM2 11C2 10.4696 2.21071 9.96086 2.58579 9.58579C2.96086 9.21071 3.46957 9 4 9H16C16.5304 9 17.0391 9.21071 17.4142 9.58579C17.7893 9.96086 18 10.4696 18 11V15C18 15.5304 17.7893 16.0391 17.4142 16.4142C17.0391 16.7893 16.5304 17 16 17H4C3.46957 17 2.96086 16.7893 2.58579 16.4142C2.21071 16.0391 2 15.5304 2 15V11Z" />
           </Svg>
         </View>
-        <Text style={tailwind(`hidden text-sm font-normal lg:ml-1 lg:flex ${textClassNames}`, safeAreaWidth)}>Move to...</Text>
+        <Text style={tailwind(`hidden text-sm font-normal lg:ml-1 lg:flex ${textClassNames}`, safeAreaWidth)}>Move to</Text>
       </TouchableOpacity>}
     </React.Fragment>
   );

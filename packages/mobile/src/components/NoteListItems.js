@@ -103,7 +103,7 @@ const NoteListItems = () => {
       );
     }
 
-    const textName = listName === ARCHIVE ? `"${displayName}"` : `"Move to... -> ${displayName}"`;
+    const textName = listName === ARCHIVE ? `"${displayName}"` : `"Move to -> ${displayName}"`;
 
     return (
       <View style={tailwind('w-full items-center mt-32 mb-24 px-4 sm:px-6', safeAreaWidth)}>

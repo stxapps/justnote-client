@@ -73,7 +73,6 @@ const NoteListTopBar = (props) => {
 
   let innerMenuBtn;
   if (syncProgress && syncProgress.status === SYNC) {
-
     const innerMenuBtnStyle = {
       transform: [{
         rotate: menuBtnAnim.interpolate(

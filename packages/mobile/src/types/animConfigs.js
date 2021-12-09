@@ -51,3 +51,9 @@ export const rotateAnimConfig = {
   duration: 1000,
   useNativeDriver: true,
 };
+
+export const slideAnimConfig = {
+  duration: 300,
+  easing: Easing.bezier(0.4, 0, 0.2, 1),
+  useNativeDriver: true,
+};

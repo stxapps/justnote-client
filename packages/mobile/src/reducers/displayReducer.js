@@ -1,22 +1,23 @@
 import {
   UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP,
-  UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY,
-  ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS,
+  UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, ADD_SELECTED_NOTE_IDS,
+  DELETE_SELECTED_NOTE_IDS, UPDATE_SELECTING_LIST_NAME, UPDATE_DELETING_LIST_NAME,
   FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES,
-  DELETE_LIST_NAMES, UPDATE_DELETING_LIST_NAME,
+  DELETE_LIST_NAMES, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY,
   INCREASE_SAVE_NOTE_COUNT, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
-  INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT, UPDATE_DISCARD_ACTION,
+  INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
+  INCREASE_RESET_DID_CLICK_COUNT, UPDATE_DISCARD_ACTION,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
-  UPDATE_UPDATE_SETTINGS_PROGRESS, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
+  CANCEL_DIED_SETTINGS, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
   UPDATE_SYNC_PROGRESS, UPDATE_SYNCED,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
-  SIGN_UP_POPUP, SIGN_IN_POPUP, PROFILE_POPUP, NOTE_LIST_MENU_POPUP, MOVE_TO_POPUP,
-  SIDEBAR_POPUP, SEARCH_POPUP, SETTINGS_POPUP, CONFIRM_DELETE_POPUP,
-  CONFIRM_DISCARD_POPUP, ALERT_SCREEN_ROTATION_POPUP, NEW_NOTE, MY_NOTES, TRASH, ARCHIVE,
-  UPDATING, DIED_UPDATING, MAX_SELECTED_NOTE_IDS,
+  SIGN_UP_POPUP, SIGN_IN_POPUP, PROFILE_POPUP, NOTE_LIST_MENU_POPUP, LIST_NAMES_POPUP,
+  SIDEBAR_POPUP, SEARCH_POPUP, SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP,
+  CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, ALERT_SCREEN_ROTATION_POPUP,
+  NEW_NOTE, MY_NOTES, TRASH, ARCHIVE, UPDATING, DIED_UPDATING, MAX_SELECTED_NOTE_IDS,
 } from '../types/const';
 import { doContainListName } from '../utils';
 
@@ -30,28 +31,32 @@ const initialState = {
   profilePopupPosition: null,
   isNoteListMenuPopupShown: false,
   noteListMenuPopupPosition: null,
-  isMoveToPopupShown: false,
-  moveToPopupPosition: null,
+  isListNamesPopupShown: false,
+  listNamesPopupPosition: null,
   isSidebarPopupShown: false,
   isSearchPopupShown: false,
   isSettingsPopupShown: false,
+  isSettingsListsMenuPopupShown: false,
+  settingsListsMenuPopupPosition: null,
   isConfirmDeletePopupShown: false,
   isConfirmDiscardPopupShown: false,
   isAlertScreenRotationPopupShown: false,
   searchString: '',
   isBulkEditing: false,
-  isEditorFocused: false,
-  isEditorBusy: false,
   selectedNoteIds: [],
   isSelectedNoteIdsMaxErrorShown: false,
+  selectingListName: null,
   deletingListName: null,
   didFetch: false,
   fetchedListNames: [],
   listChangedCount: 0,
+  isEditorFocused: false,
+  isEditorBusy: false,
   updatingNoteId: null,
   changingListName: null,
   discardAction: null,
-  updateSettingsProgress: null,
+  resetDidClickCount: 0,
+  settingsStatus: null,
   syncProgress: null,
   exportAllDataProgress: null,
   deleteAllDataProgress: null,
@@ -85,7 +90,6 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_POPUP) {
-
     const { id, isShown, anchorPosition } = action.payload;
 
     if (id === SIGN_UP_POPUP) {
@@ -110,12 +114,16 @@ const displayReducer = (state = initialState, action) => {
       };
     }
 
-    if (action.payload.id === MOVE_TO_POPUP) {
-      return {
+    if (id === LIST_NAMES_POPUP) {
+      const newState = {
         ...state,
-        isMoveToPopupShown: isShown,
-        moveToPopupPosition: anchorPosition,
+        isListNamesPopupShown: isShown,
+        listNamesPopupPosition: anchorPosition,
       };
+      if (!isShown) {
+        newState.selectingListName = null;
+      }
+      return newState;
     }
 
     if (id === SIDEBAR_POPUP) {
@@ -124,23 +132,33 @@ const displayReducer = (state = initialState, action) => {
       };
     }
 
-    if (action.payload.id === SEARCH_POPUP) {
+    if (id === SEARCH_POPUP) {
       const newState = { ...state, isSearchPopupShown: isShown };
       if (!isShown) newState.searchString = '';
       return newState;
     }
 
     if (id === SETTINGS_POPUP) {
-      return { ...state, isSettingsPopupShown: isShown };
+      const newState = { ...state, isSettingsPopupShown: isShown };
+      if (!isShown) newState.selectingListName = null;
+      return newState;
     }
 
-    if (action.payload.id === CONFIRM_DELETE_POPUP) {
+    if (id === SETTINGS_LISTS_MENU_POPUP) {
+      return {
+        ...state,
+        isSettingsListsMenuPopupShown: isShown,
+        settingsListsMenuPopupPosition: anchorPosition,
+      };
+    }
+
+    if (id === CONFIRM_DELETE_POPUP) {
       const newState = { ...state, isConfirmDeletePopupShown: isShown };
       if (!isShown) newState.deletingListName = null;
       return newState;
     }
 
-    if (action.payload.id === CONFIRM_DISCARD_POPUP) {
+    if (id === CONFIRM_DISCARD_POPUP) {
       const newState = { ...state, isConfirmDiscardPopupShown: isShown };
       if (!isShown) {
         newState.updatingNoteId = null;
@@ -150,7 +168,7 @@ const displayReducer = (state = initialState, action) => {
       return newState;
     }
 
-    if (action.payload.id === ALERT_SCREEN_ROTATION_POPUP) {
+    if (id === ALERT_SCREEN_ROTATION_POPUP) {
       return { ...state, isAlertScreenRotationPopupShown: isShown };
     }
 
@@ -168,14 +186,6 @@ const displayReducer = (state = initialState, action) => {
       newState.isSelectedNoteIdsMaxErrorShown = false;
     }
     return newState;
-  }
-
-  if (action.type === UPDATE_EDITOR_FOCUSED) {
-    return { ...state, isEditorFocused: action.payload };
-  }
-
-  if (action.type === UPDATE_EDITOR_BUSY) {
-    return { ...state, isEditorBusy: action.payload };
   }
 
   if (action.type === ADD_SELECTED_NOTE_IDS) {
@@ -198,6 +208,14 @@ const displayReducer = (state = initialState, action) => {
     return { ...state, selectedNoteIds, isSelectedNoteIdsMaxErrorShown: isShown };
   }
 
+  if (action.type === UPDATE_SELECTING_LIST_NAME) {
+    return { ...state, selectingListName: action.payload };
+  }
+
+  if (action.type === UPDATE_DELETING_LIST_NAME) {
+    return { ...state, deletingListName: action.payload };
+  }
+
   if (action.type === FETCH_COMMIT) {
     const { listName } = action.payload;
     const newState = {
@@ -214,9 +232,11 @@ const displayReducer = (state = initialState, action) => {
 
     // Make sure listName is in listNameMap, if not, set to My Notes.
     const { listNames, doFetchSettings, settings } = action.payload;
-    if (listNames.includes(newState.listName)) return newState;
     if (!doFetchSettings) return newState;
 
+    newState.settingsStatus = null;
+
+    if (listNames.includes(newState.listName)) return newState;
     if (settings) {
       if (!doContainListName(newState.listName, settings.listNameMap)) {
         newState.listName = MY_NOTES;
@@ -251,14 +271,16 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === DELETE_LIST_NAMES) {
     const { listNames } = action.payload;
-    if (listNames.includes(state.listName)) {
-      return { ...state, listName: MY_NOTES };
-    }
-    return state;
+    if (!listNames.includes(state.listName)) return state;
+    return { ...state, listName: MY_NOTES };
   }
 
-  if (action.type === UPDATE_DELETING_LIST_NAME) {
-    return { ...state, deletingListName: action.payload };
+  if (action.type === UPDATE_EDITOR_FOCUSED) {
+    return { ...state, isEditorFocused: action.payload };
+  }
+
+  if (action.type === UPDATE_EDITOR_BUSY) {
+    return { ...state, isEditorBusy: action.payload };
   }
 
   if (action.type === INCREASE_SAVE_NOTE_COUNT) {
@@ -280,20 +302,38 @@ const displayReducer = (state = initialState, action) => {
     return { ...state, discardAction: action.payload };
   }
 
+  if (action.type === INCREASE_RESET_DID_CLICK_COUNT) {
+    return { ...state, resetDidClickCount: state.resetDidClickCount + 1 };
+  }
+
   if (action.type === UPDATE_SETTINGS) {
-    return { ...state, updateSettingsProgress: { status: UPDATING } };
+    const { settings } = action.payload;
+    const doContain = doContainListName(state.listName, settings.listNameMap);
+
+    return {
+      ...state,
+      listName: doContain ? state.listName : MY_NOTES,
+      settingsStatus: UPDATING,
+    };
   }
 
   if (action.type === UPDATE_SETTINGS_COMMIT) {
-    return { ...state, updateSettingsProgress: null };
+    return { ...state, settingsStatus: null };
   }
 
   if (action.type === UPDATE_SETTINGS_ROLLBACK) {
-    return { ...state, updateSettingsProgress: { status: DIED_UPDATING } };
+    return { ...state, settingsStatus: DIED_UPDATING };
   }
 
-  if (action.type === UPDATE_UPDATE_SETTINGS_PROGRESS) {
-    return { ...state, updateSettingsProgress: action.payload };
+  if (action.type === CANCEL_DIED_SETTINGS) {
+    const { settings } = action.payload;
+    const doContain = doContainListName(state.listName, settings.listNameMap);
+
+    return {
+      ...state,
+      listName: doContain ? state.listName : MY_NOTES,
+      settingsStatus: null,
+    };
   }
 
   if (action.type === SYNC) {

@@ -5,8 +5,8 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
-import { signOut, updatePopup } from '../actions';
-import { DOMAIN_NAME, PROFILE_POPUP, SETTINGS_POPUP } from '../types/const';
+import { signOut, updatePopup, updateSettingsPopup } from '../actions';
+import { DOMAIN_NAME, PROFILE_POPUP } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import { popupFMV } from '../types/animConfigs';
 
@@ -27,7 +27,7 @@ const SidebarProfilePopup = () => {
 
   const onSettingsBtnClick = () => {
     onProfileCancelBtnClick();
-    dispatch(updatePopup(SETTINGS_POPUP, true, null));
+    dispatch(updateSettingsPopup(true));
   };
 
   const onSupportBtnClick = () => {

@@ -12,6 +12,8 @@ import settingsFPathReducer from './settingsFPathReducer';
 import serverFPathsReducer from './serverFPathsReducer';
 import editorReducer from './editorReducer';
 import stacksAccessReducer from './stacksAccessReducer';
+import snapshotReducer from './snapshotReducer';
+import listNameEditorsReducer from './listNameEditorsReducer';
 
 const reducers = combineReducers({
   window: windowReducer,
@@ -26,6 +28,8 @@ const reducers = combineReducers({
   serverFPaths: serverFPathsReducer,
   editor: editorReducer,
   stacksAccess: stacksAccessReducer,
+  snapshot: snapshotReducer,
+  listNameEditors: listNameEditorsReducer,
 });
 
 export default reducers;
