@@ -1,14 +1,16 @@
 import { MY_NOTES, TRASH, ARCHIVE, ADDED_DT, MODE_VIEW } from '../types/const';
 
+export const myNotesListNameObj = { listName: MY_NOTES, displayName: MY_NOTES };
+export const trashListNameObj = { listName: TRASH, displayName: TRASH };
+export const archiveListNameObj = { listName: ARCHIVE, displayName: ARCHIVE };
+
 export const initialSettingsState = {
   doDeleteOldNotesInTrash: true,
   sortOn: ADDED_DT,
   doDescendingOrder: true,
   doAlertScreenRotation: true,
   listNameMap: [
-    { listName: MY_NOTES, displayName: MY_NOTES },
-    { listName: TRASH, displayName: TRASH },
-    { listName: ARCHIVE, displayName: ARCHIVE },
+    { ...myNotesListNameObj }, { ...trashListNameObj }, { ...archiveListNameObj },
   ],
 };
 

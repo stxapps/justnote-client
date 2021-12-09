@@ -7,11 +7,14 @@ import {
   UPDATE_DO_DESCENDING_ORDER, UPDATE_DO_ALERT_SCREEN_ROTATION, CANCEL_DIED_SETTINGS,
   UPDATE_SETTINGS_COMMIT, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
-import { SWAP_LEFT, SWAP_RIGHT } from '../types/const';
+import { MY_NOTES, TRASH, ARCHIVE, SWAP_LEFT, SWAP_RIGHT } from '../types/const';
 import {
   getListNameObj, doContainListName, copyListNameObjs, swapArrayElements,
 } from '../utils';
-import { initialSettingsState as initialState } from '../types/initialStates';
+import {
+  initialSettingsState as initialState,
+  myNotesListNameObj, trashListNameObj, archiveListNameObj,
+} from '../types/initialStates';
 
 const settingsReducer = (state = initialState, action) => {
 
@@ -152,6 +155,16 @@ const settingsReducer = (state = initialState, action) => {
 
     const newState = { ...state };
     newState.listNameMap = copyListNameObjs(newState.listNameMap, listNames);
+
+    if (!doContainListName(MY_NOTES, newState.listNameMap)) {
+      newState.listNameMap.push({ ...myNotesListNameObj });
+    }
+    if (!doContainListName(TRASH, newState.listNameMap)) {
+      newState.listNameMap.push({ ...trashListNameObj });
+    }
+    if (!doContainListName(ARCHIVE, newState.listNameMap)) {
+      newState.listNameMap.push({ ...archiveListNameObj });
+    }
 
     return newState;
   }
