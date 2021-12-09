@@ -52,21 +52,22 @@ const NoteCommands = (props) => {
 
     let rect;
     if (safeAreaWidth < LG_WIDTH) {
-      const newY = _rect.y + 4;
-      const newWidth = _rect.width - 8;
+      const newX = _rect.x + 4, newY = _rect.y + 4;
+      const newWidth = _rect.width - 12, newHeight = _rect.height - 12;
       rect = {
-        x: _rect.x, y: newY,
-        width: newWidth, height: _rect.height,
-        top: newY, bottom: _rect.bottom,
-        left: _rect.x, right: _rect.x + newWidth,
+        x: newX, y: newY,
+        width: newWidth, height: newHeight,
+        top: newY, bottom: newY + newHeight,
+        left: newX, right: newX + newWidth,
       };
     } else {
       const newY = _rect.y - 8;
+      const newHeight = _rect.height + 16;
       rect = {
         x: _rect.x, y: newY,
-        width: _rect.width, height: _rect.height,
-        top: newY, bottom: _rect.bottom,
-        left: _rect.x, right: _rect.right,
+        width: _rect.width, height: newHeight,
+        top: newY, bottom: newY + newHeight,
+        left: _rect.x, right: _rect.x + _rect.width,
       };
     }
 

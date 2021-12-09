@@ -68,7 +68,7 @@ const _SidebarListName = (props) => {
       );
       expandBtn = (
         <button onClick={onExpandBtnClick} className="flex-grow-0 flex-shrink-0 flex justify-center items-center w-8 h-10 -ml-2.5 rounded group focus:outline-none focus-visible:bg-gray-200 lg:h-9">
-          <div className="w-3.5 h-3.5 flex justify-center items-center text-gray-500 rounded-sm group-hover:text-gray-700">
+          <div className="w-3.5 h-3.5 flex justify-center items-center text-gray-500 rounded-sm ml-1 group-hover:text-gray-700">
             {expandSvg}
           </div>
         </button>
