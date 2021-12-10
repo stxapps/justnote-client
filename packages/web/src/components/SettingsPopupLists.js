@@ -73,7 +73,8 @@ const _ListNameEditor = (props) => {
   const key = listNameObj ? listNameObj.listName : 'newListNameEditor';
   const getListNameEditor = useMemo(makeGetListNameEditor, []);
   const state = useSelector(s => getListNameEditor(s, key));
-  const prevFocusCount = useRef(0);
+  const prevFocusCount = useRef(state.focusCount);
+  const prevDisplayName = useRef(null);
   const input = useRef(null);
   const menuBtn = useRef(null);
   const didOkBtnJustPress = useRef(false);
@@ -161,7 +162,9 @@ const _ListNameEditor = (props) => {
     }
 
     dispatch(addListNames([state.value]));
-    dispatch(updateListNameEditors({ [key]: { ...initialListNameEditorState } }));
+    dispatch(updateListNameEditors({
+      [key]: { ...initialListNameEditorState, focusCount: state.focusCount },
+    }));
     input.current.blur();
   };
 
@@ -182,7 +185,12 @@ const _ListNameEditor = (props) => {
 
     dispatch(updateListNames([listNameObj.listName], [state.value]));
     dispatch(updateListNameEditors({
-      [key]: { ...initialListNameEditorState, value: state.value },
+      [key]: {
+        ...initialListNameEditorState,
+        value: state.value,
+        doExpand: state.doExpand,
+        focusCount: state.focusCount,
+      },
     }));
     input.current.blur();
   };
@@ -220,19 +228,18 @@ const _ListNameEditor = (props) => {
   };
 
   useEffect(() => {
-    if (listNameObj) {
+    if (listNameObj && listNameObj.displayName !== prevDisplayName.current) {
       dispatch(updateListNameEditors({
         [key]: { value: listNameObj.displayName },
       }));
+      prevDisplayName.current = listNameObj.displayName;
     }
   }, [listNameObj, key, dispatch]);
 
   useEffect(() => {
     // state.focusCount can be undefined when the popup is close, so can't use !==
-    if (state.focusCount > prevFocusCount.current) {
-      input.current.focus();
-      prevFocusCount.current = state.focusCount;
-    }
+    if (state.focusCount > prevFocusCount.current) input.current.focus();
+    prevFocusCount.current = state.focusCount;
   }, [state.focusCount]);
 
   useEffect(() => {
