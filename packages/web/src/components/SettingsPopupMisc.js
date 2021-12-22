@@ -82,7 +82,7 @@ const SettingsPopupMisc = (props) => {
           <div className="mx-auto mt-2.5 w-full max-w-48 bg-white rounded-md shadow-sm -space-y-px sm:mt-1 sm:flex-grow-0 sm:flex-shrink-0 sm:w-48 sm:max-w-none">
             <div className={`${addedDTBtnClassNames} p-4 relative flex border rounded-tl-md rounded-tr-md`}>
               <div className="flex items-center h-5">
-                <input onChange={onSortOnInputChange} id="list-order-on-option-1" name="list-order-on" type="radio" className="h-4 w-4 text-green-600 transition duration-150 ease-in-out cursor-pointer focus:ring-2 focus:ring-offset-2 focus:ring-green-600" checked={sortOn === ADDED_DT} value={ADDED_DT} />
+                <input onChange={onSortOnInputChange} id="list-order-on-option-1" name="list-order-on-option-1" type="radio" className="h-4 w-4 text-green-600 transition duration-150 ease-in-out cursor-pointer focus:ring-2 focus:ring-offset-2 focus:ring-green-600" checked={sortOn === ADDED_DT} value={ADDED_DT} />
               </div>
               <label htmlFor="list-order-on-option-1" className="ml-3 flex flex-col cursor-pointer">
                 <span className={`${addedDTBtnInnerClassNames} block text-sm leading-5 font-medium`}>Added Date</span>
@@ -90,7 +90,7 @@ const SettingsPopupMisc = (props) => {
             </div>
             <div className={`${updatedDTBtnClassNames} p-4 flex relative border rounded-bl-md rounded-br-md`}>
               <div className="flex items-center h-5">
-                <input onChange={onSortOnInputChange} id="list-order-on-option-2" name="list-order-on" type="radio" className="h-4 w-4 text-green-600 transition duration-150 ease-in-out cursor-pointer focus:ring-2 focus:ring-offset-2 focus:ring-green-600" checked={sortOn === UPDATED_DT} value={UPDATED_DT} />
+                <input onChange={onSortOnInputChange} id="list-order-on-option-2" name="list-order-on-option-2" type="radio" className="h-4 w-4 text-green-600 transition duration-150 ease-in-out cursor-pointer focus:ring-2 focus:ring-offset-2 focus:ring-green-600" checked={sortOn === UPDATED_DT} value={UPDATED_DT} />
               </div>
               <label htmlFor="list-order-on-option-2" className="ml-3 flex flex-col cursor-pointer">
                 <span className={`${updatedDTBtnInnerClassNames} block text-sm leading-5 font-medium`}>Updated Date</span>
@@ -106,7 +106,7 @@ const SettingsPopupMisc = (props) => {
           <div className="mx-auto mt-2.5 w-full max-w-48 bg-white rounded-md shadow-sm -space-y-px sm:mt-1 sm:flex-grow-0 sm:flex-shrink-0 sm:w-48 sm:max-w-none">
             <div className={`${ascendingBtnClassNames} p-4 relative flex border rounded-tl-md rounded-tr-md`}>
               <div className="flex items-center h-5">
-                <input onChange={onDoDescendingInputChange} id="list-order-direction-option-1" name="list-order-direction" type="radio" className="h-4 w-4 text-green-600 transition duration-150 ease-in-out cursor-pointer focus:ring-2 focus:ring-offset-2 focus:ring-green-600" checked={!doDescendingOrder} value="ascending" />
+                <input onChange={onDoDescendingInputChange} id="list-order-direction-option-1" name="list-order-direction-option-1" type="radio" className="h-4 w-4 text-green-600 transition duration-150 ease-in-out cursor-pointer focus:ring-2 focus:ring-offset-2 focus:ring-green-600" checked={!doDescendingOrder} value="ascending" />
               </div>
               <label htmlFor="list-order-direction-option-1" className="ml-3 flex flex-col cursor-pointer">
                 <span className={`${ascendingBtnInnerClassNames} block text-sm leading-5 font-medium`}>Ascending order</span>
@@ -114,7 +114,7 @@ const SettingsPopupMisc = (props) => {
             </div>
             <div className={`${descendingBtnClassNames} p-4 flex relative border rounded-bl-md rounded-br-md`}>
               <div className="flex items-center h-5">
-                <input onChange={onDoDescendingInputChange} id="list-order-direction-option-2" name="list-order-direction" type="radio" className="h-4 w-4 text-green-600 transition duration-150 ease-in-out cursor-pointer focus:ring-2 focus:ring-offset-2 focus:ring-green-600" checked={doDescendingOrder} value="descending" />
+                <input onChange={onDoDescendingInputChange} id="list-order-direction-option-2" name="list-order-direction-option-2" type="radio" className="h-4 w-4 text-green-600 transition duration-150 ease-in-out cursor-pointer focus:ring-2 focus:ring-offset-2 focus:ring-green-600" checked={doDescendingOrder} value="descending" />
               </div>
               <label htmlFor="list-order-direction-option-2" className="ml-3 flex flex-col cursor-pointer">
                 <span className={`${descendingBtnInnerClassNames} block text-sm leading-5 font-medium`}>Descending order</span>

@@ -259,7 +259,7 @@ const _SettingsPopupDataDelete = (props) => {
       <p className="mt-6 text-base text-gray-500 leading-relaxed">It may take several minutes to delete all your data.</p>
       <p className="mt-6 text-base text-red-600 leading-relaxed">This action CANNOT be undone.</p>
       <div className="mt-6 flex items-center">
-        <input onChange={onConfirmInputChange} checked={didCheckConfirm} className="w-4 h-4 text-gray-600 border-gray-400 rounded transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400" id="confirm-input" type="checkbox" />
+        <input onChange={onConfirmInputChange} checked={didCheckConfirm} className="w-4 h-4 text-gray-600 border-gray-400 rounded transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400" id="confirm-input" name="confirm-input" type="checkbox" />
         <label htmlFor="confirm-input" className="ml-2 block text-base text-gray-500">Yes, I’m absolutely sure I want to delete all my data.</label>
       </div>
       {actionPanel}
