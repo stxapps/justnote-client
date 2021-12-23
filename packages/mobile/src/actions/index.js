@@ -1268,7 +1268,6 @@ export const sync = (
     });
 
     if (_newSyncObj) {
-
       let _doForce = /** @type boolean */(_newSyncObj.doForceServerListFPaths);
       if (doForceServerListFPaths) _doForce = false;
 
