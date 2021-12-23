@@ -148,7 +148,7 @@ const SettingsPopup = () => {
       didMount = false;
       registerPopupBackHandler(false);
     };
-  }, [isShown, popupAnim, registerPopupBackHandler, safeAreaWidth]);
+  }, [isShown, isUserSignedIn, popupAnim, registerPopupBackHandler, safeAreaWidth]);
 
   useEffect(() => {
     let didMount = true;

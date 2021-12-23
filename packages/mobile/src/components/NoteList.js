@@ -87,7 +87,7 @@ const NoteList = (props) => {
   useEffect(() => {
     // As dummy then signed in, need to sync
     if (isUserSignedIn && isUserDummy) dispatch(sync());
-  }, [isUserSignedIn, isUserDummy]);
+  }, [isUserSignedIn, isUserDummy, dispatch]);
 
   useEffect(() => {
     registerBulkEditBackHandler(isBulkEditing);
