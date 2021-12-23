@@ -33,9 +33,10 @@ const SettingsPopup = () => {
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
   const insets = useSafeAreaInsets();
   const isShown = useSelector(state => state.display.isSettingsPopupShown);
+  const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
 
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
-  const [viewId, setViewId] = useState(VIEW_ACCOUNT);
+  const [viewId, setViewId] = useState(isUserSignedIn ? VIEW_ACCOUNT : VIEW_LISTS);
   const [isSidebarShown, setIsSidebarShown] = useState(safeAreaWidth < MD_WIDTH);
   const [didSidebarAnimEnd, setDidSidebarAnimEnd] = useState(true);
   const [derivedIsShown, setDerivedIsShown] = useState(isShown);
@@ -135,7 +136,7 @@ const SettingsPopup = () => {
       Animated.timing(popupAnim, { toValue: 0, ...popupFMV.hidden }).start(() => {
         if (didMount) {
           setDidCloseAnimEnd(true);
-          setViewId(VIEW_ACCOUNT);
+          setViewId(isUserSignedIn ? VIEW_ACCOUNT : VIEW_LISTS);
           setIsSidebarShown(safeAreaWidth < MD_WIDTH);
           setDidSidebarAnimEnd(true);
         }
@@ -233,20 +234,20 @@ const SettingsPopup = () => {
           <View style={tailwind('hidden md:flex md:flex-shrink-0 md:flex-grow-0', safeAreaWidth)}>
             <View style={tailwind('mt-2 flex-1 w-48 border-r border-gray-200 md:ml-6 md:mb-6', safeAreaWidth)}>
               <View style={tailwind('mt-2 pr-2 bg-white')}>
-                <TouchableOpacity onPress={onAccountBtnClick} style={tailwind(`px-2 py-2 flex-row items-center w-full rounded-md ${isViewSelected(VIEW_ACCOUNT) ? selectedMenuBtnStyleClasses : menuBtnStyleClasses}`)}>
+                {isUserSignedIn && <TouchableOpacity onPress={onAccountBtnClick} style={tailwind(`px-2 py-2 flex-row items-center w-full rounded-md ${isViewSelected(VIEW_ACCOUNT) ? selectedMenuBtnStyleClasses : menuBtnStyleClasses}`)}>
                   <Svg style={tailwind(`mr-3 font-normal ${isViewSelected(VIEW_ACCOUNT) ? selectedMenuSvgStyleClasses : menuSvgStyleClasses}`)} width={20} height={20} viewBox="0 0 20 20" fill="currentColor">
                     <Path fillRule="evenodd" clipRule="evenodd" d="M18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10ZM12 7C12 8.10457 11.1046 9 10 9C8.89543 9 8 8.10457 8 7C8 5.89543 8.89543 5 10 5C11.1046 5 12 5.89543 12 7ZM9.99993 11C7.98239 11 6.24394 12.195 5.45374 13.9157C6.55403 15.192 8.18265 16 9.99998 16C11.8173 16 13.4459 15.1921 14.5462 13.9158C13.756 12.195 12.0175 11 9.99993 11Z" />
                   </Svg>
                   <Text style={tailwind(`text-sm font-medium leading-5 ${isViewSelected(VIEW_ACCOUNT) ? selectedMenuTextStyleClasses : menuTextStyleClasses}`)}>Account</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={onDataBtnClick} style={tailwind(`mt-1 px-2 py-2 flex-row items-center w-full rounded-md ${isViewSelected(VIEW_DATA) ? selectedMenuBtnStyleClasses : menuBtnStyleClasses}`)}>
+                </TouchableOpacity>}
+                {isUserSignedIn && <TouchableOpacity onPress={onDataBtnClick} style={tailwind(`mt-1 px-2 py-2 flex-row items-center w-full rounded-md ${isViewSelected(VIEW_DATA) ? selectedMenuBtnStyleClasses : menuBtnStyleClasses}`)}>
                   <Svg style={tailwind(`mr-3 font-normal ${isViewSelected(VIEW_DATA) ? selectedMenuSvgStyleClasses : menuSvgStyleClasses}`)} width={20} height={20} viewBox="0 0 20 20" fill="currentColor">
                     <Path fillRule="evenodd" clipRule="evenodd" d="M3 5C3 4.44772 3.44772 4 4 4H16C16.5523 4 17 4.44772 17 5C17 5.55228 16.5523 6 16 6H4C3.44772 6 3 5.55228 3 5Z" />
                     <Path fillRule="evenodd" clipRule="evenodd" d="M3 10C3 9.44772 3.44772 9 4 9H16C16.5523 9 17 9.44772 17 10C17 10.5523 16.5523 11 16 11H4C3.44772 11 3 10.5523 3 10Z" />
                     <Path fillRule="evenodd" clipRule="evenodd" d="M3 15C3 14.4477 3.44772 14 4 14H16C16.5523 14 17 14.4477 17 15C17 15.5523 16.5523 16 16 16H4C3.44772 16 3 15.5523 3 15Z" />
                   </Svg>
                   <Text style={tailwind(`text-sm font-medium leading-5 ${isViewSelected(VIEW_DATA) ? selectedMenuTextStyleClasses : menuTextStyleClasses}`)}>Data</Text>
-                </TouchableOpacity>
+                </TouchableOpacity>}
                 <TouchableOpacity onPress={onListsBtnClick} style={tailwind(`mt-1 px-2 py-2 flex-row items-center w-full rounded-md ${isViewSelected(VIEW_LISTS) ? selectedMenuBtnStyleClasses : menuBtnStyleClasses}`)}>
                   <Svg style={tailwind(`mr-3 font-normal ${isViewSelected(VIEW_LISTS) ? selectedMenuSvgStyleClasses : menuSvgStyleClasses}`)} width={20} height={20} viewBox="0 0 20 20" fill="currentColor">
                     <Path d="M2 6C2 4.89543 2.89543 4 4 4H9L11 6H16C17.1046 6 18 6.89543 18 8V14C18 15.1046 17.1046 16 16 16H4C2.89543 16 2 15.1046 2 14V6Z" />
@@ -294,20 +295,20 @@ const SettingsPopup = () => {
                 <Text style={tailwind('text-xl text-gray-800 font-medium leading-6')}>Settings</Text>
               </View>
               <View style={tailwind('mt-5 px-2')}>
-                <TouchableOpacity onPress={onAccountBtnClick} style={tailwind('px-2 py-2.5 flex-row items-center w-full rounded-md')}>
+                {isUserSignedIn && <TouchableOpacity onPress={onAccountBtnClick} style={tailwind('px-2 py-2.5 flex-row items-center w-full rounded-md')}>
                   <Svg style={tailwind('mr-2 text-gray-400 font-normal')} width={20} height={20} viewBox="0 0 20 20" fill="currentColor">
                     <Path fillRule="evenodd" clipRule="evenodd" d="M18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10ZM12 7C12 8.10457 11.1046 9 10 9C8.89543 9 8 8.10457 8 7C8 5.89543 8.89543 5 10 5C11.1046 5 12 5.89543 12 7ZM9.99993 11C7.98239 11 6.24394 12.195 5.45374 13.9157C6.55403 15.192 8.18265 16 9.99998 16C11.8173 16 13.4459 15.1921 14.5462 13.9158C13.756 12.195 12.0175 11 9.99993 11Z" />
                   </Svg>
                   <Text style={tailwind('text-base text-gray-500 font-medium leading-5')}>Account</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={onDataBtnClick} style={tailwind('mt-1 px-2 py-2.5 flex-row items-center w-full rounded-md')}>
+                </TouchableOpacity>}
+                {isUserSignedIn && <TouchableOpacity onPress={onDataBtnClick} style={tailwind('mt-1 px-2 py-2.5 flex-row items-center w-full rounded-md')}>
                   <Svg style={tailwind('mr-2 text-gray-400 font-normal')} width={20} height={20} viewBox="0 0 20 20" fill="currentColor">
                     <Path fillRule="evenodd" clipRule="evenodd" d="M3 5C3 4.44772 3.44772 4 4 4H16C16.5523 4 17 4.44772 17 5C17 5.55228 16.5523 6 16 6H4C3.44772 6 3 5.55228 3 5Z" />
                     <Path fillRule="evenodd" clipRule="evenodd" d="M3 10C3 9.44772 3.44772 9 4 9H16C16.5523 9 17 9.44772 17 10C17 10.5523 16.5523 11 16 11H4C3.44772 11 3 10.5523 3 10Z" />
                     <Path fillRule="evenodd" clipRule="evenodd" d="M3 15C3 14.4477 3.44772 14 4 14H16C16.5523 14 17 14.4477 17 15C17 15.5523 16.5523 16 16 16H4C3.44772 16 3 15.5523 3 15Z" />
                   </Svg>
                   <Text style={tailwind('text-base text-gray-500 font-medium leading-5')}>Data</Text>
-                </TouchableOpacity>
+                </TouchableOpacity>}
                 <TouchableOpacity onPress={onListsBtnClick} style={tailwind('mt-1 px-2 py-2.5 flex-row items-center w-full rounded-md')}>
                   <Svg style={tailwind('mr-2 text-gray-400 font-normal')} width={20} height={20} viewBox="0 0 20 20" fill="currentColor">
                     <Path d="M2 6C2 4.89543 2.89543 4 4 4H9L11 6H16C17.1046 6 18 6.89543 18 8V14C18 15.1046 17.1046 16 16 16H4C2.89543 16 2 15.1046 2 14V6Z" />

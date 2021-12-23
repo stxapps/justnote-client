@@ -1031,7 +1031,7 @@ export const cancelDiedSettings = () => async (dispatch, getState) => {
  *               1 - force, update immediately no matter what
  *               2 - no update even there is a change
  */
-let _isSyncing = false, _newSyncObj = null, _lastSyncDT = 0;
+let _isSyncing = false, _newSyncObj = /** @type Object */(null), _lastSyncDT = 0;
 export const sync = (
   doForceServerListFPaths = false, updateAction = 0, haveUpdate = false
 ) => async (dispatch, getState) => {
@@ -1268,6 +1268,7 @@ export const sync = (
     });
 
     if (_newSyncObj) {
+
       let _doForce = /** @type boolean */(_newSyncObj.doForceServerListFPaths);
       if (doForceServerListFPaths) _doForce = false;
 

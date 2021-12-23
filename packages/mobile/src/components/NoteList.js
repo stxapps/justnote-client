@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
-import { updateBulkEdit, updateNoteId, fetch } from '../actions';
+import { updateBulkEdit, updateNoteId, fetch, sync } from '../actions';
 import { TRASH, NEW_NOTE, MAX_SELECTED_NOTE_IDS } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import { popupFMV } from '../types/animConfigs';
@@ -22,6 +22,8 @@ const NoteList = (props) => {
   const isMaxErrorShown = useSelector(state => state.display.isSelectedNoteIdsMaxErrorShown);
   const didFetch = useSelector(state => state.display.didFetch);
   const fetchedListNames = useSelector(state => state.display.fetchedListNames);
+  const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
+  const isUserDummy = useSelector(state => state.user.isUserDummy);
   const maxErrorAnim = useRef(new Animated.Value(0)).current;
   const bulkEditBackHandler = useRef(null);
   const dispatch = useDispatch();
@@ -81,6 +83,11 @@ const NoteList = (props) => {
       dispatch(fetch(didFetch ? false : null, !didFetch));
     }
   }, [listName, fetchedListNames, didFetch, dispatch]);
+
+  useEffect(() => {
+    // As dummy then signed in, need to sync
+    if (isUserSignedIn && isUserDummy) dispatch(sync());
+  }, [isUserSignedIn, isUserDummy]);
 
   useEffect(() => {
     registerBulkEditBackHandler(isBulkEditing);
