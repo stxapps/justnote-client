@@ -1,12 +1,24 @@
 import MMKVStorage from 'react-native-mmkv-storage';
 
-import { COLS_PANEL_STATE, INDEX, SETTINGS, DOT_JSON } from './types/const';
+import {
+  IS_USER_DUMMY, COLS_PANEL_STATE, INDEX, SETTINGS, DOT_JSON,
+} from './types/const';
 
 let _instance = null;
 
 const getInstance = () => {
   if (!_instance) _instance = new MMKVStorage.Loader().initialize();
   return _instance;
+};
+
+const isUserDummy = async () => {
+  const res = await getInstance().getStringAsync(IS_USER_DUMMY);
+  return res === 'true'
+};
+
+const updateUserDummy = async (isUserDummy) => {
+  const value = isUserDummy ? 'true' : 'false';
+  await getInstance().setStringAsync(IS_USER_DUMMY, value);
 };
 
 const putFile = async (path, content) => {
@@ -37,7 +49,7 @@ const listFiles = async (callback) => {
   const files = await getInstance().indexer.getKeys();
   files.forEach(file => {
     if ([
-      COLS_PANEL_STATE,
+      IS_USER_DUMMY, COLS_PANEL_STATE,
       'default',
       'boolIndex', 'numberIndex', 'stringIndex', 'arrayIndex', 'mapIndex',
       'boolsIndex', 'numbersIndex', 'stringsIndex', 'arraysIndex', 'mapsIndex',
@@ -56,6 +68,7 @@ const setItem = async (key, value) => {
 };
 
 export default {
+  isUserDummy, updateUserDummy,
   putFile, getFile, deleteFile, deleteAllFiles, listFiles,
   getItem, setItem,
 };

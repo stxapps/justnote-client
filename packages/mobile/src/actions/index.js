@@ -1,6 +1,7 @@
 import { Linking, Dimensions, AppState } from 'react-native';
 
 import userSession from '../userSession';
+import mmkvStorage from '../mmkvStorage';
 import dataApi from '../apis/data';
 import serverApi from '../apis/server';
 import fileApi from '../apis/file';
@@ -100,6 +101,7 @@ export const init = () => async (dispatch, getState) => {
   });
 
   const isUserSignedIn = await userSession.isUserSignedIn();
+  const isUserDummy = await mmkvStorage.isUserDummy();
   let username = null, userImage = null;
   if (isUserSignedIn) {
     const userData = await userSession.loadUserData();
@@ -110,6 +112,7 @@ export const init = () => async (dispatch, getState) => {
     type: INIT,
     payload: {
       isUserSignedIn,
+      isUserDummy,
       username,
       userImage,
       windowWidth: Dimensions.get('window').width,
@@ -201,6 +204,14 @@ export const updateUserData = (data) => async (dispatch, getState) => {
       },
     });
   }
+};
+
+export const updateUserDummy = (isUserDummy) => async (dispatch, getState) => {
+  await mmkvStorage.updateUserDummy(isUserDummy);
+  dispatch({
+    type: UPDATE_USER,
+    payload: { isUserDummy: isUserDummy },
+  });
 };
 
 export const changeListName = (listName, doCheckEditing) => async (
@@ -1024,6 +1035,8 @@ let _isSyncing = false, _newSyncObj = null, _lastSyncDT = 0;
 export const sync = (
   doForceServerListFPaths = false, updateAction = 0, haveUpdate = false
 ) => async (dispatch, getState) => {
+
+  if (!getState().user.isUserSignedIn) return;
 
   if (_isSyncing) {
     _newSyncObj = { doForceServerListFPaths, updateAction };

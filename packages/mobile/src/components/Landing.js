@@ -5,12 +5,15 @@ import Svg, { SvgXml, Path } from 'react-native-svg';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
 import { updatePopup } from '../actions';
-import { SIGN_UP_POPUP, SIGN_IN_POPUP, SM_WIDTH } from '../types/const';
+import {
+  SIGN_UP_POPUP, SIGN_IN_POPUP, CONFIRM_AS_DUMMY_POPUP, SM_WIDTH,
+} from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import cache from '../utils/cache';
 
 import SignUpPopup from './SignUpPopup';
 import SignInPopup from './SignInPopup';
+import ConfirmAsDummyPopup from './ConfirmAsDummyPopup';
 
 import logoFull from '../images/logo-full.svg';
 
@@ -25,6 +28,10 @@ const Landing = () => {
 
   const onSignInBtnClick = () => {
     dispatch(updatePopup(SIGN_IN_POPUP, true));
+  };
+
+  const onAsDummyBtnClick = () => {
+    dispatch(updatePopup(CONFIRM_AS_DUMMY_POPUP, true));
   };
 
   return (
@@ -46,10 +53,14 @@ const Landing = () => {
               <Path fillRule="evenodd" clipRule="evenodd" d="M0.29289 9.7071C-0.09763 9.3166 -0.09763 8.6834 0.29289 8.2929L3.5858 5L0.29289 1.70711C-0.09763 1.31658 -0.09763 0.68342 0.29289 0.29289C0.68342 -0.09763 1.31658 -0.09763 1.70711 0.29289L5.7071 4.29289C6.0976 4.68342 6.0976 5.3166 5.7071 5.7071L1.70711 9.7071C1.31658 10.0976 0.68342 10.0976 0.29289 9.7071Z" />
             </Svg>
           </TouchableOpacity>
+          <TouchableOpacity onPress={onAsDummyBtnClick} style={tailwind(`items-center justify-center px-8 py-3 border border-transparent bg-transparent ${safeAreaWidth < SM_WIDTH ? 'w-full' : ''} md:py-4 md:px-10`, safeAreaWidth)}>
+            <Text style={tailwind('text-base font-normal text-gray-500 md:text-lg', safeAreaWidth)}>Continue without an account</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
       <SignUpPopup />
       <SignInPopup />
+      <ConfirmAsDummyPopup />
     </React.Fragment>
   );
 };

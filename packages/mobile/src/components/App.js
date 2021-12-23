@@ -15,6 +15,7 @@ UIManager.setLayoutAnimationEnabledExperimental &&
 const App = () => {
 
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
+  const isUserDummy = useSelector(state => state.user.isUserDummy);
   const isHandlingSignIn = useSelector(state => state.display.isHandlingSignIn);
   const dispatch = useDispatch();
 
@@ -23,7 +24,7 @@ const App = () => {
   }, [dispatch]);
 
   if (isUserSignedIn === null || isHandlingSignIn) return <Loading />;
-  if (isUserSignedIn === true) return <Main />;
+  if (isUserSignedIn === true || isUserDummy === true) return <Main />;
 
   return <Landing />;
 };

@@ -16,7 +16,8 @@ import {
 import {
   SIGN_UP_POPUP, SIGN_IN_POPUP, PROFILE_POPUP, NOTE_LIST_MENU_POPUP, LIST_NAMES_POPUP,
   SIDEBAR_POPUP, SEARCH_POPUP, SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP,
-  CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, ALERT_SCREEN_ROTATION_POPUP,
+  CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, CONFIRM_AS_DUMMY_POPUP,
+  CONFIRM_EXIT_DUMMY_POPUP, ALERT_SCREEN_ROTATION_POPUP,
   NEW_NOTE, MY_NOTES, TRASH, ARCHIVE, UPDATING, DIED_UPDATING, MAX_SELECTED_NOTE_IDS,
 } from '../types/const';
 import { doContainListName } from '../utils';
@@ -40,6 +41,8 @@ const initialState = {
   settingsListsMenuPopupPosition: null,
   isConfirmDeletePopupShown: false,
   isConfirmDiscardPopupShown: false,
+  isConfirmAsDummyPopupShown: false,
+  isConfirmExitDummyPopupShown: false,
   isAlertScreenRotationPopupShown: false,
   searchString: '',
   isBulkEditing: false,
@@ -166,6 +169,14 @@ const displayReducer = (state = initialState, action) => {
         newState.discardAction = null;
       }
       return newState;
+    }
+
+    if (id === CONFIRM_AS_DUMMY_POPUP) {
+      return { ...state, isConfirmAsDummyPopupShown: isShown };
+    }
+
+    if (id === CONFIRM_EXIT_DUMMY_POPUP) {
+      return { ...state, isConfirmExitDummyPopupShown: isShown };
     }
 
     if (id === ALERT_SCREEN_ROTATION_POPUP) {

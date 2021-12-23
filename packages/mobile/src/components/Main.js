@@ -3,6 +3,8 @@ import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
 import { LG_WIDTH } from '../types/const';
 
+import SignUpPopup from './SignUpPopup';
+import SignInPopup from './SignInPopup';
 import ColsPanel from './ColsPanel';
 import NavPanel from './NavPanel';
 import SidebarProfilePopup from './SidebarProfilePopup';
@@ -13,6 +15,7 @@ import SettingsErrorPopup from './SettingsErrorPopup';
 import ListNamesPopup from './ListNamesPopup';
 import ConfirmDeletePopup from './ConfirmDeletePopup';
 import ConfirmDiscardPopup from './ConfirmDiscardPopup';
+import ConfirmExitDummyPopup from './ConfirmExitDummyPopup';
 import AlertScreenRotationPopup from './AlertScreenRotationPopup';
 
 const Main = () => {
@@ -31,6 +34,9 @@ const Main = () => {
       <ListNamesPopup />
       <ConfirmDeletePopup />
       <ConfirmDiscardPopup />
+      <ConfirmExitDummyPopup />
+      <SignUpPopup />
+      <SignInPopup />
       <AlertScreenRotationPopup />
     </React.Fragment>
   );
