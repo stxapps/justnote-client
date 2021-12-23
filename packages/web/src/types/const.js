@@ -39,6 +39,8 @@ export const SETTINGS_POPUP = 'SETTINGS_POPUP';
 export const SETTINGS_LISTS_MENU_POPUP = 'SETTINGS_LISTS_MENU_POPUP';
 export const CONFIRM_DELETE_POPUP = 'CONFIRM_DELETE_POPUP';
 export const CONFIRM_DISCARD_POPUP = 'CONFIRM_DISCARD_POPUP';
+export const CONFIRM_AS_DUMMY_POPUP = 'CONFIRM_AS_DUMMY_POPUP';
+export const CONFIRM_EXIT_DUMMY_POPUP = 'CONFIRM_EXIT_DUMMY_POPUP';
 export const ALERT_SCREEN_ROTATION_POPUP = 'ALERT_SCREEN_ROTATION_POPUP';
 
 export const ADDED = 'ADDED';
@@ -89,6 +91,7 @@ export const SWAP_RIGHT = 'SWAP_RIGHT';
 export const ADDED_DT = 'addedDT';
 export const UPDATED_DT = 'updatedDT';
 
+export const IS_USER_DUMMY = 'isUserDummy';
 export const COLS_PANEL_STATE = 'colsPanelState';
 
 export const SHOW_SYNCED = 'SHOW_SYNCED';
