@@ -1,7 +1,9 @@
 import { loop, Cmd } from 'redux-loop';
 
 import { tryUpdateSynced } from '../actions';
-import { SYNC_COMMIT, DELETE_ALL_DATA, RESET_STATE } from '../types/actionTypes';
+import {
+  SYNC_COMMIT, SYNC_ROLLBACK, DELETE_ALL_DATA, RESET_STATE,
+} from '../types/actionTypes';
 
 export const initialState = {
   noteFPaths: null,
@@ -28,6 +30,10 @@ const serverFPathsReducer = (state = initialState, action) => {
         tryUpdateSynced(updateAction, haveUpdate), { args: [Cmd.dispatch, Cmd.getState] }
       )
     );
+  }
+
+  if (action.type === SYNC_ROLLBACK) {
+    return { ...initialState };
   }
 
   if (action.type === DELETE_ALL_DATA || action.type === RESET_STATE) {
