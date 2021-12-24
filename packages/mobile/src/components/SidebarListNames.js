@@ -128,7 +128,7 @@ const _SidebarListName = (props) => {
           <Text style={tailwind(`${textClassNames} text-base font-medium flex-grow flex-shrink lg:text-sm`, safeAreaWidth)} numberOfLines={1} ellipsizeMode="tail">{listNameObj.displayName}</Text>
         </TouchableOpacity>
       </View>
-      {doExpand && listNameObj.children.map(child => <SidebarListName key={child.listName} listNameObj={child} level={level + 1} isChildless={isChildless} />)}
+      {(doExpand && listNameObj && listNameObj.children && listNameObj.children.length > 0) && listNameObj.children.map(child => <SidebarListName key={child.listName} listNameObj={child} level={level + 1} isChildless={isChildless} />)}
     </React.Fragment>
   );
 };

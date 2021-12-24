@@ -122,7 +122,7 @@ const _SidebarListName = (props) => {
           <span className="truncate">{listNameObj.displayName}</span>
         </button>
       </div>
-      {doExpand && listNameObj.children.map(child => <SidebarListName key={child.listName} listNameObj={child} level={level + 1} isChildless={isChildless} />)}
+      {(doExpand && listNameObj && listNameObj.children && listNameObj.children.length > 0) && listNameObj.children.map(child => <SidebarListName key={child.listName} listNameObj={child} level={level + 1} isChildless={isChildless} />)}
     </React.Fragment>
   );
 };

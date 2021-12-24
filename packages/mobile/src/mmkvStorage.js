@@ -13,11 +13,11 @@ const getInstance = () => {
 
 const isUserDummy = async () => {
   const res = await getInstance().getStringAsync(IS_USER_DUMMY);
-  return res === 'true'
+  return res === 'true';
 };
 
-const updateUserDummy = async (isUserDummy) => {
-  const value = isUserDummy ? 'true' : 'false';
+const updateUserDummy = async (_isUserDummy) => {
+  const value = _isUserDummy ? 'true' : 'false';
   await getInstance().setStringAsync(IS_USER_DUMMY, value);
 };
 

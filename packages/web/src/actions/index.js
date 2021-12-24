@@ -55,6 +55,7 @@ export const init = () => async (dispatch, getState) => {
   await handlePendingSignIn()(dispatch, getState);
 
   const isUserSignedIn = userSession.isUserSignedIn();
+  const isUserDummy = false;
   let username = null, userImage = null;
   if (isUserSignedIn) {
     const userData = userSession.loadUserData();
@@ -68,6 +69,7 @@ export const init = () => async (dispatch, getState) => {
     type: INIT,
     payload: {
       isUserSignedIn,
+      isUserDummy,
       username,
       userImage,
       windowWidth: window.innerWidth,
