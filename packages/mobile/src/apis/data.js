@@ -232,9 +232,17 @@ const toConflictedNotes = (noteIds, conflictWiths, fpaths, contents) => {
 
 const fetch = async (params) => {
 
-  const { listName, sortOn, doDescendingOrder, doFetchSettings } = params;
-
+  let { listName, sortOn, doDescendingOrder, doFetchSettings } = params;
   const { noteFPaths, settingsFPath } = await listFPaths();
+
+  let settings;
+  if (settingsFPath && doFetchSettings) {
+    settings = await mmkvStorage.getFile(settingsFPath);
+
+    sortOn = settings.sortOn;
+    doDescendingOrder = settings.doDescendingOrder;
+  }
+
   const { noteIds, conflictedIds, conflictWiths } = listNoteIds(noteFPaths);
 
   const namedNoteIds = noteIds.filter(id => id.listName === listName);
@@ -277,12 +285,6 @@ const fetch = async (params) => {
   listNames.push(...noteIds.map(id => id.listName));
   listNames.push(...conflictedIds.map(id => id.listName));
   listNames = [...new Set(listNames)];
-
-  // If there is settings, fetch settings
-  let settings;
-  if (settingsFPath && doFetchSettings) {
-    settings = await mmkvStorage.getFile(settingsFPath);
-  }
 
   return { notes, hasMore, conflictedNotes, listNames, settingsFPath, settings };
 };
