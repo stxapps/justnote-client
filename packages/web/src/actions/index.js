@@ -1,4 +1,5 @@
 import Url from 'url-parse';
+import * as zip from "@zip.js/zip.js";
 import { saveAs } from 'file-saver';
 
 import userSession from '../userSession';
@@ -47,6 +48,7 @@ import {
   isNoteBodyEqual, clearNoteData, getStaticFPath, deriveFPaths,
   getListNameObj, getAllListNames,
 } from '../utils';
+import { isUint8Array } from '../utils/index-web';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
 
@@ -1450,35 +1452,7 @@ export const updateStacksAccess = (data) => {
   return { type: UPDATE_STACKS_ACCESS, payload: data };
 };
 
-const exportAllDataLoop = async (dispatch, fpaths, doneCount) => {
-
-  if (fpaths.length === 0) throw new Error(`Invalid fpaths: ${fpaths}`);
-
-  const selectedCount = Math.min(fpaths.length - doneCount, N_NOTES);
-  const selectedFPaths = fpaths.slice(doneCount, doneCount + selectedCount);
-  const responses = await dataApi.batchGetFileWithRetry(selectedFPaths, 0);
-  const data = responses.map((response) => {
-    // Export only index.json and settings.json so safe to JSON.parse all responses.
-    return { path: response.fpath, data: JSON.parse(response.content) };
-  });
-
-  doneCount = doneCount + selectedCount;
-  if (doneCount > fpaths.length) {
-    throw new Error(`Invalid doneCount: ${doneCount}, total: ${fpaths.length}`);
-  }
-
-  dispatch(updateExportAllDataProgress({ total: fpaths.length, done: doneCount }));
-
-  if (doneCount < fpaths.length) {
-    const remainingData = await exportAllDataLoop(dispatch, fpaths, doneCount);
-    data.push(...remainingData);
-  }
-
-  return data;
-};
-
 export const exportAllData = () => async (dispatch, getState) => {
-
   dispatch(updateExportAllDataProgress({ total: 'calculating...', done: 0 }));
 
   let fpaths = [];
@@ -1488,7 +1462,8 @@ export const exportAllData = () => async (dispatch, getState) => {
 
     for (const noteId of [...noteIds, ...conflictedIds]) {
       for (const fpath of noteId.fpaths) {
-        if (fpath.endsWith(INDEX + DOT_JSON)) fpaths.push(fpath);
+        fpaths.push(fpath);
+        if (fpath.includes(CD_ROOT + '/')) fpaths.push(getStaticFPath(fpath));
       }
     }
     if (settingsFPath) fpaths.push(settingsFPath);
@@ -1501,15 +1476,34 @@ export const exportAllData = () => async (dispatch, getState) => {
     return;
   }
 
-  dispatch(updateExportAllDataProgress({ total: fpaths.length, done: 0 }));
-
-  if (fpaths.length === 0) return;
+  let total = fpaths.length, doneCount = 0;
+  dispatch(updateExportAllDataProgress({ total, done: doneCount }));
+  if (total === 0) return;
 
   try {
-    const data = await exportAllDataLoop(dispatch, fpaths, 0);
+    const zipWriter = new zip.ZipWriter(new zip.BlobWriter('application/zip'));
+    for (let i = 0; i < fpaths.length; i += N_NOTES) {
+      const selectedFPaths = fpaths.slice(i, i + N_NOTES);
+      const responses = await dataApi.batchGetFileWithRetry(selectedFPaths, 0, true);
+      await Promise.all(responses.map(({ fpath, content }) => {
+        let reader;
+        if (fpath.endsWith(DOT_JSON) || fpath.includes(CD_ROOT + '/')) {
+          reader = new zip.TextReader(content);
+        } else if (isUint8Array(content)) {
+          reader = new zip.Uint8ArrayReader(content);
+        } else {
+          reader = new zip.BlobReader(content);
+        }
 
-    var blob = new Blob([JSON.stringify(data)], { type: 'text/plain;charset=utf-8' });
-    saveAs(blob, 'justnote-data.txt');
+        return zipWriter.add(fpath, reader);
+      }));
+
+      doneCount += selectedFPaths.length;
+      dispatch(updateExportAllDataProgress({ total, done: doneCount }));
+    }
+
+    const blob = await zipWriter.close();
+    saveAs(blob, 'justnote-data.zip');
   } catch (e) {
     dispatch(updateExportAllDataProgress({
       total: -1,
