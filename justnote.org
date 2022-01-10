@@ -13,8 +13,11 @@
 ** www.zotero.org
 ** usejournal.com
 ** getpolarized.io
+** standardnotes.com
+** simplenote.com
 ** github.com/zadam/trilium
 ** github.com/logseq/logseq
+** github.com/OmGodse/Notally
 ** github.com/twitter/TwitterTextEditor
 ** www.serenity.re/en/notes
 * Same Name
@@ -205,10 +208,10 @@
 * Fully Fledged
 * Implementation
 ** Web steps
-- npx create-react-app justnotecc --template cra-template-pwa
-- yarn add tailwindcss postcss postcss-cli autoprefixer
+- yarn create react-app justnotecc --template cra-template-pwa
+- yarn add tailwindcss postcss autoprefixer
 - yarn add @tailwindcss/forms @tailwindcss/typography @tailwindcss/aspect-ratio @tailwindcss/line-clamp
-- npx tailwindcss init
+- npx tailwindcss init -p
 - yarn add redux react-redux redux-loop reselect
 - Fix dev server crash because of Emacs temp/lock file
   + github.com/facebook/create-react-app/issues/9056#issuecomment-744168146
@@ -227,6 +230,11 @@
 - yarn add @ckeditor/ckeditor5-react
 - yarn add file:../../../ckeditor5/packages/ckeditor5-build-decoupled-document
 - yarn add @types/node @types/react @types/react-dom @types/jest @types/react-redux @types/url-parse @types/file-saver
+- fix webpack 5 issue
+  + yarn add react-app-rewired stream-browserify crypto-browserify assert util buffer process
+  + create config-overrides.js
+  + change scripts in packages.js
+  + ref: stackoverflow.com/questions/70429654/webpack-5-errors-cannot-resolve-crypto-http-and-https-in-reactjs-proje, github.com/facebook/create-react-app/issues/11756, stackoverflow.com/questions/63729455/hosted-images-with-react-pdf/70441023#70441023
 ** Server steps
 *** s3
 - Set public and enable CORS
