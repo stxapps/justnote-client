@@ -9,7 +9,7 @@ import {
   INCREASE_RESET_DID_CLICK_COUNT, UPDATE_DISCARD_ACTION,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
   CANCEL_DIED_SETTINGS, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
-  UPDATE_SYNC_PROGRESS, UPDATE_SYNCED,
+  UPDATE_SYNC_PROGRESS, UPDATE_SYNCED, UPDATE_IMPORT_ALL_DATA_PROGRESS,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -61,6 +61,7 @@ const initialState = {
   resetDidClickCount: 0,
   settingsStatus: null,
   syncProgress: null,
+  importAllDataProgress: null,
   exportAllDataProgress: null,
   deleteAllDataProgress: null,
 };
@@ -329,7 +330,11 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_SETTINGS_COMMIT) {
-    return { ...state, settingsStatus: null };
+    const { doFetch } = action.payload;
+
+    const newState = { ...state, settingsStatus: null };
+    if (doFetch) newState.fetchedListNames = [];
+    return newState;
   }
 
   if (action.type === UPDATE_SETTINGS_ROLLBACK) {
@@ -366,6 +371,10 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_SYNCED) {
     return { ...state, syncProgress: null, fetchedListNames: [] };
+  }
+
+  if (action.type === UPDATE_IMPORT_ALL_DATA_PROGRESS) {
+    return { ...state, importAllDataProgress: action.payload };
   }
 
   if (action.type === UPDATE_EXPORT_ALL_DATA_PROGRESS) {

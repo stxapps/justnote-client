@@ -30,7 +30,7 @@ import {
   INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT,
   INCREASE_UPDATE_EDITOR_WIDTH_COUNT, INCREASE_RESET_DID_CLICK_COUNT,
   ADD_SAVING_OBJ_URLS, DELETE_SAVING_OBJ_URLS, CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS,
-  UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_STACKS_ACCESS,
+  UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_STACKS_ACCESS, UPDATE_IMPORT_ALL_DATA_PROGRESS,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -1294,7 +1294,11 @@ export const updateSettings = () => async (dispatch, getState) => {
   const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
   const _settingsFPath = getState().settingsFPath.fpath;
 
-  const payload = { settingsFPath, settings };
+  const doFetch = (
+    settings.sortOn !== snapshotSettings.sortOn ||
+    settings.doDescendingOrder !== snapshotSettings.doDescendingOrder
+  );
+  const payload = { settingsFPath, settings, doFetch };
   dispatch({ type: UPDATE_SETTINGS, payload });
 
   try {
@@ -1450,6 +1454,57 @@ export const updateEditorScrollEnabled = (enabled) => {
 
 export const updateStacksAccess = (data) => {
   return { type: UPDATE_STACKS_ACCESS, payload: data };
+};
+
+const importAllDataLoop = async (dispatch, fpaths, contents) => {
+
+};
+
+const parseImportedFile = (dispatch, text) => {
+
+  dispatch(updateImportAllDataProgress({
+    total: 'calculating...',
+    done: 0,
+  }));
+
+  // 2 formats: html or zip file
+  const fpaths = [], contents = [];
+
+  importAllDataLoop(dispatch, fpaths, contents);
+};
+
+export const importAllData = () => async (dispatch, getState) => {
+
+  const onError = () => {
+    window.alert('Read failed: could not read content in the file. Please recheck your file.');
+  };
+
+  const onReaderLoad = (e) => {
+    const text = e.target.result;
+    parseImportedFile(dispatch, text);
+  };
+
+  const onInputChange = () => {
+    if (input.files) {
+      const reader = new FileReader();
+      reader.onload = onReaderLoad;
+      reader.onerror = onError;
+      reader.readAsText(input.files[0]);
+    }
+  };
+
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.html, .zip';
+  input.addEventListener('change', onInputChange);
+  input.click();
+};
+
+export const updateImportAllDataProgress = (progress) => {
+  return {
+    type: UPDATE_IMPORT_ALL_DATA_PROGRESS,
+    payload: progress,
+  };
 };
 
 export const exportAllData = () => async (dispatch, getState) => {

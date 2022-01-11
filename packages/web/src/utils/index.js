@@ -146,12 +146,20 @@ export const throttle = (func, limit) => {
   };
 };
 
+export const sleep = ms => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
+
 export const isObject = val => {
   return typeof val === 'object' && val !== null;
 };
 
 export const isString = val => {
   return typeof val === 'string' || val instanceof String;
+};
+
+export const isNumber = val => {
+  return typeof val === 'number' && isFinite(val);
 };
 
 export const isEqual = (x, y) => {
@@ -676,4 +684,21 @@ export const copyTextToClipboard = (text) => {
   }, function (err) {
     console.error('Async: Could not copy text: ', err);
   });
+};
+
+export const isListNameObjsValid = (listNameObjs) => {
+  if (listNameObjs === undefined || listNameObjs === null) return true;
+  if (!Array.isArray(listNameObjs)) return false;
+
+  for (const listNameObj of listNameObjs) {
+    if (!('listName' in listNameObj && 'displayName' in listNameObj)) return false;
+    if (!(isString(listNameObj.listName) && isString(listNameObj.displayName))) {
+      return false;
+    }
+    if ('children' in listNameObj) {
+      if (!isListNameObjsValid(listNameObj.children)) return false;
+    }
+  }
+
+  return true;
 };

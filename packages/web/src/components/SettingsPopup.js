@@ -11,13 +11,15 @@ import {
 import { useSafeAreaFrame } from '.';
 import SettingsPopupAccount from './SettingsPopupAccount';
 import {
-  SettingsPopupData, SettingsPopupDataExport, SettingsPopupDataDelete,
+  SettingsPopupData, SettingsPopupDataImport, SettingsPopupDataExport,
+  SettingsPopupDataDelete,
 } from './SettingsPopupData';
 import SettingsPopupLists from './SettingsPopupLists';
 import SettingsPopupMisc from './SettingsPopupMisc';
 
 const VIEW_ACCOUNT = 1;
 const VIEW_DATA = 2;
+const VIEW_DATA_IMPORT = 7;
 const VIEW_DATA_EXPORT = 3;
 const VIEW_DATA_DELETE = 4;
 const VIEW_LISTS = 5;
@@ -34,7 +36,7 @@ const SettingsPopup = () => {
   const dispatch = useDispatch();
 
   const isViewSelected = (refViewId) => {
-    const dataViews = [VIEW_DATA, VIEW_DATA_EXPORT, VIEW_DATA_DELETE];
+    const dataViews = [VIEW_DATA, VIEW_DATA_IMPORT, VIEW_DATA_EXPORT, VIEW_DATA_DELETE];
     if (refViewId === VIEW_DATA) {
       return dataViews.includes(viewId);
     }
@@ -72,6 +74,10 @@ const SettingsPopup = () => {
   const onMiscBtnClick = () => {
     setIsSidebarShown(false);
     setViewId(VIEW_MISC);
+  };
+
+  const onToImportAllDataViewBtnClick = () => {
+    setViewId(VIEW_DATA_IMPORT);
   };
 
   const onToExportAllDataViewBtnClick = () => {
@@ -266,7 +272,14 @@ const SettingsPopup = () => {
 
   const renderDataView = () => {
     const content = (
-      <SettingsPopupData onSidebarOpenBtnClick={onSidebarOpenBtnClick} onToExportAllDataViewBtnClick={onToExportAllDataViewBtnClick} onToDeleteAllDataViewBtnClick={onToDeleteAllDataViewBtnClick} />
+      <SettingsPopupData onSidebarOpenBtnClick={onSidebarOpenBtnClick} onToImportAllDataViewBtnClick={onToImportAllDataViewBtnClick} onToExportAllDataViewBtnClick={onToExportAllDataViewBtnClick} onToDeleteAllDataViewBtnClick={onToDeleteAllDataViewBtnClick} />
+    );
+    return _render(content);
+  };
+
+  const renderImportAllDataView = () => {
+    const content = (
+      <SettingsPopupDataImport onBackToDataViewBtnClick={onBackToDataViewBtnClick} />
     );
     return _render(content);
   };
@@ -301,6 +314,7 @@ const SettingsPopup = () => {
 
   if (viewId === VIEW_ACCOUNT) return renderAccountView();
   else if (viewId === VIEW_DATA) return renderDataView();
+  else if (viewId === VIEW_DATA_IMPORT) return renderImportAllDataView();
   else if (viewId === VIEW_DATA_EXPORT) return renderExportAllDataView();
   else if (viewId === VIEW_DATA_DELETE) return renderDeleteAllDataView();
   else if (viewId === VIEW_LISTS) return renderListsView();
