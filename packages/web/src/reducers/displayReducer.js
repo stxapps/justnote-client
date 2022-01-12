@@ -51,6 +51,7 @@ const initialState = {
   selectingListName: null,
   deletingListName: null,
   didFetch: false,
+  didFetchSettings: false,
   fetchedListNames: [],
   listChangedCount: 0,
   isEditorFocused: false,
@@ -239,6 +240,7 @@ const displayReducer = (state = initialState, action) => {
       selectedNoteIds: [],
       isSelectedNoteIdsMaxErrorShown: false,
       didFetch: true,
+      didFetchSettings: true,
       fetchedListNames: [...state.fetchedListNames, listName],
     };
 
@@ -370,11 +372,20 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_SYNCED) {
-    return { ...state, syncProgress: null, fetchedListNames: [] };
+    return {
+      ...state, syncProgress: null, didFetchSettings: false, fetchedListNames: [],
+    };
   }
 
   if (action.type === UPDATE_IMPORT_ALL_DATA_PROGRESS) {
-    return { ...state, importAllDataProgress: action.payload };
+    const newState = { ...state, importAllDataProgress: action.payload };
+    if (action.payload && action.payload.total && action.payload.done) {
+      if (action.payload.total === action.payload.done) {
+        newState.didFetchSettings = false;
+        newState.fetchedListNames = [];
+      }
+    }
+    return newState;
   }
 
   if (action.type === UPDATE_EXPORT_ALL_DATA_PROGRESS) {
@@ -386,7 +397,10 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === DELETE_ALL_DATA) {
-    return { ...initialState, didFetch: true, fetchedListNames: [MY_NOTES] };
+    return {
+      ...initialState,
+      didFetch: true, didFetchSettings: true, fetchedListNames: [MY_NOTES],
+    };
   }
 
   if (action.type === RESET_STATE) {

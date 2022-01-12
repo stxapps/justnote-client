@@ -40,15 +40,16 @@ import {
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
   DISCARD_ACTION_CHANGE_LIST_NAME, MY_NOTES, TRASH, ID, NEW_NOTE, NEW_NOTE_OBJ,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
-  N_NOTES, CD_ROOT, SETTINGS, INDEX, DOT_JSON, LG_WIDTH,
+  N_NOTES, CD_ROOT, NOTES, IMAGES, SETTINGS, INDEX, DOT_JSON, LG_WIDTH,
 } from '../types/const';
 import {
   throttle, extractUrl, urlHashToObj, objToUrlHash, isIPadIPhoneIPod, isBusyStatus,
   isEqual, separateUrlAndParam, getUserImageUrl, randomString,
   isNoteBodyEqual, clearNoteData, getStaticFPath, deriveFPaths,
   getListNameObj, getAllListNames,
+  sleep, isString, isNumber, isListNameObjsValid,
 } from '../utils';
-import { isUint8Array } from '../utils/index-web';
+import { isArrayBuffer, isUint8Array } from '../utils/index-web';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
 
@@ -1457,10 +1458,43 @@ export const updateStacksAccess = (data) => {
 };
 
 const importAllDataLoop = async (dispatch, fpaths, contents) => {
+  let total = fpaths.length, doneCount = 0;
+  dispatch(updateImportAllDataProgress({ total, done: doneCount }));
 
+  try {
+    for (let i = 0; i < fpaths.length; i += N_NOTES) {
+      const _fpaths = fpaths.slice(i, i + N_NOTES);
+      const _contents = contents.slice(i, i + N_NOTES).map((content, j) => {
+        if (_fpaths[j].endsWith(INDEX + DOT_JSON) || _fpaths[j].startsWith(SETTINGS)) {
+          content = JSON.stringify(content);
+        }
+        return content;
+      });
+      await dataApi.batchPutFileWithRetry(_fpaths, _contents, 0);
+
+      doneCount += _fpaths.length;
+      dispatch(updateImportAllDataProgress({ total, done: doneCount }));
+
+      await sleep(1000); // Make it slow to not overwhelm the server
+    }
+  } catch (e) {
+    dispatch(updateImportAllDataProgress({
+      total: -1,
+      done: -1,
+      error: e.name + ': ' + e.message,
+    }));
+
+    if (doneCount < total) {
+      let msg = 'There is an error while importing! Below are contents that have not been imported:\n';
+      for (let i = doneCount; i < fpaths.length; i++) {
+        msg += '    • ' + fpaths[i] + '\n';
+      }
+      window.alert(msg);
+    }
+  }
 };
 
-const parseImportedFile = (dispatch, text) => {
+const parseImportedFile = async (dispatch, fileContent) => {
 
   dispatch(updateImportAllDataProgress({
     total: 'calculating...',
@@ -1469,6 +1503,120 @@ const parseImportedFile = (dispatch, text) => {
 
   // 2 formats: html or zip file
   const fpaths = [], contents = [];
+  if (isArrayBuffer(fileContent)) {
+    const reader = new zip.ZipReader(
+      new zip.Uint8ArrayReader(new Uint8Array(fileContent))
+    );
+
+    let addedDT = Date.now();
+    const idMap = {};
+
+    const entries = await reader.getEntries();
+    for (const entry of entries) {
+      let fpath = entry.filename;
+
+      let content;
+      if (
+        fpath.endsWith(INDEX + DOT_JSON) ||
+        fpath.startsWith(SETTINGS) ||
+        fpath.includes(CD_ROOT + '/')
+      ) {
+        content = await entry.getData(new zip.TextWriter());
+      } else {
+        content = await entry.getData(new zip.BlobWriter());
+      }
+      if (!fpath.includes(CD_ROOT + '/') && !content) continue;
+
+      if (fpath.startsWith(NOTES)) {
+        const parts = fpath.split('/');
+        if (fpath.includes(CD_ROOT + '/')) {
+          if (parts.length !== 6) continue;
+        } else {
+          if (parts.length !== 4) continue;
+        }
+        if (parts[0] !== NOTES) continue;
+
+        const { id, parentIds } = dataApi.extractNoteFName(parts[2]);
+        if (!(/^\d+[A-Za-z]+$/.test(id))) continue;
+        if (parentIds) {
+          if (!parentIds.every(id => (/^\d+[A-Za-z]+$/.test(id)))) continue;
+        }
+
+        if (parts[3] === INDEX + DOT_JSON) {
+          try {
+            content = JSON.parse(content);
+            if (
+              !('title' in content && 'body' in content)
+            ) continue;
+            if (!(isString(content.title) && isString(content.body))) continue;
+          } catch (e) {
+            console.log('parseImportedFile: JSON.parse note content error: ', e);
+            continue;
+          }
+        } else if (parts[3] === CD_ROOT) {
+          if (parts[4] !== IMAGES) continue;
+        } else continue;
+
+        // Treat import notes as adding new notes, replace note id with a new one
+        if (!idMap[parts[2]]) {
+          idMap[parts[2]] = `${addedDT}${randomString(4)}`;
+          addedDT += 1;
+        }
+        parts[2] = idMap[parts[2]];
+        fpath = parts.join('/');
+      } else if (fpath.startsWith(IMAGES)) {
+        const parts = fpath.split('/');
+        if (parts.length !== 2 || parts[0] !== IMAGES) continue;
+
+        const names = parts[1].split('.');
+        if (names.length !== 2) continue;
+      } else if (fpath.startsWith(SETTINGS)) {
+        if (!fpath.endsWith(DOT_JSON)) continue;
+
+        let dt = parseInt(fpath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10);
+        if (!isNumber(dt)) continue;
+
+        try {
+          content = JSON.parse(content);
+
+          const settings = { ...initialSettingsState };
+          if ('doDeleteOldNotesInTrash' in content) {
+            settings.doDeleteOldNotesInTrash = content.doDeleteOldNotesInTrash;
+          }
+          if ('sortOn' in content) {
+            settings.sortOn = content.sortOn;
+          }
+          if ('doDescendingOrder' in content) {
+            settings.doDescendingOrder = content.doDescendingOrder;
+          }
+          if ('doAlertScreenRotation' in content) {
+            settings.doAlertScreenRotation = content.doAlertScreenRotation;
+          }
+          if ('listNameMap' in content && isListNameObjsValid(content.listNameMap)) {
+            settings.listNameMap = content.listNameMap;
+          }
+          content = settings;
+        } catch (e) {
+          console.log('parseImportedFile: JSON.parse settings content error: ', e);
+          continue;
+        }
+
+        // Make the settings newest version
+        fpath = `${SETTINGS}${addedDT}${DOT_JSON}`;
+        addedDT += 1;
+      } else continue;
+
+      fpaths.push(fpath);
+      contents.push(content);
+    }
+
+    // if no fpaths and contents, try as it's from other app
+
+
+    await reader.close();
+  } else {
+
+  }
 
   importAllDataLoop(dispatch, fpaths, contents);
 };
@@ -1480,16 +1628,18 @@ export const importAllData = () => async (dispatch, getState) => {
   };
 
   const onReaderLoad = (e) => {
-    const text = e.target.result;
-    parseImportedFile(dispatch, text);
+    parseImportedFile(dispatch, e.target.result);
   };
 
   const onInputChange = () => {
     if (input.files) {
+      const file = input.files[0];
+
       const reader = new FileReader();
       reader.onload = onReaderLoad;
       reader.onerror = onError;
-      reader.readAsText(input.files[0]);
+      if (file.name.endsWith('.zip')) reader.readAsArrayBuffer(file);
+      else reader.readAsText(file);
     }
   };
 
@@ -1542,11 +1692,14 @@ export const exportAllData = () => async (dispatch, getState) => {
       const responses = await dataApi.batchGetFileWithRetry(selectedFPaths, 0, true);
       await Promise.all(responses.map(({ fpath, content }) => {
         let reader;
-        if (fpath.endsWith(DOT_JSON) || fpath.includes(CD_ROOT + '/')) {
+        if (
+          fpath.endsWith(INDEX + DOT_JSON) ||
+          fpath.startsWith(SETTINGS) ||
+          fpath.includes(CD_ROOT + '/')
+        ) {
           reader = new zip.TextReader(content);
-        } else if (isUint8Array(content)) {
-          reader = new zip.Uint8ArrayReader(content);
         } else {
+          if (isUint8Array(content)) content = new Blob([content]);
           reader = new zip.BlobReader(content);
         }
 

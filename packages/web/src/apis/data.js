@@ -2,7 +2,7 @@ import userSession from '../userSession';
 import {
   NOTES, IMAGES, SETTINGS, INDEX, DOT_JSON, N_NOTES, MAX_TRY, TRASH, N_DAYS,
 } from '../types/const';
-import { splitOnFirst } from '../utils';
+import { splitOnFirst, isNumber } from '../utils';
 
 const createNoteFPath = (listName, fname, subName) => {
   return `${NOTES}/${listName}/${fname}/${subName}`;
@@ -55,7 +55,7 @@ const listFPaths = async () => {
           settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10
         );
         const _dt = parseInt(fpath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10);
-        if (dt < _dt) settingsFPath = fpath;
+        if (isNumber(dt) && isNumber(_dt) && dt < _dt) settingsFPath = fpath;
       }
     } else {
       console.log(`Invalid file path: ${fpath}`);
@@ -492,9 +492,9 @@ const deleteFiles = async (fpaths) => {
 };
 
 const data = {
-  listFPaths, listNoteIds, batchGetFileWithRetry, toNotes,
-  fetch, fetchMore, putNotes, fetchOldNotesInTrash, canDeleteListNames,
-  getFiles, putFiles, deleteFiles,
+  extractNoteFName, listFPaths, listNoteIds, batchGetFileWithRetry, toNotes,
+  fetch, fetchMore, batchPutFileWithRetry, putNotes, fetchOldNotesInTrash,
+  canDeleteListNames, getFiles, putFiles, deleteFiles,
 };
 
 export default data;
