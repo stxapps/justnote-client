@@ -32,7 +32,7 @@ const _SettingsPopupData = (props) => {
         <button onClick={onToImportAllDataViewBtnClick} className="w-full text-left rounded-sm focus:outline-none focus:ring-2 focus:ring-gray-400">
           <h4 className="text-base text-gray-800 font-medium underline hover:text-gray-900">Import Data</h4>
         </button>
-        <p className="mt-2.5 text-base text-gray-500 leading-relaxed">Import data from a file. The file can be a html file or a zip file exported from some note taking apps or our website.</p>
+        <p className="mt-2.5 text-base text-gray-500 leading-relaxed">Import data from a file. The file can be a html file or a zip file exported from some note taking apps i.e. <a className="underline rounded hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400" href="https://takeout.google.com/" target="_blank" rel="noreferrer">Google Keep</a> or our website.</p>
       </div>
       <div className="mt-8">
         <button onClick={onToExportAllDataViewBtnClick} className="w-full text-left rounded-sm focus:outline-none focus:ring-2 focus:ring-gray-400">

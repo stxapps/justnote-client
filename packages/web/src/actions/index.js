@@ -38,16 +38,17 @@ import {
   SEARCH_POPUP, SETTINGS_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP,
   ALERT_SCREEN_ROTATION_POPUP, DISCARD_ACTION_CANCEL_EDIT,
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
-  DISCARD_ACTION_CHANGE_LIST_NAME, MY_NOTES, TRASH, ID, NEW_NOTE, NEW_NOTE_OBJ,
+  DISCARD_ACTION_CHANGE_LIST_NAME, MY_NOTES, TRASH, ARCHIVE, ID, NEW_NOTE, NEW_NOTE_OBJ,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
   N_NOTES, CD_ROOT, NOTES, IMAGES, SETTINGS, INDEX, DOT_JSON, LG_WIDTH,
+  IMAGE_FILE_EXTS,
 } from '../types/const';
 import {
   throttle, extractUrl, urlHashToObj, objToUrlHash, isIPadIPhoneIPod, isBusyStatus,
   isEqual, separateUrlAndParam, getUserImageUrl, randomString,
   isNoteBodyEqual, clearNoteData, getStaticFPath, deriveFPaths,
   getListNameObj, getAllListNames,
-  sleep, isString, isNumber, isListNameObjsValid,
+  sleep, isObject, isString, isNumber, isListNameObjsValid,
 } from '../utils';
 import { isArrayBuffer, isUint8Array } from '../utils/index-web';
 import { _ } from '../utils/obj';
@@ -1502,14 +1503,11 @@ const parseImportedFile = async (dispatch, fileContent) => {
   }));
 
   // 2 formats: html or zip file
-  const fpaths = [], contents = [];
+  let fpaths = [], contents = [], addedDT = Date.now(), idMap = {};
   if (isArrayBuffer(fileContent)) {
     const reader = new zip.ZipReader(
       new zip.Uint8ArrayReader(new Uint8Array(fileContent))
     );
-
-    let addedDT = Date.now();
-    const idMap = {};
 
     const entries = await reader.getEntries();
     for (const entry of entries) {
@@ -1519,7 +1517,11 @@ const parseImportedFile = async (dispatch, fileContent) => {
       if (
         fpath.endsWith(INDEX + DOT_JSON) ||
         fpath.startsWith(SETTINGS) ||
-        fpath.includes(CD_ROOT + '/')
+        fpath.includes(CD_ROOT + '/') ||
+        (
+          fpath.startsWith('Takeout/Keep/') &&
+          (fpath.endsWith('Labels.txt') || fpath.endsWith(DOT_JSON))
+        )
       ) {
         content = await entry.getData(new zip.TextWriter());
       } else {
@@ -1604,21 +1606,152 @@ const parseImportedFile = async (dispatch, fileContent) => {
         // Make the settings newest version
         fpath = `${SETTINGS}${addedDT}${DOT_JSON}`;
         addedDT += 1;
+      } else if (fpath.startsWith('Takeout/Keep/')) {
+        const parts = fpath.split('/');
+        if (parts.length < 3) continue;
+
+        const fname = parts[parts.length - 1];
+        const tokens = fname.split('.');
+        if (tokens.length < 2) continue;
+
+        const ext = tokens[tokens.length - 1];
+        if (fname === 'Labels.txt') {
+          const settings = { ...initialSettingsState };
+          for (const label of content.split('\n')) {
+            if (!label) continue;
+
+            const id = `${addedDT}-${randomString(4)}`;
+            settings.listNameMap.push({ listName: id, displayName: label });
+            idMap[label] = id;
+            addedDT += 1;
+          }
+          content = settings;
+
+          fpath = `${SETTINGS}${addedDT}${DOT_JSON}`;
+          addedDT += 1;
+        } else if (IMAGE_FILE_EXTS.includes(ext)) {
+          const newName = `${randomString(4)}-${randomString(4)}-${randomString(4)}-${randomString(4)}.${ext}`;
+          fpath = `${IMAGES}/${newName}`;
+
+          // As file name can be .jpg but attachment in note.json can be .jpeg
+          //   so need to ignore the ext.
+          idMap[tokens.slice(0, -1).join('.')] = fpath;
+        } else if (['json'].includes(ext)) {
+          // Need to convert to notes/[listName]/[noteId]/index.json below
+          //   after gathering all images and labels.
+          try {
+            content = JSON.parse(content);
+          } catch (e) {
+            console.log('parseImportedFile: JSON.parse Keep content error: ', e);
+            continue;
+          }
+        } else continue;
       } else continue;
 
       fpaths.push(fpath);
       contents.push(content);
     }
 
-    // if no fpaths and contents, try as it's from other app
-
-
     await reader.close();
   } else {
 
   }
 
-  importAllDataLoop(dispatch, fpaths, contents);
+  const selectedFPaths = [], selectedContents = [];
+  for (let i = 0; i < fpaths.length; i++) {
+    const fpath = fpaths[i];
+    const content = contents[i];
+
+    if (fpath.startsWith('Takeout/Keep/') && fpath.endsWith(DOT_JSON)) {
+      let listName = MY_NOTES;
+      if (content.isTrashed) listName = TRASH;
+      else if (content.isArchived) listName = ARCHIVE;
+      else if (
+        content.labels && Array.isArray(content.labels) && content.labels.length > 0
+      ) {
+        const label = content.labels[0];
+        if (isObject(label) && idMap[label.name]) listName = idMap[label.name];
+      }
+
+      let dt;
+      if (
+        content.userEditedTimestampUsec &&
+        isNumber(content.userEditedTimestampUsec)
+      ) {
+        dt = content.userEditedTimestampUsec;
+        if (dt > 1000000000000000) dt = Math.round(dt / 1000);
+      } else {
+        dt = addedDT;
+        addedDT += 1;
+      }
+
+      const id = `${dt}${randomString(4)}`;
+      const dpath = `${NOTES}/${listName}/${id}`;
+
+      const title = content.title || '';
+      let body = '';
+      if (content.textContent) {
+        body = '<p>' + content.textContent.replace(/\r?\n/g, '<br />') + '</p>';
+      }
+
+      if (content.attachments && Array.isArray(content.attachments)) {
+        for (const attachment of content.attachments) {
+          if (
+            !attachment.mimetype ||
+            !isString(attachment.mimetype) ||
+            !attachment.mimetype.startsWith('image/') ||
+            !attachment.filePath ||
+            !isString(attachment.filePath)
+          ) continue;
+
+          const tokens = attachment.filePath.split('.');
+          if (tokens.length < 2) continue;
+
+          const imgFPath = idMap[tokens.slice(0, -1).join('.')];
+          if (imgFPath) {
+            let imgHtml = '<figure class="image"><img src="cdroot/';
+            imgHtml += imgFPath;
+            imgHtml += '" /></figure>';
+            body += imgHtml;
+
+            selectedFPaths.push(`${dpath}/cdroot/${imgFPath}`);
+            selectedContents.push('');
+          }
+        }
+      }
+      if (
+        content.listContent &&
+        Array.isArray(content.listContent) &&
+        content.listContent.length > 0
+      ) {
+        let listHtml = '<ul class="todo-list">';
+        for (const listItem of content.listContent) {
+          if (
+            !isObject(listItem) || !listItem.text || !isString(listItem.text)
+          ) continue;
+
+          listHtml += '<li><label class="todo-list__label"><input type="checkbox" disabled="disabled"';
+          if (listItem.isChecked) listHtml += ' checked="checked"';
+          listHtml += ' /><span class="todo-list__label__description">';
+          listHtml += listItem.text;
+          listHtml += '</span></label></li>';
+        }
+        listHtml += '</ul>'
+        body += listHtml;
+      }
+
+      if (title || body) {
+        selectedFPaths.push(`${dpath}/index.json`);
+        selectedContents.push({ title, body });
+      }
+      continue;
+    }
+
+    selectedFPaths.push(fpath);
+    selectedContents.push(content);
+  }
+
+  importAllDataLoop(dispatch, selectedFPaths, selectedContents);
 };
 
 export const importAllData = () => async (dispatch, getState) => {
