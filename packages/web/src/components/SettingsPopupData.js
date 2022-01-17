@@ -32,7 +32,7 @@ const _SettingsPopupData = (props) => {
         <button onClick={onToImportAllDataViewBtnClick} className="w-full text-left rounded-sm focus:outline-none focus:ring-2 focus:ring-gray-400">
           <h4 className="text-base text-gray-800 font-medium underline hover:text-gray-900">Import Data</h4>
         </button>
-        <p className="mt-2.5 text-base text-gray-500 leading-relaxed">Import data from a file. The file can be a html file or a zip file exported from some note taking apps i.e. <a className="underline rounded hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400" href="https://takeout.google.com/" target="_blank" rel="noreferrer">Google Keep</a> or our website.</p>
+        <p className="mt-2.5 text-base text-gray-500 leading-relaxed">Import data from a zip file. The zip file can be exported from some note taking apps i.e. <a className="underline rounded hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400" href="https://takeout.google.com/" target="_blank" rel="noreferrer">Google Keep</a>, <a className="underline rounded hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400" href="https://help.evernote.com/hc/en-us/articles/209005557-Export-notes-and-notebooks-as-ENEX-or-HTML" target="_blank" rel="noreferrer">Evernote</a> (as multiple web pages (.html) and manually zip the folder) and our website.</p>
       </div>
       <div className="mt-8">
         <button onClick={onToExportAllDataViewBtnClick} className="w-full text-left rounded-sm focus:outline-none focus:ring-2 focus:ring-gray-400">
@@ -143,7 +143,7 @@ const _SettingsPopupDataImport = (props) => {
         </button>
         <h3 className="pb-2 text-xl text-gray-800 font-medium leading-none md:pb-0">Import Data</h3>
       </div>
-      <p className="mt-6 text-base text-gray-500 leading-relaxed">Import data from a file.</p>
+      <p className="mt-6 text-base text-gray-500 leading-relaxed">Import data from a zip file.</p>
       <p className="mt-6 text-base text-gray-500 leading-relaxed">It may take several minutes to import data.</p>
       {actionPanel}
     </div>

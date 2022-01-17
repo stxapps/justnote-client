@@ -48,9 +48,9 @@ import {
   isEqual, separateUrlAndParam, getUserImageUrl, randomString,
   isNoteBodyEqual, clearNoteData, getStaticFPath, deriveFPaths,
   getListNameObj, getAllListNames,
-  sleep, isObject, isString, isNumber, isListNameObjsValid,
+  sleep, isObject, isString, isNumber, isListNameObjsValid, indexOfClosingTag,
 } from '../utils';
-import { isArrayBuffer, isUint8Array } from '../utils/index-web';
+import { isUint8Array } from '../utils/index-web';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
 
@@ -1502,159 +1502,188 @@ const parseImportedFile = async (dispatch, fileContent) => {
     done: 0,
   }));
 
-  // 2 formats: html or zip file
+  // 1 format: zip file
   let fpaths = [], contents = [], addedDT = Date.now(), idMap = {};
-  if (isArrayBuffer(fileContent)) {
-    const reader = new zip.ZipReader(
-      new zip.Uint8ArrayReader(new Uint8Array(fileContent))
-    );
+  let isEvernote = false, enFPaths = [], enContents = [];
+  const reader = new zip.ZipReader(
+    new zip.Uint8ArrayReader(new Uint8Array(fileContent))
+  );
 
-    const entries = await reader.getEntries();
-    for (const entry of entries) {
-      let fpath = entry.filename;
+  const entries = await reader.getEntries();
+  for (const entry of entries) {
+    if (entry.directory) continue;
 
-      let content;
-      if (
-        fpath.endsWith(INDEX + DOT_JSON) ||
-        fpath.startsWith(SETTINGS) ||
-        fpath.includes(CD_ROOT + '/') ||
-        (
-          fpath.startsWith('Takeout/Keep/') &&
-          (fpath.endsWith('Labels.txt') || fpath.endsWith(DOT_JSON))
-        )
-      ) {
-        content = await entry.getData(new zip.TextWriter());
+    let fpath = entry.filename;
+    const fpathParts = fpath.split('/');
+    const fname = fpathParts[fpathParts.length - 1];
+    const fnameParts = fname.split('.');
+    const fext = fnameParts[fnameParts.length - 1];
+
+    let content;
+    if (
+      fpath.endsWith(INDEX + DOT_JSON) ||
+      fpath.startsWith(SETTINGS) ||
+      fpath.includes(CD_ROOT + '/') ||
+      (
+        fpath.startsWith('Takeout/Keep/') &&
+        (fpath.endsWith('Labels.txt') || fpath.endsWith(DOT_JSON))
+      ) ||
+      fpath.endsWith('.html')
+    ) {
+      content = await entry.getData(new zip.TextWriter());
+    } else {
+      content = await entry.getData(new zip.BlobWriter());
+    }
+    if (!fpath.includes(CD_ROOT + '/') && !content) continue;
+
+    if (fpath.startsWith(NOTES)) {
+      if (fpath.includes(CD_ROOT + '/')) {
+        if (fpathParts.length !== 6) continue;
       } else {
-        content = await entry.getData(new zip.BlobWriter());
+        if (fpathParts.length !== 4) continue;
       }
-      if (!fpath.includes(CD_ROOT + '/') && !content) continue;
+      if (fpathParts[0] !== NOTES) continue;
 
-      if (fpath.startsWith(NOTES)) {
-        const parts = fpath.split('/');
-        if (fpath.includes(CD_ROOT + '/')) {
-          if (parts.length !== 6) continue;
-        } else {
-          if (parts.length !== 4) continue;
-        }
-        if (parts[0] !== NOTES) continue;
+      const { id, parentIds } = dataApi.extractNoteFName(fpathParts[2]);
+      if (!(/^\d+[A-Za-z]+$/.test(id))) continue;
+      if (parentIds) {
+        if (!parentIds.every(id => (/^\d+[A-Za-z]+$/.test(id)))) continue;
+      }
 
-        const { id, parentIds } = dataApi.extractNoteFName(parts[2]);
-        if (!(/^\d+[A-Za-z]+$/.test(id))) continue;
-        if (parentIds) {
-          if (!parentIds.every(id => (/^\d+[A-Za-z]+$/.test(id)))) continue;
-        }
-
-        if (parts[3] === INDEX + DOT_JSON) {
-          try {
-            content = JSON.parse(content);
-            if (
-              !('title' in content && 'body' in content)
-            ) continue;
-            if (!(isString(content.title) && isString(content.body))) continue;
-          } catch (e) {
-            console.log('parseImportedFile: JSON.parse note content error: ', e);
-            continue;
-          }
-        } else if (parts[3] === CD_ROOT) {
-          if (parts[4] !== IMAGES) continue;
-        } else continue;
-
-        // Treat import notes as adding new notes, replace note id with a new one
-        if (!idMap[parts[2]]) {
-          idMap[parts[2]] = `${addedDT}${randomString(4)}`;
-          addedDT += 1;
-        }
-        parts[2] = idMap[parts[2]];
-        fpath = parts.join('/');
-      } else if (fpath.startsWith(IMAGES)) {
-        const parts = fpath.split('/');
-        if (parts.length !== 2 || parts[0] !== IMAGES) continue;
-
-        const names = parts[1].split('.');
-        if (names.length !== 2) continue;
-      } else if (fpath.startsWith(SETTINGS)) {
-        if (!fpath.endsWith(DOT_JSON)) continue;
-
-        let dt = parseInt(fpath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10);
-        if (!isNumber(dt)) continue;
-
+      if (fpathParts[3] === INDEX + DOT_JSON) {
         try {
           content = JSON.parse(content);
-
-          const settings = { ...initialSettingsState };
-          if ('doDeleteOldNotesInTrash' in content) {
-            settings.doDeleteOldNotesInTrash = content.doDeleteOldNotesInTrash;
-          }
-          if ('sortOn' in content) {
-            settings.sortOn = content.sortOn;
-          }
-          if ('doDescendingOrder' in content) {
-            settings.doDescendingOrder = content.doDescendingOrder;
-          }
-          if ('doAlertScreenRotation' in content) {
-            settings.doAlertScreenRotation = content.doAlertScreenRotation;
-          }
-          if ('listNameMap' in content && isListNameObjsValid(content.listNameMap)) {
-            settings.listNameMap = content.listNameMap;
-          }
-          content = settings;
+          if (
+            !('title' in content && 'body' in content)
+          ) continue;
+          if (!(isString(content.title) && isString(content.body))) continue;
         } catch (e) {
-          console.log('parseImportedFile: JSON.parse settings content error: ', e);
+          console.log('parseImportedFile: JSON.parse note content error: ', e);
           continue;
         }
+      } else if (fpathParts[3] === CD_ROOT) {
+        if (fpathParts[4] !== IMAGES) continue;
+      } else continue;
 
-        // Make the settings newest version
+      // Treat import notes as adding new notes, replace note id with a new one
+      if (!idMap[fpathParts[2]]) {
+        idMap[fpathParts[2]] = `${addedDT}${randomString(4)}`;
+        addedDT += 1;
+      }
+      fpathParts[2] = idMap[fpathParts[2]];
+      fpath = fpathParts.join('/');
+    } else if (fpath.startsWith(IMAGES)) {
+      if (fpathParts.length !== 2 || fpathParts[0] !== IMAGES) continue;
+      if (fnameParts.length !== 2) continue;
+    } else if (fpath.startsWith(SETTINGS)) {
+      if (!fpath.endsWith(DOT_JSON)) continue;
+
+      let dt = parseInt(fpath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10);
+      if (!isNumber(dt)) continue;
+
+      try {
+        content = JSON.parse(content);
+
+        const settings = { ...initialSettingsState };
+        if ('doDeleteOldNotesInTrash' in content) {
+          settings.doDeleteOldNotesInTrash = content.doDeleteOldNotesInTrash;
+        }
+        if ('sortOn' in content) {
+          settings.sortOn = content.sortOn;
+        }
+        if ('doDescendingOrder' in content) {
+          settings.doDescendingOrder = content.doDescendingOrder;
+        }
+        if ('doAlertScreenRotation' in content) {
+          settings.doAlertScreenRotation = content.doAlertScreenRotation;
+        }
+        if ('listNameMap' in content && isListNameObjsValid(content.listNameMap)) {
+          settings.listNameMap = content.listNameMap;
+        }
+        content = settings;
+      } catch (e) {
+        console.log('parseImportedFile: JSON.parse settings content error: ', e);
+        continue;
+      }
+
+      // Make the settings newest version
+      fpath = `${SETTINGS}${addedDT}${DOT_JSON}`;
+      addedDT += 1;
+    } else if (fpath.startsWith('Takeout/Keep/')) {
+      if (fpathParts.length < 3) continue;
+      if (fnameParts.length < 2) continue;
+
+      if (fname === 'Labels.txt') {
+        const settings = { ...initialSettingsState };
+        for (const label of content.split('\n')) {
+          if (!label) continue;
+
+          const id = `${addedDT}-${randomString(4)}`;
+          settings.listNameMap.push({ listName: id, displayName: label });
+          idMap[label] = id;
+          addedDT += 1;
+        }
+        content = settings;
+
         fpath = `${SETTINGS}${addedDT}${DOT_JSON}`;
         addedDT += 1;
-      } else if (fpath.startsWith('Takeout/Keep/')) {
-        const parts = fpath.split('/');
-        if (parts.length < 3) continue;
+      } else if (IMAGE_FILE_EXTS.includes(fext)) {
+        const newName = `${randomString(4)}-${randomString(4)}-${randomString(4)}-${randomString(4)}.${fext}`;
+        fpath = `${IMAGES}/${newName}`;
 
-        const fname = parts[parts.length - 1];
-        const tokens = fname.split('.');
-        if (tokens.length < 2) continue;
-
-        const ext = tokens[tokens.length - 1];
-        if (fname === 'Labels.txt') {
-          const settings = { ...initialSettingsState };
-          for (const label of content.split('\n')) {
-            if (!label) continue;
-
-            const id = `${addedDT}-${randomString(4)}`;
-            settings.listNameMap.push({ listName: id, displayName: label });
-            idMap[label] = id;
-            addedDT += 1;
-          }
-          content = settings;
-
-          fpath = `${SETTINGS}${addedDT}${DOT_JSON}`;
-          addedDT += 1;
-        } else if (IMAGE_FILE_EXTS.includes(ext)) {
-          const newName = `${randomString(4)}-${randomString(4)}-${randomString(4)}-${randomString(4)}.${ext}`;
-          fpath = `${IMAGES}/${newName}`;
-
-          // As file name can be .jpg but attachment in note.json can be .jpeg
-          //   so need to ignore the ext.
-          idMap[tokens.slice(0, -1).join('.')] = fpath;
-        } else if (['json'].includes(ext)) {
-          // Need to convert to notes/[listName]/[noteId]/index.json below
-          //   after gathering all images and labels.
-          try {
-            content = JSON.parse(content);
-          } catch (e) {
-            console.log('parseImportedFile: JSON.parse Keep content error: ', e);
-            continue;
-          }
-        } else continue;
+        // As file name can be .jpg but attachment in note.json can be .jpeg
+        //   so need to ignore the ext.
+        idMap[fnameParts.slice(0, -1).join('.')] = fpath;
+      } else if (['json'].includes(fext)) {
+        // Need to convert to notes/[listName]/[noteId]/index.json below
+        //   after gathering all images and labels.
+        try {
+          content = JSON.parse(content);
+        } catch (e) {
+          console.log('parseImportedFile: JSON.parse Keep content error: ', e);
+          continue;
+        }
       } else continue;
+    } else if (fpath.endsWith('Evernote_index.html')) {
+      isEvernote = true;
+      continue;
+    } else if (fpath.endsWith('.html') || IMAGE_FILE_EXTS.includes(fext)) {
+      enFPaths.push(fpath);
+      enContents.push(content);
+      continue;
+    } else continue;
+
+    fpaths.push(fpath);
+    contents.push(content);
+  }
+
+  await reader.close();
+
+  if (isEvernote) {
+    fpaths = []; contents = []; addedDT = Date.now(); idMap = {};
+
+    for (let i = 0; i < enFPaths.length; i++) {
+      let fpath = enFPaths[i];
+      const fpathParts = fpath.split('/');
+      const fname = fpathParts[fpathParts.length - 1];
+      const fnameParts = fname.split('.');
+      const fext = fnameParts[fnameParts.length - 1];
+
+      const content = enContents[i];
+
+      if (IMAGE_FILE_EXTS.includes(fext)) {
+        const newName = `${randomString(4)}-${randomString(4)}-${randomString(4)}-${randomString(4)}.${fext}`;
+        fpath = `${IMAGES}/${newName}`;
+
+        // Also includes dir name to be matched with src in the html
+        if (fpathParts.length < 2) continue;
+        const dir = fpathParts[fpathParts.length - 2] + '/';
+        idMap[dir + fnameParts.slice(0, -1).join('.')] = fpath;
+      }
 
       fpaths.push(fpath);
       contents.push(content);
     }
-
-    await reader.close();
-  } else {
-
   }
 
   const selectedFPaths = [], selectedContents = [];
@@ -1704,10 +1733,10 @@ const parseImportedFile = async (dispatch, fileContent) => {
             !isString(attachment.filePath)
           ) continue;
 
-          const tokens = attachment.filePath.split('.');
-          if (tokens.length < 2) continue;
+          const fnameParts = attachment.filePath.split('.');
+          if (fnameParts.length < 2) continue;
 
-          const imgFPath = idMap[tokens.slice(0, -1).join('.')];
+          const imgFPath = idMap[fnameParts.slice(0, -1).join('.')];
           if (imgFPath) {
             let imgHtml = '<figure class="image"><img src="cdroot/';
             imgHtml += imgFPath;
@@ -1747,6 +1776,169 @@ const parseImportedFile = async (dispatch, fileContent) => {
       continue;
     }
 
+    if (isEvernote && fpath.endsWith('.html')) {
+      const listName = MY_NOTES;
+
+      let dt, dtMatch = content.match(/<meta itemprop="updated" content="(.+)">/i);
+      if (!dtMatch) {
+        dtMatch = content.match(/<meta itemprop="created" content="(.+)">/i);
+      }
+      if (dtMatch) {
+        const s = dtMatch[1];
+        if (s.length === 16) {
+          const _dt = Date.parse(`${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 11)}:${s.slice(11, 13)}:${s.slice(13)}`);
+          if (_dt && isNumber(_dt)) dt = _dt;
+        }
+      }
+      if (!dt) {
+        dt = addedDT;
+        addedDT += 1;
+      }
+
+      const id = `${dt}${randomString(4)}`;
+      const dpath = `${NOTES}/${listName}/${id}`;
+
+      let title = '';
+      const tMatch = content.match(/<h1[^>]*>([^<]+)<\/h1>/i);
+      if (tMatch) title = tMatch[1].trim();
+      if (title === 'Untitled') title = '';
+
+      let body = '';
+      const bMatch = content.match(/<en-note[^>]*>([\s\S]+?)<\/en-note>/i);
+      if (bMatch) body = bMatch[1].trim();
+
+      // img tags
+      for (const match of body.matchAll(/<img[^>]+?src="([^"]+)"[^>]*>/gi)) {
+        const fpath = match[1];
+        const fpathParts = fpath.split('/');
+        const fname = fpathParts[fpathParts.length - 1];
+        const fnameParts = fname.split('.');
+
+        if (fpathParts.length < 2 || fnameParts.length < 2) continue;
+
+        const dir = fpathParts[fpathParts.length - 2] + '/';
+        const imgFPath = idMap[dir + fnameParts.slice(0, -1).join('.')];
+        if (imgFPath) {
+          body = body.split(fpath).join('cdroot/' + imgFPath);
+
+          selectedFPaths.push(`${dpath}/cdroot/${imgFPath}`);
+          selectedContents.push('');
+        }
+      }
+
+      // task tags
+      let i = -1;
+      while ((i = body.indexOf('<div class="taskgroup">', i + 1)) !== -1) {
+        let html = body.slice(i);
+
+        const endIndex = indexOfClosingTag(html);
+        if (endIndex < 0) continue;
+
+        html = html.slice(0, endIndex).trim();
+
+        try {
+          const template = document.createElement('template');
+          template.innerHTML = html;
+
+          const taskObjs = [];
+          const elem = template.content.firstChild;
+          for (const node of elem.childNodes) {
+            let isCompleted = false;
+            if (node instanceof HTMLElement && node.dataset && node.dataset.completed) {
+              isCompleted = node.dataset.completed === 'true';
+            }
+
+            const text = node.firstChild.firstChild.lastChild.firstChild.textContent;
+            taskObjs.push({ text: text.trim(), isCompleted });
+          }
+
+          if (taskObjs.length > 0) {
+            let todoHtml = '<ul class="todo-list">';
+            for (const { text, isCompleted } of taskObjs) {
+              todoHtml += '<li><label class="todo-list__label"><input type="checkbox" disabled="disabled"';
+              if (isCompleted) todoHtml += ' checked="checked"';
+              todoHtml += ' /><span class="todo-list__label__description">';
+              todoHtml += text;
+              todoHtml += '</span></label></li>';
+            }
+            todoHtml += '</ul>';
+            body = body.slice(0, i) + todoHtml + body.slice(endIndex);
+          }
+        } catch (e) {
+          console.log('parseImportedFile: Evernote task tag error', e);
+          continue;
+        }
+      }
+
+      // todo tags
+      for (const match of body.matchAll(/<ul[^>]+?class="en-todolist"[\s\S]+?<\/ul>/gi)) {
+        const html = match[0];
+        try {
+          const template = document.createElement('template');
+          template.innerHTML = html;
+
+          const todoObjs = [];
+          const elem = template.content.firstChild;
+          for (const node of elem.childNodes) {
+            let isCompleted = false;
+            if (node instanceof HTMLElement && node.dataset && node.dataset.checked) {
+              isCompleted = node.dataset.checked === 'true';
+            }
+
+            const text = node.lastChild.firstChild.textContent;
+            todoObjs.push({ text: text.trim(), isCompleted });
+          }
+
+          if (todoObjs.length > 0) {
+            let todoHtml = '<ul class="todo-list">';
+            for (const { text, isCompleted } of todoObjs) {
+              todoHtml += '<li><label class="todo-list__label"><input type="checkbox" disabled="disabled"';
+              if (isCompleted) todoHtml += ' checked="checked"';
+              todoHtml += ' /><span class="todo-list__label__description">';
+              todoHtml += text;
+              todoHtml += '</span></label></li>';
+            }
+            todoHtml += '</ul>';
+            body = body.split(html).join(todoHtml);
+          }
+        } catch (e) {
+          console.log('parseImportedFile: Evernote todo tag error', e);
+          continue;
+        }
+      }
+
+      // code block tags
+      for (const match of body.matchAll(/<en-codeblock[^>]*?>[\s\S]+?<\/en-codeblock>/gi)) {
+        const html = match[0];
+        try {
+          const template = document.createElement('template');
+          template.innerHTML = html;
+
+          const lines = [];
+          const elem = template.content.firstChild;
+          for (const node of elem.childNodes) {
+            lines.push(node.textContent);
+          }
+
+          if (lines.length > 0) {
+            let codeHtml = '<pre><code>';
+            codeHtml += lines.join('<br />');
+            codeHtml += '</code></pre>';
+            body = body.split(html).join(codeHtml);
+          }
+        } catch (e) {
+          console.log('parseImportedFile: Evernote code block tag error', e);
+          continue;
+        }
+      }
+
+      if (title || body) {
+        selectedFPaths.push(`${dpath}/index.json`);
+        selectedContents.push({ title, body });
+      }
+      continue;
+    }
+
     selectedFPaths.push(fpath);
     selectedContents.push(content);
   }
@@ -1771,14 +1963,13 @@ export const importAllData = () => async (dispatch, getState) => {
       const reader = new FileReader();
       reader.onload = onReaderLoad;
       reader.onerror = onError;
-      if (file.name.endsWith('.zip')) reader.readAsArrayBuffer(file);
-      else reader.readAsText(file);
+      reader.readAsArrayBuffer(file);
     }
   };
 
   const input = document.createElement('input');
   input.type = 'file';
-  input.accept = '.html, .zip';
+  input.accept = '.zip';
   input.addEventListener('change', onInputChange);
   input.click();
 };
