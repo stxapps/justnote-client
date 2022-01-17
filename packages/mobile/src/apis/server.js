@@ -2,6 +2,7 @@ import userSession from '../userSession';
 import {
   NOTES, IMAGES, SETTINGS, INDEX, DOT_JSON, N_NOTES, MAX_TRY,
 } from '../types/const';
+import { isNumber } from '../utils';
 
 const listFPaths = async () => {
 
@@ -21,7 +22,7 @@ const listFPaths = async () => {
           settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10
         );
         const _dt = parseInt(fpath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10);
-        if (dt < _dt) settingsFPath = fpath;
+        if (isNumber(dt) && isNumber(_dt) && dt < _dt) settingsFPath = fpath;
       }
     } else {
       console.log(`Invalid file path: ${fpath}`);

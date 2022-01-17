@@ -2,7 +2,7 @@ import mmkvStorage from '../mmkvStorage';
 import {
   NOTES, IMAGES, SETTINGS, INDEX, DOT_JSON, N_NOTES, MAX_TRY, TRASH, N_DAYS,
 } from '../types/const';
-import { splitOnFirst } from '../utils';
+import { splitOnFirst, isNumber } from '../utils';
 
 const createNoteFPath = (listName, fname, subName) => {
   return `${NOTES}/${listName}/${fname}/${subName}`;
@@ -55,7 +55,7 @@ const listFPaths = async () => {
           settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10
         );
         const _dt = parseInt(fpath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10);
-        if (dt < _dt) settingsFPath = fpath;
+        if (isNumber(dt) && isNumber(_dt) && dt < _dt) settingsFPath = fpath;
       }
     } else {
       console.log(`Invalid file path: ${fpath}`);
@@ -476,9 +476,9 @@ const deleteAllFiles = async () => {
 };
 
 const data = {
-  listFPaths, listNoteIds, batchGetFileWithRetry, toNotes,
-  fetch, fetchMore, putNotes, fetchOldNotesInTrash, canDeleteListNames,
-  getFiles, putFiles, deleteFiles, deleteAllFiles,
+  extractNoteFName, extractNoteId, listFPaths, listNoteIds, batchGetFileWithRetry,
+  toNotes, fetch, fetchMore, batchPutFileWithRetry, putNotes, fetchOldNotesInTrash,
+  canDeleteListNames, getFiles, putFiles, deleteFiles, deleteAllFiles,
 };
 
 export default data;

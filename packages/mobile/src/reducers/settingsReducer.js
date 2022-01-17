@@ -186,6 +186,9 @@ const settingsReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_SETTINGS_COMMIT) {
+    const { doFetch } = action.payload;
+
+    if (doFetch) return state;
     return loop(state, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
   }
 

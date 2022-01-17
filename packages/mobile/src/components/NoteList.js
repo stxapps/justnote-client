@@ -21,6 +21,7 @@ const NoteList = (props) => {
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const isMaxErrorShown = useSelector(state => state.display.isSelectedNoteIdsMaxErrorShown);
   const didFetch = useSelector(state => state.display.didFetch);
+  const didFetchSettings = useSelector(state => state.display.didFetchSettings);
   const fetchedListNames = useSelector(state => state.display.fetchedListNames);
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
   const isUserDummy = useSelector(state => state.user.isUserDummy);
@@ -80,9 +81,9 @@ const NoteList = (props) => {
 
   useEffect(() => {
     if (!fetchedListNames.includes(listName)) {
-      dispatch(fetch(didFetch ? false : null, !didFetch));
+      dispatch(fetch(didFetch ? false : null, !didFetchSettings));
     }
-  }, [listName, fetchedListNames, didFetch, dispatch]);
+  }, [listName, didFetch, didFetchSettings, fetchedListNames, dispatch]);
 
   useEffect(() => {
     // As dummy then signed in, need to sync

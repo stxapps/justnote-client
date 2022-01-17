@@ -104,3 +104,8 @@ export const DISCARD_ACTION_UPDATE_SYNCED = 4;
 
 export const MODE_VIEW = 'MODE_VIEW';
 export const MODE_EDIT = 'MODE_EDIT';
+
+export const IMAGE_FILE_EXTS = [
+  'apng', 'avif', 'gif', 'jpg', 'jpeg', 'jfif', 'pjpeg', 'pjp', 'png', 'svg', 'webp',
+  'bmp', 'ico', 'cur', 'tif', 'tiff',
+];

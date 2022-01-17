@@ -146,12 +146,20 @@ export const throttle = (func, limit) => {
   };
 };
 
+export const sleep = ms => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
+
 export const isObject = val => {
   return typeof val === 'object' && val !== null;
 };
 
 export const isString = val => {
   return typeof val === 'string' || val instanceof String;
+};
+
+export const isNumber = val => {
+  return typeof val === 'number' && isFinite(val);
 };
 
 export const isEqual = (x, y) => {
@@ -533,7 +541,7 @@ export const replaceObjectUrls = (
   body, objectUrlContents, objectUrlFiles, objectUrlNames
 ) => {
   const sources = [];
-  for (const match of body.matchAll(/<img.+?src="([^"]*)"[^>]*>/g)) {
+  for (const match of body.matchAll(/<img[^>]+?src="([^"]+)"[^>]*>/gi)) {
     const src = match[1];
     if (src.startsWith('blob:') || src.startsWith('file:')) sources.push(src);
   }
@@ -676,4 +684,39 @@ export const copyTextToClipboard = (text) => {
   }, function (err) {
     console.error('Async: Could not copy text: ', err);
   });
+};
+
+export const isListNameObjsValid = (listNameObjs) => {
+  if (listNameObjs === undefined || listNameObjs === null) return true;
+  if (!Array.isArray(listNameObjs)) return false;
+
+  for (const listNameObj of listNameObjs) {
+    if (!('listName' in listNameObj && 'displayName' in listNameObj)) return false;
+    if (!(isString(listNameObj.listName) && isString(listNameObj.displayName))) {
+      return false;
+    }
+    if ('children' in listNameObj) {
+      if (!isListNameObjsValid(listNameObj.children)) return false;
+    }
+  }
+
+  return true;
+};
+
+export const indexOfClosingTag = (html, tag = '<div', closingTag = '</div>') => {
+  let openCount = 0;
+  for (let i = closingTag.length; i <= html.length; i++) {
+    if (html.slice(i - closingTag.length, i) === closingTag) {
+      if (openCount === 0) return i;
+      openCount -= 1;
+      continue;
+    }
+
+    if (html.slice(i - tag.length, i) === tag) {
+      openCount += 1;
+      continue;
+    }
+  }
+
+  return -1;
 };

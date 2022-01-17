@@ -31,7 +31,7 @@ import {
   INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT,
   INCREASE_UPDATE_EDITOR_WIDTH_COUNT, INCREASE_RESET_DID_CLICK_COUNT,
   ADD_SAVING_OBJ_URLS, DELETE_SAVING_OBJ_URLS, CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS,
-  UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_STACKS_ACCESS,
+  UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_STACKS_ACCESS, UPDATE_IMPORT_ALL_DATA_PROGRESS,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -990,7 +990,11 @@ export const updateSettings = () => async (dispatch, getState) => {
   const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
   const _settingsFPath = getState().settingsFPath.fpath;
 
-  const payload = { settingsFPath, settings };
+  const doFetch = (
+    settings.sortOn !== snapshotSettings.sortOn ||
+    settings.doDescendingOrder !== snapshotSettings.doDescendingOrder
+  );
+  const payload = { settingsFPath, settings, doFetch };
   dispatch({ type: UPDATE_SETTINGS, payload });
 
   try {
@@ -1333,7 +1337,6 @@ export const updateSynced = (doCheckEditing = false) => async (dispatch, getStat
   }
 
   dispatch({ type: UPDATE_SYNCED });
-  dispatch(fetch(false, true));
 };
 
 export const updateEditorFocused = (isFocused) => {
@@ -1437,74 +1440,19 @@ export const updateStacksAccess = (data) => {
   return { type: UPDATE_STACKS_ACCESS, payload: data };
 };
 
-const exportAllDataLoop = async (dispatch, fpaths, doneCount) => {
+export const importAllData = () => async (dispatch, getState) => {
+  // Do nothing on mobile. This is for web.
+};
 
-  if (fpaths.length === 0) throw new Error(`Invalid fpaths: ${fpaths}`);
-
-  const selectedCount = Math.min(fpaths.length - doneCount, N_NOTES);
-  const selectedFPaths = fpaths.slice(doneCount, doneCount + selectedCount);
-  const responses = await dataApi.batchGetFileWithRetry(selectedFPaths, 0);
-  const data = responses.map((response) => {
-    // Export only index.json and settings.json so safe to not JSON.parse all responses.
-    return { path: response.fpath, data: response.content };
-  });
-
-  doneCount = doneCount + selectedCount;
-  if (doneCount > fpaths.length) {
-    throw new Error(`Invalid doneCount: ${doneCount}, total: ${fpaths.length}`);
-  }
-
-  dispatch(updateExportAllDataProgress({ total: fpaths.length, done: doneCount }));
-
-  if (doneCount < fpaths.length) {
-    const remainingData = await exportAllDataLoop(dispatch, fpaths, doneCount);
-    data.push(...remainingData);
-  }
-
-  return data;
+export const updateImportAllDataProgress = (progress) => {
+  return {
+    type: UPDATE_IMPORT_ALL_DATA_PROGRESS,
+    payload: progress,
+  };
 };
 
 export const exportAllData = () => async (dispatch, getState) => {
-
-  dispatch(updateExportAllDataProgress({ total: 'calculating...', done: 0 }));
-
-  let fpaths = [];
-  try {
-    const { noteFPaths, settingsFPath } = await dataApi.listFPaths();
-    const { noteIds, conflictedIds } = dataApi.listNoteIds(noteFPaths);
-
-    for (const noteId of [...noteIds, ...conflictedIds]) {
-      for (const fpath of noteId.fpaths) {
-        if (fpath.endsWith(INDEX + DOT_JSON)) fpaths.push(fpath);
-      }
-    }
-    if (settingsFPath) fpaths.push(settingsFPath);
-  } catch (e) {
-    dispatch(updateExportAllDataProgress({
-      total: -1,
-      done: -1,
-      error: e.name + ': ' + e.message,
-    }));
-    return;
-  }
-
-  dispatch(updateExportAllDataProgress({ total: fpaths.length, done: 0 }));
-
-  if (fpaths.length === 0) return;
-
-  try {
-    const data = await exportAllDataLoop(dispatch, fpaths, 0);
-
-    //var blob = new Blob([JSON.stringify(data)], { type: 'text/plain;charset=utf-8' });
-    //saveAs(blob, 'justnote-data.txt');
-  } catch (e) {
-    dispatch(updateExportAllDataProgress({
-      total: -1,
-      done: -1,
-      error: e.name + ': ' + e.message,
-    }));
-    return;
-  }
+  // Do nothing on mobile. This is for web.
 };
 
 export const updateExportAllDataProgress = (progress) => {
