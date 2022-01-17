@@ -492,8 +492,8 @@ const deleteFiles = async (fpaths) => {
 };
 
 const data = {
-  extractNoteFName, listFPaths, listNoteIds, batchGetFileWithRetry, toNotes,
-  fetch, fetchMore, batchPutFileWithRetry, putNotes, fetchOldNotesInTrash,
+  extractNoteFName, extractNoteId, listFPaths, listNoteIds, batchGetFileWithRetry,
+  toNotes, fetch, fetchMore, batchPutFileWithRetry, putNotes, fetchOldNotesInTrash,
   canDeleteListNames, getFiles, putFiles, deleteFiles,
 };
 

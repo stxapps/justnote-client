@@ -1567,8 +1567,11 @@ const parseImportedFile = async (dispatch, fileContent) => {
 
       // Treat import notes as adding new notes, replace note id with a new one
       if (!idMap[fpathParts[2]]) {
-        idMap[fpathParts[2]] = `${addedDT}${randomString(4)}`;
-        addedDT += 1;
+        const { dt } = dataApi.extractNoteId(id);
+
+        let newId = id;
+        while (newId === id) newId = `${dt}${randomString(4)}`;
+        idMap[fpathParts[2]] = newId;
       }
       fpathParts[2] = idMap[fpathParts[2]];
       fpath = fpathParts.join('/');
@@ -1779,9 +1782,9 @@ const parseImportedFile = async (dispatch, fileContent) => {
     if (isEvernote && fpath.endsWith('.html')) {
       const listName = MY_NOTES;
 
-      let dt, dtMatch = content.match(/<meta itemprop="updated" content="(.+)">/i);
+      let dt, dtMatch = content.match(/<meta itemprop="created" content="(.+)">/i);
       if (!dtMatch) {
-        dtMatch = content.match(/<meta itemprop="created" content="(.+)">/i);
+        dtMatch = content.match(/<meta itemprop="updated" content="(.+)">/i);
       }
       if (dtMatch) {
         const s = dtMatch[1];
@@ -1862,7 +1865,7 @@ const parseImportedFile = async (dispatch, fileContent) => {
               todoHtml += '</span></label></li>';
             }
             todoHtml += '</ul>';
-            body = body.slice(0, i) + todoHtml + body.slice(endIndex);
+            body = body.slice(0, i) + todoHtml + body.slice(i + endIndex);
           }
         } catch (e) {
           console.log('parseImportedFile: Evernote task tag error', e);
