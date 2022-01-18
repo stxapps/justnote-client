@@ -134,8 +134,8 @@ android {
         applicationId "com.justnotecc"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 12
-        versionName "0.8.0"
+        versionCode 13
+        versionName "0.8.1"
     }
     splits {
         abi {
