@@ -1,7 +1,7 @@
 import Url from 'url-parse';
 
 import {
-  HTTP, MAX_CHARS, CD_ROOT,
+  HTTP, MAX_CHARS, CD_ROOT, STATUS,
   ADDING, UPDATING, MOVING, DELETING, MERGING,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, DIED_MERGING,
   VALID_URL, NO_URL, ASK_CONFIRM_URL,
@@ -361,6 +361,7 @@ export const copyListNameObjs = (listNameObjs, excludedListNames = []) => {
     return !excludedListNames.includes(listNameObj.listName);
   }).map(listNameObj => {
     const obj = { ...listNameObj };
+    if (STATUS in obj) delete obj[STATUS];
     if (obj.children) obj.children = copyListNameObjs(obj.children, excludedListNames);
     return obj;
   });
