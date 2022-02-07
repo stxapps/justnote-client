@@ -175,6 +175,22 @@
   min-width: auto;
 }
 
+.ck.ck-dropdown.ck-alignment-dropdown .ck.ck-dropdown__panel {
+  max-width: none;
+}
+
+.ck.ck-dropdown.ck-alignment-dropdown .ck.ck-toolbar__items {
+  display: flex;
+  flex-flow: row nowrap;
+  margin-left: var(--ck-spacing-small);
+  margin-right: var(--ck-spacing-small);
+}
+
+.ck.ck-dropdown.ck-alignment-dropdown .ck.ck-toolbar__items .ck-button {
+  margin-top: var(--ck-spacing-small);
+  margin-bottom: var(--ck-spacing-small);
+}
+
 .ck.ck-blurred .ck-widget:hover {
   outline-color: transparent;
 }

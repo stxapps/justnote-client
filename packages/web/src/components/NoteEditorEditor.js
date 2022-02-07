@@ -16,6 +16,8 @@ import { isUint8Array, isBlob } from '../utils/index-web';
 
 import '../stylesheets/ckeditor.css';
 
+import { useSafeAreaFrame } from '.';
+
 const GET_DATA_SAVE_NOTE = 'GET_DATA_SAVE_NOTE';
 const GET_DATA_DISCARD_NOTE = 'GET_DATA_DISCARD_NOTE';
 const GET_DATA_UPDATE_NOTE_ID_URL_HASH = 'GET_DATA_UPDATE_NOTE_ID_URL_HASH';
@@ -31,6 +33,7 @@ const dataUrlToBlob = async (content) => {
 const NoteEditorEditor = (props) => {
 
   const { note } = props;
+  const { width: safeAreaWidth } = useSafeAreaFrame();
   const isEditorBusy = useSelector(state => state.editor.isEditorBusy);
   const saveNoteCount = useSelector(state => state.editor.saveNoteCount);
   const discardNoteCount = useSelector(state => state.editor.discardNoteCount);
@@ -211,8 +214,9 @@ const NoteEditorEditor = (props) => {
     if (isMobile) {
       if (groupedItemsDropdown) groupedItemsDropdown.panelPosition = 'nw';
 
+      toolbarItems.get(2).panelPosition = 'nme';
       toolbarItems.get(3).panelPosition = 'nme';
-      toolbarItems.get(4).panelPosition = 'nme';
+      toolbarItems.get(4).panelPosition = 'nmw';
       toolbarItems.get(5).panelPosition = 'nmw';
     } else {
       document.documentElement.style.setProperty('--ck-font-size-base', '13px');
@@ -315,6 +319,30 @@ const NoteEditorEditor = (props) => {
       prevUpdateEditorWidthCount.current = updateEditorWidthCount;
     }
   }, [isEditorReady, updateEditorWidthCount]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+
+    const editor = bodyEditor.current;
+    const groupedItemsDropdown = editor.ui.view.toolbar._behavior.groupedItemsDropdown;
+    if (!groupedItemsDropdown) return;
+
+    if (isMobile) {
+      if (safeAreaWidth < 389) {
+        groupedItemsDropdown.toolbarView.maxWidth = '256px';
+      } else if (safeAreaWidth < 428) {
+        groupedItemsDropdown.toolbarView.maxWidth = '218px';
+      } else {
+        groupedItemsDropdown.toolbarView.maxWidth = '';
+      }
+    } else {
+      if (safeAreaWidth < 372) {
+        groupedItemsDropdown.toolbarView.maxWidth = '188px';
+      } else {
+        groupedItemsDropdown.toolbarView.maxWidth = '';
+      }
+    }
+  }, [isEditorReady, isMobile, safeAreaWidth]);
 
   useEffect(() => {
     const beforeUnloadListener = (e) => {
