@@ -128,6 +128,14 @@
   padding-left: 40px;
 }
 
+.ck.ck-editor__editable ul ul {
+  list-style: circle;
+}
+
+.ck.ck-editor__editable ul ul ul {
+  list-style: square;
+}
+
 .ck.ck-editor__editable ol {
   list-style: decimal;
   padding-left: 40px;
