@@ -750,7 +750,7 @@ export const cancelDiedNotes = (ids, listName = null) => async (dispatch, getSta
   });
 };
 
-export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
+export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash, noteIds) => async (
   dispatch, getState
 ) => {
 
@@ -770,14 +770,7 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
   let addedDT = Date.now();
   const listName = TRASH;
 
-  let oldNotes;
-  try {
-    ({ notes: oldNotes } = await dataApi.fetchOldNotesInTrash());
-  } catch (e) {
-    console.log('deleteOldNotesInTrash error: ', e);
-    return;
-  }
-
+  const oldNotes = dataApi.getOldNotesInTrash(noteIds);
   const toNotes = oldNotes.map(note => {
     const toNote = {
       ...note,

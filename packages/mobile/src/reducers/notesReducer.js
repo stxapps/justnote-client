@@ -53,17 +53,18 @@ const notesReducer = (state = initialState, action) => {
       }
     }
 
-    const { listName, notes, doDeleteOldNotesInTrash } = action.payload;
+    const { listName, notes } = action.payload;
     if (listName in newState) {
       const processingNotes = _.exclude(state[listName], STATUS, ADDED);
       const fetchedNotes = toObjAndAddAttrs(notes, ADDED);
       newState[listName] = { ...processingNotes, ...fetchedNotes };
     }
 
+    const { doDeleteOldNotesInTrash, noteIds } = action.payload;
     return loop(
       newState,
       Cmd.run(
-        deleteOldNotesInTrash(doDeleteOldNotesInTrash),
+        deleteOldNotesInTrash(doDeleteOldNotesInTrash, noteIds),
         { args: [Cmd.dispatch, Cmd.getState] })
     );
   }

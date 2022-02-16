@@ -286,7 +286,9 @@ const fetch = async (params) => {
   listNames.push(...conflictedIds.map(id => id.listName));
   listNames = [...new Set(listNames)];
 
-  return { notes, hasMore, conflictedNotes, listNames, settingsFPath, settings };
+  return {
+    notes, hasMore, conflictedNotes, noteIds, listNames, settingsFPath, settings,
+  };
 };
 
 const fetchMore = async (params) => {
@@ -395,10 +397,7 @@ export const batchDeleteFileWithRetry = async (fpaths, callCount) => {
   return responses;
 };
 
-const fetchOldNotesInTrash = async () => {
-
-  const { noteFPaths } = await listFPaths();
-  const { noteIds } = listNoteIds(noteFPaths);
+const getOldNotesInTrash = (noteIds) => {
 
   const trashNoteIds = noteIds.filter(id => id.listName === TRASH);
   const oldNoteIds = trashNoteIds.filter(noteId => {
@@ -419,8 +418,7 @@ const fetchOldNotesInTrash = async () => {
     else contents.push('');
   }
 
-  const notes = toNotes(selectedNoteIds, fpaths, contents);
-  return { notes };
+  return toNotes(selectedNoteIds, fpaths, contents);
 };
 
 const canDeleteListNames = async (listNames) => {
@@ -477,7 +475,7 @@ const deleteAllFiles = async () => {
 
 const data = {
   extractNoteFName, extractNoteId, listFPaths, listNoteIds, batchGetFileWithRetry,
-  toNotes, fetch, fetchMore, batchPutFileWithRetry, putNotes, fetchOldNotesInTrash,
+  toNotes, fetch, fetchMore, batchPutFileWithRetry, putNotes, getOldNotesInTrash,
   canDeleteListNames, getFiles, putFiles, deleteFiles, deleteAllFiles,
 };
 
