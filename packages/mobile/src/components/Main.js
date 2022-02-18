@@ -16,7 +16,6 @@ import ListNamesPopup from './ListNamesPopup';
 import ConfirmDeletePopup from './ConfirmDeletePopup';
 import ConfirmDiscardPopup from './ConfirmDiscardPopup';
 import ConfirmExitDummyPopup from './ConfirmExitDummyPopup';
-import AlertScreenRotationPopup from './AlertScreenRotationPopup';
 
 const Main = () => {
 
@@ -37,7 +36,6 @@ const Main = () => {
       <ConfirmExitDummyPopup />
       <SignUpPopup />
       <SignInPopup />
-      <AlertScreenRotationPopup />
     </React.Fragment>
   );
 };

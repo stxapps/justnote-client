@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import {
   updateDoDeleteOldNotesInTrash, updateSortOn, updateDoDescendingOrder,
-  updateDoAlertScreenRotation,
 } from '../actions';
 import { ADDED_DT, UPDATED_DT } from '../types/const';
 
@@ -13,7 +12,6 @@ const SettingsPopupMisc = (props) => {
   const doDeleteOldNotesInTrash = useSelector(state => state.settings.doDeleteOldNotesInTrash);
   const sortOn = useSelector(state => state.settings.sortOn);
   const doDescendingOrder = useSelector(state => state.settings.doDescendingOrder);
-  const doAlertScreenRotation = useSelector(state => state.settings.doAlertScreenRotation);
   const dispatch = useDispatch();
 
   const onDoDeleteBtnClick = () => {
@@ -36,10 +34,6 @@ const SettingsPopupMisc = (props) => {
     dispatch(updateDoDescendingOrder(doDescend));
   };
 
-  const onDoAlertBtnClick = () => {
-    dispatch(updateDoAlertScreenRotation(!doAlertScreenRotation));
-  };
-
   const doDeleteBtnClassNames = doDeleteOldNotesInTrash ? 'bg-green-500' : 'bg-gray-200';
   const doDeleteBtnInnerClassNames = doDeleteOldNotesInTrash ? 'translate-x-5' : 'translate-x-0';
 
@@ -54,9 +48,6 @@ const SettingsPopupMisc = (props) => {
 
   const descendingBtnClassNames = doDescendingOrder ? 'bg-green-100 border-green-200' : 'border-gray-200';
   const descendingBtnInnerClassNames = doDescendingOrder ? 'text-green-800' : 'text-gray-600';
-
-  const doAlertBtnClassNames = doAlertScreenRotation ? 'bg-green-500' : 'bg-gray-200';
-  const doAlertBtnInnerClassNames = doAlertScreenRotation ? 'translate-x-5' : 'translate-x-0';
 
   return (
     <div className="p-4 relative md:p-6 md:pt-4">
@@ -122,15 +113,6 @@ const SettingsPopupMisc = (props) => {
             </div>
           </div>
         </div>
-      </div>
-      <div className="mt-10 mb-4 flex items-center justify-between space-x-4">
-        <div className="flex flex-col">
-          <h4 className="text-base text-gray-800 font-medium leading-none">Screen Rotation Warning</h4>
-          <p className="mt-2.5 text-base text-gray-500 leading-relaxed">Show a warning when rotating screen on iPad/Tablet as on these devices, screen rotation is not fully supported. Please do not rotate your iPad/Tablet while editing your note, new changes to your note will be lost. We are sorry for the inconvenience.</p>
-        </div>
-        <span onClick={onDoAlertBtnClick} role="checkbox" tabIndex={0} aria-checked="true" aria-labelledby="auto-cleanup-option-label" aria-describedby="auto-cleanup-option-description" className={`${doAlertBtnClassNames} relative inline-flex flex-shrink-0 w-11 h-6 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600`}>
-          <span aria-hidden="true" className={`${doAlertBtnInnerClassNames} inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200`} />
-        </span>
       </div>
     </div>
   );

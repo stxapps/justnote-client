@@ -8,7 +8,7 @@ export const initialSettingsState = {
   doDeleteOldNotesInTrash: true,
   sortOn: ADDED_DT,
   doDescendingOrder: true,
-  doAlertScreenRotation: true,
+  doAlertScreenRotation: true, // No need anymore but keep it for comparing
   listNameMap: [
     { ...myNotesListNameObj }, { ...trashListNameObj }, { ...archiveListNameObj },
   ],

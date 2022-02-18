@@ -5,7 +5,6 @@ import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
 import {
   updateDoDeleteOldNotesInTrash, updateSortOn, updateDoDescendingOrder,
-  updateDoAlertScreenRotation,
 } from '../actions';
 import { ADDED_DT, UPDATED_DT } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
@@ -17,7 +16,6 @@ const SettingsPopupAccount = (props) => {
   const doDeleteOldNotesInTrash = useSelector(state => state.settings.doDeleteOldNotesInTrash);
   const sortOn = useSelector(state => state.settings.sortOn);
   const doDescendingOrder = useSelector(state => state.settings.doDescendingOrder);
-  const doAlertScreenRotation = useSelector(state => state.settings.doAlertScreenRotation);
   const dispatch = useDispatch();
 
   const onDoDeleteBtnClick = () => {
@@ -35,10 +33,6 @@ const SettingsPopupAccount = (props) => {
     else throw new Error(`Invalid value: ${value}`);
 
     dispatch(updateDoDescendingOrder(doDescend));
-  };
-
-  const onDoAlertBtnClick = () => {
-    dispatch(updateDoAlertScreenRotation(!doAlertScreenRotation));
   };
 
   const switchThumbColorOn = 'rgba(34, 197, 94, 1)';
@@ -145,15 +139,6 @@ const SettingsPopupAccount = (props) => {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
-      </View>
-      <View style={tailwind('mt-10 mb-4 flex-row items-center justify-between')}>
-        <View style={tailwind('flex-grow flex-shrink')}>
-          <Text style={tailwind('text-base text-gray-800 font-medium leading-5')}>Screen Rotation Warning</Text>
-          <Text style={tailwind('mt-2.5 text-base text-gray-500 font-normal leading-6.5')}>Show a warning when rotating screen on iPad/Tablet as on these devices, screen rotation is not fully supported. Please do not rotate your iPad/Tablet while editing your note, new changes to your note will be lost. We are sorry for the inconvenience.</Text>
-        </View>
-        <View style={tailwind('ml-4 flex-grow-0 flex-shrink-0 w-11 h-6')}>
-          <Switch onValueChange={onDoAlertBtnClick} value={doAlertScreenRotation} thumbColor={Platform.OS === 'android' ? doAlertScreenRotation ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} />
         </View>
       </View>
     </View>

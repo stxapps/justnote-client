@@ -22,7 +22,7 @@ import {
   UPDATE_LIST_NAME_EDITORS, ADD_LIST_NAMES, UPDATE_LIST_NAMES, MOVE_LIST_NAME,
   MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_SELECTING_LIST_NAME,
   UPDATE_DELETING_LIST_NAME, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, UPDATE_SORT_ON,
-  UPDATE_DO_DESCENDING_ORDER, UPDATE_DO_ALERT_SCREEN_ROTATION,
+  UPDATE_DO_DESCENDING_ORDER,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
   CANCEL_DIED_SETTINGS, UPDATE_DISCARD_ACTION, INCREASE_SAVE_NOTE_COUNT,
   INCREASE_DISCARD_NOTE_COUNT, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
@@ -184,7 +184,6 @@ const handlePendingSignIn = () => async (dispatch, getState) => {
 const handleScreenRotation = (prevWidth) => (dispatch, getState) => {
   const { isUserSignedIn, isUserDummy } = getState().user;
   if (!isUserSignedIn && !isUserDummy) return;
-  if (!getState().settings.doAlertScreenRotation) return;
 
   const toLg = prevWidth < LG_WIDTH && window.innerWidth >= LG_WIDTH;
   const fromLg = prevWidth >= LG_WIDTH && window.innerWidth < LG_WIDTH;
@@ -1272,10 +1271,6 @@ export const updateSortOn = (sortOn) => {
 
 export const updateDoDescendingOrder = (doDescendingOrder) => {
   return { type: UPDATE_DO_DESCENDING_ORDER, payload: doDescendingOrder };
-};
-
-export const updateDoAlertScreenRotation = (doAlertScreenRotation) => {
-  return { type: UPDATE_DO_ALERT_SCREEN_ROTATION, payload: doAlertScreenRotation };
 };
 
 export const updateSelectingListName = (listName) => {

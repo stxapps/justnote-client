@@ -4,7 +4,7 @@ import { updateFetchedSettings, sync } from '../actions';
 import {
   FETCH_COMMIT, ADD_LIST_NAMES, UPDATE_LIST_NAMES, MOVE_LIST_NAME, MOVE_TO_LIST_NAME,
   DELETE_LIST_NAMES, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, UPDATE_SORT_ON,
-  UPDATE_DO_DESCENDING_ORDER, UPDATE_DO_ALERT_SCREEN_ROTATION, CANCEL_DIED_SETTINGS,
+  UPDATE_DO_DESCENDING_ORDER, CANCEL_DIED_SETTINGS,
   UPDATE_SETTINGS_COMMIT, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import { MY_NOTES, TRASH, ARCHIVE, SWAP_LEFT, SWAP_RIGHT } from '../types/const';
@@ -179,10 +179,6 @@ const settingsReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_DO_DESCENDING_ORDER) {
     return { ...state, doDescendingOrder: action.payload };
-  }
-
-  if (action.type === UPDATE_DO_ALERT_SCREEN_ROTATION) {
-    return { ...state, doAlertScreenRotation: action.payload };
   }
 
   if (action.type === UPDATE_SETTINGS_COMMIT) {

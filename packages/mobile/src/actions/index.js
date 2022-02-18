@@ -22,7 +22,7 @@ import {
   UPDATE_LIST_NAME_EDITORS, ADD_LIST_NAMES, UPDATE_LIST_NAMES, MOVE_LIST_NAME,
   MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_SELECTING_LIST_NAME,
   UPDATE_DELETING_LIST_NAME, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, UPDATE_SORT_ON,
-  UPDATE_DO_DESCENDING_ORDER, UPDATE_DO_ALERT_SCREEN_ROTATION,
+  UPDATE_DO_DESCENDING_ORDER,
   UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
   CANCEL_DIED_SETTINGS, UPDATE_DISCARD_ACTION, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
   UPDATE_SYNC_PROGRESS, UPDATE_SYNCED, INCREASE_SAVE_NOTE_COUNT,
@@ -936,10 +936,6 @@ export const updateDoDescendingOrder = (doDescendingOrder) => {
   return { type: UPDATE_DO_DESCENDING_ORDER, payload: doDescendingOrder };
 };
 
-export const updateDoAlertScreenRotation = (doAlertScreenRotation) => {
-  return { type: UPDATE_DO_ALERT_SCREEN_ROTATION, payload: doAlertScreenRotation };
-};
-
 export const updateSelectingListName = (listName) => {
   return {
     type: UPDATE_SELECTING_LIST_NAME,
@@ -1289,8 +1285,7 @@ export const tryUpdateSynced = (updateAction, haveUpdate) => async (
     getState().display.isSearchPopupShown ||
     getState().display.isSettingsPopupShown ||
     getState().display.isConfirmDeletePopupShown ||
-    getState().display.isConfirmDiscardPopupShown ||
-    getState().display.isAlertScreenRotationPopupShown
+    getState().display.isConfirmDiscardPopupShown
   );
   const isBulkEditing = getState().display.isBulkEditing;
   const isEditorFocused = getState().display.isEditorFocused;
