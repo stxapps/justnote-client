@@ -55,6 +55,7 @@ import { isUint8Array } from '../utils/index-web';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
 
+let hashChangeListener;
 export const init = () => async (dispatch, getState) => {
 
   await handlePendingSignIn()(dispatch, getState);
@@ -83,10 +84,11 @@ export const init = () => async (dispatch, getState) => {
   });
 
   // Let hash get updated first before add an listener
+  hashChangeListener = function (e) {
+    onUrlHashChange(e.oldURL, e.newURL, dispatch, getState);
+  };
   setTimeout(() => {
-    window.addEventListener('hashchange', function (e) {
-      onUrlHashChange(e.oldURL, e.newURL, dispatch, getState);
-    });
+    window.addEventListener('hashchange', hashChangeListener);
   }, 1);
 
   let prevWidth = window.innerWidth;
@@ -191,11 +193,21 @@ const handleScreenRotation = (prevWidth) => (dispatch, getState) => {
   const noteId = getState().display.noteId;
   if (noteId) {
     if (fromLg) {
-      dispatch(updateNoteId(null));
-      setTimeout(() => updateNoteIdUrlHash(noteId), 100);
+      window.removeEventListener('hashchange', hashChangeListener);
+      setTimeout(() => {
+        updateNoteIdUrlHash(noteId);
+        setTimeout(() => {
+          window.addEventListener('hashchange', hashChangeListener);
+        }, 100);
+      }, 100);
     } else if (toLg) {
-      updateNoteIdUrlHash(null);
-      setTimeout(() => dispatch(updateNoteId(noteId)), 320);
+      window.removeEventListener('hashchange', hashChangeListener);
+      setTimeout(() => {
+        window.history.back();
+        setTimeout(() => {
+          window.addEventListener('hashchange', hashChangeListener);
+        }, 100);
+      }, 100);
     }
   }
 };

@@ -31,7 +31,7 @@ const NoteEditorEditor = (props) => {
 
   const { note } = props;
   const isFocused = useSelector(state => state.display.isEditorFocused);
-  const isEditorBusy = useSelector(state => state.editor.isEditorBusy);
+  const isEditorBusy = useSelector(state => state.display.isEditorBusy);
   const saveNoteCount = useSelector(state => state.editor.saveNoteCount);
   const discardNoteCount = useSelector(state => state.editor.discardNoteCount);
   const updateNoteIdCount = useSelector(state => state.editor.updateNoteIdCount);
@@ -423,7 +423,9 @@ const NoteEditorEditor = (props) => {
     if (!isEditorReady) return;
 
     if (didEditorUnmount) {
-      if (!isEditorBusy && !didDiscardEditing && note.id === editingNoteId) {
+      if (
+        isFocused && !isEditorBusy && !didDiscardEditing && note.id === editingNoteId
+      ) {
         _setInitData(
           editingNoteId, editingNoteTitle, editingNoteBody, editingNoteMedia
         );
@@ -431,7 +433,7 @@ const NoteEditorEditor = (props) => {
       dispatch(updateEditorUnmount(false));
     }
   }, [
-    isEditorBusy, isEditorReady, didDiscardEditing, didEditorUnmount,
+    isFocused, isEditorBusy, isEditorReady, didDiscardEditing, didEditorUnmount,
     note.id, editingNoteId, editingNoteTitle, editingNoteBody, editingNoteMedia,
     _setInitData, dispatch,
   ]);
