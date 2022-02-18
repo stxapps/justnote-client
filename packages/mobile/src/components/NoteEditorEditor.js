@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { TextInput, Keyboard, Platform } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { Dirs } from 'react-native-file-access';
 
@@ -9,8 +8,9 @@ import fileApi from '../apis/file';
 import {
   updateEditorFocused, saveNote, discardNote, onUpdateNoteId, onChangeListName,
   addSavingObjectUrls, deleteSavingObjectUrls, addSavingFPaths,
+  updateEditingNote, updateEditorUnmount,
 } from '../actions';
-import { NEW_NOTE, ADDED, LG_WIDTH, IMAGES, CD_ROOT, UTF8 } from '../types/const';
+import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, UTF8 } from '../types/const';
 import {
   replaceObjectUrls, splitOnFirst, escapeDoubleQuotes, getFileExt,
 } from '../utils';
@@ -30,7 +30,6 @@ const HTML_FNAME = 'ckeditor.html';
 const NoteEditorEditor = (props) => {
 
   const { note } = props;
-  const { width: safeAreaWidth } = useSafeAreaFrame();
   const isFocused = useSelector(state => state.display.isEditorFocused);
   const isEditorBusy = useSelector(state => state.editor.isEditorBusy);
   const saveNoteCount = useSelector(state => state.editor.saveNoteCount);
@@ -64,6 +63,19 @@ const NoteEditorEditor = (props) => {
   const keyboardDidHideListener = useRef(null);
   const dispatch = useDispatch();
 
+  const editingNoteId = useSelector(state => state.editor.editingNoteId);
+  const editingNoteTitle = useSelector(state => state.editor.editingNoteTitle);
+  const editingNoteBody = useSelector(state => state.editor.editingNoteBody);
+  const editingNoteMedia = useSelector(state => state.editor.editingNoteMedia);
+  const didEditorUnmount = useSelector(state => state.editor.didEditorUnmount);
+  const didDiscardEditing = useSelector(state => state.editor.didDiscardEditing);
+  const editingObjectUrlContents = useRef({});
+  const editingObjectUrlNames = useRef({});
+  const refToIsFocused = useRef(isFocused);
+  const refToIsEditorBusy = useRef(isEditorBusy);
+  const refToIsEditorReady = useRef(isEditorReady);
+  const didUpdateEditingNote = useRef(false);
+
   const focusTitleInput = useCallback(() => {
     setTimeout(() => {
       if (Platform.OS === 'ios') {
@@ -74,13 +86,13 @@ const NoteEditorEditor = (props) => {
         webView.current.requestFocus();
       }
       webView.current.injectJavaScript('document.querySelector("#titleInput").focus(); true;');
-    }, safeAreaWidth < LG_WIDTH ? 300 : 1);
-  }, [safeAreaWidth]);
+    }, 300);
+  }, []);
 
-  const setInitData = useCallback(() => {
+  const _setInitData = useCallback((id, title, body, media) => {
     webView.current.injectJavaScript('window.justnote.scrollTo(0, 0); true;');
 
-    const escapedTitle = escapeDoubleQuotes(note.title);
+    const escapedTitle = escapeDoubleQuotes(title);
     webView.current.injectJavaScript('window.justnote.setTitle("' + escapedTitle + '"); true;');
 
     const dir = Dirs.DocumentDir;
@@ -96,17 +108,21 @@ const NoteEditorEditor = (props) => {
     objectUrlFiles.current = {};
 
     webView.current.injectJavaScript('window.justnote.clearNoteMedia(); true;');
-    for (const { name, content } of note.media) {
+    for (const { name, content } of media) {
       const escapedName = escapeDoubleQuotes(name);
       const escapedContent = escapeDoubleQuotes(content);
       webView.current.injectJavaScript('window.justnote.addNoteMedia("' + escapedName + '", "' + escapedContent + '"); true;');
     }
 
-    const escapedBody = escapeDoubleQuotes(note.body);
+    const escapedBody = escapeDoubleQuotes(body);
     webView.current.injectJavaScript('window.justnote.setBody("' + escapedBody + '"); true;');
 
-    if (note.id === NEW_NOTE) focusTitleInput();
-  }, [note.id, note.title, note.body, note.media, focusTitleInput]);
+    if (id === NEW_NOTE) focusTitleInput();
+  }, [focusTitleInput]);
+
+  const setInitData = useCallback(() => {
+    _setInitData(note.id, note.title, note.body, note.media);
+  }, [note.id, note.title, note.body, note.media, _setInitData]);
 
   const setEditable = (editable) => {
     const titleDisabled = editable ? 'false' : 'true';
@@ -170,6 +186,20 @@ const NoteEditorEditor = (props) => {
     } else throw new Error(`Invalid getDataAction: ${getDataAction.current}`);
   }, [dispatch]);
 
+  const onGetEditingData = useCallback((value) => {
+
+    const [title, _body] = splitOnFirst(value, SEP);
+    const { body, media } = replaceObjectUrls(
+      _body,
+      editingObjectUrlContents.current,
+      objectUrlFiles.current,
+      editingObjectUrlNames.current
+    );
+
+    dispatch(updateEditingNote(title, body, media));
+    didUpdateEditingNote.current = true;
+  }, [dispatch]);
+
   const onMessage = useCallback(async (e) => {
     const data = e.nativeEvent.data;
     const [change, rest1] = splitOnFirst(data, ':');
@@ -200,8 +230,21 @@ const NoteEditorEditor = (props) => {
       onGetData(value);
     } else if (change === 'editor' && to === 'isReady') {
       setEditorReady(value === 'true');
+    } else if (change === 'clear' && to === 'editingObjectUrlContents') {
+      editingObjectUrlContents.current = {};
+    } else if (change === 'add' && to === 'editingObjectUrlContents') {
+      const [objectUrl, rest2] = splitOnFirst(value, SEP);
+      const [fname, content] = splitOnFirst(rest2, SEP);
+      editingObjectUrlContents.current[objectUrl] = { fname, content };
+    } else if (change === 'clear' && to === 'editingObjectUrlNames') {
+      editingObjectUrlNames.current = {};
+    } else if (change === 'add' && to === 'editingObjectUrlNames') {
+      const [objectUrl, name] = splitOnFirst(value, SEP);
+      editingObjectUrlNames.current[objectUrl] = name;
+    } else if (change === 'editingData' && to === 'webView') {
+      onGetEditingData(value);
     } else throw new Error(`Invalid data: ${data}`);
-  }, [onFocus, onAddObjectUrlFiles, onGetData]);
+  }, [onFocus, onAddObjectUrlFiles, onGetData, onGetEditingData]);
 
   const onContentProcessDidTerminate = useCallback(() => {
     setEditorReady(false);
@@ -356,6 +399,42 @@ const NoteEditorEditor = (props) => {
       keyboardDidHideListener.current.remove();
     };
   }, []);
+
+  useEffect(() => {
+    refToIsFocused.current = isFocused;
+    refToIsEditorBusy.current = isEditorBusy;
+    refToIsEditorReady.current = isEditorReady;
+  }, [isFocused, isEditorBusy, isEditorReady]);
+
+  useEffect(() => {
+    didUpdateEditingNote.current = false;
+  }, [note.id]);
+
+  useEffect(() => {
+    return () => {
+      if (
+        refToIsEditorReady.current && !refToIsEditorBusy.current &&
+        refToIsFocused.current && didUpdateEditingNote.current
+      ) dispatch(updateEditorUnmount(true));
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+
+    if (didEditorUnmount) {
+      if (!isEditorBusy && !didDiscardEditing && note.id === editingNoteId) {
+        _setInitData(
+          editingNoteId, editingNoteTitle, editingNoteBody, editingNoteMedia
+        );
+      }
+      dispatch(updateEditorUnmount(false));
+    }
+  }, [
+    isEditorBusy, isEditorReady, didDiscardEditing, didEditorUnmount,
+    note.id, editingNoteId, editingNoteTitle, editingNoteBody, editingNoteMedia,
+    _setInitData, dispatch,
+  ]);
 
   if (Platform.OS === 'ios' && !isHtmlReady) return null;
 

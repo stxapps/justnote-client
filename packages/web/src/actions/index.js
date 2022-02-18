@@ -30,13 +30,14 @@ import {
   INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT,
   INCREASE_UPDATE_EDITOR_WIDTH_COUNT, INCREASE_RESET_DID_CLICK_COUNT,
   ADD_SAVING_OBJ_URLS, DELETE_SAVING_OBJ_URLS, CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS,
-  UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_STACKS_ACCESS, UPDATE_IMPORT_ALL_DATA_PROGRESS,
+  UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_EDITING_NOTE, UPDATE_EDITOR_UNMOUNT,
+  UPDATE_DID_DISCARD_EDITING, UPDATE_STACKS_ACCESS, UPDATE_IMPORT_ALL_DATA_PROGRESS,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   SEARCH_POPUP, SETTINGS_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP,
-  ALERT_SCREEN_ROTATION_POPUP, DISCARD_ACTION_CANCEL_EDIT,
+  DISCARD_ACTION_CANCEL_EDIT,
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
   DISCARD_ACTION_CHANGE_LIST_NAME, MY_NOTES, TRASH, ARCHIVE, ID, NEW_NOTE, NEW_NOTE_OBJ,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
@@ -187,12 +188,14 @@ const handleScreenRotation = (prevWidth) => (dispatch, getState) => {
   const fromLg = prevWidth >= LG_WIDTH && window.innerWidth < LG_WIDTH;
   if (!toLg && !fromLg) return;
 
-  dispatch(updatePopup(ALERT_SCREEN_ROTATION_POPUP, true, null));
-  if (fromLg) {
-    const noteId = getState().display.noteId;
-    if (noteId) {
+  const noteId = getState().display.noteId;
+  if (noteId) {
+    if (fromLg) {
       dispatch(updateNoteId(null));
       setTimeout(() => updateNoteIdUrlHash(noteId), 100);
+    } else if (toLg) {
+      updateNoteIdUrlHash(null);
+      setTimeout(() => dispatch(updateNoteId(noteId)), 320);
     }
   }
 };
@@ -1446,6 +1449,22 @@ export const addSavingFPaths = (fpaths) => {
 
 export const updateEditorScrollEnabled = (enabled) => {
   return { type: UPDATE_EDITOR_SCROLL_ENABLED, payload: enabled };
+};
+
+export const updateEditingNote = (title, body, media) => async (dispatch, getState) => {
+  const id = getState().display.noteId;
+  dispatch({
+    type: UPDATE_EDITING_NOTE,
+    payload: { id, title, body, media },
+  });
+};
+
+export const updateEditorUnmount = (didUnmount) => {
+  return { type: UPDATE_EDITOR_UNMOUNT, payload: didUnmount };
+};
+
+export const updateDidDiscardEditing = (didDiscardEditing) => {
+  return { type: UPDATE_DID_DISCARD_EDITING, payload: didDiscardEditing };
 };
 
 export const updateStacksAccess = (data) => {

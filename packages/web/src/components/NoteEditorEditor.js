@@ -6,11 +6,12 @@ import ckeditor from '@ckeditor/ckeditor5-build-decoupled-document';
 import fileApi from '../apis/file';
 import {
   updateEditorFocused, saveNote, discardNote, onUpdateNoteIdUrlHash, onUpdateNoteId,
-  onChangeListName, addSavingFPaths,
+  onChangeListName, addSavingFPaths, updateEditingNote, updateEditorUnmount,
 } from '../actions';
 import { NEW_NOTE, ADDED, IMAGES, CD_ROOT } from '../types/const';
 import {
   isString, isNoteBodyEqual, isMobile as _isMobile, replaceObjectUrls, getFileExt,
+  debounce,
 } from '../utils';
 import { isUint8Array, isBlob } from '../utils/index-web';
 
@@ -34,6 +35,7 @@ const NoteEditorEditor = (props) => {
 
   const { note } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
+  const isFocused = useSelector(state => state.display.isEditorFocused);
   const isEditorBusy = useSelector(state => state.editor.isEditorBusy);
   const saveNoteCount = useSelector(state => state.editor.saveNoteCount);
   const discardNoteCount = useSelector(state => state.editor.discardNoteCount);
@@ -68,6 +70,17 @@ const NoteEditorEditor = (props) => {
   const getDataAction = useRef(null);
   const dispatch = useDispatch();
 
+  const editingNoteId = useSelector(state => state.editor.editingNoteId);
+  const editingNoteTitle = useSelector(state => state.editor.editingNoteTitle);
+  const editingNoteBody = useSelector(state => state.editor.editingNoteBody);
+  const editingNoteMedia = useSelector(state => state.editor.editingNoteMedia);
+  const didEditorUnmount = useSelector(state => state.editor.didEditorUnmount);
+  const didDiscardEditing = useSelector(state => state.editor.didDiscardEditing);
+  const refToIsFocused = useRef(isFocused);
+  const refToIsEditorBusy = useRef(isEditorBusy);
+  const refToIsEditorReady = useRef(isEditorReady);
+  const didUpdateEditingNote = useRef(false);
+
   const isMobile = useMemo(() => _isMobile(), []);
 
   const focusTitleInput = () => {
@@ -89,11 +102,11 @@ const NoteEditorEditor = (props) => {
     objectUrlNames.current = {};
   };
 
-  const replaceWithContents = useCallback(async (body) => {
-    const _media = note.media.filter(({ content }) => {
+  const replaceWithContents = useCallback(async (body, media) => {
+    media = media.filter(({ content }) => {
       return isString(content) && content.startsWith('data:');
     });
-    const media = await Promise.all(_media.map(async ({ name, content }) => {
+    media = await Promise.all(media.map(async ({ name, content }) => {
       const blob = await dataUrlToBlob(content);
       return { name, content, blob };
     }));
@@ -108,10 +121,10 @@ const NoteEditorEditor = (props) => {
     }
 
     return body;
-  }, [note.media]);
+  }, []);
 
-  const replaceWithFiles = useCallback(async (body) => {
-    const media = note.media.filter(({ name }) => {
+  const replaceWithFiles = useCallback(async (body, media) => {
+    media = media.filter(({ name }) => {
       return isString(name) && name.startsWith(CD_ROOT + '/');
     });
 
@@ -129,16 +142,16 @@ const NoteEditorEditor = (props) => {
     }
 
     return body;
-  }, [note.media]);
+  }, []);
 
-  const setInitData = useCallback(async () => {
+  const _setInitData = useCallback(async (id, title, body, media) => {
     scrollView.current.scrollTo(0, 0);
-    titleInput.current.value = note.title;
+    titleInput.current.value = title;
 
     clearNoteMedia();
 
-    let body = await replaceWithContents(note.body);
-    body = await replaceWithFiles(body);
+    body = await replaceWithContents(body, media);
+    body = await replaceWithFiles(body, media);
     try {
       bodyEditor.current.setData(body);
     } catch (e) {
@@ -146,11 +159,17 @@ const NoteEditorEditor = (props) => {
       //   after dispatching UPDATE_NOTE_ROLLBACK
       //   guess because CKEditor.setData still working on updated version
       //   then suddenly got upmounted.
+      // Also, in handleScreenRotation, calling updateNoteIdUrlHash(null)
+      //   guess it's the same reason.
       console.log('NoteEditorEditor.setInitData: ckeditor.setData error ', e);
     }
 
-    if (note.id === NEW_NOTE) focusTitleInput();
-  }, [note.id, note.title, note.body, replaceWithContents, replaceWithFiles]);
+    if (id === NEW_NOTE) focusTitleInput();
+  }, [replaceWithContents, replaceWithFiles]);
+
+  const setInitData = useCallback(async () => {
+    await _setInitData(note.id, note.title, note.body, note.media)
+  }, [note.id, note.title, note.body, note.media, _setInitData]);
 
   const onFocus = useCallback(() => {
     dispatch(updateEditorFocused(true));
@@ -231,6 +250,22 @@ const NoteEditorEditor = (props) => {
     bodyEditor.current = editor;
     setEditorReady(true);
   }, [isMobile, onAddObjectUrlFiles, setEditorReady]);
+
+  const onDataChange = useMemo(() => debounce(() => {
+    // At the time, might already unmounted
+    if (!titleInput.current || !bodyEditor.current) return;
+
+    const title = titleInput.current.value;
+    const { body, media } = replaceObjectUrls(
+      bodyEditor.current.getData(),
+      objectUrlContents.current,
+      objectUrlFiles.current,
+      objectUrlNames.current
+    );
+
+    dispatch(updateEditingNote(title, body, media));
+    didUpdateEditingNote.current = true;
+  }, 1000), [dispatch]);
 
   useEffect(() => {
     if (!isEditorReady) return;
@@ -397,6 +432,42 @@ const NoteEditorEditor = (props) => {
     }
   }, []);
 
+  useEffect(() => {
+    refToIsFocused.current = isFocused;
+    refToIsEditorBusy.current = isEditorBusy;
+    refToIsEditorReady.current = isEditorReady;
+  }, [isFocused, isEditorBusy, isEditorReady]);
+
+  useEffect(() => {
+    didUpdateEditingNote.current = false;
+  }, [note.id]);
+
+  useEffect(() => {
+    return () => {
+      if (
+        refToIsEditorReady.current && !refToIsEditorBusy.current &&
+        refToIsFocused.current && didUpdateEditingNote.current
+      ) dispatch(updateEditorUnmount(true));
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+
+    if (didEditorUnmount) {
+      if (!isEditorBusy && !didDiscardEditing && note.id === editingNoteId) {
+        _setInitData(
+          editingNoteId, editingNoteTitle, editingNoteBody, editingNoteMedia
+        );
+      }
+      dispatch(updateEditorUnmount(false));
+    }
+  }, [
+    isEditorBusy, isEditorReady, didDiscardEditing, didEditorUnmount,
+    note.id, editingNoteId, editingNoteTitle, editingNoteBody, editingNoteMedia,
+    _setInitData, dispatch,
+  ]);
+
   const editorConfig = useMemo(() => {
     return {
       placeholder: 'Start writing...',
@@ -444,10 +515,10 @@ const NoteEditorEditor = (props) => {
     <div className="flex-1 flex flex-col overflow-hidden">
       <div ref={scrollView} className="flex-grow flex-shrink overflow-x-hidden overflow-y-auto z-0">
         <div className={`px-1.5 py-1.5 ${isMobile ? 'border-b border-gray-200' : ''}`}>
-          <input ref={titleInput} onFocus={onFocus} type="text" name="titleInput" id="titleInput" className="block w-full text-xl font-normal text-gray-800 px-1.5 py-1.5 placeholder-gray-500 border-0 focus:outline-none focus:ring-0 lg:text-lg" placeholder="Note Title" disabled={(note.id !== NEW_NOTE && note.status !== ADDED) || isEditorBusy} />
+          <input ref={titleInput} onFocus={onFocus} onChange={onDataChange} type="text" name="titleInput" id="titleInput" className="block w-full text-xl font-normal text-gray-800 px-1.5 py-1.5 placeholder-gray-500 border-0 focus:outline-none focus:ring-0 lg:text-lg" placeholder="Note Title" disabled={(note.id !== NEW_NOTE && note.status !== ADDED) || isEditorBusy} />
         </div>
         <div ref={bodyTopToolbar} className="sticky -top-px z-10"></div>
-        <CKEditor editor={ckeditor} config={editorConfig} disabled={(note.id !== NEW_NOTE && note.status !== ADDED) || isEditorBusy} onReady={onReady} onFocus={onFocus} />
+        <CKEditor editor={ckeditor} config={editorConfig} disabled={(note.id !== NEW_NOTE && note.status !== ADDED) || isEditorBusy} onReady={onReady} onFocus={onFocus} onChange={onDataChange} />
         <div className="h-28"></div>
       </div>
       <div ref={bodyBottomToolbar} className="flex-grow-0 flex-shrink-0"></div>

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import {
   updatePopupUrlHash, discardNote, updateNoteIdUrlHash, updateNoteId,
-  changeListName, clearSavingFPaths,
+  changeListName, clearSavingFPaths, updateDidDiscardEditing,
 } from '../actions';
 import {
   CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT,
@@ -46,6 +46,7 @@ const ConfirmDiscardPopup = () => {
     } else throw new Error(`Invalid discard action: ${discardAction}`);
 
     dispatch(clearSavingFPaths());
+    dispatch(updateDidDiscardEditing(true));
 
     onConfirmDiscardCancelBtnClick();
     didClick.current = true;

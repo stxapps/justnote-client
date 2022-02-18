@@ -5,6 +5,7 @@ import {
   INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
   ADD_SAVING_OBJ_URLS, DELETE_SAVING_OBJ_URLS, CLEAR_SAVING_FPATHS,
   ADD_SAVING_FPATHS, ADD_NOTE_COMMIT, UPDATE_NOTE_COMMIT, UPDATE_EDITOR_SCROLL_ENABLED,
+  UPDATE_EDITING_NOTE, UPDATE_EDITOR_UNMOUNT, UPDATE_DID_DISCARD_EDITING,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 
@@ -21,6 +22,12 @@ const initialState = {
   savingObjectUrls: [],
   savingFPaths: [],
   isScrollEnabled: true,
+  editingNoteId: null,
+  editingNoteTitle: '',
+  editingNoteBody: '',
+  editingNoteMedia: [],
+  didEditorUnmount: false,
+  didDiscardEditing: false,
 };
 
 const editorReducer = (state = initialState, action) => {
@@ -87,6 +94,26 @@ const editorReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_EDITOR_SCROLL_ENABLED) {
     return { ...state, isScrollEnabled: action.payload };
+  }
+
+  if (action.type === UPDATE_EDITING_NOTE) {
+    const { id, title, body, media } = action.payload;
+    return {
+      ...state,
+      editingNoteId: id,
+      editingNoteTitle: title,
+      editingNoteBody: body,
+      editingNoteMedia: media,
+      didDiscardEditing: false,
+    };
+  }
+
+  if (action.type === UPDATE_EDITOR_UNMOUNT) {
+    return { ...state, didEditorUnmount: action.payload };
+  }
+
+  if (action.type === UPDATE_DID_DISCARD_EDITING) {
+    return { ...state, didDiscardEditing: action.payload };
   }
 
   if (action.type === DELETE_ALL_DATA || action.type === RESET_STATE) {
