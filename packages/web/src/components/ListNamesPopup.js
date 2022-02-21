@@ -22,7 +22,7 @@ const MODE_MOVE_LIST_NAME = 'MODE_MOVE_LIST_NAME';
 
 const ListNamesPopup = () => {
 
-  const { height: safeAreaHeight } = useSafeAreaFrame();
+  const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
   const isShown = useSelector(state => state.display.isListNamesPopupShown);
   const anchorPosition = useSelector(state => state.display.listNamesPopupPosition);
   const listName = useSelector(state => state.display.listName);
@@ -247,9 +247,11 @@ const ListNamesPopup = () => {
     );
   };
 
-  const layouts = createLayouts(derivedAnchorPosition, {
-    width: popupWidth, height: popupHeight,
-  });
+  const layouts = createLayouts(
+    derivedAnchorPosition,
+    { width: popupWidth, height: popupHeight },
+    { width: safeAreaWidth, height: safeAreaHeight }
+  );
   const popupPosition = computePosition(layouts, null, 8);
 
   const { top, left, topOrigin, leftOrigin } = popupPosition;

@@ -1,4 +1,4 @@
-import { Linking, Dimensions, AppState } from 'react-native';
+import { Linking, AppState } from 'react-native';
 
 import userSession from '../userSession';
 import mmkvStorage from '../mmkvStorage';
@@ -6,7 +6,7 @@ import dataApi from '../apis/data';
 import serverApi from '../apis/server';
 import fileApi from '../apis/file';
 import {
-  INIT, UPDATE_WINDOW_SIZE, UPDATE_USER, UPDATE_HANDLING_SIGN_IN,
+  INIT, UPDATE_USER, UPDATE_HANDLING_SIGN_IN,
   UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP, UPDATE_SEARCH_STRING,
   UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, UPDATE_PAGE_Y_OFFSET,
@@ -75,16 +75,6 @@ export const init = () => async (dispatch, getState) => {
     await handlePendingSignIn(e.url)(dispatch, getState);
   });
 
-  Dimensions.addEventListener('change', ({ window }) => {
-    dispatch({
-      type: UPDATE_WINDOW_SIZE,
-      payload: {
-        windowWidth: window.width,
-        windowHeight: window.height,
-      },
-    });
-  });
-
   AppState.addEventListener('change', async (nextAppState) => {
     if (nextAppState === 'active') {
       const isUserSignedIn = await userSession.isUserSignedIn();
@@ -110,8 +100,8 @@ export const init = () => async (dispatch, getState) => {
       isUserDummy,
       username,
       userImage,
-      windowWidth: Dimensions.get('window').width,
-      windowHeight: Dimensions.get('window').height,
+      windowWidth: null,
+      windowHeight: null,
     },
   });
 };

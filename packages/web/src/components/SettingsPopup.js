@@ -116,8 +116,8 @@ const SettingsPopup = () => {
   const _render = (content) => {
 
     let panelHeight = safeAreaHeight * 0.9;
-    if (window.innerWidth >= LG_WIDTH) panelHeight = Math.min(panelHeight, 608);
-    else if (window.innerWidth >= MD_WIDTH) panelHeight = Math.min(panelHeight, 656);
+    if (safeAreaWidth >= LG_WIDTH) panelHeight = Math.min(panelHeight, 608);
+    else if (safeAreaWidth >= MD_WIDTH) panelHeight = Math.min(panelHeight, 656);
 
     const selectedMenuTextStyleClasses = 'bg-gray-100 text-gray-800';
     const menuTextStyleClasses = 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 focus:bg-gray-50 focus:text-gray-700';

@@ -24,7 +24,7 @@
     "react-native-file-access": "^2.0.0",
     "react-native-keyboard-manager": "^6.5.4-3",
     "react-native-mmkv-storage": "0.4.4",
-    "react-native-safe-area-context": "^3.3.2",
+    "react-native-safe-area-context": "^3.4.1",
     "react-native-svg": "^12.1.1",
     "react-native-webview": "^11.14.2",
     "react-redux": "^7.2.6",
