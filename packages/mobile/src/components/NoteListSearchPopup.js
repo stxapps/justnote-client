@@ -3,13 +3,14 @@ import {
   View, Text, TouchableOpacity, TextInput, Animated, BackHandler, Keyboard,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { updateSearchString, updatePopup } from '../actions';
 import { SEARCH_POPUP } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import { popupFMV } from '../types/animConfigs';
+
+import { useSafeAreaFrame } from '.';
 
 const NoteListSearchPopup = () => {
 

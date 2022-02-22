@@ -4,7 +4,6 @@ import {
   BackHandler,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { updatePopup, moveNotes, moveToListName } from '../actions';
@@ -15,8 +14,10 @@ import {
   getMaxListNameChildrenSize,
 } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
-import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
 import { popupFMV, slideAnimConfig } from '../types/animConfigs';
+
+import { useSafeAreaFrame } from '.';
+import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
 
 const MODE_MOVE_NOTES = 'MODE_MOVE_NOTES';
 const MODE_MOVE_LIST_NAME = 'MODE_MOVE_LIST_NAME';

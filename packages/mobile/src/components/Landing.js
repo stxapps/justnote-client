@@ -2,7 +2,6 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import Svg, { SvgXml, Path } from 'react-native-svg';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
 import { updatePopup } from '../actions';
 import {
@@ -11,6 +10,7 @@ import {
 import { tailwind } from '../stylesheets/tailwind';
 import cache from '../utils/cache';
 
+import { useSafeAreaFrame } from '.';
 import SignUpPopup from './SignUpPopup';
 import SignInPopup from './SignInPopup';
 import ConfirmAsDummyPopup from './ConfirmAsDummyPopup';

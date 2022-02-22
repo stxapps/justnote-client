@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, Switch, Linking, Platform } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { Circle } from 'react-native-animated-spinkit';
 
@@ -10,6 +9,8 @@ import {
 } from '../actions';
 import { SM_WIDTH } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
+
+import { useSafeAreaFrame } from '.';
 
 const _SettingsPopupData = (props) => {
 

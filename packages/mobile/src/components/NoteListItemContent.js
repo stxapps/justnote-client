@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
 import {
   updateNoteId, updateBulkEdit, addSelectedNoteIds, deleteSelectedNoteIds,
@@ -10,6 +9,8 @@ import {
 import { makeIsNoteIdSelected } from '../selectors';
 import { isBusyStatus, stripHtml } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
+
+import { useSafeAreaFrame } from '.';
 
 const NoteListItemContent = (props) => {
 

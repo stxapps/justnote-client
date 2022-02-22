@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { updatePopup, moveNotes } from '../actions';
@@ -11,6 +10,8 @@ import {
 import { getListNameMap } from '../selectors';
 import { getListNameDisplayName, getAllListNames } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
+
+import { useSafeAreaFrame } from '.';
 
 const NoteCommands = (props) => {
 

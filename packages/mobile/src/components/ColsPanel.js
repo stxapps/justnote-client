@@ -2,12 +2,12 @@ import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react'
 import { View, TouchableOpacity, PanResponder } from 'react-native';
 import { useSelector } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
 import mmkvStorage from '../mmkvStorage';
 import { COLS_PANEL_STATE, NEW_NOTE, NEW_NOTE_OBJ } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 
+import { useSafeAreaFrame } from '.';
 import Loading from './Loading';
 import Sidebar from './Sidebar';
 import NoteList from './NoteList';

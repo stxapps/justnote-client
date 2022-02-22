@@ -3,7 +3,6 @@ import {
   ScrollView, View, Text, TouchableOpacity, Animated, Linking,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { Circle } from 'react-native-animated-spinkit';
 
@@ -13,6 +12,8 @@ import { getListNameMap } from '../selectors';
 import { getListNameDisplayName, getFormattedDT } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 import { popupFMV } from '../types/animConfigs';
+
+import { useSafeAreaFrame } from '.';
 
 const NoteEditorConflict = (props) => {
 

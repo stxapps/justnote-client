@@ -2,11 +2,12 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
 import { updateNoteId } from '../actions';
 import { isDiedStatus } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
+
+import { useSafeAreaFrame } from '.';
 
 const NoteListItemError = (props) => {
 

@@ -4,7 +4,6 @@ import {
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
-import { useSafeAreaFrame, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   updatePopup, discardNote, updateNoteId, changeListName, updateSynced,
@@ -16,6 +15,8 @@ import {
 } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import { dialogFMV } from '../types/animConfigs';
+
+import { useSafeAreaFrame, useSafeAreaInsets } from '.';
 
 const ConfirmDiscardPopup = () => {
 

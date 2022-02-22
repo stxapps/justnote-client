@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, Animated } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path, Circle } from 'react-native-svg';
 
 import { updatePopup } from '../actions';
@@ -14,6 +13,7 @@ import { getListNameDisplayName } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 import { rotateAnimConfig } from '../types/animConfigs';
 
+import { useSafeAreaFrame } from '.';
 import NoteListSearchPopup from './NoteListSearchPopup';
 import NoteListTopBarBulkEdit from './NoteListTopBarBulkEdit';
 

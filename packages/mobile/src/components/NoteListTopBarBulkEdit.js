@@ -1,13 +1,13 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { updateBulkEdit } from '../actions';
 import { getSelectedNoteIdsLength } from '../selectors';
 import { tailwind } from '../stylesheets/tailwind';
 
+import { useSafeAreaFrame } from '.';
 import NoteCommands from './NoteCommands';
 
 const NoteListTopBarBulkEdit = () => {

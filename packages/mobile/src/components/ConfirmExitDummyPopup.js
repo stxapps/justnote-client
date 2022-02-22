@@ -4,12 +4,13 @@ import {
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
-import { useSafeAreaFrame, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { updatePopup, signOut } from '../actions';
 import { CONFIRM_EXIT_DUMMY_POPUP } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import { dialogFMV } from '../types/animConfigs';
+
+import { useSafeAreaFrame, useSafeAreaInsets } from '.';
 
 const ConfirmExitDummyPopup = () => {
 

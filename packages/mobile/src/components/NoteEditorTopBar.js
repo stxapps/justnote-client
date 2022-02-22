@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { Circle } from 'react-native-animated-spinkit';
 
@@ -11,6 +10,7 @@ import {
 import { NEW_NOTE, ADDED, LG_WIDTH } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 
+import { useSafeAreaFrame } from '.';
 import NoteCommands from './NoteCommands';
 
 const NoteEditorTopBar = (props) => {

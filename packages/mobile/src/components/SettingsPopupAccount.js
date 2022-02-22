@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Linking } from 'react-native';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
 import { tailwind } from '../stylesheets/tailwind';
+
+import { useSafeAreaFrame } from '.';
 
 const SettingsPopupAccount = (props) => {
 

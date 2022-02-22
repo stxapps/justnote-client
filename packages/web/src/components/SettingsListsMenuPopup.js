@@ -9,9 +9,9 @@ import {
 } from '../types/const';
 import { makeGetListNameEditor } from '../selectors';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
-import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
 
 import { useSafeAreaFrame } from '.';
+import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
 
 const SettingsListsMenuPopup = () => {
 

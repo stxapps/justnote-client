@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 import { FlatList, View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { Flow } from 'react-native-animated-spinkit';
 
@@ -11,6 +10,7 @@ import { getListNameMap, getNotes } from '../selectors';
 import { getListNameDisplayName } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 
+import { useSafeAreaFrame } from '.';
 import NoteListItem from './NoteListItem';
 
 const SHOW_FETCH_MORE_BTN = 'SHOW_FETCH_MORE_BTN';

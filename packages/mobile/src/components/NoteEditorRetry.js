@@ -1,12 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import { ScrollView, View, Text, TouchableOpacity, Linking } from 'react-native';
 import { useDispatch } from 'react-redux';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { updateNoteId, retryDiedNotes, cancelDiedNotes } from '../actions';
 import { LG_WIDTH } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
+
+import { useSafeAreaFrame } from '.';
 
 const NoteEditorRetry = (props) => {
 

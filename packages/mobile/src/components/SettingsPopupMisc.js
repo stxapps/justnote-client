@@ -1,13 +1,14 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Switch, Platform } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
 import {
   updateDoDeleteOldNotesInTrash, updateSortOn, updateDoDescendingOrder,
 } from '../actions';
 import { ADDED_DT, UPDATED_DT } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
+
+import { useSafeAreaFrame } from '.';
 
 const SettingsPopupAccount = (props) => {
 

@@ -3,7 +3,6 @@ import {
   View, Text, TouchableOpacity, TouchableWithoutFeedback, Animated, BackHandler,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { moveListName, updateListNameEditors, updatePopup } from '../actions';
@@ -13,8 +12,10 @@ import {
 } from '../types/const';
 import { makeGetListNameEditor } from '../selectors';
 import { tailwind } from '../stylesheets/tailwind';
-import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
 import { popupFMV } from '../types/animConfigs';
+
+import { useSafeAreaFrame } from '.';
+import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
 
 const SettingsListsMenuPopup = () => {
 
@@ -234,7 +235,7 @@ const SettingsListsMenuPopup = () => {
     );
   } else {
     panel = (
-      <Animated.View onLayout={onPopupLayout} style={[tailwind(popupClassNames), { top: safeAreaHeight, left: safeAreaWidth }]}>
+      <Animated.View onLayout={onPopupLayout} style={[tailwind(popupClassNames), { top: safeAreaHeight + 256, left: safeAreaWidth + 256 }]}>
         {buttons}
       </Animated.View>
     );

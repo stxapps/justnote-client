@@ -1,8 +1,8 @@
 import React from 'react';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
 import { LG_WIDTH } from '../types/const';
 
+import { useSafeAreaFrame } from '.';
 import SignUpPopup from './SignUpPopup';
 import SignInPopup from './SignInPopup';
 import ColsPanel from './ColsPanel';

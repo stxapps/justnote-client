@@ -3,12 +3,12 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { SvgXml, Path, Circle } from 'react-native-svg';
 import FastImage from 'react-native-fast-image';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
 import { updateNoteId, updatePopup } from '../actions';
 import { NEW_NOTE, PROFILE_POPUP } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 
+import { useSafeAreaFrame } from '.';
 import SidebarSearchInput from './SidebarSearchInput';
 import SidebarListNames from './SidebarListNames';
 import LoadingSidebarListNames from './LoadingSidebarListNames';

@@ -3,7 +3,6 @@ import {
   View, TouchableOpacity, TouchableWithoutFeedback, Animated, BackHandler, PanResponder,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { useSafeAreaFrame, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { updateNoteId, updatePopup, updateEditorScrollEnabled } from '../actions';
@@ -11,6 +10,7 @@ import { NEW_NOTE, NEW_NOTE_OBJ, SIDEBAR_POPUP } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import { sidebarFMV } from '../types/animConfigs';
 
+import { useSafeAreaFrame, useSafeAreaInsets } from '.';
 import Sidebar from './Sidebar';
 import NoteList from './NoteList';
 import NoteEditor from './NoteEditor';

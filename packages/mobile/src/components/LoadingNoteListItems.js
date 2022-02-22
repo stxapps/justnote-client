@@ -1,9 +1,10 @@
 import React from 'react';
 import { View } from 'react-native';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
 import { randInt, sample } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
+
+import { useSafeAreaFrame } from '.';
 
 const widths = ['20%', '25%', '30%', '35%', '40%', '45%', '50%', '55%', '60%', '65%', '70%', '75%', '80%', '85%', '90%', '95%', '100%'];
 

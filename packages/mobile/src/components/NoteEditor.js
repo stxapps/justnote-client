@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { View, Text, Keyboard, Platform } from 'react-native';
 import { useSelector } from 'react-redux';
-import { useSafeAreaFrame, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { DUMMY_NOTE_OBJ } from '../types/const';
 import { isDiedStatus } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 
+import { useSafeAreaFrame, useSafeAreaInsets } from '.';
 import NoteEditorTopBar from './NoteEditorTopBar';
 import NoteEditorEditor from './NoteEditorEditor';
 import NoteEditorBulkEdit from './NoteEditorBulkEdit';
@@ -28,7 +28,7 @@ const NoteEditor = (props) => {
   const style = useMemo(() => {
     if (Platform.OS === 'android') return tailwind('w-full h-full bg-white');
     else if (Platform.OS === 'ios') {
-      let height = safeAreaHeight - insets.top - insets.bottom;
+      let height = safeAreaHeight;
       if (keyboardHeight > 0) height = height + insets.bottom - keyboardHeight;
       return [tailwind('w-full bg-white'), { height }];
     } else throw new Error(`Invalid Platform.OS: ${Platform.OS}`);

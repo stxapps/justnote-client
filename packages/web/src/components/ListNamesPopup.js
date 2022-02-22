@@ -10,9 +10,9 @@ import {
   getMaxListNameChildrenSize,
 } from '../utils';
 import { popupBgFMV, popupFMV, slideFMV } from '../types/animConfigs';
-import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
 
 import { useSafeAreaFrame } from '.';
+import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
 
 // eslint-disable-next-line
 import { Tween } from 'framer-motion';

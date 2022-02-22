@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { View, Text, TouchableOpacity, Animated, BackHandler } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { updateBulkEdit, updateNoteId, fetch, sync } from '../actions';
@@ -9,6 +8,7 @@ import { TRASH, NEW_NOTE, MAX_SELECTED_NOTE_IDS } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import { popupFMV } from '../types/animConfigs';
 
+import { useSafeAreaFrame } from '.';
 import NoteListTopBar from './NoteListTopBar';
 import NoteListItems from './NoteListItems';
 import LoadingNoteListItems from './LoadingNoteListItems';

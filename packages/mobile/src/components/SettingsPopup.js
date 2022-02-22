@@ -4,7 +4,6 @@ import {
   BackHandler,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { useSafeAreaFrame, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { updateSettingsPopup } from '../actions';
@@ -12,6 +11,7 @@ import { MD_WIDTH, LG_WIDTH } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import { popupFMV, sidebarFMV } from '../types/animConfigs';
 
+import { useSafeAreaFrame, useSafeAreaInsets } from '.';
 import SettingsPopupAccount from './SettingsPopupAccount';
 import {
   SettingsPopupData, SettingsPopupDataExport, SettingsPopupDataDelete,
@@ -189,7 +189,7 @@ const SettingsPopup = () => {
   if (!isShown && didCloseAnimEnd) return null;
 
   const _render = (content) => {
-
+    // safeAreaHeight doesn't include status bar height, but minus it anyway.
     const statusBarHeight = 24;
     const appHeight = safeAreaHeight - statusBarHeight;
 
