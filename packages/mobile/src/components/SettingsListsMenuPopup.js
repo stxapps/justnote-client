@@ -194,7 +194,7 @@ const SettingsListsMenuPopup = () => {
     const layouts = createLayouts(
       derivedAnchorPosition,
       { width: popupSize.width, height: popupSize.height },
-      { width: safeAreaWidth + insets.left, height: safeAreaHeight + insets.top }
+      { width: safeAreaWidth + insets.left, height: safeAreaHeight + insets.top },
     );
     const popupPosition = computePosition(layouts, null, 8);
 

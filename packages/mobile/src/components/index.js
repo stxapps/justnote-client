@@ -21,7 +21,7 @@ export const useSafeAreaFrame = () => {
   const {
     x: windowX, y: windowY, width: windowWidth, height: windowHeight,
   } = useWindowFrame();
-  const { width: screenWidth, height: screenHeight } = Dimensions.get("screen");
+  const { width: screenWidth, height: screenHeight } = Dimensions.get('screen');
   const screenInsets = useScreenInsets();
 
   const safeAreaInsets = getSafeAreaInsets(
@@ -41,7 +41,7 @@ export const useSafeAreaInsets = () => {
   const {
     x: windowX, y: windowY, width: windowWidth, height: windowHeight,
   } = useWindowFrame();
-  const { width: screenWidth, height: screenHeight } = Dimensions.get("screen");
+  const { width: screenWidth, height: screenHeight } = Dimensions.get('screen');
   const screenInsets = useScreenInsets();
 
   return getSafeAreaInsets(
