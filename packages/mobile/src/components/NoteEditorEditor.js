@@ -78,6 +78,7 @@ const NoteEditorEditor = (props) => {
 
   const focusTitleInput = useCallback(() => {
     setTimeout(() => {
+      if (!hackInput.current || !webView.current) return;
       if (Platform.OS === 'ios') {
         webView.current.injectJavaScript('document.querySelector("#titleInput").blur(); true;');
       }
@@ -429,6 +430,7 @@ const NoteEditorEditor = (props) => {
         _setInitData(
           editingNoteId, editingNoteTitle, editingNoteBody, editingNoteMedia
         );
+        didUpdateEditingNote.current = true;
       }
       dispatch(updateEditorUnmount(false));
     }
