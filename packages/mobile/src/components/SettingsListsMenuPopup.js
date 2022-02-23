@@ -14,12 +14,13 @@ import { makeGetListNameEditor } from '../selectors';
 import { tailwind } from '../stylesheets/tailwind';
 import { popupFMV } from '../types/animConfigs';
 
-import { useSafeAreaFrame } from '.';
+import { useSafeAreaFrame, useSafeAreaInsets } from '.';
 import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
 
 const SettingsListsMenuPopup = () => {
 
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
+  const insets = useSafeAreaInsets();
   const isShown = useSelector(state => state.display.isSettingsListsMenuPopupShown);
   const anchorPosition = useSelector(
     state => state.display.settingsListsMenuPopupPosition
@@ -193,7 +194,7 @@ const SettingsListsMenuPopup = () => {
     const layouts = createLayouts(
       derivedAnchorPosition,
       { width: popupSize.width, height: popupSize.height },
-      { width: safeAreaWidth, height: safeAreaHeight }
+      { width: safeAreaWidth + insets.left, height: safeAreaHeight + insets.top }
     );
     const popupPosition = computePosition(layouts, null, 8);
 

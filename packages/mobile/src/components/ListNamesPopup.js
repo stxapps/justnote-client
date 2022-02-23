@@ -16,7 +16,7 @@ import {
 import { tailwind } from '../stylesheets/tailwind';
 import { popupFMV, slideAnimConfig } from '../types/animConfigs';
 
-import { useSafeAreaFrame } from '.';
+import { useSafeAreaFrame, useSafeAreaInsets } from '.';
 import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
 
 const MODE_MOVE_NOTES = 'MODE_MOVE_NOTES';
@@ -25,6 +25,7 @@ const MODE_MOVE_LIST_NAME = 'MODE_MOVE_LIST_NAME';
 const ListNamesPopup = () => {
 
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
+  const insets = useSafeAreaInsets();
   const isShown = useSelector(state => state.display.isListNamesPopupShown);
   const anchorPosition = useSelector(state => state.display.listNamesPopupPosition);
   const listName = useSelector(state => state.display.listName);
@@ -286,7 +287,7 @@ const ListNamesPopup = () => {
   const layouts = createLayouts(
     derivedAnchorPosition,
     { width: popupWidth, height: popupHeight },
-    { width: safeAreaWidth, height: safeAreaHeight }
+    { width: safeAreaWidth + insets.left, height: safeAreaHeight + insets.right }
   );
   const popupPosition = computePosition(layouts, null, 8);
 

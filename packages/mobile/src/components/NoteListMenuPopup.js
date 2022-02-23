@@ -16,11 +16,12 @@ import {
 import { tailwind } from '../stylesheets/tailwind';
 import { popupFMV, rotateAnimConfig } from '../types/animConfigs';
 
-import { useSafeAreaFrame } from '.';
+import { useSafeAreaFrame, useSafeAreaInsets } from '.';
 
 const NoteListMenuPopup = () => {
 
   const { width: safeAreaWidth } = useSafeAreaFrame();
+  const insets = useSafeAreaInsets();
   const isShown = useSelector(state => state.display.isNoteListMenuPopupShown);
   const anchorPosition = useSelector(state => state.display.noteListMenuPopupPosition);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
@@ -210,7 +211,7 @@ const NoteListMenuPopup = () => {
     transform: [],
   };
   if (safeAreaWidth < LG_WIDTH) {
-    popupStyle.right = safeAreaWidth - derivedAnchorPosition.right + 16;
+    popupStyle.right = (safeAreaWidth + insets.left) - derivedAnchorPosition.right + 16;
     popupStyle.transform.push({
       translateX: popupAnim.interpolate({
         inputRange: [0, 1], outputRange: [0.05 * 148, 0],
