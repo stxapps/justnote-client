@@ -243,15 +243,16 @@ const NoteEditorEditor = (props) => {
       document.documentElement.style.setProperty('--ck-font-size-base', '13px');
     }
 
-    toolbarItems.get(8).on('done', () => {
+    toolbarItems.get(10).on('done', () => {
       if (groupedItemsDropdown) groupedItemsDropdown.set('isOpen', false);
+      onFocus();
     });
 
     window.JustnoteReactWebApp = { addObjectUrlFiles: onAddObjectUrlFiles };
 
     bodyEditor.current = editor;
     setEditorReady(true);
-  }, [isMobile, onAddObjectUrlFiles, setEditorReady]);
+  }, [isMobile, onAddObjectUrlFiles, setEditorReady, onFocus]);
 
   const onDataChange = useMemo(() => debounce(() => {
     // At the time, might already unmounted
