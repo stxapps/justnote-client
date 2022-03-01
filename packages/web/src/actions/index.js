@@ -29,7 +29,7 @@ import {
   INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
   INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT,
   INCREASE_UPDATE_EDITOR_WIDTH_COUNT, INCREASE_RESET_DID_CLICK_COUNT,
-  ADD_SAVING_OBJ_URLS, DELETE_SAVING_OBJ_URLS, CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS,
+  CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS, UPDATE_EDITOR_IS_UPLOADING,
   UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_EDITING_NOTE, UPDATE_EDITOR_UNMOUNT,
   UPDATE_DID_DISCARD_EDITING, UPDATE_STACKS_ACCESS, UPDATE_IMPORT_ALL_DATA_PROGRESS,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
@@ -761,9 +761,9 @@ export const saveNote = (title, body, media) => async (dispatch, getState) => {
 
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
-  const savingObjectUrls = getState().editor.savingObjectUrls;
+  const isUploading = getState().editor.isUploading;
 
-  if ((title === '' && body === '') || savingObjectUrls.length > 0) {
+  if ((title === '' && body === '') || isUploading) {
     dispatch(updateEditorBusy(false));
     setTimeout(() => {
       dispatch(increaseFocusTitleCount());
@@ -1431,14 +1431,6 @@ export const increaseResetDidClickCount = () => {
   return { type: INCREASE_RESET_DID_CLICK_COUNT };
 };
 
-export const addSavingObjectUrls = (urls) => {
-  return { type: ADD_SAVING_OBJ_URLS, payload: urls };
-};
-
-export const deleteSavingObjectUrls = (urls) => {
-  return { type: DELETE_SAVING_OBJ_URLS, payload: urls };
-};
-
 export const clearSavingFPaths = () => async (dispatch, getState) => {
   const savingFPaths = getState().editor.savingFPaths;
   try {
@@ -1452,6 +1444,10 @@ export const clearSavingFPaths = () => async (dispatch, getState) => {
 
 export const addSavingFPaths = (fpaths) => {
   return { type: ADD_SAVING_FPATHS, payload: fpaths };
+};
+
+export const updateEditorIsUploading = (isUploading) => {
+  return { type: UPDATE_EDITOR_IS_UPLOADING, payload: isUploading };
 };
 
 export const updateEditorScrollEnabled = (enabled) => {

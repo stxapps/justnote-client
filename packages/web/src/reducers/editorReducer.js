@@ -3,8 +3,8 @@ import {
   INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT, INCREASE_UPDATE_NOTE_ID_COUNT,
   INCREASE_CHANGE_LIST_NAME_COUNT, INCREASE_FOCUS_TITLE_COUNT,
   INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
-  ADD_SAVING_OBJ_URLS, DELETE_SAVING_OBJ_URLS, CLEAR_SAVING_FPATHS,
-  ADD_SAVING_FPATHS, ADD_NOTE_COMMIT, UPDATE_NOTE_COMMIT, UPDATE_EDITOR_SCROLL_ENABLED,
+  CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS, ADD_NOTE_COMMIT, UPDATE_NOTE_COMMIT,
+  UPDATE_EDITOR_IS_UPLOADING, UPDATE_EDITOR_SCROLL_ENABLED,
   UPDATE_EDITING_NOTE, UPDATE_EDITOR_UNMOUNT, UPDATE_DID_DISCARD_EDITING,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -19,8 +19,8 @@ const initialState = {
   setInitDataCount: 0,
   blurCount: 0,
   updateEditorWidthCount: 0,
-  savingObjectUrls: [],
   savingFPaths: [],
+  isUploading: false,
   isScrollEnabled: true,
   editingNoteId: null,
   editingNoteTitle: '',
@@ -68,18 +68,6 @@ const editorReducer = (state = initialState, action) => {
     return { ...state, updateEditorWidthCount: state.updateEditorWidthCount + 1 };
   }
 
-  if (action.type === ADD_SAVING_OBJ_URLS) {
-    const urls = action.payload;
-    const savingObjectUrls = [...new Set([...state.savingObjectUrls, ...urls])];
-    return { ...state, savingObjectUrls };
-  }
-
-  if (action.type === DELETE_SAVING_OBJ_URLS) {
-    const urls = action.payload;
-    const savingObjectUrls = state.savingObjectUrls.filter(url => !urls.includes(url));
-    return { ...state, savingObjectUrls };
-  }
-
   if (action.type === CLEAR_SAVING_FPATHS) {
     return { ...state, savingFPaths: [] };
   }
@@ -90,6 +78,10 @@ const editorReducer = (state = initialState, action) => {
 
   if (action.type === ADD_NOTE_COMMIT || action.type === UPDATE_NOTE_COMMIT) {
     return { ...state, savingFPaths: [] };
+  }
+
+  if (action.type === UPDATE_EDITOR_IS_UPLOADING) {
+    return { ...state, isUploading: action.payload };
   }
 
   if (action.type === UPDATE_EDITOR_SCROLL_ENABLED) {

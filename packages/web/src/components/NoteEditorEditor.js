@@ -6,7 +6,8 @@ import ckeditor from '@ckeditor/ckeditor5-build-decoupled-document';
 import fileApi from '../apis/file';
 import {
   updateEditorFocused, saveNote, discardNote, onUpdateNoteIdUrlHash, onUpdateNoteId,
-  onChangeListName, addSavingFPaths, updateEditingNote, updateEditorUnmount,
+  onChangeListName, addSavingFPaths, updateEditorIsUploading, updateEditingNote,
+  updateEditorUnmount,
 } from '../actions';
 import { NEW_NOTE, ADDED, IMAGES, CD_ROOT } from '../types/const';
 import {
@@ -177,6 +178,10 @@ const NoteEditorEditor = (props) => {
     dispatch(updateEditorFocused(true));
   }, [dispatch]);
 
+  const onUpdateIsUploading = useCallback((isUploading) => {
+    dispatch(updateEditorIsUploading(isUploading));
+  }, [dispatch]);
+
   const onAddObjectUrlFiles = useCallback(async (objectUrl, fname, content) => {
     if (imagesDir.current) {
       let fpart = imagesDir.current + '/' + objectUrl.split('/').pop();
@@ -196,7 +201,8 @@ const NoteEditorEditor = (props) => {
     } else {
       objectUrlFiles.current[objectUrl] = { fname, content };
     }
-  }, [dispatch]);
+    onUpdateIsUploading(false);
+  }, [onUpdateIsUploading, dispatch]);
 
   const onGetData = useCallback(() => {
 
@@ -248,11 +254,13 @@ const NoteEditorEditor = (props) => {
       onFocus();
     });
 
-    window.JustnoteReactWebApp = { addObjectUrlFiles: onAddObjectUrlFiles };
+    window.JustnoteReactWebApp = {
+      updateIsUploading: onUpdateIsUploading, addObjectUrlFiles: onAddObjectUrlFiles,
+    };
 
     bodyEditor.current = editor;
     setEditorReady(true);
-  }, [isMobile, onAddObjectUrlFiles, setEditorReady, onFocus]);
+  }, [isMobile, onUpdateIsUploading, onAddObjectUrlFiles, setEditorReady, onFocus]);
 
   const onDataChange = useMemo(() => debounce(() => {
     // At the time, might already unmounted
@@ -357,6 +365,10 @@ const NoteEditorEditor = (props) => {
       prevUpdateEditorWidthCount.current = updateEditorWidthCount;
     }
   }, [isEditorReady, updateEditorWidthCount]);
+
+  useEffect(() => {
+    onUpdateIsUploading(false);
+  }, [note.id, onUpdateIsUploading]);
 
   useEffect(() => {
     if (!isEditorReady) return;

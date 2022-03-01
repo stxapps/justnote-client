@@ -7,8 +7,7 @@ import { Dirs } from 'react-native-file-access';
 import fileApi from '../apis/file';
 import {
   updateEditorFocused, saveNote, discardNote, onUpdateNoteId, onChangeListName,
-  addSavingObjectUrls, deleteSavingObjectUrls, addSavingFPaths,
-  updateEditingNote, updateEditorUnmount,
+  addSavingFPaths, updateEditorIsUploading, updateEditingNote, updateEditorUnmount,
 } from '../actions';
 import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, UTF8 } from '../types/const';
 import {
@@ -126,9 +125,12 @@ const NoteEditorEditor = (props) => {
   }, [note.id, note.title, note.body, note.media, _setInitData]);
 
   const setEditable = (editable) => {
-    const titleDisabled = editable ? 'false' : 'true';
-    const isBodyReadOnly = editable ? 'false' : 'true';
-    webView.current.injectJavaScript('document.querySelector("#titleInput").disabled = ' + titleDisabled + '; window.editor.isReadOnly = ' + isBodyReadOnly + '; true;');
+    // Currently there is a bug!
+    //   Set isReadOnly to true then to false and change:isFocused is not fired.
+    //const titleDisabled = editable ? 'false' : 'true';
+    //const isBodyReadOnly = editable ? 'false' : 'true';
+    //webView.current.injectJavaScript('document.querySelector("#titleInput").disabled = ' + titleDisabled + '; window.editor.isReadOnly = ' + isBodyReadOnly + '; true;');
+    webView.current.injectJavaScript('window.justnote.setEditable(' + editable + '); true;');
   };
 
   const blur = () => {
@@ -140,30 +142,31 @@ const NoteEditorEditor = (props) => {
     dispatch(updateEditorFocused(true));
   }, [dispatch]);
 
-  const onAddObjectUrlFiles = useCallback((objectUrl, fname, content) => {
-    dispatch(addSavingObjectUrls([objectUrl]));
-    setTimeout(async () => {
-      if (imagesDir.current) {
-        let fpart = imagesDir.current + '/' + objectUrl.split('/').pop();
-        const ext = getFileExt(fname);
-        if (ext) fpart += `.${ext}`;
+  const onUpdateIsUploading = useCallback((isUploading) => {
+    dispatch(updateEditorIsUploading(isUploading));
+  }, [dispatch]);
 
-        try {
-          await fileApi.putFile(fpart, content);
+  const onAddObjectUrlFiles = useCallback(async (objectUrl, fname, content) => {
+    if (imagesDir.current) {
+      let fpart = imagesDir.current + '/' + objectUrl.split('/').pop();
+      const ext = getFileExt(fname);
+      if (ext) fpart += `.${ext}`;
 
-          const cfpart = CD_ROOT + '/' + fpart;
-          dispatch(addSavingFPaths([cfpart]));
-          objectUrlFiles.current[objectUrl] = { fname: cfpart, content: '' };
-        } catch (e) {
-          console.log(`NoteEditorEditor: onAddObjectUrlFiles with fpart: ${fpart} error: `, e);
-          objectUrlFiles.current[objectUrl] = { fname, content };
-        }
-      } else {
+      try {
+        await fileApi.putFile(fpart, content);
+
+        const cfpart = CD_ROOT + '/' + fpart;
+        dispatch(addSavingFPaths([cfpart]));
+        objectUrlFiles.current[objectUrl] = { fname: cfpart, content: '' };
+      } catch (e) {
+        console.log(`NoteEditorEditor: onAddObjectUrlFiles with fpart: ${fpart} error: `, e);
         objectUrlFiles.current[objectUrl] = { fname, content };
       }
-      dispatch(deleteSavingObjectUrls([objectUrl]));
-    }, 1);
-  }, [dispatch]);
+    } else {
+      objectUrlFiles.current[objectUrl] = { fname, content };
+    }
+    onUpdateIsUploading(false);
+  }, [onUpdateIsUploading, dispatch]);
 
   const onGetData = useCallback((value) => {
 
@@ -208,6 +211,8 @@ const NoteEditorEditor = (props) => {
 
     if (change === 'focus' && to === 'webView') {
       onFocus();
+    } else if (change === 'update' && to === 'isUploading') {
+      onUpdateIsUploading(value === 'true');
     } else if (change === 'clear' && to === 'objectUrlContents') {
       objectUrlContents.current = {};
     } else if (change === 'add' && to === 'objectUrlContents') {
@@ -245,7 +250,7 @@ const NoteEditorEditor = (props) => {
     } else if (change === 'editingData' && to === 'webView') {
       onGetEditingData(value);
     } else throw new Error(`Invalid data: ${data}`);
-  }, [onFocus, onAddObjectUrlFiles, onGetData, onGetEditingData]);
+  }, [onFocus, onUpdateIsUploading, onAddObjectUrlFiles, onGetData, onGetEditingData]);
 
   const onContentProcessDidTerminate = useCallback(() => {
     setEditorReady(false);
@@ -259,7 +264,7 @@ const NoteEditorEditor = (props) => {
 
   useEffect(() => {
     if (!isEditorReady) return;
-    setEditable((note.id === NEW_NOTE || note.status === ADDED) || isEditorBusy);
+    setEditable((note.id === NEW_NOTE || note.status === ADDED) && !isEditorBusy);
   }, [isEditorReady, note.id, note.status, isEditorBusy]);
 
   useEffect(() => {
@@ -345,6 +350,10 @@ const NoteEditorEditor = (props) => {
     if (!isFocused && prevIsFocused.current) blur();
     prevIsFocused.current = isFocused;
   }, [isEditorReady, isFocused]);
+
+  useEffect(() => {
+    onUpdateIsUploading(false);
+  }, [note.id, onUpdateIsUploading]);
 
   useEffect(() => {
     if (!isEditorReady) {
