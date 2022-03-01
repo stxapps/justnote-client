@@ -6,8 +6,9 @@ import { Dirs } from 'react-native-file-access';
 
 import fileApi from '../apis/file';
 import {
-  updateEditorFocused, saveNote, discardNote, onUpdateNoteId, onChangeListName,
-  addSavingFPaths, updateEditorIsUploading, updateEditingNote, updateEditorUnmount,
+  updateEditorFocused, updateEditorBusy, saveNote, discardNote, onUpdateNoteId,
+  onChangeListName, addSavingFPaths, updateEditorIsUploading, updateEditingNote,
+  updateEditorUnmount,
 } from '../actions';
 import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, UTF8 } from '../types/const';
 import {
@@ -57,6 +58,7 @@ const NoteEditorEditor = (props) => {
   const objectUrlNames = useRef({});
   const imagesDir = useRef(null);
   const getDataAction = useRef(null);
+  const doResetEditorBusy = useRef(false);
   const keyboardHeight = useRef(0);
   const keyboardDidShowListener = useRef(null);
   const keyboardDidHideListener = useRef(null);
@@ -140,6 +142,10 @@ const NoteEditorEditor = (props) => {
 
   const onFocus = useCallback(() => {
     dispatch(updateEditorFocused(true));
+    if (doResetEditorBusy.current) {
+      dispatch(updateEditorBusy(false));
+      doResetEditorBusy.current = false;
+    }
   }, [dispatch]);
 
   const onUpdateIsUploading = useCallback((isUploading) => {
@@ -320,6 +326,7 @@ const NoteEditorEditor = (props) => {
      */
     if (!isEditorReady) return;
     if (focusTitleCount !== prevFocusTitleCount.current) {
+      doResetEditorBusy.current = true;
       focusTitleInput();
       prevFocusTitleCount.current = focusTitleCount;
     }

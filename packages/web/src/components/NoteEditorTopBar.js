@@ -15,6 +15,7 @@ const NoteEditorTopBar = (props) => {
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const isEditorFocused = useSelector(state => state.display.isEditorFocused);
   const isEditorBusy = useSelector(state => state.display.isEditorBusy);
+  const isEditorUploading = useSelector(state => state.editor.isUploading);
   const isConfirmDiscardPopupShown = useSelector(
     state => state.display.isConfirmDiscardPopupShown
   );
@@ -22,14 +23,14 @@ const NoteEditorTopBar = (props) => {
   const dispatch = useDispatch();
 
   const onRightPanelCloseBtnClick = () => {
-    if (didClick.current) return;
+    if (didClick.current || isEditorUploading) return;
     if (note.id !== NEW_NOTE && isEditorFocused) dispatch(increaseDiscardNoteCount());
     else dispatch(updateNoteIdUrlHash(null, false, true));
     didClick.current = true;
   };
 
   const onCancelBtnClick = () => {
-    if (didClick.current) return;
+    if (didClick.current || isEditorUploading) return;
     if (note.id !== NEW_NOTE && isEditorFocused) dispatch(increaseDiscardNoteCount());
     else dispatch(updateNoteId(null, false, true));
 
@@ -38,7 +39,7 @@ const NoteEditorTopBar = (props) => {
   };
 
   const onSaveBtnClick = () => {
-    if (didClick.current) return;
+    if (didClick.current || isEditorUploading) return;
     dispatch(increaseSaveNoteCount());
     didClick.current = true;
   };
@@ -77,10 +78,15 @@ const NoteEditorTopBar = (props) => {
 
   const style = safeAreaWidth < LG_WIDTH ? {} : { minWidth: 496 };
 
-  let commands;
-  if (note.id === NEW_NOTE) commands = isEditorFocused ? renderFocusedCommands() : null;
-  else if (note.status !== ADDED || isEditorBusy) commands = renderLoading();
-  else commands = isEditorFocused ? renderFocusedCommands() : <NoteCommands isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} />;
+  let commands = null;
+  if (note.id === NEW_NOTE) {
+    if (isEditorBusy) commands = renderLoading();
+    if (isEditorFocused) commands = renderFocusedCommands();
+  } else if (note.status !== ADDED || isEditorBusy) {
+    commands = renderLoading();
+  } else {
+    commands = isEditorFocused ? renderFocusedCommands() : <NoteCommands isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} />;
+  }
 
   return (
     <div className="flex-grow-0 flex-shrink-0 border-b border-gray-200 w-full h-16 overflow-x-auto">

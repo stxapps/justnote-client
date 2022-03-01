@@ -188,7 +188,13 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_BULK_EDITING) {
-    const newState = { ...state, isBulkEditing: action.payload, noteId: null };
+    const newState = {
+      ...state,
+      isBulkEditing: action.payload,
+      noteId: null,
+      isEditorFocused: false,
+      isEditorBusy: false,
+    };
     if (!action.payload) {
       newState.selectedNoteIds = [];
       newState.isSelectedNoteIdsMaxErrorShown = false;

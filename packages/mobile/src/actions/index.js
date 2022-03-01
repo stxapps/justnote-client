@@ -196,6 +196,9 @@ export const changeListName = (listName, doCheckEditing) => async (
   if (!listName) throw new Error(`Invalid listName: ${listName}`);
 
   if (doCheckEditing) {
+    const isEditorUploading = getState().editor.isUploading;
+    if (isEditorUploading) return;
+
     const isEditorFocused = getState().display.isEditorFocused;
     if (isEditorFocused) {
       dispatch(increaseChangeListNameCount(listName));
@@ -244,6 +247,9 @@ export const updateNoteId = (id, doGetIdFromState = false, doCheckEditing = fals
     // id can be both null and non-null so need doGetIdFromState, can't just check if.
     if (doGetIdFromState) id = getState().display.updatingNoteId;
     if (doCheckEditing) {
+      const isEditorUploading = getState().editor.isUploading;
+      if (isEditorUploading) return;
+
       const isEditorFocused = getState().display.isEditorFocused;
       if (isEditorFocused) {
         dispatch(increaseUpdateNoteIdCount(id));
@@ -433,13 +439,9 @@ export const saveNote = (title, body, media) => async (dispatch, getState) => {
 
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
-  const isUploading = getState().editor.isUploading;
 
-  if ((title === '' && body === '') || isUploading) {
-    dispatch(updateEditorBusy(false));
-    setTimeout(() => {
-      dispatch(increaseFocusTitleCount());
-    }, 1);
+  if (title === '' && body === '') {
+    dispatch(increaseFocusTitleCount());
     return;
   }
 
@@ -1292,11 +1294,16 @@ export const tryUpdateSynced = (updateAction, haveUpdate) => async (
 };
 
 export const updateSynced = (doCheckEditing = false) => async (dispatch, getState) => {
-  const isEditorFocused = getState().display.isEditorFocused;
-  if (doCheckEditing && isEditorFocused) {
-    dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_SYNCED));
-    dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
-    return;
+  if (doCheckEditing) {
+    const isEditorUploading = getState().editor.isUploading;
+    if (isEditorUploading) return;
+
+    const isEditorFocused = getState().display.isEditorFocused;
+    if (isEditorFocused) {
+      dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_SYNCED));
+      dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
+      return;
+    }
   }
 
   dispatch({ type: UPDATE_SYNCED });

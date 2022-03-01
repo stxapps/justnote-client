@@ -5,9 +5,9 @@ import ckeditor from '@ckeditor/ckeditor5-build-decoupled-document';
 
 import fileApi from '../apis/file';
 import {
-  updateEditorFocused, saveNote, discardNote, onUpdateNoteIdUrlHash, onUpdateNoteId,
-  onChangeListName, addSavingFPaths, updateEditorIsUploading, updateEditingNote,
-  updateEditorUnmount,
+  updateEditorFocused, updateEditorBusy, saveNote, discardNote, onUpdateNoteIdUrlHash,
+  onUpdateNoteId, onChangeListName, addSavingFPaths, updateEditorIsUploading,
+  updateEditingNote, updateEditorUnmount,
 } from '../actions';
 import { NEW_NOTE, ADDED, IMAGES, CD_ROOT } from '../types/const';
 import {
@@ -344,10 +344,12 @@ const NoteEditorEditor = (props) => {
      */
     if (!isEditorReady) return;
     if (focusTitleCount !== prevFocusTitleCount.current) {
+      // Different from mobile: need to not disabled titleInput first before focus.
+      dispatch(updateEditorBusy(false));
       focusTitleInput();
       prevFocusTitleCount.current = focusTitleCount;
     }
-  }, [isEditorReady, focusTitleCount]);
+  }, [isEditorReady, focusTitleCount, dispatch]);
 
   useEffect(() => {
     if (!isEditorReady) return;
