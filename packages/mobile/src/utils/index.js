@@ -239,12 +239,9 @@ export const isArrayEqual = (arr1, arr2) => {
 };
 
 export const urlHashToObj = (hash) => {
-
-  if (hash === null || hash === undefined || !isString(hash)) {
-    throw new Error(`Invalid hash: ${hash}`);
-  }
-
   const obj = {};
+
+  if (hash === null || hash === undefined || !isString(hash)) return obj;
   if (hash === '' || hash === '#' || hash === '#?') return obj;
   if (hash.startsWith('#')) hash = hash.slice(1);
   if (hash.startsWith('?')) hash = hash.slice(1);
@@ -252,8 +249,7 @@ export const urlHashToObj = (hash) => {
   const arr = hash.split('&');
   for (const el of arr) {
     const kv = el.split('=');
-    if (kv.length !== 2) throw new Error(`Invalid hash: ${hash}`);
-    obj[kv[0]] = kv[1];
+    if (kv.length === 2) obj[kv[0]] = kv[1];
   }
 
   return obj;

@@ -10,8 +10,8 @@ import {
 } from '../actions';
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import {
-  DOMAIN_NAME, SIGN_UP_POPUP, NOTE_LIST_MENU_POPUP, CONFIRM_EXIT_DUMMY_POPUP,
-  LG_WIDTH, SHOW_SYNCED,
+  DOMAIN_NAME, HASH_SUPPORT, SIGN_UP_POPUP, NOTE_LIST_MENU_POPUP,
+  CONFIRM_EXIT_DUMMY_POPUP, LG_WIDTH, SHOW_SYNCED,
 } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import { popupFMV, rotateAnimConfig } from '../types/animConfigs';
@@ -58,7 +58,7 @@ const NoteListMenuPopup = () => {
 
   const onSupportBtnClick = () => {
     onNoteListMenuCancelBtnClick();
-    Linking.openURL(DOMAIN_NAME + '/support');
+    Linking.openURL(DOMAIN_NAME + '/' + HASH_SUPPORT);
   };
 
   const onSignOutBtnClick = () => {

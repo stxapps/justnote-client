@@ -1,27 +1,29 @@
 import React from 'react';
 
+import { HASH_ABOUT, HASH_TERMS, HASH_PRIVACY, HASH_SUPPORT } from '../types/const';
+
 const Footer = () => {
   return (
     <footer className="bg-white">
       <div className="max-w-7xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
         <nav className="-mx-5 -my-2 flex flex-wrap justify-center" aria-label="Footer">
           <div className="px-5 py-2">
-            <a className="text-base text-gray-500 rounded-sm hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400" href="/about">
+            <a className="text-base text-gray-500 rounded-sm hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400" href={'/' + HASH_ABOUT}>
               About
             </a>
           </div>
           <div className="px-5 py-2">
-            <a className="text-base text-gray-500 rounded-sm hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400" href="/terms">
+            <a className="text-base text-gray-500 rounded-sm hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400" href={'/' + HASH_TERMS}>
               Terms
             </a>
           </div>
           <div className="px-5 py-2">
-            <a className="text-base text-gray-500 rounded-sm hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400" href="/privacy">
+            <a className="text-base text-gray-500 rounded-sm hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400" href={'/' + HASH_PRIVACY}>
               Privacy
             </a>
           </div>
           <div className="px-5 py-2">
-            <a className="text-base text-gray-500 rounded-sm hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400" href="/support">
+            <a className="text-base text-gray-500 rounded-sm hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400" href={'/' + HASH_SUPPORT}>
               Support
             </a>
           </div>

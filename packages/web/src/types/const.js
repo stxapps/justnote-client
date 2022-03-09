@@ -7,6 +7,13 @@ export const APP_URL_SCHEME = 'justnotecc';
 export const APP_DOMAIN_NAME = 'justnotecc://app';
 export const BLOCKSTACK_AUTH = '/blockstack-auth';
 
+export const HASH_LANDING = '#landing';
+export const HASH_LANDING_MOBILE = '#landing-mobile';
+export const HASH_ABOUT = '#about';
+export const HASH_TERMS = '#terms';
+export const HASH_PRIVACY = '#privacy';
+export const HASH_SUPPORT = '#support';
+
 export const HTTP = 'http://';
 export const HTTPS = 'https://';
 export const WWW = 'www.';

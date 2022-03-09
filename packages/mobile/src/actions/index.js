@@ -100,6 +100,7 @@ export const init = () => async (dispatch, getState) => {
       isUserDummy,
       username,
       userImage,
+      href: null,
       windowWidth: null,
       windowHeight: null,
     },

@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
 import { signOut, updatePopup, updateSettingsPopup } from '../actions';
-import { DOMAIN_NAME, PROFILE_POPUP } from '../types/const';
+import { DOMAIN_NAME, HASH_SUPPORT, PROFILE_POPUP } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import { popupFMV } from '../types/animConfigs';
 
@@ -32,7 +32,7 @@ const SidebarProfilePopup = () => {
 
   const onSupportBtnClick = () => {
     onProfileCancelBtnClick();
-    Linking.openURL(DOMAIN_NAME + '/support');
+    Linking.openURL(DOMAIN_NAME + '/' + HASH_SUPPORT);
   };
 
   const onSignOutBtnClick = () => {

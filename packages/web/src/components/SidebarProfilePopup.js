@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Url from 'url-parse';
 
 import { signOut, updatePopupUrlHash, updateSettingsPopup } from '../actions';
-import { PROFILE_POPUP } from '../types/const';
+import { HASH_SUPPORT, PROFILE_POPUP } from '../types/const';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
 
 const SidebarProfilePopup = () => {
@@ -24,8 +24,8 @@ const SidebarProfilePopup = () => {
 
   const onSupportBtnClick = () => {
     const urlObj = new Url(window.location.href, {});
-    urlObj.set('pathname', '/support');
-    urlObj.set('hash', '');
+    urlObj.set('pathname', '/');
+    urlObj.set('hash', HASH_SUPPORT);
     window.location.replace(urlObj.toString());
   };
 

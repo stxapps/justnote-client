@@ -6,7 +6,7 @@ import userSession from '../userSession';
 import dataApi from '../apis/data';
 import fileApi from '../apis/file';
 import {
-  INIT, UPDATE_WINDOW_SIZE, UPDATE_USER, UPDATE_HANDLING_SIGN_IN,
+  INIT, UPDATE_HREF, UPDATE_WINDOW_SIZE, UPDATE_USER, UPDATE_HANDLING_SIGN_IN,
   UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP, UPDATE_SEARCH_STRING,
   UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, UPDATE_PAGE_Y_OFFSET,
@@ -36,6 +36,7 @@ import {
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
+  HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY, HASH_SUPPORT,
   SEARCH_POPUP, SETTINGS_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP,
   DISCARD_ACTION_CANCEL_EDIT,
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
@@ -55,7 +56,7 @@ import { isUint8Array } from '../utils/index-web';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
 
-let hashChangeListener;
+let popStateListener, hashChangeListener;
 export const init = () => async (dispatch, getState) => {
 
   await handlePendingSignIn()(dispatch, getState);
@@ -78,13 +79,25 @@ export const init = () => async (dispatch, getState) => {
       isUserDummy,
       username,
       userImage,
+      href: window.location.href,
       windowWidth: window.innerWidth,
       windowHeight: window.innerHeight,
     },
   });
 
-  // Let hash get updated first before add an listener
-  hashChangeListener = function (e) {
+  // Let hash get updated first before add an listener by using setTimeout.
+  // popStateListener can be a local variable,
+  //   but make it the same as hashChangeListener.
+  popStateListener = () => {
+    onPopStateChange(dispatch, getState);
+  };
+  setTimeout(() => {
+    window.addEventListener('popstate', popStateListener);
+  }, 1);
+
+  // hashChangeListener can't be a local variable
+  //   as need to be removed and added when rotating.
+  hashChangeListener = (e) => {
     onUrlHashChange(e.oldURL, e.newURL, dispatch, getState);
   };
   setTimeout(() => {
@@ -242,10 +255,23 @@ export const updateUserData = (data) => async (dispatch, getState) => {
 
 export const handleUrlHash = () => {
   const urlObj = new Url(window.location.href, {});
-  if (urlObj.hash !== '') {
+  if (
+    urlObj.hash !== '' &&
+    ![
+      HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY,
+      HASH_SUPPORT,
+    ].includes(urlObj.hash)
+  ) {
     urlObj.set('hash', '');
     window.location.replace(urlObj.toString());
   }
+};
+
+export const onPopStateChange = (dispatch, getState) => {
+  dispatch({
+    type: UPDATE_HREF,
+    payload: window.location.href,
+  });
 };
 
 export const onUrlHashChange = (oldUrl, newUrl, dispatch, getState) => {

@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
+import Url from 'url-parse';
 
 import { updatePopupUrlHash } from '../actions';
-import { SIGN_UP_POPUP } from '../types/const';
+import { HASH_LANDING_MOBILE, SIGN_UP_POPUP } from '../types/const';
+import { isNumber } from '../utils';
 
 import TopBar from './TopBar';
 import Footer from './Footer';
@@ -26,9 +29,32 @@ import creator from '../images/creator.jpg';
 
 const Landing = () => {
 
+  const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
+  const ubiquitousSection = useRef(null);
+
   const onSignUpBtnClick = () => {
+    if (isUserSignedIn) {
+      const urlObj = new Url(window.location.href, {});
+      urlObj.set('pathname', '/');
+      urlObj.set('hash', '');
+      window.location.href = urlObj.toString();
+      return;
+    }
+
     updatePopupUrlHash(SIGN_UP_POPUP, true);
   };
+
+  useEffect(() => {
+    const hrefObj = new Url(window.location.href, {});
+    if (hrefObj.hash === HASH_LANDING_MOBILE) {
+      setTimeout(() => {
+        if (ubiquitousSection.current) {
+          const top = ubiquitousSection.current.offsetTop;
+          if (isNumber(top)) window.scrollTo(0, Math.max(top - 80, 0));
+        }
+      }, 100);
+    }
+  }, []);
 
   return (
     <React.Fragment>
@@ -247,7 +273,7 @@ const Landing = () => {
           </div>
         </div>
       </div>
-      <div className="relative bg-gray-800">
+      <div ref={ubiquitousSection} className="relative bg-gray-800">
         <div className="h-64 bg-gray-800 sm:h-72 md:absolute md:left-0 md:h-full md:w-1/2">
           <img className="w-full h-full object-cover object-top sm:object-contain sm:object-bottom md:object-cover md:ml-3 lg:object-contain lg:ml-0" src={ubiquitous} srcSet={`${ubiquitous} 1x, ${ubiquitous2x} 2x, ${ubiquitous3x} 3x, ${ubiquitous4x} 4x`} alt="" />
         </div>
