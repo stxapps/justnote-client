@@ -111,8 +111,11 @@ const NavPanel = () => {
           dispatch(updateNoteId(null));
         });
       }
-      dispatch(updateEditorScrollEnabled(true));
     }
+
+    // Should be only for the rightPanelAnim
+    //   but place here to make sure always enable back.
+    dispatch(updateEditorScrollEnabled(true));
   }, [
     isSidebarShown, derivedNote, isEditorFocused, dispatch, sidebarAnim, rightPanelAnim,
   ]);
@@ -123,6 +126,7 @@ const NavPanel = () => {
       onMoveShouldSetPanResponder: shouldSetPanResponder,
       onPanResponderMove: onPanResponderMove,
       onPanResponderRelease: onPanResponderRelease,
+      onPanResponderTerminate: onPanResponderRelease,
     });
   }, [shouldSetPanResponder, onPanResponderMove, onPanResponderRelease]);
 
