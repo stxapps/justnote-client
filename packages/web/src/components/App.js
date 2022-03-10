@@ -10,11 +10,16 @@ import { extractUrl } from '../utils';
 
 import Loading from './Loading';
 import Landing from './Landing';
-import Main from './Main';
 import About from './About';
 import Terms from './Terms';
 import Privacy from './Privacy';
 import Support from './Support';
+import ErrorBoundary from './ErrorBoundary';
+
+// medium.com/hackernoon/lazy-loading-and-preloading-components-in-react-16-6-804de091c82d
+// @ts-ignore
+const _Main = import('./Main');
+const Main = React.lazy(() => _Main);
 
 const App = () => {
 
@@ -44,7 +49,15 @@ const App = () => {
   if (hrefObj.hash === HASH_PRIVACY) return <Privacy />;
   if (hrefObj.hash === HASH_SUPPORT) return <Support />;
 
-  if (isUserSignedIn === true) return <Main />;
+  if (isUserSignedIn === true) {
+    return (
+      <ErrorBoundary>
+        <React.Suspense fallback={<Loading />}>
+          <Main />
+        </React.Suspense>
+      </ErrorBoundary>
+    );
+  }
 
   return <Landing />;
 };

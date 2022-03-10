@@ -1,5 +1,4 @@
 import Url from 'url-parse';
-import * as zip from "@zip.js/zip.js";
 import { saveAs } from 'file-saver';
 
 import userSession from '../userSession';
@@ -1549,6 +1548,19 @@ const parseImportedFile = async (dispatch, fileContent) => {
     done: 0,
   }));
 
+  let zip;
+  try {
+    // @ts-ignore
+    zip = await import('@zip.js/zip.js');
+  } catch (e) {
+    dispatch(updateImportAllDataProgress({
+      total: -1,
+      done: -1,
+      error: e.name + ': ' + e.message,
+    }));
+    return;
+  }
+
   // 1 format: zip file
   let fpaths = [], contents = [], addedDT = Date.now(), idMap = {};
   let isEvernote = false, enFPaths = [], enContents = [];
@@ -2060,6 +2072,8 @@ export const exportAllData = () => async (dispatch, getState) => {
   if (total === 0) return;
 
   try {
+    // @ts-ignore
+    const zip = await import('@zip.js/zip.js');
     const zipWriter = new zip.ZipWriter(new zip.BlobWriter('application/zip'));
     for (let i = 0; i < fpaths.length; i += N_NOTES) {
       const selectedFPaths = fpaths.slice(i, i + N_NOTES);
