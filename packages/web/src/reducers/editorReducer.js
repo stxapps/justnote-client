@@ -5,7 +5,7 @@ import {
   INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
   CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS, ADD_NOTE_COMMIT, UPDATE_NOTE_COMMIT,
   UPDATE_EDITOR_IS_UPLOADING, UPDATE_BULK_EDITING, UPDATE_EDITOR_SCROLL_ENABLED,
-  UPDATE_EDITING_NOTE, UPDATE_EDITOR_UNMOUNT, UPDATE_DID_DISCARD_EDITING,
+  UPDATE_NOTE_ID, UPDATE_EDITING_NOTE, UPDATE_EDITOR_UNMOUNT, UPDATE_DID_DISCARD_EDITING,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 
@@ -90,6 +90,11 @@ const editorReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_EDITOR_SCROLL_ENABLED) {
     return { ...state, isScrollEnabled: action.payload };
+  }
+
+  if (action.type === UPDATE_NOTE_ID) {
+    if (action.payload) return { ...state, isScrollEnabled: true };
+    return state;
   }
 
   if (action.type === UPDATE_EDITING_NOTE) {
