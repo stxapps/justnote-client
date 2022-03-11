@@ -760,3 +760,8 @@ export const indexOfClosingTag = (html, tag = '<div', closingTag = '</div>') => 
 
   return -1;
 };
+
+export const getOffsetTop = (element) => {
+  if (!element) return 0;
+  return getOffsetTop(element.offsetParent) + element.offsetTop;
+};

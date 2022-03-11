@@ -4,7 +4,7 @@ import Url from 'url-parse';
 
 import { updatePopupUrlHash } from '../actions';
 import { HASH_LANDING_MOBILE, SIGN_UP_POPUP } from '../types/const';
-import { isNumber } from '../utils';
+import { isNumber, getOffsetTop } from '../utils';
 
 import TopBar from './TopBar';
 import Footer from './Footer';
@@ -49,7 +49,7 @@ const Landing = () => {
     if (hrefObj.hash === HASH_LANDING_MOBILE) {
       setTimeout(() => {
         if (ubiquitousSection.current) {
-          const top = ubiquitousSection.current.offsetTop;
+          const top = getOffsetTop(ubiquitousSection.current);
           if (isNumber(top)) window.scrollTo(0, Math.max(top - 80, 0));
         }
       }, 100);
