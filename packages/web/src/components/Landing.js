@@ -30,6 +30,7 @@ import creator from '../images/creator.jpg';
 const Landing = () => {
 
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
+  const href = useSelector(state => state.window.href);
   const ubiquitousSection = useRef(null);
 
   const onSignUpBtnClick = () => {
@@ -45,7 +46,7 @@ const Landing = () => {
   };
 
   useEffect(() => {
-    const hrefObj = new Url(window.location.href, {});
+    const hrefObj = new Url(href, {});
     if (hrefObj.hash === HASH_LANDING_MOBILE) {
       setTimeout(() => {
         if (ubiquitousSection.current) {
@@ -53,8 +54,11 @@ const Landing = () => {
           if (isNumber(top)) window.scrollTo(0, Math.max(top - 80, 0));
         }
       }, 100);
+      return;
     }
-  }, []);
+
+    window.scrollTo(0, 0);
+  }, [href]);
 
   return (
     <React.Fragment>
