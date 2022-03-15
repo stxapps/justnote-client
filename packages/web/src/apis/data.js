@@ -490,9 +490,10 @@ const deleteFiles = async (fpaths) => {
 };
 
 const data = {
-  extractNoteFName, extractNoteId, listFPaths, listNoteIds, batchGetFileWithRetry,
-  toNotes, fetch, fetchMore, batchPutFileWithRetry, putNotes, getOldNotesInTrash,
-  canDeleteListNames, getFiles, putFiles, deleteFiles,
+  createNoteFPath, createNoteFName, extractNoteFPath, extractNoteFName, extractNoteId,
+  listFPaths, listNoteIds, batchGetFileWithRetry, toNotes, fetch, fetchMore,
+  batchPutFileWithRetry, putNotes, getOldNotesInTrash, canDeleteListNames, getFiles,
+  putFiles, deleteFiles,
 };
 
 export default data;

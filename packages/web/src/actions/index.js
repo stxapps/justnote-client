@@ -1624,12 +1624,26 @@ const parseImportedFile = async (dispatch, fileContent) => {
         if (fpathParts[4] !== IMAGES) continue;
       } else continue;
 
-      // Treat import notes as adding new notes, replace note id with a new one
+      // Treat import notes as adding new notes, replace note id with a new one.
       if (!idMap[fpathParts[2]]) {
-        const { dt } = dataApi.extractNoteId(id);
+        // If there's a parent, add a parent id with empty note content.
+        let rootId = null;
+        if (parentIds && parentIds.length > 0) {
+          rootId = parentIds[0];
+          const { dt } = dataApi.extractNoteId(rootId);
+          while (rootId === parentIds[0]) rootId = `${dt}${randomString(4)}`;
+
+          const rootFPathParts = [...fpathParts.slice(0, 4)];
+          rootFPathParts[2] = rootId;
+          rootFPathParts[3] = INDEX + DOT_JSON;
+          fpaths.push(rootFPathParts.join('/'));
+          contents.push({ title: '', body: '' });
+        }
 
         let newId = id;
+        const { dt } = dataApi.extractNoteId(newId);
         while (newId === id) newId = `${dt}${randomString(4)}`;
+        if (rootId) newId = `${newId}_${rootId}`;
         idMap[fpathParts[2]] = newId;
       }
       fpathParts[2] = idMap[fpathParts[2]];
@@ -2046,7 +2060,7 @@ export const updateImportAllDataProgress = (progress) => {
 export const exportAllData = () => async (dispatch, getState) => {
   dispatch(updateExportAllDataProgress({ total: 'calculating...', done: 0 }));
 
-  let fpaths = [];
+  let fpaths = [], rootIds = {};
   try {
     const { noteFPaths, settingsFPath } = await dataApi.listFPaths();
     const { noteIds, conflictedIds } = dataApi.listNoteIds(noteFPaths);
@@ -2056,6 +2070,7 @@ export const exportAllData = () => async (dispatch, getState) => {
         fpaths.push(fpath);
         if (fpath.includes(CD_ROOT + '/')) fpaths.push(getStaticFPath(fpath));
       }
+      rootIds[noteId.id] = `${noteId.addedDT}${randomString(4)}`;
     }
     if (settingsFPath) fpaths.push(settingsFPath);
   } catch (e) {
@@ -2089,6 +2104,15 @@ export const exportAllData = () => async (dispatch, getState) => {
         } else {
           if (isUint8Array(content)) content = new Blob([content]);
           reader = new zip.BlobReader(content);
+        }
+
+        if (fpath.startsWith(NOTES)) {
+          const { listName, fname, subName } = dataApi.extractNoteFPath(fpath);
+          const { id, parentIds } = dataApi.extractNoteFName(fname);
+          if (parentIds && rootIds[id]) {
+            const newFName = dataApi.createNoteFName(id, [rootIds[id]]);
+            fpath = dataApi.createNoteFPath(listName, newFName, subName);
+          }
         }
 
         return zipWriter.add(fpath, reader);
