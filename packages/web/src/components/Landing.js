@@ -3,9 +3,10 @@ import { useSelector } from 'react-redux';
 import Url from 'url-parse';
 
 import { updatePopupUrlHash } from '../actions';
-import { HASH_LANDING_MOBILE, SIGN_UP_POPUP } from '../types/const';
+import { HASH_LANDING_MOBILE, SIGN_UP_POPUP, SM_WIDTH, MD_WIDTH } from '../types/const';
 import { isNumber, getOffsetTop } from '../utils';
 
+import { useSafeAreaFrame } from '.';
 import TopBar from './TopBar';
 import Footer from './Footer';
 import SignUpPopup from './SignUpPopup';
@@ -29,6 +30,7 @@ import creator from '../images/creator.jpg';
 
 const Landing = () => {
 
+  const { width: safeAreaWidth } = useSafeAreaFrame();
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
   const href = useSelector(state => state.window.href);
   const ubiquitousSection = useRef(null);
@@ -51,14 +53,19 @@ const Landing = () => {
       setTimeout(() => {
         if (ubiquitousSection.current) {
           const top = getOffsetTop(ubiquitousSection.current);
-          if (isNumber(top)) window.scrollTo(0, Math.max(top - 80, 0));
+          if (isNumber(top)) {
+            let mt = 16;
+            if (safeAreaWidth >= SM_WIDTH) mt = 0;
+            if (safeAreaWidth >= MD_WIDTH) mt = 80;
+            window.scrollTo(0, Math.max(top - mt, 0));
+          }
         }
       }, 100);
       return;
     }
 
     window.scrollTo(0, 0);
-  }, [href]);
+  }, [href, safeAreaWidth]);
 
   return (
     <React.Fragment>
