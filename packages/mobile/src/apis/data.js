@@ -474,9 +474,10 @@ const deleteAllFiles = async () => {
 };
 
 const data = {
-  extractNoteFName, extractNoteId, listFPaths, listNoteIds, batchGetFileWithRetry,
-  toNotes, fetch, fetchMore, batchPutFileWithRetry, putNotes, getOldNotesInTrash,
-  canDeleteListNames, getFiles, putFiles, deleteFiles, deleteAllFiles,
+  createNoteFPath, createNoteFName, extractNoteFPath, extractNoteFName, extractNoteId,
+  listFPaths, listNoteIds, batchGetFileWithRetry, toNotes, fetch, fetchMore,
+  batchPutFileWithRetry, putNotes, getOldNotesInTrash, canDeleteListNames, getFiles,
+  putFiles, deleteFiles, deleteAllFiles,
 };
 
 export default data;
