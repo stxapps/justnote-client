@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { TextInput, Keyboard, Platform } from 'react-native';
+import { TextInput, Keyboard, Platform, Linking } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { WebView } from 'react-native-webview';
 import { Dirs } from 'react-native-file-access';
@@ -258,6 +258,11 @@ const NoteEditorEditor = (props) => {
     } else throw new Error(`Invalid data: ${data}`);
   }, [onFocus, onUpdateIsUploading, onAddObjectUrlFiles, onGetData, onGetEditingData]);
 
+  const onShouldStartLoadWithRequest = useCallback((e) => {
+    if (e.url.slice(0, 4) === 'http') Linking.openURL(e.url);
+    return false;
+  }, []);
+
   const onContentProcessDidTerminate = useCallback(() => {
     setEditorReady(false);
     webView.current.reload();
@@ -461,9 +466,9 @@ const NoteEditorEditor = (props) => {
   return (
     <React.Fragment>
       {Platform.OS === 'ios' ?
-        <WebView ref={webView} style={tailwind('flex-1')} source={cache('NEE_webView_source_ios', { uri: Dirs.DocumentDir + '/' + HTML_FNAME })} originWhitelist={cache('NEE_webView_originWhitelist_ios', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} textZoom={100} allowFileAccessFromFileURLs={true} allowUniversalAccessFromFileURLs={true} allowingReadAccessToURL={Dirs.DocumentDir} cacheEnabled={false} onContentProcessDidTerminate={onContentProcessDidTerminate} />
+        <WebView ref={webView} style={tailwind('flex-1')} source={cache('NEE_webView_source_ios', { uri: Dirs.DocumentDir + '/' + HTML_FNAME })} originWhitelist={cache('NEE_webView_originWhitelist_ios', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} textZoom={100} allowFileAccessFromFileURLs={true} allowUniversalAccessFromFileURLs={true} allowingReadAccessToURL={Dirs.DocumentDir} cacheEnabled={false} onShouldStartLoadWithRequest={onShouldStartLoadWithRequest} onContentProcessDidTerminate={onContentProcessDidTerminate} />
         :
-        <WebView ref={webView} style={tailwind('flex-1')} source={cache('NEE_webView_source', { baseUrl: '', html: ckeditor })} originWhitelist={cache('NEE_webView_originWhitelist', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} textZoom={100} androidLayerType="hardware" allowFileAccess={true} cacheEnabled={false} onContentProcessDidTerminate={onContentProcessDidTerminate} />
+        <WebView ref={webView} style={tailwind('flex-1')} source={cache('NEE_webView_source', { baseUrl: '', html: ckeditor })} originWhitelist={cache('NEE_webView_originWhitelist', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} textZoom={100} androidLayerType="hardware" allowFileAccess={true} cacheEnabled={false} onShouldStartLoadWithRequest={onShouldStartLoadWithRequest} onContentProcessDidTerminate={onContentProcessDidTerminate} />
       }
       <TextInput ref={hackInput} style={tailwind('absolute -top-1 -left-1 w-1 h-1')} />
     </React.Fragment>
