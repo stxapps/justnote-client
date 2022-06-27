@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@ckeditor/ckeditor5-build-decoupled-document": "file:../../../ckeditor5/packages/ckeditor5-build-decoupled-document",
-    "@ckeditor/ckeditor5-react": "^3.0.3",
+    "@ckeditor/ckeditor5-react": "^5.0.2",
     "@stacks/auth": "2.0.1",
     "@stacks/connect": "6.2.0",
     "@stacks/storage": "2.0.1",

@@ -17,6 +17,7 @@ const readLines = (fpath) => {
         if (i - 5 >= 0 && line.slice(i - 5, i) === 'http:') return true;
         if (i - 6 >= 0 && line.slice(i - 6, i) === 'https:') return true;
         if (i - 5 >= 0 && line.slice(i - 5, i) === 'file:') return true;
+        if (i - 8 >= 0 && line.slice(i - 8, i) === 'webpack:') return true;
         if (i - 1 >= 0 && line.slice(i - 1, i) === '"') return true;
 
         console.log(`Line with a comment deleted: ${line}`);
