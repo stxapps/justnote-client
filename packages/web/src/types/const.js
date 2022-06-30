@@ -40,6 +40,7 @@ export const SIGN_IN_POPUP = 'SIGN_IN_POPUP';
 export const PROFILE_POPUP = 'PROFILE_POPUP';
 export const NOTE_LIST_MENU_POPUP = 'NOTE_LIST_MENU_POPUP';
 export const LIST_NAMES_POPUP = 'LIST_NAMES_POPUP';
+export const PIN_MENU_POPUP = 'PIN_MENU_POPUP';
 export const SIDEBAR_POPUP = 'SIDEBAR_POPUP';
 export const SEARCH_POPUP = 'SEARCH_POPUP';
 export const SETTINGS_POPUP = 'SETTINGS_POPUP';
@@ -48,6 +49,7 @@ export const CONFIRM_DELETE_POPUP = 'CONFIRM_DELETE_POPUP';
 export const CONFIRM_DISCARD_POPUP = 'CONFIRM_DISCARD_POPUP';
 export const CONFIRM_AS_DUMMY_POPUP = 'CONFIRM_AS_DUMMY_POPUP';
 export const CONFIRM_EXIT_DUMMY_POPUP = 'CONFIRM_EXIT_DUMMY_POPUP';
+export const PAYWALL_POPUP = 'PAYWALL_POPUP';
 
 export const ADDED = 'ADDED';
 export const ADDING = 'ADDING';
@@ -71,6 +73,7 @@ export const CD_ROOT = 'cdroot';
 export const NOTES = 'notes';
 export const IMAGES = 'images';
 export const SETTINGS = 'settings';
+export const PINS = 'pins';
 export const INDEX = 'index';
 export const DOT_JSON = '.json';
 export const BASE64 = 'base64';
@@ -115,3 +118,47 @@ export const IMAGE_FILE_EXTS = [
   'apng', 'avif', 'gif', 'jpg', 'jpeg', 'jfif', 'pjpeg', 'pjp', 'png', 'svg', 'webp',
   'bmp', 'ico', 'cur', 'tif', 'tiff',
 ];
+
+export const IAP_URL = 'https://iap-001.uc.r.appspot.com'; //'http://192.168.1.44:8088';
+export const IAP_VERIFY_URL = IAP_URL + '/verify';
+export const IAP_STATUS_URL = IAP_URL + '/status';
+
+export const APPSTORE = 'AppStore';
+export const PLAYSTORE = 'PlayStore';
+export const COM_JUSTNOTECC = 'com.justnotecc';
+export const COM_JUSTNOTECC_SUPPORTER = 'com.justnotecc.supporter';
+export const SIGNED_TEST_STRING = 'Privacy Security UX';
+
+export const VALID = 'VALID';
+export const INVALID = 'INVALID';
+export const UNKNOWN = 'UNKNOWN';
+export const ERROR = 'ERROR';
+
+export const ACTIVE = 'Active';
+export const NO_RENEW = 'NoRenew';
+export const GRACE = 'GracePeriod';
+export const ON_HOLD = 'OnHold';
+export const PAUSED = 'Paused';
+export const EXPIRED = 'Expired';
+//export const UNKNOWN = 'UNKNOWN';
+
+export const PIN = 'Pin to the top';
+export const MANAGE_PIN = 'Manage pin';
+export const UNPIN = 'Unpin';
+export const PIN_LEFT = 'Move pin forward';
+export const PIN_RIGHT = 'Move pin backward';
+export const PIN_UP = 'Move pin up';
+export const PIN_DOWN = 'Move pin down';
+
+export const PINNED = 'PINNED';
+
+export const SETTINGS_VIEW_ACCOUNT = 1;
+export const SETTINGS_VIEW_IAP = 9;
+export const SETTINGS_VIEW_IAP_RESTORE = 10;
+export const SETTINGS_VIEW_DATA = 2;
+export const SETTINGS_VIEW_DATA_IMPORT = 7;
+export const SETTINGS_VIEW_DATA_EXPORT = 3;
+export const SETTINGS_VIEW_DATA_DELETE = 4;
+export const SETTINGS_VIEW_LISTS = 5;
+export const SETTINGS_VIEW_MISC = 6;
+export const SETTINGS_VIEW_ABOUT = 8;

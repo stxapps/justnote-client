@@ -1,5 +1,7 @@
 import Url from 'url-parse';
+import axios from 'axios';
 import { saveAs } from 'file-saver';
+import { LexoRank } from "@wewatch/lexorank";
 
 import userSession from '../userSession';
 import dataApi from '../apis/data';
@@ -7,49 +9,60 @@ import fileApi from '../apis/file';
 import {
   INIT, UPDATE_HREF, UPDATE_WINDOW_SIZE, UPDATE_USER, UPDATE_HANDLING_SIGN_IN,
   UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP, UPDATE_SEARCH_STRING,
-  UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY,
-  ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, UPDATE_PAGE_Y_OFFSET,
-  FETCH, FETCH_COMMIT, FETCH_ROLLBACK,
-  FETCH_MORE, FETCH_MORE_COMMIT, FETCH_MORE_ROLLBACK,
+  UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY, UPDATE_SCROLL_PANEL,
+  ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS,
+  FETCH, FETCH_COMMIT, FETCH_ROLLBACK, FETCH_MORE, FETCH_MORE_COMMIT,
+  FETCH_MORE_ROLLBACK, CACHE_FETCHED_MORE, UPDATE_FETCHED_MORE,
   ADD_NOTE, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK,
   UPDATE_NOTE, UPDATE_NOTE_COMMIT, UPDATE_NOTE_ROLLBACK,
   MOVE_NOTES, MOVE_NOTES_COMMIT, MOVE_NOTES_ROLLBACK,
   DELETE_NOTES, DELETE_NOTES_COMMIT, DELETE_NOTES_ROLLBACK, CANCEL_DIED_NOTES,
   DELETE_OLD_NOTES_IN_TRASH, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
   DELETE_OLD_NOTES_IN_TRASH_ROLLBACK,
-  MERGE_NOTES, MERGE_NOTES_COMMIT, MERGE_NOTES_ROLLBACK, UPDATE_FETCHED_SETTINGS,
+  MERGE_NOTES, MERGE_NOTES_COMMIT, MERGE_NOTES_ROLLBACK,
   UPDATE_LIST_NAME_EDITORS, ADD_LIST_NAMES, UPDATE_LIST_NAMES, MOVE_LIST_NAME,
   MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_SELECTING_LIST_NAME,
   UPDATE_DELETING_LIST_NAME, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, UPDATE_SORT_ON,
-  UPDATE_DO_DESCENDING_ORDER,
-  UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
-  CANCEL_DIED_SETTINGS, UPDATE_DISCARD_ACTION, INCREASE_SAVE_NOTE_COUNT,
+  UPDATE_DO_DESCENDING_ORDER, UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT,
+  UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS, UPDATE_SETTINGS_VIEW_ID,
+  UPDATE_DISCARD_ACTION, INCREASE_SAVE_NOTE_COUNT,
   INCREASE_DISCARD_NOTE_COUNT, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
   INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
   INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT,
   INCREASE_UPDATE_EDITOR_WIDTH_COUNT, INCREASE_RESET_DID_CLICK_COUNT,
   CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS, UPDATE_EDITOR_IS_UPLOADING,
   UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_EDITING_NOTE, UPDATE_EDITOR_UNMOUNT,
-  UPDATE_DID_DISCARD_EDITING, UPDATE_STACKS_ACCESS, UPDATE_IMPORT_ALL_DATA_PROGRESS,
+  UPDATE_DID_DISCARD_EDITING, UPDATE_STACKS_ACCESS,
+  REQUEST_PURCHASE, RESTORE_PURCHASES, RESTORE_PURCHASES_COMMIT,
+  RESTORE_PURCHASES_ROLLBACK, REFRESH_PURCHASES, REFRESH_PURCHASES_COMMIT,
+  REFRESH_PURCHASES_ROLLBACK, UPDATE_IAP_PUBLIC_KEY, UPDATE_IAP_PRODUCT_STATUS,
+  UPDATE_IAP_PURCHASE_STATUS, UPDATE_IAP_RESTORE_STATUS, UPDATE_IAP_REFRESH_STATUS,
+  PIN_NOTE, PIN_NOTE_COMMIT, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_COMMIT,
+  UNPIN_NOTE_ROLLBACK, MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_COMMIT,
+  MOVE_PINNED_NOTE_ROLLBACK, CANCEL_DIED_PINS, UPDATE_IMPORT_ALL_DATA_PROGRESS,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY, HASH_SUPPORT,
-  SEARCH_POPUP, SETTINGS_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP,
-  DISCARD_ACTION_CANCEL_EDIT,
+  SEARCH_POPUP, PAYWALL_POPUP, SETTINGS_POPUP, CONFIRM_DELETE_POPUP,
+  CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT,
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
-  DISCARD_ACTION_CHANGE_LIST_NAME, MY_NOTES, TRASH, ARCHIVE, ID, NEW_NOTE, NEW_NOTE_OBJ,
-  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
-  N_NOTES, CD_ROOT, NOTES, IMAGES, SETTINGS, INDEX, DOT_JSON, LG_WIDTH,
-  IMAGE_FILE_EXTS,
+  DISCARD_ACTION_CHANGE_LIST_NAME, MY_NOTES, TRASH, ARCHIVE, ID, NEW_NOTE,
+  NEW_NOTE_OBJ, DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES,
+  N_DAYS, CD_ROOT, NOTES, IMAGES, SETTINGS, INDEX, DOT_JSON, PINS, LG_WIDTH,
+  IMAGE_FILE_EXTS, IAP_STATUS_URL, COM_JUSTNOTECC, SIGNED_TEST_STRING, VALID, ACTIVE,
+  SWAP_LEFT, SWAP_RIGHT,
 } from '../types/const';
 import {
   throttle, extractUrl, urlHashToObj, objToUrlHash, isIPadIPhoneIPod, isBusyStatus,
-  isEqual, separateUrlAndParam, getUserImageUrl, randomString,
-  isNoteBodyEqual, clearNoteData, getStaticFPath, deriveFPaths,
-  getListNameObj, getAllListNames,
-  sleep, isObject, isString, isNumber, isListNameObjsValid, indexOfClosingTag,
+  isEqual, separateUrlAndParam, getUserImageUrl, randomString, sleep, isObject,
+  isString, isNumber, isListNameObjsValid, indexOfClosingTag, isNoteBodyEqual,
+  clearNoteData, getStaticFPath, deriveFPaths, getListNameObj, getAllListNames,
+  getMainId, createNoteFPath, createNoteFName, extractNoteFPath, extractNoteFName,
+  extractNoteId, listNoteIds, getNoteFPaths, getLatestPurchase, getValidPurchase,
+  doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins, getSortedNotes,
+  separatePinnedValues,
 } from '../utils';
 import { isUint8Array } from '../utils/index-web';
 import { _ } from '../utils/obj';
@@ -519,6 +532,8 @@ export const changeListName = (listName, doCheckEditing) => async (
   dispatch, getState
 ) => {
 
+  const _listName = getState().display.listName;
+
   if (!listName) listName = getState().display.changingListName;
   if (!listName) throw new Error(`Invalid listName: ${listName}`);
 
@@ -537,6 +552,8 @@ export const changeListName = (listName, doCheckEditing) => async (
     type: UPDATE_LIST_NAME,
     payload: listName,
   });
+
+  await updateFetchedMore(null, _listName)(dispatch, getState);
 };
 
 export const onChangeListName = (title, body) => async (
@@ -632,8 +649,15 @@ export const deleteSelectedNoteIds = (ids) => {
   };
 };
 
-export const updatePageYOffset = (pageYOffset) => {
-  return { type: UPDATE_PAGE_Y_OFFSET, payload: pageYOffset };
+export const updateScrollPanel = (contentHeight, layoutHeight, pageYOffset) => {
+  if (!isNumber(contentHeight)) contentHeight = 0;
+  if (!isNumber(layoutHeight)) layoutHeight = 0;
+  if (!isNumber(pageYOffset)) pageYOffset = 0;
+
+  return {
+    type: UPDATE_SCROLL_PANEL,
+    payload: { contentHeight, layoutHeight, pageYOffset },
+  };
 };
 
 const fetchStaticFiles = async (notes, conflictedNotes) => {
@@ -668,12 +692,14 @@ export const fetch = (
   const listName = getState().display.listName;
   const sortOn = getState().settings.sortOn;
   const doDescendingOrder = getState().settings.doDescendingOrder;
+  const pendingPins = getState().pendingPins;
 
   dispatch({ type: FETCH });
 
   try {
     const params = {
       listName, sortOn, doDescendingOrder, doDeleteOldNotesInTrash, doFetchSettings,
+      pendingPins,
     };
     const fetched = await dataApi.fetch(params);
 
@@ -691,12 +717,13 @@ export const fetchMore = () => async (dispatch, getState) => {
   const ids = Object.keys(getState().notes[listName]);
   const sortOn = getState().settings.sortOn;
   const doDescendingOrder = getState().settings.doDescendingOrder;
+  const pendingPins = getState().pendingPins;
 
   const payload = { listName };
   dispatch({ type: FETCH_MORE, payload });
 
   try {
-    const params = { listName, ids, sortOn, doDescendingOrder };
+    const params = { listName, ids, sortOn, doDescendingOrder, pendingPins };
     const fetched = await dataApi.fetchMore(params);
 
     await fetchStaticFiles(fetched.notes, null);
@@ -705,6 +732,45 @@ export const fetchMore = () => async (dispatch, getState) => {
   } catch (e) {
     dispatch({ type: FETCH_MORE_ROLLBACK, payload: { ...payload, error: e } });
   }
+};
+
+export const tryUpdateFetchedMore = (payload) => async (dispatch, getState) => {
+
+  const { listName, hasDisorder } = payload;
+
+  if (listName !== getState().display.listName || !hasDisorder) {
+    dispatch(updateFetchedMore(payload));
+    return;
+  }
+
+  const isBulkEditing = getState().display.isBulkEditing;
+  if (!isBulkEditing) {
+    const scrollHeight = getState().scrollPanel.contentHeight;
+    const windowHeight = getState().scrollPanel.layoutHeight;
+    const windowBottom = windowHeight + getState().scrollPanel.pageYOffset;
+
+    if (windowBottom > (scrollHeight * 0.96)) {
+      dispatch(updateFetchedMore(payload));
+      return;
+    }
+  }
+
+  dispatch({ type: CACHE_FETCHED_MORE, payload });
+};
+
+export const updateFetchedMore = (payload, listName = null) => async (
+  dispatch, getState
+) => {
+
+  if (!payload) {
+    if (!listName) listName = getState().display.listName;
+
+    const fetchedMore = getState().fetchedMore[listName];
+    if (fetchedMore) ({ payload } = fetchedMore);
+  }
+  if (!payload) return;
+
+  dispatch({ type: UPDATE_FETCHED_MORE, payload });
 };
 
 export const addNote = (title, body, media, listName = null) => async (
@@ -1220,20 +1286,10 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
   }
 };
 
-export const updateFetchedSettings = () => async (dispatch, getState) => {
-  const settings = getState().settings;
-  dispatch({ type: UPDATE_FETCHED_SETTINGS, payload: settings });
-};
-
-export const updateListNameEditors = (listNameEditors) => {
-  return { type: UPDATE_LIST_NAME_EDITORS, payload: listNameEditors };
-};
-
 export const updateSettingsPopup = (isShown) => async (dispatch, getState) => {
   /*
     A settings snapshot is made when FETCH_COMMIT and UPDATE_SETTINGS_COMMIT
-    For FETCH_COMMIT, use Redux Loop
-    For UPDATE_SETTINGS_COMMIT, check action type in snapshotReducer
+    For FETCH_COMMIT and UPDATE_SETTINGS_COMMIT, check action type in snapshotReducer
       as need settings that used to upload to the server, not the current in the state
 
     Can't make a snapshot when open the popup because
@@ -1243,6 +1299,29 @@ export const updateSettingsPopup = (isShown) => async (dispatch, getState) => {
   if (!isShown) dispatch(updateSettings());
 
   updatePopupUrlHash(SETTINGS_POPUP, isShown, null);
+};
+
+export const updateSettingsViewId = (
+  viewId, isSidebarShown, didCloseAnimEnd, didSidebarAnimEnd
+) => async (dispatch, getState) => {
+
+  const payload = {};
+  if (viewId) payload.settingsViewId = viewId;
+  if ([true, false].includes(isSidebarShown)) {
+    payload.isSettingsSidebarShown = isSidebarShown;
+  }
+  if ([true, false].includes(didCloseAnimEnd)) {
+    payload.didSettingsCloseAnimEnd = didCloseAnimEnd;
+  }
+  if ([true, false].includes(didSidebarAnimEnd)) {
+    payload.didSettingsSidebarAnimEnd = didSidebarAnimEnd;
+  }
+
+  dispatch({ type: UPDATE_SETTINGS_VIEW_ID, payload });
+};
+
+export const updateListNameEditors = (listNameEditors) => {
+  return { type: UPDATE_LIST_NAME_EDITORS, payload: listNameEditors };
 };
 
 export const addListNames = (newNames) => {
@@ -1315,6 +1394,13 @@ export const updateDeletingListName = (listName) => {
     type: UPDATE_DELETING_LIST_NAME,
     payload: listName,
   };
+};
+
+export const tryUpdateSettings = () => async (dispatch, getState) => {
+  const isSettingsPopupShown = getState().display.isSettingsPopupShown;
+  if (isSettingsPopupShown) return;
+
+  dispatch(updateSettings());
 };
 
 export const updateSettings = () => async (dispatch, getState) => {
@@ -1563,6 +1649,7 @@ const parseImportedFile = async (dispatch, fileContent) => {
 
   // 1 format: zip file
   let fpaths = [], contents = [], addedDT = Date.now(), idMap = {};
+  let pinFPathParts = [], pinIds = [], pinContents = [];
   let isEvernote = false, enFPaths = [], enContents = [];
   const reader = new zip.ZipReader(
     new zip.Uint8ArrayReader(new Uint8Array(fileContent))
@@ -1583,6 +1670,7 @@ const parseImportedFile = async (dispatch, fileContent) => {
       fpath.endsWith(INDEX + DOT_JSON) ||
       fpath.startsWith(SETTINGS) ||
       fpath.includes(CD_ROOT + '/') ||
+      fpath.startsWith(PINS) ||
       (
         fpath.startsWith('Takeout/Keep/') &&
         (fpath.endsWith('Labels.txt') || fpath.endsWith(DOT_JSON))
@@ -1603,7 +1691,7 @@ const parseImportedFile = async (dispatch, fileContent) => {
       }
       if (fpathParts[0] !== NOTES) continue;
 
-      const { id, parentIds } = dataApi.extractNoteFName(fpathParts[2]);
+      const { id, parentIds } = extractNoteFName(fpathParts[2]);
       if (!(/^\d+[A-Za-z]+$/.test(id))) continue;
       if (parentIds) {
         if (!parentIds.every(id => (/^\d+[A-Za-z]+$/.test(id)))) continue;
@@ -1630,7 +1718,7 @@ const parseImportedFile = async (dispatch, fileContent) => {
         let rootId = null;
         if (parentIds && parentIds.length > 0) {
           rootId = parentIds[0];
-          const { dt } = dataApi.extractNoteId(rootId);
+          const { dt } = extractNoteId(rootId);
           while (rootId === parentIds[0]) rootId = `${dt}${randomString(4)}`;
 
           const rootFPathParts = [...fpathParts.slice(0, 4)];
@@ -1641,16 +1729,30 @@ const parseImportedFile = async (dispatch, fileContent) => {
         }
 
         let newId = id;
-        const { dt } = dataApi.extractNoteId(newId);
+        const { dt } = extractNoteId(newId);
         while (newId === id) newId = `${dt}${randomString(4)}`;
-        if (rootId) newId = `${newId}_${rootId}`;
-        idMap[fpathParts[2]] = newId;
+
+        let newFName = rootId ? `${newId}_${rootId}` : newId;
+        idMap[fpathParts[2]] = newFName;
+        idMap[id] = newId;
       }
       fpathParts[2] = idMap[fpathParts[2]];
       fpath = fpathParts.join('/');
     } else if (fpath.startsWith(IMAGES)) {
       if (fpathParts.length !== 2 || fpathParts[0] !== IMAGES) continue;
       if (fnameParts.length !== 2) continue;
+    } else if (fpath.startsWith(PINS)) {
+      if (fpathParts.length !== 5 || fpathParts[0] !== PINS) continue;
+      if (fnameParts.length !== 2) continue;
+
+      const updatedDT = fpathParts[2], addedDT = fpathParts[3], fname = fpathParts[4];
+      if (!(/^\d+$/.test(updatedDT))) continue;
+      if (!(/^\d+$/.test(addedDT))) continue;
+      if (!fname.endsWith('.json')) continue;
+
+      pinFPathParts.push(fpathParts);
+      pinIds.push(fnameParts[0]);
+      pinContents.push(content);
     } else if (fpath.startsWith(SETTINGS)) {
       if (!fpath.endsWith(DOT_JSON)) continue;
 
@@ -1734,6 +1836,20 @@ const parseImportedFile = async (dispatch, fileContent) => {
   }
 
   await reader.close();
+
+  // Need idMap to be all populated before mapping pinId to a new id.
+  for (let i = 0; i < pinFPathParts.length; i++) {
+    const fpathParts = pinFPathParts[i];
+    const id = pinIds[i];
+    const content = pinContents[i];
+
+    if (idMap[id]) {
+      fpathParts[fpathParts.length - 1] = idMap[id] + '.json';
+
+      fpaths.push(fpathParts.join('/'));
+      contents.push(content);
+    }
+  }
 
   if (isEvernote) {
     fpaths = []; contents = []; addedDT = Date.now(); idMap = {};
@@ -2060,10 +2176,10 @@ export const updateImportAllDataProgress = (progress) => {
 export const exportAllData = () => async (dispatch, getState) => {
   dispatch(updateExportAllDataProgress({ total: 'calculating...', done: 0 }));
 
-  let fpaths = [], rootIds = {};
+  let fpaths = [], rootIds = {}, toRootIds;
   try {
-    const { noteFPaths, settingsFPath } = await dataApi.listFPaths();
-    const { noteIds, conflictedIds } = dataApi.listNoteIds(noteFPaths);
+    const { noteFPaths, settingsFPath, pinFPaths } = await dataApi.listFPaths(true);
+    const { noteIds, conflictedIds, toRootIds: _toRootIds } = listNoteIds(noteFPaths);
 
     for (const noteId of [...noteIds, ...conflictedIds]) {
       for (const fpath of noteId.fpaths) {
@@ -2072,7 +2188,14 @@ export const exportAllData = () => async (dispatch, getState) => {
       }
       rootIds[noteId.id] = `${noteId.addedDT}${randomString(4)}`;
     }
+
     if (settingsFPath) fpaths.push(settingsFPath);
+
+    for (const fpath of pinFPaths) {
+      fpaths.push(fpath);
+    }
+
+    toRootIds = _toRootIds;
   } catch (e) {
     dispatch(updateExportAllDataProgress({
       total: -1,
@@ -2090,10 +2213,34 @@ export const exportAllData = () => async (dispatch, getState) => {
     // @ts-ignore
     const zip = await import('@zip.js/zip.js');
     const zipWriter = new zip.ZipWriter(new zip.BlobWriter('application/zip'));
+
+    const pinFPaths = [], pinContents = [], idMap = {};
     for (let i = 0; i < fpaths.length; i += N_NOTES) {
       const selectedFPaths = fpaths.slice(i, i + N_NOTES);
       const responses = await dataApi.batchGetFileWithRetry(selectedFPaths, 0, true);
-      await Promise.all(responses.map(({ fpath, content }) => {
+
+      const filteredResponses = [];
+      for (let { fpath, content } of responses) {
+        if (fpath.startsWith(PINS)) {
+          pinFPaths.push(fpath);
+          pinContents.push(content);
+          continue;
+        }
+
+        if (fpath.startsWith(NOTES)) {
+          const { listName, fname, subName } = extractNoteFPath(fpath);
+          const { id, parentIds } = extractNoteFName(fname);
+          if (parentIds && rootIds[id]) {
+            const newFName = createNoteFName(id, [rootIds[id]]);
+            fpath = createNoteFPath(listName, newFName, subName);
+          }
+          idMap[toRootIds[id]] = id;
+        }
+
+        filteredResponses.push({ fpath, content });
+      }
+
+      await Promise.all(filteredResponses.map(({ fpath, content }) => {
         let reader;
         if (
           fpath.endsWith(INDEX + DOT_JSON) ||
@@ -2106,20 +2253,30 @@ export const exportAllData = () => async (dispatch, getState) => {
           reader = new zip.BlobReader(content);
         }
 
-        if (fpath.startsWith(NOTES)) {
-          const { listName, fname, subName } = dataApi.extractNoteFPath(fpath);
-          const { id, parentIds } = dataApi.extractNoteFName(fname);
-          if (parentIds && rootIds[id]) {
-            const newFName = dataApi.createNoteFName(id, [rootIds[id]]);
-            fpath = dataApi.createNoteFPath(listName, newFName, subName);
-          }
-        }
-
         return zipWriter.add(fpath, reader);
       }));
 
       doneCount += selectedFPaths.length;
       dispatch(updateExportAllDataProgress({ total, done: doneCount }));
+    }
+
+    // Need idMap to be all populated before mapping pinId to a new id.
+    for (let i = 0; i < pinFPaths.length; i++) {
+      let fpath = pinFPaths[i];
+      let content = pinContents[i];
+
+      const fpathParts = fpath.split('/');
+      const id = fpathParts[fpathParts.length - 1].split('.')[0];
+
+      if (idMap[toRootIds[id]]) {
+        // If conflicts, only one will get pinned but it should be fine
+        //   as conflicted notes are exported separately as not conflicted.
+        fpathParts[fpathParts.length - 1] = idMap[toRootIds[id]] + '.json';
+        fpath = fpathParts.join('/');
+      }
+
+      const reader = new zip.TextReader(content);
+      await zipWriter.add(fpath, reader);
     }
 
     const blob = await zipWriter.close();
@@ -2141,7 +2298,7 @@ export const updateExportAllDataProgress = (progress) => {
   };
 };
 
-const deleteAllDataLoop = async (dispatch, noteIds, total, doneCount) => {
+const deleteAllNotes = async (dispatch, noteIds, total, doneCount) => {
 
   if (noteIds.length === 0) throw new Error(`Invalid noteIds: ${noteIds}`);
 
@@ -2188,7 +2345,7 @@ const deleteAllDataLoop = async (dispatch, noteIds, total, doneCount) => {
       await dataApi.putNotes({ listName: _listName, notes: _notes });
     }
   } catch (e) {
-    console.log('deleteAllDataLoop error: ', e);
+    console.log('deleteAllNotes error: ', e);
     // error in this step should be fine
   }
 
@@ -2200,7 +2357,35 @@ const deleteAllDataLoop = async (dispatch, noteIds, total, doneCount) => {
   dispatch(updateDeleteAllDataProgress({ total, done: doneCount }));
 
   if (doneCount < noteIds.length) {
-    await deleteAllDataLoop(dispatch, noteIds, total, doneCount);
+    await deleteAllNotes(dispatch, noteIds, total, doneCount);
+  }
+};
+
+export const deleteAllPins = async (dispatch, pins, total, doneCount) => {
+
+  let now = Date.now();
+  for (let i = 0; i < pins.length; i += N_NOTES) {
+    const _pins = pins.slice(i, i + N_NOTES);
+
+    const toPins = [], fromPins = [];
+    for (const { rank, updatedDT, addedDT, id } of _pins) {
+      toPins.push({ rank, updatedDT: now, addedDT, id: `deleted${id}` });
+      fromPins.push({ rank, updatedDT, addedDT, id });
+
+      now += 1;
+    }
+
+    await dataApi.putPins({ pins: toPins });
+
+    try {
+      dataApi.deletePins({ pins: fromPins });
+    } catch (e) {
+      console.log('deleteAllPins error: ', e);
+      // error in this step should be fine
+    }
+
+    doneCount = doneCount + toPins.length;
+    dispatch(updateDeleteAllDataProgress({ total, done: doneCount }));
   }
 };
 
@@ -2208,19 +2393,17 @@ export const deleteAllData = () => async (dispatch, getState) => {
 
   dispatch(updateDeleteAllDataProgress({ total: 'calculating...', done: 0 }));
 
-  const addedDT = Date.now();
-  const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
-
-  let allNoteIds, _staticFPaths, _settingsFPath;
+  let allNoteIds, staticFPaths, settingsFPath, pins;
   try {
-    const {
-      noteFPaths, staticFPaths, settingsFPath: sFPath,
-    } = await dataApi.listFPaths();
-    const { noteIds, conflictedIds } = dataApi.listNoteIds(noteFPaths);
+    const fpaths = await dataApi.listFPaths(true);
+    const noteIds = listNoteIds(fpaths.noteFPaths);
 
-    allNoteIds = [...noteIds, ...conflictedIds];
-    _staticFPaths = staticFPaths;
-    _settingsFPath = sFPath;
+    allNoteIds = [...noteIds.noteIds, ...noteIds.conflictedIds];
+    staticFPaths = fpaths.staticFPaths;
+    settingsFPath = fpaths.settingsFPath;
+
+    pins = getPins(fpaths.pinFPaths, {}, false, noteIds.toRootIds);
+    pins = Object.values(pins);
   } catch (e) {
     dispatch(updateDeleteAllDataProgress({
       total: -1,
@@ -2230,27 +2413,50 @@ export const deleteAllData = () => async (dispatch, getState) => {
     return;
   }
 
-  const total = allNoteIds.length + (_settingsFPath ? 1 : 0);
+  const total = (
+    allNoteIds.length + staticFPaths.length + (settingsFPath ? 1 : 0) + pins.length
+  );
   dispatch(updateDeleteAllDataProgress({ total, done: 0 }));
 
   if (total === 0) return;
 
   try {
-    if (allNoteIds.length > 0) await deleteAllDataLoop(dispatch, allNoteIds, total, 0);
-    if (_staticFPaths) await dataApi.deleteFiles(_staticFPaths);
-    if (_settingsFPath) {
-      await dataApi.putFiles([settingsFPath], [{ ...initialSettingsState }]);
+    let newSettingsFPath = null;
+
+    if (allNoteIds.length > 0) {
+      await deleteAllNotes(dispatch, allNoteIds, total, 0);
+    }
+    if (staticFPaths.length > 0) {
+      await dataApi.deleteFiles(staticFPaths);
+      dispatch(updateDeleteAllDataProgress({
+        total, done: allNoteIds.length + staticFPaths.length,
+      }));
+    }
+    if (settingsFPath) {
+      const addedDT = Date.now();
+      newSettingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
+
+      await dataApi.putFiles([newSettingsFPath], [{ ...initialSettingsState }]);
       try {
-        await dataApi.deleteFiles([_settingsFPath]);
+        await dataApi.deleteFiles([settingsFPath]);
       } catch (e) {
         console.log('deleteAllData error: ', e);
         // error in this step should be fine
       }
+
+      dispatch(updateDeleteAllDataProgress({
+        total, done: allNoteIds.length + staticFPaths.length + 1,
+      }));
     }
-    await fileApi.deleteFiles(_staticFPaths);
+    if (pins.length > 0) {
+      await deleteAllPins(
+        dispatch, pins, total, allNoteIds.length + staticFPaths.length + 1
+      );
+    }
+    await fileApi.deleteFiles(staticFPaths);
 
     updatePopupUrlHash(SETTINGS_POPUP, false, null);
-    dispatch({ type: DELETE_ALL_DATA, payload: { settingsFPath } });
+    dispatch({ type: DELETE_ALL_DATA, payload: { newSettingsFPath } });
   } catch (e) {
     dispatch(updateDeleteAllDataProgress({
       total: -1,
@@ -2266,4 +2472,345 @@ export const updateDeleteAllDataProgress = (progress) => {
     type: UPDATE_DELETE_ALL_DATA_PROGRESS,
     payload: progress,
   };
+};
+
+const getIapStatus = async (doForce) => {
+  const sigObj = userSession.signECDSA(SIGNED_TEST_STRING);
+  const reqBody = {
+    userId: sigObj.publicKey,
+    signature: sigObj.signature,
+    appId: COM_JUSTNOTECC,
+    doForce: doForce,
+  };
+
+  const res = await axios.post(
+    IAP_STATUS_URL,
+    reqBody,
+  );
+  return res;
+};
+
+const getPurchases = (
+  action, commitAction, rollbackAction, doForce, serverOnly
+) => async (dispatch, getState) => {
+
+  const { purchaseState, restoreStatus, refreshStatus } = getState().iap;
+  if (
+    purchaseState === REQUEST_PURCHASE ||
+    restoreStatus === RESTORE_PURCHASES ||
+    refreshStatus === REFRESH_PURCHASES
+  ) return;
+
+  dispatch({ type: action });
+
+  let statusResult;
+  try {
+    const res = await getIapStatus(doForce);
+    statusResult = res.data;
+
+    if (serverOnly) {
+      dispatch({ type: commitAction, payload: statusResult });
+      return;
+    }
+
+    if (statusResult.status === VALID) {
+      const purchase = getLatestPurchase(statusResult.purchases);
+      if (purchase && purchase.status === ACTIVE) {
+        dispatch({ type: commitAction, payload: statusResult });
+        return;
+      }
+    }
+  } catch (error) {
+    console.log('Error when contact IAP server to get purchases: ', error);
+    dispatch({ type: rollbackAction });
+    return;
+  }
+
+  dispatch({ type: commitAction, payload: statusResult });
+};
+
+export const restorePurchases = () => async (dispatch, getState) => {
+  await getPurchases(
+    RESTORE_PURCHASES, RESTORE_PURCHASES_COMMIT, RESTORE_PURCHASES_ROLLBACK,
+    false, false
+  )(dispatch, getState);
+};
+
+export const refreshPurchases = () => async (dispatch, getState) => {
+  await getPurchases(
+    REFRESH_PURCHASES, REFRESH_PURCHASES_COMMIT, REFRESH_PURCHASES_ROLLBACK,
+    true, false
+  )(dispatch, getState);
+};
+
+export const checkPurchases = () => async (dispatch, getState) => {
+  const { purchases, checkPurchasesDT } = getState().settings;
+
+  const purchase = getValidPurchase(purchases);
+  if (!purchase) return;
+
+  const now = Date.now();
+  const expiryDT = (new Date(purchase.expiryDate)).getTime();
+
+  let doCheck = false;
+  if (now >= expiryDT || !checkPurchasesDT) doCheck = true;
+  else {
+    let p = 1.0 / (N_DAYS * 24 * 60 * 60 * 1000) * Math.abs(now - checkPurchasesDT);
+    p = Math.max(0.01, Math.min(p, 0.99));
+    doCheck = p > Math.random();
+  }
+  if (!doCheck) return;
+
+  await getPurchases(
+    REFRESH_PURCHASES, REFRESH_PURCHASES_COMMIT, REFRESH_PURCHASES_ROLLBACK,
+    false, true
+  )(dispatch, getState);
+};
+
+export const updateIapPublicKey = () => async (dispatch, getState) => {
+  const sigObj = userSession.signECDSA(SIGNED_TEST_STRING);
+  dispatch({ type: UPDATE_IAP_PUBLIC_KEY, payload: sigObj.publicKey });
+};
+
+export const updateIapProductStatus = (status, canMakePayments, products) => {
+  return {
+    type: UPDATE_IAP_PRODUCT_STATUS,
+    payload: { status, canMakePayments, products },
+  };
+};
+
+export const updateIapPurchaseStatus = (status, rawPurchase) => {
+  return {
+    type: UPDATE_IAP_PURCHASE_STATUS,
+    payload: { status, rawPurchase },
+  };
+};
+
+export const updateIapRestoreStatus = (status) => {
+  return {
+    type: UPDATE_IAP_RESTORE_STATUS,
+    payload: status,
+  };
+};
+
+export const updateIapRefreshStatus = (status) => {
+  return {
+    type: UPDATE_IAP_REFRESH_STATUS,
+    payload: status,
+  };
+};
+
+export const pinNotes = (ids) => async (dispatch, getState) => {
+  const state = getState();
+  const purchases = state.settings.purchases;
+
+  if (!doEnableExtraFeatures(purchases)) {
+    dispatch(updatePopup(PAYWALL_POPUP, true));
+    return;
+  }
+
+  const noteFPaths = getNoteFPaths(state);
+  const pinFPaths = getPinFPaths(state);
+  const pendingPins = state.pendingPins;
+
+  const { toRootIds } = listNoteIds(noteFPaths);
+  let currentPins = getPins(pinFPaths, pendingPins, true, toRootIds);
+  currentPins = Object.values(currentPins).map(pin => pin.rank).sort();
+
+  const fromPins = [];
+  const noteMainIds = ids.map(id => getMainId(id, toRootIds));
+  for (const fpath of pinFPaths) {
+    const { rank, updatedDT, addedDT, id } = extractPinFPath(fpath);
+
+    const _id = id.startsWith('deleted') ? id.slice(7) : id;
+    const pinMainId = getMainId(_id, toRootIds);
+    if (noteMainIds.includes(pinMainId)) {
+      fromPins.push({ rank, updatedDT, addedDT, id });
+    }
+  }
+
+  let lexoRank;
+  if (currentPins.length > 0) {
+    const rank = currentPins[currentPins.length - 1];
+    lexoRank = LexoRank.parse(`0|${rank.replace('_', ':')}`).genNext();
+  } else {
+    lexoRank = LexoRank.middle();
+  }
+
+  let now = Date.now();
+  const pins = [];
+  for (const id of ids) {
+    const nextRank = lexoRank.toString().slice(2).replace(':', '_');
+    pins.push({ rank: nextRank, updatedDT: now, addedDT: now, id });
+
+    lexoRank = lexoRank.genNext();
+    now += 1;
+  }
+
+  const payload = { pins };
+  dispatch({ type: PIN_NOTE, payload });
+
+  try {
+    await dataApi.putPins(payload);
+  } catch (e) {
+    dispatch({ type: PIN_NOTE_ROLLBACK, payload: { ...payload, error: e } });
+    return;
+  }
+
+  try {
+    dataApi.deletePins({ pins: fromPins });
+  } catch (e) {
+    console.log('pinNotes error: ', e);
+    // error in this step should be fine
+  }
+
+  dispatch({ type: PIN_NOTE_COMMIT, payload });
+};
+
+export const unpinNotes = (ids) => async (dispatch, getState) => {
+  const state = getState();
+  const noteFPaths = getNoteFPaths(state);
+  const pinFPaths = getPinFPaths(state);
+  const pendingPins = state.pendingPins;
+
+  const { toRootIds } = listNoteIds(noteFPaths);
+  let currentPins = getPins(pinFPaths, pendingPins, true, toRootIds);
+
+  let now = Date.now();
+  const pins = [], fromPins = [];
+  for (const id of ids) {
+    const noteMainId = getMainId(id, toRootIds);
+    if (currentPins[noteMainId]) {
+      const { rank, updatedDT, addedDT, id } = currentPins[noteMainId];
+      pins.push({ rank, updatedDT: now, addedDT, id: `deleted${id}` });
+      fromPins.push({ rank, updatedDT, addedDT, id });
+
+      now += 1;
+    }
+  }
+
+  if (pins.length === 0) {
+    // As for every move note to ARCHIVE and TRASH, will try to unpin the note too,
+    //  if no pin to unpin, just return.
+    console.log('In unpinNotes, no pin found for ids: ', ids);
+    return;
+  }
+
+  const payload = { pins };
+  dispatch({ type: UNPIN_NOTE, payload });
+
+  try {
+    await dataApi.putPins(payload);
+  } catch (e) {
+    dispatch({ type: UNPIN_NOTE_ROLLBACK, payload: { ...payload, error: e } });
+    return;
+  }
+
+  try {
+    dataApi.deletePins({ pins: fromPins });
+  } catch (e) {
+    console.log('unpinNotes error: ', e);
+    // error in this step should be fine
+  }
+
+  dispatch({ type: UNPIN_NOTE_COMMIT, payload });
+};
+
+export const movePinnedNote = (id, direction) => async (dispatch, getState) => {
+  const state = getState();
+  const notes = state.notes;
+  const listName = state.display.listName;
+  const doDescendingOrder = state.settings.doDescendingOrder;
+  const noteFPaths = getNoteFPaths(state);
+  const pinFPaths = getPinFPaths(state);
+  const pendingPins = state.pendingPins;
+
+  const sortedNotes = getSortedNotes(notes, listName, doDescendingOrder);
+  if (!sortedNotes) {
+    console.log(`No notes found for note id: `, id);
+    return;
+  }
+
+  const { toRootIds } = listNoteIds(noteFPaths);
+  let [pinnedValues] = separatePinnedValues(
+    sortedNotes,
+    pinFPaths,
+    pendingPins,
+    toRootIds,
+    (note) => {
+      return getMainId(note.id);
+    }
+  );
+
+  const i = pinnedValues.findIndex(pinnedValue => pinnedValue.value.id === id);
+  if (i < 0) {
+    console.log('In movePinnedNote, no pin found for note id: ', id);
+    return;
+  }
+
+  let nextRank;
+  if (direction === SWAP_LEFT) {
+    if (i === 0) return;
+    if (i === 1) {
+      const pRank = pinnedValues[i - 1].pin.rank;
+
+      const lexoRank = LexoRank.parse(`0|${pRank.replace('_', ':')}`)
+
+      nextRank = lexoRank.genPrev().toString();
+    } else {
+      const pRank = pinnedValues[i - 1].pin.rank;
+      const ppRank = pinnedValues[i - 2].pin.rank;
+
+      const pLexoRank = LexoRank.parse(`0|${pRank.replace('_', ':')}`)
+      const ppLexoRank = LexoRank.parse(`0|${ppRank.replace('_', ':')}`)
+
+      nextRank = ppLexoRank.between(pLexoRank).toString();
+    }
+  } else if (direction === SWAP_RIGHT) {
+    if (i === pinnedValues.length - 1) return;
+    if (i === pinnedValues.length - 2) {
+      const nRank = pinnedValues[i + 1].pin.rank;
+
+      const lexoRank = LexoRank.parse(`0|${nRank.replace('_', ':')}`)
+
+      nextRank = lexoRank.genNext().toString();
+    } else {
+      const nRank = pinnedValues[i + 1].pin.rank;
+      const nnRank = pinnedValues[i + 2].pin.rank;
+
+      const nLexoRank = LexoRank.parse(`0|${nRank.replace('_', ':')}`)
+      const nnLexoRank = LexoRank.parse(`0|${nnRank.replace('_', ':')}`)
+
+      nextRank = nLexoRank.between(nnLexoRank).toString();
+    }
+  } else {
+    throw new Error(`Invalid direction: ${direction}`);
+  }
+  nextRank = nextRank.slice(2).replace(':', '_');
+
+  const now = Date.now();
+  const { rank, updatedDT, addedDT } = pinnedValues[i].pin;
+
+  const payload = { rank: nextRank, updatedDT: now, addedDT, id };
+  dispatch({ type: MOVE_PINNED_NOTE, payload });
+
+  try {
+    await dataApi.putPins({ pins: [payload] });
+  } catch (e) {
+    dispatch({ type: MOVE_PINNED_NOTE_ROLLBACK, payload: { ...payload, error: e } });
+    return;
+  }
+
+  try {
+    dataApi.deletePins({ pins: [{ rank, updatedDT, addedDT, id }] });
+  } catch (e) {
+    console.log('movePinnedNote error: ', e);
+    // error in this step should be fine
+  }
+
+  dispatch({ type: MOVE_PINNED_NOTE_COMMIT, payload });
+};
+
+export const cancelDiedPins = () => {
+  return { type: CANCEL_DIED_PINS };
 };

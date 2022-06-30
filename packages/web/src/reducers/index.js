@@ -4,6 +4,7 @@ import windowReducer from './windowReducer';
 import notesReducer from './notesReducer';
 import hasMoreNotesReducer from './hasMoreNotesReducer';
 import isFetchingMoreNotesReducer from './isFetchingMoreNotesReducer';
+import fetchedMoreReducer from './fetchedMoreReducer';
 import conflictedNotesReducer from './conflictedNotesReducer';
 import displayReducer from './displayReducer';
 import userReducer from './userReducer';
@@ -14,12 +15,17 @@ import editorReducer from './editorReducer';
 import stacksAccessReducer from './stacksAccessReducer';
 import snapshotReducer from './snapshotReducer';
 import listNameEditorsReducer from './listNameEditorsReducer';
+import iapReducer from './iapReducer';
+import cachedFPathsReducer from './cachedFPathsReducer';
+import pendingPinsReducer from './pendingPinsReducer';
+import scrollPanelReducer from './scrollPanelReducer';
 
 const reducers = combineReducers({
   window: windowReducer,
   notes: notesReducer,
   hasMoreNotes: hasMoreNotesReducer,
   isFetchingMoreNotes: isFetchingMoreNotesReducer,
+  fetchedMore: fetchedMoreReducer,
   conflictedNotes: conflictedNotesReducer,
   display: displayReducer,
   user: userReducer,
@@ -30,6 +36,10 @@ const reducers = combineReducers({
   stacksAccess: stacksAccessReducer,
   snapshot: snapshotReducer,
   listNameEditors: listNameEditorsReducer,
+  iap: iapReducer,
+  cachedFPaths: cachedFPathsReducer,
+  pendingPins: pendingPinsReducer,
+  scrollPanel: scrollPanelReducer,
 });
 
 export default reducers;

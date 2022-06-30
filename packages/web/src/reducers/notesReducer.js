@@ -1,9 +1,11 @@
 import { loop, Cmd } from 'redux-loop';
 
-import { deleteOldNotesInTrash, sync } from '../actions';
 import {
-  FETCH_COMMIT, FETCH_MORE_COMMIT, ADD_NOTE, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK,
-  UPDATE_NOTE, UPDATE_NOTE_COMMIT, UPDATE_NOTE_ROLLBACK,
+  tryUpdateFetchedMore, deleteOldNotesInTrash, unpinNotes, sync,
+} from '../actions';
+import {
+  FETCH_COMMIT, FETCH_MORE_COMMIT, UPDATE_FETCHED_MORE, ADD_NOTE, ADD_NOTE_COMMIT,
+  ADD_NOTE_ROLLBACK, UPDATE_NOTE, UPDATE_NOTE_COMMIT, UPDATE_NOTE_ROLLBACK,
   MOVE_NOTES, MOVE_NOTES_COMMIT, MOVE_NOTES_ROLLBACK,
   DELETE_NOTES, DELETE_NOTES_COMMIT, DELETE_NOTES_ROLLBACK,
   CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
@@ -70,6 +72,15 @@ const notesReducer = (state = initialState, action) => {
   }
 
   if (action.type === FETCH_MORE_COMMIT) {
+    return loop(
+      state,
+      Cmd.run(
+        tryUpdateFetchedMore(action.payload),
+        { args: [Cmd.dispatch, Cmd.getState] })
+    );
+  }
+
+  if (action.type === UPDATE_FETCHED_MORE) {
     const { listName, notes } = action.payload;
 
     const newState = { ...state };
@@ -163,6 +174,13 @@ const notesReducer = (state = initialState, action) => {
       newState[toListName], ID, _.extract(toNotes, ID), STATUS, ADDED
     );
 
+    if ([ARCHIVE, TRASH].includes(toListName)) {
+      const { fromNotes } = action.payload;
+      const ids = fromNotes.map(note => note.id);
+      return loop(
+        newState, Cmd.run(unpinNotes(ids), { args: [Cmd.dispatch, Cmd.getState] })
+      );
+    }
     return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
   }
 

@@ -1,6 +1,7 @@
 import {
-  UPDATE_FETCHED_SETTINGS, UPDATE_SETTINGS_COMMIT, DELETE_ALL_DATA, RESET_STATE,
+  FETCH_COMMIT, UPDATE_SETTINGS_COMMIT, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
+import { deriveSettingsState } from '../utils';
 import { initialSettingsState } from '../types/initialStates';
 
 const initialState = {
@@ -9,8 +10,15 @@ const initialState = {
 
 const snapshotReducer = (state = initialState, action) => {
 
-  if (action.type === UPDATE_FETCHED_SETTINGS) {
-    return { ...state, settings: { ...action.payload } };
+  if (action.type === FETCH_COMMIT) {
+    const { listNames, doFetchSettings, settings } = action.payload;
+    if (!doFetchSettings) return state;
+
+    const derivedSettings = deriveSettingsState(
+      listNames, settings, initialSettingsState
+    );
+    const newState = { ...state, settings: { ...derivedSettings } };
+    return newState;
   }
 
   if (action.type === UPDATE_SETTINGS_COMMIT) {

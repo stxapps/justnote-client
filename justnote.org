@@ -222,7 +222,7 @@
 - Font
   + Config in tailwind.config.js
   + Add font-face in layer: base in tailwind.css
-- yarn add @stacks/auth @stacks/storage @stacks/wallet-sdk @stacks/connect
+- yarn add @stacks/auth @stacks/storage @stacks/wallet-sdk @stacks/connect @stacks/encryption
 - yarn add url-parse
 - yarn add framer-motion
 - yarn add @welldone-software/why-did-you-render
@@ -236,6 +236,7 @@
   + change scripts in packages.js
   + ref: stackoverflow.com/questions/70429654/webpack-5-errors-cannot-resolve-crypto-http-and-https-in-reactjs-proje, github.com/facebook/create-react-app/issues/11756, stackoverflow.com/questions/63729455/hosted-images-with-react-pdf/70441023#70441023
 - yarn add @zip.js/zip.js
+- yarn add @wewatch/lexorank axios
 ** Server steps
 *** s3
 - Set public and enable CORS
@@ -347,3 +348,18 @@
 - https://d2kp6vvq64w651.cloudfront.net
 ** prod
 - https://justnote.cc
+* ckeditor
+** repo
+- merge from upstream/stable to origin/stable
+  + git pull upstream stable
+  + git push origin stable
+- merge from stable to justnote
+  + git co justnote, copy 3 changing files
+  + git co the version in stable, replace all changes files including build dir
+  + git co justnote, revert changes and merge stable, then apply changes from the 3 files
+- apply change
+  + change package.json to _package.json
+  + edit packages/ckeditor5-build-decoupled-document/package.json
+  + edit packages/ckeditor5-build-decoupled-document/src/ckeditor.js
+  + add packages/ckeditor5-build-decoupled-document/src/objecturluploadadapter.js
+

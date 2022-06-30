@@ -1,11 +1,12 @@
 import { createSelectorCreator, defaultMemoize, createSelector } from 'reselect';
 
+import { PINNED } from '../types/const';
 import {
-  ADDED, ADDING, UPDATING, MOVING, DIED_ADDING, DIED_UPDATING, DIED_MOVING,
-  DIED_DELETING, STATUS,
-} from '../types/const';
-import { isObject, isArrayEqual, isEqual, isStringIn } from '../utils';
-import { _ } from '../utils/obj';
+  isStringIn, isObject, isArrayEqual, isEqual,
+  getMainId, getValidProduct as _getValidProduct, getValidPurchase as _getValidPurchase,
+  listNoteIds, getSortedNotes, sortWithPins, getNoteFPaths, getPinFPaths, getPins,
+  doEnableExtraFeatures,
+} from '../utils';
 import { initialListNameEditorState } from '../types/initialStates';
 
 const createSelectorListNameMap = createSelectorCreator(
@@ -63,6 +64,16 @@ const createSelectorNotes = createSelectorCreator(
     if (prevVal['display'].listName !== val['display'].listName) return false;
     if (prevVal['display'].searchString !== val['display'].searchString) return false;
 
+    if (prevVal['cachedFPaths'].fpaths !== val['cachedFPaths'].fpaths) {
+      if (!prevVal['cachedFPaths'].fpaths || !val['cachedFPaths'].fpaths) return false;
+      if (!isArrayEqual(
+        prevVal['cachedFPaths'].fpaths.pinFPaths,
+        val['cachedFPaths'].fpaths.pinFPaths
+      )) return false;
+    }
+
+    if (prevVal['pendingPins'] !== val['pendingPins']) return false;
+
     if (
       prevVal['notes'] === val['notes'] &&
       prevVal['conflictedNotes'] === val['conflictedNotes']
@@ -93,23 +104,25 @@ const createSelectorNotes = createSelectorCreator(
 );
 
 export const _getNotes = (state) => {
+
   const notes = state.notes;
   const listName = state.display.listName;
   const searchString = state.display.searchString;
   const sortOn = state.settings.sortOn;
   const doDescendingOrder = state.settings.doDescendingOrder;
+  const noteFPaths = getNoteFPaths(state);
+  const pinFPaths = getPinFPaths(state);
+  const pendingPins = state.pendingPins;
 
-  if (!notes || !notes[listName]) return null;
+  let sortedNotes = getSortedNotes(notes, listName, sortOn, doDescendingOrder);
+  if (!sortedNotes) return null;
 
-  const selectedNotes = _.select(notes[listName], STATUS, [ADDED, ADDING, UPDATING, MOVING, DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING]);
-  const sortedNotes = Object.values(selectedNotes).sort((a, b) => {
-    return a[sortOn] - b[sortOn];
+  const { toRootIds } = listNoteIds(noteFPaths);
+  sortedNotes = sortWithPins(sortedNotes, pinFPaths, pendingPins, toRootIds, (note) => {
+    return getMainId(note.id);
   });
-  if (doDescendingOrder) sortedNotes.reverse();
 
-  if (searchString === '') {
-    return sortedNotes;
-  }
+  if (searchString === '') return sortedNotes;
 
   const searchNotes = sortedNotes.filter(note => {
     return isStringIn(note, searchString);
@@ -120,17 +133,13 @@ export const _getNotes = (state) => {
 
 export const _getConflictedNotes = (state) => {
 
-  const conflictedNotes = state.conflictedNotes;
+  const notes = state.conflictedNotes;
   const listName = state.display.listName;
   const sortOn = state.settings.sortOn;
   const doDescendingOrder = state.settings.doDescendingOrder;
 
-  if (!conflictedNotes || !conflictedNotes[listName]) return null;
-
-  const sortedNotes = Object.values(conflictedNotes[listName]).sort((a, b) => {
-    return a[sortOn] - b[sortOn];
-  });
-  if (doDescendingOrder) sortedNotes.reverse();
+  let sortedNotes = getSortedNotes(notes, listName, sortOn, doDescendingOrder);
+  if (!sortedNotes) return null;
 
   return sortedNotes;
 };
@@ -140,12 +149,12 @@ export const getNotes = createSelectorNotes(
   (state) => {
 
     const notes = _getNotes(state);
-    if (!notes) return null;
-
     const conflictedNotes = _getConflictedNotes(state);
-    if (conflictedNotes) return [...conflictedNotes, ...notes];
 
-    return notes;
+    if (!notes && !conflictedNotes) return null;
+    if (!conflictedNotes) return notes;
+    if (!notes) return conflictedNotes;
+    return [...conflictedNotes, ...notes];
   }
 );
 
@@ -158,5 +167,42 @@ export const makeGetListNameEditor = () => {
       return { ...initialListNameEditorState, ...listNameEditors[key] };
     },
     { memoizeOptions: { resultEqualityCheck: isEqual } },
+  );
+};
+
+export const getValidProduct = createSelector(
+  state => state.iap.products,
+  products => _getValidProduct(products),
+);
+
+export const getValidPurchase = createSelector(
+  state => state.settings.purchases,
+  purchases => _getValidPurchase(purchases),
+);
+
+export const getDoEnableExtraFeatures = createSelector(
+  state => state.settings.purchases,
+  purchases => doEnableExtraFeatures(purchases),
+);
+
+/** @return {function(any, any): any} */
+export const makeGetPinStatus = () => {
+  return createSelector(
+    state => getPinFPaths(state),
+    state => state.pendingPins,
+    (__, note) => note ? note.id : null,
+    (pinFPaths, pendingPins, noteId) => {
+
+      if (!noteId) return null;
+
+      const pins = getPins(pinFPaths, pendingPins, false);
+      const noteMainId = getMainId(noteId);
+      if (noteMainId in pins) {
+        if ('status' in pins[noteMainId]) return pins[noteMainId].status;
+        return PINNED;
+      }
+
+      return null;
+    }
   );
 };
