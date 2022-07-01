@@ -10,7 +10,7 @@ import {
   INIT, UPDATE_HREF, UPDATE_WINDOW_SIZE, UPDATE_USER, UPDATE_HANDLING_SIGN_IN,
   UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP, UPDATE_SEARCH_STRING,
   UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY, UPDATE_SCROLL_PANEL,
-  ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS,
+  ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, UPDATE_SELECTING_NOTE_ID,
   FETCH, FETCH_COMMIT, FETCH_ROLLBACK, FETCH_MORE, FETCH_MORE_COMMIT,
   FETCH_MORE_ROLLBACK, CACHE_FETCHED_MORE, UPDATE_FETCHED_MORE,
   ADD_NOTE, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK,
@@ -646,6 +646,13 @@ export const deleteSelectedNoteIds = (ids) => {
   return {
     type: DELETE_SELECTED_NOTE_IDS,
     payload: ids,
+  };
+};
+
+export const updateSelectingNoteId = (id) => {
+  return {
+    type: UPDATE_SELECTING_NOTE_ID,
+    payload: id,
   };
 };
 
@@ -2738,7 +2745,7 @@ export const movePinnedNote = (id, direction) => async (dispatch, getState) => {
     pendingPins,
     toRootIds,
     (note) => {
-      return getMainId(note.id);
+      return getMainId(note.id, toRootIds);
     }
   );
 

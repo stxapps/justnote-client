@@ -119,7 +119,7 @@ export const _getNotes = (state) => {
 
   const { toRootIds } = listNoteIds(noteFPaths);
   sortedNotes = sortWithPins(sortedNotes, pinFPaths, pendingPins, toRootIds, (note) => {
-    return getMainId(note.id);
+    return getMainId(note.id, toRootIds);
   });
 
   if (searchString === '') return sortedNotes;
@@ -188,15 +188,17 @@ export const getDoEnableExtraFeatures = createSelector(
 /** @return {function(any, any): any} */
 export const makeGetPinStatus = () => {
   return createSelector(
+    state => getNoteFPaths(state),
     state => getPinFPaths(state),
     state => state.pendingPins,
     (__, note) => note ? note.id : null,
-    (pinFPaths, pendingPins, noteId) => {
+    (noteFPaths, pinFPaths, pendingPins, noteId) => {
 
       if (!noteId) return null;
 
+      const { toRootIds } = listNoteIds(noteFPaths);
       const pins = getPins(pinFPaths, pendingPins, false);
-      const noteMainId = getMainId(noteId);
+      const noteMainId = getMainId(noteId, toRootIds);
       if (noteMainId in pins) {
         if ('status' in pins[noteMainId]) return pins[noteMainId].status;
         return PINNED;

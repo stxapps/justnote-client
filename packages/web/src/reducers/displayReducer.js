@@ -1,9 +1,9 @@
 import {
   UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP,
   UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, ADD_SELECTED_NOTE_IDS,
-  DELETE_SELECTED_NOTE_IDS, UPDATE_SELECTING_LIST_NAME, UPDATE_DELETING_LIST_NAME,
-  FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES,
-  DELETE_LIST_NAMES, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY,
+  DELETE_SELECTED_NOTE_IDS, UPDATE_SELECTING_NOTE_ID, UPDATE_SELECTING_LIST_NAME,
+  UPDATE_DELETING_LIST_NAME, FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT,
+  CANCEL_DIED_NOTES, DELETE_LIST_NAMES, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY,
   INCREASE_SAVE_NOTE_COUNT, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
   INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
   INCREASE_RESET_DID_CLICK_COUNT, UPDATE_DISCARD_ACTION,
@@ -50,6 +50,7 @@ const initialState = {
   isBulkEditing: false,
   selectedNoteIds: [],
   isSelectedNoteIdsMaxErrorShown: false,
+  selectingNoteId: null,
   selectingListName: null,
   deletingListName: null,
   didFetch: false,
@@ -132,6 +133,7 @@ const displayReducer = (state = initialState, action) => {
         listNamesPopupPosition: anchorPosition,
       };
       if (!isShown) {
+        newState.selectingNoteId = null;
         newState.selectingListName = null;
       }
       return newState;
@@ -144,6 +146,7 @@ const displayReducer = (state = initialState, action) => {
         pinMenuPopupPosition: anchorPosition,
       };
       if (!isShown) {
+        newState.selectingNoteId = null;
         newState.selectingListName = null;
       }
       return newState;
@@ -248,6 +251,10 @@ const displayReducer = (state = initialState, action) => {
     }
     const isShown = selectedNoteIds.length > MAX_SELECTED_NOTE_IDS;
     return { ...state, selectedNoteIds, isSelectedNoteIdsMaxErrorShown: isShown };
+  }
+
+  if (action.type === UPDATE_SELECTING_NOTE_ID) {
+    return { ...state, selectingNoteId: action.payload };
   }
 
   if (action.type === UPDATE_SELECTING_LIST_NAME) {

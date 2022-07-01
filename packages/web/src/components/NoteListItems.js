@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { fetchMore } from '../actions';
+import { fetchMore, updateFetchedMore, updateScrollPanel } from '../actions';
 import { MY_NOTES, TRASH, ARCHIVE } from '../types/const';
 import { getListNameMap, getNotes } from '../selectors';
 import { getListNameDisplayName, throttle } from '../utils';
@@ -14,6 +14,9 @@ const NoteListItems = () => {
   const listNameMap = useSelector(getListNameMap);
   const searchString = useSelector(state => state.display.searchString);
   const hasMore = useSelector(state => state.hasMoreNotes[listName]);
+  const hasFetchedMore = useSelector(
+    state => state.fetchedMore[listName] ? true : false
+  );
   const isFetchingMore = useSelector(state => state.isFetchingMoreNotes[listName]);
   const listChangedCount = useSelector(state => state.display.listChangedCount);
   const flatList = useRef(null);
@@ -26,7 +29,7 @@ const NoteListItems = () => {
   }
 
   const updateScrollY = throttle(() => {
-    if (!hasMore || isFetchingMore) return;
+    if (!hasMore || hasFetchedMore || isFetchingMore) return;
     if (!flatList.current) return;
 
     const scrollHeight = Math.max(
@@ -40,11 +43,17 @@ const NoteListItems = () => {
     const windowBottom = windowHeight + flatList.current.scrollTop;
 
     if (windowBottom > (scrollHeight * 0.96)) dispatch(fetchMore());
+
+    dispatch(updateScrollPanel(scrollHeight, windowHeight, flatList.current.scrollTop));
   }, 16);
 
   const onFetchMoreBtnClick = () => {
     dispatch(fetchMore());
   }
+
+  const onUpdateFetchedBtnClick = () => {
+    dispatch(updateFetchedMore());
+  };
 
   const renderEmpty = () => {
 
@@ -129,6 +138,14 @@ const NoteListItems = () => {
     );
   };
 
+  const renderUpdateFetchedBtn = () => {
+    return (
+      <div className="my-6 px-4 sm:px-6">
+        <button onClick={onUpdateFetchedBtnClick} className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-500 bg-white hover:text-gray-600 hover:border-gray-400 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-offset-2 focus:ring-gray-400">Show more</button>
+      </div>
+    );
+  };
+
   const renderItems = () => {
     return (
       <div className="mt-5">
@@ -161,15 +178,17 @@ const NoteListItems = () => {
     };
   }, [updateScrollY]);
 
-  const showFetchMoreBtn = hasMore && !isFetchingMore;
-  const showFetchingMore = hasMore && isFetchingMore;
+  let fetchMoreBtn;
+  if (!hasMore) fetchMoreBtn = null;
+  else if (hasFetchedMore) fetchMoreBtn = renderUpdateFetchedBtn();
+  else if (isFetchingMore) fetchMoreBtn = renderFetchingMore();
+  else fetchMoreBtn = renderFetchMoreBtn();
 
   return (
     <div ref={flatList} className="flex-grow flex-shrink overflow-y-auto">
       {notes.length === 0 && renderEmpty()}
       {notes.length > 0 && renderItems()}
-      {showFetchMoreBtn && renderFetchMoreBtn()}
-      {showFetchingMore && renderFetchingMore()}
+      {fetchMoreBtn}
     </div>
   );
 };

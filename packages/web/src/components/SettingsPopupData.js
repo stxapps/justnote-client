@@ -17,7 +17,7 @@ const _SettingsPopupData = (props) => {
   } = props;
 
   return (
-    <div className="p-4 md:p-6 md:pt-4">
+    <div className="p-4 md:p-6">
       <div className="border-b border-gray-200 md:hidden">
         <button onClick={onSidebarOpenBtnClick} className="pb-1 group focus:outline-none">
           <span className="text-sm text-gray-500 rounded-sm group-focus:ring-2 group-focus:ring-gray-400">{'<'} <span className="group-hover:underline">Settings</span></span>
@@ -26,7 +26,7 @@ const _SettingsPopupData = (props) => {
       </div>
       <div className="mt-6 md:mt-0">
         <h4 className="text-base text-gray-800 font-medium leading-none">Data Server</h4>
-        <p className="mt-2.5 text-base text-gray-500 leading-relaxed">Justnote stores your data in a Stacks data server. You can specify which Stacks data server to store your data. By default, your Stacks data server is at <a className="underline rounded hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400" href="https://hub.blockstack.org/hub_info" target="_blank" rel="noreferrer">hub.blockstack.org</a> provided by <a className="underline rounded hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400" href="https://www.hiro.so" target="_blank" rel="noreferrer">Hiro Systems</a>. You can also deploy your own Stacks data server. To change your Stacks data server, you need to record your server’s information to Stacks blockchain. Justnote stores your data to the server specified in the blockchain. For more details, please visit <a className="underline rounded hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400" href="https://docs.stacks.co/build-apps/references/gaia" target="_blank" rel="noreferrer">Stacks Gaia</a>.</p>
+        <p className="mt-2.5 text-base text-gray-500 leading-relaxed">Justnote stores your data in a Stacks data server. You can specify which Stacks data server to store your data. By default, your Stacks data server is at <a className="underline rounded hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400" href="https://hub.blockstack.org/hub_info" target="_blank" rel="noreferrer">hub.blockstack.org</a> provided by <a className="underline rounded hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400" href="https://www.hiro.so" target="_blank" rel="noreferrer">Hiro Systems</a>. You can also deploy your own Stacks data server. To change your Stacks data server, you need to record your server’s information to Stacks blockchain. Justnote stores your data to the server specified in the blockchain. For more details, please visit <a className="underline rounded hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400" href="https://docs.stacks.co/docs/gaia" target="_blank" rel="noreferrer">Stacks Gaia</a>.</p>
       </div>
       <div className="mt-8">
         <button onClick={onToImportAllDataViewBtnClick} className="w-full text-left rounded-sm focus:outline-none focus:ring-2 focus:ring-gray-400">
@@ -83,10 +83,10 @@ const _SettingsPopupDataImport = (props) => {
     actionPanel = (
       <div className="mt-6 mb-4">
         <div className="flex items-center">
-          <svg className="w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <svg className="flex-grow-0 flex-shrink-0 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path fillRule="evenodd" clipRule="evenodd" d="M18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10ZM11 14C11 14.5523 10.5523 15 10 15C9.44772 15 9 14.5523 9 14C9 13.4477 9.44772 13 10 13C10.5523 13 11 13.4477 11 14ZM10 5C9.44772 5 9 5.44772 9 6V10C9 10.5523 9.44772 11 10 11C10.5523 11 11 10.5523 11 10V6C11 5.44772 10.5523 5 10 5Z" />
           </svg>
-          <p className="ml-1 text-base text-red-600">Oops..., something went wrong!</p>
+          <p className="flex-grow flex-shrink ml-1 text-base text-red-600">Oops..., something went wrong!</p>
         </div>
         <p className="text-base text-red-600 leading-relaxed">{importAllDataProgress.error}</p>
         <p className="mt-6 text-base text-gray-500 leading-relaxed">Please wait a moment and try again. If the problem persists, please <a className="underline rounded-sm hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400" href={'/' + HASH_SUPPORT} target="_blank" rel="noreferrer">contact us
@@ -101,10 +101,10 @@ const _SettingsPopupDataImport = (props) => {
     actionPanel = (
       <div className="mt-6 mb-4">
         <div className="flex items-center">
-          <svg className="w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <svg className="flex-grow-0 flex-shrink-0 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path fillRule="evenodd" clipRule="evenodd" d="M18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10ZM11 6C11 6.55228 10.5523 7 10 7C9.44772 7 9 6.55228 9 6C9 5.44772 9.44772 5 10 5C10.5523 5 11 5.44772 11 6ZM9 9C8.44772 9 8 9.44772 8 10C8 10.5523 8.44772 11 9 11V14C9 14.5523 9.44772 15 10 15H11C11.5523 15 12 14.5523 12 14C12 13.4477 11.5523 13 11 13V10C11 9.44772 10.5523 9 10 9H9Z" />
           </svg>
-          <p className="ml-1 text-base text-gray-500">No data to import.</p>
+          <p className="flex-grow flex-shrink ml-1 text-base text-gray-500">No data to import.</p>
         </div>
         <p className="text-base text-gray-500">{importAllDataProgress.done} / {importAllDataProgress.total}</p>
       </div>
@@ -113,10 +113,10 @@ const _SettingsPopupDataImport = (props) => {
     actionPanel = (
       <div className="mt-6 mb-4">
         <div className="flex items-center">
-          <svg className="w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <svg className="flex-grow-0 flex-shrink-0 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path fillRule="evenodd" clipRule="evenodd" d="M10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18ZM13.7071 8.70711C14.0976 8.31658 14.0976 7.68342 13.7071 7.29289C13.3166 6.90237 12.6834 6.90237 12.2929 7.29289L9 10.5858L7.70711 9.29289C7.31658 8.90237 6.68342 8.90237 6.29289 9.29289C5.90237 9.68342 5.90237 10.3166 6.29289 10.7071L8.29289 12.7071C8.68342 13.0976 9.31658 13.0976 9.70711 12.7071L13.7071 8.70711Z" />
           </svg>
-          <p className="ml-1 text-base text-gray-500">Done</p>
+          <p className="flex-grow flex-shrink ml-1 text-base text-gray-500">Done</p>
         </div>
         <p className="text-base text-gray-500">{importAllDataProgress.done} / {importAllDataProgress.total}</p>
       </div>
@@ -149,8 +149,6 @@ const _SettingsPopupDataImport = (props) => {
     </div>
   );
 };
-
-export const SettingsPopupDataImport = React.memo(_SettingsPopupDataImport);
 
 const _SettingsPopupDataExport = (props) => {
 
@@ -188,10 +186,10 @@ const _SettingsPopupDataExport = (props) => {
     actionPanel = (
       <div className="mt-6 mb-4">
         <div className="flex items-center">
-          <svg className="w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <svg className="flex-grow-0 flex-shrink-0 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path fillRule="evenodd" clipRule="evenodd" d="M18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10ZM11 14C11 14.5523 10.5523 15 10 15C9.44772 15 9 14.5523 9 14C9 13.4477 9.44772 13 10 13C10.5523 13 11 13.4477 11 14ZM10 5C9.44772 5 9 5.44772 9 6V10C9 10.5523 9.44772 11 10 11C10.5523 11 11 10.5523 11 10V6C11 5.44772 10.5523 5 10 5Z" />
           </svg>
-          <p className="ml-1 text-base text-red-600">Oops..., something went wrong!</p>
+          <p className="flex-grow flex-shrink ml-1 text-base text-red-600">Oops..., something went wrong!</p>
         </div>
         <p className="text-base text-red-600 leading-relaxed">{exportAllDataProgress.error}</p>
         <p className="mt-6 text-base text-gray-500 leading-relaxed">Please wait a moment and try again. If the problem persists, please <a className="underline rounded-sm hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400" href={'/' + HASH_SUPPORT} target="_blank" rel="noreferrer">contact us
@@ -206,10 +204,10 @@ const _SettingsPopupDataExport = (props) => {
     actionPanel = (
       <div className="mt-6 mb-4">
         <div className="flex items-center">
-          <svg className="w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <svg className="flex-grow-0 flex-shrink-0 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path fillRule="evenodd" clipRule="evenodd" d="M18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10ZM11 6C11 6.55228 10.5523 7 10 7C9.44772 7 9 6.55228 9 6C9 5.44772 9.44772 5 10 5C10.5523 5 11 5.44772 11 6ZM9 9C8.44772 9 8 9.44772 8 10C8 10.5523 8.44772 11 9 11V14C9 14.5523 9.44772 15 10 15H11C11.5523 15 12 14.5523 12 14C12 13.4477 11.5523 13 11 13V10C11 9.44772 10.5523 9 10 9H9Z" />
           </svg>
-          <p className="ml-1 text-base text-gray-500">No data to export.</p>
+          <p className="flex-grow flex-shrink ml-1 text-base text-gray-500">No data to export.</p>
         </div>
         <p className="text-base text-gray-500">{exportAllDataProgress.done} / {exportAllDataProgress.total}</p>
       </div>
@@ -218,10 +216,10 @@ const _SettingsPopupDataExport = (props) => {
     actionPanel = (
       <div className="mt-6 mb-4">
         <div className="flex items-center">
-          <svg className="w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <svg className="flex-grow-0 flex-shrink-0 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path fillRule="evenodd" clipRule="evenodd" d="M10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18ZM13.7071 8.70711C14.0976 8.31658 14.0976 7.68342 13.7071 7.29289C13.3166 6.90237 12.6834 6.90237 12.2929 7.29289L9 10.5858L7.70711 9.29289C7.31658 8.90237 6.68342 8.90237 6.29289 9.29289C5.90237 9.68342 5.90237 10.3166 6.29289 10.7071L8.29289 12.7071C8.68342 13.0976 9.31658 13.0976 9.70711 12.7071L13.7071 8.70711Z" />
           </svg>
-          <p className="ml-1 text-base text-gray-500">Done</p>
+          <p className="flex-grow flex-shrink ml-1 text-base text-gray-500">Done</p>
         </div>
         <p className="text-base text-gray-500">{exportAllDataProgress.done} / {exportAllDataProgress.total}</p>
       </div>
@@ -306,10 +304,10 @@ const _SettingsPopupDataDelete = (props) => {
     actionPanel = (
       <div className="mt-6 mb-4">
         <div className="flex items-center">
-          <svg className="w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <svg className="flex-grow-0 flex-shrink-0 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path fillRule="evenodd" clipRule="evenodd" d="M18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10ZM11 14C11 14.5523 10.5523 15 10 15C9.44772 15 9 14.5523 9 14C9 13.4477 9.44772 13 10 13C10.5523 13 11 13.4477 11 14ZM10 5C9.44772 5 9 5.44772 9 6V10C9 10.5523 9.44772 11 10 11C10.5523 11 11 10.5523 11 10V6C11 5.44772 10.5523 5 10 5Z" />
           </svg>
-          <p className="ml-1 text-base text-red-600">Oops..., something went wrong!</p>
+          <p className="flex-grow flex-shrink ml-1 text-base text-red-600">Oops..., something went wrong!</p>
         </div>
         <p className="text-base text-red-600 leading-relaxed">{deleteAllDataProgress.error}</p>
         <p className="mt-6 text-base text-gray-500 leading-relaxed">Please wait a moment and try again. If the problem persists, please <a className="underline rounded-sm hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400" href={'/' + HASH_SUPPORT} target="_blank" rel="noreferrer">contact us
@@ -324,10 +322,10 @@ const _SettingsPopupDataDelete = (props) => {
     actionPanel = (
       <div className="mt-6 mb-4">
         <div className="flex items-center">
-          <svg className="w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <svg className="flex-grow-0 flex-shrink-0 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path fillRule="evenodd" clipRule="evenodd" d="M18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10ZM11 6C11 6.55228 10.5523 7 10 7C9.44772 7 9 6.55228 9 6C9 5.44772 9.44772 5 10 5C10.5523 5 11 5.44772 11 6ZM9 9C8.44772 9 8 9.44772 8 10C8 10.5523 8.44772 11 9 11V14C9 14.5523 9.44772 15 10 15H11C11.5523 15 12 14.5523 12 14C12 13.4477 11.5523 13 11 13V10C11 9.44772 10.5523 9 10 9H9Z" />
           </svg>
-          <p className="ml-1 text-base text-gray-500">No data to delete.</p>
+          <p className="flex-grow flex-shrink ml-1 text-base text-gray-500">No data to delete.</p>
         </div>
         <p className="text-base text-gray-500">{deleteAllDataProgress.done} / {deleteAllDataProgress.total}</p>
       </div>
@@ -336,10 +334,10 @@ const _SettingsPopupDataDelete = (props) => {
     actionPanel = (
       <div className="mt-6 mb-4">
         <div className="flex items-center">
-          <svg className="w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <svg className="flex-grow-0 flex-shrink-0 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path fillRule="evenodd" clipRule="evenodd" d="M10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18ZM13.7071 8.70711C14.0976 8.31658 14.0976 7.68342 13.7071 7.29289C13.3166 6.90237 12.6834 6.90237 12.2929 7.29289L9 10.5858L7.70711 9.29289C7.31658 8.90237 6.68342 8.90237 6.29289 9.29289C5.90237 9.68342 5.90237 10.3166 6.29289 10.7071L8.29289 12.7071C8.68342 13.0976 9.31658 13.0976 9.70711 12.7071L13.7071 8.70711Z" />
           </svg>
-          <p className="ml-1 text-base text-gray-500">Done</p>
+          <p className="flex-grow flex-shrink ml-1 text-base text-gray-500">Done</p>
         </div>
         <p className="text-base text-gray-500">{deleteAllDataProgress.done} / {deleteAllDataProgress.total}</p>
       </div>
@@ -380,5 +378,6 @@ const _SettingsPopupDataDelete = (props) => {
 };
 
 export const SettingsPopupData = React.memo(_SettingsPopupData);
+export const SettingsPopupDataImport = React.memo(_SettingsPopupDataImport);
 export const SettingsPopupDataExport = React.memo(_SettingsPopupDataExport);
 export const SettingsPopupDataDelete = React.memo(_SettingsPopupDataDelete);

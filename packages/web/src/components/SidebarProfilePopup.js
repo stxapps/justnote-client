@@ -3,8 +3,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import Url from 'url-parse';
 
-import { signOut, updatePopupUrlHash, updateSettingsPopup } from '../actions';
-import { HASH_SUPPORT, PROFILE_POPUP } from '../types/const';
+import {
+  signOut, updatePopupUrlHash, updateSettingsPopup, updateSettingsViewId,
+} from '../actions';
+import { HASH_SUPPORT, PROFILE_POPUP, SETTINGS_VIEW_ACCOUNT } from '../types/const';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
 
 const SidebarProfilePopup = () => {
@@ -19,7 +21,8 @@ const SidebarProfilePopup = () => {
   };
 
   const onSettingsBtnClick = () => {
-    updateSettingsPopup(true);
+    dispatch(updateSettingsViewId(SETTINGS_VIEW_ACCOUNT, true));
+    dispatch(updateSettingsPopup(true));
   };
 
   const onSupportBtnClick = () => {
@@ -51,7 +54,7 @@ const SidebarProfilePopup = () => {
   return (
     <AnimatePresence key="AP_Sb_ProfilePopup">
       <motion.button key="Sb_ProfilePopup_cancelBtn" ref={cancelBtn} onClick={onProfileCancelBtnClick} className="fixed inset-0 w-full h-full bg-black bg-opacity-25 cursor-default focus:outline-none" variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden" />
-      <motion.div key="Sb_ProfilePopup_popup" style={popupStyle} className="absolute origin-top mt-1 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5" variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+      <motion.div key="Sb_ProfilePopup_popup" style={popupStyle} className="absolute origin-top rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5" variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
         <div className="py-1">
           <button onClick={onSettingsBtnClick} className="group w-full flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900" role="menuitem">
             <svg className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500 group-focus:text-gray-500" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">

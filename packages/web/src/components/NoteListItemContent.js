@@ -6,8 +6,8 @@ import {
   addSelectedNoteIds, deleteSelectedNoteIds,
 } from '../actions';
 import { LG_WIDTH } from '../types/const';
-import { makeIsNoteIdSelected } from '../selectors';
-import { isBusyStatus, stripHtml } from '../utils';
+import { makeIsNoteIdSelected, makeGetPinStatus } from '../selectors';
+import { isBusyStatus, isPinningStatus, stripHtml } from '../utils';
 
 import { useSafeAreaFrame } from '.';
 
@@ -16,10 +16,14 @@ const NoteListItemContent = (props) => {
   const { note } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const getIsNoteIdSelected = useMemo(makeIsNoteIdSelected, []);
+  const getPinStatus = useMemo(makeGetPinStatus, []);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const isSelected = useSelector(state => getIsNoteIdSelected(state, note.id));
+  const pinStatus = useSelector(state => getPinStatus(state, note));
   const body = useMemo(() => stripHtml(note.body), [note.body]);
-  const isBusy = useMemo(() => isBusyStatus(note.status), [note.status]);
+  const isBusy = useMemo(() => {
+    return isBusyStatus(note.status) || isPinningStatus(pinStatus);
+  }, [note.status, pinStatus]);
   const clickPressTimer = useRef(null);
   const touchPressTimer = useRef(null);
   const isLongPress = useRef(false);

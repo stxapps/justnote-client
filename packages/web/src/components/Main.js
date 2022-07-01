@@ -7,8 +7,11 @@ import ColsPanel from './ColsPanel';
 import NavPanel from './NavPanel';
 import SidebarProfilePopup from './SidebarProfilePopup';
 import NoteListMenuPopup from './NoteListMenuPopup';
+import PinMenuPopup from './PinMenuPopup';
+import PaywallPopup from './PaywallPopup';
 import SettingsPopup from './SettingsPopup';
 import SettingsListsMenuPopup from './SettingsListsMenuPopup';
+import PinErrorPopup from './PinErrorPopup';
 import SettingsErrorPopup from './SettingsErrorPopup';
 import ListNamesPopup from './ListNamesPopup';
 import ConfirmDeletePopup from './ConfirmDeletePopup';
@@ -36,8 +39,11 @@ const Main = () => {
       {panel}
       <SidebarProfilePopup />
       <NoteListMenuPopup />
+      <PinMenuPopup />
+      <PaywallPopup />
       <SettingsPopup />
       <SettingsListsMenuPopup />
+      <PinErrorPopup />
       <SettingsErrorPopup />
       <ListNamesPopup />
       <ConfirmDeletePopup />

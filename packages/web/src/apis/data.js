@@ -4,7 +4,7 @@ import {
 } from '../types/const';
 import {
   isNumber, createNoteFPath, createNoteFName, extractNoteFPath, createPinFPath,
-  copyFPaths, listNoteIds, sortWithPins, getMainId,
+  copyFPaths, getMainId, listNoteIds, sortWithPins,
 } from '../utils';
 import { cachedFPaths } from '../vars';
 

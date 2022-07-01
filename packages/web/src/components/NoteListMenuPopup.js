@@ -4,10 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Url from 'url-parse';
 
 import {
-  signOut, updatePopupUrlHash, updateSettingsPopup, updateBulkEditUrlHash,
+  signOut, updatePopupUrlHash, updateSettingsPopup, updateSettingsViewId,
+  updateBulkEditUrlHash,
 } from '../actions';
 import {
-  HASH_LANDING_MOBILE, HASH_SUPPORT, NOTE_LIST_MENU_POPUP, LG_WIDTH,
+  HASH_SUPPORT, NOTE_LIST_MENU_POPUP, SETTINGS_VIEW_ACCOUNT, LG_WIDTH,
 } from '../types/const';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
 
@@ -35,20 +36,16 @@ const NoteListMenuPopup = () => {
 
     // As this and showing settings popup both change url hash,
     //   need to be in different js clock cycle.
-    setTimeout(() => dispatch(updateSettingsPopup(true)), 100);
+    setTimeout(() => {
+      dispatch(updateSettingsViewId(SETTINGS_VIEW_ACCOUNT, true));
+      dispatch(updateSettingsPopup(true));
+    }, 100);
   };
 
   const onSupportBtnClick = () => {
     const urlObj = new Url(window.location.href, {});
     urlObj.set('pathname', '/');
     urlObj.set('hash', HASH_SUPPORT);
-    window.location.replace(urlObj.toString());
-  };
-
-  const onMobileBtnClick = () => {
-    const urlObj = new Url(window.location.href, {});
-    urlObj.set('pathname', '/');
-    urlObj.set('hash', HASH_LANDING_MOBILE);
     window.location.replace(urlObj.toString());
   };
 
@@ -116,12 +113,6 @@ const NoteListMenuPopup = () => {
           </svg>
           Support
         </button>
-        <button onClick={onMobileBtnClick} className="group w-full flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900" role="menuitem">
-          <svg className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500 group-focus:text-gray-500" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path fillRule="evenodd" clipRule="evenodd" d="M6 2C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V16C4 16.5304 4.21071 17.0391 4.58579 17.4142C4.96086 17.7893 5.46957 18 6 18H14C14.5304 18 15.0391 17.7893 15.4142 17.4142C15.7893 17.0391 16 16.5304 16 16V4C16 3.46957 15.7893 2.96086 15.4142 2.58579C15.0391 2.21071 14.5304 2 14 2H6ZM10 16C10.2652 16 10.5196 15.8946 10.7071 15.7071C10.8946 15.5196 11 15.2652 11 15C11 14.7348 10.8946 14.4804 10.7071 14.2929C10.5196 14.1054 10.2652 14 10 14C9.73478 14 9.48043 14.1054 9.29289 14.2929C9.10536 14.4804 9 14.7348 9 15C9 15.2652 9.10536 15.5196 9.29289 15.7071C9.48043 15.8946 9.73478 16 10 16Z" />
-          </svg>
-          Mobile apps
-        </button>
         <button onClick={onSignOutBtnClick} className="group w-full flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900" role="menuitem">
           <svg className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500 group-focus:text-gray-500" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path fillRule="evenodd" clipRule="evenodd" d="M3 3C2.73478 3 2.48043 3.10536 2.29289 3.29289C2.10536 3.48043 2 3.73478 2 4V16C2 16.2652 2.10536 16.5196 2.29289 16.7071C2.48043 16.8946 2.73478 17 3 17C3.26522 17 3.51957 16.8946 3.70711 16.7071C3.89464 16.5196 4 16.2652 4 16V4C4 3.73478 3.89464 3.48043 3.70711 3.29289C3.51957 3.10536 3.26522 3 3 3ZM13.293 12.293C13.1108 12.4816 13.01 12.7342 13.0123 12.9964C13.0146 13.2586 13.1198 13.5094 13.3052 13.6948C13.4906 13.8802 13.7414 13.9854 14.0036 13.9877C14.2658 13.99 14.5184 13.8892 14.707 13.707L17.707 10.707C17.8945 10.5195 17.9998 10.2652 17.9998 10C17.9998 9.73484 17.8945 9.48053 17.707 9.293L14.707 6.293C14.6148 6.19749 14.5044 6.12131 14.3824 6.0689C14.2604 6.01649 14.1292 5.9889 13.9964 5.98775C13.8636 5.9866 13.7319 6.0119 13.609 6.06218C13.4861 6.11246 13.3745 6.18671 13.2806 6.2806C13.1867 6.3745 13.1125 6.48615 13.0622 6.60905C13.0119 6.73194 12.9866 6.86362 12.9877 6.9964C12.9889 7.12918 13.0165 7.2604 13.0689 7.3824C13.1213 7.50441 13.1975 7.61475 13.293 7.707L14.586 9H7C6.73478 9 6.48043 9.10536 6.29289 9.29289C6.10536 9.48043 6 9.73478 6 10C6 10.2652 6.10536 10.5196 6.29289 10.7071C6.48043 10.8946 6.73478 11 7 11H14.586L13.293 12.293Z" />
@@ -135,7 +126,7 @@ const NoteListMenuPopup = () => {
   return (
     <AnimatePresence key="AP_NL_MenuPopup">
       <motion.button key="NL_MenuPopup_cancelBtn" ref={cancelBtn} onClick={onNoteListMenuCancelBtnClick} className="fixed inset-0 w-full h-full bg-black bg-opacity-25 cursor-default focus:outline-none" variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden" />
-      <motion.div key="NL_MenuPopup_popup" style={popupStyle} className="absolute mt-1 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5" variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+      <motion.div key="NL_MenuPopup_popup" style={popupStyle} className="absolute rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5" variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
         <div className="py-1">
           {buttons}
         </div>

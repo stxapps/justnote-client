@@ -511,6 +511,18 @@ export const getFormattedDT = (dt) => {
   return `${date} ${month} ${year} ${hour}:${min}`;
 };
 
+export const getFormattedDate = (d) => {
+  const months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+
+  const year = d.getFullYear();
+  const month = months[d.getMonth()];
+  const date = d.getDate();
+
+  return `${date} ${month} ${year}`;
+};
+
 export const stripHtml = (s) => {
   const codeRe = /&(nbsp|amp|quot|lt|gt);/g;
   const codeMap = { 'nbsp': ' ', 'amp': '&', 'quot': '"', 'lt': '<', 'gt': '>' };

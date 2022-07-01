@@ -145,8 +145,6 @@ export const EXPIRED = 'Expired';
 export const PIN = 'Pin to the top';
 export const MANAGE_PIN = 'Manage pin';
 export const UNPIN = 'Unpin';
-export const PIN_LEFT = 'Move pin forward';
-export const PIN_RIGHT = 'Move pin backward';
 export const PIN_UP = 'Move pin up';
 export const PIN_DOWN = 'Move pin down';
 
