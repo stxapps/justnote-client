@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { updatePopupUrlHash, deleteNotes, deleteListNames } from '../actions';
-import { CONFIRM_DELETE_POPUP, SM_WIDTH } from '../types/const';
+import { CONFIRM_DELETE_POPUP, DELETE_ACTION_LIST_NAME, SM_WIDTH } from '../types/const';
 import { dialogBgFMV, dialogFMV } from '../types/animConfigs';
 
 import { useSafeAreaFrame } from '.';
@@ -12,6 +12,7 @@ const ConfirmDeletePopup = () => {
 
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
   const isShown = useSelector(state => state.display.isConfirmDeletePopupShown);
+  const deleteAction = useSelector(state => state.display.deleteAction);
   const deletingListName = useSelector(state => state.display.deletingListName);
   const cancelBtn = useRef(null);
   const didClick = useRef(false);
@@ -26,8 +27,9 @@ const ConfirmDeletePopup = () => {
   const onConfirmDeleteOkBtnClick = () => {
     if (didClick.current) return;
 
-    if (deletingListName) dispatch(deleteListNames([deletingListName]));
-    else {
+    if (deleteAction === DELETE_ACTION_LIST_NAME) {
+      dispatch(deleteListNames([deletingListName]));
+    } else {
       // As this and closing confirmDelete popup both call window.history.back(),
       //   need to be in different js clock cycle.
       setTimeout(() => dispatch(deleteNotes()), 100);

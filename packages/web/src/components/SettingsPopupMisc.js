@@ -3,8 +3,12 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import {
   updateDoDeleteOldNotesInTrash, updateSortOn, updateDoDescendingOrder,
+  updateNoteDateShowingMode,
 } from '../actions';
-import { ADDED_DT, UPDATED_DT } from '../types/const';
+import {
+  ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE,
+  NOTE_DATE_SHOWING_MODE_SHOW_DEFAULT,
+} from '../types/const';
 
 const SettingsPopupMisc = (props) => {
 
@@ -12,6 +16,7 @@ const SettingsPopupMisc = (props) => {
   const doDeleteOldNotesInTrash = useSelector(state => state.settings.doDeleteOldNotesInTrash);
   const sortOn = useSelector(state => state.settings.sortOn);
   const doDescendingOrder = useSelector(state => state.settings.doDescendingOrder);
+  const noteDateShowingMode = useSelector(state => state.settings.noteDateShowingMode);
   const dispatch = useDispatch();
 
   const onDoDeleteBtnClick = () => {
@@ -34,6 +39,16 @@ const SettingsPopupMisc = (props) => {
     dispatch(updateDoDescendingOrder(doDescend));
   };
 
+  const onDoShowDateBtnClick = () => {
+    if (noteDateShowingMode === NOTE_DATE_SHOWING_MODE_HIDE) {
+      dispatch(updateNoteDateShowingMode(NOTE_DATE_SHOWING_MODE_SHOW_DEFAULT));
+    } else if (noteDateShowingMode === NOTE_DATE_SHOWING_MODE_SHOW_DEFAULT) {
+      dispatch(updateNoteDateShowingMode(NOTE_DATE_SHOWING_MODE_HIDE));
+    } else {
+      console.log('Invalid noteDateShowingMode: ', noteDateShowingMode);
+    }
+  };
+
   const doDeleteBtnClassNames = doDeleteOldNotesInTrash ? 'bg-green-500' : 'bg-gray-200';
   const doDeleteBtnInnerClassNames = doDeleteOldNotesInTrash ? 'translate-x-5' : 'translate-x-0';
 
@@ -49,6 +64,10 @@ const SettingsPopupMisc = (props) => {
   const descendingBtnClassNames = doDescendingOrder ? 'bg-green-100 border-green-200' : 'border-gray-200';
   const descendingBtnInnerClassNames = doDescendingOrder ? 'text-green-800' : 'text-gray-600';
 
+  const doShowDate = noteDateShowingMode === NOTE_DATE_SHOWING_MODE_SHOW_DEFAULT;
+  const doShowDateBtnClassNames = doShowDate ? 'bg-green-500' : 'bg-gray-200';
+  const doShowDateBtnInnerClassNames = doShowDate ? 'translate-x-5' : 'translate-x-0';
+
   return (
     <div className="p-4 relative md:p-6">
       <div className="border-b border-gray-200 md:hidden">
@@ -60,7 +79,7 @@ const SettingsPopupMisc = (props) => {
       <div className="mt-6 flex items-center justify-between space-x-4 md:mt-0">
         <div className="flex flex-col">
           <h4 className="text-base text-gray-800 font-medium leading-none">Auto Cleanup</h4>
-          <p className="mt-2.5 text-base text-gray-500 leading-relaxed">Allow old removed notes in Trash to be automatically deleted after 45 days</p>
+          <p className="mt-2.5 text-base text-gray-500 leading-relaxed">Allow old removed notes in Trash to be automatically deleted after 45 days.</p>
         </div>
         <span onClick={onDoDeleteBtnClick} role="checkbox" tabIndex={0} aria-checked="true" aria-labelledby="auto-cleanup-option-label" aria-describedby="auto-cleanup-option-description" className={`${doDeleteBtnClassNames} relative inline-flex flex-shrink-0 w-11 h-6 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600`}>
           <span aria-hidden="true" className={`${doDeleteBtnInnerClassNames} inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200`} />
@@ -113,6 +132,15 @@ const SettingsPopupMisc = (props) => {
             </div>
           </div>
         </div>
+      </div>
+      <div className="mt-10 flex items-center justify-between space-x-4">
+        <div className="flex flex-col">
+          <h4 className="text-base text-gray-800 font-medium leading-none">Note Date Showing</h4>
+          <p className="mt-2.5 text-base text-gray-500 leading-relaxed">Show note's added date or updated date when you browse your notes. It will appear on the top right of each note.</p>
+        </div>
+        <span onClick={onDoShowDateBtnClick} role="checkbox" tabIndex={0} aria-checked="true" aria-labelledby="note-date-option-label" aria-describedby="note-date-option-description" className={`${doShowDateBtnClassNames} relative inline-flex flex-shrink-0 w-11 h-6 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600`}>
+          <span aria-hidden="true" className={`${doShowDateBtnInnerClassNames} inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200`} />
+        </span>
       </div>
     </div>
   );

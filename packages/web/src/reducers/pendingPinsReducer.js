@@ -48,7 +48,7 @@ const pendingPinsReducer = (state = initialState, action) => {
   if (action.type === MOVE_PINNED_NOTE_COMMIT) {
     const { id } = action.payload;
 
-    const newState = { ...state }
+    const newState = { ...state };
     delete newState[id];
 
     return newState;

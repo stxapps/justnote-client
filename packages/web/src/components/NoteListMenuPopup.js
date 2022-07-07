@@ -70,14 +70,12 @@ const NoteListMenuPopup = () => {
     <AnimatePresence key="AP_NL_MenuPopup" />
   );
 
-  const popupStyle = {
-    top: anchorPosition.top + anchorPosition.height,
-  };
+  const popupStyle = { top: anchorPosition.top + 4 };
   if (safeAreaWidth < LG_WIDTH) {
-    popupStyle.right = safeAreaWidth - anchorPosition.right + 16;
+    popupStyle.right = safeAreaWidth - anchorPosition.right + 12;
     popupStyle.transformOrigin = 'top right';
   } else {
-    popupStyle.left = anchorPosition.left + 16;
+    popupStyle.left = anchorPosition.left + 4;
     popupStyle.transformOrigin = 'top left';
   }
 

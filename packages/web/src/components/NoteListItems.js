@@ -185,7 +185,7 @@ const NoteListItems = () => {
   else fetchMoreBtn = renderFetchMoreBtn();
 
   return (
-    <div ref={flatList} className="flex-grow flex-shrink overflow-y-auto">
+    <div ref={flatList} className="flex-grow flex-shrink overflow-y-auto pb-[5.5rem] lg:pb-0">
       {notes.length === 0 && renderEmpty()}
       {notes.length > 0 && renderItems()}
       {fetchMoreBtn}

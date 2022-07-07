@@ -3,7 +3,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
 
 import { updatePopupUrlHash, moveNotes, moveToListName } from '../actions';
-import { LIST_NAMES_POPUP, TRASH } from '../types/const';
+import {
+  LIST_NAMES_POPUP, TRASH, LIST_NAMES_MODE_MOVE_NOTES, LIST_NAMES_MODE_MOVE_LIST_NAME,
+} from '../types/const';
 import { getListNameMap } from '../selectors';
 import {
   getLastHalfHeight, getListNameObj, getLongestListNameDisplayName,
@@ -17,14 +19,15 @@ import { computePosition, createLayouts, getOriginClassName } from './MenuPopupR
 // eslint-disable-next-line
 import { Tween } from 'framer-motion';
 
-const MODE_MOVE_NOTES = 'MODE_MOVE_NOTES';
-const MODE_MOVE_LIST_NAME = 'MODE_MOVE_LIST_NAME';
+const MODE_MOVE_NOTES = LIST_NAMES_MODE_MOVE_NOTES;
+const MODE_MOVE_LIST_NAME = LIST_NAMES_MODE_MOVE_LIST_NAME;
 
 const ListNamesPopup = () => {
 
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
   const isShown = useSelector(state => state.display.isListNamesPopupShown);
   const anchorPosition = useSelector(state => state.display.listNamesPopupPosition);
+  const mode = useSelector(state => state.display.listNamesMode);
   const listName = useSelector(state => state.display.listName);
   const selectingListName = useSelector(state => state.display.selectingListName);
   const listNameMap = useSelector(getListNameMap);
@@ -47,10 +50,6 @@ const ListNamesPopup = () => {
   const didClick = useRef(false);
   const dispatch = useDispatch();
 
-  const mode = useMemo(() => {
-    if (derivedSelectingListName) return MODE_MOVE_LIST_NAME;
-    return MODE_MOVE_NOTES;
-  }, [derivedSelectingListName]);
   const { listNameObj, parent, children } = useMemo(() => {
     const { listNameObj: obj, parent: p } = getListNameObj(
       currentListName, derivedListNameMap

@@ -1,7 +1,7 @@
 import Url from 'url-parse';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
-import { LexoRank } from "@wewatch/lexorank";
+import { LexoRank } from '@wewatch/lexorank';
 
 import userSession from '../userSession';
 import dataApi from '../apis/data';
@@ -23,9 +23,10 @@ import {
   UPDATE_LIST_NAME_EDITORS, ADD_LIST_NAMES, UPDATE_LIST_NAMES, MOVE_LIST_NAME,
   MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_SELECTING_LIST_NAME,
   UPDATE_DELETING_LIST_NAME, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, UPDATE_SORT_ON,
-  UPDATE_DO_DESCENDING_ORDER, UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT,
-  UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS, UPDATE_SETTINGS_VIEW_ID,
-  UPDATE_DISCARD_ACTION, INCREASE_SAVE_NOTE_COUNT,
+  UPDATE_DO_DESCENDING_ORDER, UPDATE_NOTE_DATE_SHOWING_MODE, UPDATE_SETTINGS,
+  UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS,
+  UPDATE_SETTINGS_VIEW_ID, UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION,
+  UPDATE_DISCARD_ACTION, UPDATE_LIST_NAMES_MODE, INCREASE_SAVE_NOTE_COUNT,
   INCREASE_DISCARD_NOTE_COUNT, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
   INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
   INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT,
@@ -46,7 +47,9 @@ import {
 import {
   HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY, HASH_SUPPORT,
   SEARCH_POPUP, PAYWALL_POPUP, SETTINGS_POPUP, CONFIRM_DELETE_POPUP,
-  CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT,
+  CONFIRM_DISCARD_POPUP, NOTE_LIST_ITEM_MENU_POPUP, MOVE_ACTION_NOTE_COMMANDS,
+  MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS,
+  DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
   DISCARD_ACTION_CHANGE_LIST_NAME, MY_NOTES, TRASH, ARCHIVE, ID, NEW_NOTE,
   NEW_NOTE_OBJ, DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES,
@@ -942,24 +945,47 @@ const _moveNotes = (toListName, ids, fromListName = null) => async (
   }
 };
 
-export const moveNotes = (toListName) => async (dispatch, getState) => {
+export const moveNotesWithAction = (toListName, moveAction) => async (
+  dispatch, getState
+) => {
 
-  const { noteId, isBulkEditing, selectedNoteIds } = getState().display;
+  const {
+    noteId, selectingNoteId, isBulkEditing, selectedNoteIds,
+  } = getState().display;
 
-  const safeAreaWidth = getState().window.width;
-  if (safeAreaWidth < LG_WIDTH && !isBulkEditing) updateNoteIdUrlHash(null);
-  else dispatch(updateNoteId(null));
-
-  if (isBulkEditing) {
-    if (selectedNoteIds.length === 0) {
-      dispatch(increaseResetDidClickCount());
-      return;
-    }
-    dispatch(_moveNotes(toListName, selectedNoteIds));
-    updateBulkEditUrlHash(false);
-  } else {
-    dispatch(_moveNotes(toListName, [noteId]));
+  if (
+    moveAction === MOVE_ACTION_NOTE_COMMANDS ||
+    (
+      moveAction === MOVE_ACTION_NOTE_ITEM_MENU &&
+      selectingNoteId === noteId
+    )
+  ) {
+    const safeAreaWidth = getState().window.width;
+    if (safeAreaWidth < LG_WIDTH && !isBulkEditing) updateNoteIdUrlHash(null);
+    else dispatch(updateNoteId(null));
   }
+
+  if (moveAction === MOVE_ACTION_NOTE_COMMANDS) {
+    if (isBulkEditing) {
+      if (selectedNoteIds.length === 0) {
+        dispatch(increaseResetDidClickCount());
+        return;
+      }
+      dispatch(_moveNotes(toListName, selectedNoteIds));
+      updateBulkEditUrlHash(false);
+    } else {
+      dispatch(_moveNotes(toListName, [noteId]));
+    }
+  } else if (moveAction === MOVE_ACTION_NOTE_ITEM_MENU) {
+    dispatch(_moveNotes(toListName, [selectingNoteId]));
+  } else {
+    console.log('In moveNotes, invalid moveAction: ', moveAction);
+  }
+};
+
+export const moveNotes = (toListName) => async (dispatch, getState) => {
+  const { moveAction } = getState().display;
+  dispatch(moveNotesWithAction(toListName, moveAction));
 };
 
 const _deleteNotes = (ids) => async (dispatch, getState) => {
@@ -1012,18 +1038,35 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
 
 export const deleteNotes = () => async (dispatch, getState) => {
 
-  const { noteId, isBulkEditing, selectedNoteIds } = getState().display;
+  const {
+    deleteAction, noteId, selectingNoteId, isBulkEditing, selectedNoteIds,
+  } = getState().display;
 
-  const safeAreaWidth = getState().window.width;
-  if (safeAreaWidth < LG_WIDTH && !isBulkEditing) updateNoteIdUrlHash(null);
-  else dispatch(updateNoteId(null));
+  if (
+    deleteAction === DELETE_ACTION_NOTE_COMMANDS ||
+    (
+      deleteAction === DELETE_ACTION_NOTE_ITEM_MENU &&
+      selectingNoteId === noteId
+    )
+  ) {
+    const safeAreaWidth = getState().window.width;
+    if (safeAreaWidth < LG_WIDTH && !isBulkEditing) updateNoteIdUrlHash(null);
+    else dispatch(updateNoteId(null));
+  }
 
-  if (isBulkEditing) {
-    if (selectedNoteIds.length === 0) return;
-    dispatch(_deleteNotes(selectedNoteIds));
-    updateBulkEditUrlHash(false);
+  if (deleteAction === DELETE_ACTION_NOTE_COMMANDS) {
+    if (isBulkEditing) {
+      if (selectedNoteIds.length === 0) return;
+      dispatch(_deleteNotes(selectedNoteIds));
+      updateBulkEditUrlHash(false);
+    } else {
+      dispatch(_deleteNotes([noteId]));
+    }
+  } else if (deleteAction === DELETE_ACTION_NOTE_ITEM_MENU) {
+    dispatch(_deleteNotes([selectingNoteId]));
+    updatePopupUrlHash(NOTE_LIST_ITEM_MENU_POPUP, false);
   } else {
-    dispatch(_deleteNotes([noteId]));
+    console.log('In deleteNotes, invalid deleteAction: ', deleteAction);
   }
 };
 
@@ -1389,6 +1432,10 @@ export const updateDoDescendingOrder = (doDescendingOrder) => {
   return { type: UPDATE_DO_DESCENDING_ORDER, payload: doDescendingOrder };
 };
 
+export const updateNoteDateShowingMode = (mode) => {
+  return { type: UPDATE_NOTE_DATE_SHOWING_MODE, payload: mode };
+};
+
 export const updateSelectingListName = (listName) => {
   return {
     type: UPDATE_SELECTING_LIST_NAME,
@@ -1498,11 +1545,29 @@ export const updateEditorBusy = (isBusy) => {
   };
 };
 
+export const updateMoveAction = (moveAction) => {
+  return {
+    type: UPDATE_MOVE_ACTION,
+    payload: moveAction,
+  };
+};
+
+export const updateDeleteAction = (deleteAction) => {
+  return {
+    type: UPDATE_DELETE_ACTION,
+    payload: deleteAction,
+  };
+};
+
 export const updateDiscardAction = (discardAction) => {
   return {
     type: UPDATE_DISCARD_ACTION,
     payload: discardAction,
   };
+};
+
+export const updateListNamesMode = (mode) => {
+  return { type: UPDATE_LIST_NAMES_MODE, payload: { listNamesMode: mode } };
 };
 
 export const increaseSaveNoteCount = () => {
@@ -1781,6 +1846,9 @@ const parseImportedFile = async (dispatch, fileContent) => {
         }
         if ('doAlertScreenRotation' in content) {
           settings.doAlertScreenRotation = content.doAlertScreenRotation;
+        }
+        if ('noteDateShowingMode' in content) {
+          settings.noteDateShowingMode = content.noteDateShowingMode;
         }
         if ('listNameMap' in content && isListNameObjsValid(content.listNameMap)) {
           settings.listNameMap = content.listNameMap;
@@ -2685,11 +2753,11 @@ export const unpinNotes = (ids) => async (dispatch, getState) => {
 
   let now = Date.now();
   const pins = [], fromPins = [];
-  for (const id of ids) {
-    const noteMainId = getMainId(id, toRootIds);
+  for (const noteId of ids) {
+    const noteMainId = getMainId(noteId, toRootIds);
     if (currentPins[noteMainId]) {
       const { rank, updatedDT, addedDT, id } = currentPins[noteMainId];
-      pins.push({ rank, updatedDT: now, addedDT, id: `deleted${id}` });
+      pins.push({ rank, updatedDT: now, addedDT, id });
       fromPins.push({ rank, updatedDT, addedDT, id });
 
       now += 1;
@@ -2707,7 +2775,8 @@ export const unpinNotes = (ids) => async (dispatch, getState) => {
   dispatch({ type: UNPIN_NOTE, payload });
 
   try {
-    await dataApi.putPins(payload);
+    const params = { pins: pins.map(pin => ({ ...pin, id: `deleted${pin.id}` })) };
+    await dataApi.putPins(params);
   } catch (e) {
     dispatch({ type: UNPIN_NOTE_ROLLBACK, payload: { ...payload, error: e } });
     return;
@@ -2734,7 +2803,7 @@ export const movePinnedNote = (id, direction) => async (dispatch, getState) => {
 
   const sortedNotes = getSortedNotes(notes, listName, doDescendingOrder);
   if (!sortedNotes) {
-    console.log(`No notes found for note id: `, id);
+    console.log('No notes found for note id: ', id);
     return;
   }
 
@@ -2761,15 +2830,15 @@ export const movePinnedNote = (id, direction) => async (dispatch, getState) => {
     if (i === 1) {
       const pRank = pinnedValues[i - 1].pin.rank;
 
-      const lexoRank = LexoRank.parse(`0|${pRank.replace('_', ':')}`)
+      const lexoRank = LexoRank.parse(`0|${pRank.replace('_', ':')}`);
 
       nextRank = lexoRank.genPrev().toString();
     } else {
       const pRank = pinnedValues[i - 1].pin.rank;
       const ppRank = pinnedValues[i - 2].pin.rank;
 
-      const pLexoRank = LexoRank.parse(`0|${pRank.replace('_', ':')}`)
-      const ppLexoRank = LexoRank.parse(`0|${ppRank.replace('_', ':')}`)
+      const pLexoRank = LexoRank.parse(`0|${pRank.replace('_', ':')}`);
+      const ppLexoRank = LexoRank.parse(`0|${ppRank.replace('_', ':')}`);
 
       nextRank = ppLexoRank.between(pLexoRank).toString();
     }
@@ -2778,15 +2847,15 @@ export const movePinnedNote = (id, direction) => async (dispatch, getState) => {
     if (i === pinnedValues.length - 2) {
       const nRank = pinnedValues[i + 1].pin.rank;
 
-      const lexoRank = LexoRank.parse(`0|${nRank.replace('_', ':')}`)
+      const lexoRank = LexoRank.parse(`0|${nRank.replace('_', ':')}`);
 
       nextRank = lexoRank.genNext().toString();
     } else {
       const nRank = pinnedValues[i + 1].pin.rank;
       const nnRank = pinnedValues[i + 2].pin.rank;
 
-      const nLexoRank = LexoRank.parse(`0|${nRank.replace('_', ':')}`)
-      const nnLexoRank = LexoRank.parse(`0|${nnRank.replace('_', ':')}`)
+      const nLexoRank = LexoRank.parse(`0|${nRank.replace('_', ':')}`);
+      const nnLexoRank = LexoRank.parse(`0|${nnRank.replace('_', ':')}`);
 
       nextRank = nLexoRank.between(nnLexoRank).toString();
     }

@@ -237,6 +237,7 @@
   + ref: stackoverflow.com/questions/70429654/webpack-5-errors-cannot-resolve-crypto-http-and-https-in-reactjs-proje, github.com/facebook/create-react-app/issues/11756, stackoverflow.com/questions/63729455/hosted-images-with-react-pdf/70441023#70441023
 - yarn add @zip.js/zip.js
 - yarn add @wewatch/lexorank axios
+- yarn add tailwindcss-labeled-groups
 ** Server steps
 *** s3
 - Set public and enable CORS

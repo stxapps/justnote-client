@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { updatePopup, unpinNotes, movePinnedNote } from '../actions';
+import { updatePopupUrlHash, unpinNotes, movePinnedNote } from '../actions';
 import {
   PIN_MENU_POPUP, PIN_UP, PIN_DOWN, UNPIN, SWAP_LEFT, SWAP_RIGHT,
 } from '../types/const';
@@ -27,7 +27,7 @@ const PinMenuPopup = () => {
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;
-    dispatch(updatePopup(PIN_MENU_POPUP, false, null));
+    updatePopupUrlHash(PIN_MENU_POPUP, false, null);
     didClick.current = true;
   };
 

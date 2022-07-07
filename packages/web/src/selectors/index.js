@@ -1,6 +1,8 @@
 import { createSelectorCreator, defaultMemoize, createSelector } from 'reselect';
 
-import { PINNED } from '../types/const';
+import {
+  PINNED, ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE,
+} from '../types/const';
 import {
   isStringIn, isObject, isArrayEqual, isEqual,
   getMainId, getValidProduct as _getValidProduct, getValidPurchase as _getValidPurchase,
@@ -191,13 +193,13 @@ export const makeGetPinStatus = () => {
     state => getNoteFPaths(state),
     state => getPinFPaths(state),
     state => state.pendingPins,
-    (__, note) => note ? note.id : null,
+    (__, noteId) => noteId,
     (noteFPaths, pinFPaths, pendingPins, noteId) => {
 
       if (!noteId) return null;
 
       const { toRootIds } = listNoteIds(noteFPaths);
-      const pins = getPins(pinFPaths, pendingPins, false);
+      const pins = getPins(pinFPaths, pendingPins, false, toRootIds);
       const noteMainId = getMainId(noteId, toRootIds);
       if (noteMainId in pins) {
         if ('status' in pins[noteMainId]) return pins[noteMainId].status;
@@ -206,5 +208,37 @@ export const makeGetPinStatus = () => {
 
       return null;
     }
+  );
+};
+
+/** @return {function(any, any): any} */
+export const makeGetNoteDate = () => {
+  return createSelector(
+    state => state.settings.sortOn,
+    state => state.settings.noteDateShowingMode,
+    (__, note) => note.addedDT,
+    (__, note) => note.updatedDT,
+    (sortOn, noteDateShowingMode, addedDT, updatedDT) => {
+      if (noteDateShowingMode === NOTE_DATE_SHOWING_MODE_HIDE) return '';
+
+      let dt;
+      if (sortOn === ADDED_DT) dt = addedDT;
+      else if (sortOn === UPDATED_DT) dt = updatedDT;
+      else throw new Error(`Invalid sortOn: sortOn`);
+
+      const currentDate = new Date();
+      const d = new Date(dt);
+
+      let text;
+      if (d.getFullYear() === currentDate.getFullYear()) {
+        text = d.toLocaleDateString(undefined, { day: 'numeric', month: 'numeric' });
+      } else {
+        text = d.toLocaleDateString(
+          undefined, { day: 'numeric', month: 'numeric', year: '2-digit' }
+        );
+      }
+
+      return text;
+    },
   );
 };

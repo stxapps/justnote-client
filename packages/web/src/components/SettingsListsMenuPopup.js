@@ -2,10 +2,12 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { moveListName, updateListNameEditors, updatePopupUrlHash } from '../actions';
+import {
+  moveListName, updateListNameEditors, updatePopupUrlHash, updateListNamesMode,
+} from '../actions';
 import {
   SETTINGS_LISTS_MENU_POPUP, LIST_NAMES_POPUP, MY_NOTES, TRASH, ARCHIVE, MODE_EDIT,
-  SWAP_LEFT, SWAP_RIGHT,
+  SWAP_LEFT, SWAP_RIGHT, LIST_NAMES_MODE_MOVE_LIST_NAME,
 } from '../types/const';
 import { makeGetListNameEditor } from '../selectors';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
@@ -64,6 +66,7 @@ const SettingsListsMenuPopup = () => {
 
   const onMoveToBtnClick = () => {
     if (didClick.current) return;
+    dispatch(updateListNamesMode(LIST_NAMES_MODE_MOVE_LIST_NAME));
     updatePopupUrlHash(LIST_NAMES_POPUP, true, anchorPosition, true);
     didClick.current = true;
   };

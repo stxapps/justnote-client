@@ -1,3 +1,4 @@
+import { createSelector } from 'reselect';
 import Url from 'url-parse';
 
 import {
@@ -951,10 +952,10 @@ const getNoteOldestRootId = (rootIds) => {
       rootId = id;
     }
   }
-  return { rootId, addedDT };
+  return rootId;
 };
 
-export const listNoteIds = (noteFPaths) => {
+const _listNoteIds = (noteFPaths) => {
 
   const ids = [];
   const toFPaths = {};
@@ -989,25 +990,28 @@ export const listNoteIds = (noteFPaths) => {
     }
   }
 
-  const _toRootIds = {};
+  const toRootIds = {};
+  for (const id of ids) {
+    const rootIds = getNoteRootIds(id, toParents);
+    const rootId = getNoteOldestRootId(rootIds);
+    toRootIds[id] = rootId;
+  }
+
   const toLeafIds = {};
   for (const id of leafIds) {
-    const rootIds = getNoteRootIds(id, toParents);
-    _toRootIds[id] = rootIds;
+    const rootId = toRootIds[id];
 
-    for (const rootId of rootIds) {
-      if (!toLeafIds[rootId]) toLeafIds[rootId] = [];
-      toLeafIds[rootId].push(id);
-    }
+    if (!toLeafIds[rootId]) toLeafIds[rootId] = [];
+    toLeafIds[rootId].push(id);
   }
 
   const noteIds = [];
   const conflictedIds = [];
-  const toRootIds = {};
   for (const id of leafIds) {
     const parentIds = toParents[id];
 
-    const { rootId, addedDT } = getNoteOldestRootId(_toRootIds[id]);
+    const rootId = toRootIds[id];
+    const { dt: addedDT } = extractNoteId(rootId);
     const { dt: updatedDT } = extractNoteId(id);
 
     const tIds = toLeafIds[rootId];
@@ -1023,14 +1027,17 @@ export const listNoteIds = (noteFPaths) => {
 
     if (isConflicted) conflictedIds.push(noteId);
     else noteIds.push(noteId);
-
-    toRootIds[id] = rootId;
   }
 
   const conflictWiths = Object.values(toLeafIds).filter(tIds => tIds.length > 1);
 
   return { noteIds, conflictedIds, conflictWiths, toRootIds };
 };
+
+export const listNoteIds = createSelector(
+  noteFPaths => noteFPaths,
+  _listNoteIds,
+);
 
 export const getMainId = (id, toRootIds) => {
   return toRootIds[id];
@@ -1047,7 +1054,7 @@ export const getPinFPaths = (state) => {
   return [];
 };
 
-export const getPins = (pinFPaths, pendingPins, doExcludeUnpinning, toRootIds) => {
+const _getPins = (pinFPaths, pendingPins, doExcludeUnpinning, toRootIds) => {
   const pins = {};
   for (const fpath of pinFPaths) {
     const { rank, updatedDT, addedDT, id } = extractPinFPath(fpath);
@@ -1084,12 +1091,21 @@ export const getPins = (pinFPaths, pendingPins, doExcludeUnpinning, toRootIds) =
 
   const filteredPins = {};
   for (const pinMainId in pins) {
-    if (pins[pinMainId].id.startWiths('deleted')) continue;
+    if (pins[pinMainId].id.startsWith('deleted')) continue;
     filteredPins[pinMainId] = pins[pinMainId];
   }
 
   return filteredPins;
 };
+
+/** @type {function(any, any, any, any): any} */
+export const getPins = createSelector(
+  (...args) => args[0],
+  (...args) => args[1],
+  (...args) => args[2],
+  (...args) => args[3],
+  _getPins,
+);
 
 export const separatePinnedValues = (
   sortedValues, pinFPaths, pendingPins, toRootIds, getValueMainId,

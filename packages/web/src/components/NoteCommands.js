@@ -1,9 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { updatePopupUrlHash, moveNotes } from '../actions';
+import {
+  updatePopupUrlHash, moveNotesWithAction, updateMoveAction, updateDeleteAction,
+  updateListNamesMode
+} from '../actions';
 import {
   LIST_NAMES_POPUP, CONFIRM_DELETE_POPUP, MY_NOTES, ARCHIVE, TRASH, LG_WIDTH,
+  MOVE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_COMMANDS, LIST_NAMES_MODE_MOVE_NOTES,
 } from '../types/const';
 import { getListNameMap } from '../selectors';
 import { getListNameDisplayName, getAllListNames } from '../utils';
@@ -23,31 +27,35 @@ const NoteCommands = (props) => {
 
   const onArchiveBtnClick = () => {
     if (didClick.current) return;
-    dispatch(moveNotes(ARCHIVE));
+    dispatch(moveNotesWithAction(ARCHIVE, MOVE_ACTION_NOTE_COMMANDS));
     if (isFullScreen) onToggleFullScreen();
     didClick.current = true;
   };
 
   const onRemoveBtnClick = () => {
     if (didClick.current) return;
-    dispatch(moveNotes(TRASH));
+    dispatch(moveNotesWithAction(TRASH, MOVE_ACTION_NOTE_COMMANDS));
     if (isFullScreen) onToggleFullScreen();
     didClick.current = true;
   };
 
   const onRestoreBtnClick = () => {
     if (didClick.current) return;
-    dispatch(moveNotes(MY_NOTES));
+    dispatch(moveNotesWithAction(MY_NOTES, MOVE_ACTION_NOTE_COMMANDS));
     if (isFullScreen) onToggleFullScreen();
     didClick.current = true;
   };
 
   const onDeleteBtnClick = () => {
+    dispatch(updateDeleteAction(DELETE_ACTION_NOTE_COMMANDS));
     updatePopupUrlHash(CONFIRM_DELETE_POPUP, true, null);
     if (isFullScreen) onToggleFullScreen();
   };
 
   const onMoveToBtnClick = () => {
+    dispatch(updateMoveAction(MOVE_ACTION_NOTE_COMMANDS));
+    dispatch(updateListNamesMode(LIST_NAMES_MODE_MOVE_NOTES));
+
     const _rect = moveToBtn.current.getBoundingClientRect();
 
     let rect;
@@ -70,7 +78,6 @@ const NoteCommands = (props) => {
         left: _rect.x, right: _rect.x + _rect.width,
       };
     }
-
     updatePopupUrlHash(LIST_NAMES_POPUP, true, rect);
     if (isFullScreen) onToggleFullScreen();
   };

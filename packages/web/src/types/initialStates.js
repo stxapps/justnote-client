@@ -1,4 +1,6 @@
-import { MY_NOTES, TRASH, ARCHIVE, ADDED_DT, MODE_VIEW } from '../types/const';
+import {
+  MY_NOTES, TRASH, ARCHIVE, ADDED_DT, MODE_VIEW, NOTE_DATE_SHOWING_MODE_HIDE,
+} from '../types/const';
 
 export const myNotesListNameObj = { listName: MY_NOTES, displayName: MY_NOTES };
 export const trashListNameObj = { listName: TRASH, displayName: TRASH };
@@ -9,6 +11,7 @@ export const initialSettingsState = {
   sortOn: ADDED_DT,
   doDescendingOrder: true,
   doAlertScreenRotation: true, // No need anymore but keep it for comparing
+  noteDateShowingMode: NOTE_DATE_SHOWING_MODE_HIDE,
   listNameMap: [
     { ...myNotesListNameObj }, { ...trashListNameObj }, { ...archiveListNameObj },
   ],

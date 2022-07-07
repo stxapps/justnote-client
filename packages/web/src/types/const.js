@@ -39,6 +39,7 @@ export const SIGN_UP_POPUP = 'SIGN_UP_POPUP';
 export const SIGN_IN_POPUP = 'SIGN_IN_POPUP';
 export const PROFILE_POPUP = 'PROFILE_POPUP';
 export const NOTE_LIST_MENU_POPUP = 'NOTE_LIST_MENU_POPUP';
+export const NOTE_LIST_ITEM_MENU_POPUP = 'NOTE_LIST_ITEM_MENU_POPUP';
 export const LIST_NAMES_POPUP = 'LIST_NAMES_POPUP';
 export const PIN_MENU_POPUP = 'PIN_MENU_POPUP';
 export const SIDEBAR_POPUP = 'SIDEBAR_POPUP';
@@ -62,6 +63,17 @@ export const DIED_UPDATING = 'DIED_UPDATING';
 export const DIED_MOVING = 'DIED_MOVING';
 export const DIED_DELETING = 'DIED_DELETING';
 export const DIED_MERGING = 'DIED_MERGING';
+
+export const REMOVE = 'Remove';
+export const RESTORE = 'Restore';
+export const DELETE = 'Permanently delete';
+export const MOVE_TO = 'Move to';
+
+export const NOTE_ITEM_POPUP_MENU = {
+  [MY_NOTES]: [ARCHIVE, REMOVE, MOVE_TO],
+  [TRASH]: [RESTORE, DELETE],
+  [ARCHIVE]: [REMOVE, MOVE_TO],
+};
 
 export const ZERO = 'ZERO'; // top or left of the window
 export const CENTER = 'CENTER'; // center of the window
@@ -104,6 +116,13 @@ export const IS_USER_DUMMY = 'isUserDummy';
 export const COLS_PANEL_STATE = 'colsPanelState';
 
 export const SHOW_SYNCED = 'SHOW_SYNCED';
+
+export const MOVE_ACTION_NOTE_COMMANDS = 0;
+export const MOVE_ACTION_NOTE_ITEM_MENU = 1;
+
+export const DELETE_ACTION_NOTE_COMMANDS = 0;
+export const DELETE_ACTION_NOTE_ITEM_MENU = 1;
+export const DELETE_ACTION_LIST_NAME = 2;
 
 export const DISCARD_ACTION_CANCEL_EDIT = 0;
 export const DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH = 1;
@@ -160,3 +179,9 @@ export const SETTINGS_VIEW_DATA_DELETE = 4;
 export const SETTINGS_VIEW_LISTS = 5;
 export const SETTINGS_VIEW_MISC = 6;
 export const SETTINGS_VIEW_ABOUT = 8;
+
+export const LIST_NAMES_MODE_MOVE_NOTES = 'LIST_NAMES_MODE_MOVE_NOTES';
+export const LIST_NAMES_MODE_MOVE_LIST_NAME = 'LIST_NAMES_MODE_MOVE_LIST_NAME';
+
+export const NOTE_DATE_SHOWING_MODE_HIDE = 0;
+export const NOTE_DATE_SHOWING_MODE_SHOW_DEFAULT = 1;

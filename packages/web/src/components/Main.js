@@ -7,6 +7,7 @@ import ColsPanel from './ColsPanel';
 import NavPanel from './NavPanel';
 import SidebarProfilePopup from './SidebarProfilePopup';
 import NoteListMenuPopup from './NoteListMenuPopup';
+import NoteListItemMenuPopup from './NoteListItemMenuPopup';
 import PinMenuPopup from './PinMenuPopup';
 import PaywallPopup from './PaywallPopup';
 import SettingsPopup from './SettingsPopup';
@@ -39,6 +40,7 @@ const Main = () => {
       {panel}
       <SidebarProfilePopup />
       <NoteListMenuPopup />
+      <NoteListItemMenuPopup />
       <PinMenuPopup />
       <PaywallPopup />
       <SettingsPopup />

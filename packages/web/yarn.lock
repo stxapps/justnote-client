@@ -9043,6 +9043,11 @@ symbol-tree@^3.2.4:
   resolved "https://registry.yarnpkg.com/symbol-tree/-/symbol-tree-3.2.4.tgz#430637d248ba77e078883951fb9aa0eed7c63fa2"
   integrity sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==
 
+tailwindcss-labeled-groups@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/tailwindcss-labeled-groups/-/tailwindcss-labeled-groups-0.0.2.tgz#476db7315eb3f7d2e46d3b7f81629efc471f29f0"
+  integrity sha512-leOVv9h2K9WDHoXPXVBOmTJgWECVkpVFc/hjrwuqGUEtNxvRvuOtCjenu9ppY+pJtky5INJUqDCNa8pS3AbYmw==
+
 tailwindcss@^3.0.12, tailwindcss@^3.0.2:
   version "3.0.12"
   resolved "https://registry.yarnpkg.com/tailwindcss/-/tailwindcss-3.0.12.tgz#b43bf952dbfd62cec087319748eb69f8e1c7855d"
