@@ -2351,8 +2351,20 @@ export const exportAllData = () => async (dispatch, getState) => {
 
     if (settingsFPath) fpaths.push(settingsFPath);
 
+    const pins = {};
     for (const fpath of pinFPaths) {
-      fpaths.push(fpath);
+      const { id, updatedDT } = extractPinFPath(fpath);
+
+      const _id = id.startsWith('deleted') ? id.slice(7) : id;
+      const pinMainId = getMainId(_id, _toRootIds);
+
+      // duplicate id, choose the latest updatedDT
+      if (pinMainId in pins && pins[pinMainId].updatedDT > updatedDT) continue;
+      pins[pinMainId] = { updatedDT, id, fpath };
+    }
+    for (const pinMainId in pins) {
+      if (pins[pinMainId].id.startsWith('deleted')) continue;
+      fpaths.push(pins[pinMainId].fpath);
     }
 
     toRootIds = _toRootIds;

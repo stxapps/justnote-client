@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import {
@@ -15,6 +15,7 @@ const NoteListItemContent = (props) => {
 
   const { note } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
+  const [doTitlePb, setDoTitlePb] = useState(false);
   const getIsNoteIdSelected = useMemo(makeIsNoteIdSelected, []);
   const getPinStatus = useMemo(makeGetPinStatus, []);
   const getNoteDate = useMemo(makeGetNoteDate, []);
@@ -29,6 +30,7 @@ const NoteListItemContent = (props) => {
   const clickPressTimer = useRef(null);
   const touchPressTimer = useRef(null);
   const isLongPress = useRef(false);
+  const pBodyRef = useRef(null);
   const dispatch = useDispatch();
 
   const onClickPress = () => {
@@ -132,8 +134,21 @@ const NoteListItemContent = (props) => {
     };
   }, []);
 
+  useEffect(() => {
+    let _doTitlePb = false;
+    if (note.title && body && pBodyRef.current) {
+      if (pBodyRef.current.clientHeight && pBodyRef.current.clientHeight > 20) {
+        _doTitlePb = true;
+      }
+    }
+
+    if (doTitlePb !== _doTitlePb) setDoTitlePb(_doTitlePb);
+  }, [doTitlePb, note.title, body, setDoTitlePb]);
+
   const circleClassNames = isSelected ? 'bg-green-600 border-green-700' : 'bg-gray-200 border-gray-300';
   const checkClassNames = isSelected ? 'text-white' : 'text-gray-400';
+
+  const titleClassNames = doTitlePb ? 'pb-1.5' : '';
 
   const titleTabIndex = note.title ? 0 : -1;
   const bodyTabIndex = note.title ? -1 : 0;
@@ -147,14 +162,14 @@ const NoteListItemContent = (props) => {
       </button>}
       <div className="flex-1 min-w-0">
         <div className="pr-3">
-          <button tabIndex={titleTabIndex} onTouchStart={onTouchPress} onTouchMove={onTouchCancel} onTouchEnd={onTouchPressRelease} onTouchCancel={onTouchCancel} onMouseDown={onClickPress} onMouseUp={onClickPressRelease} onMouseLeave={onClickCancel} className="w-full flex justify-between items-center rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400">
+          <button tabIndex={titleTabIndex} onTouchStart={onTouchPress} onTouchMove={onTouchCancel} onTouchEnd={onTouchPressRelease} onTouchCancel={onTouchCancel} onMouseDown={onClickPress} onMouseUp={onClickPressRelease} onMouseLeave={onClickCancel} className={`w-full flex justify-between items-center rounded-sm ${titleClassNames} focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400`}>
             <h3 className="flex-1 min-w-0 text-base font-semibold text-gray-800 text-left truncate group-hover:underline lg:text-sm">{note.title}</h3>
             <p className="ml-3 flex-grow-0 flex-shrink-0 whitespace-nowrap text-xs text-gray-400 text-left">{noteDate}</p>
           </button>
         </div>
         <div className={`flex justify-between items-center ${isBulkEditing ? 'pr-3' : ''}`}>
           <button tabIndex={bodyTabIndex} onTouchStart={onTouchPress} onTouchMove={onTouchCancel} onTouchEnd={onTouchPressRelease} onTouchCancel={onTouchCancel} onMouseDown={onClickPress} onMouseUp={onClickPressRelease} onMouseLeave={onClickCancel} className="flex-1 min-w-0 min-h-[2.625rem] w-full rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400">
-            <p className="text-sm text-gray-500 text-left line-clamp-3">{body}</p>
+            <p ref={pBodyRef} className="text-sm text-gray-500 text-left line-clamp-3">{body}</p>
           </button>
           {!isBulkEditing && <button onClick={onMenuBtnClick} className="flex-grow-0 flex-shrink-0 text-gray-400 pl-4 pr-2 py-1 group-s focus:outline-none" disabled={isBusy}>
             <svg className="w-[1.125rem] py-2 rounded-full group-s-hover:bg-gray-200 group-s-focus-visible:bg-gray-200" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
