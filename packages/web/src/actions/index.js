@@ -2786,8 +2786,8 @@ export const pinNotes = (ids) => async (dispatch, getState) => {
   const pendingPins = state.pendingPins;
 
   const { toRootIds } = listNoteIds(noteFPaths);
-  let currentPins = getPins(pinFPaths, pendingPins, true, toRootIds);
-  currentPins = Object.values(currentPins).map(pin => pin.rank).sort();
+  const currentPins = getPins(pinFPaths, pendingPins, true, toRootIds);
+  const currentRanks = Object.values(currentPins).map(pin => pin.rank).sort();
 
   const fromPins = [];
   const noteMainIds = ids.map(id => getMainId(id, toRootIds));
@@ -2802,8 +2802,8 @@ export const pinNotes = (ids) => async (dispatch, getState) => {
   }
 
   let lexoRank;
-  if (currentPins.length > 0) {
-    const rank = currentPins[currentPins.length - 1];
+  if (currentRanks.length > 0) {
+    const rank = currentRanks[currentRanks.length - 1];
     lexoRank = LexoRank.parse(`0|${rank.replace('_', ':')}`).genNext();
   } else {
     lexoRank = LexoRank.middle();
@@ -2829,14 +2829,14 @@ export const pinNotes = (ids) => async (dispatch, getState) => {
     return;
   }
 
+  dispatch({ type: PIN_NOTE_COMMIT, payload });
+
   try {
     dataApi.deletePins({ pins: fromPins });
   } catch (e) {
     console.log('pinNotes error: ', e);
     // error in this step should be fine
   }
-
-  dispatch({ type: PIN_NOTE_COMMIT, payload });
 };
 
 export const unpinNotes = (ids) => async (dispatch, getState) => {
@@ -2879,14 +2879,14 @@ export const unpinNotes = (ids) => async (dispatch, getState) => {
     return;
   }
 
+  dispatch({ type: UNPIN_NOTE_COMMIT, payload });
+
   try {
     dataApi.deletePins({ pins: fromPins });
   } catch (e) {
     console.log('unpinNotes error: ', e);
     // error in this step should be fine
   }
-
-  dispatch({ type: UNPIN_NOTE_COMMIT, payload });
 };
 
 export const movePinnedNote = (id, direction) => async (dispatch, getState) => {
@@ -2962,7 +2962,7 @@ export const movePinnedNote = (id, direction) => async (dispatch, getState) => {
   nextRank = nextRank.slice(2).replace(':', '_');
 
   const now = Date.now();
-  const { rank, updatedDT, addedDT } = pinnedValues[i].pin;
+  const { addedDT } = pinnedValues[i].pin;
 
   const payload = { rank: nextRank, updatedDT: now, addedDT, id };
   dispatch({ type: MOVE_PINNED_NOTE, payload });
@@ -2974,14 +2974,14 @@ export const movePinnedNote = (id, direction) => async (dispatch, getState) => {
     return;
   }
 
+  dispatch({ type: MOVE_PINNED_NOTE_COMMIT, payload });
+
   try {
-    dataApi.deletePins({ pins: [{ rank, updatedDT, addedDT, id }] });
+    dataApi.deletePins({ pins: [{ ...pinnedValues[i].pin }] });
   } catch (e) {
     console.log('movePinnedNote error: ', e);
     // error in this step should be fine
   }
-
-  dispatch({ type: MOVE_PINNED_NOTE_COMMIT, payload });
 };
 
 export const cancelDiedPins = () => {
