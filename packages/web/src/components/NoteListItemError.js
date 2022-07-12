@@ -14,7 +14,7 @@ const NoteListItemError = (props) => {
   const dispatch = useDispatch();
 
   const onContentBtnClick = () => {
-    if (safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(note.id);
+    if (safeAreaWidth < LG_WIDTH) dispatch(updateNoteIdUrlHash(note.id, false, true));
     else dispatch(updateNoteId(note.id, false, true));
   };
 

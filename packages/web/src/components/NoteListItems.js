@@ -1,10 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { fetchMore, updateFetchedMore, updateScrollPanel } from '../actions';
+import { fetchMore, updateFetchedMore } from '../actions';
 import { MY_NOTES, TRASH, ARCHIVE } from '../types/const';
 import { getListNameMap, getNotes } from '../selectors';
 import { getListNameDisplayName, throttle } from '../utils';
+import vars from '../vars';
 
 import NoteListItem from './NoteListItem';
 
@@ -29,7 +30,6 @@ const NoteListItems = () => {
   }
 
   const updateScrollY = throttle(() => {
-    if (!hasMore || hasFetchedMore || isFetchingMore) return;
     if (!flatList.current) return;
 
     const scrollHeight = Math.max(
@@ -40,11 +40,16 @@ const NoteListItems = () => {
     const windowHeight = Math.min(
       flatList.current.offsetHeight, flatList.current.clientHeight,
     );
-    const windowBottom = windowHeight + flatList.current.scrollTop;
+    const scrollTop = flatList.current.scrollTop;
 
+    vars.scrollPanel.contentHeight = scrollHeight;
+    vars.scrollPanel.layoutHeight = windowHeight;
+    vars.scrollPanel.pageYOffset = scrollTop;
+
+    if (!hasMore || hasFetchedMore || isFetchingMore) return;
+
+    const windowBottom = windowHeight + scrollTop;
     if (windowBottom > (scrollHeight * 0.96)) dispatch(fetchMore());
-
-    dispatch(updateScrollPanel(scrollHeight, windowHeight, flatList.current.scrollTop));
   }, 16);
 
   const onFetchMoreBtnClick = () => {

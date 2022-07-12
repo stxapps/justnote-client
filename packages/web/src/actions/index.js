@@ -9,19 +9,17 @@ import fileApi from '../apis/file';
 import {
   INIT, UPDATE_HREF, UPDATE_WINDOW_SIZE, UPDATE_USER, UPDATE_HANDLING_SIGN_IN,
   UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP, UPDATE_SEARCH_STRING,
-  UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY, UPDATE_SCROLL_PANEL,
+  UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, UPDATE_SELECTING_NOTE_ID,
   FETCH, FETCH_COMMIT, FETCH_ROLLBACK, FETCH_MORE, FETCH_MORE_COMMIT,
   FETCH_MORE_ROLLBACK, CACHE_FETCHED_MORE, UPDATE_FETCHED_MORE,
-  ADD_NOTE, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK,
-  UPDATE_NOTE, UPDATE_NOTE_COMMIT, UPDATE_NOTE_ROLLBACK,
-  MOVE_NOTES, MOVE_NOTES_COMMIT, MOVE_NOTES_ROLLBACK,
+  ADD_NOTE, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK, UPDATE_NOTE, UPDATE_NOTE_COMMIT,
+  UPDATE_NOTE_ROLLBACK, MOVE_NOTES, MOVE_NOTES_COMMIT, MOVE_NOTES_ROLLBACK,
   DELETE_NOTES, DELETE_NOTES_COMMIT, DELETE_NOTES_ROLLBACK, CANCEL_DIED_NOTES,
   DELETE_OLD_NOTES_IN_TRASH, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
-  DELETE_OLD_NOTES_IN_TRASH_ROLLBACK,
-  MERGE_NOTES, MERGE_NOTES_COMMIT, MERGE_NOTES_ROLLBACK,
-  UPDATE_LIST_NAME_EDITORS, ADD_LIST_NAMES, UPDATE_LIST_NAMES, MOVE_LIST_NAME,
-  MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_SELECTING_LIST_NAME,
+  DELETE_OLD_NOTES_IN_TRASH_ROLLBACK, MERGE_NOTES, MERGE_NOTES_COMMIT,
+  MERGE_NOTES_ROLLBACK, UPDATE_LIST_NAME_EDITORS, ADD_LIST_NAMES, UPDATE_LIST_NAMES,
+  MOVE_LIST_NAME, MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_SELECTING_LIST_NAME,
   UPDATE_DELETING_LIST_NAME, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, UPDATE_SORT_ON,
   UPDATE_DO_DESCENDING_ORDER, UPDATE_NOTE_DATE_SHOWING_MODE, UPDATE_SETTINGS,
   UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS,
@@ -31,9 +29,9 @@ import {
   INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
   INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT,
   INCREASE_UPDATE_EDITOR_WIDTH_COUNT, INCREASE_RESET_DID_CLICK_COUNT,
-  CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS, UPDATE_EDITOR_IS_UPLOADING,
-  UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_EDITING_NOTE, UPDATE_EDITOR_UNMOUNT,
-  UPDATE_DID_DISCARD_EDITING, UPDATE_STACKS_ACCESS,
+  INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT, CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS,
+  UPDATE_EDITOR_IS_UPLOADING, UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_EDITING_NOTE,
+  UPDATE_EDITOR_UNMOUNT, UPDATE_DID_DISCARD_EDITING, UPDATE_STACKS_ACCESS,
   REQUEST_PURCHASE, RESTORE_PURCHASES, RESTORE_PURCHASES_COMMIT,
   RESTORE_PURCHASES_ROLLBACK, REFRESH_PURCHASES, REFRESH_PURCHASES_COMMIT,
   REFRESH_PURCHASES_ROLLBACK, UPDATE_IAP_PUBLIC_KEY, UPDATE_IAP_PRODUCT_STATUS,
@@ -51,8 +49,9 @@ import {
   MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS,
   DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
-  DISCARD_ACTION_CHANGE_LIST_NAME, MY_NOTES, TRASH, ARCHIVE, ID, NEW_NOTE,
-  NEW_NOTE_OBJ, DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES,
+  DISCARD_ACTION_CHANGE_LIST_NAME, DISCARD_ACTION_UPDATE_BULK_EDIT_URL_HASH,
+  MY_NOTES, TRASH, ARCHIVE, ID, NEW_NOTE, NEW_NOTE_OBJ,
+  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES,
   N_DAYS, CD_ROOT, NOTES, IMAGES, SETTINGS, INDEX, DOT_JSON, PINS, LG_WIDTH,
   IMAGE_FILE_EXTS, IAP_STATUS_URL, COM_JUSTNOTECC, SIGNED_TEST_STRING, VALID, ACTIVE,
   SWAP_LEFT, SWAP_RIGHT,
@@ -70,6 +69,7 @@ import {
 import { isUint8Array } from '../utils/index-web';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
+import vars from '../vars';
 
 let popStateListener, hashChangeListener;
 export const init = () => async (dispatch, getState) => {
@@ -149,31 +149,34 @@ export const init = () => async (dispatch, getState) => {
   }
 
   window.addEventListener('beforeunload', (e) => {
-    const notes = getState().notes;
-    for (const listName in notes) {
-      for (const noteId in notes[listName]) {
-        if (isBusyStatus(notes[listName][noteId].status)) {
-          e.preventDefault();
-          return e.returnValue = 'It looks like your note hasn\'t been saved. Do you want to leave this site and discard your changes?';
+    const isUserSignedIn = userSession.isUserSignedIn();
+    if (isUserSignedIn) {
+      const notes = getState().notes;
+      for (const listName in notes) {
+        for (const noteId in notes[listName]) {
+          if (isBusyStatus(notes[listName][noteId].status)) {
+            e.preventDefault();
+            return e.returnValue = 'It looks like your note hasn\'t been saved. Do you want to leave this site and discard your changes?';
+          }
         }
       }
-    }
 
-    const conflictedNotes = getState().conflictedNotes;
-    for (const listName in conflictedNotes) {
-      for (const noteId in conflictedNotes[listName]) {
-        if (isBusyStatus(conflictedNotes[listName][noteId].status)) {
-          e.preventDefault();
-          return e.returnValue = 'It looks like your selection on conflicted notes hasn\'t been saved. Do you want to leave this site and discard your changes?';
+      const conflictedNotes = getState().conflictedNotes;
+      for (const listName in conflictedNotes) {
+        for (const noteId in conflictedNotes[listName]) {
+          if (isBusyStatus(conflictedNotes[listName][noteId].status)) {
+            e.preventDefault();
+            return e.returnValue = 'It looks like your selection on conflicted notes hasn\'t been saved. Do you want to leave this site and discard your changes?';
+          }
         }
       }
-    }
 
-    const settings = getState().settings;
-    const snapshotSettings = getState().snapshot.settings;
-    if (!isEqual(settings, snapshotSettings)) {
-      e.preventDefault();
-      return e.returnValue = 'It looks like your changes to the settings hasn\'t been saved. Do you want to leave this site and discard your changes?';
+      const settings = getState().settings;
+      const snapshotSettings = getState().snapshot.settings;
+      if (!isEqual(settings, snapshotSettings)) {
+        e.preventDefault();
+        return e.returnValue = 'It looks like your changes to the settings hasn\'t been saved. Do you want to leave this site and discard your changes?';
+      }
     }
   }, { capture: true });
 };
@@ -459,14 +462,18 @@ export const updateNoteIdUrlHash = (
 
   return async (dispatch, getState) => {
     // id can be both null and non-null so need doGetIdFromState, can't just check if.
-    if (doGetIdFromState) id = getState().display.updatingNoteId;
+    if (doGetIdFromState) id = vars.updateNoteId.updatingNoteId;
     if (doCheckEditing) {
+      if (vars.updateSettings.doFetch) return;
+      if (vars.deleteOldNotes.ids && vars.deleteOldNotes.ids.includes(id)) return;
+
       const isEditorUploading = getState().editor.isUploading;
       if (isEditorUploading) return;
 
       const isEditorFocused = getState().display.isEditorFocused;
       if (isEditorFocused) {
-        dispatch(increaseUpdateNoteIdUrlHashCount(id));
+        vars.updateNoteId.updatingNoteId = id;
+        dispatch(increaseUpdateNoteIdUrlHashCount());
         return;
       }
     }
@@ -516,7 +523,7 @@ export const updatePopupUrlHash = (id, isShown, anchorPosition, doReplace = fals
   updateUrlHash(obj, doReplace);
 };
 
-export const updateBulkEditUrlHash = (isBulkEditing, doReplace = false) => {
+export const _updateBulkEditUrlHash = (isBulkEditing) => {
   if (!isBulkEditing) {
     window.history.back();
     return;
@@ -528,7 +535,54 @@ export const updateBulkEditUrlHash = (isBulkEditing, doReplace = false) => {
     ppx: null, ppy: null, ppw: null, pph: null,
     ppt: null, ppr: null, ppb: null, ppl: null,
   };
-  updateUrlHash(obj, doReplace);
+  updateUrlHash(obj);
+};
+
+export const updateBulkEditUrlHash = (
+  isBulkEditing, selectedNoteId = null, doGetIdFromState = false, doCheckEditing = false
+) => {
+  if (!isBulkEditing && !doCheckEditing) {
+    _updateBulkEditUrlHash(isBulkEditing);
+    return;
+  }
+
+  return async (dispatch, getState) => {
+    if (doGetIdFromState) selectedNoteId = vars.updateBulkEdit.selectedNoteId;
+    if (doCheckEditing) {
+      if (vars.updateSettings.doFetch) return;
+
+      const listName = getState().display.listName;
+      if (listName === TRASH && vars.deleteOldNotes.ids) return;
+
+      const isEditorUploading = getState().editor.isUploading;
+      if (isEditorUploading) return;
+
+      const isEditorFocused = getState().display.isEditorFocused;
+      if (isEditorFocused) {
+        vars.updateBulkEdit.selectedNoteId = selectedNoteId;
+        dispatch(increaseUpdateBulkEditUrlHashCount());
+        return;
+      }
+    }
+
+    _updateBulkEditUrlHash(isBulkEditing);
+    if (isBulkEditing && selectedNoteId) {
+      dispatch(addSelectedNoteIds([selectedNoteId]));
+    }
+  };
+};
+
+export const onUpdateBulkEditUrlHash = (title, body) => async (dispatch, getState) => {
+  const { listName, noteId } = getState().display;
+  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
+
+  if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+    dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_BULK_EDIT_URL_HASH));
+    updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
+    return;
+  }
+
+  dispatch(updateBulkEditUrlHash(true, null, true, false));
 };
 
 export const changeListName = (listName, doCheckEditing) => async (
@@ -537,16 +591,19 @@ export const changeListName = (listName, doCheckEditing) => async (
 
   const _listName = getState().display.listName;
 
-  if (!listName) listName = getState().display.changingListName;
+  if (!listName) listName = vars.changeListName.changingListName;
   if (!listName) throw new Error(`Invalid listName: ${listName}`);
 
   if (doCheckEditing) {
+    if (vars.updateSettings.doFetch) return;
+
     const isEditorUploading = getState().editor.isUploading;
     if (isEditorUploading) return;
 
     const isEditorFocused = getState().display.isEditorFocused;
     if (isEditorFocused) {
-      dispatch(increaseChangeListNameCount(listName));
+      vars.changeListName.changingListName = listName;
+      dispatch(increaseChangeListNameCount());
       return;
     }
   }
@@ -586,14 +643,18 @@ export const updateNoteId = (id, doGetIdFromState = false, doCheckEditing = fals
 
   return async (dispatch, getState) => {
     // id can be both null and non-null so need doGetIdFromState, can't just check if.
-    if (doGetIdFromState) id = getState().display.updatingNoteId;
+    if (doGetIdFromState) id = vars.updateNoteId.updatingNoteId;
     if (doCheckEditing) {
+      if (vars.updateSettings.doFetch) return;
+      if (vars.deleteOldNotes.ids && vars.deleteOldNotes.ids.includes(id)) return;
+
       const isEditorUploading = getState().editor.isUploading;
       if (isEditorUploading) return;
 
       const isEditorFocused = getState().display.isEditorFocused;
       if (isEditorFocused) {
-        dispatch(increaseUpdateNoteIdCount(id));
+        vars.updateNoteId.updatingNoteId = id;
+        dispatch(increaseUpdateNoteIdCount());
         return;
       }
     }
@@ -656,17 +717,6 @@ export const updateSelectingNoteId = (id) => {
   return {
     type: UPDATE_SELECTING_NOTE_ID,
     payload: id,
-  };
-};
-
-export const updateScrollPanel = (contentHeight, layoutHeight, pageYOffset) => {
-  if (!isNumber(contentHeight)) contentHeight = 0;
-  if (!isNumber(layoutHeight)) layoutHeight = 0;
-  if (!isNumber(pageYOffset)) pageYOffset = 0;
-
-  return {
-    type: UPDATE_SCROLL_PANEL,
-    payload: { contentHeight, layoutHeight, pageYOffset },
   };
 };
 
@@ -755,11 +805,13 @@ export const tryUpdateFetchedMore = (payload) => async (dispatch, getState) => {
 
   const isBulkEditing = getState().display.isBulkEditing;
   if (!isBulkEditing) {
-    const scrollHeight = getState().scrollPanel.contentHeight;
-    const windowHeight = getState().scrollPanel.layoutHeight;
-    const windowBottom = windowHeight + getState().scrollPanel.pageYOffset;
+    const scrollHeight = vars.scrollPanel.contentHeight;
+    const windowHeight = vars.scrollPanel.layoutHeight;
+    const windowBottom = windowHeight + vars.scrollPanel.pageYOffset;
 
-    if (windowBottom > (scrollHeight * 0.96)) {
+    const isMenuPopupShown = getState().display.isNoteListItemMenuPopupShown;
+
+    if (windowBottom > (scrollHeight * 0.96) && !isMenuPopupShown) {
       dispatch(updateFetchedMore(payload));
       return;
     }
@@ -1203,15 +1255,23 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 export const cancelDiedNotes = (ids, listName = null) => async (dispatch, getState) => {
 
   if (!listName) listName = getState().display.listName;
-  const payload = { listName, ids };
 
+  const safeAreaWidth = getState().window.width;
+  if (safeAreaWidth < LG_WIDTH) {
+    updateNoteIdUrlHash(null);
+    // Need this to make sure noteId is null before deleting notes in notesReducer.
+    // moveNotes and deleteNotes don't need this because of awaiting dataApi.
+    await sleep(100);
+  }
+
+  const payload = { listName, ids };
   dispatch({
     type: CANCEL_DIED_NOTES,
     payload,
   });
 };
 
-export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash, noteIds) => async (
+export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
   dispatch, getState
 ) => {
 
@@ -1228,10 +1288,14 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash, noteIds) => async
     return;
   }
 
-  let addedDT = Date.now();
-  const listName = TRASH;
+  const oldNotes = await dataApi.getOldNotesInTrash();
+  const oldNoteIds = oldNotes.map(note => note.id);
+  if (oldNoteIds.includes(getState().display.noteId)) {
+    dispatch(sync());
+    return;
+  }
 
-  const oldNotes = dataApi.getOldNotesInTrash(noteIds);
+  let addedDT = Date.now();
   const toNotes = oldNotes.map(note => {
     const toNote = {
       ...note,
@@ -1252,17 +1316,22 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash, noteIds) => async
     }
   }
 
-  const payload = { listName, ids: _.extract(fromNotes, ID) };
+  const listName = TRASH;
+  const payload = { listName, ids: oldNoteIds };
+
+  vars.deleteOldNotes.ids = oldNoteIds;
   dispatch({ type: DELETE_OLD_NOTES_IN_TRASH, payload });
 
   try {
     await dataApi.putNotes({ listName, notes: toNotes });
   } catch (e) {
     dispatch({ type: DELETE_OLD_NOTES_IN_TRASH_ROLLBACK, payload });
+    vars.deleteOldNotes.ids = null;
     return;
   }
 
   dispatch({ type: DELETE_OLD_NOTES_IN_TRASH_COMMIT, payload });
+  vars.deleteOldNotes.ids = null;
 
   try {
     dataApi.putNotes({ listName, notes: fromNotes });
@@ -1322,6 +1391,14 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
   toNote['addedDT'] = Math.min(...conflictedNote.notes.map(note => {
     return note.addedDT ? note.addedDT : addedDT;
   }));
+
+  const safeAreaWidth = getState().window.width;
+  if (safeAreaWidth < LG_WIDTH && getState().display.listName !== toListName) {
+    updateNoteIdUrlHash(null);
+    // Need this to make sure noteId is null before deleting notes in conflictedNotes.
+    await sleep(100);
+  }
+
   dispatch({ type: MERGE_NOTES_COMMIT, payload: { ...payload, toNote } });
 
   try {
@@ -1468,23 +1545,27 @@ export const updateSettings = () => async (dispatch, getState) => {
 
   const addedDT = Date.now();
   const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
-  const _settingsFPath = getState().settingsFPath.fpath;
+  const _settingsFPath = getState().cachedFPaths.fpaths.settingsFPath;
 
   const doFetch = (
     settings.sortOn !== snapshotSettings.sortOn ||
     settings.doDescendingOrder !== snapshotSettings.doDescendingOrder
   );
   const payload = { settingsFPath, settings, doFetch };
+
+  vars.updateSettings.doFetch = doFetch;
   dispatch({ type: UPDATE_SETTINGS, payload });
 
   try {
     await dataApi.putFiles([settingsFPath], [settings]);
   } catch (e) {
     dispatch({ type: UPDATE_SETTINGS_ROLLBACK, payload: { ...payload, error: e } });
+    vars.updateSettings.doFetch = false;
     return;
   }
 
   dispatch({ type: UPDATE_SETTINGS_COMMIT, payload });
+  vars.updateSettings.doFetch = false;
 
   try {
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
@@ -1617,6 +1698,10 @@ export const increaseUpdateEditorWidthCount = () => {
 
 export const increaseResetDidClickCount = () => {
   return { type: INCREASE_RESET_DID_CLICK_COUNT };
+};
+
+export const increaseUpdateBulkEditUrlHashCount = () => {
+  return { type: INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT };
 };
 
 export const clearSavingFPaths = () => async (dispatch, getState) => {

@@ -3,10 +3,10 @@ import {
   INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT, INCREASE_UPDATE_NOTE_ID_COUNT,
   INCREASE_CHANGE_LIST_NAME_COUNT, INCREASE_FOCUS_TITLE_COUNT,
   INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
-  CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS, ADD_NOTE_COMMIT, UPDATE_NOTE_COMMIT,
-  UPDATE_EDITOR_IS_UPLOADING, UPDATE_BULK_EDITING, UPDATE_EDITOR_SCROLL_ENABLED,
-  UPDATE_NOTE_ID, UPDATE_EDITING_NOTE, UPDATE_EDITOR_UNMOUNT, UPDATE_DID_DISCARD_EDITING,
-  DELETE_ALL_DATA, RESET_STATE,
+  INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT, CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS,
+  ADD_NOTE_COMMIT, UPDATE_NOTE_COMMIT, UPDATE_EDITOR_IS_UPLOADING, UPDATE_BULK_EDITING,
+  UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_NOTE_ID, UPDATE_EDITING_NOTE,
+  UPDATE_EDITOR_UNMOUNT, UPDATE_DID_DISCARD_EDITING, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 
 const initialState = {
@@ -19,6 +19,7 @@ const initialState = {
   setInitDataCount: 0,
   blurCount: 0,
   updateEditorWidthCount: 0,
+  updateBulkEditUrlHashCount: 0,
   savingFPaths: [],
   isUploading: false,
   isScrollEnabled: true,
@@ -66,6 +67,12 @@ const editorReducer = (state = initialState, action) => {
 
   if (action.type === INCREASE_UPDATE_EDITOR_WIDTH_COUNT) {
     return { ...state, updateEditorWidthCount: state.updateEditorWidthCount + 1 };
+  }
+
+  if (action.type === INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT) {
+    return {
+      ...state, updateBulkEditUrlHashCount: state.updateBulkEditUrlHashCount + 1,
+    };
   }
 
   if (action.type === CLEAR_SAVING_FPATHS) {

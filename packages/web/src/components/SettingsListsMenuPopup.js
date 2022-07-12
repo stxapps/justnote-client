@@ -74,9 +74,15 @@ const SettingsListsMenuPopup = () => {
   const onDeleteBtnClick = () => {
     if (didClick.current) return;
     onCancelBtnClick();
-    dispatch(updateListNameEditors({
-      [selectingListName]: { isCheckingCanDelete: true },
-    }));
+
+    // As this and showing ConfirmDeletePopup both change url hash,
+    //   need to be in different js clock cycle.
+    setTimeout(() => {
+      dispatch(updateListNameEditors({
+        [selectingListName]: { isCheckingCanDelete: true },
+      }));
+    }, 100);
+
     didClick.current = true;
   };
 

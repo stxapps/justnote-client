@@ -4,12 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import {
   updatePopupUrlHash, discardNote, updateNoteIdUrlHash, updateNoteId,
-  changeListName, clearSavingFPaths, updateDidDiscardEditing,
+  changeListName, updateBulkEditUrlHash, clearSavingFPaths, updateDidDiscardEditing,
 } from '../actions';
 import {
   CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT,
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
-  DISCARD_ACTION_CHANGE_LIST_NAME, SM_WIDTH,
+  DISCARD_ACTION_CHANGE_LIST_NAME, DISCARD_ACTION_UPDATE_BULK_EDIT_URL_HASH, SM_WIDTH,
 } from '../types/const';
 import { dialogBgFMV, dialogFMV } from '../types/animConfigs';
 
@@ -43,6 +43,10 @@ const ConfirmDiscardPopup = () => {
       dispatch(updateNoteId(null, true, false));
     } else if (discardAction === DISCARD_ACTION_CHANGE_LIST_NAME) {
       dispatch(changeListName(null, false));
+    } else if (discardAction === DISCARD_ACTION_UPDATE_BULK_EDIT_URL_HASH) {
+      // As this and closing confirmDiscard popup both change url hash,
+      //   need to be in different js clock cycle.
+      setTimeout(() => dispatch(updateBulkEditUrlHash(true, null, true, false)), 100);
     } else throw new Error(`Invalid discard action: ${discardAction}`);
 
     dispatch(clearSavingFPaths());

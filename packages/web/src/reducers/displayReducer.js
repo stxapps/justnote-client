@@ -3,9 +3,8 @@ import {
   UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, ADD_SELECTED_NOTE_IDS,
   DELETE_SELECTED_NOTE_IDS, UPDATE_SELECTING_NOTE_ID, UPDATE_SELECTING_LIST_NAME,
   UPDATE_DELETING_LIST_NAME, FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT,
-  CANCEL_DIED_NOTES, DELETE_LIST_NAMES, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY,
-  INCREASE_SAVE_NOTE_COUNT, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
-  INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
+  CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH_COMMIT, DELETE_LIST_NAMES,
+  UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY, INCREASE_SAVE_NOTE_COUNT,
   INCREASE_RESET_DID_CLICK_COUNT, UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION,
   UPDATE_DISCARD_ACTION, UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT,
   UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS, UPDATE_SETTINGS_VIEW_ID,
@@ -63,8 +62,6 @@ const initialState = {
   listChangedCount: 0,
   isEditorFocused: false,
   isEditorBusy: false,
-  updatingNoteId: null,
-  changingListName: null,
   moveAction: null,
   deleteAction: null,
   discardAction: null,
@@ -310,11 +307,19 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === MERGE_NOTES_COMMIT) {
     const { toListName, toNote } = action.payload;
+    // Need to set NoteId here for consistency with notesReducer
     return { ...state, noteId: state.listName === toListName ? toNote.id : null };
   }
 
   if (action.type === CANCEL_DIED_NOTES) {
+    // Need to reset NoteId here for consistency with notesReducer
     return { ...state, noteId: null };
+  }
+
+  if (action.type === DELETE_OLD_NOTES_IN_TRASH_COMMIT) {
+    const { ids } = action.payload;
+    if (ids.includes(state.noteId)) return { ...state, noteId: null };
+    return state;
   }
 
   if (action.type === DELETE_LIST_NAMES) {
@@ -335,17 +340,6 @@ const displayReducer = (state = initialState, action) => {
     return { ...state, isEditorFocused: false, isEditorBusy: true };
   }
 
-  if (
-    action.type === INCREASE_UPDATE_NOTE_ID_COUNT ||
-    action.type === INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT
-  ) {
-    return { ...state, updatingNoteId: action.payload };
-  }
-
-  if (action.type === INCREASE_CHANGE_LIST_NAME_COUNT) {
-    return { ...state, changingListName: action.payload };
-  }
-
   if (action.type === UPDATE_MOVE_ACTION) {
     return { ...state, moveAction: action.payload };
   }
@@ -363,14 +357,16 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_SETTINGS) {
-    const { settings } = action.payload;
+    const { settings, doFetch } = action.payload;
     const doContain = doContainListName(state.listName, settings.listNameMap);
 
-    return {
+    const newState = {
       ...state,
       listName: doContain ? state.listName : MY_NOTES,
       settingsStatus: UPDATING,
     };
+    if (doFetch) newState.noteId = null;
+    return newState;
   }
 
   if (action.type === UPDATE_SETTINGS_COMMIT) {

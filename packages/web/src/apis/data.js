@@ -35,7 +35,7 @@ const deleteFPath = (fpaths, fpath) => {
   } else if (fpath.startsWith(IMAGES)) {
     fpaths.staticFPaths = fpaths.staticFPaths.filter(el => el !== fpath);
   } else if (fpath.startsWith(SETTINGS)) {
-    fpaths.settingsFPath = null;
+    if (fpaths.settingsFPath === fpath) fpaths.settingsFPath = null;
   } else if (fpath.startsWith(PINS)) {
     fpaths.pinFPaths = fpaths.pinFPaths.filter(el => el !== fpath);
   } else {
@@ -212,7 +212,7 @@ const fetch = async (params) => {
   listNames = [...new Set(listNames)];
 
   return {
-    notes, hasMore, conflictedNotes, noteIds, listNames, settingsFPath, settings,
+    notes, hasMore, conflictedNotes, listNames, settingsFPath, settings,
   };
 };
 
@@ -351,7 +351,10 @@ export const batchDeleteFileWithRetry = async (fpaths, callCount) => {
   return responses;
 };
 
-const getOldNotesInTrash = (noteIds) => {
+const getOldNotesInTrash = async () => {
+
+  const { noteFPaths } = await listFPaths();
+  const { noteIds } = listNoteIds(noteFPaths);
 
   const trashNoteIds = noteIds.filter(id => id.listName === TRASH);
   const oldNoteIds = trashNoteIds.filter(noteId => {

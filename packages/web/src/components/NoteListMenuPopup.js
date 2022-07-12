@@ -28,7 +28,13 @@ const NoteListMenuPopup = () => {
   };
 
   const onSelectBtnClick = () => {
-    updateBulkEditUrlHash(true, true);
+    onNoteListMenuCancelBtnClick();
+
+    // As this and showing settings popup both change url hash,
+    //   need to be in different js clock cycle.
+    setTimeout(() => {
+      dispatch(updateBulkEditUrlHash(true, null, false, true));
+    }, 100);
   };
 
   const onSettingsBtnClick = () => {

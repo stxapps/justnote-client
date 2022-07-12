@@ -35,8 +35,7 @@ const NoteListItemContent = (props) => {
     clickPressTimer.current = setTimeout(() => {
       isLongPress.current = true;
       if (!isBulkEditing) {
-        updateBulkEditUrlHash(true);
-        if (!isBusy) dispatch(addSelectedNoteIds([note.id]));
+        dispatch(updateBulkEditUrlHash(true, isBusy ? null : note.id, false, true));
       }
     }, 500);
   };
@@ -59,8 +58,11 @@ const NoteListItemContent = (props) => {
             else dispatch(addSelectedNoteIds([note.id]));
           }
         } else {
-          if (safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(note.id);
-          else dispatch(updateNoteId(note.id, false, true));
+          if (safeAreaWidth < LG_WIDTH) {
+            dispatch(updateNoteIdUrlHash(note.id, false, true));
+          } else {
+            dispatch(updateNoteId(note.id, false, true));
+          }
         }
       }
       clickPressTimer.current = null;
@@ -72,8 +74,7 @@ const NoteListItemContent = (props) => {
     touchPressTimer.current = setTimeout(() => {
       isLongPress.current = true;
       if (!isBulkEditing) {
-        updateBulkEditUrlHash(true);
-        if (!isBusy) dispatch(addSelectedNoteIds([note.id]));
+        dispatch(updateBulkEditUrlHash(true, isBusy ? null : note.id, false, true));
       }
     }, 500);
   };
@@ -97,8 +98,11 @@ const NoteListItemContent = (props) => {
             else dispatch(addSelectedNoteIds([note.id]));
           }
         } else {
-          if (safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(note.id);
-          else dispatch(updateNoteId(note.id, false, true));
+          if (safeAreaWidth < LG_WIDTH) {
+            dispatch(updateNoteIdUrlHash(note.id, false, true));
+          } else {
+            dispatch(updateNoteId(note.id, false, true));
+          }
         }
       }
       touchPressTimer.current = null;

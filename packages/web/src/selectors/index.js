@@ -135,13 +135,17 @@ export const _getNotes = (state) => {
 
 export const _getConflictedNotes = (state) => {
 
-  const notes = state.conflictedNotes;
+  const conflictedNotes = state.conflictedNotes;
   const listName = state.display.listName;
   const sortOn = state.settings.sortOn;
   const doDescendingOrder = state.settings.doDescendingOrder;
 
-  let sortedNotes = getSortedNotes(notes, listName, sortOn, doDescendingOrder);
-  if (!sortedNotes) return null;
+  if (!conflictedNotes || !conflictedNotes[listName]) return null;
+
+  const sortedNotes = Object.values(conflictedNotes[listName]).sort((a, b) => {
+    return a[sortOn] - b[sortOn];
+  });
+  if (doDescendingOrder) sortedNotes.reverse();
 
   return sortedNotes;
 };

@@ -6,8 +6,8 @@ import ckeditor from '@ckeditor/ckeditor5-build-decoupled-document';
 import fileApi from '../apis/file';
 import {
   updateEditorFocused, updateEditorBusy, saveNote, discardNote, onUpdateNoteIdUrlHash,
-  onUpdateNoteId, onChangeListName, addSavingFPaths, updateEditorIsUploading,
-  updateEditingNote, updateEditorUnmount,
+  onUpdateNoteId, onChangeListName, onUpdateBulkEditUrlHash, addSavingFPaths,
+  updateEditorIsUploading, updateEditingNote, updateEditorUnmount,
 } from '../actions';
 import { NEW_NOTE, ADDED, IMAGES, CD_ROOT } from '../types/const';
 import {
@@ -25,6 +25,7 @@ const GET_DATA_DISCARD_NOTE = 'GET_DATA_DISCARD_NOTE';
 const GET_DATA_UPDATE_NOTE_ID_URL_HASH = 'GET_DATA_UPDATE_NOTE_ID_URL_HASH';
 const GET_DATA_UPDATE_NOTE_ID = 'GET_DATA_UPDATE_NOTE_ID';
 const GET_DATA_CHANGE_LIST_NAME = 'GET_DATA_CHANGE_LIST_NAME';
+const GET_DATA_UPDATE_BULK_EDIT_URL_HASH = 'GET_DATA_UPDATE_BULK_EDIT_URL_HASH';
 
 const dataUrlToBlob = async (content) => {
   const res = await fetch(content);
@@ -50,6 +51,9 @@ const NoteEditorEditor = (props) => {
   const updateEditorWidthCount = useSelector(
     state => state.editor.updateEditorWidthCount
   );
+  const updateBulkEditUrlHashCount = useSelector(
+    state => state.editor.updateBulkEditUrlHashCount
+  );
   const [isEditorReady, setEditorReady] = useState(false);
   const scrollView = useRef(null);
   const titleInput = useRef(null);
@@ -64,6 +68,7 @@ const NoteEditorEditor = (props) => {
   const prevFocusTitleCount = useRef(focusTitleCount);
   const prevSetInitDataCount = useRef(setInitDataCount);
   const prevUpdateEditorWidthCount = useRef(updateEditorWidthCount);
+  const prevUpdateBulkEditUrlHashCount = useRef(updateBulkEditUrlHashCount);
   const objectUrlContents = useRef({});
   const objectUrlFiles = useRef({});
   const objectUrlNames = useRef({});
@@ -225,6 +230,8 @@ const NoteEditorEditor = (props) => {
       dispatch(onUpdateNoteId(title, body));
     } else if (action === GET_DATA_CHANGE_LIST_NAME) {
       dispatch(onChangeListName(title, body));
+    } else if (action === GET_DATA_UPDATE_BULK_EDIT_URL_HASH) {
+      dispatch(onUpdateBulkEditUrlHash(title, body));
     } else throw new Error(`Invalid getDataAction: ${getDataAction.current}`);
   }, [dispatch]);
 
@@ -367,6 +374,15 @@ const NoteEditorEditor = (props) => {
       prevUpdateEditorWidthCount.current = updateEditorWidthCount;
     }
   }, [isEditorReady, updateEditorWidthCount]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+    if (updateBulkEditUrlHashCount !== prevUpdateBulkEditUrlHashCount.current) {
+      getDataAction.current = GET_DATA_UPDATE_BULK_EDIT_URL_HASH;
+      onGetData();
+      prevUpdateBulkEditUrlHashCount.current = updateBulkEditUrlHashCount;
+    }
+  }, [isEditorReady, updateBulkEditUrlHashCount, onGetData]);
 
   useEffect(() => {
     onUpdateIsUploading(false);

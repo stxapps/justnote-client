@@ -22,7 +22,7 @@ const NoteList = (props) => {
   const dispatch = useDispatch();
 
   const onAddBtnClick = () => {
-    updateNoteIdUrlHash(NEW_NOTE);
+    dispatch(updateNoteIdUrlHash(NEW_NOTE, false, true));
   };
 
   const renderMaxError = () => {

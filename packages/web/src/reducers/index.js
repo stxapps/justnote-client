@@ -9,7 +9,6 @@ import conflictedNotesReducer from './conflictedNotesReducer';
 import displayReducer from './displayReducer';
 import userReducer from './userReducer';
 import settingsReducer from './settingsReducer';
-import settingsFPathReducer from './settingsFPathReducer';
 import serverFPathsReducer from './serverFPathsReducer';
 import editorReducer from './editorReducer';
 import stacksAccessReducer from './stacksAccessReducer';
@@ -18,7 +17,6 @@ import listNameEditorsReducer from './listNameEditorsReducer';
 import iapReducer from './iapReducer';
 import cachedFPathsReducer from './cachedFPathsReducer';
 import pendingPinsReducer from './pendingPinsReducer';
-import scrollPanelReducer from './scrollPanelReducer';
 
 const reducers = combineReducers({
   window: windowReducer,
@@ -30,7 +28,6 @@ const reducers = combineReducers({
   display: displayReducer,
   user: userReducer,
   settings: settingsReducer,
-  settingsFPath: settingsFPathReducer,
   serverFPaths: serverFPathsReducer,
   editor: editorReducer,
   stacksAccess: stacksAccessReducer,
@@ -39,7 +36,6 @@ const reducers = combineReducers({
   iap: iapReducer,
   cachedFPaths: cachedFPathsReducer,
   pendingPins: pendingPinsReducer,
-  scrollPanel: scrollPanelReducer,
 });
 
 export default reducers;
