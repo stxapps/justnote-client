@@ -228,7 +228,7 @@ export const makeGetNoteDate = () => {
       let dt;
       if (sortOn === ADDED_DT) dt = addedDT;
       else if (sortOn === UPDATED_DT) dt = updatedDT;
-      else throw new Error(`Invalid sortOn: sortOn`);
+      else throw new Error(`Invalid sortOn: ${sortOn}`);
 
       const currentDate = new Date();
       const d = new Date(dt);

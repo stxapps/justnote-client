@@ -4,8 +4,12 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import {
   updateDoDeleteOldNotesInTrash, updateSortOn, updateDoDescendingOrder,
+  updateNoteDateShowingMode,
 } from '../actions';
-import { ADDED_DT, UPDATED_DT } from '../types/const';
+import {
+  ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE,
+  NOTE_DATE_SHOWING_MODE_SHOW_DEFAULT,
+} from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 
 import { useSafeAreaFrame } from '.';
@@ -17,6 +21,7 @@ const SettingsPopupAccount = (props) => {
   const doDeleteOldNotesInTrash = useSelector(state => state.settings.doDeleteOldNotesInTrash);
   const sortOn = useSelector(state => state.settings.sortOn);
   const doDescendingOrder = useSelector(state => state.settings.doDescendingOrder);
+  const noteDateShowingMode = useSelector(state => state.settings.noteDateShowingMode);
   const dispatch = useDispatch();
 
   const onDoDeleteBtnClick = () => {
@@ -34,6 +39,16 @@ const SettingsPopupAccount = (props) => {
     else throw new Error(`Invalid value: ${value}`);
 
     dispatch(updateDoDescendingOrder(doDescend));
+  };
+
+  const onDoShowDateBtnClick = () => {
+    if (noteDateShowingMode === NOTE_DATE_SHOWING_MODE_HIDE) {
+      dispatch(updateNoteDateShowingMode(NOTE_DATE_SHOWING_MODE_SHOW_DEFAULT));
+    } else if (noteDateShowingMode === NOTE_DATE_SHOWING_MODE_SHOW_DEFAULT) {
+      dispatch(updateNoteDateShowingMode(NOTE_DATE_SHOWING_MODE_HIDE));
+    } else {
+      console.log('Invalid noteDateShowingMode: ', noteDateShowingMode);
+    }
   };
 
   const switchThumbColorOn = 'rgba(34, 197, 94, 1)';
@@ -61,8 +76,10 @@ const SettingsPopupAccount = (props) => {
   const descendingRBtnClassNames = doDescendingOrder ? 'border-green-500' : 'border-gray-200';
   const descendingRBtnInnerClassNames = doDescendingOrder ? 'bg-green-500' : 'bg-gray-200';
 
+  const doShowDate = noteDateShowingMode === NOTE_DATE_SHOWING_MODE_SHOW_DEFAULT;
+
   return (
-    <View style={tailwind('p-4 relative md:p-6 md:pt-4', safeAreaWidth)}>
+    <View style={tailwind('p-4 relative md:p-6', safeAreaWidth)}>
       <View style={tailwind('border-b border-gray-200 md:hidden', safeAreaWidth)}>
         <TouchableOpacity onPress={onSidebarOpenBtnClick} style={tailwind('pb-1')}>
           <Text style={tailwind('text-sm text-gray-500 font-normal')}>{'<'} <Text style={tailwind('text-sm text-gray-500 font-normal')}>Settings</Text></Text>
@@ -72,7 +89,7 @@ const SettingsPopupAccount = (props) => {
       <View style={tailwind('mt-6 flex-row items-center justify-between md:mt-0', safeAreaWidth)}>
         <View style={tailwind('flex-grow flex-shrink')}>
           <Text style={tailwind('text-base text-gray-800 font-medium leading-5')}>Auto Cleanup</Text>
-          <Text style={tailwind('mt-2.5 text-base text-gray-500 font-normal leading-6.5')}>Allow old removed notes in Trash to be automatically deleted after 45 days</Text>
+          <Text style={tailwind('mt-2.5 text-base text-gray-500 font-normal leading-6.5')}>Allow old removed notes in Trash to be automatically deleted after 45 days.</Text>
         </View>
         <View style={tailwind('ml-4 flex-grow-0 flex-shrink-0 w-11 h-6')}>
           <Switch onValueChange={onDoDeleteBtnClick} value={doDeleteOldNotesInTrash} thumbColor={Platform.OS === 'android' ? doDeleteOldNotesInTrash ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} />
@@ -140,6 +157,15 @@ const SettingsPopupAccount = (props) => {
               </TouchableOpacity>
             </View>
           </View>
+        </View>
+      </View>
+      <View style={tailwind('mt-10 flex-row items-center justify-between')}>
+        <View style={tailwind('flex-grow flex-shrink')}>
+          <Text style={tailwind('text-base text-gray-800 font-medium leading-5')}>Note Date Showing</Text>
+          <Text style={tailwind('mt-2.5 text-base text-gray-500 font-normal leading-6.5')}>Show note's added date or updated date when you browse your notes. It will appear on the top right of each note.</Text>
+        </View>
+        <View style={tailwind('ml-4 flex-grow-0 flex-shrink-0 w-11 h-6')}>
+          <Switch onValueChange={onDoShowDateBtnClick} value={doShowDate} thumbColor={Platform.OS === 'android' ? doShowDate ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} />
         </View>
       </View>
     </View>

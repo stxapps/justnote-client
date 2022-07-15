@@ -7,8 +7,8 @@ import { Dirs } from 'react-native-file-access';
 import fileApi from '../apis/file';
 import {
   updateEditorFocused, updateEditorBusy, saveNote, discardNote, onUpdateNoteId,
-  onChangeListName, addSavingFPaths, updateEditorIsUploading, updateEditingNote,
-  updateEditorUnmount,
+  onChangeListName, onUpdateBulkEdit, addSavingFPaths,
+  updateEditorIsUploading, updateEditingNote, updateEditorUnmount,
 } from '../actions';
 import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, UTF8 } from '../types/const';
 import {
@@ -23,6 +23,7 @@ const GET_DATA_SAVE_NOTE = 'GET_DATA_SAVE_NOTE';
 const GET_DATA_DISCARD_NOTE = 'GET_DATA_DISCARD_NOTE';
 const GET_DATA_UPDATE_NOTE_ID = 'GET_DATA_UPDATE_NOTE_ID';
 const GET_DATA_CHANGE_LIST_NAME = 'GET_DATA_CHANGE_LIST_NAME';
+const GET_DATA_UPDATE_BULK_EDIT = 'GET_DATA_UPDATE_BULK_EDIT';
 
 const SEP = '_jUSTnOTE-sEpArAtOr_';
 const HTML_FNAME = 'ckeditor.html';
@@ -39,6 +40,7 @@ const NoteEditorEditor = (props) => {
   const focusTitleCount = useSelector(state => state.editor.focusTitleCount);
   const setInitDataCount = useSelector(state => state.editor.setInitDataCount);
   const blurCount = useSelector(state => state.editor.blurCount);
+  const updateBulkEditCount = useSelector(state => state.editor.updateBulkEditCount);
   const isScrollEnabled = useSelector(state => state.editor.isScrollEnabled);
   const [isHtmlReady, setHtmlReady] = useState(Platform.OS === 'ios' ? false : true);
   const [isEditorReady, setEditorReady] = useState(false);
@@ -52,6 +54,7 @@ const NoteEditorEditor = (props) => {
   const prevFocusTitleCount = useRef(focusTitleCount);
   const prevSetInitDataCount = useRef(setInitDataCount);
   const prevBlurCount = useRef(blurCount);
+  const prevUpdateBulkEditCount = useRef(updateBulkEditCount);
   const prevIsScrollEnabled = useRef(isScrollEnabled);
   const objectUrlContents = useRef({});
   const objectUrlFiles = useRef({});
@@ -193,6 +196,8 @@ const NoteEditorEditor = (props) => {
       dispatch(onUpdateNoteId(title, body, keyboardHeight.current));
     } else if (action === GET_DATA_CHANGE_LIST_NAME) {
       dispatch(onChangeListName(title, body, keyboardHeight.current));
+    } else if (action === GET_DATA_UPDATE_BULK_EDIT) {
+      dispatch(onUpdateBulkEdit(title, body, keyboardHeight.current));
     } else throw new Error(`Invalid getDataAction: ${getDataAction.current}`);
   }, [dispatch]);
 
@@ -259,8 +264,11 @@ const NoteEditorEditor = (props) => {
   }, [onFocus, onUpdateIsUploading, onAddObjectUrlFiles, onGetData, onGetEditingData]);
 
   const onShouldStartLoadWithRequest = useCallback((e) => {
-    if (e.url.slice(0, 4) === 'http') Linking.openURL(e.url);
-    return false;
+    if (e.url.slice(0, 4) === 'http') {
+      Linking.openURL(e.url);
+      return false;
+    }
+    return true;
   }, []);
 
   const onContentProcessDidTerminate = useCallback(() => {
@@ -352,6 +360,15 @@ const NoteEditorEditor = (props) => {
       prevBlurCount.current = blurCount;
     }
   }, [isEditorReady, blurCount]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+    if (updateBulkEditCount !== prevUpdateBulkEditCount.current) {
+      getDataAction.current = GET_DATA_UPDATE_BULK_EDIT;
+      webView.current.injectJavaScript('window.justnote.getData(); true;');
+      prevUpdateBulkEditCount.current = updateBulkEditCount;
+    }
+  }, [isEditorReady, updateBulkEditCount]);
 
   useEffect(() => {
     if (!isEditorReady) {

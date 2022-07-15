@@ -6,12 +6,13 @@ import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
 import {
-  updatePopup, discardNote, updateNoteId, changeListName, updateSynced,
+  updatePopup, discardNote, updateNoteId, changeListName, updateBulkEdit, updateSynced,
   clearSavingFPaths, updateDidDiscardEditing,
 } from '../actions';
 import {
   CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_NOTE_ID,
-  DISCARD_ACTION_CHANGE_LIST_NAME, DISCARD_ACTION_UPDATE_SYNCED,
+  DISCARD_ACTION_CHANGE_LIST_NAME, DISCARD_ACTION_UPDATE_BULK_EDIT,
+  DISCARD_ACTION_UPDATE_SYNCED,
 } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import { dialogFMV } from '../types/animConfigs';
@@ -48,6 +49,8 @@ const ConfirmDiscardPopup = () => {
       dispatch(changeListName(null, false));
     } else if (discardAction === DISCARD_ACTION_UPDATE_SYNCED) {
       dispatch(updateSynced());
+    } else if (discardAction === DISCARD_ACTION_UPDATE_BULK_EDIT) {
+      dispatch(updateBulkEdit(true, null, true, false));
     } else throw new Error(`Invalid discard action: ${discardAction}`);
 
     dispatch(clearSavingFPaths());

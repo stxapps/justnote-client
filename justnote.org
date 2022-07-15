@@ -266,11 +266,12 @@
   + Add proguard rules
   + require iOS target to 11.0
 - yarn add https://github.com/bracedotto/tailwind-rn#6047a3e3de6607a6cb5b738ab3392d80aa81fd13
-- yarn add 'https://gitpkg.now.sh/bracedotto/blockstack-react-native/BlockstackSDK?f928cd0381ac81b13b2c51fee1abf510ff8e8e95'
+- yarn add 'https://gitpkg.now.sh/bracedotto/blockstack-react-native/BlockstackSDK?414786075849b51b511ea261ade6f8ccc623d68b'
 - yarn add babel-plugin-inline-import --dev
   + Update babel.config.js to work with .svg
 - yarn add @welldone-software/why-did-you-render --dev
 - yarn add typescript --dev
+- yarn add react-native-iap @wewatch/lexorank axios
 - Font
   + Create react-native.config.js
   + Run npx react-native link

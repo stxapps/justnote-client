@@ -28,20 +28,20 @@ export const dialogFMV = {
 
 export const sidebarFMV = {
   hidden: {
-    duration: 300,
-    easing: Easing.bezier(0.4, 0, 0.2, 1),
+    duration: 200,
+    easing: Easing.bezier(0.4, 0, 1, 1),
     useNativeDriver: true,
   },
   visible: {
-    duration: 300,
-    easing: Easing.bezier(0.4, 0, 0.2, 1),
+    duration: 200,
+    easing: Easing.bezier(0, 0, 0.2, 1),
     useNativeDriver: true,
   },
 };
 
-export const swapAnimConfig = () => {
+export const listsFMV = () => {
   return LayoutAnimation.create(
-    225,
+    150,
     LayoutAnimation.Types.easeInEaseOut,
     LayoutAnimation.Properties.scaleY
   );
@@ -52,8 +52,8 @@ export const rotateAnimConfig = {
   useNativeDriver: true,
 };
 
-export const slideAnimConfig = {
-  duration: 300,
+export const slideFMV = {
+  duration: 225,
   easing: Easing.bezier(0.4, 0, 0.2, 1),
   useNativeDriver: true,
 };

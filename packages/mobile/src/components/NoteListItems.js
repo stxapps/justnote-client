@@ -4,17 +4,20 @@ import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 import { Flow } from 'react-native-animated-spinkit';
 
-import { updatePageYOffset, fetchMore } from '../actions';
-import { MY_NOTES, TRASH, ARCHIVE } from '../types/const';
+import { fetchMore, updateFetchedMore } from '../actions';
+import { MY_NOTES, TRASH, ARCHIVE, LG_WIDTH } from '../types/const';
 import { getListNameMap, getNotes } from '../selectors';
 import { getListNameDisplayName } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
+import vars from '../vars';
 
 import { useSafeAreaFrame } from '.';
 import NoteListItem from './NoteListItem';
 
 const SHOW_FETCH_MORE_BTN = 'SHOW_FETCH_MORE_BTN';
 const SHOW_FETCHING_MORE = 'SHOW_FETCHING_MORE';
+const SHOW_UPDATE_FETCHED_BTN = 'SHOW_UPDATE_FETCHED_BTN';
+const SHOW_EMPTY_SPACE = 'SHOW_EMPTY_SPACE';
 
 const NoteListItems = () => {
 
@@ -23,6 +26,9 @@ const NoteListItems = () => {
   const listNameMap = useSelector(getListNameMap);
   const searchString = useSelector(state => state.display.searchString);
   const hasMore = useSelector(state => state.hasMoreNotes[listName]);
+  const hasFetchedMore = useSelector(
+    state => state.fetchedMore[listName] ? true : false
+  );
   const isFetchingMore = useSelector(state => state.isFetchingMoreNotes[listName]);
   const listChangedCount = useSelector(state => state.display.listChangedCount);
   const flatList = useRef(null);
@@ -37,26 +43,40 @@ const NoteListItems = () => {
   const data = useMemo(() => {
     const _data = [...notes];
 
-    const showFetchMoreBtn = hasMore && !isFetchingMore;
-    const showFetchingMore = hasMore && isFetchingMore;
-    if (showFetchMoreBtn) _data.push({ id: SHOW_FETCH_MORE_BTN });
-    if (showFetchingMore) _data.push({ id: SHOW_FETCHING_MORE });
+    if (!hasMore) { /* Do nothing */ }
+    else if (hasFetchedMore) _data.push({ id: SHOW_UPDATE_FETCHED_BTN });
+    else if (isFetchingMore) _data.push({ id: SHOW_FETCHING_MORE });
+    else _data.push({ id: SHOW_FETCH_MORE_BTN });
+
+    if (_data.length > 0 && safeAreaWidth < LG_WIDTH) {
+      _data.push({ id: SHOW_EMPTY_SPACE });
+    }
 
     return _data;
-  }, [notes, hasMore, isFetchingMore]);
+  }, [notes, hasMore, hasFetchedMore, isFetchingMore, safeAreaWidth]);
 
   const onScrollEnd = useCallback((e) => {
-    dispatch(updatePageYOffset(e.nativeEvent.contentOffset.y));
-  }, [dispatch]);
+    const contentHeight = e.nativeEvent.contentSize.height;
+    const layoutHeight = e.nativeEvent.layoutMeasurement.height;
+    const pageYOffset = e.nativeEvent.contentOffset.y;
+
+    vars.scrollPanel.contentHeight = contentHeight;
+    vars.scrollPanel.layoutHeight = layoutHeight;
+    vars.scrollPanel.pageYOffset = pageYOffset;
+  }, []);
 
   const onFetchMoreBtnClick = useCallback(() => {
     dispatch(fetchMore());
   }, [dispatch]);
 
+  const onUpdateFetchedBtnClick = useCallback(() => {
+    dispatch(updateFetchedMore());
+  }, [dispatch]);
+
   const onEndReached = useCallback(() => {
-    if (!hasMore || isFetchingMore) return;
+    if (!hasMore || hasFetchedMore || isFetchingMore) return;
     dispatch(fetchMore());
-  }, [hasMore, isFetchingMore, dispatch]);
+  }, [hasMore, hasFetchedMore, isFetchingMore, dispatch]);
 
   const getItemId = useCallback((item) => {
     return item.id;
@@ -142,11 +162,27 @@ const NoteListItems = () => {
     );
   }, []);
 
+  const renderUpdateFetchedBtn = useCallback(() => {
+    return (
+      <View style={tailwind('my-6 px-4 sm:px-6', safeAreaWidth)}>
+        <TouchableOpacity onPress={onUpdateFetchedBtnClick} style={tailwind('w-full items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white')}>
+          <Text style={tailwind('text-sm font-medium text-gray-500')}>More</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }, [onUpdateFetchedBtnClick, safeAreaWidth]);
+
   const renderItem = useCallback(({ item }) => {
     if (item.id === SHOW_FETCH_MORE_BTN) return renderFetchMoreBtn();
     if (item.id === SHOW_FETCHING_MORE) return renderFetchingMore();
+    if (item.id === SHOW_UPDATE_FETCHED_BTN) return renderUpdateFetchedBtn();
+    if (item.id === SHOW_EMPTY_SPACE) {
+      return (
+        <View style={[tailwind('w-full bg-white'), { height: 88 }]} />
+      );
+    }
     return <NoteListItem note={item} />;
-  }, [renderFetchMoreBtn, renderFetchingMore]);
+  }, [renderFetchMoreBtn, renderFetchingMore, renderUpdateFetchedBtn]);
 
   useEffect(() => {
     if (flatList.current) {

@@ -16,12 +16,15 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@wewatch/lexorank": "^1.0.3",
+    "axios": "^0.27.2",
     "react": "17.0.2",
     "react-native": "0.66.1",
     "react-native-animated-spinkit": "^1.5.2",
-    "react-native-blockstack": "https://gitpkg.now.sh/bracedotto/blockstack-react-native/BlockstackSDK?f928cd0381ac81b13b2c51fee1abf510ff8e8e95",
+    "react-native-blockstack": "https://gitpkg.now.sh/bracedotto/blockstack-react-native/BlockstackSDK?414786075849b51b511ea261ade6f8ccc623d68b",
     "react-native-fast-image": "^8.5.11",
     "react-native-file-access": "^2.0.0",
+    "react-native-iap": "^8.2.1",
     "react-native-keyboard-manager": "^6.5.4-3",
     "react-native-mmkv-storage": "0.4.4",
     "react-native-safe-area-context": "^3.4.1",

@@ -4306,6 +4306,9 @@
 	"min-h-full": {
 		"minHeight": "100%"
 	},
+	"min-h-xl": {
+		"minHeight": 576
+	},
 	"w-0": {
 		"width": 0
 	},
@@ -4501,8 +4504,8 @@
 	"min-w-0": {
 		"minWidth": 0
 	},
-	"min-w-28": {
-		"minWidth": 112
+	"min-w-32": {
+		"minWidth": 128
 	},
 	"min-w-56": {
 		"minWidth": 224

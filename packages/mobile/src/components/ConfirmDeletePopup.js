@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
 import { updatePopup, deleteNotes, deleteListNames } from '../actions';
-import { CONFIRM_DELETE_POPUP } from '../types/const';
+import { CONFIRM_DELETE_POPUP, DELETE_ACTION_LIST_NAME } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import { dialogFMV } from '../types/animConfigs';
 
@@ -17,6 +17,7 @@ const ConfirmDeletePopup = () => {
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const insets = useSafeAreaInsets();
   const isShown = useSelector(state => state.display.isConfirmDeletePopupShown);
+  const deleteAction = useSelector(state => state.display.deleteAction);
   const deletingListName = useSelector(state => state.display.deletingListName);
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
   const [derivedIsShown, setDerivedIsShown] = useState(isShown);
@@ -34,8 +35,11 @@ const ConfirmDeletePopup = () => {
   const onConfirmDeleteOkBtnClick = () => {
     if (didClick.current) return;
 
-    if (deletingListName) dispatch(deleteListNames([deletingListName]));
-    else dispatch(deleteNotes());
+    if (deleteAction === DELETE_ACTION_LIST_NAME) {
+      dispatch(deleteListNames([deletingListName]));
+    } else {
+      dispatch(deleteNotes());
+    }
     onConfirmDeleteCancelBtnClick();
 
     didClick.current = true;

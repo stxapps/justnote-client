@@ -91,7 +91,8 @@ const NoteListItemMenuPopup = () => {
     }
 
     if (listName !== TRASH) {
-      // Only when no other pending actions and list name is not TRASH
+      // Only when no other pending actions and list name is not TRASH.
+      // If busy, the menuBtn will be disabled.
       if (pinStatus === PINNED) menu = [...menu, MANAGE_PIN];
       else if (doEnableExtraFeatures && pinStatus === null) menu = [...menu, PIN];
     }

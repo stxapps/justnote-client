@@ -5,8 +5,12 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
-import { signOut, updatePopup, updateSettingsPopup } from '../actions';
-import { DOMAIN_NAME, HASH_SUPPORT, PROFILE_POPUP } from '../types/const';
+import {
+  signOut, updatePopup, updateSettingsPopup, updateSettingsViewId,
+} from '../actions';
+import {
+  DOMAIN_NAME, HASH_SUPPORT, PROFILE_POPUP, SETTINGS_VIEW_ACCOUNT,
+} from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import { popupFMV } from '../types/animConfigs';
 
@@ -27,6 +31,7 @@ const SidebarProfilePopup = () => {
 
   const onSettingsBtnClick = () => {
     onProfileCancelBtnClick();
+    dispatch(updateSettingsViewId(SETTINGS_VIEW_ACCOUNT, true));
     dispatch(updateSettingsPopup(true));
   };
 
@@ -110,7 +115,7 @@ const SidebarProfilePopup = () => {
       <TouchableWithoutFeedback onPress={onProfileCancelBtnClick}>
         <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
       </TouchableWithoutFeedback>
-      <Animated.View style={[tailwind('absolute mt-1 rounded-md shadow-lg bg-white'), popupStyle]}>
+      <Animated.View style={[tailwind('absolute rounded-md shadow-lg bg-white'), popupStyle]}>
         <View style={tailwind('py-1')}>
           <TouchableOpacity onPress={onSettingsBtnClick} style={tailwind('w-full flex-row items-center px-4 py-3')}>
             <Svg width={20} height={20} style={tailwind('mr-3 text-gray-400 font-normal')} viewBox="0 0 20 20" fill="currentColor">

@@ -1,12 +1,9 @@
-import {
-  INIT, UPDATE_HREF, UPDATE_WINDOW_SIZE, UPDATE_PAGE_Y_OFFSET,
-} from '../types/actionTypes';
+import { INIT, UPDATE_HREF, UPDATE_WINDOW_SIZE } from '../types/actionTypes';
 
 const initialState = {
   href: null,
   width: null,
   height: null,
-  pageYOffset: 0,
 };
 
 const windowReducer = (state = initialState, action) => {
@@ -30,10 +27,6 @@ const windowReducer = (state = initialState, action) => {
       width: action.payload.windowWidth,
       height: action.payload.windowHeight,
     };
-  }
-
-  if (action.type === UPDATE_PAGE_Y_OFFSET) {
-    return { ...state, pageYOffset: action.payload };
   }
 
   return state;

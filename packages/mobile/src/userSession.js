@@ -33,7 +33,9 @@ const updateUserData = async (userData) => {
 };
 
 const loadUserData = async () => {
-  return await RNBlockstackSdk.loadUserData();
+  const userData = await RNBlockstackSdk.loadUserData();
+  if (!userData.appPrivateKey) userData.appPrivateKey = userData.private_key;
+  return userData;
 };
 
 const putFileOptions = { encrypt: true, dir: Dirs.DocumentDir };
@@ -60,8 +62,17 @@ const listFiles = async (callback) => {
   return fileCount;
 };
 
-export default {
+const signECDSA = async (content) => {
+  const userData = await loadUserData();
+  const sigObj = await RNBlockstackSdk.signECDSA(userData.appPrivateKey, content);
+  return sigObj;
+};
+
+const userSession = {
   hasSession, createSession,
   isUserSignedIn, handlePendingSignIn, signUserOut,
-  updateUserData, loadUserData, putFile, getFile, deleteFile, listFiles,
+  updateUserData, loadUserData, putFile, getFile, deleteFile,
+  listFiles, signECDSA,
 };
+
+export default userSession;

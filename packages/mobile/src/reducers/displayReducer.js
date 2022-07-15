@@ -1,24 +1,25 @@
 import {
   UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP,
   UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, ADD_SELECTED_NOTE_IDS,
-  DELETE_SELECTED_NOTE_IDS, UPDATE_SELECTING_LIST_NAME, UPDATE_DELETING_LIST_NAME,
-  FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES,
-  DELETE_LIST_NAMES, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY,
-  INCREASE_SAVE_NOTE_COUNT, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
-  INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
-  INCREASE_RESET_DID_CLICK_COUNT, UPDATE_DISCARD_ACTION,
-  UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK,
-  CANCEL_DIED_SETTINGS, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
-  UPDATE_SYNC_PROGRESS, UPDATE_SYNCED, UPDATE_IMPORT_ALL_DATA_PROGRESS,
-  UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
-  DELETE_ALL_DATA, RESET_STATE,
+  DELETE_SELECTED_NOTE_IDS, UPDATE_SELECTING_NOTE_ID, UPDATE_SELECTING_LIST_NAME,
+  UPDATE_DELETING_LIST_NAME, FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT,
+  CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH_COMMIT, DELETE_LIST_NAMES,
+  UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY, INCREASE_SAVE_NOTE_COUNT,
+  INCREASE_RESET_DID_CLICK_COUNT, UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION,
+  UPDATE_DISCARD_ACTION, UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT,
+  UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS, UPDATE_SETTINGS_VIEW_ID,
+  UPDATE_LIST_NAMES_MODE, SYNC, SYNC_COMMIT, SYNC_ROLLBACK, UPDATE_SYNC_PROGRESS,
+  UPDATE_SYNCED, UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
+  UPDATE_DELETE_ALL_DATA_PROGRESS, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
-  SIGN_UP_POPUP, SIGN_IN_POPUP, PROFILE_POPUP, NOTE_LIST_MENU_POPUP, LIST_NAMES_POPUP,
+  SIGN_UP_POPUP, SIGN_IN_POPUP, PROFILE_POPUP, NOTE_LIST_MENU_POPUP,
+  NOTE_LIST_ITEM_MENU_POPUP, LIST_NAMES_POPUP, PIN_MENU_POPUP, PAYWALL_POPUP,
   SIDEBAR_POPUP, SEARCH_POPUP, SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP,
   CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, CONFIRM_AS_DUMMY_POPUP,
-  CONFIRM_EXIT_DUMMY_POPUP,
-  NEW_NOTE, MY_NOTES, TRASH, ARCHIVE, UPDATING, DIED_UPDATING, MAX_SELECTED_NOTE_IDS,
+  CONFIRM_EXIT_DUMMY_POPUP, NEW_NOTE, MY_NOTES, TRASH, ARCHIVE,
+  UPDATING, DIED_UPDATING, MAX_SELECTED_NOTE_IDS, SETTINGS_VIEW_ACCOUNT,
+  DELETE_ACTION_LIST_NAME,
 } from '../types/const';
 import { doContainListName } from '../utils';
 
@@ -32,8 +33,13 @@ const initialState = {
   profilePopupPosition: null,
   isNoteListMenuPopupShown: false,
   noteListMenuPopupPosition: null,
+  isNoteListItemMenuPopupShown: false,
+  noteListItemMenuPopupPosition: null,
   isListNamesPopupShown: false,
   listNamesPopupPosition: null,
+  isPinMenuPopupShown: false,
+  pinMenuPopupPosition: null,
+  isPaywallPopupShown: false,
   isSidebarPopupShown: false,
   isSearchPopupShown: false,
   isSettingsPopupShown: false,
@@ -47,6 +53,7 @@ const initialState = {
   isBulkEditing: false,
   selectedNoteIds: [],
   isSelectedNoteIdsMaxErrorShown: false,
+  selectingNoteId: null,
   selectingListName: null,
   deletingListName: null,
   didFetch: false,
@@ -55,11 +62,16 @@ const initialState = {
   listChangedCount: 0,
   isEditorFocused: false,
   isEditorBusy: false,
-  updatingNoteId: null,
-  changingListName: null,
+  moveAction: null,
+  deleteAction: null,
   discardAction: null,
   resetDidClickCount: 0,
   settingsStatus: null,
+  settingsViewId: SETTINGS_VIEW_ACCOUNT,
+  isSettingsSidebarShown: false,
+  didSettingsCloseAnimEnd: true,
+  didSettingsSidebarAnimEnd: true,
+  listNamesMode: null,
   syncProgress: null,
   importAllDataProgress: null,
   exportAllDataProgress: null,
@@ -82,14 +94,12 @@ const displayReducer = (state = initialState, action) => {
       isEditorBusy: false,
       selectedNoteIds: [],
       isSelectedNoteIdsMaxErrorShown: false,
-      changingListName: null,
     };
   }
 
   if (action.type === UPDATE_NOTE_ID) {
     const newState = { ...state, isEditorFocused: false, isEditorBusy: false };
     newState.noteId = state.noteId === action.payload ? null : action.payload;
-    newState.updatingNoteId = null;
     return newState;
   }
 
@@ -118,16 +128,34 @@ const displayReducer = (state = initialState, action) => {
       };
     }
 
+    if (id === NOTE_LIST_ITEM_MENU_POPUP) {
+      return {
+        ...state,
+        isNoteListItemMenuPopupShown: isShown,
+        noteListItemMenuPopupPosition: anchorPosition,
+      };
+    }
+
     if (id === LIST_NAMES_POPUP) {
       const newState = {
         ...state,
         isListNamesPopupShown: isShown,
         listNamesPopupPosition: anchorPosition,
       };
-      if (!isShown) {
-        newState.selectingListName = null;
-      }
       return newState;
+    }
+
+    if (id === PIN_MENU_POPUP) {
+      const newState = {
+        ...state,
+        isPinMenuPopupShown: isShown,
+        pinMenuPopupPosition: anchorPosition,
+      };
+      return newState;
+    }
+
+    if (id === PAYWALL_POPUP) {
+      return { ...state, isPaywallPopupShown: isShown };
     }
 
     if (id === SIDEBAR_POPUP) {
@@ -144,7 +172,10 @@ const displayReducer = (state = initialState, action) => {
 
     if (id === SETTINGS_POPUP) {
       const newState = { ...state, isSettingsPopupShown: isShown };
-      if (!isShown) newState.selectingListName = null;
+      if (isShown) {
+        newState.didSettingsCloseAnimEnd = false;
+        newState.didSettingsSidebarAnimEnd = true;
+      }
       return newState;
     }
 
@@ -158,17 +189,11 @@ const displayReducer = (state = initialState, action) => {
 
     if (id === CONFIRM_DELETE_POPUP) {
       const newState = { ...state, isConfirmDeletePopupShown: isShown };
-      if (!isShown) newState.deletingListName = null;
       return newState;
     }
 
     if (id === CONFIRM_DISCARD_POPUP) {
       const newState = { ...state, isConfirmDiscardPopupShown: isShown };
-      if (!isShown) {
-        newState.updatingNoteId = null;
-        newState.changingListName = null;
-        newState.discardAction = null;
-      }
       return newState;
     }
 
@@ -222,12 +247,18 @@ const displayReducer = (state = initialState, action) => {
     return { ...state, selectedNoteIds, isSelectedNoteIdsMaxErrorShown: isShown };
   }
 
+  if (action.type === UPDATE_SELECTING_NOTE_ID) {
+    return { ...state, selectingNoteId: action.payload };
+  }
+
   if (action.type === UPDATE_SELECTING_LIST_NAME) {
     return { ...state, selectingListName: action.payload };
   }
 
   if (action.type === UPDATE_DELETING_LIST_NAME) {
-    return { ...state, deletingListName: action.payload };
+    return {
+      ...state, deletingListName: action.payload, deleteAction: DELETE_ACTION_LIST_NAME,
+    };
   }
 
   if (action.type === FETCH_COMMIT) {
@@ -235,7 +266,6 @@ const displayReducer = (state = initialState, action) => {
     const newState = {
       ...state,
       noteId: state.noteId === NEW_NOTE ? NEW_NOTE : null,
-      isBulkEditing: false,
       isEditorFocused: state.noteId === NEW_NOTE ? true : false,
       isEditorBusy: false,
       selectedNoteIds: [],
@@ -277,11 +307,19 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === MERGE_NOTES_COMMIT) {
     const { toListName, toNote } = action.payload;
+    // Need to set NoteId here for consistency with notesReducer
     return { ...state, noteId: state.listName === toListName ? toNote.id : null };
   }
 
   if (action.type === CANCEL_DIED_NOTES) {
+    // Need to reset NoteId here for consistency with notesReducer
     return { ...state, noteId: null };
+  }
+
+  if (action.type === DELETE_OLD_NOTES_IN_TRASH_COMMIT) {
+    const { ids } = action.payload;
+    if (ids.includes(state.noteId)) return { ...state, noteId: null };
+    return state;
   }
 
   if (action.type === DELETE_LIST_NAMES) {
@@ -302,15 +340,12 @@ const displayReducer = (state = initialState, action) => {
     return { ...state, isEditorFocused: false, isEditorBusy: true };
   }
 
-  if (
-    action.type === INCREASE_UPDATE_NOTE_ID_COUNT ||
-    action.type === INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT
-  ) {
-    return { ...state, updatingNoteId: action.payload };
+  if (action.type === UPDATE_MOVE_ACTION) {
+    return { ...state, moveAction: action.payload };
   }
 
-  if (action.type === INCREASE_CHANGE_LIST_NAME_COUNT) {
-    return { ...state, changingListName: action.payload };
+  if (action.type === UPDATE_DELETE_ACTION) {
+    return { ...state, deleteAction: action.payload };
   }
 
   if (action.type === UPDATE_DISCARD_ACTION) {
@@ -322,14 +357,16 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_SETTINGS) {
-    const { settings } = action.payload;
+    const { settings, doFetch } = action.payload;
     const doContain = doContainListName(state.listName, settings.listNameMap);
 
-    return {
+    const newState = {
       ...state,
       listName: doContain ? state.listName : MY_NOTES,
       settingsStatus: UPDATING,
     };
+    if (doFetch) newState.noteId = null;
+    return newState;
   }
 
   if (action.type === UPDATE_SETTINGS_COMMIT) {
@@ -356,6 +393,14 @@ const displayReducer = (state = initialState, action) => {
       listName: doContain ? state.listName : MY_NOTES,
       settingsStatus: null,
     };
+  }
+
+  if (action.type === UPDATE_SETTINGS_VIEW_ID) {
+    return { ...state, ...action.payload };
+  }
+
+  if (action.type === UPDATE_LIST_NAMES_MODE) {
+    return { ...state, ...action.payload };
   }
 
   if (action.type === SYNC) {

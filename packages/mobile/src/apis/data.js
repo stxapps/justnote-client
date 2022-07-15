@@ -1,146 +1,63 @@
 import mmkvStorage from '../mmkvStorage';
 import {
-  NOTES, IMAGES, SETTINGS, INDEX, DOT_JSON, N_NOTES, MAX_TRY, TRASH, N_DAYS,
+  NOTES, IMAGES, SETTINGS, PINS, INDEX, DOT_JSON, N_NOTES, MAX_TRY, TRASH, N_DAYS,
 } from '../types/const';
-import { splitOnFirst, isNumber } from '../utils';
+import {
+  isNumber, createNoteFPath, createNoteFName, extractNoteFPath, createPinFPath,
+  copyFPaths, getMainId, listNoteIds, sortWithPins,
+} from '../utils';
+import { cachedFPaths } from '../vars';
 
-const createNoteFPath = (listName, fname, subName) => {
-  return `${NOTES}/${listName}/${fname}/${subName}`;
-};
-
-const createNoteFName = (id, parentIds) => {
-  if (parentIds) return `${id}_${parentIds.join('-')}`;
-  return id;
-};
-
-const extractNoteFPath = (fpath) => {
-  const rest1 = splitOnFirst(fpath, '/')[1];
-  const [listName, rest2] = splitOnFirst(rest1, '/');
-  const [fname, subName] = splitOnFirst(rest2, '/');
-  return { listName, fname, subName };
-};
-
-const extractNoteFName = (fname) => {
-  if (!fname.includes('_')) return { id: fname, parentIds: null };
-
-  const [id, _parentIds] = fname.split('_');
-  const parentIds = _parentIds.split('-');
-  return { id, parentIds };
-};
-
-const extractNoteId = (id) => {
-  let i;
-  for (i = id.length - 1; i <= 0; i--) {
-    if (/\d/.test(id[i])) break;
-  }
-
-  return { dt: parseInt(id.slice(0, i + 1), 10) };
-};
-
-const listFPaths = async () => {
-
-  const noteFPaths = [];
-  const staticFPaths = [];
-  let settingsFPath = null;
-
-  await mmkvStorage.listFiles((fpath) => {
-    if (fpath.startsWith(NOTES)) {
-      noteFPaths.push(fpath);
-    } else if (fpath.startsWith(IMAGES)) {
-      staticFPaths.push(fpath);
-    } else if (fpath.startsWith(SETTINGS)) {
-      if (!settingsFPath) settingsFPath = fpath;
-      else {
-        const dt = parseInt(
-          settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10
-        );
-        const _dt = parseInt(fpath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10);
-        if (isNumber(dt) && isNumber(_dt) && dt < _dt) settingsFPath = fpath;
-      }
-    } else {
-      console.log(`Invalid file path: ${fpath}`);
+const addFPath = (fpaths, fpath) => {
+  if (fpath.startsWith(NOTES)) {
+    if (!fpaths.noteFPaths.includes(fpath)) fpaths.noteFPaths.push(fpath);
+  } else if (fpath.startsWith(IMAGES)) {
+    if (!fpaths.staticFPaths.includes(fpath)) fpaths.staticFPaths.push(fpath);
+  } else if (fpath.startsWith(SETTINGS)) {
+    if (!fpaths.settingsFPath) fpaths.settingsFPath = fpath;
+    else {
+      const dt = parseInt(
+        fpaths.settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10
+      );
+      const _dt = parseInt(fpath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10);
+      if (isNumber(dt) && isNumber(_dt) && dt < _dt) fpaths.settingsFPath = fpath;
     }
+  } else if (fpath.startsWith(PINS)) {
+    if (!fpaths.pinFPaths.includes(fpath)) fpaths.pinFPaths.push(fpath);
+  } else {
+    console.log(`Invalid file path: ${fpath}`);
+  }
+};
 
+const deleteFPath = (fpaths, fpath) => {
+  if (fpath.startsWith(NOTES)) {
+    fpaths.noteFPaths = fpaths.noteFPaths.filter(el => el !== fpath);
+  } else if (fpath.startsWith(IMAGES)) {
+    fpaths.staticFPaths = fpaths.staticFPaths.filter(el => el !== fpath);
+  } else if (fpath.startsWith(SETTINGS)) {
+    if (fpaths.settingsFPath === fpath) fpaths.settingsFPath = null;
+  } else if (fpath.startsWith(PINS)) {
+    fpaths.pinFPaths = fpaths.pinFPaths.filter(el => el !== fpath);
+  } else {
+    console.log(`Invalid file path: ${fpath}`);
+  }
+};
+
+const _listFPaths = async () => {
+  const fpaths = {
+    noteFPaths: [], staticFPaths: [], settingsFPath: null, pinFPaths: [],
+  };
+  await mmkvStorage.listFiles((fpath) => {
+    addFPath(fpaths, fpath);
     return true;
   });
-
-  return { noteFPaths, staticFPaths, settingsFPath };
+  return fpaths;
 };
 
-const listNoteIds = (noteFPaths) => {
-
-  const ids = [];
-  const toFPaths = {};
-  const toParents = {};
-  const toChildren = {};
-  for (const fpath of noteFPaths) {
-    const { fname } = extractNoteFPath(fpath);
-    const { id, parentIds } = extractNoteFName(fname);
-
-    if (!toFPaths[id]) toFPaths[id] = [];
-    toFPaths[id].push(fpath);
-
-    if (ids.includes(id)) continue;
-    ids.push(id);
-
-    if (parentIds) {
-      toParents[id] = parentIds;
-      for (const pid of parentIds) {
-        if (!toChildren[pid]) toChildren[pid] = [];
-        toChildren[pid].push(id);
-      }
-    } else {
-      toParents[id] = null;
-    }
-  }
-
-  const leafIds = [];
-  for (const id of ids) {
-    if (!toChildren[id]) {
-      if (id.startsWith('deleted')) continue;
-      leafIds.push(id);
-    }
-  }
-
-  const toRootIds = {};
-  const toLeafIds = {};
-  for (const id of leafIds) {
-    let _id = id;
-    while (toParents[_id]) _id = toParents[_id][0];
-
-    toRootIds[id] = _id;
-
-    if (!toLeafIds[_id]) toLeafIds[_id] = [];
-    toLeafIds[_id].push(id);
-  }
-
-  const noteIds = [];
-  const conflictedIds = [];
-  for (const id of leafIds) {
-    const parentIds = toParents[id];
-
-    const rootId = toRootIds[id];
-    const { dt: addedDT } = extractNoteId(rootId);
-    const { dt: updatedDT } = extractNoteId(id);
-
-    const tIds = toLeafIds[rootId];
-    const isConflicted = tIds.length > 1;
-    const conflictWith = isConflicted ? tIds : null;
-
-    const fpaths = toFPaths[id];
-    const { listName } = extractNoteFPath(fpaths[0]);
-
-    const noteId = {
-      parentIds, id, addedDT, updatedDT, isConflicted, conflictWith, fpaths, listName,
-    };
-
-    if (isConflicted) conflictedIds.push(noteId);
-    else noteIds.push(noteId);
-  }
-
-  const conflictWiths = Object.values(toLeafIds).filter(tIds => tIds.length > 1);
-
-  return { noteIds, conflictedIds, conflictWiths };
+const listFPaths = async (doForce = false) => {
+  if (cachedFPaths.fpaths && !doForce) return copyFPaths(cachedFPaths.fpaths);
+  cachedFPaths.fpaths = await _listFPaths();
+  return copyFPaths(cachedFPaths.fpaths);
 };
 
 const batchGetFileWithRetry = async (
@@ -232,8 +149,8 @@ const toConflictedNotes = (noteIds, conflictWiths, fpaths, contents) => {
 
 const fetch = async (params) => {
 
-  let { listName, sortOn, doDescendingOrder, doFetchSettings } = params;
-  const { noteFPaths, settingsFPath } = await listFPaths();
+  let { listName, sortOn, doDescendingOrder, doFetchSettings, pendingPins } = params;
+  const { noteFPaths, settingsFPath, pinFPaths } = await listFPaths(doFetchSettings);
 
   let settings;
   if (settingsFPath && doFetchSettings) {
@@ -243,12 +160,19 @@ const fetch = async (params) => {
     doDescendingOrder = settings.doDescendingOrder;
   }
 
-  const { noteIds, conflictedIds, conflictWiths } = listNoteIds(noteFPaths);
+  const { noteIds, conflictedIds, conflictWiths, toRootIds } = listNoteIds(noteFPaths);
 
   const namedNoteIds = noteIds.filter(id => id.listName === listName);
-  let selectedNoteIds = namedNoteIds.sort((a, b) => a[sortOn] - b[sortOn]);
-  if (doDescendingOrder) selectedNoteIds.reverse();
-  selectedNoteIds = selectedNoteIds.slice(0, N_NOTES);
+  let sortedNoteIds = namedNoteIds.sort((a, b) => a[sortOn] - b[sortOn]);
+  if (doDescendingOrder) sortedNoteIds.reverse();
+
+  sortedNoteIds = sortWithPins(
+    sortedNoteIds, pinFPaths, pendingPins, toRootIds,
+    (noteId) => {
+      return getMainId(noteId.id, toRootIds);
+    }
+  );
+  const selectedNoteIds = sortedNoteIds.slice(0, N_NOTES);
 
   const namedConflictWiths = conflictWiths.filter(conflictWith => {
     for (const id of conflictWith) {
@@ -266,7 +190,7 @@ const fetch = async (params) => {
   for (const id of selectedNoteIds) _fpaths.push(...id.fpaths);
   for (const id of selectedConflictedIds) _fpaths.push(...id.fpaths);
 
-  const responses = await batchGetFileWithRetry(_fpaths, 0);
+  const responses = await batchGetFileWithRetry(_fpaths, 0, true);
   const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
   for (let { fpath, content } of responses) {
     fpaths.push(fpath);
@@ -287,31 +211,43 @@ const fetch = async (params) => {
   listNames = [...new Set(listNames)];
 
   return {
-    notes, hasMore, conflictedNotes, noteIds, listNames, settingsFPath, settings,
+    notes, hasMore, conflictedNotes, listNames, settingsFPath, settings,
   };
 };
 
 const fetchMore = async (params) => {
 
-  const { listName, ids, sortOn, doDescendingOrder } = params;
+  const { listName, ids, sortOn, doDescendingOrder, pendingPins } = params;
 
-  const { noteFPaths } = await listFPaths();
-  const { noteIds } = listNoteIds(noteFPaths);
+  const { noteFPaths, pinFPaths } = await listFPaths();
+  const { noteIds, toRootIds } = listNoteIds(noteFPaths);
 
   const namedNoteIds = noteIds.filter(id => id.listName === listName);
   let sortedNoteIds = namedNoteIds.sort((a, b) => a[sortOn] - b[sortOn]);
   if (doDescendingOrder) sortedNoteIds.reverse();
 
-  const indexes = ids.map(id => sortedNoteIds.findIndex(noteId => noteId.id === id));
-  const maxIndex = Math.max(...indexes);
+  sortedNoteIds = sortWithPins(
+    sortedNoteIds, pinFPaths, pendingPins, toRootIds,
+    (noteId) => {
+      return getMainId(noteId.id, toRootIds);
+    }
+  );
 
-  const filteredNoteIds = sortedNoteIds.slice(maxIndex + 1);
+  // With pins, can't fetch further from the current point
+  let filteredNoteIds = [], hasDisorder = false;
+  for (let i = 0; i < sortedNoteIds.length; i++) {
+    const noteId = sortedNoteIds[i];
+    if (!ids.includes(noteId.id)) {
+      if (i < ids.length) hasDisorder = true;
+      filteredNoteIds.push(noteId);
+    }
+  }
   const selectedNoteIds = filteredNoteIds.slice(0, N_NOTES);
 
   const _fpaths = [];
   for (const id of selectedNoteIds) _fpaths.push(...id.fpaths);
 
-  const responses = await batchGetFileWithRetry(_fpaths, 0);
+  const responses = await batchGetFileWithRetry(_fpaths, 0, true);
   const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
   for (let { fpath, content } of responses) {
     fpaths.push(fpath);
@@ -321,7 +257,7 @@ const fetchMore = async (params) => {
   const notes = toNotes(selectedNoteIds, fpaths, contents);
   const hasMore = filteredNoteIds.length > N_NOTES;
 
-  return { notes, hasMore };
+  return { notes, hasMore, hasDisorder };
 };
 
 const batchPutFileWithRetry = async (fpaths, contents, callCount) => {
@@ -329,7 +265,11 @@ const batchPutFileWithRetry = async (fpaths, contents, callCount) => {
   const responses = await Promise.all(
     fpaths.map((fpath, i) =>
       mmkvStorage.putFile(fpath, contents[i])
-        .then(publicUrl => ({ publicUrl, fpath, success: true }))
+        .then(publicUrl => {
+          addFPath(cachedFPaths.fpaths, fpath);
+          cachedFPaths.fpaths = copyFPaths(cachedFPaths.fpaths);
+          return { publicUrl, fpath, success: true };
+        })
         .catch(error => ({ error, fpath, content: contents[i], success: false }))
     )
   );
@@ -374,7 +314,11 @@ export const batchDeleteFileWithRetry = async (fpaths, callCount) => {
   const responses = await Promise.all(
     fpaths.map((fpath) =>
       mmkvStorage.deleteFile(fpath)
-        .then(() => ({ fpath, success: true }))
+        .then(() => {
+          deleteFPath(cachedFPaths.fpaths, fpath);
+          cachedFPaths.fpaths = copyFPaths(cachedFPaths.fpaths);
+          return { fpath, success: true };
+        })
         .catch(error => {
           // For MMKV, there is no error when does_not_exist or file_not_found
           return { error, fpath, success: false };
@@ -397,7 +341,10 @@ export const batchDeleteFileWithRetry = async (fpaths, callCount) => {
   return responses;
 };
 
-const getOldNotesInTrash = (noteIds) => {
+const getOldNotesInTrash = async () => {
+
+  const { noteFPaths } = await listFPaths();
+  const { noteIds } = listNoteIds(noteFPaths);
 
   const trashNoteIds = noteIds.filter(id => id.listName === TRASH);
   const oldNoteIds = trashNoteIds.filter(noteId => {
@@ -473,11 +420,34 @@ const deleteAllFiles = async () => {
   await mmkvStorage.deleteAllFiles();
 };
 
+const putPins = async (params) => {
+  const { pins } = params;
+
+  const fpaths = [], contents = [];
+  for (const pin of pins) {
+    fpaths.push(createPinFPath(pin.rank, pin.updatedDT, pin.addedDT, pin.id));
+    contents.push(JSON.stringify({}));
+  }
+
+  await batchPutFileWithRetry(fpaths, contents, 0);
+  return { pins };
+};
+
+const deletePins = async (params) => {
+
+  const { pins } = params;
+  const pinFPaths = pins.map(pin => {
+    return createPinFPath(pin.rank, pin.updatedDT, pin.addedDT, pin.id);
+  });
+  await batchDeleteFileWithRetry(pinFPaths, 0);
+
+  return { pins };
+};
+
 const data = {
-  createNoteFPath, createNoteFName, extractNoteFPath, extractNoteFName, extractNoteId,
-  listFPaths, listNoteIds, batchGetFileWithRetry, toNotes, fetch, fetchMore,
+  listFPaths, batchGetFileWithRetry, toNotes, fetch, fetchMore,
   batchPutFileWithRetry, putNotes, getOldNotesInTrash, canDeleteListNames, getFiles,
-  putFiles, deleteFiles, deleteAllFiles,
+  putFiles, deleteFiles, deleteAllFiles, putPins, deletePins,
 };
 
 export default data;

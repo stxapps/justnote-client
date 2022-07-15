@@ -29,9 +29,10 @@ import {
   INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
   INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT,
   INCREASE_UPDATE_EDITOR_WIDTH_COUNT, INCREASE_RESET_DID_CLICK_COUNT,
-  INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT, CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS,
-  UPDATE_EDITOR_IS_UPLOADING, UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_EDITING_NOTE,
-  UPDATE_EDITOR_UNMOUNT, UPDATE_DID_DISCARD_EDITING, UPDATE_STACKS_ACCESS,
+  INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT, INCREASE_UPDATE_BULK_EDIT_COUNT,
+  CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS, UPDATE_EDITOR_IS_UPLOADING,
+  UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_EDITING_NOTE, UPDATE_EDITOR_UNMOUNT,
+  UPDATE_DID_DISCARD_EDITING, UPDATE_STACKS_ACCESS,
   REQUEST_PURCHASE, RESTORE_PURCHASES, RESTORE_PURCHASES_COMMIT,
   RESTORE_PURCHASES_ROLLBACK, REFRESH_PURCHASES, REFRESH_PURCHASES_COMMIT,
   REFRESH_PURCHASES_ROLLBACK, UPDATE_IAP_PUBLIC_KEY, UPDATE_IAP_PRODUCT_STATUS,
@@ -1704,6 +1705,10 @@ export const increaseUpdateBulkEditUrlHashCount = () => {
   return { type: INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT };
 };
 
+export const increaseUpdateBulkEditCount = () => {
+  return { type: INCREASE_UPDATE_BULK_EDIT_COUNT };
+};
+
 export const clearSavingFPaths = () => async (dispatch, getState) => {
   const savingFPaths = getState().editor.savingFPaths;
   try {
@@ -2593,8 +2598,6 @@ export const deleteAllData = () => async (dispatch, getState) => {
   if (total === 0) return;
 
   try {
-    let newSettingsFPath = null;
-
     if (allNoteIds.length > 0) {
       await deleteAllNotes(dispatch, allNoteIds, total, 0);
     }
@@ -2606,7 +2609,7 @@ export const deleteAllData = () => async (dispatch, getState) => {
     }
     if (settingsFPath) {
       const addedDT = Date.now();
-      newSettingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
+      const newSettingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
 
       await dataApi.putFiles([newSettingsFPath], [{ ...initialSettingsState }]);
       try {
@@ -2628,7 +2631,7 @@ export const deleteAllData = () => async (dispatch, getState) => {
     await fileApi.deleteFiles(staticFPaths);
 
     updatePopupUrlHash(SETTINGS_POPUP, false, null);
-    dispatch({ type: DELETE_ALL_DATA, payload: { newSettingsFPath } });
+    dispatch({ type: DELETE_ALL_DATA });
   } catch (e) {
     dispatch(updateDeleteAllDataProgress({
       total: -1,

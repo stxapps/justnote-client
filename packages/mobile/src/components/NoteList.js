@@ -49,7 +49,7 @@ const NoteList = (props) => {
   }, [dispatch]);
 
   const onAddBtnClick = () => {
-    dispatch(updateNoteId(NEW_NOTE));
+    dispatch(updateNoteId(NEW_NOTE, false, true));
   };
 
   const renderMaxError = () => {

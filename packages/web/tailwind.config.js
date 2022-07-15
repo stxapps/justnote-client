@@ -12,7 +12,7 @@ module.exports = {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],
       },
       minWidth: {
-        '28': '7rem',
+        '32': '8rem',
         '56': '14rem',
         '64': '16rem',
       },

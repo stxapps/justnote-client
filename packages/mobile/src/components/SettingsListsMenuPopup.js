@@ -5,17 +5,19 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
-import { moveListName, updateListNameEditors, updatePopup } from '../actions';
+import {
+  moveListName, updateListNameEditors, updatePopup, updateListNamesMode,
+} from '../actions';
 import {
   SETTINGS_LISTS_MENU_POPUP, LIST_NAMES_POPUP, MY_NOTES, TRASH, ARCHIVE, MODE_EDIT,
-  SWAP_LEFT, SWAP_RIGHT,
+  SWAP_LEFT, SWAP_RIGHT, LIST_NAMES_MODE_MOVE_LIST_NAME,
 } from '../types/const';
 import { makeGetListNameEditor } from '../selectors';
 import { tailwind } from '../stylesheets/tailwind';
 import { popupFMV } from '../types/animConfigs';
 
 import { useSafeAreaFrame, useSafeAreaInsets } from '.';
-import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
+import { computePosition, createLayouts, getOriginTranslate } from './MenuPopupRenderer';
 
 const SettingsListsMenuPopup = () => {
 
@@ -73,6 +75,7 @@ const SettingsListsMenuPopup = () => {
   const onMoveToBtnClick = () => {
     if (didClick.current) return;
     onCancelBtnClick();
+    dispatch(updateListNamesMode(LIST_NAMES_MODE_MOVE_LIST_NAME));
     dispatch(updatePopup(LIST_NAMES_POPUP, true, anchorPosition));
     didClick.current = true;
   };
@@ -186,7 +189,7 @@ const SettingsListsMenuPopup = () => {
     </View>
   );
 
-  let popupClassNames = 'absolute w-36 mt-1 rounded-md bg-white shadow-xl';
+  let popupClassNames = 'absolute w-36 bg-white border border-gray-100 rounded-md shadow-xl';
   let panel;
   let bgStyle = { opacity: 0 };
   if (popupSize) {
@@ -199,33 +202,24 @@ const SettingsListsMenuPopup = () => {
     const popupPosition = computePosition(layouts, null, 8);
 
     const { top, left, topOrigin, leftOrigin } = popupPosition;
-    const originClassName = getOriginClassName(topOrigin, leftOrigin);
+    const { startX, startY } = getOriginTranslate(
+      topOrigin, leftOrigin, popupSize.width, popupSize.height
+    );
 
     const popupStyle = { top, left, opacity: popupAnim, transform: [] };
-    if (originClassName === 'origin-top-right') {
-      popupStyle.transform.push({
-        translateX: popupAnim.interpolate({
-          inputRange: [0, 1], outputRange: [popupSize.width / 2, 0],
-        }),
-      });
-      popupStyle.transform.push({
-        translateY: popupAnim.interpolate({
-          inputRange: [0, 1], outputRange: [-1 * popupSize.height / 2, 0],
-        }),
-      });
-    } else if (originClassName === 'origin-bottom-right') {
-      popupStyle.transform.push({
-        translateX: popupAnim.interpolate({
-          inputRange: [0, 1], outputRange: [popupSize.width / 2, 0],
-        }),
-      });
-      popupStyle.transform.push({
-        translateY: popupAnim.interpolate({
-          inputRange: [0, 1], outputRange: [popupSize.height / 2, 0],
-        }),
-      });
-    }
-    popupStyle.transform.push({ scale: popupAnim });
+    popupStyle.transform.push({
+      translateX: popupAnim.interpolate({
+        inputRange: [0, 1], outputRange: [startX, 0],
+      }),
+    });
+    popupStyle.transform.push({
+      translateY: popupAnim.interpolate({
+        inputRange: [0, 1], outputRange: [startY, 0],
+      }),
+    });
+    popupStyle.transform.push({
+      scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }),
+    });
     /* @ts-ignore */
     bgStyle = { opacity: popupAnim };
 

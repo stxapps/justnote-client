@@ -1,12 +1,19 @@
+import { createSelector } from 'reselect';
 import Url from 'url-parse';
 
 import {
-  HTTP, MAX_CHARS, CD_ROOT, STATUS,
-  ADDING, UPDATING, MOVING, DELETING, MERGING,
+  HTTP, MAX_CHARS, CD_ROOT, STATUS, NOTES, PINS,
+  ADDED, ADDING, UPDATING, MOVING, DELETING, MERGING,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, DIED_MERGING,
   VALID_URL, NO_URL, ASK_CONFIRM_URL,
   VALID_LIST_NAME, NO_LIST_NAME, TOO_LONG_LIST_NAME, DUPLICATE_LIST_NAME,
+  COM_JUSTNOTECC_SUPPORTER, ACTIVE, NO_RENEW, GRACE, ON_HOLD, PAUSED, UNKNOWN,
 } from '../types/const';
+import {
+  PIN_NOTE, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_ROLLBACK,
+  MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_ROLLBACK,
+} from '../types/actionTypes';
+import { _ } from './obj';
 
 export const containUrlProtocol = (url) => {
   const urlObj = new Url(url, {});
@@ -432,8 +439,10 @@ export const isBusyStatus = (status) => {
 };
 
 export const getLastHalfHeight = (height, textHeight, pt, pb, halfRatio = 0.6) => {
-  const x = Math.floor((height - pt - pb) / textHeight) - 1;
-  return Math.round((textHeight * x + textHeight * halfRatio) + pt + pb);
+  let x = height - pt - pb - (textHeight * halfRatio);
+  x = Math.floor(x / textHeight);
+
+  return Math.round((textHeight * x) + (textHeight * halfRatio) + pt + pb);
 };
 
 export const randInt = (max) => {
@@ -501,6 +510,18 @@ export const getFormattedDT = (dt) => {
   const min = String(d.getMinutes()).padStart(2, '0');
 
   return `${date} ${month} ${year} ${hour}:${min}`;
+};
+
+export const getFormattedDate = (d) => {
+  const months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+
+  const year = d.getFullYear();
+  const month = months[d.getMonth()];
+  const date = d.getDate();
+
+  return `${date} ${month} ${year}`;
 };
 
 export const stripHtml = (s) => {
@@ -764,4 +785,402 @@ export const indexOfClosingTag = (html, tag = '<div', closingTag = '</div>') => 
 export const getOffsetTop = (element) => {
   if (!element) return 0;
   return getOffsetTop(element.offsetParent) + element.offsetTop;
+};
+
+export const deriveSettingsState = (listNames, settings, initialState) => {
+  const state = settings ? { ...initialState, ...settings } : { ...initialState };
+  state.listNameMap = copyListNameObjs(state.listNameMap);
+
+  let i = 1;
+  for (const listName of listNames) {
+    if (!doContainListName(listName, state.listNameMap)) {
+      state.listNameMap.push(
+        { listName: listName, displayName: `<missing-name-${i}>` }
+      );
+      i += 1;
+    }
+  }
+
+  return state;
+};
+
+export const getValidProduct = (products) => {
+  if (!Array.isArray(products) || products.length === 0) return null;
+  for (const product of products) {
+    if (product.productId === COM_JUSTNOTECC_SUPPORTER) return product;
+  }
+  return null;
+};
+
+export const getLatestPurchase = (purchases) => {
+  if (!Array.isArray(purchases) || purchases.length === 0) return null;
+
+  const _purchases = purchases.sort((a, b) => {
+    return (new Date(b.endDate)).getTime() - (new Date(a.endDate)).getTime();
+  });
+
+  for (const status of [ACTIVE, NO_RENEW, GRACE, ON_HOLD, PAUSED]) {
+    const purchase = _purchases.find(p => p.status === status);
+    if (purchase) return purchase;
+  }
+
+  return _purchases[0];
+};
+
+export const getValidPurchase = (purchases) => {
+  const purchase = getLatestPurchase(purchases);
+
+  if (!purchase) return null;
+  if ([ACTIVE, NO_RENEW, GRACE, ON_HOLD, PAUSED].includes(purchase.status)) {
+    return purchase;
+  }
+  return null;
+};
+
+export const doEnableExtraFeatures = (purchases) => {
+  // If just purchased, enable extra features.
+  // Can have pro features or premium features that not included here,
+  //   just don't use this function to enable the features.
+  const purchase = getLatestPurchase(purchases);
+
+  if (!purchase) return false;
+  if ([ACTIVE, NO_RENEW, GRACE].includes(purchase.status)) return true;
+  if (purchase.status === UNKNOWN) return null;
+  return false;
+};
+
+export const createNoteFPath = (listName, fname, subName) => {
+  return `${NOTES}/${listName}/${fname}/${subName}`;
+};
+
+export const createNoteFName = (id, parentIds) => {
+  if (parentIds) return `${id}_${parentIds.join('-')}`;
+  return id;
+};
+
+export const extractNoteFPath = (fpath) => {
+  const rest1 = splitOnFirst(fpath, '/')[1];
+  const [listName, rest2] = splitOnFirst(rest1, '/');
+  const [fname, subName] = splitOnFirst(rest2, '/');
+  return { listName, fname, subName };
+};
+
+export const extractNoteFName = (fname) => {
+  if (!fname.includes('_')) return { id: fname, parentIds: null };
+
+  const [id, _parentIds] = fname.split('_');
+  const parentIds = _parentIds.split('-');
+  return { id, parentIds };
+};
+
+export const extractNoteId = (id) => {
+  let i;
+  for (i = id.length - 1; i <= 0; i--) {
+    if (/\d/.test(id[i])) break;
+  }
+
+  return { dt: parseInt(id.slice(0, i + 1), 10) };
+};
+
+export const createPinFPath = (rank, updatedDT, addedDT, id) => {
+  return `${PINS}/${rank}/${updatedDT}/${addedDT}/${id}.json`;
+};
+
+export const extractPinFPath = (fpath) => {
+  const [rank, updatedDTStr, addedDTStr, fname] = fpath.split('/').slice(1);
+
+  const updatedDT = parseInt(updatedDTStr, 10);
+  const addedDT = parseInt(addedDTStr, 10);
+
+  const dotIndex = fname.lastIndexOf('.');
+  const ext = fname.substring(dotIndex + 1);
+  const id = fname.substring(0, dotIndex);
+
+  return { rank, updatedDT, addedDT, id, ext };
+};
+
+export const copyFPaths = (fpaths) => {
+  const newNoteFPaths = [...fpaths.noteFPaths];
+  const newStaticFPaths = [...fpaths.staticFPaths];
+  const newPinFPaths = [...fpaths.pinFPaths];
+
+  return {
+    ...fpaths,
+    noteFPaths: newNoteFPaths,
+    staticFPaths: newStaticFPaths,
+    pinFPaths: newPinFPaths,
+  };
+};
+
+export const getNoteFPaths = (state) => {
+  if (
+    state.cachedFPaths &&
+    state.cachedFPaths.fpaths &&
+    Array.isArray(state.cachedFPaths.fpaths.noteFPaths)
+  ) {
+    return state.cachedFPaths.fpaths.noteFPaths;
+  }
+  return [];
+};
+
+const getNoteRootIds = (leafId, toParents) => {
+  const rootIds = [];
+
+  let pendingIds = [leafId];
+  while (pendingIds.length > 0) {
+    let id = pendingIds[0];
+    pendingIds = pendingIds.slice(1);
+
+    while (toParents[id]) {
+      const parents = toParents[id];
+      id = parents[0];
+      pendingIds.push(...parents.slice(1));
+    }
+
+    if (!rootIds.includes(id)) rootIds.push(id);
+  }
+
+  return rootIds;
+};
+
+const getNoteOldestRootId = (rootIds) => {
+  let rootId, addedDT;
+  for (const id of rootIds.sort()) {
+    const { dt } = extractNoteId(id);
+    if (!isNumber(addedDT) || dt < addedDT) {
+      addedDT = dt;
+      rootId = id;
+    }
+  }
+  return rootId;
+};
+
+const _listNoteIds = (noteFPaths) => {
+
+  const ids = [];
+  const toFPaths = {};
+  const toParents = {};
+  const toChildren = {};
+  for (const fpath of noteFPaths) {
+    const { fname } = extractNoteFPath(fpath);
+    const { id, parentIds } = extractNoteFName(fname);
+
+    if (!toFPaths[id]) toFPaths[id] = [];
+    toFPaths[id].push(fpath);
+
+    if (ids.includes(id)) continue;
+    ids.push(id);
+
+    if (parentIds) {
+      toParents[id] = parentIds;
+      for (const pid of parentIds) {
+        if (!toChildren[pid]) toChildren[pid] = [];
+        toChildren[pid].push(id);
+      }
+    } else {
+      toParents[id] = null;
+    }
+  }
+
+  const leafIds = [];
+  for (const id of ids) {
+    if (!toChildren[id]) {
+      if (id.startsWith('deleted')) continue;
+      leafIds.push(id);
+    }
+  }
+
+  const toRootIds = {};
+  for (const id of ids) {
+    const rootIds = getNoteRootIds(id, toParents);
+    const rootId = getNoteOldestRootId(rootIds);
+    toRootIds[id] = rootId;
+  }
+
+  const toLeafIds = {};
+  for (const id of leafIds) {
+    const rootId = toRootIds[id];
+
+    if (!toLeafIds[rootId]) toLeafIds[rootId] = [];
+    toLeafIds[rootId].push(id);
+  }
+
+  const noteIds = [];
+  const conflictedIds = [];
+  for (const id of leafIds) {
+    const parentIds = toParents[id];
+
+    const rootId = toRootIds[id];
+    const { dt: addedDT } = extractNoteId(rootId);
+    const { dt: updatedDT } = extractNoteId(id);
+
+    const tIds = toLeafIds[rootId];
+    const isConflicted = tIds.length > 1;
+    const conflictWith = isConflicted ? tIds : null;
+
+    const fpaths = toFPaths[id];
+    const { listName } = extractNoteFPath(fpaths[0]);
+
+    const noteId = {
+      parentIds, id, addedDT, updatedDT, isConflicted, conflictWith, fpaths, listName,
+    };
+
+    if (isConflicted) conflictedIds.push(noteId);
+    else noteIds.push(noteId);
+  }
+
+  const conflictWiths = Object.values(toLeafIds).filter(tIds => tIds.length > 1);
+
+  return { noteIds, conflictedIds, conflictWiths, toRootIds };
+};
+
+export const listNoteIds = createSelector(
+  noteFPaths => noteFPaths,
+  _listNoteIds,
+);
+
+export const getMainId = (id, toRootIds) => {
+  return toRootIds[id];
+};
+
+export const getPinFPaths = (state) => {
+  if (
+    state.cachedFPaths &&
+    state.cachedFPaths.fpaths &&
+    Array.isArray(state.cachedFPaths.fpaths.pinFPaths)
+  ) {
+    return state.cachedFPaths.fpaths.pinFPaths;
+  }
+  return [];
+};
+
+const _getPins = (pinFPaths, pendingPins, doExcludeUnpinning, toRootIds) => {
+  const pins = {};
+  for (const fpath of pinFPaths) {
+    const { rank, updatedDT, addedDT, id } = extractPinFPath(fpath);
+
+    const _id = id.startsWith('deleted') ? id.slice(7) : id;
+    const pinMainId = getMainId(_id, toRootIds);
+
+    // duplicate id, choose the latest updatedDT
+    if (pinMainId in pins && pins[pinMainId].updatedDT > updatedDT) continue;
+    pins[pinMainId] = { rank, updatedDT, addedDT, id };
+  }
+
+  for (const id in pendingPins) {
+    const { status, rank, updatedDT, addedDT } = pendingPins[id];
+    const pinMainId = getMainId(id, toRootIds);
+
+    if ([PIN_NOTE, PIN_NOTE_ROLLBACK].includes(status)) {
+      pins[pinMainId] = { status, rank, updatedDT, addedDT, id };
+    } else if ([UNPIN_NOTE, UNPIN_NOTE_ROLLBACK].includes(status)) {
+      if (doExcludeUnpinning) {
+        delete pins[pinMainId];
+      } else {
+        // Can't delete just yet, need for showing loading.
+        pins[pinMainId] = { status, rank, updatedDT, addedDT, id };
+      }
+    } else if ([
+      MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_ROLLBACK,
+    ].includes(status)) {
+      pins[pinMainId] = { status, rank, updatedDT, addedDT, id };
+    } else {
+      console.log('getPins: unsupport pin status: ', status);
+    }
+  }
+
+  const filteredPins = {};
+  for (const pinMainId in pins) {
+    if (pins[pinMainId].id.startsWith('deleted')) continue;
+    filteredPins[pinMainId] = pins[pinMainId];
+  }
+
+  return filteredPins;
+};
+
+/** @type {function(any, any, any, any): any} */
+export const getPins = createSelector(
+  (...args) => args[0],
+  (...args) => args[1],
+  (...args) => args[2],
+  (...args) => args[3],
+  _getPins,
+);
+
+export const separatePinnedValues = (
+  sortedValues, pinFPaths, pendingPins, toRootIds, getValueMainId,
+) => {
+  const pins = getPins(pinFPaths, pendingPins, true, toRootIds);
+
+  let values = [], pinnedValues = [];
+  for (const value of sortedValues) {
+    const valueMainId = getValueMainId(value);
+
+    if (valueMainId in pins) {
+      pinnedValues.push({ value, pin: pins[valueMainId] });
+    } else {
+      values.push(value);
+    }
+  }
+
+  pinnedValues = pinnedValues.sort((pinnedValueA, pinnedValueB) => {
+    if (pinnedValueA.pin.rank < pinnedValueB.pin.rank) return -1;
+    if (pinnedValueA.pin.rank > pinnedValueB.pin.rank) return 1;
+    return 0;
+  });
+
+  return [pinnedValues, values];
+};
+
+export const sortWithPins = (
+  sortedValues, pinFPaths, pendingPins, toRootIds, getValueMainId
+) => {
+  let [pinnedValues, values] = separatePinnedValues(
+    sortedValues, pinFPaths, pendingPins, toRootIds, getValueMainId,
+  );
+  pinnedValues = pinnedValues.map(pinnedValue => pinnedValue.value);
+
+  const pinnedAndSortedValues = [...pinnedValues, ...values];
+  return pinnedAndSortedValues;
+};
+
+export const isPinningStatus = (pinStatus) => {
+  return [
+    PIN_NOTE, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_ROLLBACK,
+    MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_ROLLBACK,
+  ].includes(pinStatus);
+};
+
+export const getFilteredNotes = (notes, listName) => {
+  if (!notes || !notes[listName]) return null;
+
+  const filteredNotes = _.select(
+    notes[listName],
+    STATUS,
+    [
+      ADDED, ADDING, UPDATING, MOVING, DIED_ADDING, DIED_UPDATING, DIED_MOVING,
+      DIED_DELETING,
+    ]
+  );
+  return filteredNotes;
+};
+
+export const sortNotes = (notes, sortOn, doDescendingOrder) => {
+  const sortedNotes = notes.sort((a, b) => {
+    return a[sortOn] - b[sortOn];
+  });
+  if (doDescendingOrder) sortedNotes.reverse();
+  return sortedNotes;
+};
+
+export const sortFilteredNotes = (filteredNotes, sortOn, doDescendingOrder) => {
+  return sortNotes(Object.values(filteredNotes), sortOn, doDescendingOrder);
+};
+
+export const getSortedNotes = (notes, listName, sortOn, doDescendingOrder) => {
+  const filteredNotes = getFilteredNotes(notes, listName);
+  if (!filteredNotes) return null;
+
+  const sortedNotes = sortFilteredNotes(filteredNotes, sortOn, doDescendingOrder);
+  return sortedNotes;
 };

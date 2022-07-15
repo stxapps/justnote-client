@@ -3,9 +3,13 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
-import { updatePopup, moveNotes } from '../actions';
+import {
+  updatePopup, moveNotesWithAction, updateMoveAction, updateDeleteAction,
+  updateListNamesMode,
+} from '../actions';
 import {
   LIST_NAMES_POPUP, CONFIRM_DELETE_POPUP, MY_NOTES, ARCHIVE, TRASH, LG_WIDTH,
+  MOVE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_COMMANDS, LIST_NAMES_MODE_MOVE_NOTES,
 } from '../types/const';
 import { getListNameMap } from '../selectors';
 import { getListNameDisplayName, getAllListNames } from '../utils';
@@ -26,32 +30,36 @@ const NoteCommands = (props) => {
 
   const onArchiveBtnClick = () => {
     if (didClick.current) return;
-    dispatch(moveNotes(ARCHIVE));
+    dispatch(moveNotesWithAction(ARCHIVE, MOVE_ACTION_NOTE_COMMANDS));
     if (isFullScreen) onToggleFullScreen();
     didClick.current = true;
   };
 
   const onRemoveBtnClick = () => {
     if (didClick.current) return;
-    dispatch(moveNotes(TRASH));
+    dispatch(moveNotesWithAction(TRASH, MOVE_ACTION_NOTE_COMMANDS));
     if (isFullScreen) onToggleFullScreen();
     didClick.current = true;
   };
 
   const onRestoreBtnClick = () => {
     if (didClick.current) return;
-    dispatch(moveNotes(MY_NOTES));
+    dispatch(moveNotesWithAction(MY_NOTES, MOVE_ACTION_NOTE_COMMANDS));
     if (isFullScreen) onToggleFullScreen();
     didClick.current = true;
   };
 
   const onDeleteBtnClick = () => {
+    dispatch(updateDeleteAction(DELETE_ACTION_NOTE_COMMANDS));
     dispatch(updatePopup(CONFIRM_DELETE_POPUP, true, null));
     if (isFullScreen) onToggleFullScreen();
   };
 
   const onMoveToBtnClick = () => {
     moveToBtn.current.measure((_fx, _fy, width, height, x, y) => {
+      dispatch(updateMoveAction(MOVE_ACTION_NOTE_COMMANDS));
+      dispatch(updateListNamesMode(LIST_NAMES_MODE_MOVE_NOTES));
+
       let rect;
       if (safeAreaWidth < LG_WIDTH) {
         const newX = x + 4, newY = y + 4;
@@ -72,7 +80,6 @@ const NoteCommands = (props) => {
           left: x, right: x + width,
         };
       }
-
       dispatch(updatePopup(LIST_NAMES_POPUP, true, rect));
       if (isFullScreen) onToggleFullScreen();
     });

@@ -9,9 +9,12 @@ module.exports = {
         green: colors.green,
       },
       minWidth: {
-        '28': '7rem',
+        '32': '8rem',
         '56': '14rem',
         '64': '16rem',
+      },
+      minHeight: {
+        'xl': '36rem',
       },
       maxWidth: {
         '48': '12rem',

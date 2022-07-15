@@ -6,12 +6,13 @@ import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
 import {
-  sync, updateSynced, signOut, updatePopup, updateSettingsPopup, updateBulkEdit,
+  sync, updateSynced, signOut, updatePopup, updateSettingsPopup, updateSettingsViewId,
+  updateBulkEdit,
 } from '../actions';
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import {
   DOMAIN_NAME, HASH_SUPPORT, SIGN_UP_POPUP, NOTE_LIST_MENU_POPUP,
-  CONFIRM_EXIT_DUMMY_POPUP, LG_WIDTH, SHOW_SYNCED,
+  CONFIRM_EXIT_DUMMY_POPUP, SETTINGS_VIEW_ACCOUNT, LG_WIDTH, SHOW_SYNCED,
 } from '../types/const';
 import { tailwind } from '../stylesheets/tailwind';
 import { popupFMV, rotateAnimConfig } from '../types/animConfigs';
@@ -53,6 +54,7 @@ const NoteListMenuPopup = () => {
 
   const onSettingsBtnClick = () => {
     onNoteListMenuCancelBtnClick();
+    dispatch(updateSettingsViewId(SETTINGS_VIEW_ACCOUNT, true));
     dispatch(updateSettingsPopup(true));
   };
 
@@ -206,12 +208,12 @@ const NoteListMenuPopup = () => {
   if (!derivedAnchorPosition) return null;
 
   const popupStyle = {
-    top: derivedAnchorPosition.top + derivedAnchorPosition.height,
+    top: derivedAnchorPosition.top + 4,
     opacity: popupAnim,
     transform: [],
   };
   if (safeAreaWidth < LG_WIDTH) {
-    popupStyle.right = (safeAreaWidth + insets.left) - derivedAnchorPosition.right + 16;
+    popupStyle.right = (safeAreaWidth + insets.left) - derivedAnchorPosition.right + 12;
     popupStyle.transform.push({
       translateX: popupAnim.interpolate({
         inputRange: [0, 1], outputRange: [0.05 * 148, 0],
@@ -223,7 +225,7 @@ const NoteListMenuPopup = () => {
       }),
     });
   } else {
-    popupStyle.left = derivedAnchorPosition.left + 16;
+    popupStyle.left = derivedAnchorPosition.left + 4;
     if (isBulkEditing) {
       popupStyle.transform.push({
         translateX: popupAnim.interpolate({
@@ -308,7 +310,7 @@ const NoteListMenuPopup = () => {
       <TouchableWithoutFeedback onPress={onNoteListMenuCancelBtnClick}>
         <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
       </TouchableWithoutFeedback>
-      <Animated.View style={[tailwind('absolute mt-1 rounded-md shadow-lg bg-white'), popupStyle]}>
+      <Animated.View style={[tailwind('absolute bg-white border border-gray-100 rounded-md shadow-lg'), popupStyle]}>
         <View style={tailwind('py-1')}>
           {buttons}
         </View>

@@ -7,20 +7,22 @@ import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
 import { updatePopup, moveNotes, moveToListName } from '../actions';
-import { LIST_NAMES_POPUP, TRASH } from '../types/const';
+import {
+  LIST_NAMES_POPUP, TRASH, LIST_NAMES_MODE_MOVE_NOTES, LIST_NAMES_MODE_MOVE_LIST_NAME,
+} from '../types/const';
 import { getListNameMap } from '../selectors';
 import {
   getLastHalfHeight, getListNameObj, getLongestListNameDisplayName,
   getMaxListNameChildrenSize,
 } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
-import { popupFMV, slideAnimConfig } from '../types/animConfigs';
+import { popupFMV, slideFMV } from '../types/animConfigs';
 
 import { useSafeAreaFrame, useSafeAreaInsets } from '.';
-import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
+import { computePosition, createLayouts, getOriginTranslate } from './MenuPopupRenderer';
 
-const MODE_MOVE_NOTES = 'MODE_MOVE_NOTES';
-const MODE_MOVE_LIST_NAME = 'MODE_MOVE_LIST_NAME';
+const MODE_MOVE_NOTES = LIST_NAMES_MODE_MOVE_NOTES;
+const MODE_MOVE_LIST_NAME = LIST_NAMES_MODE_MOVE_LIST_NAME;
 
 const ListNamesPopup = () => {
 
@@ -28,6 +30,7 @@ const ListNamesPopup = () => {
   const insets = useSafeAreaInsets();
   const isShown = useSelector(state => state.display.isListNamesPopupShown);
   const anchorPosition = useSelector(state => state.display.listNamesPopupPosition);
+  const mode = useSelector(state => state.display.listNamesMode);
   const listName = useSelector(state => state.display.listName);
   const selectingListName = useSelector(state => state.display.selectingListName);
   const listNameMap = useSelector(getListNameMap);
@@ -52,10 +55,6 @@ const ListNamesPopup = () => {
   const didClick = useRef(false);
   const dispatch = useDispatch();
 
-  const mode = useMemo(() => {
-    if (derivedSelectingListName) return MODE_MOVE_LIST_NAME;
-    return MODE_MOVE_NOTES;
-  }, [derivedSelectingListName]);
   const { listNameObj, parent, children } = useMemo(() => {
     const { listNameObj: obj, parent: p } = getListNameObj(
       currentListName, derivedListNameMap
@@ -108,7 +107,7 @@ const ListNamesPopup = () => {
   };
 
   const onForwardBtnClick = (selectedListName) => {
-    Animated.timing(slideAnim, { toValue: 1, ...slideAnimConfig }).start(() => {
+    Animated.timing(slideAnim, { toValue: 1, ...slideFMV }).start(() => {
       setCurrentListName(selectedListName);
       setForwardCount(forwardCount + 1);
     });
@@ -155,7 +154,7 @@ const ListNamesPopup = () => {
   }, [derivedIsShown, popupAnim, registerPopupBackHandler]);
 
   useEffect(() => {
-    Animated.timing(slideAnim, { toValue: 0, ...slideAnimConfig }).start();
+    Animated.timing(slideAnim, { toValue: 0, ...slideFMV }).start();
   }, [backCount, slideAnim]);
 
   if (derivedIsShown !== isShown) {
@@ -276,7 +275,7 @@ const ListNamesPopup = () => {
           </Animated.View>
         </View>
         <View style={tailwind('px-3 py-2.5 border-t border-gray-200 flex-row justify-end items-center')}>
-          <TouchableOpacity onPress={onMoveHereBtnClick} style={tailwind(`px-3 py-1.5 bg-white border ${moveHereDisabled ? 'border-gray-300' : 'border-gray-400'} rounded-full`)} disabled={moveHereDisabled}>
+          <TouchableOpacity onPress={onMoveHereBtnClick} style={tailwind(`px-3 py-1.5 bg-white border ${moveHereDisabled ? 'border-gray-300' : 'border-gray-400'} rounded-md`)} disabled={moveHereDisabled}>
             <Text style={tailwind(`text-xs ${moveHereDisabled ? 'text-gray-400' : 'text-gray-500'} font-normal`)}>{moveHereDisabled ? 'View only' : 'Move here'}</Text>
           </TouchableOpacity>
         </View>
@@ -292,62 +291,31 @@ const ListNamesPopup = () => {
   const popupPosition = computePosition(layouts, null, 8);
 
   const { top, left, topOrigin, leftOrigin } = popupPosition;
-  const originClassName = getOriginClassName(topOrigin, leftOrigin);
+  const { startX, startY } = getOriginTranslate(
+    topOrigin, leftOrigin, popupWidth, popupHeight
+  );
 
   const popupStyle = {
     top, left,
     width: popupWidth, height: popupHeight,
     opacity: popupAnim, transform: [],
   };
-  if (originClassName === 'origin-top-left') {
-    popupStyle.transform.push({
-      translateX: popupAnim.interpolate({
-        inputRange: [0, 1], outputRange: [-1 * popupWidth / 2, 0],
-      }),
-    });
-    popupStyle.transform.push({
-      translateY: popupAnim.interpolate({
-        inputRange: [0, 1], outputRange: [-1 * popupHeight / 2, 0],
-      }),
-    });
-  } else if (originClassName === 'origin-top-right') {
-    popupStyle.transform.push({
-      translateX: popupAnim.interpolate({
-        inputRange: [0, 1], outputRange: [popupWidth / 2, 0],
-      }),
-    });
-    popupStyle.transform.push({
-      translateY: popupAnim.interpolate({
-        inputRange: [0, 1], outputRange: [-1 * popupHeight / 2, 0],
-      }),
-    });
-  } else if (originClassName === 'origin-bottom-left') {
-    popupStyle.transform.push({
-      translateX: popupAnim.interpolate({
-        inputRange: [0, 1], outputRange: [-1 * popupWidth / 2, 0],
-      }),
-    });
-    popupStyle.transform.push({
-      translateY: popupAnim.interpolate({
-        inputRange: [0, 1], outputRange: [popupHeight / 2, 0],
-      }),
-    });
-  } else if (originClassName === 'origin-bottom-right') {
-    popupStyle.transform.push({
-      translateX: popupAnim.interpolate({
-        inputRange: [0, 1], outputRange: [popupWidth / 2, 0],
-      }),
-    });
-    popupStyle.transform.push({
-      translateY: popupAnim.interpolate({
-        inputRange: [0, 1], outputRange: [popupHeight / 2, 0],
-      }),
-    });
-  }
-  popupStyle.transform.push({ scale: popupAnim });
+  popupStyle.transform.push({
+    translateX: popupAnim.interpolate({
+      inputRange: [0, 1], outputRange: [startX, 0],
+    }),
+  });
+  popupStyle.transform.push({
+    translateY: popupAnim.interpolate({
+      inputRange: [0, 1], outputRange: [startY, 0],
+    }),
+  });
+  popupStyle.transform.push({
+    scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }),
+  });
 
   const panel = (
-    <Animated.View style={[tailwind('absolute mt-1 rounded-md bg-white shadow-xl'), popupStyle]}>
+    <Animated.View style={[tailwind('absolute bg-white border border-gray-100 rounded-md shadow-xl'), popupStyle]}>
       {_render()}
     </Animated.View>
   );

@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import {
   updatePopupUrlHash, moveNotesWithAction, updateMoveAction, updateDeleteAction,
-  updateListNamesMode
+  updateListNamesMode,
 } from '../actions';
 import {
   LIST_NAMES_POPUP, CONFIRM_DELETE_POPUP, MY_NOTES, ARCHIVE, TRASH, LG_WIDTH,
