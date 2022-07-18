@@ -50,7 +50,7 @@ const NoteListItems = () => {
 
     const windowBottom = windowHeight + scrollTop;
     if (windowBottom > (scrollHeight * 0.96)) dispatch(fetchMore());
-  }, 16);
+  }, 200);
 
   const onFetchMoreBtnClick = () => {
     dispatch(fetchMore());

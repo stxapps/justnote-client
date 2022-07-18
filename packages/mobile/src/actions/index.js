@@ -1496,6 +1496,8 @@ export const sync = (
     fpaths = []; contents = [];
     for (const fpath of leafPinFPaths) {
       if (_pinFPaths.includes(fpath)) continue;
+      haveUpdate = true;
+
       fpaths.push(fpath);
       contents.push({});
     }
