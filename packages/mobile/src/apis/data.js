@@ -1,47 +1,10 @@
 import mmkvStorage from '../mmkvStorage';
+import { INDEX, DOT_JSON, N_NOTES, MAX_TRY, TRASH, N_DAYS } from '../types/const';
 import {
-  NOTES, IMAGES, SETTINGS, PINS, INDEX, DOT_JSON, N_NOTES, MAX_TRY, TRASH, N_DAYS,
-} from '../types/const';
-import {
-  isNumber, createNoteFPath, createNoteFName, extractNoteFPath, createPinFPath,
-  copyFPaths, getMainId, listNoteIds, sortWithPins,
+  createNoteFPath, createNoteFName, extractNoteFPath, createPinFPath,
+  addFPath, deleteFPath, copyFPaths, getMainId, listNoteIds, sortWithPins,
 } from '../utils';
 import { cachedFPaths } from '../vars';
-
-const addFPath = (fpaths, fpath) => {
-  if (fpath.startsWith(NOTES)) {
-    if (!fpaths.noteFPaths.includes(fpath)) fpaths.noteFPaths.push(fpath);
-  } else if (fpath.startsWith(IMAGES)) {
-    if (!fpaths.staticFPaths.includes(fpath)) fpaths.staticFPaths.push(fpath);
-  } else if (fpath.startsWith(SETTINGS)) {
-    if (!fpaths.settingsFPath) fpaths.settingsFPath = fpath;
-    else {
-      const dt = parseInt(
-        fpaths.settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10
-      );
-      const _dt = parseInt(fpath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10);
-      if (isNumber(dt) && isNumber(_dt) && dt < _dt) fpaths.settingsFPath = fpath;
-    }
-  } else if (fpath.startsWith(PINS)) {
-    if (!fpaths.pinFPaths.includes(fpath)) fpaths.pinFPaths.push(fpath);
-  } else {
-    console.log(`Invalid file path: ${fpath}`);
-  }
-};
-
-const deleteFPath = (fpaths, fpath) => {
-  if (fpath.startsWith(NOTES)) {
-    fpaths.noteFPaths = fpaths.noteFPaths.filter(el => el !== fpath);
-  } else if (fpath.startsWith(IMAGES)) {
-    fpaths.staticFPaths = fpaths.staticFPaths.filter(el => el !== fpath);
-  } else if (fpath.startsWith(SETTINGS)) {
-    if (fpaths.settingsFPath === fpath) fpaths.settingsFPath = null;
-  } else if (fpath.startsWith(PINS)) {
-    fpaths.pinFPaths = fpaths.pinFPaths.filter(el => el !== fpath);
-  } else {
-    console.log(`Invalid file path: ${fpath}`);
-  }
-};
 
 const _listFPaths = async () => {
   const fpaths = {
@@ -426,7 +389,7 @@ const putPins = async (params) => {
   const fpaths = [], contents = [];
   for (const pin of pins) {
     fpaths.push(createPinFPath(pin.rank, pin.updatedDT, pin.addedDT, pin.id));
-    contents.push(JSON.stringify({}));
+    contents.push({});
   }
 
   await batchPutFileWithRetry(fpaths, contents, 0);

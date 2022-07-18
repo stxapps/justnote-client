@@ -1,47 +1,10 @@
 import userSession from '../userSession';
+import { INDEX, DOT_JSON, N_NOTES, MAX_TRY, TRASH, N_DAYS } from '../types/const';
 import {
-  NOTES, IMAGES, SETTINGS, PINS, INDEX, DOT_JSON, N_NOTES, MAX_TRY, TRASH, N_DAYS,
-} from '../types/const';
-import {
-  isNumber, createNoteFPath, createNoteFName, extractNoteFPath, createPinFPath,
-  copyFPaths, getMainId, listNoteIds, sortWithPins,
+  createNoteFPath, createNoteFName, extractNoteFPath, createPinFPath,
+  addFPath, deleteFPath, copyFPaths, getMainId, listNoteIds, sortWithPins,
 } from '../utils';
 import { cachedFPaths } from '../vars';
-
-const addFPath = (fpaths, fpath) => {
-  if (fpath.startsWith(NOTES)) {
-    if (!fpaths.noteFPaths.includes(fpath)) fpaths.noteFPaths.push(fpath);
-  } else if (fpath.startsWith(IMAGES)) {
-    if (!fpaths.staticFPaths.includes(fpath)) fpaths.staticFPaths.push(fpath);
-  } else if (fpath.startsWith(SETTINGS)) {
-    if (!fpaths.settingsFPath) fpaths.settingsFPath = fpath;
-    else {
-      const dt = parseInt(
-        fpaths.settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10
-      );
-      const _dt = parseInt(fpath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10);
-      if (isNumber(dt) && isNumber(_dt) && dt < _dt) fpaths.settingsFPath = fpath;
-    }
-  } else if (fpath.startsWith(PINS)) {
-    if (!fpaths.pinFPaths.includes(fpath)) fpaths.pinFPaths.push(fpath);
-  } else {
-    console.log(`Invalid file path: ${fpath}`);
-  }
-};
-
-const deleteFPath = (fpaths, fpath) => {
-  if (fpath.startsWith(NOTES)) {
-    fpaths.noteFPaths = fpaths.noteFPaths.filter(el => el !== fpath);
-  } else if (fpath.startsWith(IMAGES)) {
-    fpaths.staticFPaths = fpaths.staticFPaths.filter(el => el !== fpath);
-  } else if (fpath.startsWith(SETTINGS)) {
-    if (fpaths.settingsFPath === fpath) fpaths.settingsFPath = null;
-  } else if (fpath.startsWith(PINS)) {
-    fpaths.pinFPaths = fpaths.pinFPaths.filter(el => el !== fpath);
-  } else {
-    console.log(`Invalid file path: ${fpath}`);
-  }
-};
 
 const _listFPaths = async () => {
   const fpaths = {
@@ -154,7 +117,7 @@ const fetch = async (params) => {
 
   let settings;
   if (settingsFPath && doFetchSettings) {
-    settings = JSON.parse(/** @type {string} */(await userSession.getFile(settingsFPath)));
+    settings = await userSession.getFile(settingsFPath);
 
     sortOn = settings.sortOn;
     doDescendingOrder = settings.doDescendingOrder;
@@ -193,7 +156,6 @@ const fetch = async (params) => {
   const responses = await batchGetFileWithRetry(_fpaths, 0, true);
   const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
   for (let { fpath, content } of responses) {
-    if (fpath.endsWith(INDEX + DOT_JSON)) content = JSON.parse(content);
     fpaths.push(fpath);
     contents.push(content);
   }
@@ -251,7 +213,6 @@ const fetchMore = async (params) => {
   const responses = await batchGetFileWithRetry(_fpaths, 0, true);
   const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
   for (let { fpath, content } of responses) {
-    if (fpath.endsWith(INDEX + DOT_JSON)) content = JSON.parse(content);
     fpaths.push(fpath);
     contents.push(content);
   }
@@ -299,7 +260,7 @@ const putNotes = async (params) => {
   for (const note of notes) {
     const fname = createNoteFName(note.id, note.parentIds);
     fpaths.push(createNoteFPath(listName, fname, INDEX + DOT_JSON));
-    contents.push(JSON.stringify({ title: note.title, body: note.body }));
+    contents.push({ title: note.title, body: note.body });
     if (note.media) {
       for (const { name, content } of note.media) {
         fpaths.push(createNoteFPath(listName, fname, name));
@@ -405,12 +366,7 @@ const getFiles = async (_fpaths, dangerouslyIgnoreError = false) => {
       selectedFPaths, 0, dangerouslyIgnoreError
     );
     fpaths.push(...responses.map(({ fpath }) => fpath));
-    contents.push(...responses.map(({ fpath, content }) => {
-      if (fpath.endsWith(INDEX + DOT_JSON) || fpath.startsWith(SETTINGS)) {
-        content = JSON.parse(content);
-      }
-      return content;
-    }));
+    contents.push(...responses.map(({ content }) => content));
   }
 
   return { fpaths, contents };
@@ -419,12 +375,7 @@ const getFiles = async (_fpaths, dangerouslyIgnoreError = false) => {
 const putFiles = async (fpaths, contents) => {
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
     const _fpaths = fpaths.slice(i, i + N_NOTES);
-    const _contents = contents.slice(i, i + N_NOTES).map((content, k) => {
-      if (_fpaths[k].endsWith(INDEX + DOT_JSON) || _fpaths[k].startsWith(SETTINGS)) {
-        content = JSON.stringify(content);
-      }
-      return content;
-    });
+    const _contents = contents.slice(i, i + N_NOTES);
     await batchPutFileWithRetry(_fpaths, _contents, 0);
   }
 };
@@ -442,7 +393,7 @@ const putPins = async (params) => {
   const fpaths = [], contents = [];
   for (const pin of pins) {
     fpaths.push(createPinFPath(pin.rank, pin.updatedDT, pin.addedDT, pin.id));
-    contents.push(JSON.stringify({}));
+    contents.push({});
   }
 
   await batchPutFileWithRetry(fpaths, contents, 0);

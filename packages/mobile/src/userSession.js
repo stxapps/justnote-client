@@ -1,6 +1,7 @@
 // @ts-ignore
 import RNBlockstackSdk from 'react-native-blockstack';
 import { Dirs } from 'react-native-file-access';
+import { DOT_JSON } from './types/const';
 
 const hasSession = async () => {
   const { hasSession: hs } = await RNBlockstackSdk.hasSession();
@@ -40,6 +41,7 @@ const loadUserData = async () => {
 
 const putFileOptions = { encrypt: true, dir: Dirs.DocumentDir };
 const putFile = async (path, content, options = putFileOptions) => {
+  if (path.endsWith(DOT_JSON)) content = JSON.stringify(content);
   const { fileUrl } = await RNBlockstackSdk.putFile(path, content, options);
   return fileUrl;
 };
@@ -47,8 +49,13 @@ const putFile = async (path, content, options = putFileOptions) => {
 const getFileOptions = { decrypt: true, dir: Dirs.DocumentDir };
 const getFile = async (path, options = getFileOptions) => {
   const result = await RNBlockstackSdk.getFile(path, options);
-  if ('fileContentsEncoded' in result) return result.fileContentsEncoded;
-  return result.fileContents;
+
+  let content;
+  if ('fileContentsEncoded' in result) content = result.fileContentsEncoded;
+  else content = result.fileContents;
+
+  if (path.endsWith(DOT_JSON)) content = JSON.parse(content);
+  return content;
 };
 
 const deleteFile = async (path, options = { wasSigned: false }) => {

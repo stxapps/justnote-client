@@ -1,37 +1,25 @@
 import userSession from '../userSession';
-import {
-  NOTES, IMAGES, SETTINGS, INDEX, DOT_JSON, N_NOTES, MAX_TRY,
-} from '../types/const';
-import { isNumber } from '../utils';
+import { N_NOTES, MAX_TRY } from '../types/const';
+import { addFPath, deleteFPath, copyFPaths } from '../utils';
+import { cachedServerFPaths } from '../vars';
 
-const listFPaths = async () => {
-
-  const noteFPaths = [];
-  const staticFPaths = [];
-  let settingsFPath = null;
-
+const _listFPaths = async () => {
+  const fpaths = {
+    noteFPaths: [], staticFPaths: [], settingsFPath: null, pinFPaths: [],
+  };
   await userSession.listFiles((fpath) => {
-    if (fpath.startsWith(NOTES)) {
-      noteFPaths.push(fpath);
-    } else if (fpath.startsWith(IMAGES)) {
-      staticFPaths.push(fpath);
-    } else if (fpath.startsWith(SETTINGS)) {
-      if (!settingsFPath) settingsFPath = fpath;
-      else {
-        const dt = parseInt(
-          settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10
-        );
-        const _dt = parseInt(fpath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10);
-        if (isNumber(dt) && isNumber(_dt) && dt < _dt) settingsFPath = fpath;
-      }
-    } else {
-      console.log(`Invalid file path: ${fpath}`);
-    }
-
+    addFPath(fpaths, fpath);
     return true;
   });
+  return fpaths;
+};
 
-  return { noteFPaths, staticFPaths, settingsFPath };
+const listFPaths = async (doForce = false) => {
+  if (cachedServerFPaths.fpaths && !doForce) {
+    return copyFPaths(cachedServerFPaths.fpaths);
+  }
+  cachedServerFPaths.fpaths = await _listFPaths();
+  return copyFPaths(cachedServerFPaths.fpaths);
 };
 
 const batchGetFileWithRetry = async (
@@ -74,7 +62,11 @@ const batchPutFileWithRetry = async (fpaths, contents, callCount) => {
   const responses = await Promise.all(
     fpaths.map((fpath, i) =>
       userSession.putFile(fpath, contents[i])
-        .then(publicUrl => ({ publicUrl, fpath, success: true }))
+        .then(publicUrl => {
+          addFPath(cachedServerFPaths.fpaths, fpath);
+          cachedServerFPaths.fpaths = copyFPaths(cachedServerFPaths.fpaths);
+          return { publicUrl, fpath, success: true };
+        })
         .catch(error => ({ error, fpath, content: contents[i], success: false }))
     )
   );
@@ -100,7 +92,11 @@ export const batchDeleteFileWithRetry = async (fpaths, callCount) => {
   const responses = await Promise.all(
     fpaths.map((fpath) =>
       userSession.deleteFile(fpath)
-        .then(() => ({ fpath, success: true }))
+        .then(() => {
+          deleteFPath(cachedServerFPaths.fpaths, fpath);
+          cachedServerFPaths.fpaths = copyFPaths(cachedServerFPaths.fpaths);
+          return { fpath, success: true };
+        })
         .catch(error => {
           // BUG ALERT
           // Treat not found error as not an error as local data might be out-dated.
@@ -140,12 +136,7 @@ const getFiles = async (_fpaths, dangerouslyIgnoreError = false) => {
       selectedFPaths, 0, dangerouslyIgnoreError
     );
     fpaths.push(...responses.map(({ fpath }) => fpath));
-    contents.push(...responses.map(({ fpath, content }) => {
-      if (fpath.endsWith(INDEX + DOT_JSON) || fpath.startsWith(SETTINGS)) {
-        content = JSON.parse(content);
-      }
-      return content;
-    }));
+    contents.push(...responses.map(({ content }) => content));
   }
 
   return { fpaths, contents };
@@ -154,12 +145,7 @@ const getFiles = async (_fpaths, dangerouslyIgnoreError = false) => {
 const putFiles = async (fpaths, contents) => {
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
     const _fpaths = fpaths.slice(i, i + N_NOTES);
-    const _contents = contents.slice(i, i + N_NOTES).map((content, k) => {
-      if (_fpaths[k].endsWith(INDEX + DOT_JSON) || _fpaths[k].startsWith(SETTINGS)) {
-        content = JSON.stringify(content);
-      }
-      return content;
-    });
+    const _contents = contents.slice(i, i + N_NOTES);
     await batchPutFileWithRetry(_fpaths, _contents, 0);
   }
 };

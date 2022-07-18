@@ -43,13 +43,16 @@ const NoteListMenuPopup = () => {
 
   const onSyncBtnClick = () => {
     onNoteListMenuCancelBtnClick();
-    if (syncProgress && syncProgress.status === SHOW_SYNCED) dispatch(updateSynced(true));
-    else dispatch(sync(true, 0));
+    if (syncProgress && syncProgress.status === SHOW_SYNCED) {
+      dispatch(updateSynced(true));
+    } else {
+      dispatch(sync(true, 0));
+    }
   };
 
   const onSelectBtnClick = () => {
     onNoteListMenuCancelBtnClick();
-    dispatch(updateBulkEdit(true));
+    dispatch(updateBulkEdit(true, null, false, true));
   };
 
   const onSettingsBtnClick = () => {

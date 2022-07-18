@@ -11,6 +11,10 @@ export const cachedFPaths = {
   fpaths: null,
 };
 
+export const cachedServerFPaths = {
+  fpaths: null,
+};
+
 const scrollPanel = {
   contentHeight: 0,
   layoutHeight: 0,
@@ -38,7 +42,7 @@ const updateSettings = {
 };
 
 const vars = {
-  scrollPanel, updateNoteId, changeListName, updateBulkEdit, deleteOldNotes,
-  updateSettings,
+  cachedFPaths, cachedServerFPaths, scrollPanel, updateNoteId, changeListName,
+  updateBulkEdit, deleteOldNotes, updateSettings,
 };
 export default vars;

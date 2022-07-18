@@ -2,7 +2,7 @@ import { createSelector } from 'reselect';
 import Url from 'url-parse';
 
 import {
-  HTTP, MAX_CHARS, CD_ROOT, STATUS, NOTES, PINS,
+  HTTP, MAX_CHARS, CD_ROOT, STATUS, NOTES, IMAGES, SETTINGS, PINS, DOT_JSON,
   ADDED, ADDING, UPDATING, MOVING, DELETING, MERGING,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, DIED_MERGING,
   VALID_URL, NO_URL, ASK_CONFIRM_URL,
@@ -883,7 +883,7 @@ export const extractNoteId = (id) => {
 };
 
 export const createPinFPath = (rank, updatedDT, addedDT, id) => {
-  return `${PINS}/${rank}/${updatedDT}/${addedDT}/${id}.json`;
+  return `${PINS}/${rank}/${updatedDT}/${addedDT}/${id}${DOT_JSON}`;
 };
 
 export const extractPinFPath = (fpath) => {
@@ -897,6 +897,41 @@ export const extractPinFPath = (fpath) => {
   const id = fname.substring(0, dotIndex);
 
   return { rank, updatedDT, addedDT, id, ext };
+};
+
+export const addFPath = (fpaths, fpath) => {
+  if (fpath.startsWith(NOTES)) {
+    if (!fpaths.noteFPaths.includes(fpath)) fpaths.noteFPaths.push(fpath);
+  } else if (fpath.startsWith(IMAGES)) {
+    if (!fpaths.staticFPaths.includes(fpath)) fpaths.staticFPaths.push(fpath);
+  } else if (fpath.startsWith(SETTINGS)) {
+    if (!fpaths.settingsFPath) fpaths.settingsFPath = fpath;
+    else {
+      const dt = parseInt(
+        fpaths.settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10
+      );
+      const _dt = parseInt(fpath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10);
+      if (isNumber(dt) && isNumber(_dt) && dt < _dt) fpaths.settingsFPath = fpath;
+    }
+  } else if (fpath.startsWith(PINS)) {
+    if (!fpaths.pinFPaths.includes(fpath)) fpaths.pinFPaths.push(fpath);
+  } else {
+    console.log(`Invalid file path: ${fpath}`);
+  }
+};
+
+export const deleteFPath = (fpaths, fpath) => {
+  if (fpath.startsWith(NOTES)) {
+    fpaths.noteFPaths = fpaths.noteFPaths.filter(el => el !== fpath);
+  } else if (fpath.startsWith(IMAGES)) {
+    fpaths.staticFPaths = fpaths.staticFPaths.filter(el => el !== fpath);
+  } else if (fpath.startsWith(SETTINGS)) {
+    if (fpaths.settingsFPath === fpath) fpaths.settingsFPath = null;
+  } else if (fpath.startsWith(PINS)) {
+    fpaths.pinFPaths = fpaths.pinFPaths.filter(el => el !== fpath);
+  } else {
+    console.log(`Invalid file path: ${fpath}`);
+  }
 };
 
 export const copyFPaths = (fpaths) => {

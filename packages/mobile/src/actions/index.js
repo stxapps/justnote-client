@@ -14,7 +14,7 @@ import {
   UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, UPDATE_SELECTING_NOTE_ID,
   FETCH, FETCH_COMMIT, FETCH_ROLLBACK, FETCH_MORE, FETCH_MORE_COMMIT,
-  FETCH_MORE_ROLLBACK, CACHE_FETCHED_MORE, UPDATE_FETCHED_MORE,
+  FETCH_MORE_ROLLBACK, CACHE_FETCHED_MORE, UPDATE_FETCHED_MORE, CANCEL_FETCHED_MORE,
   ADD_NOTE, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK, UPDATE_NOTE, UPDATE_NOTE_COMMIT,
   UPDATE_NOTE_ROLLBACK, MOVE_NOTES, MOVE_NOTES_COMMIT, MOVE_NOTES_ROLLBACK,
   DELETE_NOTES, DELETE_NOTES_COMMIT, DELETE_NOTES_ROLLBACK, CANCEL_DIED_NOTES,
@@ -60,7 +60,7 @@ import {
   N_DAYS, CD_ROOT, IMAGES, SETTINGS, INDEX, DOT_JSON, SHOW_SYNCED,
   IAP_VERIFY_URL, IAP_STATUS_URL, APPSTORE, PLAYSTORE, COM_JUSTNOTECC,
   COM_JUSTNOTECC_SUPPORTER, SIGNED_TEST_STRING, VALID, INVALID, UNKNOWN, ERROR, ACTIVE,
-  SWAP_LEFT, SWAP_RIGHT,
+  SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS,
 } from '../types/const';
 import {
   isEqual, sleep, separateUrlAndParam, getUserImageUrl, randomString,
@@ -100,6 +100,9 @@ export const init = () => async (dispatch, getState) => {
     if (nextAppState === 'active') {
       const isUserSignedIn = await userSession.isUserSignedIn();
       if (isUserSignedIn) {
+        const { purchaseStatus } = getState().iap;
+        if (purchaseStatus === REQUEST_PURCHASE) return;
+
         const interval = (Date.now() - _lastSyncDT) / 1000 / 60 / 60;
         dispatch(sync(interval > 1, 0));
       }
@@ -179,6 +182,10 @@ export const signOut = () => async (dispatch, getState) => {
   // clear file storage
   await fileApi.deleteAllFiles(IMAGES);
 
+  // clear cached fpaths
+  vars.cachedFPaths.fpaths = null;
+  vars.cachedServerFPaths.fpaths = null;
+
   // clear all user data!
   dispatch({
     type: RESET_STATE,
@@ -243,7 +250,9 @@ export const changeListName = (listName, doCheckEditing) => async (
     payload: listName,
   });
 
-  await updateFetchedMore(null, _listName)(dispatch, getState);
+  if (!(syncProgress && syncProgress.status === SHOW_SYNCED)) {
+    await updateFetchedMore(null, _listName)(dispatch, getState);
+  }
 };
 
 export const onChangeListName = (title, body, keyboardHeight = 0) => async (
@@ -425,20 +434,27 @@ export const fetch = (
 
 export const fetchMore = () => async (dispatch, getState) => {
 
+  const addedDT = Date.now();
+
+  const fetchMoreId = `${addedDT}-${randomString(4)}`;
   const listName = getState().display.listName;
   const ids = Object.keys(getState().notes[listName]);
   const sortOn = getState().settings.sortOn;
   const doDescendingOrder = getState().settings.doDescendingOrder;
   const pendingPins = getState().pendingPins;
 
-  const payload = { listName };
+  // If there is already cached fetchedMore with the same list name, just return.
+  const fetchedMore = getState().fetchedMore[listName];
+  if (fetchedMore) return;
+
+  const payload = {
+    fetchMoreId, listName, ids, sortOn, doDescendingOrder, pendingPins,
+  };
   dispatch({ type: FETCH_MORE, payload });
 
   try {
-    const params = { listName, ids, sortOn, doDescendingOrder, pendingPins };
-    const fetched = await dataApi.fetchMore(params);
-
-    dispatch({ type: FETCH_MORE_COMMIT, payload: { ...params, ...fetched } });
+    const fetched = await dataApi.fetchMore(payload);
+    dispatch({ type: FETCH_MORE_COMMIT, payload: { ...payload, ...fetched } });
   } catch (e) {
     dispatch({ type: FETCH_MORE_ROLLBACK, payload: { ...payload, error: e } });
   }
@@ -446,7 +462,20 @@ export const fetchMore = () => async (dispatch, getState) => {
 
 export const tryUpdateFetchedMore = (payload) => async (dispatch, getState) => {
 
-  const { listName, hasDisorder } = payload;
+  const { fetchMoreId, listName, hasDisorder } = payload;
+
+  let isInterrupted = false;
+  for (const id in getState().isFetchMoreInterrupted[listName]) {
+    if (id === fetchMoreId) {
+      isInterrupted = getState().isFetchMoreInterrupted[listName][id];
+      break;
+    }
+  }
+
+  if (isInterrupted) {
+    dispatch({ type: CANCEL_FETCHED_MORE, payload });
+    return;
+  }
 
   if (listName !== getState().display.listName || !hasDisorder) {
     dispatch(updateFetchedMore(payload));
@@ -459,9 +488,13 @@ export const tryUpdateFetchedMore = (payload) => async (dispatch, getState) => {
     const windowHeight = vars.scrollPanel.layoutHeight;
     const windowBottom = windowHeight + vars.scrollPanel.pageYOffset;
 
-    const isMenuPopupShown = getState().display.isNoteListItemMenuPopupShown;
+    const isPopupShown = (
+      getState().display.isNoteListItemMenuPopupShown ||
+      getState().display.isListNamesPopupShown ||
+      getState().display.isPinMenuPopupShown
+    );
 
-    if (windowBottom > (scrollHeight * 0.96) && !isMenuPopupShown) {
+    if (windowBottom > (scrollHeight * 0.96) && !isPopupShown) {
       dispatch(updateFetchedMore(payload));
       return;
     }
@@ -1041,6 +1074,11 @@ export const updateSettingsViewId = (
   viewId, isSidebarShown, didCloseAnimEnd, didSidebarAnimEnd
 ) => async (dispatch, getState) => {
 
+  const isUserSignedIn = getState().user.isUserSignedIn;
+  if (!isUserSignedIn && viewId === SETTINGS_VIEW_ACCOUNT) {
+    viewId = SETTINGS_VIEW_LISTS;
+  }
+
   const payload = {};
   if (viewId) payload.settingsViewId = viewId;
   if ([true, false].includes(isSidebarShown)) {
@@ -1207,13 +1245,13 @@ export const cancelDiedSettings = () => async (dispatch, getState) => {
  */
 let _isSyncing = false, _newSyncObj = /** @type Object */(null), _lastSyncDT = 0;
 export const sync = (
-  doForceServerListFPaths = false, updateAction = 0, haveUpdate = false
+  doForceListFPaths = false, updateAction = 0, haveUpdate = false
 ) => async (dispatch, getState) => {
 
   if (!getState().user.isUserSignedIn) return;
 
   if (_isSyncing) {
-    _newSyncObj = { doForceServerListFPaths, updateAction };
+    _newSyncObj = { doForceListFPaths, updateAction };
     return;
   }
   [_isSyncing, _newSyncObj] = [true, null];
@@ -1226,10 +1264,9 @@ export const sync = (
   dispatch({ type: SYNC });
 
   try {
-    let { noteFPaths, staticFPaths, settingsFPath } = getState().serverFPaths;
-    if (doForceServerListFPaths || !noteFPaths) {
-      ({ noteFPaths, staticFPaths, settingsFPath } = await serverApi.listFPaths());
-    }
+    const {
+      noteFPaths, staticFPaths, settingsFPath, pinFPaths,
+    } = await serverApi.listFPaths(doForceListFPaths);
     const { noteIds, conflictedIds } = listNoteIds(noteFPaths);
 
     const leafFPaths = [];
@@ -1240,7 +1277,8 @@ export const sync = (
       noteFPaths: _noteFPaths,
       staticFPaths: _staticFPaths,
       settingsFPath: _settingsFPath,
-    } = await dataApi.listFPaths();
+      pinFPaths: _pinFPaths,
+    } = await dataApi.listFPaths(doForceListFPaths);
     const {
       noteIds: _noteIds, conflictedIds: _conflictedIds,
     } = listNoteIds(_noteFPaths);
@@ -1251,7 +1289,7 @@ export const sync = (
 
     const allNoteFPaths = [...new Set([...noteFPaths, ..._noteFPaths])];
     const {
-      noteIds: allNoteIds, conflictedIds: allConflictedIds,
+      noteIds: allNoteIds, conflictedIds: allConflictedIds, toRootIds: allToRootIds,
     } = listNoteIds(allNoteFPaths);
 
     const allLeafFPaths = [];
@@ -1400,8 +1438,7 @@ export const sync = (
     else if (_settingsFPath) syncSettingsAction = 2;
     else syncSettingsAction = 0;
 
-    let syncSettingsFPath;
-    if (syncSettingsAction === 0) syncSettingsFPath = _settingsFPath;
+    if (syncSettingsAction === 0) { /* Do nothing */ }
     else if (syncSettingsAction === 1) {
       // Download from server to device
 
@@ -1412,7 +1449,6 @@ export const sync = (
       // Delete obsolete version in device
       if (_settingsFPath) await dataApi.deleteFiles([_settingsFPath]);
 
-      syncSettingsFPath = settingsFPath;
       haveUpdate = true;
     } else if (syncSettingsAction === 2) {
       // Upload from device to server
@@ -1423,18 +1459,59 @@ export const sync = (
 
       // Delete obsolete version in server
       if (settingsFPath) await serverApi.deleteFiles([settingsFPath]);
-
-      syncSettingsFPath = _settingsFPath;
     } else throw new Error(`Invalid syncSettingsAction: ${syncSettingsAction}`);
+
+    // Pins
+    const allPinFPaths = [...new Set([...pinFPaths, ..._pinFPaths])];
+    const leafPins = {};
+    for (const fpath of allPinFPaths) {
+      const { updatedDT, id } = extractPinFPath(fpath);
+
+      const _id = id.startsWith('deleted') ? id.slice(7) : id;
+      const pinMainId = getMainId(_id, allToRootIds);
+
+      if (pinMainId in leafPins && leafPins[pinMainId].updatedDT > updatedDT) continue;
+      leafPins[pinMainId] = { updatedDT, fpath };
+    }
+    const leafPinFPaths = Object.values(leafPins).map(el => el.fpath);
+
+    // 1. Server side: upload leaf pinFPaths
+    fpaths = []; contents = [];
+    for (const fpath of leafPinFPaths) {
+      if (pinFPaths.includes(fpath)) continue;
+      fpaths.push(fpath);
+      contents.push({});
+    }
+    await serverApi.putFiles(fpaths, contents);
+
+    // 2. Server side: delete obsolete pinFPaths
+    fpaths = []; contents = [];
+    for (const fpath of pinFPaths) {
+      if (leafPinFPaths.includes(fpath)) continue;
+      fpaths.push(fpath);
+    }
+    await serverApi.deleteFiles(fpaths);
+
+    // 3. Local side: download leaf pinFPaths
+    fpaths = []; contents = [];
+    for (const fpath of leafPinFPaths) {
+      if (_pinFPaths.includes(fpath)) continue;
+      fpaths.push(fpath);
+      contents.push({});
+    }
+    await dataApi.putFiles(fpaths, contents);
+
+    // 4. Local side: delete obsolete pinFpaths
+    fpaths = []; contents = [];
+    for (const fpath of _pinFPaths) {
+      if (leafPinFPaths.includes(fpath)) continue;
+      fpaths.push(fpath);
+    }
+    await dataApi.deleteFiles(fpaths);
 
     dispatch({
       type: SYNC_COMMIT,
       payload: {
-        serverFPaths: {
-          noteFPaths: allNoteFPaths,
-          staticFPaths: allLeafStaticFPaths,
-          settingsFPath: syncSettingsFPath,
-        },
         updateAction,
         haveUpdate,
         haveNewSync: _newSyncObj !== null,
@@ -1442,8 +1519,8 @@ export const sync = (
     });
 
     if (_newSyncObj) {
-      let _doForce = /** @type boolean */(_newSyncObj.doForceServerListFPaths);
-      if (doForceServerListFPaths) _doForce = false;
+      let _doForce = /** @type boolean */(_newSyncObj.doForceListFPaths);
+      if (doForceListFPaths) _doForce = false;
 
       /** @ts-ignore */
       const _updateAction = Math.min(updateAction, _newSyncObj.updateAction);
@@ -1472,27 +1549,25 @@ export const tryUpdateSynced = (updateAction, haveUpdate) => async (
 
   if (!haveUpdate) return;
 
-  const pageYOffset = getState().window.pageYOffset;
-  const noteId = getState().display.noteId;
-  const isPopupShown = (
-    getState().display.isProfilePopupShown ||
-    getState().display.isNoteListMenuPopupShown ||
-    getState().display.isMoveToPopupShown ||
-    getState().display.isSidebarPopupShown ||
-    getState().display.isSearchPopupShown ||
-    getState().display.isSettingsPopupShown ||
-    getState().display.isConfirmDeletePopupShown ||
-    getState().display.isConfirmDiscardPopupShown
-  );
   const isBulkEditing = getState().display.isBulkEditing;
-  const isEditorFocused = getState().display.isEditorFocused;
-  const isEditorBusy = getState().display.isEditorBusy;
-  if (
-    pageYOffset === 0 && noteId === null && !isPopupShown &&
-    !isBulkEditing && !isEditorFocused && !isEditorBusy
-  ) {
-    dispatch(updateSynced());
-    return;
+  if (!isBulkEditing) {
+    const pageYOffset = vars.scrollPanel.pageYOffset;
+    const noteId = getState().display.noteId;
+    const isPopupShown = (
+      getState().display.isNoteListItemMenuPopupShown ||
+      getState().display.isListNamesPopupShown ||
+      getState().display.isPinMenuPopupShown
+    );
+
+    const isEditorFocused = getState().display.isEditorFocused;
+    const isEditorBusy = getState().display.isEditorBusy;
+    if (
+      pageYOffset === 0 && noteId === null && !isPopupShown &&
+      !isEditorFocused && !isEditorBusy
+    ) {
+      dispatch(updateSynced());
+      return;
+    }
   }
 
   dispatch({ type: UPDATE_SYNC_PROGRESS, payload: { status: SHOW_SYNCED } });

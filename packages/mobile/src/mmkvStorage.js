@@ -1,8 +1,6 @@
 import MMKVStorage from 'react-native-mmkv-storage';
 
-import {
-  IS_USER_DUMMY, COLS_PANEL_STATE, INDEX, SETTINGS, DOT_JSON,
-} from './types/const';
+import { IS_USER_DUMMY, COLS_PANEL_STATE, DOT_JSON } from './types/const';
 
 let _instance = null;
 
@@ -22,17 +20,14 @@ const updateUserDummy = async (_isUserDummy) => {
 };
 
 const putFile = async (path, content) => {
-  if (path.endsWith(INDEX + DOT_JSON) || path.startsWith(SETTINGS)) {
-    await getInstance().setMapAsync(path, content);
-  } else await getInstance().setStringAsync(path, content);
+  if (path.endsWith(DOT_JSON)) await getInstance().setMapAsync(path, content);
+  else await getInstance().setStringAsync(path, content);
 
   return path;
 };
 
 const getFile = async (path) => {
-  if (path.endsWith(INDEX + DOT_JSON) || path.startsWith(SETTINGS)) {
-    return await getInstance().getMapAsync(path);
-  }
+  if (path.endsWith(DOT_JSON)) return await getInstance().getMapAsync(path);
   return await getInstance().getStringAsync(path);
 };
 

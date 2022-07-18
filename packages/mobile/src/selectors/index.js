@@ -164,6 +164,16 @@ export const getNotes = createSelectorNotes(
   }
 );
 
+export const getIsFetchingMore = createSelector(
+  state => state.display.listName,
+  state => state.isFetchMoreInterrupted,
+  (listName, isFetchMoreInterrupted) => {
+    const obj = isFetchMoreInterrupted[listName];
+    if (isObject(obj) && !isEqual(obj, {})) return true;
+    return false;
+  }
+);
+
 /** @return {function(any, any): initialListNameEditorState} */
 export const makeGetListNameEditor = () => {
   return createSelector(

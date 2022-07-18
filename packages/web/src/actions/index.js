@@ -12,7 +12,7 @@ import {
   UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, UPDATE_SELECTING_NOTE_ID,
   FETCH, FETCH_COMMIT, FETCH_ROLLBACK, FETCH_MORE, FETCH_MORE_COMMIT,
-  FETCH_MORE_ROLLBACK, CACHE_FETCHED_MORE, UPDATE_FETCHED_MORE,
+  FETCH_MORE_ROLLBACK, CACHE_FETCHED_MORE, UPDATE_FETCHED_MORE, CANCEL_FETCHED_MORE,
   ADD_NOTE, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK, UPDATE_NOTE, UPDATE_NOTE_COMMIT,
   UPDATE_NOTE_ROLLBACK, MOVE_NOTES, MOVE_NOTES_COMMIT, MOVE_NOTES_ROLLBACK,
   DELETE_NOTES, DELETE_NOTES_COMMIT, DELETE_NOTES_ROLLBACK, CANCEL_DIED_NOTES,
@@ -55,7 +55,7 @@ import {
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES,
   N_DAYS, CD_ROOT, NOTES, IMAGES, SETTINGS, INDEX, DOT_JSON, PINS, LG_WIDTH,
   IMAGE_FILE_EXTS, IAP_STATUS_URL, COM_JUSTNOTECC, SIGNED_TEST_STRING, VALID, ACTIVE,
-  SWAP_LEFT, SWAP_RIGHT,
+  SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS,
 } from '../types/const';
 import {
   throttle, extractUrl, urlHashToObj, objToUrlHash, isIPadIPhoneIPod, isBusyStatus,
@@ -249,6 +249,10 @@ export const signOut = () => async (dispatch, getState) => {
 
   // clear file storage
   await fileApi.deleteAllFiles();
+
+  // clear cached fpaths
+  vars.cachedFPaths.fpaths = null;
+  vars.cachedServerFPaths.fpaths = null;
 
   // clear all user data!
   dispatch({
@@ -774,22 +778,28 @@ export const fetch = (
 
 export const fetchMore = () => async (dispatch, getState) => {
 
+  const addedDT = Date.now();
+
+  const fetchMoreId = `${addedDT}-${randomString(4)}`;
   const listName = getState().display.listName;
   const ids = Object.keys(getState().notes[listName]);
   const sortOn = getState().settings.sortOn;
   const doDescendingOrder = getState().settings.doDescendingOrder;
   const pendingPins = getState().pendingPins;
 
-  const payload = { listName };
+  // If there is already cached fetchedMore with the same list name, just return.
+  const fetchedMore = getState().fetchedMore[listName];
+  if (fetchedMore) return;
+
+  const payload = {
+    fetchMoreId, listName, ids, sortOn, doDescendingOrder, pendingPins,
+  };
   dispatch({ type: FETCH_MORE, payload });
 
   try {
-    const params = { listName, ids, sortOn, doDescendingOrder, pendingPins };
-    const fetched = await dataApi.fetchMore(params);
-
+    const fetched = await dataApi.fetchMore(payload);
     await fetchStaticFiles(fetched.notes, null);
-
-    dispatch({ type: FETCH_MORE_COMMIT, payload: { ...params, ...fetched } });
+    dispatch({ type: FETCH_MORE_COMMIT, payload: { ...payload, ...fetched } });
   } catch (e) {
     dispatch({ type: FETCH_MORE_ROLLBACK, payload: { ...payload, error: e } });
   }
@@ -797,7 +807,20 @@ export const fetchMore = () => async (dispatch, getState) => {
 
 export const tryUpdateFetchedMore = (payload) => async (dispatch, getState) => {
 
-  const { listName, hasDisorder } = payload;
+  const { fetchMoreId, listName, hasDisorder } = payload;
+
+  let isInterrupted = false;
+  for (const id in getState().isFetchMoreInterrupted[listName]) {
+    if (id === fetchMoreId) {
+      isInterrupted = getState().isFetchMoreInterrupted[listName][id];
+      break;
+    }
+  }
+
+  if (isInterrupted) {
+    dispatch({ type: CANCEL_FETCHED_MORE, payload });
+    return;
+  }
 
   if (listName !== getState().display.listName || !hasDisorder) {
     dispatch(updateFetchedMore(payload));
@@ -810,9 +833,13 @@ export const tryUpdateFetchedMore = (payload) => async (dispatch, getState) => {
     const windowHeight = vars.scrollPanel.layoutHeight;
     const windowBottom = windowHeight + vars.scrollPanel.pageYOffset;
 
-    const isMenuPopupShown = getState().display.isNoteListItemMenuPopupShown;
+    const isPopupShown = (
+      getState().display.isNoteListItemMenuPopupShown ||
+      getState().display.isListNamesPopupShown ||
+      getState().display.isPinMenuPopupShown
+    );
 
-    if (windowBottom > (scrollHeight * 0.96) && !isMenuPopupShown) {
+    if (windowBottom > (scrollHeight * 0.96) && !isPopupShown) {
       dispatch(updateFetchedMore(payload));
       return;
     }
@@ -1433,6 +1460,11 @@ export const updateSettingsViewId = (
   viewId, isSidebarShown, didCloseAnimEnd, didSidebarAnimEnd
 ) => async (dispatch, getState) => {
 
+  const isUserSignedIn = getState().user.isUserSignedIn;
+  if (!isUserSignedIn && viewId === SETTINGS_VIEW_ACCOUNT) {
+    viewId = SETTINGS_VIEW_LISTS;
+  }
+
   const payload = {};
   if (viewId) payload.settingsViewId = viewId;
   if ([true, false].includes(isSidebarShown)) {
@@ -1759,12 +1791,7 @@ const importAllDataLoop = async (dispatch, fpaths, contents) => {
   try {
     for (let i = 0; i < fpaths.length; i += N_NOTES) {
       const _fpaths = fpaths.slice(i, i + N_NOTES);
-      const _contents = contents.slice(i, i + N_NOTES).map((content, j) => {
-        if (_fpaths[j].endsWith(INDEX + DOT_JSON) || _fpaths[j].startsWith(SETTINGS)) {
-          content = JSON.stringify(content);
-        }
-        return content;
-      });
+      const _contents = contents.slice(i, i + N_NOTES);
       await dataApi.batchPutFileWithRetry(_fpaths, _contents, 0);
 
       doneCount += _fpaths.length;

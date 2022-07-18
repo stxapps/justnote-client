@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { fetchMore, updateFetchedMore } from '../actions';
 import { MY_NOTES, TRASH, ARCHIVE } from '../types/const';
-import { getListNameMap, getNotes } from '../selectors';
+import { getListNameMap, getNotes, getIsFetchingMore } from '../selectors';
 import { getListNameDisplayName, throttle } from '../utils';
 import vars from '../vars';
 
@@ -18,7 +18,7 @@ const NoteListItems = () => {
   const hasFetchedMore = useSelector(
     state => state.fetchedMore[listName] ? true : false
   );
-  const isFetchingMore = useSelector(state => state.isFetchingMoreNotes[listName]);
+  const isFetchingMore = useSelector(state => getIsFetchingMore(state));
   const listChangedCount = useSelector(state => state.display.listChangedCount);
   const flatList = useRef(null);
   const dispatch = useDispatch();

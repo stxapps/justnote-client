@@ -1,15 +1,14 @@
 import { loop, Cmd } from 'redux-loop';
 
 import {
-  tryUpdateFetchedMore, deleteOldNotesInTrash, unpinNotes, sync,
+  tryUpdateFetchedMore, deleteOldNotesInTrash, unpinNotes, sync, tryUpdateSynced,
 } from '../actions';
 import {
   FETCH_COMMIT, FETCH_MORE_COMMIT, UPDATE_FETCHED_MORE, ADD_NOTE, ADD_NOTE_COMMIT,
   ADD_NOTE_ROLLBACK, UPDATE_NOTE, UPDATE_NOTE_COMMIT, UPDATE_NOTE_ROLLBACK,
-  MOVE_NOTES, MOVE_NOTES_COMMIT, MOVE_NOTES_ROLLBACK,
-  DELETE_NOTES, DELETE_NOTES_COMMIT, DELETE_NOTES_ROLLBACK,
-  CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
-  MERGE_NOTES_COMMIT, UPDATE_SETTINGS, CANCEL_DIED_SETTINGS,
+  MOVE_NOTES, MOVE_NOTES_COMMIT, MOVE_NOTES_ROLLBACK, DELETE_NOTES, DELETE_NOTES_COMMIT,
+  DELETE_NOTES_ROLLBACK, CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
+  MERGE_NOTES_COMMIT, UPDATE_SETTINGS, CANCEL_DIED_SETTINGS, SYNC_COMMIT,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
@@ -299,6 +298,17 @@ const notesReducer = (state = initialState, action) => {
     }
 
     return newState;
+  }
+
+  if (action.type === SYNC_COMMIT) {
+    const { updateAction, haveUpdate } = action.payload;
+
+    return loop(
+      state,
+      Cmd.run(
+        tryUpdateSynced(updateAction, haveUpdate), { args: [Cmd.dispatch, Cmd.getState] }
+      )
+    );
   }
 
   if (action.type === DELETE_ALL_DATA) {
