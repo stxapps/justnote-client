@@ -13,9 +13,8 @@ import {
   updateDeletingListName, updateListNameEditors, updatePopup,
 } from '../actions';
 import {
-  VALID_LIST_NAME, IN_USE_LIST_NAME,
-  NO_LIST_NAME, TOO_LONG_LIST_NAME, DUPLICATE_LIST_NAME,
-  SETTINGS_LISTS_MENU_POPUP, CONFIRM_DELETE_POPUP,
+  VALID_LIST_NAME, IN_USE_LIST_NAME, NO_LIST_NAME, TOO_LONG_LIST_NAME,
+  DUPLICATE_LIST_NAME, SETTINGS_LISTS_MENU_POPUP, CONFIRM_DELETE_POPUP,
   SWAP_LEFT, SWAP_RIGHT, MODE_VIEW, MODE_EDIT, SM_WIDTH,
 } from '../types/const';
 import { getListNameMap, makeGetListNameEditor } from '../selectors';

@@ -227,7 +227,7 @@ const batchPutFileWithRetry = async (fpaths, contents, callCount) => {
 
   const responses = await Promise.all(
     fpaths.map((fpath, i) =>
-      userSession.putFile(fpath, contents[i], { dangerouslyIgnoreEtag: true })
+      userSession.putFile(fpath, contents[i])
         .then(publicUrl => {
           addFPath(cachedFPaths.fpaths, fpath);
           cachedFPaths.fpaths = copyFPaths(cachedFPaths.fpaths);

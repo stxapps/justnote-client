@@ -38,7 +38,7 @@ const _SettingsPopupIap = (props) => {
         <Text style={tailwind('pb-2 text-xl text-gray-800 font-medium leading-6')}>Subscription</Text>
       </View>
       {purchase ? <IapPurchased purchase={purchase} /> : <IapHome onToRestoreIapViewBtnClick={onToRestoreIapViewBtnClick} />}
-    </View >
+    </View>
   );
 };
 

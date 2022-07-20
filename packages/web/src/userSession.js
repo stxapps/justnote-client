@@ -33,7 +33,8 @@ const loadUserData = () => {
   return _userSession.loadUserData();
 };
 
-const putFile = (path, content, options = {}) => {
+const putFileOptions = { dangerouslyIgnoreEtag: true };
+const putFile = (path, content, options = putFileOptions) => {
   if (path.endsWith(DOT_JSON)) content = JSON.stringify(content);
 
   const storage = new Storage({ userSession: _userSession });

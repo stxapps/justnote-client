@@ -165,7 +165,7 @@ const ListNamesPopup = () => {
       setDerivedSelectingListName(selectingListName);
       setDerivedListNameMap(listNameMap);
 
-      if (selectingListName) {
+      if (mode === MODE_MOVE_LIST_NAME) {
         const { parent: p } = getListNameObj(selectingListName, listNameMap);
         setCurrentListName(p);
       } else {

@@ -9,7 +9,7 @@ const hasMoreNotesReducer = (state = initialState, action) => {
   if (action.type === FETCH_COMMIT || action.type === UPDATE_FETCHED_MORE) {
     const { listName, hasMore } = action.payload;
 
-    if (hasMore) return { ...state, [listName]: hasMore };
+    if ([true, false].includes(hasMore)) return { ...state, [listName]: hasMore };
 
     const newState = {};
     for (const id in state) {

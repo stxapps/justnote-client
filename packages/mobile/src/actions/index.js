@@ -1,10 +1,10 @@
 import { Linking, AppState, Platform } from 'react-native';
-import axios from 'axios';
 import * as RNIap from 'react-native-iap';
 import { LexoRank } from '@wewatch/lexorank';
 
 import userSession from '../userSession';
 import mmkvStorage from '../mmkvStorage';
+import axios from '../axiosWrapper';
 import dataApi from '../apis/data';
 import serverApi from '../apis/server';
 import fileApi from '../apis/file';
@@ -1955,11 +1955,7 @@ const verifyPurchase = async (rawPurchase) => {
 
   let verifyResult;
   try {
-    const res = await axios.post(
-      IAP_VERIFY_URL,
-      reqBody,
-      { headers: { Referer: DOMAIN_NAME } }
-    );
+    const res = await axios.post(IAP_VERIFY_URL, reqBody);
     verifyResult = res.data;
   } catch (error) {
     console.log(`Error when contact IAP server to verify with reqBody: ${JSON.stringify(reqBody)}, Error: `, error);
@@ -1986,11 +1982,7 @@ const getIapStatus = async (doForce) => {
     doForce: doForce,
   };
 
-  const res = await axios.post(
-    IAP_STATUS_URL,
-    reqBody,
-    { headers: { Referer: DOMAIN_NAME } }
-  );
+  const res = await axios.post(IAP_STATUS_URL, reqBody);
   return res;
 };
 

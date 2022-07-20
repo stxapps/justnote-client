@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { fetchMore, updateFetchedMore } from '../actions';
 import { MY_NOTES, TRASH, ARCHIVE } from '../types/const';
 import { getListNameMap, getNotes, getIsFetchingMore } from '../selectors';
-import { getListNameDisplayName, throttle } from '../utils';
+import { getListNameDisplayName, debounce } from '../utils';
 import vars from '../vars';
 
 import NoteListItem from './NoteListItem';
@@ -29,7 +29,7 @@ const NoteListItems = () => {
     notes = [];
   }
 
-  const updateScrollY = throttle(() => {
+  const updateScrollY = useCallback(() => {
     if (!flatList.current) return;
 
     const scrollHeight = Math.max(
@@ -50,7 +50,7 @@ const NoteListItems = () => {
 
     const windowBottom = windowHeight + scrollTop;
     if (windowBottom > (scrollHeight * 0.96)) dispatch(fetchMore());
-  }, 200);
+  }, [hasMore, hasFetchedMore, isFetchingMore, dispatch]);
 
   const onFetchMoreBtnClick = () => {
     dispatch(fetchMore());
@@ -172,13 +172,17 @@ const NoteListItems = () => {
   }, [listChangedCount]);
 
   useEffect(() => {
+    // throttle may refer to stale updateScrollY with old isFetchingMore,
+    //   use debounce with immediate = true to prevent duplicate fetchMore.
+    const listener = debounce(updateScrollY, 16, true);
+
     const _flatList = flatList.current;
     if (_flatList && _flatList.addEventListener) {
-      _flatList.addEventListener('scroll', updateScrollY);
+      _flatList.addEventListener('scroll', listener);
     }
     return () => {
       if (_flatList && _flatList.addEventListener) {
-        _flatList.removeEventListener('scroll', updateScrollY);
+        _flatList.removeEventListener('scroll', listener);
       }
     };
   }, [updateScrollY]);

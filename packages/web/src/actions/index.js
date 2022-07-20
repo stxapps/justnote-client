@@ -1,9 +1,9 @@
 import Url from 'url-parse';
-import axios from 'axios';
 import { saveAs } from 'file-saver';
 import { LexoRank } from '@wewatch/lexorank';
 
 import userSession from '../userSession';
+import axios from '../axiosWrapper';
 import dataApi from '../apis/data';
 import fileApi from '../apis/file';
 import {
@@ -2685,10 +2685,7 @@ const getIapStatus = async (doForce) => {
     doForce: doForce,
   };
 
-  const res = await axios.post(
-    IAP_STATUS_URL,
-    reqBody,
-  );
+  const res = await axios.post(IAP_STATUS_URL, reqBody);
   return res;
 };
 
