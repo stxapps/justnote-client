@@ -396,6 +396,8 @@ PODS:
     - React-Core
     - SDWebImage (~> 5.11.1)
     - SDWebImageWebPCoder (~> 0.8.4)
+  - RNIap (8.2.1):
+    - React-Core
   - RNSVG (12.1.1):
     - React
   - SDWebImage (5.11.1):
@@ -410,7 +412,7 @@ PODS:
     - Yoga (~> 1.14)
 
 DEPENDENCIES:
-  - Blockstack (from `https://github.com/bracedotto/blockstack-ios.git`, commit `1b3c7b5`)
+  - Blockstack (from `https://github.com/bracedotto/blockstack-ios.git`, commit `32ffb14`)
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
@@ -474,6 +476,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - ReactNativeKeyboardManager (from `../node_modules/react-native-keyboard-manager`)
   - RNFastImage (from `../node_modules/react-native-fast-image`)
+  - RNIap (from `../node_modules/react-native-iap`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -507,7 +510,7 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   Blockstack:
-    :commit: 1b3c7b5
+    :commit: 32ffb14
     :git: https://github.com/bracedotto/blockstack-ios.git
   boost:
     :podspec: "../node_modules/react-native/third-party-podspecs/boost.podspec"
@@ -583,6 +586,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-keyboard-manager"
   RNFastImage:
     :path: "../node_modules/react-native-fast-image"
+  RNIap:
+    :path: "../node_modules/react-native-iap"
   RNSVG:
     :path: "../node_modules/react-native-svg"
   Yoga:
@@ -590,7 +595,7 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   Blockstack:
-    :commit: 1b3c7b5
+    :commit: 32ffb14
     :git: https://github.com/bracedotto/blockstack-ios.git
 
 SPEC CHECKSUMS:
@@ -653,6 +658,7 @@ SPEC CHECKSUMS:
   ReactCommon: 620442811dc6f707b4bf5e3b27d4f19c12d5a821
   ReactNativeKeyboardManager: 4fb4d82d670ec6c00e9a2d2cc576f7cbb14975d6
   RNFastImage: 1f2cab428712a4baaf78d6169eaec7f622556dd7
+  RNIap: 7b833f386ecee6e4ab3a5303332274bd6844e4d9
   RNSVG: 551acb6562324b1d52a4e0758f7ca0ec234e278f
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: f93010f3f6c031e2f8fb3081ca4ee6966c539815
@@ -660,6 +666,6 @@ SPEC CHECKSUMS:
   Yoga: 2b4a01651f42a32f82e6cef3830a3ba48088237f
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: cd76ae68281c11e39f7d9beed0c73b367cf599f8
+PODFILE CHECKSUM: 5f9c5987294aad9cc034f5dfa57b257233601bca
 
 COCOAPODS: 1.11.2

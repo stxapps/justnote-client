@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* JustnoteccTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* JustnoteccTests.m */; };
 		047A5CAB27393CF2006A8A3F /* Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047A5CAA27393CF2006A8A3F /* Dummy.swift */; };
+		04C735E6288813760059EEF1 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04C735E5288813760059EEF1 /* StoreKit.framework */; };
 		0BC7197F13B546509E1E73B2 /* Inter-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = B8D0E7DB53784459BA91B77C /* Inter-Regular.otf */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
@@ -52,6 +53,8 @@
 		047A5CA927393CF1006A8A3F /* Justnotecc-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Justnotecc-Bridging-Header.h"; sourceTree = "<group>"; };
 		047A5CAA27393CF2006A8A3F /* Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dummy.swift; sourceTree = "<group>"; };
 		049803CA2733ECBC00C89235 /* Justnotecc.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = Justnotecc.entitlements; path = Justnotecc/Justnotecc.entitlements; sourceTree = "<group>"; };
+		04C735E5288813760059EEF1 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		04C735E72888141F0059EEF1 /* supporter.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = supporter.storekit; sourceTree = "<group>"; };
 		0AB42F43606A4BA0BF884788 /* Inter-Black.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Black.otf"; path = "../src/fonts/Inter/Inter-Black.otf"; sourceTree = "<group>"; };
 		0E24341C7A23956080E46903 /* Pods-Justnotecc-JustnoteccTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Justnotecc-JustnoteccTests.debug.xcconfig"; path = "Target Support Files/Pods-Justnotecc-JustnoteccTests/Pods-Justnotecc-JustnoteccTests.debug.xcconfig"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* Justnotecc.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Justnotecc.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -100,6 +103,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AB993080B97080752D4DCC4F /* libPods-Justnotecc.a in Frameworks */,
+				04C735E6288813760059EEF1 /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -140,6 +144,7 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				04C735E5288813760059EEF1 /* StoreKit.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				CD7A271862A43B0D38ACBE29 /* libPods-Justnotecc.a */,
 				F860EC83455BAF9B90FB3E39 /* libPods-Justnotecc-JustnoteccTests.a */,
@@ -164,6 +169,7 @@
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				FD676130933048E915D58BA3 /* Pods */,
 				B60E6C4DA1F34C74B5533142 /* Resources */,
+				04C735E72888141F0059EEF1 /* supporter.storekit */,
 				047A5CAA27393CF2006A8A3F /* Dummy.swift */,
 				047A5CA927393CF1006A8A3F /* Justnotecc-Bridging-Header.h */,
 			);
