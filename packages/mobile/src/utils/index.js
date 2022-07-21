@@ -915,6 +915,8 @@ export const addFPath = (fpaths, fpath) => {
     }
   } else if (fpath.startsWith(PINS)) {
     if (!fpaths.pinFPaths.includes(fpath)) fpaths.pinFPaths.push(fpath);
+  } else if (fpath.startsWith('file://')) {
+    // Just ignore, for mobile downloads a static file and save to storage.
   } else {
     console.log(`Invalid file path: ${fpath}`);
   }
