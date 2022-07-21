@@ -35,6 +35,7 @@ const NoteListItemMenuPopup = () => {
   const listNameMap = useSelector(state => getListNameMap(state));
   const selectingNoteId = useSelector(state => state.display.selectingNoteId);
   const pinStatus = useSelector(state => getPinStatus(state, selectingNoteId));
+  const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
   const [popupSize, setPopupSize] = useState(null);
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
   const [derivedIsShown, setDerivedIsShown] = useState(isShown);
@@ -126,7 +127,7 @@ const NoteListItemMenuPopup = () => {
       // Only when no other pending actions and list name is not TRASH.
       // If busy, the menuBtn will be disabled.
       if (pinStatus === PINNED) menu = [...menu, MANAGE_PIN];
-      else if (pinStatus === null) menu = [...menu, PIN];
+      else if (isUserSignedIn && pinStatus === null) menu = [...menu, PIN];
     }
 
     return menu;
