@@ -1,10 +1,11 @@
+import { Platform } from 'react-native';
 import { createSelectorCreator, defaultMemoize, createSelector } from 'reselect';
 
 import {
   PINNED, ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE,
 } from '../types/const';
 import {
-  isStringIn, isObject, isArrayEqual, isEqual,
+  isStringIn, isObject, isArrayEqual, isEqual, getFormattedShortDate,
   getMainId, getValidProduct as _getValidProduct, getValidPurchase as _getValidPurchase,
   listNoteIds, getSortedNotes, sortWithPins, getNoteFPaths, getPinFPaths, getPins,
   doEnableExtraFeatures,
@@ -242,6 +243,10 @@ export const makeGetNoteDate = () => {
 
       const currentDate = new Date();
       const d = new Date(dt);
+
+      if (Platform.OS === 'ios') {
+        return getFormattedShortDate(d, d.getFullYear() === currentDate.getFullYear());
+      }
 
       let text;
       if (d.getFullYear() === currentDate.getFullYear()) {

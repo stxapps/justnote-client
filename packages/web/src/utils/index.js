@@ -524,6 +524,16 @@ export const getFormattedDate = (d) => {
   return `${date} ${month} ${year}`;
 };
 
+export const getFormattedShortDate = (d, doExcludeYear = false) => {
+  const month = d.getMonth() + 1;
+  const date = d.getDate();
+
+  if (doExcludeYear) return `${month}/${date}`
+
+  const year = d.getFullYear().toString().slice(-2);
+  return `${month}/${date}/${year}`;
+};
+
 export const stripHtml = (s) => {
   const codeRe = /&(nbsp|amp|quot|lt|gt);/g;
   const codeMap = { 'nbsp': ' ', 'amp': '&', 'quot': '"', 'lt': '<', 'gt': '>' };
