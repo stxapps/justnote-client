@@ -815,7 +815,7 @@ export const getValidProduct = (products) => {
 export const getLatestPurchase = (purchases) => {
   if (!Array.isArray(purchases) || purchases.length === 0) return null;
 
-  const _purchases = purchases.sort((a, b) => {
+  const _purchases = [...purchases].sort((a, b) => {
     return (new Date(b.endDate)).getTime() - (new Date(a.endDate)).getTime();
   });
 
@@ -982,7 +982,7 @@ const getNoteRootIds = (leafId, toParents) => {
 
 const getNoteOldestRootId = (rootIds) => {
   let rootId, addedDT;
-  for (const id of rootIds.sort()) {
+  for (const id of [...rootIds].sort()) {
     const { dt } = extractNoteId(id);
     if (!isNumber(addedDT) || dt < addedDT) {
       addedDT = dt;
@@ -1203,7 +1203,7 @@ export const getFilteredNotes = (notes, listName) => {
 };
 
 export const sortNotes = (notes, sortOn, doDescendingOrder) => {
-  const sortedNotes = notes.sort((a, b) => {
+  const sortedNotes = [...notes].sort((a, b) => {
     return a[sortOn] - b[sortOn];
   });
   if (doDescendingOrder) sortedNotes.reverse();
