@@ -380,7 +380,7 @@ export const onUpdateBulkEdit = (title, body, keyboardHeight = 0) => async (
   if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
     if (keyboardHeight > 0) dispatch(increaseBlurCount());
     dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_BULK_EDIT));
-    updatePopup(CONFIRM_DISCARD_POPUP, true);
+    dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
     return;
   }
 
@@ -788,7 +788,7 @@ export const deleteNotes = () => async (dispatch, getState) => {
     }
   } else if (deleteAction === DELETE_ACTION_NOTE_ITEM_MENU) {
     dispatch(_deleteNotes([selectingNoteId]));
-    updatePopup(NOTE_LIST_ITEM_MENU_POPUP, false);
+    dispatch(updatePopup(NOTE_LIST_ITEM_MENU_POPUP, false));
   } else {
     console.log('In deleteNotes, invalid deleteAction: ', deleteAction);
   }

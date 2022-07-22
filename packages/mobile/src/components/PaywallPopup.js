@@ -113,11 +113,11 @@ const PaywallPopup = () => {
             </View>
           </View>
         </View>
-        <View style={tailwind('mt-5 sm:mt-6 sm:flex-row sm:justify-center sm:items-center', safeAreaWidth)}>
-          <TouchableOpacity onPress={onOkBtnClick} style={tailwind('w-full rounded-md border border-gray-800 py-2 bg-gray-800 shadow-sm sm:w-40', safeAreaWidth)}>
+        <View style={tailwind('mt-5 sm:mt-6 sm:flex-row sm:justify-between sm:items-center', safeAreaWidth)}>
+          <TouchableOpacity onPress={onOkBtnClick} style={tailwind('w-full rounded-md border border-gray-800 py-2 bg-gray-800 shadow-sm sm:mr-1.5 sm:flex-grow sm:flex-shrink', safeAreaWidth)}>
             <Text style={tailwind('text-base font-medium text-white text-center sm:text-sm', safeAreaWidth)}>More info</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={onCancelBtnClick} style={[tailwind('mt-3 w-full rounded-md border border-gray-400 bg-white shadow-sm sm:mt-0 sm:ml-14 sm:w-40', safeAreaWidth), cancelBtnStyle]}>
+          <TouchableOpacity onPress={onCancelBtnClick} style={[tailwind('mt-3 w-full rounded-md border border-gray-400 bg-white shadow-sm sm:mt-0 sm:ml-1.5 sm:flex-grow sm:flex-shrink', safeAreaWidth), cancelBtnStyle]}>
             <Text style={tailwind('text-base font-normal text-gray-500 text-center sm:text-sm', safeAreaWidth)}>Cancel</Text>
           </TouchableOpacity>
         </View>

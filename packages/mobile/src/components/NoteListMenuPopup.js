@@ -216,7 +216,9 @@ const NoteListMenuPopup = () => {
     transform: [],
   };
   if (safeAreaWidth < LG_WIDTH) {
-    popupStyle.right = (safeAreaWidth + insets.left) - derivedAnchorPosition.right + 12;
+    popupStyle.right = (
+      (safeAreaWidth + insets.left + insets.right) - derivedAnchorPosition.right + 12
+    );
     popupStyle.transform.push({
       translateX: popupAnim.interpolate({
         inputRange: [0, 1], outputRange: [0.05 * 148, 0],
