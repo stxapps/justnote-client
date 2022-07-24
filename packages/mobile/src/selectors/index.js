@@ -3,6 +3,7 @@ import { createSelectorCreator, defaultMemoize, createSelector } from 'reselect'
 
 import {
   PINNED, ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE,
+  UPDATING, MOVING, DIED_UPDATING, DIED_MOVING,
 } from '../types/const';
 import {
   isStringIn, isObject, isArrayEqual, isEqual, getFormattedShortDate,
@@ -122,7 +123,13 @@ export const _getNotes = (state) => {
 
   const { toRootIds } = listNoteIds(noteFPaths);
   sortedNotes = sortWithPins(sortedNotes, pinFPaths, pendingPins, toRootIds, (note) => {
-    return getMainId(note.id, toRootIds);
+    let noteId = note.id;
+    if ([UPDATING, MOVING, DIED_UPDATING, DIED_MOVING].includes(note.status)) {
+      if (Array.isArray(note.parentIds) && note.parentIds.length > 0) {
+        noteId = note.parentIds[0];
+      }
+    }
+    return getMainId(noteId, toRootIds);
   });
 
   if (searchString === '') return sortedNotes;
@@ -208,14 +215,29 @@ export const makeGetPinStatus = () => {
     state => getNoteFPaths(state),
     state => getPinFPaths(state),
     state => state.pendingPins,
-    (__, noteId) => noteId,
-    (noteFPaths, pinFPaths, pendingPins, noteId) => {
+    (state, noteId) => {
+      for (const listName in state.notes) {
+        if (isObject(state.notes[listName]) && noteId in state.notes[listName]) {
+          return state.notes[listName][noteId];
+        }
+      }
+      return null;
+    },
+    (noteFPaths, pinFPaths, pendingPins, note) => {
 
-      if (!noteId) return null;
+      if (!note) return null;
 
       const { toRootIds } = listNoteIds(noteFPaths);
       const pins = getPins(pinFPaths, pendingPins, false, toRootIds);
+
+      let noteId = note.id;
+      if ([UPDATING, MOVING, DIED_UPDATING, DIED_MOVING].includes(note.status)) {
+        if (Array.isArray(note.parentIds) && note.parentIds.length > 0) {
+          noteId = note.parentIds[0];
+        }
+      }
       const noteMainId = getMainId(noteId, toRootIds);
+
       if (noteMainId in pins) {
         if ('status' in pins[noteMainId]) return pins[noteMainId].status;
         return PINNED;

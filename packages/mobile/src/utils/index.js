@@ -528,7 +528,7 @@ export const getFormattedShortDate = (d, doExcludeYear = false) => {
   const month = d.getMonth() + 1;
   const date = d.getDate();
 
-  if (doExcludeYear) return `${month}/${date}`
+  if (doExcludeYear) return `${month}/${date}`;
 
   const year = d.getFullYear().toString().slice(-2);
   return `${month}/${date}/${year}`;
