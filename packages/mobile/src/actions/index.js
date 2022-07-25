@@ -359,7 +359,7 @@ export const updateBulkEdit = (
       const isEditorFocused = getState().display.isEditorFocused;
       if (isEditorFocused) {
         vars.updateBulkEdit.selectedNoteId = selectedNoteId;
-        dispatch(increaseUpdateBulkEditUrlHashCount());
+        dispatch(increaseUpdateBulkEditCount());
         return;
       }
     }
@@ -2349,6 +2349,7 @@ export const unpinNotes = (ids) => async (dispatch, getState) => {
     // As for every move note to ARCHIVE and TRASH, will try to unpin the note too,
     //  if no pin to unpin, just return.
     console.log('In unpinNotes, no pin found for ids: ', ids);
+    dispatch(sync());
     return;
   }
 

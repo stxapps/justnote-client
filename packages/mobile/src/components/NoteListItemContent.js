@@ -70,6 +70,7 @@ const NoteListItemContent = (props) => {
   useEffect(() => {
     // If no setTimeout, height is 0.
     setTimeout(() => {
+      if (!pBodyRef.current) return;
       pBodyRef.current.measure((_fx, _fy, width, height, x, y) => {
         let _doTitlePb = false;
         if (note.title && body && height > 20) _doTitlePb = true;
