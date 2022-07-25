@@ -321,7 +321,7 @@ PODS:
     - React-Core
   - react-native-safe-area-context (3.4.1):
     - React-Core
-  - react-native-webview (11.14.2):
+  - react-native-webview (11.22.7):
     - React-Core
   - React-perflogger (0.66.1)
   - React-RCTActionSheet (0.66.1):
@@ -643,7 +643,7 @@ SPEC CHECKSUMS:
   react-native-file-access: c879d32fcf4c75e90475dcbd60fd0a4709513107
   react-native-mmkv-storage: 209432836f405981816f1b7bfb0e82baaf84f02a
   react-native-safe-area-context: 9e40fb181dac02619414ba1294d6c2a807056ab9
-  react-native-webview: cc4ac8f021a832dce2979e1f48c5595341dd2fb5
+  react-native-webview: 227ba9205abb8579116b69ea5774d9744267c65a
   React-perflogger: fcac6090a80e3d967791b4c7f1b1a017f9d4a398
   React-RCTActionSheet: caf5913d9f9e605f5467206cf9d1caa6d47d7ad6
   React-RCTAnimation: 6539e3bf594f6a529cd861985ba6548286ae1ead
