@@ -29,7 +29,7 @@
     "react-native-mmkv-storage": "0.4.4",
     "react-native-safe-area-context": "^3.4.1",
     "react-native-svg": "^12.1.1",
-    "react-native-webview": "^11.14.2",
+    "react-native-webview": "^11.22.7",
     "react-redux": "^7.2.6",
     "redux": "^4.1.2",
     "redux-loop": "^6.1.0",
