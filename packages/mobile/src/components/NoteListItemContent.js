@@ -73,13 +73,12 @@ const NoteListItemContent = (props) => {
       if (!pBodyRef.current) return;
       pBodyRef.current.measure((_fx, _fy, width, height, x, y) => {
         let _doTitlePb = false;
-        if (note.title && body && height > 20) _doTitlePb = true;
-        if (doTitlePb !== _doTitlePb) {
-          setDoTitlePb(_doTitlePb);
-        }
+        if (note && note.title && body && height > 20) _doTitlePb = true;
+
+        if (doTitlePb !== _doTitlePb) setDoTitlePb(_doTitlePb);
       });
     }, 1);
-  }, [doTitlePb, note.title, body, setDoTitlePb]);
+  }, [doTitlePb, note, body, setDoTitlePb]);
 
   const circleClassNames = isSelected ? 'bg-green-600 border-green-700' : 'bg-gray-200 border-gray-300';
   const checkClassNames = isSelected ? 'text-white' : 'text-gray-400';

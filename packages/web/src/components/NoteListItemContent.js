@@ -135,15 +135,14 @@ const NoteListItemContent = (props) => {
   }, []);
 
   useEffect(() => {
+    if (!pBodyRef.current || !pBodyRef.current.clientHeight) return;
+    const height = pBodyRef.current.clientHeight;
+
     let _doTitlePb = false;
-    if (note.title && body && pBodyRef.current) {
-      if (pBodyRef.current.clientHeight && pBodyRef.current.clientHeight > 20) {
-        _doTitlePb = true;
-      }
-    }
+    if (note && note.title && body && height > 20) _doTitlePb = true;
 
     if (doTitlePb !== _doTitlePb) setDoTitlePb(_doTitlePb);
-  }, [doTitlePb, note.title, body, setDoTitlePb]);
+  }, [doTitlePb, note, body, setDoTitlePb]);
 
   const circleClassNames = isSelected ? 'bg-green-600 border-green-700' : 'bg-gray-200 border-gray-300';
   const checkClassNames = isSelected ? 'text-white' : 'text-gray-400';

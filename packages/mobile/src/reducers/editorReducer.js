@@ -132,7 +132,24 @@ const editorReducer = (state = initialState, action) => {
     return { ...state, didDiscardEditing: action.payload };
   }
 
-  if (action.type === DELETE_ALL_DATA || action.type === RESET_STATE) {
+  if (action.type === DELETE_ALL_DATA) {
+    return {
+      ...initialState,
+      saveNoteCount: state.saveNoteCount,
+      discardNoteCount: state.discardNoteCount,
+      updateNoteIdUrlHashCount: state.updateNoteIdUrlHashCount,
+      updateNoteIdCount: state.updateNoteIdCount,
+      changeListNameCount: state.changeListNameCount,
+      focusTitleCount: state.focusTitleCount,
+      setInitDataCount: state.setInitDataCount,
+      blurCount: state.blurCount,
+      updateEditorWidthCount: state.updateEditorWidthCount,
+      updateBulkEditUrlHashCount: state.updateBulkEditUrlHashCount,
+      updateBulkEditCount: state.updateBulkEditCount,
+    };
+  }
+
+  if (action.type === RESET_STATE) {
     return { ...initialState };
   }
 

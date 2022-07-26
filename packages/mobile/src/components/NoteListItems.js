@@ -166,7 +166,7 @@ const NoteListItems = () => {
     return (
       <View style={tailwind('my-6 px-4 sm:px-6', safeAreaWidth)}>
         <TouchableOpacity onPress={onUpdateFetchedBtnClick} style={tailwind('w-full items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white')}>
-          <Text style={tailwind('text-sm font-medium text-gray-500')}>More</Text>
+          <Text style={tailwind('text-sm font-medium text-gray-500')}>Show more</Text>
         </TouchableOpacity>
       </View>
     );
