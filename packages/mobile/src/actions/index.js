@@ -261,7 +261,7 @@ export const onChangeListName = (title, body, keyboardHeight = 0) => async (
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
-  if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+  if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
     if (keyboardHeight > 0) dispatch(increaseBlurCount());
     dispatch(updateDiscardAction(DISCARD_ACTION_CHANGE_LIST_NAME));
     dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
@@ -309,7 +309,7 @@ export const onUpdateNoteId = (title, body, keyboardHeight = 0) => async (
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
-  if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+  if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
     if (keyboardHeight > 0) dispatch(increaseBlurCount());
     dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_NOTE_ID));
     dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
@@ -377,7 +377,7 @@ export const onUpdateBulkEdit = (title, body, keyboardHeight = 0) => async (
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
-  if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+  if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
     if (keyboardHeight > 0) dispatch(increaseBlurCount());
     dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_BULK_EDIT));
     dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
@@ -597,15 +597,15 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
 
 export const saveNote = (title, body, media) => async (dispatch, getState) => {
 
-  const { listName, noteId } = getState().display;
-  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
-
   if (title === '' && body === '') {
     dispatch(increaseFocusTitleCount());
     return;
   }
 
-  if (note.title === title && isNoteBodyEqual(note.body, body)) {
+  const { listName, noteId } = getState().display;
+  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
+
+  if (note && (note.title === title && isNoteBodyEqual(note.body, body))) {
     dispatch(updateEditorBusy(false));
     return;
   }
@@ -622,7 +622,7 @@ export const discardNote = (
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
   if (doCheckEditing) {
-    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+    if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
       if (keyboardHeight > 0) dispatch(increaseBlurCount());
       dispatch(updateDiscardAction(DISCARD_ACTION_CANCEL_EDIT));
       dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
