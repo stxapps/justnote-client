@@ -491,7 +491,7 @@ export const onUpdateNoteIdUrlHash = (title, body) => async (dispatch, getState)
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
-  if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+  if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
     dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH));
     updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
     return;
@@ -581,7 +581,7 @@ export const onUpdateBulkEditUrlHash = (title, body) => async (dispatch, getStat
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
-  if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+  if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
     dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_BULK_EDIT_URL_HASH));
     updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
     return;
@@ -627,7 +627,7 @@ export const onChangeListName = (title, body) => async (
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
-  if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+  if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
     dispatch(updateDiscardAction(DISCARD_ACTION_CHANGE_LIST_NAME));
     updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
     return;
@@ -674,7 +674,7 @@ export const onUpdateNoteId = (title, body) => async (
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
-  if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+  if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
     dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_NOTE_ID));
     updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
     return;
@@ -949,15 +949,15 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
 
 export const saveNote = (title, body, media) => async (dispatch, getState) => {
 
-  const { listName, noteId } = getState().display;
-  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
-
   if (title === '' && body === '') {
     dispatch(increaseFocusTitleCount());
     return;
   }
 
-  if (note.title === title && isNoteBodyEqual(note.body, body)) {
+  const { listName, noteId } = getState().display;
+  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
+
+  if (note && (note.title === title && isNoteBodyEqual(note.body, body))) {
     dispatch(updateEditorBusy(false));
     return;
   }
@@ -974,7 +974,7 @@ export const discardNote = (
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
   if (doCheckEditing) {
-    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+    if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
       dispatch(updateDiscardAction(DISCARD_ACTION_CANCEL_EDIT));
       updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
       return;
@@ -2892,6 +2892,7 @@ export const unpinNotes = (ids) => async (dispatch, getState) => {
     // As for every move note to ARCHIVE and TRASH, will try to unpin the note too,
     //  if no pin to unpin, just return.
     console.log('In unpinNotes, no pin found for ids: ', ids);
+    dispatch(sync());
     return;
   }
 
