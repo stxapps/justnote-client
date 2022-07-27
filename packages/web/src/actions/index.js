@@ -1939,6 +1939,14 @@ const parseImportedFile = async (dispatch, fileContent) => {
       if (!(/^\d+$/.test(addedDT))) continue;
       if (!fname.endsWith('.json')) continue;
 
+      try {
+        content = JSON.parse(content);
+        if (!isEqual(content, {})) continue;
+      } catch (e) {
+        console.log('parseImportedFile: JSON.parse pin content error: ', e);
+        continue;
+      }
+
       pinFPathParts.push(fpathParts);
       pinIds.push(fnameParts[0]);
       pinContents.push(content);
@@ -2399,6 +2407,7 @@ export const exportAllData = () => async (dispatch, getState) => {
       fpaths.push(pins[pinMainId].fpath);
     }
 
+    fpaths = [...new Set(fpaths)];
     toRootIds = _toRootIds;
   } catch (e) {
     dispatch(updateExportAllDataProgress({
@@ -2445,6 +2454,8 @@ export const exportAllData = () => async (dispatch, getState) => {
       }
 
       await Promise.all(filteredResponses.map(({ fpath, content }) => {
+        if (fpath.endsWith(DOT_JSON)) content = JSON.stringify(content);
+
         let reader;
         if (
           fpath.endsWith(INDEX + DOT_JSON) ||
@@ -2478,6 +2489,7 @@ export const exportAllData = () => async (dispatch, getState) => {
         fpathParts[fpathParts.length - 1] = idMap[toRootIds[id]] + '.json';
         fpath = fpathParts.join('/');
       }
+      content = JSON.stringify(content);
 
       const reader = new zip.TextReader(content);
       await zipWriter.add(fpath, reader);

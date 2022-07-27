@@ -432,6 +432,7 @@ const displayReducer = (state = initialState, action) => {
       if (action.payload.total === action.payload.done) {
         newState.didFetchSettings = false;
         newState.fetchedListNames = [];
+        newState.noteId = null;
       }
     }
     return newState;

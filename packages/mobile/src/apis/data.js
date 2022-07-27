@@ -62,7 +62,7 @@ const toNotes = (noteIds, fpaths, contents) => {
 
   const notes = [];
   for (const noteId of noteIds) {
-    let title, body, media = [];
+    let title = '', body = '', media = [];
     for (const fpath of noteId.fpaths) {
       const content = contents[fpaths.indexOf(fpath)];
 
