@@ -1061,7 +1061,7 @@
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
 "@ckeditor/ckeditor5-build-decoupled-document@file:../../../ckeditor5/packages/ckeditor5-build-decoupled-document":
-  version "34.1.0"
+  version "35.0.1"
 
 "@ckeditor/ckeditor5-react@^5.0.2":
   version "5.0.2"
