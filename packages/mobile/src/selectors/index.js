@@ -6,7 +6,7 @@ import {
   UPDATING, MOVING, DIED_UPDATING, DIED_MOVING,
 } from '../types/const';
 import {
-  isStringIn, isObject, isArrayEqual, isEqual, getFormattedShortDate,
+  isStringIn, isObject, isArrayEqual, isEqual, getListNameObj, getFormattedShortDate,
   getMainId, getValidProduct as _getValidProduct, getValidPurchase as _getValidPurchase,
   listNoteIds, getSortedNotes, sortWithPins, getNoteFPaths, getPinFPaths, getPins,
   doEnableExtraFeatures,
@@ -185,10 +185,16 @@ export const getIsFetchingMore = createSelector(
 /** @return {function(any, any): initialListNameEditorState} */
 export const makeGetListNameEditor = () => {
   return createSelector(
+    state => state.settings.listNameMap,
     state => state.listNameEditors,
     (__, key) => key,
-    (listNameEditors, key) => {
-      return { ...initialListNameEditorState, ...listNameEditors[key] };
+    (listNameMap, listNameEditors, key) => {
+      const state = { ...initialListNameEditorState };
+
+      const { listNameObj } = getListNameObj(key, listNameMap);
+      if (listNameObj) state.value = listNameObj.displayName;
+
+      return { ...state, ...listNameEditors[key] };
     },
     { memoizeOptions: { resultEqualityCheck: isEqual } },
   );

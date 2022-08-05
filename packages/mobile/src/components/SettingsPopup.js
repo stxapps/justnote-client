@@ -10,7 +10,7 @@ import { updateSettingsPopup, updateSettingsViewId } from '../actions';
 import {
   SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_IAP, SETTINGS_VIEW_IAP_RESTORE,
   SETTINGS_VIEW_DATA, SETTINGS_VIEW_DATA_DELETE, SETTINGS_VIEW_LISTS,
-  SETTINGS_VIEW_MISC, SETTINGS_VIEW_ABOUT,
+  SETTINGS_VIEW_MISC, SETTINGS_VIEW_ABOUT, MD_WIDTH, LG_WIDTH,
 } from '../types/const';
 import cache from '../utils/cache';
 import { tailwind } from '../stylesheets/tailwind';
@@ -222,6 +222,14 @@ const SettingsPopup = () => {
       paddingLeft: insets.left, paddingRight: insets.right,
     };
 
+    const MAX_W_6XL = 1152; // If change max-w-6xl below, need to update this too.
+    const closeBtnStyle = { right: 0 };
+    if (safeAreaWidth >= LG_WIDTH) closeBtnStyle.right = 6;
+    if (safeAreaWidth >= MAX_W_6XL) {
+      closeBtnStyle.right = ((safeAreaWidth - MAX_W_6XL) / 2) + 6;
+    }
+    const closeBtnSvgWidth = safeAreaWidth < MD_WIDTH ? 20 : 28;
+
     return (
       <React.Fragment>
         <View style={cache('SP_modal', [tailwind('absolute inset-0 bg-white'), modalStyle], [insets.top, insets.bottom, insets.left, insets.right])}>
@@ -283,26 +291,21 @@ const SettingsPopup = () => {
                     {/* Main panel */}
                     <View key="panel-content" style={tailwind('flex-shrink flex-grow')}>
                       {content}
-                      <View style={tailwind('absolute top-0 right-0 md:hidden md:relative', safeAreaWidth)}>
-                        <TouchableOpacity onPress={onPopupCloseBtnClick} style={tailwind('items-center justify-center h-12 w-12')}>
-                          <Svg style={tailwind('text-gray-300 font-normal')} width={20} height={20} stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                            <Path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                          </Svg>
-                        </TouchableOpacity>
-                      </View>
                     </View>
                   </View>
-                </View>
-                <View style={tailwind('hidden relative md:flex md:absolute md:top-0 md:right-0', safeAreaWidth)}>
-                  <TouchableOpacity onPress={onPopupCloseBtnClick} style={tailwind('items-center justify-center h-12 w-12')}>
-                    <Svg style={tailwind('text-gray-300 font-normal')} width={28} height={28} stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                      <Path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                    </Svg>
-                  </TouchableOpacity>
                 </View>
               </View>
             </View>
           </ScrollView>
+          <View style={[tailwind('absolute top-0'), closeBtnStyle]}>
+            <TouchableOpacity onPress={onPopupCloseBtnClick} style={tailwind('items-center justify-center h-12 w-12')}>
+              <View style={tailwind('bg-white rounded-full')}>
+                <Svg style={tailwind('text-gray-300 font-normal')} width={closeBtnSvgWidth} height={closeBtnSvgWidth} stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                  <Path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </Svg>
+              </View>
+            </TouchableOpacity>
+          </View>
         </View>
         {/* Sidebar for mobile */}
         <View key="sidebar-for-mobile" style={[tailwind(`${sidebarCanvasStyleClasses} md:hidden md:relative`, safeAreaWidth), modalStyle]}>
