@@ -71,6 +71,7 @@ const initialState = {
   isSettingsSidebarShown: false,
   didSettingsCloseAnimEnd: true,
   didSettingsSidebarAnimEnd: true,
+  updateSettingsViewIdCount: 0,
   listNamesMode: null,
   syncProgress: null,
   importAllDataProgress: null,
