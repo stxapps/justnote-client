@@ -134,8 +134,8 @@ android {
         applicationId "com.justnotecc"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 19
-        versionName "0.10.0"
+        versionCode 20
+        versionName "0.10.1"
 
         // react-native-iap: only use the Google Play flavor
         missingDimensionStrategy 'store', 'play'
