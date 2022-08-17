@@ -5,10 +5,9 @@ import Svg, { Path } from 'react-native-svg';
 
 import { updateBulkEdit, updateNoteId, fetch, sync } from '../actions';
 import { TRASH, NEW_NOTE, MAX_SELECTED_NOTE_IDS } from '../types/const';
-import { tailwind } from '../stylesheets/tailwind';
 import { popupFMV } from '../types/animConfigs';
 
-import { useSafeAreaFrame } from '.';
+import { useTailwind } from '.';
 import NoteListTopBar from './NoteListTopBar';
 import NoteListItems from './NoteListItems';
 import LoadingNoteListItems from './LoadingNoteListItems';
@@ -16,7 +15,6 @@ import LoadingNoteListItems from './LoadingNoteListItems';
 const NoteList = (props) => {
 
   const { onSidebarOpenBtnClick } = props;
-  const { width: safeAreaWidth } = useSafeAreaFrame();
   const listName = useSelector(state => state.display.listName);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const isMaxErrorShown = useSelector(state => state.display.isSelectedNoteIdsMaxErrorShown);
@@ -28,6 +26,7 @@ const NoteList = (props) => {
   const maxErrorAnim = useRef(new Animated.Value(0)).current;
   const bulkEditBackHandler = useRef(null);
   const dispatch = useDispatch();
+  const tailwind = useTailwind();
 
   const registerBulkEditBackHandler = useCallback((isShown) => {
     if (isShown) {
@@ -62,16 +61,16 @@ const NoteList = (props) => {
     };
 
     return (
-      <View style={tailwind('absolute top-0 inset-x-0 justify-center items-center')}>
-        <Animated.View style={[tailwind('m-4 p-4 bg-red-50 rounded-md shadow-lg'), maxErrorStyle]}>
-          <View style={tailwind('flex-row w-full')}>
+      <View style={tailwind('absolute inset-x-0 top-0 items-center justify-center')}>
+        <Animated.View style={[tailwind('m-4 rounded-md bg-red-50 p-4 shadow-lg'), maxErrorStyle]}>
+          <View style={tailwind('w-full flex-row')}>
             <View style={tailwind('flex-shrink-0 flex-grow-0')}>
-              <Svg style={tailwind('text-red-400 font-normal')} width={24} height={24} viewBox="0 0 20 20" fill="currentColor">
+              <Svg style={tailwind('font-normal text-red-400')} width={24} height={24} viewBox="0 0 20 20" fill="currentColor">
                 <Path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </Svg>
             </View>
             <View style={tailwind('ml-3 flex-shrink flex-grow')}>
-              <Text style={tailwind('text-sm text-red-800 font-normal leading-5 text-left')}>To prevent network overload, up to {MAX_SELECTED_NOTE_IDS} items can be selected.</Text>
+              <Text style={tailwind('text-left text-sm font-normal leading-5 text-red-800')}>To prevent network overload, up to {MAX_SELECTED_NOTE_IDS} items can be selected.</Text>
             </View>
           </View>
         </Animated.View>
@@ -108,14 +107,14 @@ const NoteList = (props) => {
   const noteListItems = fetchedListNames.includes(listName) ? <NoteListItems /> : <LoadingNoteListItems />;
 
   return (
-    <View style={[tailwind('w-full min-w-64 h-full'), { elevation: 0 }]}>
+    <View style={[tailwind('h-full w-full min-w-64'), { elevation: 0 }]}>
       {/* TopBar */}
       <NoteListTopBar onSidebarOpenBtnClick={onSidebarOpenBtnClick} />
       {/* Main */}
       {noteListItems}
       {/* Add button */}
-      {!isBulkEditing && (listName !== TRASH) && <TouchableOpacity onPress={onAddBtnClick} style={tailwind('absolute right-4 bottom-4 rounded-full bg-green-600 w-16 h-16 shadow-md items-center justify-center lg:relative lg:hidden', safeAreaWidth)}>
-        <Svg width={40} height={40} style={tailwind('text-white font-normal')} viewBox="0 0 40 40" fill="currentColor">
+      {!isBulkEditing && (listName !== TRASH) && <TouchableOpacity onPress={onAddBtnClick} style={tailwind('absolute right-4 bottom-4 h-16 w-16 items-center justify-center rounded-full bg-green-600 shadow-md lg:relative lg:hidden')}>
+        <Svg width={40} height={40} style={tailwind('font-normal text-white')} viewBox="0 0 40 40" fill="currentColor">
           <Path fillRule="evenodd" clipRule="evenodd" d="M20 10C20.5304 10 21.0391 10.2107 21.4142 10.5858C21.7893 10.9609 22 11.4696 22 12V18H28C28.5304 18 29.0391 18.2107 29.4142 18.5858C29.7893 18.9609 30 19.4696 30 20C30 20.5304 29.7893 21.0391 29.4142 21.4142C29.0391 21.7893 28.5304 22 28 22H22V28C22 28.5304 21.7893 29.0391 21.4142 29.4142C21.0391 29.7893 20.5304 30 20 30C19.4696 30 18.9609 29.7893 18.5858 29.4142C18.2107 29.0391 18 28.5304 18 28V22H12C11.4696 22 10.9609 21.7893 10.5858 21.4142C10.2107 21.0391 10 20.5304 10 20C10 19.4696 10.2107 18.9609 10.5858 18.5858C10.9609 18.2107 11.4696 18 12 18H18V12C18 11.4696 18.2107 10.9609 18.5858 10.5858C18.9609 10.2107 19.4696 10 20 10Z" />
         </Svg>
       </TouchableOpacity>}

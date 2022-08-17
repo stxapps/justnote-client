@@ -1,9 +1,10 @@
 import { INIT, UPDATE_HREF, UPDATE_WINDOW_SIZE } from '../types/actionTypes';
+import { isNumber } from '../utils';
 
 const initialState = {
   href: null,
-  width: null,
-  height: null,
+  width: (window && isNumber(window.innerWidth)) ? window.innerWidth : null,
+  height: (window && isNumber(window.innerHeight)) ? window.innerHeight : null,
 };
 
 const windowReducer = (state = initialState, action) => {

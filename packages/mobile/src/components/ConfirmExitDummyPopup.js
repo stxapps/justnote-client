@@ -7,14 +7,12 @@ import Svg, { Path } from 'react-native-svg';
 
 import { updatePopup, signOut } from '../actions';
 import { CONFIRM_EXIT_DUMMY_POPUP } from '../types/const';
-import { tailwind } from '../stylesheets/tailwind';
 import { dialogFMV } from '../types/animConfigs';
 
-import { useSafeAreaFrame, useSafeAreaInsets } from '.';
+import { useSafeAreaInsets, useTailwind } from '.';
 
 const ConfirmExitDummyPopup = () => {
 
-  const { width: safeAreaWidth } = useSafeAreaFrame();
   const insets = useSafeAreaInsets();
   const isShown = useSelector(state => state.display.isConfirmExitDummyPopupShown);
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
@@ -23,6 +21,7 @@ const ConfirmExitDummyPopup = () => {
   const popupBackHandler = useRef(null);
   const didClick = useRef(false);
   const dispatch = useDispatch();
+  const tailwind = useTailwind();
 
   const onCancelBtnClick = useCallback(() => {
     if (didClick.current) return;
@@ -91,30 +90,30 @@ const ConfirmExitDummyPopup = () => {
   const bgStyle = { opacity: popupAnim };
 
   return (
-    <View style={[tailwind('absolute inset-0 items-center justify-end pt-4 px-4 pb-20 elevation-xl sm:justify-center sm:p-0', safeAreaWidth), canvasStyle]}>
+    <View style={[tailwind('absolute inset-0 items-center justify-end px-4 pt-4 pb-20 sm:justify-center sm:p-0 elevation-xl'), canvasStyle]}>
       <TouchableWithoutFeedback onPress={onCancelBtnClick}>
         <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
       </TouchableWithoutFeedback>
-      <Animated.View style={[tailwind('w-full max-w-lg bg-white rounded-lg px-4 pt-5 pb-4 shadow-xl sm:my-8 sm:p-6', safeAreaWidth), popupStyle]}>
-        <View style={tailwind('items-center sm:flex-row sm:items-start', safeAreaWidth)}>
-          <View style={tailwind('flex-grow-0 flex-shrink-0 items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:h-10 sm:w-10', safeAreaWidth)}>
-            <Svg width={24} height={24} style={tailwind('text-red-600 font-normal')} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <Animated.View style={[tailwind('w-full max-w-lg rounded-lg bg-white px-4 pt-5 pb-4 shadow-xl sm:my-8 sm:p-6'), popupStyle]}>
+        <View style={tailwind('items-center sm:flex-row sm:items-start')}>
+          <View style={tailwind('h-12 w-12 flex-shrink-0 flex-grow-0 items-center justify-center rounded-full bg-red-100 sm:h-10 sm:w-10')}>
+            <Svg width={24} height={24} style={tailwind('font-normal text-red-600')} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <Path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </Svg>
           </View>
-          <View style={tailwind('flex-grow flex-shrink mt-3 sm:mt-0 sm:ml-4', safeAreaWidth)}>
-            <Text style={tailwind('text-lg leading-6 font-medium text-gray-900 text-center sm:text-left', safeAreaWidth)}>Delete everything and exit?</Text>
+          <View style={tailwind('mt-3 flex-shrink flex-grow sm:mt-0 sm:ml-4')}>
+            <Text style={tailwind('text-center text-lg font-medium leading-6 text-gray-900 sm:text-left')}>Delete everything and exit?</Text>
             <View style={tailwind('mt-2')}>
-              <Text style={tailwind('text-sm text-gray-500 font-normal text-center sm:text-left', safeAreaWidth)}>Without an account, when exit, everything will be permanently deleted. You can sign up first to encrypt and sync all your notes to server.</Text>
+              <Text style={tailwind('text-center text-sm font-normal text-gray-500 sm:text-left')}>Without an account, when exit, everything will be permanently deleted. You can sign up first to encrypt and sync all your notes to server.</Text>
             </View>
           </View>
         </View>
-        <View style={tailwind('mt-5 sm:mt-4 sm:ml-10 sm:pl-4 sm:flex-row', safeAreaWidth)}>
-          <TouchableOpacity onPress={onOkBtnClick} style={tailwind('w-full rounded-md border border-red-600 shadow-sm px-4 py-2 bg-red-600 sm:w-auto', safeAreaWidth)}>
-            <Text style={tailwind('text-base font-medium text-white text-center sm:text-sm', safeAreaWidth)}>Delete everything and exit</Text>
+        <View style={tailwind('mt-5 sm:mt-4 sm:ml-10 sm:flex-row sm:pl-4')}>
+          <TouchableOpacity onPress={onOkBtnClick} style={tailwind('w-full rounded-md border border-red-600 bg-red-600 px-4 py-2 shadow-sm sm:w-auto')}>
+            <Text style={tailwind('text-center text-base font-medium text-white sm:text-sm')}>Delete everything and exit</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={onCancelBtnClick} style={tailwind('mt-3 w-full rounded-md border border-gray-300 px-4 py-2 bg-white shadow-sm sm:mt-0 sm:ml-3 sm:w-auto', safeAreaWidth)}>
-            <Text style={tailwind('text-base font-medium text-gray-700 text-center sm:text-sm', safeAreaWidth)}>Cancel</Text>
+          <TouchableOpacity onPress={onCancelBtnClick} style={tailwind('mt-3 w-full rounded-md border border-gray-300 bg-white px-4 py-2 shadow-sm sm:mt-0 sm:ml-3 sm:w-auto')}>
+            <Text style={tailwind('text-center text-base font-medium text-gray-700 sm:text-sm')}>Cancel</Text>
           </TouchableOpacity>
         </View>
       </Animated.View>

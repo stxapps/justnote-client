@@ -16,10 +16,9 @@ import {
 } from '../types/const';
 import { getListNameMap, makeGetPinStatus } from '../selectors';
 import { getListNameDisplayName, getAllListNames } from '../utils';
-import { tailwind } from '../stylesheets/tailwind';
 import { popupFMV } from '../types/animConfigs';
 
-import { useSafeAreaFrame, useSafeAreaInsets } from '.';
+import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 import { computePosition, createLayouts, getOriginTranslate } from './MenuPopupRenderer';
 
 const NoteListItemMenuPopup = () => {
@@ -44,6 +43,7 @@ const NoteListItemMenuPopup = () => {
   const popupBackHandler = useRef(null);
   const didClick = useRef(false);
   const dispatch = useDispatch();
+  const tailwind = useTailwind();
 
   const onCancelBtnClick = useCallback(() => {
     if (didClick.current) return;
@@ -180,14 +180,14 @@ const NoteListItemMenuPopup = () => {
         if (text === ARCHIVE) displayText = getListNameDisplayName(text, listNameMap);
         return (
           <TouchableOpacity key={text} onPress={() => onMenuPopupBtnClick(text)} style={tailwind('w-full px-4 py-3')}>
-            <Text style={tailwind('text-sm text-gray-700 font-normal text-left')} numberOfLines={1} ellipsizeMode="tail">{displayText}</Text>
+            <Text style={tailwind('text-left text-sm font-normal text-gray-700')} numberOfLines={1} ellipsizeMode="tail">{displayText}</Text>
           </TouchableOpacity>
         );
       })}
     </View>
   );
 
-  let popupClassNames = 'absolute bg-white border border-gray-100 rounded-md shadow-lg';
+  let popupClassNames = 'absolute rounded-md border border-gray-100 bg-white shadow-lg';
   let panel;
   let bgStyle = { opacity: 0 };
   if (popupSize) {

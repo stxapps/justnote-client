@@ -1,4 +1,7 @@
 import { create } from 'tailwind-rn';
+
+import { isNumber } from '../utils';
+
 import tailwindStyles from './tailwind.json';
 import extrasStyles from './extras.json';
 
@@ -6,6 +9,9 @@ const styles = { ...tailwindStyles, ...extrasStyles };
 const { tailwind: _tailwind, getColor } = create(styles);
 
 const tailwind = (classNames, windowWidth = null) => {
+  if (!isNumber(windowWidth)) {
+    console.log('In tailwind, found NAN windowWidth: ', windowWidth);
+  }
 
   const v1 = classNames.includes('text') ? 1 : 0;
   const v2 = classNames.includes('font') ? 1 : 0;

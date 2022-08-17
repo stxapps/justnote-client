@@ -14,10 +14,11 @@ import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, UTF8 } from '../types/const';
 import {
   replaceObjectUrls, splitOnFirst, escapeDoubleQuotes, getFileExt,
 } from '../utils';
-import { tailwind } from '../stylesheets/tailwind';
 import cache from '../utils/cache';
 
 const ckeditor = require('../../ckeditor');
+
+import { useTailwind } from '.';
 
 const GET_DATA_SAVE_NOTE = 'GET_DATA_SAVE_NOTE';
 const GET_DATA_DISCARD_NOTE = 'GET_DATA_DISCARD_NOTE';
@@ -66,6 +67,7 @@ const NoteEditorEditor = (props) => {
   const keyboardDidShowListener = useRef(null);
   const keyboardDidHideListener = useRef(null);
   const dispatch = useDispatch();
+  const tailwind = useTailwind();
 
   const editingNoteId = useSelector(state => state.editor.editingNoteId);
   const editingNoteTitle = useSelector(state => state.editor.editingNoteTitle);
@@ -487,7 +489,7 @@ const NoteEditorEditor = (props) => {
         :
         <WebView ref={webView} style={tailwind('flex-1')} source={cache('NEE_webView_source', { baseUrl: '', html: ckeditor })} originWhitelist={cache('NEE_webView_originWhitelist', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} textZoom={100} androidLayerType="hardware" allowFileAccess={true} cacheEnabled={false} onShouldStartLoadWithRequest={onShouldStartLoadWithRequest} onContentProcessDidTerminate={onContentProcessDidTerminate} onRenderProcessGone={onContentProcessDidTerminate} />
       }
-      <TextInput ref={hackInput} style={tailwind('absolute -top-1 -left-1 w-1 h-1')} />
+      <TextInput ref={hackInput} style={tailwind('absolute -top-1 -left-1 h-1 w-1')} />
     </React.Fragment>
   );
 };

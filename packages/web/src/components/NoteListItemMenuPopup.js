@@ -18,7 +18,7 @@ import {
 import { getListNameDisplayName, getAllListNames } from '../utils';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
 
-import { useSafeAreaFrame } from '.';
+import { useSafeAreaFrame, useTailwind } from '.';
 import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
 
 const NoteListItemMenuPopup = () => {
@@ -39,6 +39,7 @@ const NoteListItemMenuPopup = () => {
   const cancelBtn = useRef(null);
   const didClick = useRef(false);
   const dispatch = useDispatch();
+  const tailwind = useTailwind();
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;
@@ -118,19 +119,19 @@ const NoteListItemMenuPopup = () => {
 
   const menu = populateMenu();
   const buttons = (
-    <div className="py-1">
+    <div className={tailwind('py-1')}>
       {menu.map(text => {
         let displayText = text;
         if (text === ARCHIVE) displayText = getListNameDisplayName(text, listNameMap);
         return (
-          <button key={text} onClick={() => onMenuPopupBtnClick(text)} className="block w-full px-4 py-3 text-sm text-gray-700 text-left truncate rounded-sm hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900" role="menuitem">{displayText}</button>
+          <button key={text} onClick={() => onMenuPopupBtnClick(text)} className={tailwind('block w-full truncate rounded-sm px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none')} role="menuitem">{displayText}</button>
         );
       })}
 
     </div>
   );
 
-  let popupClassNames = 'fixed min-w-[8rem] rounded-md shadow-xl bg-white overflow-auto ring-1 ring-black ring-opacity-5';
+  let popupClassNames = 'fixed min-w-[8rem] overflow-auto rounded-md bg-white shadow-xl ring-1 ring-black ring-opacity-5';
   let panel;
   if (popupSize) {
 
@@ -147,13 +148,13 @@ const NoteListItemMenuPopup = () => {
     popupClassNames += ' ' + getOriginClassName(topOrigin, leftOrigin);
 
     panel = (
-      <motion.div key="NLI_MenuPopup_popup" ref={popup} style={popupStyle} className={popupClassNames} variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+      <motion.div key="NLI_MenuPopup_popup" ref={popup} style={popupStyle} className={tailwind(popupClassNames)} variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
         {buttons}
       </motion.div>
     );
   } else {
     panel = (
-      <div key="NLI_MenuPopup_popup" ref={popup} style={{ top: safeAreaHeight, left: safeAreaWidth }} className={popupClassNames} role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+      <div key="NLI_MenuPopup_popup" ref={popup} style={{ top: safeAreaHeight, left: safeAreaWidth }} className={tailwind(popupClassNames)} role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
         {buttons}
       </div>
     );
@@ -161,7 +162,7 @@ const NoteListItemMenuPopup = () => {
 
   return (
     <AnimatePresence key="AP_NLI_MenuPopup">
-      <motion.button key="NLI_MenuPopup_cancelBtn" ref={cancelBtn} onClick={onCancelBtnClick} className="fixed inset-0 w-full h-full bg-black bg-opacity-25 cursor-default focus:outline-none" variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden" />
+      <motion.button key="NLI_MenuPopup_cancelBtn" ref={cancelBtn} onClick={onCancelBtnClick} className={tailwind('fixed inset-0 h-full w-full cursor-default bg-black bg-opacity-25 focus:outline-none')} variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden" />
       {panel}
     </AnimatePresence>
   );

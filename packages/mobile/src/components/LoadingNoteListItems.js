@@ -2,29 +2,28 @@ import React from 'react';
 import { View } from 'react-native';
 
 import { randInt, sample } from '../utils';
-import { tailwind } from '../stylesheets/tailwind';
 
-import { useSafeAreaFrame } from '.';
+import { useTailwind } from '.';
 
 const widths = ['20%', '25%', '30%', '35%', '40%', '45%', '50%', '55%', '60%', '65%', '70%', '75%', '80%', '85%', '90%', '95%', '100%'];
 
 const LoadingNoteListItem = () => {
+  const tailwind = useTailwind();
 
-  const { width: safeAreaWidth } = useSafeAreaFrame();
   const titleWidth = sample(widths);
   const nTexts = 1 + randInt(3);
   const textIndices = [];
   for (let i = 0; i < nTexts; i++) textIndices.push(i);
 
   return (
-    <View style={tailwind('border-b border-gray-200 px-4 py-5 sm:px-6', safeAreaWidth)}>
-      <View style={[tailwind('h-5 bg-gray-300 rounded-md'), { width: titleWidth }]} />
+    <View style={tailwind('border-b border-gray-200 px-4 py-5 sm:px-6')}>
+      <View style={[tailwind('h-5 rounded-md bg-gray-300'), { width: titleWidth }]} />
       <View style={tailwind('mt-1')}>
         {textIndices.map(i => {
           const textWidth = sample(widths);
           return (
             <View key={i} style={tailwind('h-5 justify-center')}>
-              <View style={[tailwind('h-3 bg-gray-200 rounded'), { width: textWidth }]} />
+              <View style={[tailwind('h-3 rounded bg-gray-200'), { width: textWidth }]} />
             </View>
           );
         })}
@@ -34,8 +33,10 @@ const LoadingNoteListItem = () => {
 };
 
 const LoadingNoteListItems = () => {
+  const tailwind = useTailwind();
+
   return (
-    <View style={tailwind('flex-grow flex-shrink')}>
+    <View style={tailwind('flex-shrink flex-grow')}>
       <LoadingNoteListItem />
       <LoadingNoteListItem />
       <LoadingNoteListItem />

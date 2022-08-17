@@ -9,7 +9,7 @@ import {
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
 
 import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
-import { useSafeAreaFrame } from '.';
+import { useSafeAreaFrame, useTailwind } from '.';
 
 const PinMenuPopup = () => {
 
@@ -24,6 +24,7 @@ const PinMenuPopup = () => {
   const cancelBtn = useRef(null);
   const didClick = useRef(false);
   const dispatch = useDispatch();
+  const tailwind = useTailwind();
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;
@@ -68,16 +69,16 @@ const PinMenuPopup = () => {
 
   const buttons = (
     <React.Fragment>
-      <div className="pl-4 pr-4 pt-1 h-11 flex justify-start items-center">
-        <p className={'text-sm text-gray-600 font-semibold text-left truncate'}>Manage pin</p>
+      <div className={tailwind('flex h-11 items-center justify-start pl-4 pr-4 pt-1')}>
+        <p className={tailwind('truncate text-left text-sm font-semibold text-gray-600')}>Manage pin</p>
       </div>
       {menu.map(text => {
-        return <button key={text} onClick={() => onMenuPopupClick(text)} className="py-2.5 pl-4 pr-4 block w-full text-sm text-gray-700 text-left truncate rounded-md hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900 focus:ring-inset" role="menuitem">{text}</button>
+        return <button key={text} onClick={() => onMenuPopupClick(text)} className={tailwind('block w-full truncate rounded-md py-2.5 pl-4 pr-4 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none focus:ring-inset')} role="menuitem">{text}</button>
       })}
     </React.Fragment>
   );
 
-  let popupClassNames = 'pb-1 fixed min-w-32 max-w-64 bg-white rounded-lg shadow-xl overflow-auto ring-1 ring-black ring-opacity-5';
+  let popupClassNames = 'fixed min-w-32 max-w-64 overflow-auto rounded-lg bg-white pb-1 shadow-xl ring-1 ring-black ring-opacity-5';
   let panel;
   if (popupSize) {
 
@@ -94,13 +95,13 @@ const PinMenuPopup = () => {
     popupClassNames += ' ' + getOriginClassName(topOrigin, leftOrigin);
 
     panel = (
-      <motion.div key="PMP_popup" ref={popup} style={popupStyle} className={popupClassNames} variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+      <motion.div key="PMP_popup" ref={popup} style={popupStyle} className={tailwind(popupClassNames)} variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
         {buttons}
       </motion.div>
     );
   } else {
     panel = (
-      <div key="PMP_popup" ref={popup} style={{ top: safeAreaHeight, left: safeAreaWidth }} className={popupClassNames} role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+      <div key="PMP_popup" ref={popup} style={{ top: safeAreaHeight, left: safeAreaWidth }} className={tailwind(popupClassNames)} role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
         {buttons}
       </div>
     );
@@ -108,7 +109,7 @@ const PinMenuPopup = () => {
 
   return (
     <AnimatePresence key="AP_pinMenuPopup">
-      <motion.button key="PMP_cancelBtn" ref={cancelBtn} onClick={onCancelBtnClick} className="fixed inset-0 w-full h-full bg-black bg-opacity-25 cursor-default focus:outline-none" variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden" />
+      <motion.button key="PMP_cancelBtn" ref={cancelBtn} onClick={onCancelBtnClick} className={tailwind('fixed inset-0 h-full w-full cursor-default bg-black bg-opacity-25 focus:outline-none')} variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden" />
       {panel}
     </AnimatePresence>
   );

@@ -7,10 +7,9 @@ import Svg, { Path } from 'react-native-svg';
 
 import { updateNoteId, updatePopup, updateEditorScrollEnabled } from '../actions';
 import { NEW_NOTE, NEW_NOTE_OBJ, SIDEBAR_POPUP } from '../types/const';
-import { tailwind } from '../stylesheets/tailwind';
 import { sidebarFMV } from '../types/animConfigs';
 
-import { useSafeAreaFrame, useSafeAreaInsets } from '.';
+import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 import Sidebar from './Sidebar';
 import NoteList from './NoteList';
 import NoteEditor from './NoteEditor';
@@ -28,6 +27,7 @@ const NavPanel = () => {
     return state.notes[listName][noteId];
   });
   const [derivedNote, setDerivedNote] = useState(note);
+  const tailwind = useTailwind();
 
   const isSidebarShown = useSelector(state => state.display.isSidebarPopupShown);
   const [didSidebarAnimEnd, setDidSidebarAnimEnd] = useState(true);
@@ -256,22 +256,22 @@ const NavPanel = () => {
           <Animated.View style={[tailwind('absolute inset-0 bg-white'), leftOverlayStyle]} />
         </TouchableWithoutFeedback>
         <Animated.View style={[tailwind('absolute top-0 right-0 p-1'), leftOverlayStyle]}>
-          <TouchableOpacity onPress={onSidebarCloseBtnClick} style={tailwind('items-center justify-center h-7 w-7')}>
-            <Svg width={20} height={20} style={tailwind('text-gray-400 font-normal')} stroke="currentColor" fill="none" viewBox="0 0 24 24">
+          <TouchableOpacity onPress={onSidebarCloseBtnClick} style={tailwind('h-7 w-7 items-center justify-center')}>
+            <Svg width={20} height={20} style={tailwind('font-normal text-gray-400')} stroke="currentColor" fill="none" viewBox="0 0 24 24">
               <Path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </Svg>
           </TouchableOpacity>
         </Animated.View>
-        <Animated.View style={[tailwind('flex-1 max-w-64 h-full bg-gray-100 pr-2'), leftPanelStyle]}>
+        <Animated.View style={[tailwind('h-full max-w-64 flex-1 bg-gray-100 pr-2'), leftPanelStyle]}>
           <Sidebar />
         </Animated.View>
-        <View style={tailwind('flex-shrink-0 w-14 h-full')}>
+        <View style={tailwind('h-full w-14 flex-shrink-0')}>
           {/* Force sidebar to shrink to fit close icon */}
         </View>
       </View>
       {/* Right panel */}
       <View style={tailwind(rightCanvasClassNames)}>
-        <Animated.View style={[tailwind('w-full h-full'), rightPanelStyle]}>
+        <Animated.View style={[tailwind('h-full w-full'), rightPanelStyle]}>
           <NoteEditor note={derivedNote} width={safeAreaWidth} />
         </Animated.View>
       </View>

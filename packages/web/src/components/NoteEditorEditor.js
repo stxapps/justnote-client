@@ -18,7 +18,7 @@ import { isUint8Array, isBlob } from '../utils/index-web';
 
 import '../stylesheets/ckeditor.css';
 
-import { useSafeAreaFrame } from '.';
+import { useSafeAreaFrame, useTailwind } from '.';
 
 const GET_DATA_SAVE_NOTE = 'GET_DATA_SAVE_NOTE';
 const GET_DATA_DISCARD_NOTE = 'GET_DATA_DISCARD_NOTE';
@@ -75,6 +75,7 @@ const NoteEditorEditor = (props) => {
   const imagesDir = useRef(IMAGES);
   const getDataAction = useRef(null);
   const dispatch = useDispatch();
+  const tailwind = useTailwind();
 
   const editingNoteId = useSelector(state => state.editor.editingNoteId);
   const editingNoteTitle = useSelector(state => state.editor.editingNoteTitle);
@@ -547,16 +548,16 @@ const NoteEditorEditor = (props) => {
   }, []);
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <div ref={scrollView} className="flex-grow flex-shrink overflow-x-hidden overflow-y-auto z-0">
-        <div className={`px-1.5 py-1.5 ${isMobile ? 'border-b border-gray-200' : ''}`}>
-          <input ref={titleInput} onFocus={onFocus} onChange={onDataChange} type="text" name="titleInput" id="titleInput" className="block w-full text-xl font-normal text-gray-800 px-1.5 py-1.5 placeholder-gray-500 border-0 focus:outline-none focus:ring-0 lg:text-lg" placeholder="Note Title" disabled={(note.id !== NEW_NOTE && note.status !== ADDED) || isEditorBusy} />
+    <div className={tailwind('flex flex-1 flex-col overflow-hidden')}>
+      <div ref={scrollView} className={tailwind('z-0 flex-shrink flex-grow overflow-y-auto overflow-x-hidden')}>
+        <div className={tailwind(`px-1.5 py-1.5 ${isMobile ? 'border-b border-gray-200' : ''}`)}>
+          <input ref={titleInput} onFocus={onFocus} onChange={onDataChange} type="text" name="titleInput" id="titleInput" className={tailwind('block w-full border-0 px-1.5 py-1.5 text-xl font-normal text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-0 lg:text-lg')} placeholder="Note Title" disabled={(note.id !== NEW_NOTE && note.status !== ADDED) || isEditorBusy} />
         </div>
-        <div ref={bodyTopToolbar} className="sticky -top-px z-10"></div>
+        <div ref={bodyTopToolbar} className={tailwind('sticky -top-px z-10')}></div>
         <CKEditor editor={ckeditor} config={editorConfig} disabled={(note.id !== NEW_NOTE && note.status !== ADDED) || isEditorBusy} onReady={onReady} onFocus={onFocus} onChange={onDataChange} />
-        <div className="h-28"></div>
+        <div className={tailwind('h-28')}></div>
       </div>
-      <div ref={bodyBottomToolbar} className="flex-grow-0 flex-shrink-0"></div>
+      <div ref={bodyBottomToolbar} className={tailwind('flex-shrink-0 flex-grow-0')}></div>
     </div>
   );
 };

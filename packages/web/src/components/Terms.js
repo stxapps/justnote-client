@@ -1,9 +1,12 @@
 import React, { useEffect } from 'react';
 
+import { useTailwind } from '.';
 import TopBar from './TopBar';
 import Footer from './Footer';
 
 const Terms = () => {
+
+  const tailwind = useTailwind();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -11,42 +14,42 @@ const Terms = () => {
 
   return (
     <React.Fragment>
-      <div className="pt-6">
+      <div className={tailwind('pt-6')}>
         <TopBar />
-        <div className="relative py-16 overflow-hidden">
-          <div className="hidden lg:block lg:absolute lg:inset-y-0 lg:h-full lg:w-full">
-            <div className="relative h-full text-lg max-w-prose mx-auto" aria-hidden="true">
-              <svg className="absolute top-12 left-full transform translate-x-32" width="404" height="384" fill="none" viewBox="0 0 404 384">
+        <div className={tailwind('relative overflow-hidden py-16')}>
+          <div className={tailwind('hidden lg:absolute lg:inset-y-0 lg:block lg:h-full lg:w-full')}>
+            <div className={tailwind('relative mx-auto h-full max-w-prose text-lg')} aria-hidden="true">
+              <svg className={tailwind('absolute top-12 left-full translate-x-32 transform')} width="404" height="384" fill="none" viewBox="0 0 404 384">
                 <defs>
                   <pattern id="74b3fd99-0a6f-4271-bef2-e80eeafdf357" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                    <rect x="0" y="0" width="4" height="4" className="text-gray-200" fill="currentColor" />
+                    <rect x="0" y="0" width="4" height="4" className={tailwind('text-gray-200')} fill="currentColor" />
                   </pattern>
                 </defs>
                 <rect width="404" height="384" fill="url(#74b3fd99-0a6f-4271-bef2-e80eeafdf357)" />
               </svg>
-              <svg className="absolute top-1/2 right-full transform -translate-y-1/2 -translate-x-32" width="404" height="384" fill="none" viewBox="0 0 404 384">
+              <svg className={tailwind('absolute top-1/2 right-full -translate-y-1/2 -translate-x-32 transform')} width="404" height="384" fill="none" viewBox="0 0 404 384">
                 <defs>
                   <pattern id="f210dbf6-a58d-4871-961e-36d5016a0f49" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                    <rect x="0" y="0" width="4" height="4" className="text-gray-200" fill="currentColor" />
+                    <rect x="0" y="0" width="4" height="4" className={tailwind('text-gray-200')} fill="currentColor" />
                   </pattern>
                 </defs>
                 <rect width="404" height="384" fill="url(#f210dbf6-a58d-4871-961e-36d5016a0f49)" />
               </svg>
-              <svg className="absolute bottom-12 left-full transform translate-x-32" width="404" height="384" fill="none" viewBox="0 0 404 384">
+              <svg className={tailwind('absolute bottom-12 left-full translate-x-32 transform')} width="404" height="384" fill="none" viewBox="0 0 404 384">
                 <defs>
                   <pattern id="d3eb07ae-5182-43e6-857d-35c643af9034" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                    <rect x="0" y="0" width="4" height="4" className="text-gray-200" fill="currentColor" />
+                    <rect x="0" y="0" width="4" height="4" className={tailwind('text-gray-200')} fill="currentColor" />
                   </pattern>
                 </defs>
                 <rect width="404" height="384" fill="url(#d3eb07ae-5182-43e6-857d-35c643af9034)" />
               </svg>
             </div>
           </div>
-          <div className="relative px-4 sm:px-6 lg:px-8">
-            <div className="max-w-prose mx-auto">
-              <h1 className="mt-2 block text-3xl text-center leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">Terms of Service</h1>
+          <div className={tailwind('relative px-4 sm:px-6 lg:px-8')}>
+            <div className={tailwind('mx-auto max-w-prose')}>
+              <h1 className={tailwind('mt-2 block text-center text-3xl font-extrabold leading-8 tracking-tight text-gray-900 sm:text-4xl')}>Terms of Service</h1>
             </div>
-            <div className="mt-10 prose text-gray-500 mx-auto">
+            <div className={tailwind('prose mx-auto mt-10 text-gray-500')}>
               <p>Last updated: 29 Jul 2022</p>
               <h3>Intro</h3>
               <p>By accessing, browsing and/or using our website(s) (each, a "Site" and collectively, the "Site(s)"), downloading, installing and/or using any mobile device software application owned, controlled or offered by <a href="https://www.stxapps.com" target="_blank" rel="noreferrer">STX Apps Co., Ltd.</a> (each an "App" and collectively, the "App(s)"), or accessing, browsing and/or using any other mobile or web services owned, controlled or offered by STX Apps Co., Ltd. (the Site(s), the App(s) and any such other services (collectively, the "Service")), you acknowledge that you have read and understood and agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, then please cease using the Service immediately and you must uninstall the App(s) from any device owned or controlled by you. STX Apps Co., Ltd. ("STX Apps") reserves the right to change these Terms at any time. We recommend that you periodically check the Site(s) for changes. By accessing, browsing and/or using any Service after these updates to these Terms have been posted, you agree to be bound by the updated Terms. THESE TERMS CONSTITUTE A BINDING AGREEMENT BETWEEN YOU AND STX APPS. In addition, the STX Apps Privacy Policy governs your access to and use of the Service and the processing of certain information about you.</p>
@@ -80,7 +83,7 @@ const Terms = () => {
               <h3>Fees and subscription</h3>
               <p>While the basic functionality of the Service is free for use, additional data charges may apply to you for mobile use of the Service through your mobile device. Additional fees may also apply for use of additional features of the Service. If there is a charge associated with a portion of the Service, you agree to pay that charge by accessing or using it. The price stated for the Service may be denominated in your local currency by Apple App Store, Google Play Store, by STX Apps through a third party payment processing service, or any other applicable App Store through which you download the App(s) on your device. Fees and charges are collected by the App Store on your device. You should consult with the appropriate App Store to determine if the price charged includes all applicable taxes and currency exchange settlements. STX Apps relies on the App Store to collect subscription fees and to report on the status of subscription accounts. Your access to the additional features may be suspended or cancelled if you do not make your payment on-time and/or in full.</p>
               <p>If you purchase one or more subscriptions or sign up for one or more trial subscriptions to the Service, then the following terms apply:</p>
-              <ol className="list-[lower-alpha]">
+              <ol className={tailwind('list-[lower-alpha]')}>
                 <li>Auto-Renewal. YOU AGREE THAT, ONCE YOUR SUBSCRIPTION PERIOD EXPIRES, YOUR SUBSCRIPTION(S) WILL AUTOMATICALLY RENEW FOR SUCCESSIVE PERIODS EQUAL IN LENGTH TO THE IMMEDIATELY PRECEDING SUBSCRIPTION PERIOD UNLESS AND UNTIL YOU CANCEL YOUR SUBSCRIPTION(S). You acknowledge and agree that deletion of your account does not cancel your subscription(s) and you must cancel your subscription(s) explicitly through the applicable App Store.</li>
                 <li>Recurring Charges. If you register for a paid subscription, YOU AUTHORIZE STX APPS' APPLICABLE SERVICE PROVIDER TO PROCESS YOUR PAYMENTS FOR ANY RENEWAL SUBSCRIPTION(S). SUBSCRIPTION PRICES WILL BE PROVIDED TO YOU AT THE TIME OF PURCHASE. YOU WILL BE BILLED FOR THE SAME SUBSCRIPTION PLAN(S) (OR THE MOST SIMILAR SUBSCRIPTION PLAN(S), IF YOUR PRIOR PLAN(S) ARE NO LONGER AVAILABLE) AT THE THEN-CURRENT SUBSCRIPTION PRICE PLUS ANY APPLICABLE TAXES. YOUR PAYMENTS WILL BE PROCESSED FOR ANY RENEWAL SUBSCRIPTION(S) USING THE SAME BILLING CYCLE AS YOUR CURRENT SUBSCRIPTION(S). IN OTHER WORDS, ON WHICHEVER DAY YOUR PAYMENT IS PROCESSED FOR YOUR CURRENT SUBSCRIPTION(S), YOUR PAYMENT WILL CONTINUE TO BE PROCESSED ON THAT DAY FOR ANY RENEWAL SUBSCRIPTION(S). ADDITIONAL TERMS AND CONDITIONS MAY APPLY UPON RENEWAL, AND SUBSCRIPTION FEES MAY CHANGE AT ANY TIME, TO THE FULLEST EXTENT PERMITTED UNDER APPLICABLE LAW. However, if you do not agree to an applicable change in fees, you may cancel your subscription(s) at any time in accordance below.</li>
                 <li>Cancellation. YOU MAY CANCEL YOUR SUBSCRIPTION(S) AT ANY TIME THROUGH GOOGLE PLAY STORE (IF YOU MANAGE YOUR SUBSCRIPTION(S) THROUGH AN ANDROID DEVICE) OR THROUGH APPLE APP STORE (IF YOU MANAGE YOUR SUBSCRIPTION(S) THROUGH AN IOS-BASED DEVICE). STX APPS HAS NO OBLIGATION TO OFFER OR PROVIDE ANY REFUND FOR THE CANCELLATION OF ANY SUBSCRIPTION, BUT YOU CAN CONTINUE TO USE THE SUBSCRIPTION SERVICE UNTIL THE END OF THE SUBSCRIPTION PERIOD THAT YOU PAID FOR.</li>
@@ -99,20 +102,20 @@ const Terms = () => {
               <p>These Terms constitute the complete and exclusive statement of the agreement between STX Apps and you with respect to the subject matter hereof and supersede any proposal or prior or contemporaneous agreement, oral or written, and any other communications between the parties in relation to the subject matter of these Terms.</p>
               <p>You represent and warrant that you are not (i) located in a country that is subject to a U.S. Government embargo, or that has been designated by the U.S. Government as a "terrorist supporting" country; and (ii) listed on any U.S. Government list of prohibited or restricted parties, including, but not limited to, the Specially Designated Nationals List.</p>
               <p>YOU AND STX APPS AGREE THAT ANY CAUSE OF ACTION ARISING OUT OF OR RELATED TO THE SERVICE MUST COMMENCE WITHIN ONE YEAR AFTER THE CAUSE OF ACTION ACCRUES. OTHERWISE, SUCH CAUSE OF ACTION SHALL BE PERMANENTLY BARRED.</p>
-              <p>If you have questions or concerns regarding these Terms or your subscription(s), you can contact us at <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#64;&#106;&#117;&#115;&#116;&#110;&#111;&#116;&#101;&#46;&#99;&#99;"><span className="e-mail" data-user="troppus" data-website="cc.etontsuj"></span></a>. Alternatively, you may contact us at:</p>
+              <p>If you have questions or concerns regarding these Terms or your subscription(s), you can contact us at <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#64;&#106;&#117;&#115;&#116;&#110;&#111;&#116;&#101;&#46;&#99;&#99;"><span className={tailwind('e-mail')} data-user="troppus" data-website="cc.etontsuj"></span></a>. Alternatively, you may contact us at:</p>
               <p>STX Apps Co., Ltd.<br />ATTN: Justnote Team<br />247 Chan 31 Sathon<br />Bangkok 10120 TH</p>
             </div>
-            <div className="pt-12 max-w-prose mx-auto text-right text-gray-500">
-              <button className="group rounded-sm hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400" onClick={() => window.scrollTo(0, 0)}>
-                <span className="pl-1">Back to top</span>
-                <svg className="mb-1 ml-1 inline-block w-5" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <div className={tailwind('mx-auto max-w-prose pt-12 text-right text-gray-500')}>
+              <button className={tailwind('group rounded-sm hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400')} onClick={() => window.scrollTo(0, 0)}>
+                <span className={tailwind('pl-1')}>Back to top</span>
+                <svg className={tailwind('mb-1 ml-1 inline-block w-5')} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                   <path fillRule="evenodd" clipRule="evenodd" d="M3.29289 9.70711C2.90237 9.31658 2.90237 8.68342 3.29289 8.29289L9.29289 2.29289C9.68342 1.90237 10.3166 1.90237 10.7071 2.29289L16.7071 8.29289C17.0976 8.68342 17.0976 9.31658 16.7071 9.70711C16.3166 10.0976 15.6834 10.0976 15.2929 9.70711L11 5.41421V17C11 17.5523 10.5523 18 10 18C9.44772 18 9 17.5523 9 17V5.41421L4.70711 9.70711C4.31658 10.0976 3.68342 10.0976 3.29289 9.70711Z" />
                 </svg>
               </button>
               <br />
-              <a className="mt-2 inline-block group rounded-sm hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400" href="/">
-                <span className="pl-0.5">Go home</span>
-                <svg className="mb-1 ml-1 inline-block w-5" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <a className={tailwind('group mt-2 inline-block rounded-sm hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1')} href="/">
+                <span className={tailwind('pl-0.5')}>Go home</span>
+                <svg className={tailwind('mb-1 ml-1 inline-block w-5')} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                   <path d="M10.7071 2.29289C10.3166 1.90237 9.68342 1.90237 9.29289 2.29289L2.29289 9.29289C1.90237 9.68342 1.90237 10.3166 2.29289 10.7071C2.68342 11.0976 3.31658 11.0976 3.70711 10.7071L4 10.4142V17C4 17.5523 4.44772 18 5 18H7C7.55228 18 8 17.5523 8 17V15C8 14.4477 8.44772 14 9 14H11C11.5523 14 12 14.4477 12 15V17C12 17.5523 12.4477 18 13 18H15C15.5523 18 16 17.5523 16 17V10.4142L16.2929 10.7071C16.6834 11.0976 17.3166 11.0976 17.7071 10.7071C18.0976 10.3166 18.0976 9.68342 17.7071 9.29289L10.7071 2.29289Z" />
                 </svg>
               </a>

@@ -1,7 +1,10 @@
 import { Dimensions } from 'react-native';
+import { createSelector } from 'reselect';
 import {
   useSafeAreaFrame as useWindowFrame, useSafeAreaInsets as useScreenInsets,
 } from 'react-native-safe-area-context';
+
+import { tailwind } from '../stylesheets/tailwind';
 
 const getSafeAreaInsets = (
   windowX, windowY, windowWidth, windowHeight, screenWidth, screenHeight, screenInsets,
@@ -47,4 +50,19 @@ export const useSafeAreaInsets = () => {
   return getSafeAreaInsets(
     windowX, windowY, windowWidth, windowHeight, screenWidth, screenHeight, screenInsets,
   );
+};
+
+const getTwWrapper = createSelector(
+  safeAreaWidth => safeAreaWidth,
+  safeAreaWidth => {
+    return (classStr) => {
+      return tailwind(classStr, safeAreaWidth);
+    };
+  },
+);
+
+export const useTailwind = () => {
+  const { width: safeAreaWidth } = useSafeAreaFrame();
+  const twWrapper = getTwWrapper(safeAreaWidth);
+  return twWrapper;
 };
