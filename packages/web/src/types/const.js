@@ -187,3 +187,10 @@ export const LIST_NAMES_MODE_MOVE_LIST_NAME = 'LIST_NAMES_MODE_MOVE_LIST_NAME';
 
 export const NOTE_DATE_SHOWING_MODE_HIDE = 0;
 export const NOTE_DATE_SHOWING_MODE_SHOW_DEFAULT = 1;
+
+export const LOCAL_SETTINGS_STATE = 'LOCAL_SETTINGS_STATE';
+
+export const WHT_MODE = 0;
+export const BLK_MODE = 1;
+export const SYSTEM_MODE = 2;
+export const CUSTOM_MODE = 3;

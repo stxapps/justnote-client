@@ -39,9 +39,9 @@ import {
   UPDATE_IAP_PURCHASE_STATUS, UPDATE_IAP_RESTORE_STATUS, UPDATE_IAP_REFRESH_STATUS,
   PIN_NOTE, PIN_NOTE_COMMIT, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_COMMIT,
   UNPIN_NOTE_ROLLBACK, MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_COMMIT,
-  MOVE_PINNED_NOTE_ROLLBACK, CANCEL_DIED_PINS, UPDATE_IMPORT_ALL_DATA_PROGRESS,
-  UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
-  DELETE_ALL_DATA, RESET_STATE,
+  MOVE_PINNED_NOTE_ROLLBACK, CANCEL_DIED_PINS, UPDATE_SYSTEM_THEME_MODE, UPDATE_THEME,
+  UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
+  UPDATE_DELETE_ALL_DATA_PROGRESS, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY, HASH_SUPPORT,
@@ -56,6 +56,7 @@ import {
   N_DAYS, CD_ROOT, NOTES, IMAGES, SETTINGS, INDEX, DOT_JSON, PINS, LG_WIDTH,
   IMAGE_FILE_EXTS, IAP_STATUS_URL, COM_JUSTNOTECC, SIGNED_TEST_STRING, VALID, ACTIVE,
   SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS,
+  WHT_MODE, BLK_MODE,
 } from '../types/const';
 import {
   throttle, extractUrl, urlHashToObj, objToUrlHash, isIPadIPhoneIPod, isBusyStatus,
@@ -88,6 +89,10 @@ export const init = () => async (dispatch, getState) => {
 
   handleUrlHash();
 
+  const darkMatches = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+  const localSettings = await dataApi.getLocalSettings();
+
   dispatch({
     type: INIT,
     payload: {
@@ -98,6 +103,8 @@ export const init = () => async (dispatch, getState) => {
       href: window.location.href,
       windowWidth: window.innerWidth,
       windowHeight: window.innerHeight,
+      systemThemeMode: darkMatches ? BLK_MODE : WHT_MODE,
+      localSettings,
     },
   });
 
@@ -180,6 +187,11 @@ export const init = () => async (dispatch, getState) => {
       }
     }
   }, { capture: true });
+
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    const systemThemeMode = e.matches ? BLK_MODE : WHT_MODE;
+    dispatch({ type: UPDATE_SYSTEM_THEME_MODE, payload: systemThemeMode });
+  });
 };
 
 const handlePendingSignIn = () => async (dispatch, getState) => {
@@ -3030,4 +3042,21 @@ export const movePinnedNote = (id, direction) => async (dispatch, getState) => {
 
 export const cancelDiedPins = () => {
   return { type: CANCEL_DIED_PINS };
+};
+
+export const updateLocalSettings = () => async (dispatch, getState) => {
+  const localSettings = getState().localSettings;
+  await dataApi.putLocalSettings(localSettings);
+};
+
+export const updateTheme = (mode, customOptions) => async (dispatch, getState) => {
+  const state = getState();
+  const purchases = state.settings.purchases;
+
+  if (!doEnableExtraFeatures(purchases)) {
+    dispatch(updatePopup(PAYWALL_POPUP, true));
+    return;
+  }
+
+  dispatch({ type: UPDATE_THEME, payload: { mode, customOptions } });
 };

@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { createSelector } from 'reselect';
 
-import { tailwind } from '../stylesheets/tailwind';
+import { getThemeMode, getTailwind } from '../selectors';
 
 export const useSafeAreaFrame = () => {
 
@@ -26,17 +25,9 @@ export const useStateWithLocalStorage = (defaultValue, localStorageKey) => {
   return [value, setValue];
 };
 
-const getTwWrapper = createSelector(
-  safeAreaWidth => safeAreaWidth,
-  safeAreaWidth => {
-    return (classStr) => {
-      return tailwind(classStr, safeAreaWidth);
-    };
-  },
-);
-
 export const useTailwind = () => {
   const { width: safeAreaWidth } = useSafeAreaFrame();
-  const twWrapper = getTwWrapper(safeAreaWidth);
-  return twWrapper;
+  const themeMode = useSelector(state => getThemeMode(state));
+  const tailwind = getTailwind(safeAreaWidth, themeMode);
+  return tailwind;
 };

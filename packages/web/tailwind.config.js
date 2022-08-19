@@ -1,4 +1,5 @@
 const defaultTheme = require('tailwindcss/defaultTheme');
+const plugin = require('tailwindcss/plugin');
 
 module.exports = {
   content: [
@@ -33,6 +34,9 @@ module.exports = {
     require('@tailwindcss/aspect-ratio'),
     require('@tailwindcss/typography'),
     require('@tailwindcss/line-clamp'),
-    require('tailwindcss-labeled-groups')(['s'])
+    require('tailwindcss-labeled-groups')(['s']),
+    plugin(function ({ addVariant }) {
+      addVariant('blk', '&');
+    })
   ],
 };

@@ -1,5 +1,6 @@
 import {
   MY_NOTES, TRASH, ARCHIVE, ADDED_DT, MODE_VIEW, NOTE_DATE_SHOWING_MODE_HIDE,
+  WHT_MODE, BLK_MODE,
 } from '../types/const';
 
 export const myNotesListNameObj = { listName: MY_NOTES, displayName: MY_NOTES };
@@ -17,6 +18,14 @@ export const initialSettingsState = {
   ],
   purchases: null, // an array with elements as purchase objs
   checkPurchasesDT: null,
+};
+
+export const initialLocalSettingsState = {
+  themeMode: WHT_MODE,
+  themeCustomOptions: [
+    { mode: WHT_MODE, startTime: '06:00' },
+    { mode: BLK_MODE, startTime: '18:00' },
+  ],
 };
 
 export const initialListNameEditorState = {

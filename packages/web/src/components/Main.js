@@ -9,12 +9,12 @@ import SidebarProfilePopup from './SidebarProfilePopup';
 import NoteListMenuPopup from './NoteListMenuPopup';
 import NoteListItemMenuPopup from './NoteListItemMenuPopup';
 import PinMenuPopup from './PinMenuPopup';
-import PaywallPopup from './PaywallPopup';
 import SettingsPopup from './SettingsPopup';
 import SettingsListsMenuPopup from './SettingsListsMenuPopup';
 import PinErrorPopup from './PinErrorPopup';
 import SettingsErrorPopup from './SettingsErrorPopup';
 import ListNamesPopup from './ListNamesPopup';
+import PaywallPopup from './PaywallPopup';
 import ConfirmDeletePopup from './ConfirmDeletePopup';
 import ConfirmDiscardPopup from './ConfirmDiscardPopup';
 
@@ -42,12 +42,12 @@ const Main = () => {
       <NoteListMenuPopup />
       <NoteListItemMenuPopup />
       <PinMenuPopup />
-      <PaywallPopup />
       <SettingsPopup />
       <SettingsListsMenuPopup />
       <PinErrorPopup />
       <SettingsErrorPopup />
       <ListNamesPopup />
+      <PaywallPopup />
       <ConfirmDeletePopup />
       <ConfirmDiscardPopup />
     </React.Fragment>
