@@ -78,6 +78,28 @@ const SettingsPopupMisc = (props) => {
     dispatch(updateTheme(_themeMode, _customOptions));
   };
 
+  const onWhtTimeInputBlur = () => {
+    if (whtTimeInput.current.value === '') {
+      const _themeMode = CUSTOM_MODE;
+      const _customOptions = [
+        { mode: WHT_MODE, startTime: '06:00' },
+        { mode: BLK_MODE, startTime: blkTimeInput.current.value },
+      ];
+      dispatch(updateTheme(_themeMode, _customOptions));
+    }
+  };
+
+  const onBlkTimeInputBlur = () => {
+    if (blkTimeInput.current.value === '') {
+      const _themeMode = CUSTOM_MODE;
+      const _customOptions = [
+        { mode: WHT_MODE, startTime: whtTimeInput.current.value },
+        { mode: BLK_MODE, startTime: '18:00' },
+      ];
+      dispatch(updateTheme(_themeMode, _customOptions));
+    }
+  };
+
   const doDeleteBtnClassNames = doDeleteOldNotesInTrash ? 'bg-green-500' : 'bg-gray-200';
   const doDeleteBtnInnerClassNames = doDeleteOldNotesInTrash ? 'translate-x-5' : 'translate-x-0';
 
@@ -124,7 +146,7 @@ const SettingsPopupMisc = (props) => {
       </div>
       <div className={tailwind('mt-6 flex flex-col md:mt-0')}>
         <h4 className={tailwind('text-base font-medium leading-none text-gray-800')}>Appearance</h4>
-        <p className={tailwind('mt-2.5 flex-shrink flex-grow text-base leading-relaxed text-gray-500')}>Choose appearance to be <span className={tailwind('font-semibold')}>Light</span>, <span className={tailwind('font-semibold')}>Dark</span>, <span className={tailwind('font-semibold')}>System</span> (uses your device's setting), or <span className={tailwind('font-semibold')}>Custom</span> (schedule times to change appearance automatically). This setting is not synced so you can have a different appearance for each of your devices.</p>
+        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500')}>Choose appearance to be <span className={tailwind('font-semibold')}>Light</span>, <span className={tailwind('font-semibold')}>Dark</span>, <span className={tailwind('font-semibold')}>System</span> (uses your device's setting), or <span className={tailwind('font-semibold')}>Custom</span> (schedule times to change appearance automatically). This setting is not synced so you can have a different appearance for each of your devices.</p>
         <div className={tailwind('mx-auto mt-2.5 w-full max-w-sm -space-y-px rounded-md bg-white shadow-sm')}>
           <div className={tailwind(`relative flex rounded-tl-md rounded-tr-md border p-4 ${whtBtnClassNames}`)}>
             <div className={tailwind('flex h-5 items-center')}>
@@ -159,11 +181,11 @@ const SettingsPopupMisc = (props) => {
               <div className={tailwind('mt-1.5 sm:flex sm:items-center sm:justify-start')}>
                 <div className={tailwind('flex items-center justify-start')}>
                   <span className={tailwind(`block w-9 text-sm ${customTextClassNames}`)}>Light:</span>
-                  <input ref={whtTimeInput} onChange={onTimeInputChange} type="time" className={tailwind(`ml-2 rounded-md border border-gray-300 py-1 pl-1 pr-0.5 text-sm leading-5 focus:border-gray-500 focus:ring-gray-500 ${customInputClassNames}`)} placeholder="HH:mm" value={whtTime} disabled={themeMode !== CUSTOM_MODE} pattern="[0-9]{2}:[0-9]{2}" />
+                  <input ref={whtTimeInput} onChange={onTimeInputChange} onBlur={onWhtTimeInputBlur} type="time" className={tailwind(`ml-2 rounded-md border border-gray-300 py-1 pl-1 pr-0.5 text-sm leading-5 ${customInputClassNames}`)} placeholder="HH:mm" value={whtTime} disabled={themeMode !== CUSTOM_MODE} pattern="[0-9]{2}:[0-9]{2}" />
                 </div>
                 <div className={tailwind('mt-2 flex items-center justify-start sm:ml-4 sm:mt-0')}>
                   <span className={tailwind(`block w-9 text-sm ${customTextClassNames}`)}>Dark:</span>
-                  <input ref={blkTimeInput} onChange={onTimeInputChange} type="time" className={tailwind(`ml-2 rounded-md border border-gray-300 py-1 pl-1 pr-0.5 text-sm leading-5 ${customInputClassNames}`)} placeholder="HH:mm" value={blkTime} disabled={themeMode !== CUSTOM_MODE} pattern="[0-9]{2}:[0-9]{2}" />
+                  <input ref={blkTimeInput} onChange={onTimeInputChange} onBlur={onBlkTimeInputBlur} type="time" className={tailwind(`ml-2 rounded-md border border-gray-300 py-1 pl-1 pr-0.5 text-sm leading-5 ${customInputClassNames}`)} placeholder="HH:mm" value={blkTime} disabled={themeMode !== CUSTOM_MODE} pattern="[0-9]{2}:[0-9]{2}" />
                 </div>
               </div>
             </label>

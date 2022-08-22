@@ -14,9 +14,9 @@ import SettingsListsMenuPopup from './SettingsListsMenuPopup';
 import PinErrorPopup from './PinErrorPopup';
 import SettingsErrorPopup from './SettingsErrorPopup';
 import ListNamesPopup from './ListNamesPopup';
-import PaywallPopup from './PaywallPopup';
 import ConfirmDeletePopup from './ConfirmDeletePopup';
 import ConfirmDiscardPopup from './ConfirmDiscardPopup';
+import PaywallPopup from './PaywallPopup';
 
 const Main = () => {
 
@@ -47,9 +47,9 @@ const Main = () => {
       <PinErrorPopup />
       <SettingsErrorPopup />
       <ListNamesPopup />
-      <PaywallPopup />
       <ConfirmDeletePopup />
       <ConfirmDiscardPopup />
+      <PaywallPopup />
     </React.Fragment>
   );
 };

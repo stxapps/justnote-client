@@ -1,8 +1,8 @@
-import { BLK_MODE } from '../types/const';
+import { WHT_MODE, BLK_MODE } from '../types/const';
 import { isNumber } from '../utils';
 
-const THEME_MODES = [BLK_MODE];
-const THEME_PREFIXES = ['blk:'];
+const THEME_MODES = [WHT_MODE, BLK_MODE];
+const THEME_PREFIXES = ['', 'blk:'];
 
 const tailwind = (classStr, windowWidth, selectedThemeMode) => {
   if (!isNumber(windowWidth)) {
@@ -12,25 +12,23 @@ const tailwind = (classStr, windowWidth, selectedThemeMode) => {
   const classes = classStr.trim().split(/\s+/);
 
   const themeBuckets = [];
-  for (let i = 0; i < THEME_PREFIXES.length + 1; i++) themeBuckets.push([]);
+  for (let i = 0; i < THEME_MODES.length; i++) themeBuckets.push([]);
 
   for (const className of classes) {
-    for (let i = 0; i < themeBuckets.length; i++) {
-      if (i === themeBuckets.length - 1) {
-        themeBuckets[i].push(className);
-        break;
-      }
-
-      const prefix = THEME_PREFIXES[i];
+    let i = 0;
+    for (let j = 1; j < THEME_PREFIXES.length; j++) {
+      const prefix = THEME_PREFIXES[j];
       if (className.includes(prefix)) {
-        themeBuckets[i].push(className);
+        i = j;
         break;
       }
     }
+
+    themeBuckets[i].push(className);
   }
 
-  let selectedClasses = themeBuckets[themeBuckets.length - 1];
-  for (let i = 0; i < THEME_PREFIXES.length; i++) {
+  let selectedClasses = themeBuckets[0];
+  for (let i = 1; i < THEME_MODES.length; i++) {
     if (selectedThemeMode === THEME_MODES[i]) {
       selectedClasses = [...selectedClasses, ...themeBuckets[i]];
       break;

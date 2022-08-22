@@ -438,7 +438,8 @@ const putLocalSettings = async (localSettings) => {
 const data = {
   listFPaths, batchGetFileWithRetry, toNotes, fetch, fetchMore,
   batchPutFileWithRetry, putNotes, getOldNotesInTrash, canDeleteListNames, getFiles,
-  putFiles, deleteFiles, putPins, deletePins, getLocalSettings, putLocalSettings,
+  putFiles, deleteFiles, putPins, deletePins,
+  getLocalSettings, putLocalSettings,
 };
 
 export default data;
