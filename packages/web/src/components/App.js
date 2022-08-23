@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import Url from 'url-parse';
 
 import { init } from '../actions';
 import {
@@ -34,20 +33,19 @@ const App = () => {
 
   if (isUserSignedIn === null || isHandlingSignIn) return <Loading />;
 
-  const { pathname } = extractUrl(href);
+  const { pathname, hash } = extractUrl(href);
   if (pathname === '/about') return <About />;
   if (pathname === '/terms') return <Terms />;
   if (pathname === '/privacy') return <Privacy />;
   if (pathname === '/support') return <Support />;
 
-  const hrefObj = new Url(href, {});
   if (
-    hrefObj.hash === HASH_LANDING || hrefObj.hash === HASH_LANDING_MOBILE
+    hash.startsWith(HASH_LANDING) || hash.startsWith(HASH_LANDING_MOBILE)
   ) return <Landing />;
-  if (hrefObj.hash === HASH_ABOUT) return <About />;
-  if (hrefObj.hash === HASH_TERMS) return <Terms />;
-  if (hrefObj.hash === HASH_PRIVACY) return <Privacy />;
-  if (hrefObj.hash === HASH_SUPPORT) return <Support />;
+  if (hash.startsWith(HASH_ABOUT)) return <About />;
+  if (hash.startsWith(HASH_TERMS)) return <Terms />;
+  if (hash.startsWith(HASH_PRIVACY)) return <Privacy />;
+  if (hash.startsWith(HASH_SUPPORT)) return <Support />;
 
   if (isUserSignedIn === true) {
     return (

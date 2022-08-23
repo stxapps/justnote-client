@@ -3,6 +3,8 @@ import React, { useEffect } from 'react';
 import { useTailwind } from '.';
 import TopBar from './TopBar';
 import Footer from './Footer';
+import SignUpPopup from './SignUpPopup';
+import SignInPopup from './SignInPopup';
 
 const Support = () => {
 
@@ -90,6 +92,8 @@ const Support = () => {
         </div>
       </div>
       <Footer />
+      <SignUpPopup />
+      <SignInPopup />
     </React.Fragment>
   );
 };

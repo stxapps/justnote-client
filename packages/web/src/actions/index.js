@@ -289,17 +289,24 @@ export const updateUserData = (data) => async (dispatch, getState) => {
 };
 
 export const handleUrlHash = () => {
+  const allowedHashes = [
+    HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY,
+    HASH_SUPPORT,
+  ];
+
   const urlObj = new Url(window.location.href, {});
-  if (
-    urlObj.hash !== '' &&
-    ![
-      HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY,
-      HASH_SUPPORT,
-    ].includes(urlObj.hash)
-  ) {
-    urlObj.set('hash', '');
-    window.location.replace(urlObj.toString());
+  if (urlObj.hash === '' || allowedHashes.includes(urlObj.hash)) return;
+
+  let newHash = '';
+  for (const allowedHash of allowedHashes) {
+    if (urlObj.hash.startsWith(allowedHash)) {
+      newHash = allowedHash;
+      break;
+    }
   }
+
+  urlObj.set('hash', newHash);
+  window.location.replace(urlObj.toString());
 };
 
 export const onPopStateChange = (dispatch, getState) => {

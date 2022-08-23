@@ -2,8 +2,8 @@ import { createSelector } from 'reselect';
 import Url from 'url-parse';
 
 import {
-  HTTP, MAX_CHARS, CD_ROOT, STATUS, NOTES, IMAGES, SETTINGS, PINS, DOT_JSON,
-  ADDED, ADDING, UPDATING, MOVING, DELETING, MERGING,
+  HASH_FRAGMENT_IDENTIFIER, HTTP, MAX_CHARS, CD_ROOT, STATUS, NOTES, IMAGES, SETTINGS,
+  PINS, DOT_JSON, ADDED, ADDING, UPDATING, MOVING, DELETING, MERGING,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, DIED_MERGING,
   VALID_URL, NO_URL, ASK_CONFIRM_URL,
   VALID_LIST_NAME, NO_LIST_NAME, TOO_LONG_LIST_NAME, DUPLICATE_LIST_NAME,
@@ -38,6 +38,7 @@ export const extractUrl = (url) => {
     host: urlObj.host,
     origin: urlObj.origin,
     pathname: urlObj.pathname,
+    hash: urlObj.hash,
   };
 };
 
@@ -246,12 +247,22 @@ export const isArrayEqual = (arr1, arr2) => {
 };
 
 export const urlHashToObj = (hash) => {
-  const obj = {};
+  const obj = { [HASH_FRAGMENT_IDENTIFIER]: '' };
 
   if (hash === null || hash === undefined || !isString(hash)) return obj;
   if (hash === '' || hash === '#' || hash === '#?') return obj;
+
   if (hash.startsWith('#')) hash = hash.slice(1);
-  if (hash.startsWith('?')) hash = hash.slice(1);
+
+  const qIndex = hash.indexOf('?');
+  if (qIndex === -1) {
+    if (hash.length > 0) obj[HASH_FRAGMENT_IDENTIFIER] = '#' + hash;
+    return obj;
+  }
+
+  const hashId = hash.slice(0, qIndex);
+  if (hashId.length > 0) obj[HASH_FRAGMENT_IDENTIFIER] = '#' + hashId;
+  hash = hash.slice(qIndex + 1);
 
   const arr = hash.split('&');
   for (const el of arr) {
@@ -263,17 +274,24 @@ export const urlHashToObj = (hash) => {
 };
 
 export const objToUrlHash = (obj) => {
-
-  let s = '';
+  let h = '', s = '';
   for (const [k, v] of Object.entries(obj)) {
     if (v === undefined) throw new Error(`Invalid obj: ${obj}`);
     if (v === null) continue;
+
+    if (k === HASH_FRAGMENT_IDENTIFIER) {
+      h = obj[HASH_FRAGMENT_IDENTIFIER];
+      continue;
+    }
 
     if (s.length > 0) s += '&';
     s += k + '=' + v;
   }
 
-  return `#?${s}`;
+  if (h.length !== 0 && s.length !== 0) return `${h}?${s}`;
+  else if (h.length !== 0) return `${h}`;
+  else if (s.length !== 0) return `#?${s}`;
+  return '';
 };
 
 export const getListNameObj = (listName, listNameObjs, parent = null) => {

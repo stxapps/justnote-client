@@ -1,10 +1,12 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import Url from 'url-parse';
 
 import { updatePopupUrlHash } from '../actions';
-import { HASH_LANDING_MOBILE, SIGN_UP_POPUP, SM_WIDTH, MD_WIDTH } from '../types/const';
-import { isNumber, getOffsetTop } from '../utils';
+import {
+  HASH_FRAGMENT_IDENTIFIER, HASH_LANDING_MOBILE, SIGN_UP_POPUP, SM_WIDTH, MD_WIDTH,
+} from '../types/const';
+import { extractUrl, urlHashToObj, isNumber, getOffsetTop } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 import TopBar from './TopBar';
@@ -34,7 +36,14 @@ const Landing = () => {
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
   const href = useSelector(state => state.window.href);
   const ubiquitousSection = useRef(null);
+  const safeAreaWidthRef = useRef(safeAreaWidth);
   const tailwind = useTailwind();
+
+  const hashId = useMemo(() => {
+    const { hash } = extractUrl(href);
+    const obj = urlHashToObj(hash);
+    return obj[HASH_FRAGMENT_IDENTIFIER];
+  }, [href]);
 
   const onSignUpBtnClick = () => {
     if (isUserSignedIn) {
@@ -49,15 +58,18 @@ const Landing = () => {
   };
 
   useEffect(() => {
-    const hrefObj = new Url(href, {});
-    if (hrefObj.hash === HASH_LANDING_MOBILE) {
+    safeAreaWidthRef.current = safeAreaWidth;
+  }, [safeAreaWidth]);
+
+  useEffect(() => {
+    if (hashId === HASH_LANDING_MOBILE) {
       setTimeout(() => {
         if (ubiquitousSection.current) {
           const top = getOffsetTop(ubiquitousSection.current);
           if (isNumber(top)) {
             let mt = 16;
-            if (safeAreaWidth >= SM_WIDTH) mt = 0;
-            if (safeAreaWidth >= MD_WIDTH) mt = 80;
+            if (safeAreaWidthRef.current >= SM_WIDTH) mt = 0;
+            if (safeAreaWidthRef.current >= MD_WIDTH) mt = 80;
             window.scrollTo(0, Math.max(top - mt, 0));
           }
         }
@@ -66,7 +78,7 @@ const Landing = () => {
     }
 
     window.scrollTo(0, 0);
-  }, [href, safeAreaWidth]);
+  }, [hashId]);
 
   return (
     <React.Fragment>
