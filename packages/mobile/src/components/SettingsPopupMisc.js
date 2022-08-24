@@ -174,7 +174,7 @@ const SettingsPopupMisc = (props) => {
                 <Text style={tailwind(`ml-3 text-sm font-medium leading-5 text-gray-500 ${blkBtnInnerClassNames}`)}>Dark</Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => onThemeInputChange(SYSTEM_MODE)}>
+            {(Platform.OS !== 'android' || (Platform.OS === 'android' && Platform.Version >= 29)) && <TouchableOpacity onPress={() => onThemeInputChange(SYSTEM_MODE)}>
               <View style={tailwind(`flex-row border p-4 ${systemBtnClassNames}`)}>
                 <View style={tailwind('h-5 flex-row items-center')}>
                   <View style={tailwind(`h-4 w-4 items-center justify-center rounded-full border bg-transparent ${systemRBtnClassNames}`)}>
@@ -183,7 +183,7 @@ const SettingsPopupMisc = (props) => {
                 </View>
                 <Text style={tailwind(`ml-3 text-sm font-medium leading-5 text-gray-500 ${systemBtnInnerClassNames}`)}>System</Text>
               </View>
-            </TouchableOpacity>
+            </TouchableOpacity>}
             <TouchableOpacity onPress={() => onThemeInputChange(CUSTOM_MODE)}>
               <View style={tailwind(`flex-row rounded-bl-md rounded-br-md border p-4 ${customBtnClassNames}`)}>
                 <View style={tailwind('h-5 flex-row items-center')}>
