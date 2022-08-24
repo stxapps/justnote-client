@@ -9,6 +9,7 @@ import conflictedNotesReducer from './conflictedNotesReducer';
 import displayReducer from './displayReducer';
 import userReducer from './userReducer';
 import settingsReducer from './settingsReducer';
+import localSettingsReducer from './localSettingsReducer';
 import editorReducer from './editorReducer';
 import stacksAccessReducer from './stacksAccessReducer';
 import snapshotReducer from './snapshotReducer';
@@ -27,6 +28,7 @@ const reducers = combineReducers({
   display: displayReducer,
   user: userReducer,
   settings: settingsReducer,
+  localSettings: localSettingsReducer,
   editor: editorReducer,
   stacksAccess: stacksAccessReducer,
   snapshot: snapshotReducer,

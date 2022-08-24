@@ -1,6 +1,8 @@
 import MMKVStorage from 'react-native-mmkv-storage';
 
-import { IS_USER_DUMMY, COLS_PANEL_STATE, DOT_JSON } from './types/const';
+import {
+  IS_USER_DUMMY, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE, DOT_JSON,
+} from './types/const';
 
 let _instance = null;
 
@@ -44,7 +46,7 @@ const listFiles = async (callback) => {
   const files = await getInstance().indexer.getKeys();
   files.forEach(file => {
     if ([
-      IS_USER_DUMMY, COLS_PANEL_STATE,
+      IS_USER_DUMMY, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE,
       'default',
       'boolIndex', 'numberIndex', 'stringIndex', 'arrayIndex', 'mapIndex',
       'boolsIndex', 'numbersIndex', 'stringsIndex', 'arraysIndex', 'mapsIndex',

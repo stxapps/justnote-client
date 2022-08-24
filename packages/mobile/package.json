@@ -22,6 +22,7 @@
     "react-native": "0.66.1",
     "react-native-animated-spinkit": "^1.5.2",
     "react-native-blockstack": "https://gitpkg.now.sh/bracedotto/blockstack-react-native/BlockstackSDK?a2aacea2fe4e384b6dbb51de05e343fe0f4602d6",
+    "react-native-device-time-format": "^2.3.0",
     "react-native-fast-image": "^8.5.11",
     "react-native-file-access": "^2.0.0",
     "react-native-iap": "^8.2.1",

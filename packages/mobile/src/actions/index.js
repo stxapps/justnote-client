@@ -1,6 +1,7 @@
-import { Linking, AppState, Platform } from 'react-native';
+import { Linking, AppState, Platform, Appearance } from 'react-native';
 import * as RNIap from 'react-native-iap';
 import { LexoRank } from '@wewatch/lexorank';
+import { is24HourFormat } from 'react-native-device-time-format';
 
 import userSession from '../userSession';
 import mmkvStorage from '../mmkvStorage';
@@ -44,9 +45,10 @@ import {
   UPDATE_IAP_PURCHASE_STATUS, UPDATE_IAP_RESTORE_STATUS, UPDATE_IAP_REFRESH_STATUS,
   PIN_NOTE, PIN_NOTE_COMMIT, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_COMMIT,
   UNPIN_NOTE_ROLLBACK, MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_COMMIT,
-  MOVE_PINNED_NOTE_ROLLBACK, CANCEL_DIED_PINS, UPDATE_IMPORT_ALL_DATA_PROGRESS,
-  UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
-  DELETE_ALL_DATA, RESET_STATE,
+  MOVE_PINNED_NOTE_ROLLBACK, CANCEL_DIED_PINS, UPDATE_SYSTEM_THEME_MODE,
+  UPDATE_THEME, UPDATE_UPDATING_THEME_MODE,
+  UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
+  UPDATE_DELETE_ALL_DATA_PROGRESS, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   DOMAIN_NAME, APP_URL_SCHEME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH,
@@ -61,6 +63,7 @@ import {
   IAP_VERIFY_URL, IAP_STATUS_URL, APPSTORE, PLAYSTORE, COM_JUSTNOTECC,
   COM_JUSTNOTECC_SUPPORTER, SIGNED_TEST_STRING, VALID, INVALID, UNKNOWN, ERROR, ACTIVE,
   SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS,
+  WHT_MODE, BLK_MODE,
 } from '../types/const';
 import {
   isEqual, sleep, separateUrlAndParam, getUserImageUrl, randomString,
@@ -117,6 +120,11 @@ export const init = () => async (dispatch, getState) => {
     username = userData.username;
     userImage = getUserImageUrl(userData);
   }
+
+  const darkMatches = Appearance.getColorScheme() === 'dark';
+  const is24HFormat = await is24HourFormat();
+  const localSettings = await dataApi.getLocalSettings();
+
   dispatch({
     type: INIT,
     payload: {
@@ -127,7 +135,15 @@ export const init = () => async (dispatch, getState) => {
       href: null,
       windowWidth: null,
       windowHeight: null,
+      systemThemeMode: darkMatches ? BLK_MODE : WHT_MODE,
+      is24HFormat,
+      localSettings,
     },
+  });
+
+  Appearance.addChangeListener((e) => {
+    const systemThemeMode = e.colorScheme === 'dark' ? BLK_MODE : WHT_MODE;
+    dispatch({ type: UPDATE_SYSTEM_THEME_MODE, payload: systemThemeMode });
   });
 };
 
@@ -2475,4 +2491,25 @@ export const movePinnedNote = (id, direction) => async (dispatch, getState) => {
 
 export const cancelDiedPins = () => {
   return { type: CANCEL_DIED_PINS };
+};
+
+export const updateLocalSettings = () => async (dispatch, getState) => {
+  const localSettings = getState().localSettings;
+  await dataApi.putLocalSettings(localSettings);
+};
+
+export const updateTheme = (mode, customOptions) => async (dispatch, getState) => {
+  const state = getState();
+  const purchases = state.settings.purchases;
+
+  if (!doEnableExtraFeatures(purchases)) {
+    dispatch(updatePopup(PAYWALL_POPUP, true));
+    return;
+  }
+
+  dispatch({ type: UPDATE_THEME, payload: { mode, customOptions } });
+};
+
+export const updateUpdatingThemeMode = (updatingThemeMode) => {
+  return { type: UPDATE_UPDATING_THEME_MODE, payload: updatingThemeMode };
 };

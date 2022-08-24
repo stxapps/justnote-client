@@ -214,7 +214,7 @@ const SettingsPopup = () => {
       didMount = false;
       registerPopupBackHandler(false);
     };
-  }, [isShown, popupAnim, registerPopupBackHandler, safeAreaWidth, dispatch]);
+  }, [isShown, popupAnim, registerPopupBackHandler, dispatch]);
 
   useEffect(() => {
     // updateSettingsViewIdCount makes sure this useEffect is called every time,

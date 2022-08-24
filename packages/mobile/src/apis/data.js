@@ -1,10 +1,13 @@
 import mmkvStorage from '../mmkvStorage';
-import { INDEX, DOT_JSON, N_NOTES, MAX_TRY, TRASH, N_DAYS } from '../types/const';
+import {
+  INDEX, DOT_JSON, N_NOTES, MAX_TRY, TRASH, N_DAYS, LOCAL_SETTINGS_STATE,
+} from '../types/const';
 import {
   createNoteFPath, createNoteFName, extractNoteFPath, createPinFPath,
   addFPath, deleteFPath, copyFPaths, getMainId, listNoteIds, sortWithPins,
 } from '../utils';
 import { cachedFPaths } from '../vars';
+import { initialLocalSettingsState } from '../types/initialStates';
 
 const _listFPaths = async () => {
   const fpaths = {
@@ -407,10 +410,32 @@ const deletePins = async (params) => {
   return { pins };
 };
 
+const getLocalSettings = async () => {
+  let localSettings = { ...initialLocalSettingsState };
+  try {
+    const item = await mmkvStorage.getItem(LOCAL_SETTINGS_STATE);
+    if (item) {
+      const _localSettings = JSON.parse(item);
+      for (const k in localSettings) {
+        if (k in _localSettings) localSettings[k] = _localSettings[k];
+      }
+    }
+  } catch (e) {
+    console.log('Get or parse localSettings error: ', e);
+  }
+
+  return localSettings;
+};
+
+const putLocalSettings = async (localSettings) => {
+  await mmkvStorage.setItem(LOCAL_SETTINGS_STATE, JSON.stringify(localSettings));
+};
+
 const data = {
   listFPaths, batchGetFileWithRetry, toNotes, fetch, fetchMore,
   batchPutFileWithRetry, putNotes, getOldNotesInTrash, canDeleteListNames, getFiles,
   putFiles, deleteFiles, deleteAllFiles, putPins, deletePins,
+  getLocalSettings, putLocalSettings,
 };
 
 export default data;

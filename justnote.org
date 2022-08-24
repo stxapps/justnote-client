@@ -272,6 +272,7 @@
 - yarn add @welldone-software/why-did-you-render --dev
 - yarn add typescript --dev
 - yarn add react-native-iap @wewatch/lexorank axios
+- yarn add react-native-device-time-format
 - Font
   + Create react-native.config.js
   + Run npx react-native link

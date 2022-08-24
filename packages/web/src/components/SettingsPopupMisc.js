@@ -180,12 +180,12 @@ const SettingsPopupMisc = (props) => {
               <span className={tailwind(`block text-sm font-medium leading-5 ${customBtnInnerClassNames}`)}>Custom</span>
               <div className={tailwind('mt-1.5 sm:flex sm:items-center sm:justify-start')}>
                 <div className={tailwind('flex items-center justify-start')}>
-                  <span className={tailwind(`block w-9 text-sm ${customTextClassNames}`)}>Light:</span>
-                  <input ref={whtTimeInput} onChange={onTimeInputChange} onBlur={onWhtTimeInputBlur} type="time" className={tailwind(`ml-2 rounded-md border border-gray-300 py-1 pl-1 pr-0.5 text-sm leading-5 ${customInputClassNames}`)} placeholder="HH:mm" value={whtTime} disabled={themeMode !== CUSTOM_MODE} pattern="[0-9]{2}:[0-9]{2}" />
+                  <span className={tailwind(`block w-10 text-sm ${customTextClassNames}`)}>Light:</span>
+                  <input ref={whtTimeInput} onChange={onTimeInputChange} onBlur={onWhtTimeInputBlur} type="time" className={tailwind(`ml-1 rounded-md border border-gray-300 py-1 pl-1 pr-0.5 text-sm leading-5 ${customInputClassNames}`)} placeholder="HH:mm" value={whtTime} disabled={themeMode !== CUSTOM_MODE} pattern="[0-9]{2}:[0-9]{2}" />
                 </div>
                 <div className={tailwind('mt-2 flex items-center justify-start sm:ml-4 sm:mt-0')}>
-                  <span className={tailwind(`block w-9 text-sm ${customTextClassNames}`)}>Dark:</span>
-                  <input ref={blkTimeInput} onChange={onTimeInputChange} onBlur={onBlkTimeInputBlur} type="time" className={tailwind(`ml-2 rounded-md border border-gray-300 py-1 pl-1 pr-0.5 text-sm leading-5 ${customInputClassNames}`)} placeholder="HH:mm" value={blkTime} disabled={themeMode !== CUSTOM_MODE} pattern="[0-9]{2}:[0-9]{2}" />
+                  <span className={tailwind(`block w-10 text-sm ${customTextClassNames}`)}>Dark:</span>
+                  <input ref={blkTimeInput} onChange={onTimeInputChange} onBlur={onBlkTimeInputBlur} type="time" className={tailwind(`ml-1 rounded-md border border-gray-300 py-1 pl-1 pr-0.5 text-sm leading-5 ${customInputClassNames}`)} placeholder="HH:mm" value={blkTime} disabled={themeMode !== CUSTOM_MODE} pattern="[0-9]{2}:[0-9]{2}" />
                 </div>
               </div>
             </label>
