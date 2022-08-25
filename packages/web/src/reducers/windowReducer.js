@@ -9,6 +9,7 @@ const initialState = {
   width: (window && isNumber(window.innerWidth)) ? window.innerWidth : null,
   height: (window && isNumber(window.innerHeight)) ? window.innerHeight : null,
   themeMode: WHT_MODE,
+  is24HFormat: null,
 };
 
 const windowReducer = (state = initialState, action) => {
@@ -20,6 +21,7 @@ const windowReducer = (state = initialState, action) => {
       width: action.payload.windowWidth,
       height: action.payload.windowHeight,
       themeMode: action.payload.systemThemeMode,
+      is24HFormat: action.payload.is24HFormat,
     };
   }
 

@@ -39,7 +39,8 @@ import {
   UPDATE_IAP_PURCHASE_STATUS, UPDATE_IAP_RESTORE_STATUS, UPDATE_IAP_REFRESH_STATUS,
   PIN_NOTE, PIN_NOTE_COMMIT, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_COMMIT,
   UNPIN_NOTE_ROLLBACK, MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_COMMIT,
-  MOVE_PINNED_NOTE_ROLLBACK, CANCEL_DIED_PINS, UPDATE_SYSTEM_THEME_MODE, UPDATE_THEME,
+  MOVE_PINNED_NOTE_ROLLBACK, CANCEL_DIED_PINS, UPDATE_SYSTEM_THEME_MODE,
+  UPDATE_THEME, UPDATE_UPDATING_THEME_MODE,
   UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
   UPDATE_DELETE_ALL_DATA_PROGRESS, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -90,7 +91,7 @@ export const init = () => async (dispatch, getState) => {
   handleUrlHash();
 
   const darkMatches = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
+  const is24HFormat = null;
   const localSettings = await dataApi.getLocalSettings();
 
   dispatch({
@@ -104,6 +105,7 @@ export const init = () => async (dispatch, getState) => {
       windowWidth: window.innerWidth,
       windowHeight: window.innerHeight,
       systemThemeMode: darkMatches ? BLK_MODE : WHT_MODE,
+      is24HFormat,
       localSettings,
     },
   });
@@ -3066,4 +3068,8 @@ export const updateTheme = (mode, customOptions) => async (dispatch, getState) =
   }
 
   dispatch({ type: UPDATE_THEME, payload: { mode, customOptions } });
+};
+
+export const updateUpdatingThemeMode = (updatingThemeMode) => {
+  return { type: UPDATE_UPDATING_THEME_MODE, payload: updatingThemeMode };
 };

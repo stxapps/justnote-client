@@ -199,7 +199,7 @@ const SettingsPopupMisc = (props) => {
                         <Text style={tailwind(`text-sm font-normal ${customTextClassNames}`)}>Light:</Text>
                       </View>
                       <TouchableOpacity ref={whtTimeBtn} onPress={onWhtTimeBtnClick} style={tailwind('ml-1 rounded-md border border-gray-300 bg-white px-3 py-1.5')} disabled={themeMode !== CUSTOM_MODE}>
-                        <Text style={tailwind(`text-base leading-5 font-normal ${customInputClassNames}`)}>{whtTime}</Text>
+                        <Text style={tailwind(`text-base font-normal leading-5 ${customInputClassNames}`)}>{whtTime}</Text>
                       </TouchableOpacity>
                     </View>
                     <View style={tailwind('mt-2 flex-row items-center justify-start sm:ml-4 sm:mt-0')}>
@@ -207,7 +207,7 @@ const SettingsPopupMisc = (props) => {
                         <Text style={tailwind(`text-sm font-normal ${customTextClassNames}`)}>Dark:</Text>
                       </View>
                       <TouchableOpacity ref={blkTimeBtn} onPress={onBlkTimeBtnClick} style={tailwind('ml-1 rounded-md border border-gray-300 bg-white px-3 py-1.5')} disabled={themeMode !== CUSTOM_MODE}>
-                        <Text style={tailwind(`text-base leading-5 font-normal ${customInputClassNames}`)}>{blkTime}</Text>
+                        <Text style={tailwind(`text-base font-normal leading-5 ${customInputClassNames}`)}>{blkTime}</Text>
                       </TouchableOpacity>
                     </View>
                   </View>

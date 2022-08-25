@@ -178,7 +178,7 @@ const TimePickPopup = () => {
   for (let i = 0; i < 60; i++) minutes.push(String(i).padStart(2, '0'));
 
   const buttons = (
-    <View style={[tailwind('py-1 pl-1 flex-row max-h-80')]}>
+    <View style={[tailwind('max-h-80 flex-row py-1 pl-1')]}>
       <ScrollView ref={hourScrollView}>
         <View style={tailwind('pr-1')}>
           {hours.map(hour => {

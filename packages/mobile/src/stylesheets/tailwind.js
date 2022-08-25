@@ -126,7 +126,7 @@ const filterByScreen = (classes, windowWidth) => {
 };
 
 const cache = {
-  '': {}
+  '': {},
 };
 
 const tailwind = (classStr, windowWidth, themeMode) => {
