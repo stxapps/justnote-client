@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { updateNoteIdUrlHash, fetch } from '../actions';
 import { TRASH, NEW_NOTE, MAX_SELECTED_NOTE_IDS } from '../types/const';

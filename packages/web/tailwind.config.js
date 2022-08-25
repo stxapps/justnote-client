@@ -37,6 +37,6 @@ module.exports = {
     require('tailwindcss-labeled-groups')(['s']),
     plugin(function ({ addVariant }) {
       addVariant('blk', '&');
-    })
+    }),
   ],
 };
