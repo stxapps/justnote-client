@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
-  ScrollView, View, Text, TouchableOpacity, TouchableWithoutFeedback, Animated,
+  FlatList, View, Text, TouchableOpacity, TouchableWithoutFeedback, Animated,
   BackHandler,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { updatePopup, updateTheme } from '../actions';
-import { TIME_PICK_POPUP, CUSTOM_MODE } from '../types/const';
-import { isString, getFormattedTime, get24HFormattedTime } from '../utils';
+import { updatePopup, updateTimePick, updateThemeCustomOptions } from '../actions';
+import { TIME_PICK_POPUP } from '../types/const';
 import { popupFMV } from '../types/animConfigs';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 import { computePosition, createLayouts, getOriginTranslate } from './MenuPopupRenderer';
+
+const ITEM_HEIGHT = 48;
 
 const TimePickPopup = () => {
 
@@ -19,58 +20,24 @@ const TimePickPopup = () => {
   const insets = useSafeAreaInsets();
   const isShown = useSelector(state => state.display.isTimePickPopupShown);
   const anchorPosition = useSelector(state => state.display.timePickPopupPosition);
-  const updatingThemeMode = useSelector(state => state.display.updatingThemeMode);
-  const customOptions = useSelector(state => state.localSettings.themeCustomOptions);
-  const is24HFormat = useSelector(state => state.window.is24HFormat);
+  const period = useSelector(state => state.timePick.period);
   const [popupSize, setPopupSize] = useState(null);
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
   const [derivedIsShown, setDerivedIsShown] = useState(isShown);
   const [derivedAnchorPosition, setDerivedAnchorPosition] = useState(anchorPosition);
   const popupAnim = useRef(new Animated.Value(0)).current;
   const popupBackHandler = useRef(null);
-  const hourScrollView = useRef(null);
-  const minuteScrollView = useRef(null);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
-  const value = useMemo(() => {
-    const option = customOptions.filter(opt => opt.mode === updatingThemeMode)[0];
-    if (!option) return { hour: '', minute: '', period: null };
-
-    return getFormattedTime(option.startTime, is24HFormat);
-  }, [updatingThemeMode, customOptions, is24HFormat]);
-
-  const is24HFormatRef = useRef(is24HFormat);
-  const valueRef = useRef(value);
-
   const onCancelBtnClick = useCallback(() => {
     dispatch(updatePopup(TIME_PICK_POPUP, false, null));
+    dispatch(updateThemeCustomOptions());
   }, [dispatch]);
 
-  const onTimeBtnClick = useCallback((hour, minute, period) => {
-    const _themeMode = CUSTOM_MODE;
-    const _customOptions = customOptions.filter(opt => {
-      return opt.mode !== updatingThemeMode;
-    }).map(opt => {
-      return { ...opt };
-    });
-
-    const updatingOption = customOptions.filter(opt => {
-      return opt.mode === updatingThemeMode;
-    })[0];
-    const timeObj = getFormattedTime(updatingOption.startTime, is24HFormat);
-
-    if (isString(hour) && hour.length > 0) timeObj.hour = hour;
-    if (isString(minute) && minute.length > 0) timeObj.minute = minute;
-    if (['AM', 'PM'].includes(period)) timeObj.period = period;
-
-    const newStartTime = get24HFormattedTime(
-      timeObj.hour, timeObj.minute, timeObj.period
-    );
-    _customOptions.push({ ...updatingOption, startTime: newStartTime });
-
-    dispatch(updateTheme(_themeMode, _customOptions));
-  }, [customOptions, is24HFormat, updatingThemeMode, dispatch]);
+  const onItemBtnClick = useCallback((item) => {
+    dispatch(updateTimePick(null, null, item));
+  }, [dispatch]);
 
   const onPopupLayout = (e) => {
     if (!popupSize) {
@@ -97,44 +64,11 @@ const TimePickPopup = () => {
     }
   }, [onCancelBtnClick]);
 
-  const scrollToValue = useCallback(() => {
-    const ITEM_HEIGHT = 48;
-
-    const hNum = parseInt(valueRef.current.hour, 10);
-    const mNum = parseInt(valueRef.current.minute, 10);
-
-    let offsetTop;
-
-    if (is24HFormatRef.current) offsetTop = hNum * ITEM_HEIGHT;
-    else offsetTop = hNum === 12 ? 0 : hNum * ITEM_HEIGHT;
-
-    if (offsetTop > popupSize.height - ITEM_HEIGHT) {
-      offsetTop -= (popupSize.height / 2);
-    } else {
-      offsetTop = 0;
-    }
-    hourScrollView.current.scrollTo({ x: 0, y: offsetTop, animated: false });
-
-    offsetTop = mNum * ITEM_HEIGHT;
-    if (offsetTop > popupSize.height - ITEM_HEIGHT) {
-      offsetTop -= (popupSize.height / 2);
-    } else {
-      offsetTop = 0;
-    }
-    minuteScrollView.current.scrollTo({ x: 0, y: offsetTop, animated: false });
-  }, [popupSize]);
-
-  useEffect(() => {
-    is24HFormatRef.current = is24HFormat;
-    valueRef.current = value;
-  }, [is24HFormat, value]);
-
   useEffect(() => {
     if (isShown && popupSize) {
-      scrollToValue();
       Animated.timing(popupAnim, { toValue: 1, ...popupFMV.visible }).start();
     }
-  }, [isShown, popupSize, popupAnim, scrollToValue]);
+  }, [isShown, popupSize, popupAnim]);
 
   useEffect(() => {
     let didMount = true;
@@ -167,45 +101,20 @@ const TimePickPopup = () => {
 
   if (!derivedAnchorPosition) return null;
 
-  const hours = [];
-  if (is24HFormat) {
-    for (let i = 0; i < 24; i++) hours.push(String(i).padStart(2, '0'));
-  } else {
-    hours.push(String(12).padStart(2, '0'));
-    for (let i = 1; i < 12; i++) hours.push(String(i).padStart(2, '0'));
-  }
-  const minutes = [];
-  for (let i = 0; i < 60; i++) minutes.push(String(i).padStart(2, '0'));
-
+  const popupHeight = Math.min(320, safeAreaHeight);
+  const buttonsStyle = { height: popupHeight, paddingTop: 4, paddingBottom: 4 };
+  const contentHeight = (
+    buttonsStyle.height - buttonsStyle.paddingTop - buttonsStyle.paddingBottom
+  );
   const buttons = (
-    <View style={[tailwind('max-h-80 flex-row py-1 pl-1')]}>
-      <ScrollView ref={hourScrollView}>
-        <View style={tailwind('pr-1')}>
-          {hours.map(hour => {
-            return (
-              <TouchableOpacity key={hour} onPress={() => onTimeBtnClick(hour)} style={tailwind(`px-5 py-3.5 ${hour === value.hour ? 'bg-gray-100' : ''}`)}>
-                <Text style={tailwind('text-sm font-normal text-gray-700')}>{hour}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </ScrollView>
-      <ScrollView ref={minuteScrollView}>
-        <View style={tailwind('pr-1')}>
-          {minutes.map(minute => {
-            return (
-              <TouchableOpacity key={minute} onPress={() => onTimeBtnClick(null, minute)} style={tailwind(`px-5 py-3.5 ${minute === value.minute ? 'bg-gray-100' : ''}`)}>
-                <Text style={tailwind('text-sm font-normal text-gray-700')}>{minute}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </ScrollView>
-      {!is24HFormat && <View style={tailwind('pr-1')}>
-        <TouchableOpacity onPress={() => onTimeBtnClick(null, null, 'AM')} style={tailwind(`px-5 py-3.5 ${value.period === 'AM' ? 'bg-gray-100' : ''}`)}>
+    <View style={[tailwind('flex-row pl-1'), buttonsStyle]}>
+      <TimePickHour contentHeight={contentHeight} />
+      <TimePickMinute contentHeight={contentHeight} />
+      {period && <View style={tailwind('pr-1')}>
+        <TouchableOpacity onPress={() => onItemBtnClick('AM')} style={tailwind(`px-5 py-3.5 ${period === 'AM' ? 'bg-gray-100' : ''}`)}>
           <Text style={tailwind('text-sm font-normal text-gray-700')}>AM</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => onTimeBtnClick(null, null, 'PM')} style={tailwind(`px-5 py-3.5 ${value.period === 'PM' ? 'bg-gray-100' : ''}`)}>
+        <TouchableOpacity onPress={() => onItemBtnClick('PM')} style={tailwind(`px-5 py-3.5 ${period === 'PM' ? 'bg-gray-100' : ''}`)}>
           <Text style={tailwind('text-sm font-normal text-gray-700')}>PM</Text>
         </TouchableOpacity>
       </View>}
@@ -268,5 +177,165 @@ const TimePickPopup = () => {
     </View>
   );
 };
+
+const _TimePickHour = (props) => {
+
+  const { contentHeight } = props;
+  const hour = useSelector(state => state.timePick.hour);
+  const is24HFormat = useSelector(state => state.window.is24HFormat);
+  const flatList = useRef(null);
+  const scrollToItemRef = useRef(null);
+  const dispatch = useDispatch();
+  const tailwind = useTailwind();
+
+  const data = useMemo(() => {
+    const hours = [];
+    if (is24HFormat) {
+      for (let i = 0; i < 24; i++) hours.push(String(i).padStart(2, '0'));
+    } else {
+      hours.push(String(12).padStart(2, '0'));
+      for (let i = 1; i < 12; i++) hours.push(String(i).padStart(2, '0'));
+    }
+    return hours;
+  }, [is24HFormat]);
+
+  const onItemBtnClick = useCallback((item) => {
+    dispatch(updateTimePick(item));
+  }, [dispatch]);
+
+  const getItemId = useCallback((item) => {
+    return item;
+  }, []);
+
+  const getItemLayout = useCallback((_, index) => {
+    return { length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index };
+  }, []);
+
+  const renderItem = useCallback(({ item }) => {
+    // change button style, need to update ITEM_HEIGHT.
+    return (
+      <TouchableOpacity onPress={() => onItemBtnClick(item)} style={tailwind(`px-5 py-3.5 ${hour === item ? 'bg-gray-100' : ''}`)}>
+        <Text style={tailwind('text-sm font-normal text-gray-700')}>{item}</Text>
+      </TouchableOpacity>
+    );
+  }, [hour, onItemBtnClick, tailwind]);
+
+  useEffect(() => {
+    const scrollToItem = () => {
+      const num = parseInt(hour, 10);
+
+      let offsetTop;
+      if (is24HFormat) offsetTop = num * ITEM_HEIGHT;
+      else offsetTop = num === 12 ? 0 : num * ITEM_HEIGHT;
+
+      if (offsetTop > contentHeight - ITEM_HEIGHT) {
+        offsetTop = offsetTop - (contentHeight / 2) + (ITEM_HEIGHT / 2);
+      } else {
+        offsetTop = 0;
+      }
+
+      flatList.current.scrollToOffset({ offset: offsetTop, animated: false });
+    };
+
+    scrollToItemRef.current = scrollToItem;
+  });
+
+  useEffect(() => {
+    if (flatList.current && scrollToItemRef.current) {
+      setTimeout(() => {
+        if (flatList.current && scrollToItemRef.current) scrollToItemRef.current();
+      }, 1);
+    }
+  }, []);
+
+  return (
+    <FlatList
+      ref={flatList}
+      contentContainerStyle={tailwind('pr-1')}
+      data={data}
+      keyExtractor={getItemId}
+      getItemLayout={getItemLayout}
+      renderItem={renderItem}
+      removeClippedSubviews={false}
+      overScrollMode="always" />
+  );
+};
+
+const _TimePickMinute = (props) => {
+
+  const { contentHeight } = props;
+  const minute = useSelector(state => state.timePick.minute);
+  const flatList = useRef(null);
+  const scrollToItemRef = useRef(null);
+  const dispatch = useDispatch();
+  const tailwind = useTailwind();
+
+  const data = useMemo(() => {
+    const minutes = [];
+    for (let i = 0; i < 60; i++) minutes.push(String(i).padStart(2, '0'));
+    return minutes;
+  }, []);
+
+  const onItemBtnClick = useCallback((item) => {
+    dispatch(updateTimePick(null, item));
+  }, [dispatch]);
+
+  const getItemId = useCallback((item) => {
+    return item;
+  }, []);
+
+  const getItemLayout = useCallback((_, index) => {
+    return { length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index };
+  }, []);
+
+  const renderItem = useCallback(({ item }) => {
+    // change button style, need to update ITEM_HEIGHT.
+    return (
+      <TouchableOpacity onPress={() => onItemBtnClick(item)} style={tailwind(`px-5 py-3.5 ${minute === item ? 'bg-gray-100' : ''}`)}>
+        <Text style={tailwind('text-sm font-normal text-gray-700')}>{item}</Text>
+      </TouchableOpacity>
+    );
+  }, [minute, onItemBtnClick, tailwind]);
+
+  useEffect(() => {
+    const scrollToItem = () => {
+      const num = parseInt(minute, 10);
+
+      let offsetTop = num * ITEM_HEIGHT;
+      if (offsetTop > contentHeight - ITEM_HEIGHT) {
+        offsetTop = offsetTop - (contentHeight / 2) + (ITEM_HEIGHT / 2);
+      } else {
+        offsetTop = 0;
+      }
+
+      flatList.current.scrollToOffset({ offset: offsetTop, animated: false });
+    };
+
+    scrollToItemRef.current = scrollToItem;
+  });
+
+  useEffect(() => {
+    if (flatList.current && scrollToItemRef.current) {
+      setTimeout(() => {
+        if (flatList.current && scrollToItemRef.current) scrollToItemRef.current();
+      }, 1);
+    }
+  }, []);
+
+  return (
+    <FlatList
+      ref={flatList}
+      contentContainerStyle={tailwind('pr-1')}
+      data={data}
+      keyExtractor={getItemId}
+      getItemLayout={getItemLayout}
+      renderItem={renderItem}
+      removeClippedSubviews={false}
+      overScrollMode="always" />
+  );
+};
+
+const TimePickHour = React.memo(_TimePickHour);
+const TimePickMinute = React.memo(_TimePickMinute);
 
 export default React.memo(TimePickPopup);

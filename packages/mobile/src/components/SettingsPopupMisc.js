@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import {
   updateDoDeleteOldNotesInTrash, updateSortOn, updateDoDescendingOrder,
-  updateNoteDateShowingMode, updateTheme, updatePopup, updateUpdatingThemeMode,
+  updateNoteDateShowingMode, updateTheme, updateUpdatingThemeMode, updatePopup,
 } from '../actions';
 import {
   ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE,
