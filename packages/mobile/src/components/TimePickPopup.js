@@ -7,6 +7,9 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { updatePopup, updateTimePick, updateThemeCustomOptions } from '../actions';
 import { TIME_PICK_POPUP } from '../types/const';
+import {
+  makeIsTimePickHourItemSelected, makeIsTimePickMinuteItemSelected,
+} from '../selectors';
 import { popupFMV } from '../types/animConfigs';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
@@ -185,7 +188,6 @@ const _TimePickHour = (props) => {
   const is24HFormat = useSelector(state => state.window.is24HFormat);
   const flatList = useRef(null);
   const scrollToItemRef = useRef(null);
-  const dispatch = useDispatch();
   const tailwind = useTailwind();
 
   const data = useMemo(() => {
@@ -199,10 +201,6 @@ const _TimePickHour = (props) => {
     return hours;
   }, [is24HFormat]);
 
-  const onItemBtnClick = useCallback((item) => {
-    dispatch(updateTimePick(item));
-  }, [dispatch]);
-
   const getItemId = useCallback((item) => {
     return item;
   }, []);
@@ -212,13 +210,8 @@ const _TimePickHour = (props) => {
   }, []);
 
   const renderItem = useCallback(({ item }) => {
-    // change button style, need to update ITEM_HEIGHT.
-    return (
-      <TouchableOpacity onPress={() => onItemBtnClick(item)} style={tailwind(`px-5 py-3.5 ${hour === item ? 'bg-gray-100' : ''}`)}>
-        <Text style={tailwind('text-sm font-normal text-gray-700')}>{item}</Text>
-      </TouchableOpacity>
-    );
-  }, [hour, onItemBtnClick, tailwind]);
+    return <TimePickHourItem item={item} />;
+  }, []);
 
   useEffect(() => {
     const scrollToItem = () => {
@@ -261,13 +254,32 @@ const _TimePickHour = (props) => {
   );
 };
 
+const _TimePickHourItem = (props) => {
+
+  const { item } = props;
+  const getIsSelected = useMemo(makeIsTimePickHourItemSelected, []);
+  const isSelected = useSelector(state => getIsSelected(state, item));
+  const dispatch = useDispatch();
+  const tailwind = useTailwind();
+
+  const onItemBtnClick = useCallback((item) => {
+    dispatch(updateTimePick(item));
+  }, [dispatch]);
+
+  // change button style, need to update ITEM_HEIGHT.
+  return (
+    <TouchableOpacity onPress={() => onItemBtnClick(item)} style={tailwind(`px-5 py-3.5 ${isSelected ? 'bg-gray-100' : ''}`)}>
+      <Text style={tailwind('text-sm font-normal text-gray-700')}>{item}</Text>
+    </TouchableOpacity>
+  );
+};
+
 const _TimePickMinute = (props) => {
 
   const { contentHeight } = props;
   const minute = useSelector(state => state.timePick.minute);
   const flatList = useRef(null);
   const scrollToItemRef = useRef(null);
-  const dispatch = useDispatch();
   const tailwind = useTailwind();
 
   const data = useMemo(() => {
@@ -275,10 +287,6 @@ const _TimePickMinute = (props) => {
     for (let i = 0; i < 60; i++) minutes.push(String(i).padStart(2, '0'));
     return minutes;
   }, []);
-
-  const onItemBtnClick = useCallback((item) => {
-    dispatch(updateTimePick(null, item));
-  }, [dispatch]);
 
   const getItemId = useCallback((item) => {
     return item;
@@ -289,13 +297,8 @@ const _TimePickMinute = (props) => {
   }, []);
 
   const renderItem = useCallback(({ item }) => {
-    // change button style, need to update ITEM_HEIGHT.
-    return (
-      <TouchableOpacity onPress={() => onItemBtnClick(item)} style={tailwind(`px-5 py-3.5 ${minute === item ? 'bg-gray-100' : ''}`)}>
-        <Text style={tailwind('text-sm font-normal text-gray-700')}>{item}</Text>
-      </TouchableOpacity>
-    );
-  }, [minute, onItemBtnClick, tailwind]);
+    return <TimePickMinuteItem item={item} />
+  }, []);
 
   useEffect(() => {
     const scrollToItem = () => {
@@ -335,7 +338,29 @@ const _TimePickMinute = (props) => {
   );
 };
 
+const _TimePickMinuteItem = (props) => {
+
+  const { item } = props;
+  const getIsSelected = useMemo(makeIsTimePickMinuteItemSelected, []);
+  const isSelected = useSelector(state => getIsSelected(state, item));
+  const dispatch = useDispatch();
+  const tailwind = useTailwind();
+
+  const onItemBtnClick = useCallback((item) => {
+    dispatch(updateTimePick(null, item));
+  }, [dispatch]);
+
+  // change button style, need to update ITEM_HEIGHT.
+  return (
+    <TouchableOpacity onPress={() => onItemBtnClick(item)} style={tailwind(`px-5 py-3.5 ${isSelected ? 'bg-gray-100' : ''}`)}>
+      <Text style={tailwind('text-sm font-normal text-gray-700')}>{item}</Text>
+    </TouchableOpacity>
+  );
+};
+
 const TimePickHour = React.memo(_TimePickHour);
+const TimePickHourItem = React.memo(_TimePickHourItem);
 const TimePickMinute = React.memo(_TimePickMinute);
+const TimePickMinuteItem = React.memo(_TimePickMinuteItem);
 
 export default React.memo(TimePickPopup);
