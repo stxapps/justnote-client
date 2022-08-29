@@ -147,7 +147,7 @@ const Landing = () => {
                 A better way to take note
               </h2>
             </div>
-            <dl className={tailwind('mt-10 space-y-10 sm:grid sm:grid-cols-2 sm:gap-x-8 sm:gap-y-10 sm:space-y-0 lg:col-span-2 lg:mt-0')}>
+            <div className={tailwind('mt-10 space-y-10 sm:grid sm:grid-cols-2 sm:gap-x-8 sm:gap-y-10 sm:space-y-0 lg:col-span-2 lg:mt-0')}>
               <div>
                 <div className={tailwind('flex h-12 w-12 items-center justify-center rounded-md bg-green-500 text-white')}>
                   <svg className={tailwind('h-6 w-6 text-white')} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -155,12 +155,10 @@ const Landing = () => {
                   </svg>
                 </div>
                 <div className={tailwind('mt-5')}>
-                  <dt className={tailwind('text-lg font-medium leading-6 text-gray-900')}>
-                    Simple
-                  </dt>
-                  <dd className={tailwind('mt-2 text-base text-gray-500')}>
+                  <h3 className={tailwind('text-lg font-medium leading-6 text-gray-900')}>Simple</h3>
+                  <p className={tailwind('mt-2 text-base text-gray-500')}>
                     Justnote is a simple note taking app, yet powerful enough. Our WYSIWYG rich text editor comes with features like bold, underline, font color, and background color.
-                  </dd>
+                  </p>
                 </div>
               </div>
               <div>
@@ -171,12 +169,10 @@ const Landing = () => {
                   </svg>
                 </div>
                 <div className={tailwind('mt-5')}>
-                  <dt className={tailwind('text-lg font-medium leading-6 text-gray-900')}>
-                    Fast
-                  </dt>
-                  <dd className={tailwind('mt-2 text-base text-gray-500')}>
+                  <h3 className={tailwind('text-lg font-medium leading-6 text-gray-900')}>Fast</h3>
+                  <p className={tailwind('mt-2 text-base text-gray-500')}>
                     You can take a note easily and quickly. Justnote is your quick note taking app where you use it for your to-do lists, reminders, shopping lists, memos, thoughts, etc.
-                  </dd>
+                  </p>
                 </div>
               </div>
               <div>
@@ -186,12 +182,10 @@ const Landing = () => {
                   </svg>
                 </div>
                 <div className={tailwind('mt-5')}>
-                  <dt className={tailwind('text-lg font-medium leading-6 text-gray-900')}>
-                    Ubiquitous
-                  </dt>
-                  <dd className={tailwind('mt-2 text-base text-gray-500')}>
+                  <h3 className={tailwind('text-lg font-medium leading-6 text-gray-900')}>Ubiquitous</h3>
+                  <p className={tailwind('mt-2 text-base text-gray-500')}>
                     Justnote is available on web, iOS, and Android. You can use Justnote on any of your devices. All your notes are synced across your devices automatically.
-                  </dd>
+                  </p>
                 </div>
               </div>
               <div>
@@ -201,15 +195,13 @@ const Landing = () => {
                   </svg>
                 </div>
                 <div className={tailwind('mt-5')}>
-                  <dt className={tailwind('text-lg font-medium leading-6 text-gray-900')}>
-                    Privacy focused
-                  </dt>
-                  <dd className={tailwind('mt-2 text-base text-gray-500')}>
+                  <h3 className={tailwind('text-lg font-medium leading-6 text-gray-900')}>Privacy focused</h3>
+                  <p className={tailwind('mt-2 text-base text-gray-500')}>
                     Your identity lives in blockchain and only you can control it. All your data are encrypted and only your private key can decrypt them and see the content inside.
-                  </dd>
+                  </p>
                 </div>
               </div>
-            </dl>
+            </div>
           </div>
         </div>
       </div>
