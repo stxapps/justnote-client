@@ -8,8 +8,7 @@ import {
   INCREASE_RESET_DID_CLICK_COUNT, UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION,
   UPDATE_DISCARD_ACTION, UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT,
   UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS, UPDATE_SETTINGS_VIEW_ID,
-  UPDATE_LIST_NAMES_MODE, UPDATE_UPDATING_THEME_MODE, SYNC, SYNC_COMMIT,
-  SYNC_ROLLBACK, UPDATE_SYNC_PROGRESS,
+  UPDATE_LIST_NAMES_MODE, SYNC, SYNC_COMMIT, SYNC_ROLLBACK, UPDATE_SYNC_PROGRESS,
   UPDATE_SYNCED, UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
   UPDATE_DELETE_ALL_DATA_PROGRESS, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -76,7 +75,6 @@ const initialState = {
   didSettingsSidebarAnimEnd: true,
   updateSettingsViewIdCount: 0,
   listNamesMode: null,
-  updatingThemeMode: null,
   syncProgress: null,
   importAllDataProgress: null,
   exportAllDataProgress: null,
@@ -414,10 +412,6 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_LIST_NAMES_MODE) {
     return { ...state, ...action.payload };
-  }
-
-  if (action.type === UPDATE_UPDATING_THEME_MODE) {
-    return { ...state, updatingThemeMode: action.payload };
   }
 
   if (action.type === SYNC) {

@@ -370,3 +370,25 @@ export const getTailwind = createSelector(
     };
   },
 );
+
+/** @return {function(any, any): any} */
+export const makeIsTimePickHourItemSelected = () => {
+  return createSelector(
+    state => state.timePick.hour,
+    (__, item) => item,
+    (hour, item) => {
+      return hour === item;
+    }
+  );
+};
+
+/** @return {function(any, any): any} */
+export const makeIsTimePickMinuteItemSelected = () => {
+  return createSelector(
+    state => state.timePick.minute,
+    (__, item) => item,
+    (minute, item) => {
+      return minute === item;
+    }
+  );
+};

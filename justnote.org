@@ -229,7 +229,7 @@
 - yarn add file-saver
 - yarn add @ckeditor/ckeditor5-react
 - yarn add file:../../../ckeditor5/packages/ckeditor5-build-decoupled-document
-- yarn add @types/node @types/react @types/react-dom @types/jest @types/react-redux @types/url-parse @types/file-saver
+- yarn add @types/node @types/react @types/react-dom @types/jest @types/url-parse @types/file-saver
 - fix webpack 5 issue
   + yarn add react-app-rewired stream-browserify crypto-browserify assert util buffer process
   + create config-overrides.js
@@ -239,6 +239,9 @@
 - yarn add @wewatch/lexorank axios
 - yarn add tailwindcss-labeled-groups
 ** Server steps
+*** namecheap
+- use ALIAS for root domain
+- setup SPF, DKIM, and DMARC
 *** s3
 - Set public and enable CORS
 *** cloudfront, lambda@edge, certificate manager, and namecheap
@@ -248,6 +251,9 @@
 - At that role -> Trust relationships, edit that json to contain server: edgelambda.amazonaws.com
 - Back to the function page -> Designer -> Add trigger, select cloudfront -> deploy to Lambda@Edge, select the correct distribution and select Viewer request.
 - Set cloudfront url in namecheap
+- Set Response headers policy -> SecurityHeadersPolicy
+  + stackoverflow.com/a/72512670
+  + aws.amazon.com/blogs/networking-and-content-delivery/amazon-cloudfront-introduces-response-headers-policies
 *** aws-cli
 - create justnote-cli user in IAM with S3FullAccess and CloudFrontFullAccess
 - aws-cli supports multiple users/profiles, add in ~/.aws/config and ~/.aws/credentials

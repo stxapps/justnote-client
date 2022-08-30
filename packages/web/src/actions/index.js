@@ -40,7 +40,7 @@ import {
   PIN_NOTE, PIN_NOTE_COMMIT, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_COMMIT,
   UNPIN_NOTE_ROLLBACK, MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_COMMIT,
   MOVE_PINNED_NOTE_ROLLBACK, CANCEL_DIED_PINS, UPDATE_SYSTEM_THEME_MODE,
-  UPDATE_THEME, UPDATE_UPDATING_THEME_MODE,
+  UPDATE_THEME, UPDATE_UPDATING_THEME_MODE, UPDATE_TIME_PICK,
   UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
   UPDATE_DELETE_ALL_DATA_PROGRESS, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -57,7 +57,7 @@ import {
   N_DAYS, CD_ROOT, NOTES, IMAGES, SETTINGS, INDEX, DOT_JSON, PINS, LG_WIDTH,
   IMAGE_FILE_EXTS, IAP_STATUS_URL, COM_JUSTNOTECC, SIGNED_TEST_STRING, VALID, ACTIVE,
   SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS,
-  WHT_MODE, BLK_MODE,
+  WHT_MODE, BLK_MODE, CUSTOM_MODE,
 } from '../types/const';
 import {
   throttle, extractUrl, urlHashToObj, objToUrlHash, isIPadIPhoneIPod, isBusyStatus,
@@ -67,7 +67,7 @@ import {
   getMainId, createNoteFPath, createNoteFName, extractNoteFPath, extractNoteFName,
   extractNoteId, listNoteIds, getNoteFPaths, getLatestPurchase, getValidPurchase,
   doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins, getSortedNotes,
-  separatePinnedValues,
+  separatePinnedValues, getFormattedTime, get24HFormattedTime,
 } from '../utils';
 import { isUint8Array } from '../utils/index-web';
 import { _ } from '../utils/obj';
@@ -3070,6 +3070,54 @@ export const updateTheme = (mode, customOptions) => async (dispatch, getState) =
   dispatch({ type: UPDATE_THEME, payload: { mode, customOptions } });
 };
 
-export const updateUpdatingThemeMode = (updatingThemeMode) => {
-  return { type: UPDATE_UPDATING_THEME_MODE, payload: updatingThemeMode };
+export const updateUpdatingThemeMode = (updatingThemeMode) => async (
+  dispatch, getState
+) => {
+  const state = getState();
+  const customOptions = state.localSettings.themeCustomOptions;
+  const is24HFormat = state.window.is24HFormat;
+
+  let option;
+  for (const opt of customOptions) {
+    if (opt.mode === updatingThemeMode) {
+      option = opt;
+      break;
+    }
+  }
+  if (!option) return;
+
+  const { hour, minute, period } = getFormattedTime(option.startTime, is24HFormat);
+  dispatch({
+    type: UPDATE_UPDATING_THEME_MODE,
+    payload: { updatingThemeMode, hour, minute, period },
+  });
+};
+
+export const updateTimePick = (hour, minute, period) => {
+  const timeObj = {};
+  if (isString(hour) && hour.length > 0) timeObj.hour = hour;
+  if (isString(minute) && minute.length > 0) timeObj.minute = minute;
+  if (['AM', 'PM'].includes(period)) timeObj.period = period;
+
+  return { type: UPDATE_TIME_PICK, payload: timeObj };
+};
+
+export const updateThemeCustomOptions = () => async (dispatch, getState) => {
+  const state = getState();
+  const customOptions = state.localSettings.themeCustomOptions;
+  const { updatingThemeMode, hour, minute, period } = state.timePick;
+
+  const _themeMode = CUSTOM_MODE, _customOptions = [];
+
+  let updatingOption;
+  for (const opt of customOptions) {
+    if (opt.mode === updatingThemeMode) updatingOption = opt;
+    else _customOptions.push({ ...opt });
+  }
+  if (!updatingOption) return;
+
+  const newStartTime = get24HFormattedTime(hour, minute, period);
+  _customOptions.push({ ...updatingOption, startTime: newStartTime });
+
+  dispatch(updateTheme(_themeMode, _customOptions));
 };
