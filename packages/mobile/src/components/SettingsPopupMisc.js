@@ -141,6 +141,19 @@ const SettingsPopupMisc = (props) => {
   whtTime = getFormattedTime(whtTime, is24HFormat).time;
   blkTime = getFormattedTime(blkTime, is24HFormat).time;
 
+  const isSystemShown = (
+    Platform.OS !== 'android' || (Platform.OS === 'android' && Platform.Version >= 29)
+  );
+
+  let systemText = (
+    <Text style={tailwind('mt-2.5 text-base font-normal text-gray-500 leading-6.5')}>Choose appearance to be <Text style={tailwind('text-base font-semibold text-gray-500 leading-6.5')}>Light</Text>, <Text style={tailwind('text-base font-semibold text-gray-500 leading-6.5')}>Dark</Text>, <Text style={tailwind('text-base font-semibold text-gray-500 leading-6.5')}>System</Text> (uses your device's setting), or <Text style={tailwind('text-base font-semibold text-gray-500 leading-6.5')}>Custom</Text> (schedule times to change appearance automatically). This setting is not synced so you can have a different appearance for each of your devices.</Text>
+  );
+  if (!isSystemShown) {
+    systemText = (
+      <Text style={tailwind('mt-2.5 text-base font-normal text-gray-500 leading-6.5')}>Choose appearance to be <Text style={tailwind('text-base font-semibold text-gray-500 leading-6.5')}>Light</Text>, <Text style={tailwind('text-base font-semibold text-gray-500 leading-6.5')}>Dark</Text>, or <Text style={tailwind('text-base font-semibold text-gray-500 leading-6.5')}>Custom</Text> (schedule times to change appearance automatically). This setting is not synced so you can have a different appearance for each of your devices.</Text>
+    );
+  }
+
   return (
     <View style={tailwind('relative p-4 md:p-6')}>
       <View style={tailwind('border-b border-gray-200 md:hidden')}>
@@ -151,7 +164,7 @@ const SettingsPopupMisc = (props) => {
       </View>
       <View style={tailwind('mt-6 md:mt-0')}>
         <Text style={tailwind('text-base font-medium leading-5 text-gray-800')}>Appearance</Text>
-        <Text style={tailwind('mt-2.5 text-base font-normal text-gray-500 leading-6.5')}>Choose appearance to be <Text style={tailwind('text-base font-semibold text-gray-500 leading-6.5')}>Light</Text>, <Text style={tailwind('text-base font-semibold text-gray-500 leading-6.5')}>Dark</Text>, <Text style={tailwind('text-base font-semibold text-gray-500 leading-6.5')}>System</Text> (uses your device's setting), or <Text style={tailwind('text-base font-semibold text-gray-500 leading-6.5')}>Custom</Text> (schedule times to change appearance automatically). This setting is not synced so you can have a different appearance for each of your devices.</Text>
+        {systemText}
         <View style={tailwind('mt-2.5 w-full items-center justify-start')}>
           <View style={tailwind('w-full max-w-sm rounded-md bg-white shadow-sm')}>
             <TouchableOpacity onPress={() => onThemeInputChange(WHT_MODE)}>
@@ -174,7 +187,7 @@ const SettingsPopupMisc = (props) => {
                 <Text style={tailwind(`ml-3 text-sm font-medium leading-5 text-gray-500 ${blkBtnInnerClassNames}`)}>Dark</Text>
               </View>
             </TouchableOpacity>
-            {(Platform.OS !== 'android' || (Platform.OS === 'android' && Platform.Version >= 29)) && <TouchableOpacity onPress={() => onThemeInputChange(SYSTEM_MODE)}>
+            {isSystemShown && <TouchableOpacity onPress={() => onThemeInputChange(SYSTEM_MODE)}>
               <View style={tailwind(`flex-row border p-4 ${systemBtnClassNames}`)}>
                 <View style={tailwind('h-5 flex-row items-center')}>
                   <View style={tailwind(`h-4 w-4 items-center justify-center rounded-full border bg-transparent ${systemRBtnClassNames}`)}>
@@ -290,7 +303,7 @@ const SettingsPopupMisc = (props) => {
           <Switch onValueChange={onDoShowDateBtnClick} value={doShowDate} thumbColor={Platform.OS === 'android' ? doShowDate ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} />
         </View>
       </View>
-      <View style={tailwind('mt-10 flex-row items-center justify-between')}>
+      <View style={tailwind('mt-10 mb-4 flex-row items-center justify-between')}>
         <View style={tailwind('flex-shrink flex-grow')}>
           <Text style={tailwind('text-base font-medium leading-5 text-gray-800')}>Auto Cleanup</Text>
           <Text style={tailwind('mt-2.5 text-base font-normal text-gray-500 leading-6.5')}>Allow old removed notes in Trash to be automatically deleted after 45 days.</Text>

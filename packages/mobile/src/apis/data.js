@@ -3,7 +3,7 @@ import {
   INDEX, DOT_JSON, N_NOTES, MAX_TRY, TRASH, N_DAYS, LOCAL_SETTINGS_STATE,
 } from '../types/const';
 import {
-  createNoteFPath, createNoteFName, extractNoteFPath, createPinFPath,
+  isObject, createNoteFPath, createNoteFName, extractNoteFPath, createPinFPath,
   addFPath, deleteFPath, copyFPaths, getMainId, listNoteIds, sortWithPins,
 } from '../utils';
 import { cachedFPaths } from '../vars';
@@ -21,7 +21,7 @@ const _listFPaths = async () => {
 };
 
 const listFPaths = async (doForce = false) => {
-  if (cachedFPaths.fpaths && !doForce) return copyFPaths(cachedFPaths.fpaths);
+  if (isObject(cachedFPaths.fpaths) && !doForce) return copyFPaths(cachedFPaths.fpaths);
   cachedFPaths.fpaths = await _listFPaths();
   return copyFPaths(cachedFPaths.fpaths);
 };

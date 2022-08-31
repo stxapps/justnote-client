@@ -249,7 +249,7 @@ const SettingsPopupMisc = (props) => {
           <span aria-hidden="true" className={tailwind(`inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out ${doShowDateBtnInnerClassNames}`)} />
         </span>
       </div>
-      <div className={tailwind('mt-10 flex items-center justify-between space-x-4')}>
+      <div className={tailwind('mt-10 mb-4 flex items-center justify-between space-x-4')}>
         <div className={tailwind('flex flex-col')}>
           <h4 className={tailwind('text-base font-medium leading-none text-gray-800')}>Auto Cleanup</h4>
           <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500')}>Allow old removed notes in Trash to be automatically deleted after 45 days.</p>

@@ -1,5 +1,5 @@
 import { RESET_STATE } from '../types/actionTypes';
-import { copyFPaths } from '../utils';
+import { isObject, copyFPaths } from '../utils';
 import { cachedFPaths } from '../vars';
 
 const initialState = {
@@ -19,7 +19,10 @@ const cachedFPathsReducer = (state = initialState, action) => {
   if (fpathsRef !== cachedFPaths.fpaths) {
     // No new object for fpaths for reference comparison
     fpathsRef = cachedFPaths.fpaths;
-    return { ...state, fpaths: copyFPaths(cachedFPaths.fpaths) };
+
+    const newState = { ...state, fpaths: cachedFPaths.fpaths };
+    if (isObject(cachedFPaths.fpaths)) newState.fpaths = copyFPaths(cachedFPaths.fpaths);
+    return newState;
   }
 
   return state;

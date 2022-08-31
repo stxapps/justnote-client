@@ -1,6 +1,6 @@
 import userSession from '../userSession';
 import { N_NOTES, MAX_TRY } from '../types/const';
-import { addFPath, deleteFPath, copyFPaths } from '../utils';
+import { isObject, addFPath, deleteFPath, copyFPaths } from '../utils';
 import { cachedServerFPaths } from '../vars';
 
 const _listFPaths = async () => {
@@ -15,7 +15,7 @@ const _listFPaths = async () => {
 };
 
 const listFPaths = async (doForce = false) => {
-  if (cachedServerFPaths.fpaths && !doForce) {
+  if (isObject(cachedServerFPaths.fpaths) && !doForce) {
     return copyFPaths(cachedServerFPaths.fpaths);
   }
   cachedServerFPaths.fpaths = await _listFPaths();
