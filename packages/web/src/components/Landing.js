@@ -28,7 +28,7 @@ import ubiquitous4x from '../images/ubiquitous@4x.png';
 import availableOnPlayStore from '../images/available-on-play-store.svg';
 import availableOnAppStore from '../images/available-on-app-store.svg';
 
-import creator from '../images/creator.jpg';
+import creator from '../images/creator.png';
 
 const Landing = () => {
 
