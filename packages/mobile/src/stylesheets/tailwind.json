@@ -4600,7 +4600,7 @@
 	"flex-1": {
 		"flexGrow": 1,
 		"flexShrink": 1,
-		"flexBasis": "0%"
+		"flexBasis": 0
 	},
 	"flex-auto": {
 		"flexGrow": 1,
@@ -7224,6 +7224,9 @@
 	},
 	"leading-10": {
 		"lineHeight": 40
+	},
+	"leading-6.5": {
+		"lineHeight": 26
 	},
 	"tracking-tighter": {
 		"letterSpacing": "-0.05em"
