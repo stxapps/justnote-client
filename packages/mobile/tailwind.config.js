@@ -20,6 +20,9 @@ module.exports = {
         '56': '14rem',
         '64': '16rem',
       },
+      lineHeight: {
+        '6.5': '1.625rem',
+      },
     },
   },
   variants: {

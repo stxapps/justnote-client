@@ -287,14 +287,17 @@ export const makeGetNoteDate = () => {
   );
 };
 
-let lastCustomOptions, lastCurHH, lastCurMM, lastCurMode;
+let lastCustomOptions = null, lastCurHH = null, lastCurMM = null, lastCurMode = null;
 export const getThemeMode = createSelector(
   state => state.user.isUserSignedIn,
   state => getDoEnableExtraFeatures(state),
   state => state.window.themeMode,
   state => {
     const mode = state.localSettings.themeMode;
-    if (mode !== CUSTOM_MODE) return WHT_MODE;
+    if (mode !== CUSTOM_MODE) {
+      [lastCustomOptions, lastCurHH, lastCurMM, lastCurMode] = [null, null, null, null];
+      return WHT_MODE;
+    }
 
     const customOptions = state.localSettings.themeCustomOptions;
 
@@ -304,7 +307,7 @@ export const getThemeMode = createSelector(
 
     if (
       customOptions === lastCustomOptions &&
-      curHH === lastCurHH && curMM < lastCurMM + 12 && lastCurMode
+      curHH === lastCurHH && curMM < lastCurMM + 12 && lastCurMode !== null
     ) {
       return lastCurMode;
     }
@@ -349,8 +352,7 @@ export const getThemeMode = createSelector(
   },
   state => state.localSettings.themeMode,
   (isSignedIn, doEnable, systemMode, customMode, mode) => {
-    if (!isSignedIn) return systemMode;
-    if (!doEnable) return WHT_MODE;
+    if (!isSignedIn || !doEnable) return WHT_MODE;
 
     if (mode === SYSTEM_MODE) return systemMode;
     if (mode === CUSTOM_MODE) return customMode;

@@ -251,7 +251,7 @@
 - At that role -> Trust relationships, edit that json to contain server: edgelambda.amazonaws.com
 - Back to the function page -> Designer -> Add trigger, select cloudfront -> deploy to Lambda@Edge, select the correct distribution and select Viewer request.
 - Set cloudfront url in namecheap
-- Set Response headers policy -> SecurityHeadersPolicy
+- Set Response headers policy -> Managed SecurityHeadersPolicy
   + stackoverflow.com/a/72512670
   + aws.amazon.com/blogs/networking-and-content-delivery/amazon-cloudfront-introduces-response-headers-policies
 *** aws-cli
@@ -271,7 +271,7 @@
   + Add pickFirst in build.gradle
   + Add proguard rules
   + require iOS target to 11.0
-- yarn add https://github.com/bracedotto/tailwind-rn#6047a3e3de6607a6cb5b738ab3392d80aa81fd13
+- yarn add https://github.com/bracedotto/tailwind-rn#96848a8d2c2370e4f5e57a773ace172c4073157d
 - yarn add 'https://gitpkg.now.sh/bracedotto/blockstack-react-native/BlockstackSDK?a2aacea2fe4e384b6dbb51de05e343fe0f4602d6'
 - yarn add babel-plugin-inline-import --dev
   + Update babel.config.js to work with .svg

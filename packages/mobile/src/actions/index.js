@@ -63,7 +63,7 @@ import {
   IAP_VERIFY_URL, IAP_STATUS_URL, APPSTORE, PLAYSTORE, COM_JUSTNOTECC,
   COM_JUSTNOTECC_SUPPORTER, SIGNED_TEST_STRING, VALID, INVALID, UNKNOWN, ERROR, ACTIVE,
   SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS,
-  WHT_MODE, BLK_MODE, CUSTOM_MODE,
+  WHT_MODE, BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE,
 } from '../types/const';
 import {
   isEqual, isString, sleep, separateUrlAndParam, getUserImageUrl, randomString,
@@ -1890,6 +1890,11 @@ export const deleteAllData = () => async (dispatch, getState) => {
     return;
   }
 
+  if (settingsFPath) {
+    const { contents } = await dataApi.getFiles([settingsFPath], true);
+    if (isEqual(initialSettingsState, contents[0])) settingsFPath = null;
+  }
+
   const total = (
     allNoteIds.length + staticFPaths.length + (settingsFPath ? 1 : 0) + pins.length
   );
@@ -2281,6 +2286,7 @@ export const pinNotes = (ids) => async (dispatch, getState) => {
   const purchases = state.settings.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
+    vars.paywallFeature.feature = FEATURE_PIN;
     dispatch(updatePopup(PAYWALL_POPUP, true));
     return;
   }
@@ -2503,6 +2509,7 @@ export const updateTheme = (mode, customOptions) => async (dispatch, getState) =
   const purchases = state.settings.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
+    vars.paywallFeature.feature = FEATURE_APPEARANCE;
     dispatch(updatePopup(PAYWALL_POPUP, true));
     return;
   }

@@ -15,6 +15,12 @@ module.exports = function override(config, env) {
       Buffer: ['buffer', 'Buffer'],
     }),
   );
+  config.module.rules.unshift({
+    test: /\.m?js$/,
+    resolve: {
+      fullySpecified: false,
+    },
+  });
 
   return config;
 };

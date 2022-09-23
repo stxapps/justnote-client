@@ -41,8 +41,12 @@ const updateSettings = {
   doFetch: false,
 };
 
+export const paywallFeature = {
+  feature: null,
+};
+
 const vars = {
   cachedFPaths, cachedServerFPaths, scrollPanel, updateNoteId, changeListName,
-  updateBulkEdit, deleteOldNotes, updateSettings,
+  updateBulkEdit, deleteOldNotes, updateSettings, paywallFeature,
 };
 export default vars;

@@ -136,4 +136,4 @@ const patchTypeReactRedux = () => {
 patchWalletUtils();
 patchSignECDSA();
 patchFetchReferer();
-//patchTypeReactRedux();
+patchTypeReactRedux();

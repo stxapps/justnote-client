@@ -1,8 +1,8 @@
 //import './wdyr';
 
-import React from 'react';
-import { Text, TextInput, Platform } from 'react-native';
-import { Provider } from 'react-redux';
+import React, { useEffect } from 'react';
+import { Text, TextInput, Platform, StatusBar } from 'react-native';
+import { Provider, useSelector } from 'react-redux';
 import { createStore, compose } from 'redux';
 import { install as installReduxLoop } from 'redux-loop';
 import {
@@ -11,6 +11,8 @@ import {
 import KeyboardManager from 'react-native-keyboard-manager';
 
 import reducers from './reducers';
+import { BLK_MODE } from './types/const';
+import { getThemeMode } from './selectors';
 import cache from './utils/cache';
 
 import App from './components/App';
@@ -36,13 +38,27 @@ if (Platform.OS === 'ios') {
   KeyboardManager.setEnableAutoToolbar(false);
 }
 
+const _Root = () => {
+  const themeMode = useSelector(state => getThemeMode(state));
+  const backgroundColor = themeMode === BLK_MODE ? 'rgb(17, 24, 39)' : 'white';
+
+  useEffect(() => {
+    StatusBar.setBarStyle(themeMode === BLK_MODE ? 'light-content' : 'dark-content');
+    if (Platform.OS === 'android') StatusBar.setBackgroundColor(backgroundColor);
+  }, [themeMode, backgroundColor]);
+
+  return (
+    <SafeAreaView style={cache('SI_safeAreaView', { flex: 1, backgroundColor }, [themeMode])}>
+      <App />
+    </SafeAreaView>
+  );
+};
+
 const Root = () => {
   return (
     <Provider store={store}>
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-        <SafeAreaView style={cache('SI_safeAreaView', { flex: 1, backgroundColor: 'white' })}>
-          <App />
-        </SafeAreaView>
+        <_Root />
       </SafeAreaProvider>
     </Provider>
   );

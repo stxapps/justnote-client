@@ -57,7 +57,7 @@ import {
   N_DAYS, CD_ROOT, NOTES, IMAGES, SETTINGS, INDEX, DOT_JSON, PINS, LG_WIDTH,
   IMAGE_FILE_EXTS, IAP_STATUS_URL, COM_JUSTNOTECC, SIGNED_TEST_STRING, VALID, ACTIVE,
   SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS,
-  WHT_MODE, BLK_MODE, CUSTOM_MODE,
+  WHT_MODE, BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE,
 } from '../types/const';
 import {
   throttle, extractUrl, urlHashToObj, objToUrlHash, isIPadIPhoneIPod, isBusyStatus,
@@ -2654,6 +2654,11 @@ export const deleteAllData = () => async (dispatch, getState) => {
     return;
   }
 
+  if (settingsFPath) {
+    const { contents } = await dataApi.getFiles([settingsFPath], true);
+    if (isEqual(initialSettingsState, contents[0])) settingsFPath = null;
+  }
+
   const total = (
     allNoteIds.length + staticFPaths.length + (settingsFPath ? 1 : 0) + pins.length
   );
@@ -2694,7 +2699,11 @@ export const deleteAllData = () => async (dispatch, getState) => {
     }
     await fileApi.deleteFiles(staticFPaths);
 
-    updatePopupUrlHash(SETTINGS_POPUP, false, null);
+    // Need to close the settings popup to update the url hash,
+    //   as DELETE_ALL_DATA will set isSettingsPopupShown to false.
+    if (getState().settings.isSettingsPopupShown) {
+      updatePopupUrlHash(SETTINGS_POPUP, false, null);
+    }
     dispatch({ type: DELETE_ALL_DATA });
   } catch (e) {
     dispatch(updateDeleteAllDataProgress({
@@ -2841,6 +2850,7 @@ export const pinNotes = (ids) => async (dispatch, getState) => {
   const purchases = state.settings.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
+    vars.paywallFeature.feature = FEATURE_PIN;
     dispatch(updatePopup(PAYWALL_POPUP, true));
     return;
   }
@@ -3063,6 +3073,7 @@ export const updateTheme = (mode, customOptions) => async (dispatch, getState) =
   const purchases = state.settings.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
+    vars.paywallFeature.feature = FEATURE_APPEARANCE;
     dispatch(updatePopup(PAYWALL_POPUP, true));
     return;
   }
