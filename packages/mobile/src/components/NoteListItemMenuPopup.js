@@ -187,7 +187,7 @@ const NoteListItemMenuPopup = () => {
     </View>
   );
 
-  let popupClassNames = 'absolute rounded-md border border-gray-100 bg-white shadow-lg';
+  let popupClassNames = 'absolute rounded-md bg-white shadow-lg';
   let panel;
   let bgStyle = { opacity: 0 };
   if (popupSize) {

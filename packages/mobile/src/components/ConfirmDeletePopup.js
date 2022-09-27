@@ -102,7 +102,7 @@ const ConfirmDeletePopup = () => {
       <TouchableWithoutFeedback onPress={onConfirmDeleteCancelBtnClick}>
         <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
       </TouchableWithoutFeedback>
-      <Animated.View style={[tailwind('w-full max-w-lg rounded-lg bg-white px-4 pt-5 pb-4 shadow-xl sm:my-8 sm:p-6'), popupStyle]}>
+      <Animated.View style={[tailwind('w-full max-w-lg rounded-lg bg-white px-4 pt-5 pb-4 shadow-xl blk:border blk:border-gray-700 blk:bg-gray-800 sm:my-8 sm:p-6'), popupStyle]}>
         <View style={tailwind('items-center sm:flex-row sm:items-start')}>
           <View style={tailwind('h-12 w-12 flex-shrink-0 flex-grow-0 items-center justify-center rounded-full bg-red-100 sm:h-10 sm:w-10')}>
             <Svg width={24} height={24} style={tailwind('font-normal text-red-600')} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -110,20 +110,18 @@ const ConfirmDeletePopup = () => {
             </Svg>
           </View>
           <View style={tailwind('mt-3 flex-shrink flex-grow sm:mt-0 sm:ml-4')}>
-            <Text style={tailwind('text-center text-lg font-medium leading-6 text-gray-900 sm:text-left')}>Confirm delete?</Text>
+            <Text style={tailwind('text-center text-lg font-medium leading-6 text-gray-900 blk:text-white sm:text-left')}>Confirm delete?</Text>
             <View style={tailwind('mt-2')}>
-              <Text style={tailwind('text-center text-sm font-normal text-gray-500 sm:text-left')}>
-                Are you sure you want to permanently delete? This action cannot be undone.
-              </Text>
+              <Text style={tailwind('text-center text-sm font-normal text-gray-500 blk:text-gray-400 sm:text-left')}>Are you sure you want to permanently delete? This action cannot be undone.</Text>
             </View>
           </View>
         </View>
         <View style={tailwind('mt-5 sm:mt-4 sm:ml-10 sm:flex-row sm:pl-4')}>
-          <TouchableOpacity onPress={onConfirmDeleteOkBtnClick} style={tailwind('w-full rounded-md border border-red-600 bg-red-600 px-4 py-2 shadow-sm sm:w-auto')}>
+          <TouchableOpacity onPress={onConfirmDeleteOkBtnClick} style={tailwind('w-full rounded-md border border-red-600 bg-red-600 px-4 py-2 shadow-sm blk:border-red-500 blk:bg-red-500 sm:w-auto')}>
             <Text style={tailwind('text-center text-base font-medium text-white sm:text-sm')}>Delete</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={onConfirmDeleteCancelBtnClick} style={tailwind('mt-3 w-full rounded-md border border-gray-300 bg-white px-4 py-2 shadow-sm sm:mt-0 sm:ml-3 sm:w-auto')}>
-            <Text style={tailwind('text-center text-base font-medium text-gray-700 sm:text-sm')}>Cancel</Text>
+          <TouchableOpacity onPress={onConfirmDeleteCancelBtnClick} style={tailwind('mt-3 w-full rounded-md border border-gray-300 bg-white px-4 py-2 shadow-sm blk:border-gray-400 blk:bg-gray-800 sm:mt-0 sm:ml-3 sm:w-auto')}>
+            <Text style={tailwind('text-center text-base font-medium text-gray-700 blk:text-gray-300 sm:text-sm')}>Cancel</Text>
           </TouchableOpacity>
         </View>
       </Animated.View>

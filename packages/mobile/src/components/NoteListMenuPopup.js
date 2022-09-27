@@ -315,7 +315,7 @@ const NoteListMenuPopup = () => {
       <TouchableWithoutFeedback onPress={onNoteListMenuCancelBtnClick}>
         <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
       </TouchableWithoutFeedback>
-      <Animated.View style={[tailwind('absolute rounded-md border border-gray-100 bg-white shadow-lg'), popupStyle]}>
+      <Animated.View style={[tailwind('absolute rounded-md bg-white shadow-lg'), popupStyle]}>
         <View style={tailwind('py-1')}>
           {buttons}
         </View>

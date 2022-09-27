@@ -79,7 +79,7 @@ const ConfirmDiscardPopup = () => {
             <motion.button ref={cancelBtn} onClick={onConfirmDiscardCancelBtnClick} className={tailwind('absolute inset-0 h-full w-full cursor-default bg-black bg-opacity-25 focus:outline-none')} variants={dialogBgFMV} initial="hidden" animate="visible" exit="hidden" />
           </div>
           <span style={spanStyle} className={tailwind('hidden sm:inline-block sm:align-middle')} aria-hidden="true">&#8203;</span>
-          <motion.div className={tailwind('relative inline-block overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left align-bottom shadow-xl sm:my-8 sm:w-full sm:max-w-lg sm:p-6 sm:align-middle')} variants={dialogFMV} initial="hidden" animate="visible" exit="hidden">
+          <motion.div className={tailwind('relative inline-block overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left align-bottom shadow-xl blk:bg-gray-800 blk:ring-1 blk:ring-white blk:ring-opacity-25 sm:my-8 sm:w-full sm:max-w-lg sm:p-6 sm:align-middle')} variants={dialogFMV} initial="hidden" animate="visible" exit="hidden">
             <div className={tailwind('sm:flex sm:items-start')}>
               <div className={tailwind('mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10')}>
                 <svg className={tailwind('h-6 w-6 text-red-600')} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -87,17 +87,17 @@ const ConfirmDiscardPopup = () => {
                 </svg>
               </div>
               <div className={tailwind('mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left')}>
-                <h3 className={tailwind('text-lg font-medium leading-6 text-gray-900')} id="modal-title">Discard unsaved changes?</h3>
+                <h3 className={tailwind('text-lg font-medium leading-6 text-gray-900 blk:text-white')} id="modal-title">Discard unsaved changes?</h3>
                 <div className={tailwind('mt-2')}>
-                  <p className={tailwind('text-sm text-gray-500')}>
+                  <p className={tailwind('text-sm text-gray-500 blk:text-gray-400')}>
                     Are you sure you want to discard your unsaved changes to your note? All of your changes will be permanently deleted. This action cannot be undone.
                   </p>
                 </div>
               </div>
             </div>
             <div className={tailwind('mt-5 sm:mt-4 sm:ml-10 sm:flex sm:pl-4')}>
-              <button onClick={onConfirmDiscardOkBtnClick} type="button" className={tailwind('inline-flex w-full justify-center rounded-md border border-red-600 bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:w-auto sm:text-sm')}>Discard</button>
-              <button onClick={onConfirmDiscardCancelBtnClick} type="button" className={tailwind('mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:border-gray-400 hover:text-gray-900 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm')}>Cancel</button>
+              <button onClick={onConfirmDiscardOkBtnClick} type="button" className={tailwind('inline-flex w-full justify-center rounded-md border border-red-600 bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 blk:border-red-500 blk:bg-red-500 blk:hover:bg-red-400 sm:w-auto sm:text-sm')}>Discard</button>
+              <button onClick={onConfirmDiscardCancelBtnClick} type="button" className={tailwind('mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:border-gray-400 hover:text-gray-900 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 blk:border-gray-400 blk:bg-gray-800 blk:text-gray-300 blk:hover:border-gray-300 blk:hover:text-gray-200 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm')}>Cancel</button>
             </div>
           </motion.div>
         </div>
