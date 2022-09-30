@@ -16,13 +16,13 @@ const LoadingNoteListItem = () => {
 
   return (
     <li className={tailwind('px-4 py-5 sm:px-6')}>
-      <div style={{ width: titleWidth }} className={tailwind('h-5 rounded-md bg-gray-300')} />
+      <div style={{ width: titleWidth }} className={tailwind('h-5 rounded-md bg-gray-300 blk:bg-gray-700')} />
       <div className={tailwind('mt-1')}>
         {textIndices.map(i => {
           const textWidth = sample(widths);
           return (
             <div key={i} className={tailwind('flex h-5 items-center')}>
-              <div style={{ width: textWidth }} className={tailwind('h-3 rounded bg-gray-200')} />
+              <div style={{ width: textWidth }} className={tailwind('h-3 rounded bg-gray-200 blk:bg-gray-800')} />
             </div>
           );
         })}
@@ -37,7 +37,7 @@ const LoadingNoteListItems = () => {
   return (
     <div className={tailwind('flex-shrink flex-grow overflow-hidden')}>
       <div className={tailwind('mt-5')}>
-        <ul className={tailwind('-my-5 animate-pulse divide-y divide-gray-200')}>
+        <ul className={tailwind('-my-5 animate-pulse divide-y divide-gray-200 blk:divide-gray-700')}>
           <LoadingNoteListItem />
           <LoadingNoteListItem />
           <LoadingNoteListItem />

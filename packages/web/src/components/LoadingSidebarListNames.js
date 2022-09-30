@@ -12,8 +12,8 @@ const LoadingSidebarListName = () => {
 
   return (
     <div className={tailwind('flex items-center px-2 py-2')}>
-      <div className={tailwind('mr-3 h-5 w-5 rounded bg-gray-300')} />
-      <div style={{ width: textWidth }} className={tailwind('h-4 rounded bg-gray-300')} />
+      <div className={tailwind('mr-3 h-5 w-5 rounded bg-gray-300 blk:bg-gray-700')} />
+      <div style={{ width: textWidth }} className={tailwind('h-4 rounded bg-gray-300 blk:bg-gray-700')} />
     </div>
   );
 };

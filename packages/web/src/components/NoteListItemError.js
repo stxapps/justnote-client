@@ -36,8 +36,8 @@ const NoteListItemError = (props) => {
         </svg>
       </div>
       <div className={tailwind('min-w-0 flex-1')}>
-        <h3 className={tailwind('truncate text-base font-semibold text-red-700 group-hover:underline lg:text-sm')}>{title}</h3>
-        <p className={tailwind('mt-1 text-sm text-red-600 line-clamp-3')}>{body}</p>
+        <h3 className={tailwind('truncate text-base font-semibold text-red-700 group-hover:underline blk:text-red-500 lg:text-sm')}>{title}</h3>
+        <p className={tailwind('mt-1 text-sm text-red-600 line-clamp-3 blk:text-red-400')}>{body}</p>
       </div>
     </button>
   );

@@ -8,7 +8,9 @@
   --jn-editor-gray-400: rgb(156, 163, 175);
   --jn-editor-gray-500: rgb(107, 114, 128);
   --jn-editor-gray-600: rgb(75, 85, 99);
+  --jn-editor-gray-700: rgb(55, 65, 81);
   --jn-editor-gray-800: rgb(31, 41, 55);
+  --jn-editor-gray-900: rgb(17, 24, 39);
 
   --jn-editor-blue-300: rgb(147, 197, 253);
   --jn-editor-blue-400: rgb(96, 165, 250);
@@ -33,7 +35,7 @@
   --ck-color-base-active-focus: var(--jn-editor-gray-600);
   --ck-color-base-error: var(--jn-editor-red-600);
 
-  --ck-color-focus-border-coordinates: 131, 50%, 43%;
+  --ck-color-focus-border-coordinates: 142, 76%, 36%;
   --ck-color-focus-border: hsl(var(--ck-color-focus-border-coordinates));
   --ck-color-focus-outer-shadow: var(--jn-editor-green-200);
   --ck-color-focus-disabled-shadow: var(--jn-editor-green-300);
@@ -54,6 +56,7 @@
   --ck-color-button-on-active-background: var(--jn-editor-gray-300);
   --ck-color-button-on-active-shadow: var(--jn-editor-gray-400);
   --ck-color-button-on-disabled-background: var(--jn-editor-gray-300);
+  --ck-color-button-on-color: var(--jn-editor-gray-400);
 
   --ck-color-button-action-background: var(--ck-color-base-action);
   --ck-color-button-action-hover-background: var(--jn-editor-green-500);
@@ -106,10 +109,114 @@
   --ck-color-link-selected-background: var(--jn-editor-blue-300);
   --ck-color-link-fake-selection: var(--jn-editor-blue-300);
 
+  --ck-color-widget-blurred-border: hsl(0, 0%, 87%);
   --ck-color-widget-hover-border: var(--jn-editor-green-600);
+  --ck-color-widget-editable-focus-background: var(--ck-color-base-background);
+  --ck-color-widget-drag-handler-icon-color: var(--ck-color-base-background);
+
+  --ck-color-widget-type-around-button-active: var(--ck-color-focus-border);
+  --ck-color-widget-type-around-button-hover: var(--ck-color-widget-hover-border);
+  --ck-color-widget-type-around-button-blurred-editable: var(--ck-color-widget-blurred-border);
+  --ck-color-widget-type-around-button-icon: var(--ck-color-base-background);
 
   --ck-font-size-base: 15px;
   --ck-toolbar-dropdown-max-width: 96vw;
+}
+
+.blk-mode {
+  --ck-color-base-foreground: var(--jn-editor-gray-900);
+  --ck-color-base-background: var(--jn-editor-gray-900);
+  --ck-color-base-border: var(--jn-editor-gray-700);
+  --ck-color-base-action: var(--jn-editor-green-400);
+  --ck-color-base-focus: var(--jn-editor-green-600);
+  --ck-color-base-text: var(--jn-editor-gray-300);
+  --ck-color-base-active: var(--jn-editor-gray-400);
+  --ck-color-base-active-focus: var(--jn-editor-gray-300);
+  --ck-color-base-error: var(--jn-editor-red-600);
+
+  --ck-color-focus-border-coordinates: 142, 76%, 36%;
+  --ck-color-focus-border: hsl(var(--ck-color-focus-border-coordinates));
+  --ck-color-focus-outer-shadow: var(--jn-editor-green-200);
+  --ck-color-focus-disabled-shadow: var(--jn-editor-green-300);
+  --ck-color-focus-error-shadow: var(--jn-editor-red-500);
+  --ck-color-text: var(--ck-color-base-text);
+  --ck-color-shadow-drop: hsla(0, 0%, 0%, 0.15);
+  --ck-color-shadow-drop-active: hsla(0, 0%, 0%, 0.2);
+  --ck-color-shadow-inner: hsla(0, 0%, 0%, 0.1);
+
+  --ck-color-button-default-background: transparent;
+  --ck-color-button-default-hover-background: var(--jn-editor-gray-800);
+  --ck-color-button-default-active-background: var(--jn-editor-gray-700) ;
+  --ck-color-button-default-active-shadow: var(--jn-editor-gray-700);
+  --ck-color-button-default-disabled-background: transparent;
+
+  --ck-color-button-on-background: var(--jn-editor-gray-600);
+  --ck-color-button-on-hover-background: var(--jn-editor-gray-600);
+  --ck-color-button-on-active-background: var(--jn-editor-gray-600);
+  --ck-color-button-on-active-shadow: var(--jn-editor-gray-500);
+  --ck-color-button-on-disabled-background: var(--jn-editor-gray-600);
+  --ck-color-button-on-color: var(--jn-editor-gray-500);
+
+  --ck-color-button-action-background: var(--ck-color-base-action);
+  --ck-color-button-action-hover-background: var(--jn-editor-green-500);
+  --ck-color-button-action-active-background: var(--jn-editor-green-500);
+  --ck-color-button-action-active-shadow: var(--jn-editor-green-500);
+  --ck-color-button-action-disabled-background: var(--jn-editor-green-200);
+  --ck-color-button-action-text: var(--ck-color-base-background);
+
+  --ck-color-button-save: var(--jn-editor-green-600);
+  --ck-color-button-cancel: var(--jn-editor-red-600);
+
+  --ck-color-switch-button-off-background: var(--jn-editor-gray-600);
+  --ck-color-switch-button-off-hover-background: var(--jn-editor-gray-600);
+  --ck-color-switch-button-on-background: var(--ck-color-button-action-background);
+  --ck-color-switch-button-on-hover-background: var(--jn-editor-green-500);
+  --ck-color-switch-button-inner-background: var(--ck-color-base-background);
+  --ck-color-switch-button-inner-shadow: hsla(0, 0%, 0%, 0.1);
+
+  --ck-color-dropdown-panel-background: var(--ck-color-base-background);
+  --ck-color-dropdown-panel-border: var(--ck-color-base-border);
+
+  --ck-color-input-background: var(--ck-color-base-background);
+  --ck-color-input-border: var(--jn-editor-gray-700);
+  --ck-color-input-error-border: var(--ck-color-base-error);
+  --ck-color-input-text: var(--ck-color-base-text);
+  --ck-color-input-disabled-background: var(--jn-editor-gray-800);
+  --ck-color-input-disabled-border: var(--jn-editor-gray-600);
+  --ck-color-input-disabled-text: var(--jn-editor-gray-400);
+
+  --ck-color-list-background: var(--ck-color-base-background);
+  --ck-color-list-button-hover-background: var(--ck-color-button-default-hover-background);
+  --ck-color-list-button-on-background: var(--ck-color-base-active);
+  --ck-color-list-button-on-background-focus: var(--ck-color-base-active-focus);
+  --ck-color-list-button-on-text: var(--ck-color-base-background);
+
+  --ck-color-panel-background: var(--ck-color-base-background);
+  --ck-color-panel-border: var(--ck-color-base-border);
+
+  --ck-color-toolbar-background: var(--ck-color-base-foreground);
+  --ck-color-toolbar-border: var(--ck-color-base-border);
+
+  --ck-color-tooltip-background: var(--ck-color-base-text);
+  --ck-color-tooltip-text: var(--ck-color-base-background);
+
+  --ck-color-engine-placeholder-text: var(--jn-editor-gray-400);
+
+  --ck-color-upload-bar-background: var(--jn-editor-blue-400);
+
+  --ck-color-link-default: var(--jn-editor-blue-700);
+  --ck-color-link-selected-background: var(--jn-editor-blue-300);
+  --ck-color-link-fake-selection: var(--jn-editor-blue-300);
+
+  --ck-color-widget-blurred-border: var(--jn-editor-gray-800);
+  --ck-color-widget-hover-border: var(--jn-editor-green-600);
+  --ck-color-widget-editable-focus-background: var(--jn-editor-gray-800);
+  --ck-color-widget-drag-handler-icon-color: var(--jn-editor-white);
+
+  --ck-color-widget-type-around-button-active: var(--ck-color-focus-border);
+  --ck-color-widget-type-around-button-hover: var(--ck-color-widget-hover-border);
+  --ck-color-widget-type-around-button-blurred-editable: var(--ck-color-widget-blurred-border);
+  --ck-color-widget-type-around-button-icon: var(--jn-editor-white);
 }
 
 .ck.ck-editor__editable {
@@ -121,6 +228,10 @@
   .ck.ck-editor__editable {
     font-size: 16px;
   }
+}
+
+.blk-mode .ck.ck-editor__editable {
+  color: var(--jn-editor-gray-200);
 }
 
 .ck.ck-editor__editable ul {
@@ -215,6 +326,11 @@
   top: -1px;
   left: -22px;
   margin-right: -8px;
+  background-color: var(--jn-editor-white);
+}
+
+.ck-content .todo-list .todo-list__label>input:before {
+  border: 1px solid var(--jn-editor-gray-700);
 }
 
 .ck-content .todo-list .todo-list__label>input:focus {
@@ -224,4 +340,12 @@
 
 .ck-content .todo-list .todo-list__label>input:checked {
   background-color: transparent;
+}
+
+.blk-mode .ck-content .todo-list .todo-list__label>input {
+  background-color: var(--jn-editor-gray-900);
+}
+
+.blk-mode .ck-content .todo-list .todo-list__label>input:before {
+  border: 1px solid var(--jn-editor-gray-300);
 }
