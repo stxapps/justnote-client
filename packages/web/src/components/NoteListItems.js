@@ -127,7 +127,7 @@ const NoteListItems = () => {
   const renderFetchMoreBtn = () => {
     return (
       <div className={tailwind('my-6 px-4 sm:px-6')}>
-        <button onClick={onFetchMoreBtnClick} className={tailwind('flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500 shadow-sm hover:border-gray-400 hover:text-gray-600 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 blk:border-gray-400 blk:bg-gray-900 blk:text-gray-300 blk:hover:border-gray-300 blk:hover:text-gray-200')}>More</button>
+        <button onClick={onFetchMoreBtnClick} className={tailwind('flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500 shadow-sm hover:border-gray-400 hover:text-gray-600 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 blk:border-gray-500 blk:bg-gray-900 blk:text-gray-400 blk:hover:border-gray-400 blk:hover:text-gray-300 blk:focus:border-gray-400 blk:focus:ring-gray-500 blk:focus:ring-offset-gray-900')}>More</button>
       </div>
     );
   };
@@ -148,7 +148,7 @@ const NoteListItems = () => {
   const renderUpdateFetchedBtn = () => {
     return (
       <div className={tailwind('my-6 px-4 sm:px-6')}>
-        <button onClick={onUpdateFetchedBtnClick} className={tailwind('flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500 shadow-sm hover:border-gray-400 hover:text-gray-600 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 blk:border-gray-400 blk:bg-gray-900 blk:text-gray-300 blk:group-hover:border-gray-300 blk:group-hover:text-gray-200')}>Show more</button>
+        <button onClick={onUpdateFetchedBtnClick} className={tailwind('flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500 shadow-sm hover:border-gray-400 hover:text-gray-600 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 blk:border-gray-500 blk:bg-gray-900 blk:text-gray-400 blk:hover:border-gray-400 blk:hover:text-gray-300 blk:focus:border-gray-400 blk:focus:ring-gray-500 blk:focus:ring-offset-gray-900')}>Show more</button>
       </div>
     );
   };

@@ -143,7 +143,7 @@ const SettingsPopup = () => {
 
     return (
       <React.Fragment>
-        <div className={tailwind('fixed inset-0 bg-white blk:bg-gray-900 blk:bg-gray-900')}>
+        <div className={tailwind('fixed inset-0 bg-white blk:bg-gray-900')}>
           <div ref={overflowPanel} className={tailwind('h-full overflow-y-scroll')}>
             <div className={tailwind('relative mx-auto max-w-6xl')}>
               <div key="panel-with-sidebar" className={tailwind('mx-auto max-w-4xl px-0 md:px-6 lg:px-8')}>
@@ -215,7 +215,7 @@ const SettingsPopup = () => {
           <div style={closeBtnStyle} className={tailwind('absolute top-0')}>
             <button onClick={onPopupCloseBtnClick} className={tailwind('group flex h-12 w-12 items-center justify-center focus:outline-none')} aria-label="Close settings popup">
               <div className={tailwind('rounded-full bg-white blk:bg-gray-900')}>
-                <svg className={tailwind('h-5 w-5 rounded text-gray-300 group-hover:text-gray-500 group-focus:ring-2 group-focus:ring-gray-400 blk:text-gray-600 blk:group-hover:text-gray-400 md:h-7 md:w-7')} stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                <svg className={tailwind('h-5 w-5 rounded text-gray-300 group-hover:text-gray-500 group-focus:ring-2 group-focus:ring-gray-400 blk:text-gray-600 blk:group-hover:text-gray-400 blk:group-focus:ring-gray-500 md:h-7 md:w-7')} stroke="currentColor" fill="none" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </div>
@@ -282,7 +282,7 @@ const SettingsPopup = () => {
             </div>
             <div className={tailwind('absolute top-0 right-0')}>
               <button onClick={onPopupCloseBtnClick} className={tailwind('group flex h-12 w-12 items-center justify-center focus:outline-none')} aria-label="Close settings popup">
-                <svg className={tailwind('h-5 w-5 rounded text-gray-300 group-hover:text-gray-500 group-focus:ring-2 group-focus:ring-gray-400 blk:text-gray-600 blk:group-hover:text-gray-400')} stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                <svg className={tailwind('h-5 w-5 rounded text-gray-300 group-hover:text-gray-500 group-focus:ring-2 group-focus:ring-gray-400 blk:text-gray-600 blk:group-hover:text-gray-400 blk:group-focus:ring-gray-500')} stroke="currentColor" fill="none" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>

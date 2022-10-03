@@ -73,7 +73,7 @@ const PinMenuPopup = () => {
         <p className={tailwind('truncate text-left text-sm font-semibold text-gray-600 blk:text-gray-200')}>Manage pin</p>
       </div>
       {menu.map(text => {
-        return <button key={text} onClick={() => onMenuPopupClick(text)} className={tailwind('block w-full truncate rounded-md py-2.5 pl-4 pr-4 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none focus:ring-inset blk:text-gray-200 blk:hover:bg-gray-700 blk:hover:text-white')} role="menuitem">{text}</button>
+        return <button key={text} onClick={() => onMenuPopupClick(text)} className={tailwind('block w-full truncate rounded-md py-2.5 pl-4 pr-4 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none blk:text-gray-200 blk:hover:bg-gray-700 blk:hover:text-white blk:focus:bg-gray-700 blk:focus:text-white')} role="menuitem">{text}</button>
       })}
     </React.Fragment>
   );

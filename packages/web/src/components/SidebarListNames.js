@@ -49,11 +49,11 @@ const _SidebarListName = (props) => {
 
   let btnClassNames, svgClassNames;
   if (listNameObj.listName === listName) {
-    btnClassNames = 'bg-gray-200 text-gray-900';
-    svgClassNames = 'text-gray-500';
+    btnClassNames = 'bg-gray-200 text-gray-900 blk:bg-gray-700 blk:text-gray-100';
+    svgClassNames = 'text-gray-500 blk:text-gray-400';
   } else {
-    btnClassNames = 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 focus:bg-gray-50 focus:text-gray-900';
-    svgClassNames = 'text-gray-400 group-hover:text-gray-500 group-focus:text-gray-500';
+    btnClassNames = 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 focus:bg-gray-50 focus:text-gray-900 blk:text-gray-200 blk:hover:bg-gray-700 blk:hover:text-gray-100 blk:focus:bg-gray-700 blk:focus:text-gray-100';
+    svgClassNames = 'text-gray-400 group-hover:text-gray-500 group-focus:text-gray-500 blk:text-gray-500 blk:group-hover:text-gray-400 blk:group-focus:text-gray-400';
   }
   svgClassNames += ' flex-grow-0 flex-shrink-0 mr-3 h-5 w-5';
 
@@ -70,8 +70,8 @@ const _SidebarListName = (props) => {
         </svg>
       );
       expandBtn = (
-        <button onClick={onExpandBtnClick} className={tailwind('group -ml-2.5 flex h-10 w-8 flex-shrink-0 flex-grow-0 items-center justify-center rounded focus:outline-none focus-visible:bg-gray-200 lg:h-9')}>
-          <div className={tailwind('ml-1 flex h-3.5 w-3.5 items-center justify-center rounded-sm text-gray-500 group-hover:text-gray-700')}>
+        <button onClick={onExpandBtnClick} className={tailwind('group -ml-2.5 flex h-10 w-8 flex-shrink-0 flex-grow-0 items-center justify-center rounded focus:outline-none focus-visible:bg-gray-200 blk:focus-visible:bg-gray-700 lg:h-9')}>
+          <div className={tailwind('ml-1 flex h-3.5 w-3.5 items-center justify-center rounded-sm text-gray-500 group-hover:text-gray-700 blk:text-gray-400 blk:group-hover:text-gray-200')}>
             {expandSvg}
           </div>
         </button>

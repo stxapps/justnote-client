@@ -124,14 +124,13 @@ const NoteListItemMenuPopup = () => {
         let displayText = text;
         if (text === ARCHIVE) displayText = getListNameDisplayName(text, listNameMap);
         return (
-          <button key={text} onClick={() => onMenuPopupBtnClick(text)} className={tailwind('block w-full truncate rounded-sm px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none')} role="menuitem">{displayText}</button>
+          <button key={text} onClick={() => onMenuPopupBtnClick(text)} className={tailwind('block w-full truncate rounded-sm px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none blk:text-gray-200 blk:hover:bg-gray-700 blk:hover:text-gray-50 blk:focus:bg-gray-700 blk:focus:text-white')} role="menuitem">{displayText}</button>
         );
       })}
-
     </div>
   );
 
-  let popupClassNames = 'fixed min-w-[8rem] overflow-auto rounded-md bg-white shadow-xl ring-1 ring-black ring-opacity-5';
+  let popupClassNames = 'fixed min-w-[8rem] overflow-auto rounded-md bg-white shadow-xl ring-1 ring-black ring-opacity-5 blk:bg-gray-800 blk:ring-white blk:ring-opacity-25';
   let panel;
   if (popupSize) {
 
