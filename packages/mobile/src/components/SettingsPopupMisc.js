@@ -235,7 +235,7 @@ const SettingsPopupMisc = (props) => {
         <Text style={tailwind('text-base font-medium leading-6 text-gray-800 blk:text-gray-100')}>List Order On</Text>
         <View style={tailwind('sm:flex-row sm:items-start sm:justify-between')}>
           <View style={tailwind('mt-2.5 sm:flex-shrink sm:flex-grow')}>
-            <Text style={tailwind('text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Choose whether your notes are sorted on <Text style={tailwind('text-base font-semibold text-gray-500')}>added date</Text> or <Text style={tailwind('text-base font-semibold text-gray-500')}>updated date</Text> when you browse your notes.</Text>
+            <Text style={tailwind('text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Choose whether your notes are sorted on <Text style={tailwind('text-base font-semibold text-gray-500 blk:text-gray-400')}>added date</Text> or <Text style={tailwind('text-base font-semibold text-gray-500 blk:text-gray-400')}>updated date</Text> when you browse your notes.</Text>
           </View>
           <View style={tailwind('mt-2.5 items-center sm:ml-4 sm:flex-shrink-0 sm:flex-grow-0')}>
             <View style={tailwind('w-full max-w-48 rounded-md bg-white shadow-sm blk:bg-gray-900 sm:w-48')}>
@@ -246,7 +246,7 @@ const SettingsPopupMisc = (props) => {
                       <View style={tailwind(`h-3 w-3 rounded-full ${addedDTRBtnInnerClassNames}`)} />
                     </View>
                   </View>
-                  <Text style={tailwind(`ml-3 text-sm font-medium leading-5 text-gray-500 ${addedDTBtnInnerClassNames}`)}>Added Date</Text>
+                  <Text style={tailwind(`ml-3 text-sm font-medium leading-5 ${addedDTBtnInnerClassNames}`)}>Added Date</Text>
                 </View>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => onSortOnInputChange(UPDATED_DT)}>
@@ -256,7 +256,7 @@ const SettingsPopupMisc = (props) => {
                       <View style={tailwind(`h-3 w-3 rounded-full ${updatedDTRBtnInnerClassNames}`)} />
                     </View>
                   </View>
-                  <Text style={tailwind(`ml-3 text-sm font-medium leading-5 text-gray-500 ${updatedDTBtnInnerClassNames}`)}>Updated Date</Text>
+                  <Text style={tailwind(`ml-3 text-sm font-medium leading-5 ${updatedDTBtnInnerClassNames}`)}>Updated Date</Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -278,7 +278,7 @@ const SettingsPopupMisc = (props) => {
                       <View style={tailwind(`h-3 w-3 rounded-full ${ascendingRBtnInnerClassNames}`)} />
                     </View>
                   </View>
-                  <Text style={tailwind(`ml-3 text-sm font-medium leading-5 text-gray-500 ${ascendingBtnInnerClassNames}`)}>Ascending order</Text>
+                  <Text style={tailwind(`ml-3 text-sm font-medium leading-5 ${ascendingBtnInnerClassNames}`)}>Ascending order</Text>
                 </View>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => onDoDescendingInputChange('descending')}>
@@ -288,7 +288,7 @@ const SettingsPopupMisc = (props) => {
                       <View style={tailwind(`h-3 w-3 rounded-full ${descendingRBtnInnerClassNames}`)} />
                     </View>
                   </View>
-                  <Text style={tailwind(`ml-3 text-sm font-medium leading-5 text-gray-500 ${descendingBtnInnerClassNames}`)}>Descending order</Text>
+                  <Text style={tailwind(`ml-3 text-sm font-medium leading-5 ${descendingBtnInnerClassNames}`)}>Descending order</Text>
                 </View>
               </TouchableOpacity>
             </View>

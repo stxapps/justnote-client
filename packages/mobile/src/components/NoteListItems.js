@@ -179,7 +179,7 @@ const NoteListItems = () => {
     if (item.id === SHOW_UPDATE_FETCHED_BTN) return renderUpdateFetchedBtn();
     if (item.id === SHOW_EMPTY_SPACE) {
       return (
-        <View style={[tailwind('w-full bg-white'), { height: 88 }]} />
+        <View style={[tailwind('w-full bg-white blk:bg-gray-900'), { height: 88 }]} />
       );
     }
     return <NoteListItem note={item} />;
