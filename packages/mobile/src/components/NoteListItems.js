@@ -161,7 +161,7 @@ const NoteListItems = () => {
         <Flow size={48} color={themeMode === BLK_MODE ? 'rgb(156, 163, 175)' : 'rgb(156, 163, 175)'} />
       </View>
     );
-  }, [tailwind]);
+  }, [themeMode, tailwind]);
 
   const renderUpdateFetchedBtn = useCallback(() => {
     return (

@@ -11,6 +11,7 @@ import {
   updateEditorIsUploading, updateEditingNote, updateEditorUnmount,
 } from '../actions';
 import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, UTF8 } from '../types/const';
+import { getThemeMode } from '../selectors';
 import {
   replaceObjectUrls, splitOnFirst, escapeDoubleQuotes, getFileExt,
 } from '../utils';
@@ -43,6 +44,7 @@ const NoteEditorEditor = (props) => {
   const blurCount = useSelector(state => state.editor.blurCount);
   const updateBulkEditCount = useSelector(state => state.editor.updateBulkEditCount);
   const isScrollEnabled = useSelector(state => state.editor.isScrollEnabled);
+  const themeMode = useSelector(state => getThemeMode(state));
   const [isHtmlReady, setHtmlReady] = useState(Platform.OS === 'ios' ? false : true);
   const [isEditorReady, setEditorReady] = useState(false);
   const webView = useRef(null);
@@ -81,6 +83,10 @@ const NoteEditorEditor = (props) => {
   const refToIsEditorBusy = useRef(isEditorBusy);
   const refToIsEditorReady = useRef(isEditorReady);
   const didUpdateEditingNote = useRef(false);
+
+  const setThemeMode = (mode) => {
+    webView.current.injectJavaScript('window.justnote.setThemeMode(' + mode + '); true;');
+  };
 
   const focusTitleInput = useCallback(() => {
     setTimeout(() => {
@@ -277,6 +283,11 @@ const NoteEditorEditor = (props) => {
     setEditorReady(false);
     webView.current.reload();
   }, []);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+    setThemeMode(themeMode);
+  }, [isEditorReady, themeMode]);
 
   useEffect(() => {
     if (!isEditorReady) return;
