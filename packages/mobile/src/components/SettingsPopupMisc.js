@@ -92,47 +92,47 @@ const SettingsPopupMisc = (props) => {
   const switchTrackColorOn = Platform.OS === 'android' ? 'rgb(187, 247, 208)' : 'rgb(34, 197, 94)';
   const switchTrackColorOff = 'rgb(156, 163, 175)';
 
-  const addedDTBtnClassNames = sortOn === ADDED_DT ? 'bg-green-100 border-green-200 blk:bg-green-600 blk:border-green-700' : 'border-gray-200 blk:border-gray-700';
+  const addedDTBtnClassNames = sortOn === ADDED_DT ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
   const addedDTBtnInnerClassNames = sortOn === ADDED_DT ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
-  const addedDTRBtnClassNames = sortOn === ADDED_DT ? 'border-green-500 blk:border-green-300' : 'border-gray-200 blk:border-gray-600';
-  const addedDTRBtnInnerClassNames = sortOn === ADDED_DT ? 'bg-green-500 blk:bg-green-300' : 'bg-gray-200 blk:bg-gray-900';
+  const addedDTRBtnClassNames = sortOn === ADDED_DT ? 'border-green-600 blk:border-green-400' : 'border-gray-200 blk:border-gray-600';
+  const addedDTRBtnInnerClassNames = sortOn === ADDED_DT ? 'bg-green-600 blk:bg-green-400' : 'bg-gray-200 blk:bg-gray-900';
 
-  const updatedDTBtnClassNames = sortOn === UPDATED_DT ? 'bg-green-100 border-green-200 blk:bg-green-600 blk:border-green-700' : 'border-gray-200 blk:border-gray-700';
+  const updatedDTBtnClassNames = sortOn === UPDATED_DT ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
   const updatedDTBtnInnerClassNames = sortOn === UPDATED_DT ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
-  const updatedDTRBtnClassNames = sortOn === UPDATED_DT ? 'border-green-500 blk:border-green-300' : 'border-gray-200 blk:border-gray-600';
-  const updatedDTRBtnInnerClassNames = sortOn === UPDATED_DT ? 'bg-green-500 blk:bg-green-300' : 'bg-gray-200 blk:bg-gray-900';
+  const updatedDTRBtnClassNames = sortOn === UPDATED_DT ? 'border-green-600 blk:border-green-400' : 'border-gray-200 blk:border-gray-600';
+  const updatedDTRBtnInnerClassNames = sortOn === UPDATED_DT ? 'bg-green-600 blk:bg-green-400' : 'bg-gray-200 blk:bg-gray-900';
 
-  const ascendingBtnClassNames = !doDescendingOrder ? 'bg-green-100 border-green-200 blk:bg-green-600 blk:border-green-700' : 'border-gray-200 blk:border-gray-700';
+  const ascendingBtnClassNames = !doDescendingOrder ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
   const ascendingBtnInnerClassNames = !doDescendingOrder ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
-  const ascendingRBtnClassNames = !doDescendingOrder ? 'border-green-500 blk:border-green-300' : 'border-gray-200 blk:border-gray-600';
-  const ascendingRBtnInnerClassNames = !doDescendingOrder ? 'bg-green-500 blk:bg-green-300' : 'bg-gray-200 blk:bg-gray-900';
+  const ascendingRBtnClassNames = !doDescendingOrder ? 'border-green-600 blk:border-green-400' : 'border-gray-200 blk:border-gray-600';
+  const ascendingRBtnInnerClassNames = !doDescendingOrder ? 'bg-green-600 blk:bg-green-400' : 'bg-gray-200 blk:bg-gray-900';
 
-  const descendingBtnClassNames = doDescendingOrder ? 'bg-green-100 border-green-200 blk:bg-green-600 blk:border-green-700' : 'border-gray-200 blk:border-gray-700';
+  const descendingBtnClassNames = doDescendingOrder ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
   const descendingBtnInnerClassNames = doDescendingOrder ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
-  const descendingRBtnClassNames = doDescendingOrder ? 'border-green-500 blk:border-green-300' : 'border-gray-200 blk:border-gray-600';
-  const descendingRBtnInnerClassNames = doDescendingOrder ? 'bg-green-500 blk:bg-green-300' : 'bg-gray-200 blk:bg-gray-900';
+  const descendingRBtnClassNames = doDescendingOrder ? 'border-green-600 blk:border-green-400' : 'border-gray-200 blk:border-gray-600';
+  const descendingRBtnInnerClassNames = doDescendingOrder ? 'bg-green-600 blk:bg-green-400' : 'bg-gray-200 blk:bg-gray-900';
 
   const doShowDate = noteDateShowingMode === NOTE_DATE_SHOWING_MODE_SHOW_DEFAULT;
 
-  const whtBtnClassNames = themeMode === WHT_MODE ? 'bg-green-100 border-green-200 blk:bg-green-600 blk:border-green-700' : 'border-gray-200 blk:border-gray-700';
+  const whtBtnClassNames = themeMode === WHT_MODE ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
   const whtBtnInnerClassNames = themeMode === WHT_MODE ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
-  const whtRBtnClassNames = themeMode === WHT_MODE ? 'border-green-500 blk:border-green-300' : 'border-gray-200 blk:border-gray-600';
-  const whtRBtnInnerClassNames = themeMode === WHT_MODE ? 'bg-green-500 blk:bg-green-300' : 'bg-gray-200 blk:bg-gray-900';
-  const blkBtnClassNames = themeMode === BLK_MODE ? 'bg-green-100 border-green-200 blk:bg-green-600 blk:border-green-700' : 'border-gray-200 blk:border-gray-700';
+  const whtRBtnClassNames = themeMode === WHT_MODE ? 'border-green-600 blk:border-green-400' : 'border-gray-200 blk:border-gray-600';
+  const whtRBtnInnerClassNames = themeMode === WHT_MODE ? 'bg-green-600 blk:bg-green-400' : 'bg-gray-200 blk:bg-gray-900';
+  const blkBtnClassNames = themeMode === BLK_MODE ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
   const blkBtnInnerClassNames = themeMode === BLK_MODE ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
-  const blkRBtnClassNames = themeMode === BLK_MODE ? 'border-green-500 blk:border-green-300' : 'border-gray-200 blk:border-gray-600';
-  const blkRBtnInnerClassNames = themeMode === BLK_MODE ? 'bg-green-500 blk:bg-green-300' : 'bg-gray-200 blk:bg-gray-900';
-  const systemBtnClassNames = themeMode === SYSTEM_MODE ? 'bg-green-100 border-green-200 blk:bg-green-600 blk:border-green-700' : 'border-gray-200 blk:border-gray-700';
+  const blkRBtnClassNames = themeMode === BLK_MODE ? 'border-green-600 blk:border-green-400' : 'border-gray-200 blk:border-gray-600';
+  const blkRBtnInnerClassNames = themeMode === BLK_MODE ? 'bg-green-600 blk:bg-green-400' : 'bg-gray-200 blk:bg-gray-900';
+  const systemBtnClassNames = themeMode === SYSTEM_MODE ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
   const systemBtnInnerClassNames = themeMode === SYSTEM_MODE ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
-  const systemRBtnClassNames = themeMode === SYSTEM_MODE ? 'border-green-500 blk:border-green-300' : 'border-gray-200 blk:border-gray-600';
-  const systemRBtnInnerClassNames = themeMode === SYSTEM_MODE ? 'bg-green-500 blk:bg-green-300' : 'bg-gray-200 blk:bg-gray-900';
-  const customBtnClassNames = themeMode === CUSTOM_MODE ? 'bg-green-100 border-green-200 blk:bg-green-600 blk:border-green-700' : 'border-gray-200 blk:border-gray-700';
+  const systemRBtnClassNames = themeMode === SYSTEM_MODE ? 'border-green-600 blk:border-green-400' : 'border-gray-200 blk:border-gray-600';
+  const systemRBtnInnerClassNames = themeMode === SYSTEM_MODE ? 'bg-green-600 blk:bg-green-400' : 'bg-gray-200 blk:bg-gray-900';
+  const customBtnClassNames = themeMode === CUSTOM_MODE ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
   const customBtnInnerClassNames = themeMode === CUSTOM_MODE ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
-  const customRBtnClassNames = themeMode === CUSTOM_MODE ? 'border-green-500 blk:border-green-300' : 'border-gray-200 blk:border-gray-600';
-  const customRBtnInnerClassNames = themeMode === CUSTOM_MODE ? 'bg-green-500 blk:bg-green-300' : 'bg-gray-200 blk:bg-gray-900';
-  const customTextClassNames = themeMode === CUSTOM_MODE ? 'text-green-700 blk:text-green-200' : 'text-gray-500 blk:text-gray-400';
-  const customInputClassNames = themeMode === CUSTOM_MODE ? 'border-gray-300 bg-white blk:border-green-300 blk:bg-green-600' : 'border-gray-300 bg-white blk:border-gray-600 blk:bg-gray-900';
-  const customInputInnerClassNames = themeMode === CUSTOM_MODE ? 'text-gray-500 blk:text-green-200' : 'text-gray-400 blk:text-gray-500';
+  const customRBtnClassNames = themeMode === CUSTOM_MODE ? 'border-green-600 blk:border-green-400' : 'border-gray-200 blk:border-gray-600';
+  const customRBtnInnerClassNames = themeMode === CUSTOM_MODE ? 'bg-green-600 blk:bg-green-400' : 'bg-gray-200 blk:bg-gray-900';
+  const customTextClassNames = themeMode === CUSTOM_MODE ? 'text-green-700 blk:text-green-200' : 'text-gray-500 blk:text-gray-500';
+  const customInputClassNames = themeMode === CUSTOM_MODE ? 'border-gray-300 bg-white blk:border-green-200 blk:bg-green-700' : 'border-gray-300 bg-white blk:border-gray-600 blk:bg-gray-900';
+  const customInputInnerClassNames = themeMode === CUSTOM_MODE ? 'text-gray-400 blk:text-green-100' : 'text-gray-400 blk:text-gray-500';
 
   let whtTime, blkTime;
   for (const option of customOptions) {

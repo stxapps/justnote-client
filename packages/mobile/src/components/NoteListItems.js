@@ -5,8 +5,8 @@ import Svg, { Path } from 'react-native-svg';
 import { Flow } from 'react-native-animated-spinkit';
 
 import { fetchMore, updateFetchedMore } from '../actions';
-import { MY_NOTES, TRASH, ARCHIVE, LG_WIDTH } from '../types/const';
-import { getListNameMap, getNotes, getIsFetchingMore } from '../selectors';
+import { MY_NOTES, TRASH, ARCHIVE, LG_WIDTH, BLK_MODE } from '../types/const';
+import { getListNameMap, getNotes, getIsFetchingMore, getThemeMode } from '../selectors';
 import { getListNameDisplayName } from '../utils';
 import vars from '../vars';
 
@@ -30,6 +30,7 @@ const NoteListItems = () => {
   );
   const isFetchingMore = useSelector(state => getIsFetchingMore(state));
   const listChangedCount = useSelector(state => state.display.listChangedCount);
+  const themeMode = useSelector(state => getThemeMode(state));
   const flatList = useRef(null);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
@@ -147,8 +148,8 @@ const NoteListItems = () => {
   const renderFetchMoreBtn = useCallback(() => {
     return (
       <View style={tailwind('my-6 px-4 sm:px-6')}>
-        <TouchableOpacity onPress={onFetchMoreBtnClick} style={tailwind('w-full items-center rounded-md border border-gray-300 bg-white px-4 py-2 shadow-sm blk:border-gray-400 blk:bg-gray-900')}>
-          <Text style={tailwind('text-sm font-medium text-gray-500 blk:text-gray-300')}>More</Text>
+        <TouchableOpacity onPress={onFetchMoreBtnClick} style={tailwind('w-full items-center rounded-md border border-gray-300 bg-white px-4 py-2 shadow-sm blk:border-gray-500 blk:bg-gray-900')}>
+          <Text style={tailwind('text-sm font-medium text-gray-500 blk:text-gray-400')}>More</Text>
         </TouchableOpacity>
       </View>
     );
@@ -157,7 +158,7 @@ const NoteListItems = () => {
   const renderFetchingMore = useCallback(() => {
     return (
       <View style={tailwind('my-6 w-full flex-row justify-center py-2')}>
-        <Flow size={48} color="rgb(156, 163, 175)" />
+        <Flow size={48} color={themeMode === BLK_MODE ? 'rgb(156, 163, 175)' : 'rgb(156, 163, 175)'} />
       </View>
     );
   }, [tailwind]);
@@ -165,8 +166,8 @@ const NoteListItems = () => {
   const renderUpdateFetchedBtn = useCallback(() => {
     return (
       <View style={tailwind('my-6 px-4 sm:px-6')}>
-        <TouchableOpacity onPress={onUpdateFetchedBtnClick} style={tailwind('w-full items-center rounded-md border border-gray-300 bg-white px-4 py-2 shadow-sm blk:border-gray-400 blk:bg-gray-900')}>
-          <Text style={tailwind('text-sm font-medium text-gray-500 blk:text-gray-300')}>Show more</Text>
+        <TouchableOpacity onPress={onUpdateFetchedBtnClick} style={tailwind('w-full items-center rounded-md border border-gray-300 bg-white px-4 py-2 shadow-sm blk:border-gray-500 blk:bg-gray-900')}>
+          <Text style={tailwind('text-sm font-medium text-gray-500 blk:text-gray-400')}>Show more</Text>
         </TouchableOpacity>
       </View>
     );

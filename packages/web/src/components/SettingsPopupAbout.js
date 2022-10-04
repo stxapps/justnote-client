@@ -27,7 +27,7 @@ const SettingsPopupAbout = (props) => {
         <h3 className={tailwind('pb-2 text-xl font-medium leading-none text-gray-800 blk:text-gray-100')}>About</h3>
       </div>
       <div className={tailwind('mt-6 md:mt-0')}>
-        <img className={tailwind('hidden h-7 blk:h-9 md:block')} src={themeMode === BLK_MODE ? shortLogoBlk : shortLogo} alt="Justnote logo" />
+        <img className={tailwind('hidden h-7 md:block')} src={themeMode === BLK_MODE ? shortLogoBlk : shortLogo} alt="Justnote logo" />
         <div className={tailwind('pt-1 md:pt-10')}>
           <a className={tailwind('block rounded-sm text-base text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:text-gray-400 blk:hover:text-white blk:focus:ring-gray-500 md:inline')} href={'/' + HASH_LANDING} target="_blank" rel="noreferrer">Home page</a>
           <a className={tailwind('mt-4 block rounded-sm text-base text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:text-gray-400 blk:hover:text-white blk:focus:ring-gray-500 md:mt-0 md:ml-14 md:inline')} href={'/' + HASH_LANDING_MOBILE} target="_blank" rel="noreferrer">Mobile apps</a>

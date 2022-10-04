@@ -180,14 +180,14 @@ const NoteListItemMenuPopup = () => {
         if (text === ARCHIVE) displayText = getListNameDisplayName(text, listNameMap);
         return (
           <TouchableOpacity key={text} onPress={() => onMenuPopupBtnClick(text)} style={tailwind('w-full px-4 py-3')}>
-            <Text style={tailwind('text-left text-sm font-normal text-gray-700')} numberOfLines={1} ellipsizeMode="tail">{displayText}</Text>
+            <Text style={tailwind('text-left text-sm font-normal text-gray-700 blk:text-gray-200')} numberOfLines={1} ellipsizeMode="tail">{displayText}</Text>
           </TouchableOpacity>
         );
       })}
     </View>
   );
 
-  let popupClassNames = 'absolute rounded-md bg-white shadow-lg';
+  let popupClassNames = 'absolute rounded-md bg-white shadow-lg blk:border blk:border-gray-700 blk:bg-gray-800';
   let panel;
   let bgStyle = { opacity: 0 };
   if (popupSize) {

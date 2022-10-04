@@ -35,8 +35,8 @@ const NoteListItemError = (props) => {
         </Svg>
       </View>
       <View style={tailwind('flex-1')}>
-        <Text style={tailwind('text-base font-semibold text-red-700 lg:text-sm')} numberOfLines={1} ellipsizeMode="tail">{title}</Text>
-        <Text style={tailwind('mt-1 text-sm font-normal text-red-600')} numberOfLines={3} ellipsizeMode="tail">{body}</Text>
+        <Text style={tailwind('text-base font-semibold text-red-700 blk:text-red-500 lg:text-sm')} numberOfLines={1} ellipsizeMode="tail">{title}</Text>
+        <Text style={tailwind('mt-1 text-sm font-normal text-red-600 blk:text-red-400')} numberOfLines={3} ellipsizeMode="tail">{body}</Text>
       </View>
     </TouchableOpacity>
   );

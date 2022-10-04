@@ -16,14 +16,14 @@ const LoadingNoteListItem = () => {
   for (let i = 0; i < nTexts; i++) textIndices.push(i);
 
   return (
-    <View style={tailwind('border-b border-gray-200 px-4 py-5 sm:px-6')}>
-      <View style={[tailwind('h-5 rounded-md bg-gray-300'), { width: titleWidth }]} />
+    <View style={tailwind('border-b border-gray-200 px-4 py-5 blk:border-gray-700 sm:px-6')}>
+      <View style={[tailwind('h-5 rounded-md bg-gray-300 blk:bg-gray-700'), { width: titleWidth }]} />
       <View style={tailwind('mt-1')}>
         {textIndices.map(i => {
           const textWidth = sample(widths);
           return (
             <View key={i} style={tailwind('h-5 justify-center')}>
-              <View style={[tailwind('h-3 rounded bg-gray-200'), { width: textWidth }]} />
+              <View style={[tailwind('h-3 rounded bg-gray-200 blk:bg-gray-800'), { width: textWidth }]} />
             </View>
           );
         })}

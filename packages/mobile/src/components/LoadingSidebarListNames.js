@@ -13,8 +13,8 @@ const LoadingSidebarListName = () => {
 
   return (
     <View style={tailwind('mb-1 flex-row items-center px-2 py-2')}>
-      <View style={tailwind('mr-3 h-5 w-5 rounded bg-gray-300')} />
-      <View style={[tailwind('h-4 rounded bg-gray-300'), { width: textWidth }]} />
+      <View style={tailwind('mr-3 h-5 w-5 rounded bg-gray-300 blk:bg-gray-700')} />
+      <View style={[tailwind('h-4 rounded bg-gray-300 blk:bg-gray-700'), { width: textWidth }]} />
     </View>
   );
 };
