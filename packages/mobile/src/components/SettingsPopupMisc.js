@@ -27,6 +27,7 @@ const SettingsPopupMisc = (props) => {
   const themeMode = useSelector(state => state.localSettings.themeMode);
   const customOptions = useSelector(state => state.localSettings.themeCustomOptions);
   const is24HFormat = useSelector(state => state.window.is24HFormat);
+  const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
   const whtTimeBtn = useRef(null);
   const blkTimeBtn = useRef(null);
   const dispatch = useDispatch();
@@ -163,7 +164,7 @@ const SettingsPopupMisc = (props) => {
         </TouchableOpacity>
         <Text style={tailwind('pb-2 text-xl font-medium leading-6 text-gray-800 blk:text-gray-100')}>Misc.</Text>
       </View>
-      <View style={tailwind('mt-6 md:mt-0')}>
+      {isUserSignedIn && <View style={tailwind('mt-6 md:mt-0')}>
         <Text style={tailwind('text-base font-medium leading-5 text-gray-800 blk:text-gray-100')}>Appearance</Text>
         {systemText}
         <View style={tailwind('mt-2.5 w-full items-center justify-start')}>
@@ -230,8 +231,8 @@ const SettingsPopupMisc = (props) => {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
-      <View style={tailwind('mt-10')}>
+      </View>}
+      <View style={tailwind(`${isUserSignedIn ? 'mt-10' : 'mt-6 md:mt-0'}`)}>
         <Text style={tailwind('text-base font-medium leading-6 text-gray-800 blk:text-gray-100')}>List Order On</Text>
         <View style={tailwind('sm:flex-row sm:items-start sm:justify-between')}>
           <View style={tailwind('mt-2.5 sm:flex-shrink sm:flex-grow')}>

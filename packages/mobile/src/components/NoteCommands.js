@@ -97,12 +97,16 @@ const NoteCommands = (props) => {
   const isDeleteBtnShown = [TRASH].includes(rListName);
   const isMoveToBtnShown = [ARCHIVE].includes(rListName) || (rListName === MY_NOTES && getAllListNames(listNameMap).length > 3);
 
-  let btnClassNames, textClassNames;
-  if (isOnDarkBackground) textClassNames = 'border-white bg-white text-gray-600 lg:border-gray-300';
-  else textClassNames = 'border-white bg-white text-gray-500 blk:border-gray-900 blk:bg-gray-900 blk:text-gray-400 lg:border-gray-300 blk:lg:border-gray-600';
+  let btnClassNames;
+  if (isOnDarkBackground) btnClassNames = 'border-white bg-white lg:border-gray-300';
+  else btnClassNames = 'border-white bg-white blk:border-gray-900 blk:bg-gray-900 lg:border-gray-300 blk:lg:border-gray-600';
 
-  if (isLeftAlign) btnClassNames = 'lg:mr-3';
-  else btnClassNames = 'lg:ml-3';
+  if (isLeftAlign) btnClassNames += ' lg:mr-3';
+  else btnClassNames += ' lg:ml-3';
+
+  let textClassNames;
+  if (isOnDarkBackground) textClassNames = 'text-gray-600';
+  else textClassNames = 'text-gray-500 blk:text-gray-400';
 
   return (
     <React.Fragment>
