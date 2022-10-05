@@ -31,7 +31,7 @@ const Sidebar = () => {
   return (
     <View style={tailwind('h-full w-full min-w-56 bg-gray-100 pt-5 pb-4 blk:bg-gray-800')}>
       <View style={tailwind('flex-shrink-0 justify-center px-6')}>
-        <SvgXml width={135} height={40} xml={themeMode === BLK_MODE ? logoFullBlk : logoFull} />
+        <SvgXml width={108} height={32} xml={themeMode === BLK_MODE ? logoFullBlk : logoFull} />
       </View>
       <View style={tailwind('flex-1')}>
         {/* Sidebar Search */}
