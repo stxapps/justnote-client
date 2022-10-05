@@ -50,7 +50,7 @@ const NoteListTopBar = (props) => {
       <React.Fragment>
         {menuBtnSvg}
         <div className={tailwind('absolute top-0 left-0 flex h-full items-center justify-start lds-rotate')}>
-          <svg className={tailwind('h-10 w-10 text-green-600')} viewBox="0 0 100 100" fill="none" stroke="currentColor" preserveAspectRatio="xMidYMid" xmlns="http://www.w3.org/2000/svg">
+          <svg className={tailwind('h-10 w-10 text-green-600 blk:text-green-500')} viewBox="0 0 100 100" fill="none" stroke="currentColor" preserveAspectRatio="xMidYMid" xmlns="http://www.w3.org/2000/svg">
             <circle cx="50" cy="50" strokeWidth="4" r="44" strokeDasharray="226.1946710584651 77.39822368615503" />
           </svg>
         </div>
