@@ -92,6 +92,7 @@ const SettingsPopupMisc = (props) => {
   const switchThumbColorOff = 'rgb(243, 244, 246)';
   const switchTrackColorOn = Platform.OS === 'android' ? 'rgb(187, 247, 208)' : 'rgb(34, 197, 94)';
   const switchTrackColorOff = 'rgb(156, 163, 175)';
+  const switchIosTrackColorOff = themeMode === BLK_MODE ? 'rgb(55, 65, 81)' : 'rgb(243, 244, 246)';
 
   const addedDTBtnClassNames = sortOn === ADDED_DT ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
   const addedDTBtnInnerClassNames = sortOn === ADDED_DT ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
@@ -302,7 +303,7 @@ const SettingsPopupMisc = (props) => {
           <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Show note's added date or updated date when you browse your notes. It will appear on the top right of each note.</Text>
         </View>
         <View style={tailwind('ml-4 h-6 w-11 flex-shrink-0 flex-grow-0')}>
-          <Switch onValueChange={onDoShowDateBtnClick} value={doShowDate} thumbColor={Platform.OS === 'android' ? doShowDate ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} />
+          <Switch onValueChange={onDoShowDateBtnClick} value={doShowDate} thumbColor={Platform.OS === 'android' ? doShowDate ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} ios_backgroundColor={switchIosTrackColorOff} />
         </View>
       </View>
       <View style={tailwind('mt-10 mb-4 flex-row items-center justify-between')}>
@@ -311,7 +312,7 @@ const SettingsPopupMisc = (props) => {
           <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Allow old removed notes in Trash to be automatically deleted after 45 days.</Text>
         </View>
         <View style={tailwind('ml-4 h-6 w-11 flex-shrink-0 flex-grow-0')}>
-          <Switch onValueChange={onDoDeleteBtnClick} value={doDeleteOldNotesInTrash} thumbColor={Platform.OS === 'android' ? doDeleteOldNotesInTrash ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} />
+          <Switch onValueChange={onDoDeleteBtnClick} value={doDeleteOldNotesInTrash} thumbColor={Platform.OS === 'android' ? doDeleteOldNotesInTrash ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} ios_backgroundColor={switchIosTrackColorOff} />
         </View>
       </View>
     </View>
