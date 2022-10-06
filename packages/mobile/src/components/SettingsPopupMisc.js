@@ -11,6 +11,7 @@ import {
   NOTE_DATE_SHOWING_MODE_SHOW_DEFAULT, WHT_MODE, BLK_MODE, SYSTEM_MODE, CUSTOM_MODE,
   TIME_PICK_POPUP,
 } from '../types/const';
+import { getThemeMode } from '../selectors';
 import { getFormattedTime } from '../utils';
 
 import { useTailwind } from '.';
@@ -28,6 +29,7 @@ const SettingsPopupMisc = (props) => {
   const customOptions = useSelector(state => state.localSettings.themeCustomOptions);
   const is24HFormat = useSelector(state => state.window.is24HFormat);
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
+  const derivedThemeMode = useSelector(state => getThemeMode(state));
   const whtTimeBtn = useRef(null);
   const blkTimeBtn = useRef(null);
   const dispatch = useDispatch();
@@ -92,7 +94,7 @@ const SettingsPopupMisc = (props) => {
   const switchThumbColorOff = 'rgb(243, 244, 246)';
   const switchTrackColorOn = Platform.OS === 'android' ? 'rgb(187, 247, 208)' : 'rgb(34, 197, 94)';
   const switchTrackColorOff = 'rgb(156, 163, 175)';
-  const switchIosTrackColorOff = themeMode === BLK_MODE ? 'rgb(55, 65, 81)' : 'rgb(243, 244, 246)';
+  const switchIosTrackColorOff = derivedThemeMode === BLK_MODE ? 'rgb(55, 65, 81)' : 'rgb(243, 244, 246)';
 
   const addedDTBtnClassNames = sortOn === ADDED_DT ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
   const addedDTBtnInnerClassNames = sortOn === ADDED_DT ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
