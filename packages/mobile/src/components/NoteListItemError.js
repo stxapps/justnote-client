@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
 import { updateNoteId } from '../actions';
@@ -11,11 +11,12 @@ import { useTailwind } from '.';
 const NoteListItemError = (props) => {
 
   const { note } = props;
+  const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
   const onContentBtnClick = () => {
-    dispatch(updateNoteId(note.id, false, true));
+    if (!isBulkEditing) dispatch(updateNoteId(note.id, false, true));
   };
 
   let title, body;

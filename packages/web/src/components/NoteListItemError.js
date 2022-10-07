@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
 import { updateNoteIdUrlHash, updateNoteId } from '../actions';
 import { LG_WIDTH } from '../types/const';
@@ -10,13 +10,16 @@ import { useSafeAreaFrame, useTailwind } from '.';
 const NoteListItemError = (props) => {
 
   const { note } = props;
+  const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
   const onContentBtnClick = () => {
-    if (safeAreaWidth < LG_WIDTH) dispatch(updateNoteIdUrlHash(note.id, false, true));
-    else dispatch(updateNoteId(note.id, false, true));
+    if (!isBulkEditing) {
+      if (safeAreaWidth < LG_WIDTH) dispatch(updateNoteIdUrlHash(note.id, false, true));
+      else dispatch(updateNoteId(note.id, false, true));
+    }
   };
 
   let title, body;
