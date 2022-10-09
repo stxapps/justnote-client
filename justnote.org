@@ -351,7 +351,9 @@
   + List list names, change list name
   + New list name, edit list name, move list name, delete list name
   + Popups: ConfirmDelete, ConfirmDiscard, AlertRotate, MoveTo, ListMenu, Profile
-  + Settings
+  + Settings: account, subscription, data, lists, misc, about
+  + Pin, unpin, move pin
+  + WHT_MODE, BLK_MODE
 * servers
 ** test server
 - https://d2kp6vvq64w651.cloudfront.net
