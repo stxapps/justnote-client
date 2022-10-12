@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
-    <device id="retina4_7" orientation="portrait" appearance="light"/>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+    <device id="retina6_72" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -14,23 +14,23 @@
             <objects>
                 <viewController id="01J-lp-oVM" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="430" height="932"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="LaunchImage" translatesAutoresizingMaskIntoConstraints="NO" id="rfb-tj-quj">
-                                <rect key="frame" x="139.5" y="174.5" width="96" height="96"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="LaunchImage" translatesAutoresizingMaskIntoConstraints="NO" id="PLn-Gu-85u">
+                                <rect key="frame" x="162" y="251.33333333333334" width="106" height="105.66666666666666"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" relation="lessThanOrEqual" constant="128" id="Kpl-av-LaO"/>
-                                    <constraint firstAttribute="width" secondItem="rfb-tj-quj" secondAttribute="height" multiplier="1:1" id="XON-3v-WA4"/>
+                                    <constraint firstAttribute="width" secondItem="PLn-Gu-85u" secondAttribute="height" multiplier="1:1" id="FcI-6X-0c5"/>
+                                    <constraint firstAttribute="width" relation="lessThanOrEqual" constant="128" id="KpQ-Jc-ywN"/>
                                 </constraints>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="rfb-tj-quj" firstAttribute="width" secondItem="Bcu-3y-fUS" secondAttribute="width" multiplier="0.246" priority="750" id="WEk-0N-68f"/>
-                            <constraint firstItem="rfb-tj-quj" firstAttribute="top" secondItem="Bcu-3y-fUS" secondAttribute="bottom" multiplier="0.333333" constant="-48" id="duP-ko-R7V"/>
-                            <constraint firstItem="rfb-tj-quj" firstAttribute="centerX" secondItem="Bcu-3y-fUS" secondAttribute="centerX" id="jzl-By-bRn"/>
+                            <constraint firstItem="PLn-Gu-85u" firstAttribute="width" secondItem="Bcu-3y-fUS" secondAttribute="width" multiplier="0.246" priority="750" id="6bq-dI-PSt"/>
+                            <constraint firstItem="PLn-Gu-85u" firstAttribute="centerX" secondItem="Bcu-3y-fUS" secondAttribute="centerX" id="gTD-ue-xDm"/>
+                            <constraint firstItem="PLn-Gu-85u" firstAttribute="top" secondItem="Bcu-3y-fUS" secondAttribute="bottom" multiplier="0.333333" constant="-48" id="rhs-Xs-SjR"/>
                         </constraints>
                     </view>
                 </viewController>
