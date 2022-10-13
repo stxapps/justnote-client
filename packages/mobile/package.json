@@ -21,7 +21,7 @@
     "react": "18.1.0",
     "react-native": "0.70.2",
     "react-native-animated-spinkit": "^1.5.2",
-    "react-native-blockstack": "https://gitpkg.now.sh/bracedotto/blockstack-react-native/BlockstackSDK?a2aacea2fe4e384b6dbb51de05e343fe0f4602d6",
+    "react-native-blockstack": "https://gitpkg.now.sh/stxapps/blockstack-react-native/BlockstackSDK?75854753bb20b72c0da94e16bb4b5e56a385578f",
     "react-native-device-time-format": "https://github.com/stxapps/react-native-device-time-format#63f4a9158a91c391d67317a489ccfe8ec28a7c84",
     "react-native-fast-image": "^8.6.1",
     "react-native-file-access": "^2.5.0",

@@ -265,10 +265,6 @@ android {
         pickFirst 'lib/x86_64/libc++_shared.so'
         pickFirst 'lib/armeabi-v7a/libc++_shared.so'
     }
-
-    dexOptions {
-        javaMaxHeapSize "3g"
-    }
 }
 
 dependencies {
