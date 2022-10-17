@@ -1,6 +1,6 @@
 import userSession from '../userSession';
 import { N_NOTES, MAX_TRY } from '../types/const';
-import { isObject, addFPath, deleteFPath, copyFPaths } from '../utils';
+import { isObject, isString, addFPath, deleteFPath, copyFPaths } from '../utils';
 import { cachedServerFPaths } from '../vars';
 
 const _listFPaths = async () => {
@@ -103,7 +103,7 @@ export const batchDeleteFileWithRetry = async (fpaths, callCount) => {
           //   i.e. user tries to delete a not-existing file, it's ok.
           // Anyway, if the file should be there, this will hide the real error!
           if (
-            error.message &&
+            isString(error.message) &&
             (
               (
                 error.message.includes('failed to delete') &&
@@ -112,7 +112,9 @@ export const batchDeleteFileWithRetry = async (fpaths, callCount) => {
               (
                 error.message.includes('deleteFile Error') &&
                 error.message.includes('GaiaError error 5')
-              )
+              ) ||
+              error.message.includes('does_not_exist') ||
+              error.message.includes('file_not_found')
             )
           ) {
             return { fpath, success: true };

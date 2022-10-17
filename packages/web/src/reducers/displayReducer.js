@@ -2,9 +2,9 @@ import {
   UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP,
   UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, ADD_SELECTED_NOTE_IDS,
   DELETE_SELECTED_NOTE_IDS, UPDATE_SELECTING_NOTE_ID, UPDATE_SELECTING_LIST_NAME,
-  UPDATE_DELETING_LIST_NAME, FETCH_COMMIT, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT,
-  CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH_COMMIT, DELETE_LIST_NAMES,
-  UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY, INCREASE_SAVE_NOTE_COUNT,
+  UPDATE_DELETING_LIST_NAME, FETCH_COMMIT, FETCH_ROLLBACK, ADD_NOTE, UPDATE_NOTE,
+  MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
+  DELETE_LIST_NAMES, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY, INCREASE_SAVE_NOTE_COUNT,
   INCREASE_RESET_DID_CLICK_COUNT, UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION,
   UPDATE_DISCARD_ACTION, UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT,
   UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS, UPDATE_SETTINGS_VIEW_ID,
@@ -17,11 +17,11 @@ import {
   NOTE_LIST_ITEM_MENU_POPUP, LIST_NAMES_POPUP, PIN_MENU_POPUP, PAYWALL_POPUP,
   SIDEBAR_POPUP, SEARCH_POPUP, SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP,
   TIME_PICK_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, CONFIRM_AS_DUMMY_POPUP,
-  CONFIRM_EXIT_DUMMY_POPUP, NEW_NOTE, MY_NOTES, TRASH, ARCHIVE,
+  CONFIRM_EXIT_DUMMY_POPUP, ACCESS_ERROR_POPUP, NEW_NOTE, MY_NOTES, TRASH, ARCHIVE,
   UPDATING, DIED_UPDATING, MAX_SELECTED_NOTE_IDS, SETTINGS_VIEW_ACCOUNT,
   DELETE_ACTION_LIST_NAME,
 } from '../types/const';
-import { doContainListName } from '../utils';
+import { doContainListName, isObject, isString } from '../utils';
 
 const initialState = {
   isHandlingSignIn: false,
@@ -51,6 +51,7 @@ const initialState = {
   isConfirmDiscardPopupShown: false,
   isConfirmAsDummyPopupShown: false,
   isConfirmExitDummyPopupShown: false,
+  isAccessErrorPopupShown: false,
   searchString: '',
   isBulkEditing: false,
   selectedNoteIds: [],
@@ -216,6 +217,11 @@ const displayReducer = (state = initialState, action) => {
       return { ...state, isConfirmExitDummyPopupShown: isShown };
     }
 
+    if (id === ACCESS_ERROR_POPUP) {
+      const newState = { ...state, isAccessErrorPopupShown: isShown };
+      return newState;
+    }
+
     throw new Error(`Invalid type: ${action.type} and payload: ${action.payload}`);
   }
 
@@ -277,6 +283,7 @@ const displayReducer = (state = initialState, action) => {
     const newState = {
       ...state,
       noteId: state.noteId === NEW_NOTE ? NEW_NOTE : null,
+      isAccessErrorPopupShown: false,
       isEditorFocused: state.noteId === NEW_NOTE ? true : false,
       isEditorBusy: false,
       selectedNoteIds: [],
@@ -303,6 +310,28 @@ const displayReducer = (state = initialState, action) => {
       }
     }
 
+    return newState;
+  }
+
+  if (action.type === FETCH_ROLLBACK) {
+    const newState = { ...state };
+    if (
+      (
+        isObject(action.payload) &&
+        isString(action.payload.message) &&
+        (
+          action.payload.message.includes('401') ||
+          action.payload.message.includes('GaiaError error 7')
+        )
+      ) ||
+      (
+        isObject(action.payload) &&
+        isObject(action.payload.hubError) &&
+        action.payload.hubError.statusCode === 401
+      )
+    ) {
+      newState.isAccessErrorPopupShown = true;
+    }
     return newState;
   }
 
@@ -420,11 +449,29 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === SYNC_COMMIT) {
     if (action.payload.haveNewSync) return state;
-    return { ...state, syncProgress: null };
+    return { ...state, isAccessErrorPopupShown: false, syncProgress: null };
   }
 
   if (action.type === SYNC_ROLLBACK) {
-    return { ...state, syncProgress: { status: SYNC_ROLLBACK } };
+    const newState = { ...state, syncProgress: { status: SYNC_ROLLBACK } };
+    if (
+      (
+        isObject(action.payload) &&
+        isString(action.payload.message) &&
+        (
+          action.payload.message.includes('401') ||
+          action.payload.message.includes('GaiaError error 7')
+        )
+      ) ||
+      (
+        isObject(action.payload) &&
+        isObject(action.payload.hubError) &&
+        action.payload.hubError.statusCode === 401
+      )
+    ) {
+      newState.isAccessErrorPopupShown = true;
+    }
+    return newState;
   }
 
   if (action.type === UPDATE_SYNC_PROGRESS) {

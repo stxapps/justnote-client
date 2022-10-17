@@ -996,7 +996,7 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
   try {
     await dataApi.putNotes({ listName, notes: toNotes });
   } catch (e) {
-    dispatch({ type: DELETE_OLD_NOTES_IN_TRASH_ROLLBACK, payload });
+    dispatch({ type: DELETE_OLD_NOTES_IN_TRASH_ROLLBACK });
     vars.deleteOldNotes.ids = null;
     return;
   }
@@ -1556,7 +1556,7 @@ export const sync = (
   } catch (e) {
     console.log('Sync error: ', e);
     [_isSyncing, _newSyncObj] = [false, null];
-    dispatch({ type: SYNC_ROLLBACK });
+    dispatch({ type: SYNC_ROLLBACK, payload: e });
   }
 };
 

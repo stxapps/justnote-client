@@ -277,6 +277,7 @@
   + Update babel.config.js to work with .svg
 - yarn add @welldone-software/why-did-you-render --dev
 - yarn add typescript@4.0.8 --dev
+- yarn add @types/react-native --dev
 - yarn add react-native-iap@8.2.1 @wewatch/lexorank axios@0.27.2
 - yarn add https://github.com/stxapps/react-native-device-time-format#63f4a9158a91c391d67317a489ccfe8ec28a7c84
 - Font

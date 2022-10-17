@@ -21,6 +21,7 @@ import ConfirmDeletePopup from './ConfirmDeletePopup';
 import ConfirmDiscardPopup from './ConfirmDiscardPopup';
 import ConfirmExitDummyPopup from './ConfirmExitDummyPopup';
 import PaywallPopup from './PaywallPopup';
+import AccessErrorPopup from './AccessErrorPopup';
 
 const Main = () => {
 
@@ -47,6 +48,7 @@ const Main = () => {
       <SignUpPopup />
       <SignInPopup />
       <PaywallPopup />
+      <AccessErrorPopup />
     </React.Fragment>
   );
 };
