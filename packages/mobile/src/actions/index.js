@@ -105,13 +105,15 @@ export const init = () => async (dispatch, getState) => {
       if (isUserSignedIn) {
         const { purchaseStatus } = getState().iap;
         if (purchaseStatus === REQUEST_PURCHASE) return;
-
-        const interval = (Date.now() - _lastSyncDT) / 1000 / 60 / 60;
-        dispatch(sync(interval > 1, 0));
       }
 
       const is24HFormat = await is24HourFormat();
       dispatch(updateIs24HFormat(is24HFormat));
+
+      if (isUserSignedIn) {
+        const interval = (Date.now() - _lastSyncDT) / 1000 / 60 / 60;
+        dispatch(sync(interval > 1, 0));
+      }
     }
   });
 
