@@ -1,5 +1,5 @@
 import {
-  INIT, UPDATE_HREF, UPDATE_WINDOW_SIZE, UPDATE_SYSTEM_THEME_MODE,
+  INIT, UPDATE_HREF, UPDATE_WINDOW_SIZE, UPDATE_SYSTEM_THEME_MODE, UPDATE_IS_24H_FORMAT,
 } from '../types/actionTypes';
 import { WHT_MODE } from '../types/const';
 import { isNumber } from '../utils';
@@ -39,6 +39,10 @@ const windowReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_SYSTEM_THEME_MODE) {
     return { ...state, themeMode: action.payload };
+  }
+
+  if (action.type === UPDATE_IS_24H_FORMAT) {
+    return { ...state, is24HFormat: action.payload };
   }
 
   return state;

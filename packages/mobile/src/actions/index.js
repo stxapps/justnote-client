@@ -46,7 +46,7 @@ import {
   PIN_NOTE, PIN_NOTE_COMMIT, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_COMMIT,
   UNPIN_NOTE_ROLLBACK, MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_COMMIT,
   MOVE_PINNED_NOTE_ROLLBACK, CANCEL_DIED_PINS, UPDATE_SYSTEM_THEME_MODE,
-  UPDATE_THEME, UPDATE_UPDATING_THEME_MODE, UPDATE_TIME_PICK,
+  UPDATE_THEME, UPDATE_UPDATING_THEME_MODE, UPDATE_TIME_PICK, UPDATE_IS_24H_FORMAT,
   UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
   UPDATE_DELETE_ALL_DATA_PROGRESS, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -109,6 +109,9 @@ export const init = () => async (dispatch, getState) => {
         const interval = (Date.now() - _lastSyncDT) / 1000 / 60 / 60;
         dispatch(sync(interval > 1, 0));
       }
+
+      const is24HFormat = await is24HourFormat();
+      dispatch(updateIs24HFormat(is24HFormat));
     }
   });
 
@@ -2567,4 +2570,8 @@ export const updateThemeCustomOptions = () => async (dispatch, getState) => {
   _customOptions.push({ ...updatingOption, startTime: newStartTime });
 
   dispatch(updateTheme(_themeMode, _customOptions));
+};
+
+export const updateIs24HFormat = (is24HFormat) => {
+  return { type: UPDATE_IS_24H_FORMAT, payload: is24HFormat };
 };
