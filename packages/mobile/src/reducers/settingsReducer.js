@@ -2,11 +2,11 @@ import { loop, Cmd } from 'redux-loop';
 
 import { tryUpdateSettings, checkPurchases, sync } from '../actions';
 import {
-  FETCH_COMMIT, ADD_LIST_NAMES, UPDATE_LIST_NAMES, MOVE_LIST_NAME, MOVE_TO_LIST_NAME,
-  DELETE_LIST_NAMES, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, UPDATE_SORT_ON,
-  UPDATE_DO_DESCENDING_ORDER, UPDATE_NOTE_DATE_SHOWING_MODE, UPDATE_SETTINGS_COMMIT,
-  CANCEL_DIED_SETTINGS, REQUEST_PURCHASE_COMMIT, RESTORE_PURCHASES_COMMIT,
-  REFRESH_PURCHASES_COMMIT, DELETE_ALL_DATA, RESET_STATE,
+  INIT, FETCH_COMMIT, ADD_LIST_NAMES, UPDATE_LIST_NAMES, MOVE_LIST_NAME,
+  MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH,
+  UPDATE_SORT_ON, UPDATE_DO_DESCENDING_ORDER, UPDATE_NOTE_DATE_SHOWING_MODE,
+  UPDATE_SETTINGS_COMMIT, CANCEL_DIED_SETTINGS, REQUEST_PURCHASE_COMMIT,
+  RESTORE_PURCHASES_COMMIT, REFRESH_PURCHASES_COMMIT, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import { MY_NOTES, TRASH, ARCHIVE, SWAP_LEFT, SWAP_RIGHT, VALID } from '../types/const';
 import {
@@ -20,6 +20,11 @@ import {
 import { didChange } from '../vars';
 
 const settingsReducer = (state = initialState, action) => {
+
+  if (action.type === INIT) {
+    const { localSettings } = action.payload;
+    return { ...state, purchases: localSettings.purchases };
+  }
 
   if (action.type === FETCH_COMMIT) {
     const { listNames, doFetchSettings, settings } = action.payload;

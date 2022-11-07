@@ -26,6 +26,7 @@ export const initialLocalSettingsState = {
     { mode: WHT_MODE, startTime: '06:00' },
     { mode: BLK_MODE, startTime: '18:00' },
   ],
+  purchases: null, // duplicate from Settings for Loading to support Dark appearance.
 };
 
 export const initialListNameEditorState = {
