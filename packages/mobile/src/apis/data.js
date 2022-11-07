@@ -420,8 +420,8 @@ const getLocalSettings = async () => {
         if (k in _localSettings) localSettings[k] = _localSettings[k];
       }
     }
-  } catch (e) {
-    console.log('Get or parse localSettings error: ', e);
+  } catch (error) {
+    console.log('Get or parse localSettings error: ', error);
   }
 
   return localSettings;

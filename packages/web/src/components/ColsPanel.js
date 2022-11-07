@@ -15,7 +15,7 @@ const unFocus = (document, window) => {
   } else {
     try {
       window.getSelection().removeAllRanges();
-    } catch (e) { }
+    } catch (error) { }
   }
 };
 

@@ -291,6 +291,7 @@ export const batchDeleteFileWithRetry = async (fpaths, callCount) => {
           //   i.e. user tries to delete a not-existing file, it's ok.
           // Anyway, if the file should be there, this will hide the real error!
           if (
+            isObject(error) &&
             isString(error.message) &&
             (
               (
@@ -436,8 +437,8 @@ const getLocalSettings = async () => {
         if (k in _localSettings) localSettings[k] = _localSettings[k];
       }
     }
-  } catch (e) {
-    console.log('Get or parse localSettings error: ', e);
+  } catch (error) {
+    console.log('Get or parse localSettings error: ', error);
   }
 
   return localSettings;

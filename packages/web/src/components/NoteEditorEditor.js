@@ -165,14 +165,14 @@ const NoteEditorEditor = (props) => {
     body = await replaceWithFiles(body, media);
     try {
       bodyEditor.current.setData(body);
-    } catch (e) {
+    } catch (error) {
       // Got Uncaught TypeError: Cannot read properties of null (reading 'model')
       //   after dispatching UPDATE_NOTE_ROLLBACK
       //   guess because CKEditor.setData still working on updated version
       //   then suddenly got upmounted.
       // Also, in handleScreenRotation, calling updateNoteIdUrlHash(null)
       //   guess it's the same reason.
-      console.log('NoteEditorEditor.setInitData: ckeditor.setData error ', e);
+      console.log('NoteEditorEditor.setInitData: ckeditor.setData error ', error);
     }
 
     if (id === NEW_NOTE) focusTitleInput();
@@ -202,8 +202,8 @@ const NoteEditorEditor = (props) => {
         const cfpart = CD_ROOT + '/' + fpart;
         dispatch(addSavingFPaths([cfpart]));
         objectUrlFiles.current[objectUrl] = { fname: cfpart, content: '' };
-      } catch (e) {
-        console.log(`NoteEditorEditor: onAddObjectUrlFiles with fpart: ${fpart} error: `, e);
+      } catch (error) {
+        console.log(`NoteEditorEditor: onAddObjectUrlFiles with fpart: ${fpart} error: `, error);
         objectUrlFiles.current[objectUrl] = { fname, content };
       }
     } else {

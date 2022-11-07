@@ -175,8 +175,8 @@ const NoteEditorEditor = (props) => {
         const cfpart = CD_ROOT + '/' + fpart;
         dispatch(addSavingFPaths([cfpart]));
         objectUrlFiles.current[objectUrl] = { fname: cfpart, content: '' };
-      } catch (e) {
-        console.log(`NoteEditorEditor: onAddObjectUrlFiles with fpart: ${fpart} error: `, e);
+      } catch (error) {
+        console.log(`NoteEditorEditor: onAddObjectUrlFiles with fpart: ${fpart} error: `, error);
         objectUrlFiles.current[objectUrl] = { fname, content };
       }
     } else {
@@ -430,8 +430,8 @@ const NoteEditorEditor = (props) => {
         const doExist = await fileApi.exists(IMAGES);
         if (!doExist) await fileApi.mkdir(IMAGES);
         imagesDir.current = IMAGES;
-      } catch (e) {
-        console.log('Can\'t make images dir with error: ', e);
+      } catch (error) {
+        console.log('Can\'t make images dir with error: ', error);
       }
     };
 

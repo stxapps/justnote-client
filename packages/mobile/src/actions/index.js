@@ -166,7 +166,8 @@ const handlePendingSignIn = (url) => async (dispatch, getState) => {
   const { param: { authResponse } } = separateUrlAndParam(url, 'authResponse');
   try {
     await userSession.handlePendingSignIn(authResponse);
-  } catch (e) {
+  } catch (error) {
+    console.log('Catched an error thrown by handlePendingSignIn', error);
     // All errors thrown by handlePendingSignIn have the same next steps
     //   - Invalid token
     //   - Already signed in with the same account
@@ -448,8 +449,9 @@ export const fetch = (
     const fetched = await dataApi.fetch(params);
 
     dispatch({ type: FETCH_COMMIT, payload: { ...params, ...fetched } });
-  } catch (e) {
-    dispatch({ type: FETCH_ROLLBACK, payload: e });
+  } catch (error) {
+    console.log('fetch error: ', error);
+    dispatch({ type: FETCH_ROLLBACK, payload: error });
   }
 };
 
@@ -476,8 +478,9 @@ export const fetchMore = () => async (dispatch, getState) => {
   try {
     const fetched = await dataApi.fetchMore(payload);
     dispatch({ type: FETCH_MORE_COMMIT, payload: { ...payload, ...fetched } });
-  } catch (e) {
-    dispatch({ type: FETCH_MORE_ROLLBACK, payload: { ...payload, error: e } });
+  } catch (error) {
+    console.log('fetchMore error: ', error);
+    dispatch({ type: FETCH_MORE_ROLLBACK, payload: { ...payload, error } });
   }
 };
 
@@ -562,8 +565,9 @@ export const addNote = (title, body, media, listName = null) => async (
 
   try {
     await dataApi.putNotes({ listName, notes: [note] });
-  } catch (e) {
-    dispatch({ type: ADD_NOTE_ROLLBACK, payload: { ...payload, error: e } });
+  } catch (error) {
+    console.log('addNote error: ', error);
+    dispatch({ type: ADD_NOTE_ROLLBACK, payload: { ...payload, error } });
     return;
   }
 
@@ -571,8 +575,8 @@ export const addNote = (title, body, media, listName = null) => async (
 
   try {
     fileApi.deleteFiles(localUnusedFPaths);
-  } catch (e) {
-    console.log('addNote error: ', e);
+  } catch (error) {
+    console.log('addNote clean up error: ', error);
     // error in this step should be fine
   }
 };
@@ -600,8 +604,9 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
 
   try {
     await dataApi.putNotes({ listName, notes: [toNote] });
-  } catch (e) {
-    dispatch({ type: UPDATE_NOTE_ROLLBACK, payload: { ...payload, error: e } });
+  } catch (error) {
+    console.log('updateNote error: ', error);
+    dispatch({ type: UPDATE_NOTE_ROLLBACK, payload: { ...payload, error } });
     return;
   }
 
@@ -610,8 +615,8 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
   try {
     dataApi.putNotes({ listName, notes: [fromNote] });
     fileApi.deleteFiles(localUnusedFPaths);
-  } catch (e) {
-    console.log('updateNote error: ', e);
+  } catch (error) {
+    console.log('updateNote clean up error: ', error);
     // error in this step should be fine
   }
 };
@@ -680,8 +685,9 @@ const _moveNotes = (toListName, ids, fromListName = null) => async (
 
   try {
     await dataApi.putNotes({ listName: toListName, notes: toNotes });
-  } catch (e) {
-    dispatch({ type: MOVE_NOTES_ROLLBACK, payload: { ...payload, error: e } });
+  } catch (error) {
+    console.log('moveNotes error: ', error);
+    dispatch({ type: MOVE_NOTES_ROLLBACK, payload: { ...payload, error } });
     return;
   }
 
@@ -689,8 +695,8 @@ const _moveNotes = (toListName, ids, fromListName = null) => async (
 
   try {
     dataApi.putNotes({ listName: fromListName, notes: fromNotes });
-  } catch (e) {
-    console.log('moveNotes error: ', e);
+  } catch (error) {
+    console.log('moveNotes clean up error: ', error);
     // error in this step should be fine
   }
 };
@@ -767,8 +773,9 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
 
   try {
     await dataApi.putNotes({ listName, notes: toNotes });
-  } catch (e) {
-    dispatch({ type: DELETE_NOTES_ROLLBACK, payload: { ...payload, error: e } });
+  } catch (error) {
+    console.log('deleteNotes error: ', error);
+    dispatch({ type: DELETE_NOTES_ROLLBACK, payload: { ...payload, error } });
     return;
   }
 
@@ -777,8 +784,8 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
   try {
     dataApi.putNotes({ listName, notes: fromNotes });
     fileApi.deleteFiles(unusedFPaths);
-  } catch (e) {
-    console.log('deleteNotes error: ', e);
+  } catch (error) {
+    console.log('deleteNotes clean up error: ', error);
     // error in this step should be fine
   }
 };
@@ -835,8 +842,9 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       try {
         await dataApi.putNotes({ listName, notes: [note] });
-      } catch (e) {
-        dispatch({ type: ADD_NOTE_ROLLBACK, payload: { ...payload, error: e } });
+      } catch (error) {
+        console.log('retryDiedNotes add error: ', error);
+        dispatch({ type: ADD_NOTE_ROLLBACK, payload: { ...payload, error } });
         return;
       }
 
@@ -854,8 +862,9 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       try {
         await dataApi.putNotes({ listName, notes: [toNote] });
-      } catch (e) {
-        dispatch({ type: UPDATE_NOTE_ROLLBACK, payload: { ...payload, error: e } });
+      } catch (error) {
+        console.log('retryDiedNotes update error: ', error);
+        dispatch({ type: UPDATE_NOTE_ROLLBACK, payload: { ...payload, error } });
         return;
       }
 
@@ -864,8 +873,8 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       try {
         dataApi.putNotes({ listName, notes: [fromNote] });
         fileApi.deleteFiles(localUnusedFPaths);
-      } catch (e) {
-        console.log('updateNote error: ', e);
+      } catch (error) {
+        console.log('retryDiedNotes update clean up error: ', error);
         // error in this step should be fine
       }
     } else if (status === DIED_MOVING) {
@@ -879,8 +888,9 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       try {
         await dataApi.putNotes({ listName: toListName, notes: [toNote] });
-      } catch (e) {
-        dispatch({ type: MOVE_NOTES_ROLLBACK, payload: { ...payload, error: e } });
+      } catch (error) {
+        console.log('retryDiedNotes move error: ', error);
+        dispatch({ type: MOVE_NOTES_ROLLBACK, payload: { ...payload, error } });
         return;
       }
 
@@ -888,8 +898,8 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       try {
         dataApi.putNotes({ listName: fromListName, notes: [fromNote] });
-      } catch (e) {
-        console.log('moveNotes error: ', e);
+      } catch (error) {
+        console.log('retryDiedNotes move clean up error: ', error);
         // error in this step should be fine
       }
     } else if (status === DIED_DELETING) {
@@ -916,8 +926,9 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       try {
         await dataApi.putNotes({ listName, notes: [toNote] });
-      } catch (e) {
-        dispatch({ type: DELETE_NOTES_ROLLBACK, payload: { ...payload, error: e } });
+      } catch (error) {
+        console.log('retryDiedNotes delete error: ', error);
+        dispatch({ type: DELETE_NOTES_ROLLBACK, payload: { ...payload, error } });
         return;
       }
 
@@ -926,8 +937,8 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       try {
         dataApi.putNotes({ listName, notes: [fromNote] });
         fileApi.deleteFiles(unusedFPaths);
-      } catch (e) {
-        console.log('deleteNotes error: ', e);
+      } catch (error) {
+        console.log('retryDiedNotes delete clean up error: ', error);
         // error in this step should be fine
       }
     } else {
@@ -1000,7 +1011,8 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
 
   try {
     await dataApi.putNotes({ listName, notes: toNotes });
-  } catch (e) {
+  } catch (error) {
+    console.log('deleteOldNotesInTrash error: ', error);
     dispatch({ type: DELETE_OLD_NOTES_IN_TRASH_ROLLBACK });
     vars.deleteOldNotes.ids = null;
     return;
@@ -1012,8 +1024,8 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
   try {
     dataApi.putNotes({ listName, notes: fromNotes });
     fileApi.deleteFiles(unusedFPaths);
-  } catch (e) {
-    console.log('deleteOldNotesInTrash error: ', e);
+  } catch (error) {
+    console.log('deleteOldNotesInTrash clean up error: ', error);
     // error in this step should be fine
   }
 };
@@ -1054,8 +1066,9 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
 
   try {
     await dataApi.putNotes({ listName: toListName, notes: [toNote] });
-  } catch (e) {
-    dispatch({ type: MERGE_NOTES_ROLLBACK, payload: { ...payload, error: e } });
+  } catch (error) {
+    console.log('mergeNote error: ', error);
+    dispatch({ type: MERGE_NOTES_ROLLBACK, payload: { ...payload, error } });
     return;
   }
 
@@ -1070,8 +1083,8 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
       dataApi.putNotes({ listName: _listName, notes: _notes });
     }
     fileApi.deleteFiles(localUnusedFPaths);
-  } catch (e) {
-    console.log('mergeNote error: ', e);
+  } catch (error) {
+    console.log('mergeNote clean up error: ', error);
     // error in this step should be fine
   }
 };
@@ -1230,8 +1243,9 @@ export const updateSettings = () => async (dispatch, getState) => {
 
   try {
     await dataApi.putFiles([settingsFPath], [settings]);
-  } catch (e) {
-    dispatch({ type: UPDATE_SETTINGS_ROLLBACK, payload: { ...payload, error: e } });
+  } catch (error) {
+    console.log('updateSettings error: ', error);
+    dispatch({ type: UPDATE_SETTINGS_ROLLBACK, payload: { ...payload, error } });
     vars.updateSettings.doFetch = false;
     return;
   }
@@ -1241,8 +1255,8 @@ export const updateSettings = () => async (dispatch, getState) => {
 
   try {
     if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
-  } catch (e) {
-    console.log('updateSettings error: ', e);
+  } catch (error) {
+    console.log('updateSettings clean up error: ', error);
     // error in this step should be fine
   }
 };
@@ -1558,10 +1572,10 @@ export const sync = (
     }
 
     [_isSyncing, _newSyncObj, _lastSyncDT] = [false, null, Date.now()];
-  } catch (e) {
-    console.log('Sync error: ', e);
+  } catch (error) {
+    console.log('Sync error: ', error);
     [_isSyncing, _newSyncObj] = [false, null];
-    dispatch({ type: SYNC_ROLLBACK, payload: e });
+    dispatch({ type: SYNC_ROLLBACK, payload: error });
   }
 };
 
@@ -1716,8 +1730,8 @@ export const clearSavingFPaths = () => async (dispatch, getState) => {
   const savingFPaths = getState().editor.savingFPaths;
   try {
     await fileApi.deleteFiles(savingFPaths);
-  } catch (e) {
-    console.log('clearSavingFiles error: ', e);
+  } catch (error) {
+    console.log('clearSavingFiles error: ', error);
     // error in this step should be fine
   }
   dispatch({ type: CLEAR_SAVING_FPATHS });
@@ -1823,8 +1837,8 @@ const deleteAllNotes = async (dispatch, noteIds, total, doneCount) => {
     for (const [_listName, _notes] of Object.entries(fromNotes)) {
       await dataApi.putNotes({ listName: _listName, notes: _notes });
     }
-  } catch (e) {
-    console.log('deleteAllNotes error: ', e);
+  } catch (error) {
+    console.log('deleteAllNotes error: ', error);
     // error in this step should be fine
   }
 
@@ -1858,8 +1872,8 @@ export const deleteAllPins = async (dispatch, pins, total, doneCount) => {
 
     try {
       dataApi.deletePins({ pins: fromPins });
-    } catch (e) {
-      console.log('deleteAllPins error: ', e);
+    } catch (error) {
+      console.log('deleteAllPins error: ', error);
       // error in this step should be fine
     }
 
@@ -1886,11 +1900,11 @@ export const deleteAllData = () => async (dispatch, getState) => {
 
     pins = getPins(fpaths.pinFPaths, {}, false, noteIds.toRootIds);
     pins = Object.values(pins);
-  } catch (e) {
+  } catch (error) {
     dispatch(updateDeleteAllDataProgress({
       total: -1,
       done: -1,
-      error: e.name + ': ' + e.message,
+      error: `${error}`,
     }));
     return;
   }
@@ -1918,8 +1932,8 @@ export const deleteAllData = () => async (dispatch, getState) => {
       await dataApi.putFiles([newSettingsFPath], [{ ...initialSettingsState }]);
       try {
         await dataApi.deleteFiles([settingsFPath]);
-      } catch (e) {
-        console.log('deleteAllData error: ', e);
+      } catch (error) {
+        console.log('deleteAllData error: ', error);
         // error in this step should be fine
       }
 
@@ -1935,11 +1949,11 @@ export const deleteAllData = () => async (dispatch, getState) => {
     await fileApi.deleteFiles(staticFPaths);
 
     dispatch({ type: DELETE_ALL_DATA });
-  } catch (e) {
+  } catch (error) {
     dispatch(updateDeleteAllDataProgress({
       total: -1,
       done: -1,
-      error: e.name + ': ' + e.message,
+      error: `${error}`,
     }));
     return;
   }
@@ -2153,8 +2167,8 @@ export const endIapConnection = (isInit = false) => async (dispatch, getState) =
   registerIapListeners(false, dispatch, getState);
   try {
     await RNIap.endConnection();
-  } catch (e) {
-    console.log('Error when end IAP connection: ', e);
+  } catch (error) {
+    console.log('Error when end IAP connection: ', error);
   }
 
   if (!isInit) {
@@ -2185,7 +2199,8 @@ export const initIapConnectionAndGetProducts = (doForce) => async (
       type: GET_PRODUCTS_COMMIT,
       payload: { canMakePayments, products },
     });
-  } catch (e) {
+  } catch (error) {
+    console.log('Error when init iap and get products: ', error);
     dispatch({ type: GET_PRODUCTS_ROLLBACK });
   }
 };
@@ -2339,8 +2354,9 @@ export const pinNotes = (ids) => async (dispatch, getState) => {
 
   try {
     await dataApi.putPins(payload);
-  } catch (e) {
-    dispatch({ type: PIN_NOTE_ROLLBACK, payload: { ...payload, error: e } });
+  } catch (error) {
+    console.log('pinNotes error: ', error);
+    dispatch({ type: PIN_NOTE_ROLLBACK, payload: { ...payload, error } });
     return;
   }
 
@@ -2348,8 +2364,8 @@ export const pinNotes = (ids) => async (dispatch, getState) => {
 
   try {
     dataApi.deletePins({ pins: fromPins });
-  } catch (e) {
-    console.log('pinNotes error: ', e);
+  } catch (error) {
+    console.log('pinNotes clean up error: ', error);
     // error in this step should be fine
   }
 };
@@ -2390,8 +2406,9 @@ export const unpinNotes = (ids) => async (dispatch, getState) => {
   try {
     const params = { pins: pins.map(pin => ({ ...pin, id: `deleted${pin.id}` })) };
     await dataApi.putPins(params);
-  } catch (e) {
-    dispatch({ type: UNPIN_NOTE_ROLLBACK, payload: { ...payload, error: e } });
+  } catch (error) {
+    console.log('unpinNotes error: ', error);
+    dispatch({ type: UNPIN_NOTE_ROLLBACK, payload: { ...payload, error } });
     return;
   }
 
@@ -2399,8 +2416,8 @@ export const unpinNotes = (ids) => async (dispatch, getState) => {
 
   try {
     dataApi.deletePins({ pins: fromPins });
-  } catch (e) {
-    console.log('unpinNotes error: ', e);
+  } catch (error) {
+    console.log('unpinNotes clean up error: ', error);
     // error in this step should be fine
   }
 };
@@ -2485,8 +2502,9 @@ export const movePinnedNote = (id, direction) => async (dispatch, getState) => {
 
   try {
     await dataApi.putPins({ pins: [payload] });
-  } catch (e) {
-    dispatch({ type: MOVE_PINNED_NOTE_ROLLBACK, payload: { ...payload, error: e } });
+  } catch (error) {
+    console.log('movePinnedNote error: ', error);
+    dispatch({ type: MOVE_PINNED_NOTE_ROLLBACK, payload: { ...payload, error } });
     return;
   }
 
@@ -2494,8 +2512,8 @@ export const movePinnedNote = (id, direction) => async (dispatch, getState) => {
 
   try {
     dataApi.deletePins({ pins: [{ ...pinnedValues[i].pin }] });
-  } catch (e) {
-    console.log('movePinnedNote error: ', e);
+  } catch (error) {
+    console.log('movePinnedNote clean up error: ', error);
     // error in this step should be fine
   }
 };

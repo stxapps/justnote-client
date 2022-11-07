@@ -103,6 +103,7 @@ export const batchDeleteFileWithRetry = async (fpaths, callCount) => {
           //   i.e. user tries to delete a not-existing file, it's ok.
           // Anyway, if the file should be there, this will hide the real error!
           if (
+            isObject(error) &&
             isString(error.message) &&
             (
               (
