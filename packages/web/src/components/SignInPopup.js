@@ -4,7 +4,7 @@ import { showConnect } from '@stacks/connect/dist/index.esm';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import userSession from '../userSession';
-import { updatePopupUrlHash, updateUserData } from '../actions';
+import { updatePopupUrlHash, updateUserData, redirectToMain } from '../actions';
 import { UPDATE_USER } from '../types/actionTypes';
 import {
   DOMAIN_NAME, APP_NAME, APP_ICON_NAME, APP_SCOPES, SIGN_UP_POPUP, SIGN_IN_POPUP,
@@ -51,6 +51,7 @@ const SignInPopup = () => {
             image: getUserImageUrl(userData),
           },
         });
+        redirectToMain();
       },
       userSession: userSession._userSession,
       sendToSignIn: true,
@@ -65,6 +66,7 @@ const SignInPopup = () => {
   const onChooseAccountBtnClick = (data) => {
     onPopupCloseBtnClick();
     dispatch(updateUserData(data));
+    redirectToMain();
   };
 
   useEffect(() => {

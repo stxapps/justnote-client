@@ -311,6 +311,16 @@ export const handleUrlHash = () => {
   window.location.replace(urlObj.toString());
 };
 
+export const redirectToMain = () => {
+  // Need timeout for window.history.back() to update the href first.
+  setTimeout(() => {
+    const urlObj = new Url(window.location.href, {});
+    if (urlObj.pathname === '/' && urlObj.hash === '') return;
+
+    window.location.href = '/';
+  }, 1);
+};
+
 export const onPopStateChange = (dispatch, getState) => {
   dispatch({
     type: UPDATE_HREF,
@@ -1926,6 +1936,7 @@ const parseImportedFile = async (dispatch, fileContent) => {
 
       if (fpathParts[3] === INDEX + DOT_JSON) {
         try {
+          // @ts-ignore
           content = JSON.parse(content);
           if (
             !('title' in content && 'body' in content)
@@ -1978,6 +1989,7 @@ const parseImportedFile = async (dispatch, fileContent) => {
       if (!fname.endsWith('.json')) continue;
 
       try {
+        // @ts-ignore
         content = JSON.parse(content);
         if (!isEqual(content, {})) continue;
       } catch (error) {
@@ -1995,6 +2007,7 @@ const parseImportedFile = async (dispatch, fileContent) => {
       if (!isNumber(dt)) continue;
 
       try {
+        // @ts-ignore
         content = JSON.parse(content);
 
         const settings = { ...initialSettingsState };
@@ -2030,6 +2043,9 @@ const parseImportedFile = async (dispatch, fileContent) => {
       if (fnameParts.length < 2) continue;
 
       if (fname === 'Labels.txt') {
+        if (!isString(content)) continue;
+        content = /** @type string */(content);
+
         const settings = { ...initialSettingsState };
         for (const label of content.split('\n')) {
           if (!label) continue;
@@ -2054,6 +2070,7 @@ const parseImportedFile = async (dispatch, fileContent) => {
         // Need to convert to notes/[listName]/[noteId]/index.json below
         //   after gathering all images and labels.
         try {
+          // @ts-ignore
           content = JSON.parse(content);
         } catch (error) {
           console.log('parseImportedFile: JSON.parse Keep content error: ', error);
