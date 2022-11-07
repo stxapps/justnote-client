@@ -2044,9 +2044,9 @@ const parseImportedFile = async (dispatch, fileContent) => {
 
       if (fname === 'Labels.txt') {
         if (!isString(content)) continue;
-        content = /** @type string */(content);
 
         const settings = { ...initialSettingsState };
+        // @ts-ignore
         for (const label of content.split('\n')) {
           if (!label) continue;
 
