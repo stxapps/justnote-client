@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import {
-  updatePopupUrlHash, updateNoteIdUrlHash, updateNoteId, updateBulkEditUrlHash,
-  addSelectedNoteIds, deleteSelectedNoteIds, updateSelectingNoteId,
+  updateNoteIdUrlHash, updateNoteId, updateBulkEditUrlHash, showNLIMPopup,
+  addSelectedNoteIds, deleteSelectedNoteIds,
 } from '../actions';
-import { NOTE_LIST_ITEM_MENU_POPUP, LG_WIDTH } from '../types/const';
+import { LG_WIDTH } from '../types/const';
 import { makeIsNoteIdSelected, makeGetPinStatus, makeGetNoteDate } from '../selectors';
 import { isBusyStatus, isPinningStatus, stripHtml } from '../utils';
 
@@ -114,8 +114,6 @@ const NoteListItemContent = (props) => {
   };
 
   const onMenuBtnClick = (e) => {
-    dispatch(updateSelectingNoteId(note.id));
-
     const _rect = e.currentTarget.getBoundingClientRect();
     const newX = _rect.x + 12;
     const newY = _rect.y + 4;
@@ -125,7 +123,7 @@ const NoteListItemContent = (props) => {
       x: newX, y: newY, width: newWidth, height: newHeight,
       top: newY, bottom: newY + newHeight, left: newX, right: newX + newWidth,
     };
-    updatePopupUrlHash(NOTE_LIST_ITEM_MENU_POPUP, true, rect);
+    dispatch(showNLIMPopup(note.id, rect, true, false));
   };
 
   useEffect(() => {

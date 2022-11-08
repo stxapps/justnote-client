@@ -4,10 +4,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
 import {
-  updatePopup, updateNoteId, updateBulkEdit, addSelectedNoteIds, deleteSelectedNoteIds,
-  updateSelectingNoteId,
+  updateNoteId, updateBulkEdit, showNLIMPopup, addSelectedNoteIds,
+  deleteSelectedNoteIds,
 } from '../actions';
-import { NOTE_LIST_ITEM_MENU_POPUP } from '../types/const';
 import { makeIsNoteIdSelected, makeGetPinStatus, makeGetNoteDate } from '../selectors';
 import { isBusyStatus, isPinningStatus, stripHtml } from '../utils';
 
@@ -52,8 +51,6 @@ const NoteListItemContent = (props) => {
 
   const onMenuBtnClick = () => {
     menuBtn.current.measure((_fx, _fy, width, height, x, y) => {
-      dispatch(updateSelectingNoteId(note.id));
-
       const newX = x + 12;
       const newY = y + 4;
       const newWidth = width - 12 - 8;
@@ -62,7 +59,7 @@ const NoteListItemContent = (props) => {
         x: newX, y: newY, width: newWidth, height: newHeight,
         top: newY, bottom: newY + newHeight, left: newX, right: newX + newWidth,
       };
-      dispatch(updatePopup(NOTE_LIST_ITEM_MENU_POPUP, true, rect));
+      dispatch(showNLIMPopup(note.id, rect, true, false));
     });
   };
 

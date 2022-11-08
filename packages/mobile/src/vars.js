@@ -33,6 +33,11 @@ const updateBulkEdit = {
   selectedNoteId: null,
 };
 
+const showNLIMPopup = {
+  selectedNoteId: null,
+  selectedRect: null,
+};
+
 const deleteOldNotes = {
   ids: null,
 };
@@ -47,6 +52,6 @@ export const paywallFeature = {
 
 const vars = {
   cachedFPaths, cachedServerFPaths, scrollPanel, updateNoteId, changeListName,
-  updateBulkEdit, deleteOldNotes, updateSettings, paywallFeature,
+  updateBulkEdit, showNLIMPopup, deleteOldNotes, updateSettings, paywallFeature,
 };
 export default vars;
