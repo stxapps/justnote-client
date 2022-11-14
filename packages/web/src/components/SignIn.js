@@ -2,9 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 
 import walletApi from '../apis/wallet';
 import { HASH_SUPPORT } from '../types/const';
-import { getUserImageUrl } from '../utils';
+import { getUserImageUrl, isIPadIPhoneIPod } from '../utils';
 
-import { useTailwind } from '.';
+import { useSafeAreaFrame, useTailwind } from '.';
 
 const VIEW_YOUR = 1;
 const VIEW_CHOOSE = 2;
@@ -12,6 +12,7 @@ const VIEW_CHOOSE = 2;
 const SignIn = (props) => {
 
   const { domainName, appName, appIconUrl, appScopes } = props;
+  const { height: safeAreaHeight } = useSafeAreaFrame();
   const [viewId, setViewId] = useState(VIEW_YOUR);
   const [isLoadingShown, setLoadingShown] = useState(false);
   const [isErrorShown, setErrorShown] = useState(false);
@@ -20,6 +21,7 @@ const SignIn = (props) => {
   const walletData = useRef(null);
   const scrollView = useRef(null);
   const textarea = useRef(null);
+  const prevSafeAreaHeight = useRef(safeAreaHeight);
   const didClick = useRef(false);
   const tailwind = useTailwind();
 
@@ -105,6 +107,17 @@ const SignIn = (props) => {
     }
   }, [viewId]);
 
+  useEffect(() => {
+    const heightDiff = prevSafeAreaHeight.current - safeAreaHeight;
+    if (isIPadIPhoneIPod() && heightDiff > 240) {
+      setTimeout(() => {
+        window.scrollBy({ top: heightDiff * -1, behavior: 'smooth' });
+      }, 100);
+    }
+
+    prevSafeAreaHeight.current = safeAreaHeight;
+  }, [safeAreaHeight]);
+
   const _render = (content) => {
     return (
       <React.Fragment>
@@ -137,7 +150,7 @@ const SignIn = (props) => {
           <label htmlFor="secret-key-input" className={tailwind('sr-only')}>Secret Key</label>
           <textarea ref={textarea} onChange={onSecretKeyInputChange} className={tailwind('block h-36 w-full resize-none rounded-md border border-gray-300 py-2.5 px-4 text-sm leading-6 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:h-32 sm:py-3')} value={secretKeyInput} id="secret-key-input" name="secret-key-input" autoCapitalize="none"></textarea>
         </div>
-        <div className={errMsg ? '' : 'pt-5'}>
+        <div className={tailwind(errMsg ? '' : 'pt-5')}>
           {errMsg && <p className={tailwind('py-2 text-sm text-red-600')}>{errMsg}</p>}
           <button onClick={onContinueBtnClick} className={tailwind('w-full rounded-md border border-transparent bg-blue-700 py-2 px-4 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2')} type="button">Continue</button>
           <p className={tailwind('mt-5 text-center text-sm text-gray-500')}>
@@ -201,6 +214,7 @@ const SignIn = (props) => {
 };
 
 const ErrorAlert = (props) => {
+
   const tailwind = useTailwind();
 
   return (

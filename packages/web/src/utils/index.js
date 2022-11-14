@@ -928,6 +928,8 @@ export const extractPinFPath = (fpath) => {
 };
 
 export const addFPath = (fpaths, fpath) => {
+  if (fpath.startsWith('file://')) fpath = fpath.slice('file://'.length);
+
   if (fpath.startsWith(NOTES)) {
     if (!fpaths.noteFPaths.includes(fpath)) fpaths.noteFPaths.push(fpath);
   } else if (fpath.startsWith(IMAGES)) {
@@ -943,8 +945,6 @@ export const addFPath = (fpaths, fpath) => {
     }
   } else if (fpath.startsWith(PINS)) {
     if (!fpaths.pinFPaths.includes(fpath)) fpaths.pinFPaths.push(fpath);
-  } else if (fpath.startsWith('file://')) {
-    // Just ignore, for mobile downloads a static file and save to storage.
   } else {
     console.log(`Invalid file path: ${fpath}`);
   }
@@ -965,9 +965,14 @@ export const deleteFPath = (fpaths, fpath) => {
 };
 
 export const copyFPaths = (fpaths) => {
-  const newNoteFPaths = [...fpaths.noteFPaths];
-  const newStaticFPaths = [...fpaths.staticFPaths];
-  const newPinFPaths = [...fpaths.pinFPaths];
+  let newNoteFPaths = [];
+  if (Array.isArray(fpaths.noteFPaths)) newNoteFPaths = [...fpaths.noteFPaths];
+
+  let newStaticFPaths = [];
+  if (Array.isArray(fpaths.staticFPaths)) newStaticFPaths = [...fpaths.staticFPaths];
+
+  let newPinFPaths = [];
+  if (Array.isArray(fpaths.pinFPaths)) newPinFPaths = [...fpaths.pinFPaths];
 
   return {
     ...fpaths,
@@ -979,13 +984,20 @@ export const copyFPaths = (fpaths) => {
 
 export const getNoteFPaths = (state) => {
   if (
-    state.cachedFPaths &&
-    state.cachedFPaths.fpaths &&
+    isObject(state.cachedFPaths) &&
+    isObject(state.cachedFPaths.fpaths) &&
     Array.isArray(state.cachedFPaths.fpaths.noteFPaths)
   ) {
     return state.cachedFPaths.fpaths.noteFPaths;
   }
   return [];
+};
+
+export const getSettingsFPath = (state) => {
+  if (isObject(state.cachedFPaths) && isObject(state.cachedFPaths.fpaths)) {
+    return state.cachedFPaths.fpaths.settingsFPath;
+  }
+  return null;
 };
 
 const getNoteRootIds = (leafId, toParents) => {

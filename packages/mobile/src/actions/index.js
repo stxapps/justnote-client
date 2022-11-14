@@ -69,9 +69,9 @@ import {
   isEqual, isString, sleep, separateUrlAndParam, getUserImageUrl, randomString,
   isNoteBodyEqual, clearNoteData, getStaticFPath, deriveFPaths,
   getListNameObj, getAllListNames,
-  getMainId, listNoteIds, getNoteFPaths, getLatestPurchase, getValidPurchase,
-  doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins, getSortedNotes,
-  separatePinnedValues, getFormattedTime, get24HFormattedTime,
+  getMainId, listNoteIds, getNoteFPaths, getSettingsFPath, getLatestPurchase,
+  getValidPurchase, doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins,
+  getSortedNotes, separatePinnedValues, getFormattedTime, get24HFormattedTime,
 } from '../utils';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
@@ -1268,9 +1268,9 @@ export const tryUpdateSettings = () => async (dispatch, getState) => {
 };
 
 export const updateSettings = () => async (dispatch, getState) => {
-
-  const settings = getState().settings;
-  const snapshotSettings = getState().snapshot.settings;
+  const state = getState();
+  const settings = state.settings;
+  const snapshotSettings = state.snapshot.settings;
   if (isEqual(settings, snapshotSettings)) {
     dispatch(cancelDiedSettings());
     return;
@@ -1278,7 +1278,7 @@ export const updateSettings = () => async (dispatch, getState) => {
 
   const addedDT = Date.now();
   const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
-  const _settingsFPath = getState().cachedFPaths.fpaths.settingsFPath;
+  const _settingsFPath = getSettingsFPath(state);
 
   const doFetch = (
     settings.sortOn !== snapshotSettings.sortOn ||
