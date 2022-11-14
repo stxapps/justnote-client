@@ -67,7 +67,8 @@ import {
   getMainId, createNoteFPath, createNoteFName, extractNoteFPath, extractNoteFName,
   extractNoteId, listNoteIds, getNoteFPaths, getSettingsFPath, getLatestPurchase,
   getValidPurchase, doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins,
-  getSortedNotes, separatePinnedValues, getFormattedTime, get24HFormattedTime,
+  getSortedNotes, separatePinnedValues, getRawPins, getFormattedTime,
+  get24HFormattedTime,
 } from '../utils';
 import { isUint8Array } from '../utils/index-web';
 import { _ } from '../utils/obj';
@@ -2945,18 +2946,6 @@ export const pinNotes = (ids) => async (dispatch, getState) => {
   const currentPins = getPins(pinFPaths, pendingPins, true, toRootIds);
   const currentRanks = Object.values(currentPins).map(pin => pin.rank).sort();
 
-  const fromPins = [];
-  const noteMainIds = ids.map(id => getMainId(id, toRootIds));
-  for (const fpath of pinFPaths) {
-    const { rank, updatedDT, addedDT, id } = extractPinFPath(fpath);
-
-    const _id = id.startsWith('deleted') ? id.slice(7) : id;
-    const pinMainId = getMainId(_id, toRootIds);
-    if (noteMainIds.includes(pinMainId)) {
-      fromPins.push({ rank, updatedDT, addedDT, id });
-    }
-  }
-
   let lexoRank;
   if (currentRanks.length > 0) {
     const rank = currentRanks[currentRanks.length - 1];
@@ -2987,13 +2976,6 @@ export const pinNotes = (ids) => async (dispatch, getState) => {
   }
 
   dispatch({ type: PIN_NOTE_COMMIT, payload });
-
-  try {
-    dataApi.deletePins({ pins: fromPins });
-  } catch (error) {
-    console.log('pinNotes clean up error: ', error);
-    // error in this step should be fine
-  }
 };
 
 export const unpinNotes = (ids) => async (dispatch, getState) => {
@@ -3006,13 +2988,12 @@ export const unpinNotes = (ids) => async (dispatch, getState) => {
   let currentPins = getPins(pinFPaths, pendingPins, true, toRootIds);
 
   let now = Date.now();
-  const pins = [], fromPins = [];
+  const pins = [];
   for (const noteId of ids) {
     const noteMainId = getMainId(noteId, toRootIds);
     if (currentPins[noteMainId]) {
-      const { rank, updatedDT, addedDT, id } = currentPins[noteMainId];
+      const { rank, addedDT, id } = currentPins[noteMainId];
       pins.push({ rank, updatedDT: now, addedDT, id });
-      fromPins.push({ rank, updatedDT, addedDT, id });
 
       now += 1;
     }
@@ -3022,7 +3003,7 @@ export const unpinNotes = (ids) => async (dispatch, getState) => {
     // As for every move note to ARCHIVE and TRASH, will try to unpin the note too,
     //  if no pin to unpin, just return.
     console.log('In unpinNotes, no pin found for ids: ', ids);
-    dispatch(sync());
+    dispatch(cleanUpPins());
     return;
   }
 
@@ -3039,13 +3020,6 @@ export const unpinNotes = (ids) => async (dispatch, getState) => {
   }
 
   dispatch({ type: UNPIN_NOTE_COMMIT, payload });
-
-  try {
-    dataApi.deletePins({ pins: fromPins });
-  } catch (error) {
-    console.log('unpinNotes clean up error: ', error);
-    // error in this step should be fine
-  }
 };
 
 export const movePinnedNote = (id, direction) => async (dispatch, getState) => {
@@ -3135,17 +3109,49 @@ export const movePinnedNote = (id, direction) => async (dispatch, getState) => {
   }
 
   dispatch({ type: MOVE_PINNED_NOTE_COMMIT, payload });
-
-  try {
-    dataApi.deletePins({ pins: [{ ...pinnedValues[i].pin }] });
-  } catch (error) {
-    console.log('movePinnedNote clean up error: ', error);
-    // error in this step should be fine
-  }
 };
 
 export const cancelDiedPins = () => {
   return { type: CANCEL_DIED_PINS };
+};
+
+export const cleanUpPins = () => async (dispatch, getState) => {
+  const state = getState();
+  const noteFPaths = getNoteFPaths(state);
+  const pinFPaths = getPinFPaths(state);
+
+  const { toRootIds } = listNoteIds(noteFPaths);
+  const pins = getRawPins(pinFPaths, toRootIds);
+
+  const unusedPins = [];
+  for (const fpath of pinFPaths) {
+    const { rank, updatedDT, addedDT, id } = extractPinFPath(fpath);
+
+    const _id = id.startsWith('deleted') ? id.slice(7) : id;
+    const pinMainId = getMainId(_id, toRootIds);
+
+    if (
+      !isString(pinMainId) ||
+      !isObject(pins[pinMainId]) ||
+      (
+        rank !== pins[pinMainId].rank ||
+        updatedDT !== pins[pinMainId].updatedDT ||
+        addedDT !== pins[pinMainId].addedDT ||
+        id !== pins[pinMainId].id
+      )
+    ) {
+      unusedPins.push({ rank, updatedDT, addedDT, id });
+    }
+  }
+
+  try {
+    dataApi.deletePins({ pins: unusedPins });
+  } catch (error) {
+    console.log('cleanUpPins error: ', error);
+    // error in this step should be fine
+  }
+
+  dispatch(sync());
 };
 
 export const updateLocalSettings = () => async (dispatch, getState) => {

@@ -1131,7 +1131,7 @@ export const getPinFPaths = (state) => {
   return [];
 };
 
-const _getPins = (pinFPaths, pendingPins, doExcludeUnpinning, toRootIds) => {
+export const getRawPins = (pinFPaths, toRootIds) => {
   const pins = {};
   for (const fpath of pinFPaths) {
     const { rank, updatedDT, addedDT, id } = extractPinFPath(fpath);
@@ -1143,6 +1143,12 @@ const _getPins = (pinFPaths, pendingPins, doExcludeUnpinning, toRootIds) => {
     if (pinMainId in pins && pins[pinMainId].updatedDT > updatedDT) continue;
     pins[pinMainId] = { rank, updatedDT, addedDT, id };
   }
+
+  return pins;
+};
+
+const _getPins = (pinFPaths, pendingPins, doExcludeUnpinning, toRootIds) => {
+  const pins = getRawPins(pinFPaths, toRootIds);
 
   for (const id in pendingPins) {
     const { status, rank, updatedDT, addedDT } = pendingPins[id];

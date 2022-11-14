@@ -1,6 +1,6 @@
 import { loop, Cmd } from 'redux-loop';
 
-import { sync } from '../actions';
+import { cleanUpPins } from '../actions';
 import {
   PIN_NOTE, PIN_NOTE_COMMIT, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_COMMIT,
   UNPIN_NOTE_ROLLBACK, MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_COMMIT,
@@ -31,7 +31,7 @@ const pendingPinsReducer = (state = initialState, action) => {
     const newState = { ...state };
     for (const pin of pins) delete newState[pin.id];
 
-    return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
+    return loop(newState, Cmd.run(cleanUpPins(), { args: [Cmd.dispatch, Cmd.getState] }));
   }
 
   if (action.type === PIN_NOTE_ROLLBACK || action.type === UNPIN_NOTE_ROLLBACK) {
@@ -54,7 +54,7 @@ const pendingPinsReducer = (state = initialState, action) => {
     const newState = { ...state };
     delete newState[id];
 
-    return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
+    return loop(newState, Cmd.run(cleanUpPins(), { args: [Cmd.dispatch, Cmd.getState] }));
   }
 
   if (action.type === MOVE_PINNED_NOTE_ROLLBACK) {
