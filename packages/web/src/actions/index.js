@@ -13,6 +13,7 @@ import {
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, UPDATE_SELECTING_NOTE_ID,
   FETCH, FETCH_COMMIT, FETCH_ROLLBACK, FETCH_MORE, FETCH_MORE_COMMIT,
   FETCH_MORE_ROLLBACK, CACHE_FETCHED_MORE, UPDATE_FETCHED_MORE, CANCEL_FETCHED_MORE,
+  REFRESH_FETCHED,
   ADD_NOTE, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK, UPDATE_NOTE, UPDATE_NOTE_COMMIT,
   UPDATE_NOTE_ROLLBACK, MOVE_NOTES, MOVE_NOTES_COMMIT, MOVE_NOTES_ROLLBACK,
   DELETE_NOTES, DELETE_NOTES_COMMIT, DELETE_NOTES_ROLLBACK, CANCEL_DIED_NOTES,
@@ -895,6 +896,19 @@ export const updateFetchedMore = (payload, listName = null) => async (
   if (!payload) return;
 
   dispatch({ type: UPDATE_FETCHED_MORE, payload });
+};
+
+export const refreshFetched = () => async (dispatch, getState) => {
+  const noteId = getState().display.noteId;
+  const safeAreaWidth = getState().window.width;
+
+  if (noteId !== null && safeAreaWidth < LG_WIDTH) {
+    updateNoteIdUrlHash(null);
+    // Might not need to await but just in case.
+    await sleep(100);
+  }
+
+  dispatch({ type: REFRESH_FETCHED });
 };
 
 export const addNote = (title, body, media, listName = null) => async (

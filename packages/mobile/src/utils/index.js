@@ -1294,3 +1294,10 @@ export const get24HFormattedTime = (hStr, mStr, period) => {
 
   return `${newHStr}:${mStr}`;
 };
+
+export const doContainStaleNotes = (notes) => {
+  for (const note of notes) {
+    if (note.title === '' && note.body === '') return true;
+  }
+  return false;
+};

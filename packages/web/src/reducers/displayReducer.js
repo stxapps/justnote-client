@@ -2,9 +2,10 @@ import {
   UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP,
   UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, ADD_SELECTED_NOTE_IDS,
   DELETE_SELECTED_NOTE_IDS, UPDATE_SELECTING_NOTE_ID, UPDATE_SELECTING_LIST_NAME,
-  UPDATE_DELETING_LIST_NAME, FETCH_COMMIT, FETCH_ROLLBACK, ADD_NOTE, UPDATE_NOTE,
-  MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
-  DELETE_LIST_NAMES, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY, INCREASE_SAVE_NOTE_COUNT,
+  UPDATE_DELETING_LIST_NAME, FETCH_COMMIT, FETCH_ROLLBACK, UPDATE_FETCHED_MORE,
+  REFRESH_FETCHED, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES,
+  DELETE_OLD_NOTES_IN_TRASH_COMMIT, DELETE_LIST_NAMES,
+  UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY, INCREASE_SAVE_NOTE_COUNT,
   INCREASE_RESET_DID_CLICK_COUNT, UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION,
   UPDATE_DISCARD_ACTION, UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT,
   UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS, UPDATE_SETTINGS_VIEW_ID,
@@ -17,11 +18,11 @@ import {
   NOTE_LIST_ITEM_MENU_POPUP, LIST_NAMES_POPUP, PIN_MENU_POPUP, PAYWALL_POPUP,
   SIDEBAR_POPUP, SEARCH_POPUP, SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP,
   TIME_PICK_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, CONFIRM_AS_DUMMY_POPUP,
-  CONFIRM_EXIT_DUMMY_POPUP, ACCESS_ERROR_POPUP, NEW_NOTE, MY_NOTES, TRASH, ARCHIVE,
-  UPDATING, DIED_UPDATING, MAX_SELECTED_NOTE_IDS, SETTINGS_VIEW_ACCOUNT,
+  CONFIRM_EXIT_DUMMY_POPUP, ACCESS_ERROR_POPUP, STALE_ERROR_POPUP, NEW_NOTE, MY_NOTES,
+  TRASH, ARCHIVE, UPDATING, DIED_UPDATING, MAX_SELECTED_NOTE_IDS, SETTINGS_VIEW_ACCOUNT,
   DELETE_ACTION_LIST_NAME,
 } from '../types/const';
-import { doContainListName, isObject, isString } from '../utils';
+import { doContainListName, isObject, isString, doContainStaleNotes } from '../utils';
 
 const initialState = {
   isHandlingSignIn: false,
@@ -52,6 +53,7 @@ const initialState = {
   isConfirmAsDummyPopupShown: false,
   isConfirmExitDummyPopupShown: false,
   isAccessErrorPopupShown: false,
+  isStaleErrorPopupShown: false,
   searchString: '',
   isBulkEditing: false,
   selectedNoteIds: [],
@@ -222,6 +224,11 @@ const displayReducer = (state = initialState, action) => {
       return newState;
     }
 
+    if (id === STALE_ERROR_POPUP) {
+      const newState = { ...state, isStaleErrorPopupShown: isShown };
+      return newState;
+    }
+
     throw new Error(`Invalid type: ${action.type} and payload: ${action.payload}`);
   }
 
@@ -279,7 +286,7 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === FETCH_COMMIT) {
-    const { listName } = action.payload;
+    const { listName, notes } = action.payload;
     const newState = {
       ...state,
       noteId: state.noteId === NEW_NOTE ? NEW_NOTE : null,
@@ -292,6 +299,8 @@ const displayReducer = (state = initialState, action) => {
       didFetchSettings: true,
       fetchedListNames: [...state.fetchedListNames, listName],
     };
+
+    if (doContainStaleNotes(notes)) newState.isStaleErrorPopupShown = true;
 
     // Make sure listName is in listNameMap, if not, set to My Notes.
     const { listNames, doFetchSettings, settings } = action.payload;
@@ -333,6 +342,27 @@ const displayReducer = (state = initialState, action) => {
       newState.isAccessErrorPopupShown = true;
     }
     return newState;
+  }
+
+  if (action.type === UPDATE_FETCHED_MORE) {
+    const { notes } = action.payload;
+
+    if (doContainStaleNotes(notes)) return { ...state, isStaleErrorPopupShown: true };
+    return state;
+  }
+
+  if (action.type === REFRESH_FETCHED) {
+    return {
+      ...state,
+      noteId: state.noteId === NEW_NOTE ? NEW_NOTE : null,
+      isStaleErrorPopupShown: false,
+      isEditorFocused: state.noteId === NEW_NOTE ? true : false,
+      isEditorBusy: false,
+      selectedNoteIds: [],
+      isSelectedNoteIdsMaxErrorShown: false,
+      didFetchSettings: false,
+      fetchedListNames: [],
+    };
   }
 
   if (action.type === ADD_NOTE) {

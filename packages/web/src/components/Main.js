@@ -18,6 +18,7 @@ import ConfirmDeletePopup from './ConfirmDeletePopup';
 import ConfirmDiscardPopup from './ConfirmDiscardPopup';
 import PaywallPopup from './PaywallPopup';
 import AccessErrorPopup from './AccessErrorPopup';
+import StaleErrorPopup from './StaleErrorPopup';
 
 const Main = () => {
 
@@ -52,6 +53,7 @@ const Main = () => {
       <ConfirmDiscardPopup />
       <PaywallPopup />
       <AccessErrorPopup />
+      <StaleErrorPopup />
     </React.Fragment>
   );
 };
