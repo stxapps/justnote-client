@@ -1,8 +1,8 @@
 import React, { useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
-import { updatePopupUrlHash } from '../actions';
-import { NOTE_LIST_MENU_POPUP, SEARCH_POPUP, LG_WIDTH, UPDATING } from '../types/const';
+import { updatePopupUrlHash, showNoteListMenuPopup } from '../actions';
+import { SEARCH_POPUP, LG_WIDTH, UPDATING } from '../types/const';
 import { getListNameMap } from '../selectors';
 import { getListNameDisplayName } from '../utils';
 
@@ -20,12 +20,12 @@ const NoteListTopBar = (props) => {
   const didFetch = useSelector(state => state.display.didFetch);
   const settingsStatus = useSelector(state => state.display.settingsStatus);
   const menuBtn = useRef(null);
+  const dispatch = useDispatch();
   const tailwind = useTailwind();
 
   const onMenuBtnClick = () => {
-    updatePopupUrlHash(
-      NOTE_LIST_MENU_POPUP, true, menuBtn.current.getBoundingClientRect()
-    );
+    const rect = menuBtn.current.getBoundingClientRect();
+    dispatch(showNoteListMenuPopup(rect, true, false));
   };
 
   const onSearchBtnClick = () => {

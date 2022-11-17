@@ -7,8 +7,8 @@ import { Dirs } from 'react-native-file-access';
 import fileApi from '../apis/file';
 import {
   updateEditorFocused, updateEditorBusy, saveNote, discardNote, onUpdateNoteId,
-  onChangeListName, onUpdateBulkEdit, onShowNLIMPopup, addSavingFPaths,
-  updateEditorIsUploading, updateEditingNote, updateEditorUnmount,
+  onChangeListName, onUpdateBulkEdit, onShowNoteListMenuPopup, onShowNLIMPopup,
+  addSavingFPaths, updateEditorIsUploading, updateEditingNote, updateEditorUnmount,
 } from '../actions';
 import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, UTF8 } from '../types/const';
 import { getThemeMode } from '../selectors';
@@ -26,6 +26,7 @@ const GET_DATA_DISCARD_NOTE = 'GET_DATA_DISCARD_NOTE';
 const GET_DATA_UPDATE_NOTE_ID = 'GET_DATA_UPDATE_NOTE_ID';
 const GET_DATA_CHANGE_LIST_NAME = 'GET_DATA_CHANGE_LIST_NAME';
 const GET_DATA_UPDATE_BULK_EDIT = 'GET_DATA_UPDATE_BULK_EDIT';
+const GET_DATA_SHOW_NOTE_LIST_MENU_POPUP = 'GET_DATA_SHOW_NOTE_LIST_MENU_POPUP';
 const GET_DATA_SHOW_NLIM_POPUP = 'GET_DATA_SHOW_NLIM_POPUP';
 
 const SEP = '_jUSTnOTE-sEpArAtOr_';
@@ -44,6 +45,9 @@ const NoteEditorEditor = (props) => {
   const setInitDataCount = useSelector(state => state.editor.setInitDataCount);
   const blurCount = useSelector(state => state.editor.blurCount);
   const updateBulkEditCount = useSelector(state => state.editor.updateBulkEditCount);
+  const showNoteListMenuPopupCount = useSelector(
+    state => state.editor.showNoteListMenuPopupCount
+  );
   const showNLIMPopupCount = useSelector(state => state.editor.showNLIMPopupCount);
   const isScrollEnabled = useSelector(state => state.editor.isScrollEnabled);
   const themeMode = useSelector(state => getThemeMode(state));
@@ -60,6 +64,7 @@ const NoteEditorEditor = (props) => {
   const prevSetInitDataCount = useRef(setInitDataCount);
   const prevBlurCount = useRef(blurCount);
   const prevUpdateBulkEditCount = useRef(updateBulkEditCount);
+  const prevShowNoteListMenuPopupCount = useRef(showNoteListMenuPopupCount);
   const prevShowNLIMPopupCount = useRef(showNLIMPopupCount);
   const prevIsScrollEnabled = useRef(isScrollEnabled);
   const objectUrlContents = useRef({});
@@ -209,6 +214,8 @@ const NoteEditorEditor = (props) => {
       dispatch(onChangeListName(title, body, keyboardHeight.current));
     } else if (action === GET_DATA_UPDATE_BULK_EDIT) {
       dispatch(onUpdateBulkEdit(title, body, keyboardHeight.current));
+    } else if (action === GET_DATA_SHOW_NOTE_LIST_MENU_POPUP) {
+      dispatch(onShowNoteListMenuPopup(title, body));
     } else if (action === GET_DATA_SHOW_NLIM_POPUP) {
       dispatch(onShowNLIMPopup(title, body));
     } else throw new Error(`Invalid getDataAction: ${getDataAction.current}`);
@@ -387,6 +394,15 @@ const NoteEditorEditor = (props) => {
       prevUpdateBulkEditCount.current = updateBulkEditCount;
     }
   }, [isEditorReady, updateBulkEditCount]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+    if (showNoteListMenuPopupCount !== prevShowNoteListMenuPopupCount.current) {
+      getDataAction.current = GET_DATA_SHOW_NOTE_LIST_MENU_POPUP;
+      webView.current.injectJavaScript('window.justnote.getData(); true;');
+      prevShowNoteListMenuPopupCount.current = showNoteListMenuPopupCount;
+    }
+  }, [isEditorReady, showNoteListMenuPopupCount]);
 
   useEffect(() => {
     if (!isEditorReady) return;

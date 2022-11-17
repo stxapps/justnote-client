@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Animated } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path, Circle } from 'react-native-svg';
 
-import { updatePopup } from '../actions';
+import { updatePopup, showNoteListMenuPopup } from '../actions';
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import {
   NOTE_LIST_MENU_POPUP, SEARCH_POPUP, LG_WIDTH, SHOW_SYNCED,
@@ -36,7 +36,7 @@ const NoteListTopBar = (props) => {
       const rect = {
         x, y, width, height, top: y, right: x + width, bottom: y + height, left: x,
       };
-      dispatch(updatePopup(NOTE_LIST_MENU_POPUP, true, rect));
+      dispatch(showNoteListMenuPopup(rect, true, false));
     });
   };
 

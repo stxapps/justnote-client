@@ -6,8 +6,9 @@ import ckeditor from '@ckeditor/ckeditor5-build-decoupled-document';
 import fileApi from '../apis/file';
 import {
   updateEditorFocused, updateEditorBusy, saveNote, discardNote, onUpdateNoteIdUrlHash,
-  onUpdateNoteId, onChangeListName, onUpdateBulkEditUrlHash, onShowNLIMPopup,
-  addSavingFPaths, updateEditorIsUploading, updateEditingNote, updateEditorUnmount,
+  onUpdateNoteId, onChangeListName, onUpdateBulkEditUrlHash, onShowNoteListMenuPopup,
+  onShowNLIMPopup, addSavingFPaths, updateEditorIsUploading, updateEditingNote,
+  updateEditorUnmount,
 } from '../actions';
 import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, BLK_MODE } from '../types/const';
 import { getThemeMode } from '../selectors';
@@ -27,6 +28,7 @@ const GET_DATA_UPDATE_NOTE_ID_URL_HASH = 'GET_DATA_UPDATE_NOTE_ID_URL_HASH';
 const GET_DATA_UPDATE_NOTE_ID = 'GET_DATA_UPDATE_NOTE_ID';
 const GET_DATA_CHANGE_LIST_NAME = 'GET_DATA_CHANGE_LIST_NAME';
 const GET_DATA_UPDATE_BULK_EDIT_URL_HASH = 'GET_DATA_UPDATE_BULK_EDIT_URL_HASH';
+const GET_DATA_SHOW_NOTE_LIST_MENU_POPUP = 'GET_DATA_SHOW_NOTE_LIST_MENU_POPUP';
 const GET_DATA_SHOW_NLIM_POPUP = 'GET_DATA_SHOW_NLIM_POPUP';
 
 const dataUrlToBlob = async (content) => {
@@ -56,6 +58,9 @@ const NoteEditorEditor = (props) => {
   const updateBulkEditUrlHashCount = useSelector(
     state => state.editor.updateBulkEditUrlHashCount
   );
+  const showNoteListMenuPopupCount = useSelector(
+    state => state.editor.showNoteListMenuPopupCount
+  );
   const showNLIMPopupCount = useSelector(state => state.editor.showNLIMPopupCount);
   const themeMode = useSelector(state => getThemeMode(state));
   const [isEditorReady, setEditorReady] = useState(false);
@@ -73,6 +78,7 @@ const NoteEditorEditor = (props) => {
   const prevSetInitDataCount = useRef(setInitDataCount);
   const prevUpdateEditorWidthCount = useRef(updateEditorWidthCount);
   const prevUpdateBulkEditUrlHashCount = useRef(updateBulkEditUrlHashCount);
+  const prevShowNoteListMenuPopupCount = useRef(showNoteListMenuPopupCount);
   const prevShowNLIMPopupCount = useRef(showNLIMPopupCount);
   const objectUrlContents = useRef({});
   const objectUrlFiles = useRef({});
@@ -238,6 +244,8 @@ const NoteEditorEditor = (props) => {
       dispatch(onChangeListName(title, body));
     } else if (action === GET_DATA_UPDATE_BULK_EDIT_URL_HASH) {
       dispatch(onUpdateBulkEditUrlHash(title, body));
+    } else if (action === GET_DATA_SHOW_NOTE_LIST_MENU_POPUP) {
+      dispatch(onShowNoteListMenuPopup(title, body));
     } else if (action === GET_DATA_SHOW_NLIM_POPUP) {
       dispatch(onShowNLIMPopup(title, body));
     } else throw new Error(`Invalid getDataAction: ${getDataAction.current}`);
@@ -391,6 +399,15 @@ const NoteEditorEditor = (props) => {
       prevUpdateBulkEditUrlHashCount.current = updateBulkEditUrlHashCount;
     }
   }, [isEditorReady, updateBulkEditUrlHashCount, onGetData]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+    if (showNoteListMenuPopupCount !== prevShowNoteListMenuPopupCount.current) {
+      getDataAction.current = GET_DATA_SHOW_NOTE_LIST_MENU_POPUP;
+      onGetData();
+      prevShowNoteListMenuPopupCount.current = showNoteListMenuPopupCount;
+    }
+  }, [isEditorReady, showNoteListMenuPopupCount, onGetData]);
 
   useEffect(() => {
     if (!isEditorReady) return;

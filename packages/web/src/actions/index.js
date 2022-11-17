@@ -31,7 +31,8 @@ import {
   INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT,
   INCREASE_UPDATE_EDITOR_WIDTH_COUNT, INCREASE_RESET_DID_CLICK_COUNT,
   INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT, INCREASE_UPDATE_BULK_EDIT_COUNT,
-  INCREASE_SHOW_NLIM_POPUP_COUNT, CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS,
+  INCREASE_SHOW_NOTE_LIST_MENU_POPUP_COUNT, INCREASE_SHOW_NLIM_POPUP_COUNT,
+  CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS,
   UPDATE_EDITOR_IS_UPLOADING, UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_EDITING_NOTE,
   UPDATE_EDITOR_UNMOUNT, UPDATE_DID_DISCARD_EDITING, UPDATE_STACKS_ACCESS,
   REQUEST_PURCHASE, RESTORE_PURCHASES, RESTORE_PURCHASES_COMMIT,
@@ -48,12 +49,13 @@ import {
 import {
   HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY, HASH_SUPPORT,
   SEARCH_POPUP, PAYWALL_POPUP, SETTINGS_POPUP, CONFIRM_DELETE_POPUP,
-  CONFIRM_DISCARD_POPUP, NOTE_LIST_ITEM_MENU_POPUP, MOVE_ACTION_NOTE_COMMANDS,
-  MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS,
+  CONFIRM_DISCARD_POPUP, NOTE_LIST_MENU_POPUP, NOTE_LIST_ITEM_MENU_POPUP,
+  MOVE_ACTION_NOTE_COMMANDS, MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS,
   DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
   DISCARD_ACTION_CHANGE_LIST_NAME, DISCARD_ACTION_UPDATE_BULK_EDIT_URL_HASH,
-  DISCARD_ACTION_SHOW_NLIM_POPUP, MY_NOTES, TRASH, ARCHIVE, ID, NEW_NOTE, NEW_NOTE_OBJ,
+  DISCARD_ACTION_SHOW_NOTE_LIST_MENU_POPUP, DISCARD_ACTION_SHOW_NLIM_POPUP,
+  MY_NOTES, TRASH, ARCHIVE, ID, NEW_NOTE, NEW_NOTE_OBJ,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES,
   N_DAYS, CD_ROOT, NOTES, IMAGES, SETTINGS, INDEX, DOT_JSON, PINS, LG_WIDTH,
   IMAGE_FILE_EXTS, IAP_STATUS_URL, COM_JUSTNOTECC, SIGNED_TEST_STRING, VALID, ACTIVE,
@@ -1499,6 +1501,55 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
   }
 };
 
+export const showNoteListMenuPopup = (rect, doCheckEditing, doReinitEditor) => async (
+  dispatch, getState
+) => {
+
+  const _noteId = getState().display.noteId;
+
+  if (!rect) rect = vars.showNoteListMenuPopup.selectedRect;
+
+  if (doCheckEditing) {
+    if (vars.updateSettings.doFetch) return;
+
+    const isEditorUploading = getState().editor.isUploading;
+    if (isEditorUploading) return;
+
+    const isEditorFocused = getState().display.isEditorFocused;
+    if (isEditorFocused) {
+      vars.showNoteListMenuPopup.selectedRect = rect;
+      dispatch(increaseShowNoteListMenuPopupCount());
+      return;
+    }
+  }
+
+  if (doReinitEditor) {
+    dispatch(updateEditorFocused(false));
+
+    // No need updateNoteIdUrlHash here as shouldn't be possible
+    //   to show the popup while editing in NavPanel.
+    if (_noteId === NEW_NOTE) dispatch(updateNoteId(null));
+    else dispatch(increaseSetInitDataCount());
+  }
+
+  updatePopupUrlHash(NOTE_LIST_MENU_POPUP, true, rect);
+};
+
+export const onShowNoteListMenuPopup = (title, body) => async (
+  dispatch, getState
+) => {
+  const { listName, noteId } = getState().display;
+  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
+
+  if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
+    dispatch(updateDiscardAction(DISCARD_ACTION_SHOW_NOTE_LIST_MENU_POPUP));
+    updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
+    return;
+  }
+
+  dispatch(showNoteListMenuPopup(null, false, true));
+};
+
 export const showNLIMPopup = (noteId, rect, doCheckEditing, doReinitEditor) => async (
   dispatch, getState
 ) => {
@@ -1850,6 +1901,10 @@ export const increaseUpdateBulkEditUrlHashCount = () => {
 
 export const increaseUpdateBulkEditCount = () => {
   return { type: INCREASE_UPDATE_BULK_EDIT_COUNT };
+};
+
+export const increaseShowNoteListMenuPopupCount = () => {
+  return { type: INCREASE_SHOW_NOTE_LIST_MENU_POPUP_COUNT };
 };
 
 export const increaseShowNLIMPopupCount = () => {
