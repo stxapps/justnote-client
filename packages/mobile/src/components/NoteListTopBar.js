@@ -5,9 +5,7 @@ import Svg, { Path, Circle } from 'react-native-svg';
 
 import { updatePopup, showNoteListMenuPopup } from '../actions';
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
-import {
-  NOTE_LIST_MENU_POPUP, SEARCH_POPUP, LG_WIDTH, SHOW_SYNCED,
-} from '../types/const';
+import { SEARCH_POPUP, LG_WIDTH, SHOW_SYNCED } from '../types/const';
 import { getListNameMap } from '../selectors';
 import { getListNameDisplayName } from '../utils';
 import { rotateAnimConfig } from '../types/animConfigs';

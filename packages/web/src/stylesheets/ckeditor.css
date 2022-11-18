@@ -56,7 +56,7 @@
   --ck-color-button-on-active-background: var(--jn-editor-gray-300);
   --ck-color-button-on-active-shadow: var(--jn-editor-gray-400);
   --ck-color-button-on-disabled-background: var(--jn-editor-gray-300);
-  --ck-color-button-on-color: var(--jn-editor-gray-400);
+  --ck-color-button-on-color: var(--jn-editor-gray-600);
 
   --ck-color-button-action-background: var(--ck-color-base-action);
   --ck-color-button-action-hover-background: var(--jn-editor-green-500);
@@ -155,7 +155,7 @@
   --ck-color-button-on-active-background: var(--jn-editor-gray-600);
   --ck-color-button-on-active-shadow: var(--jn-editor-gray-500);
   --ck-color-button-on-disabled-background: var(--jn-editor-gray-600);
-  --ck-color-button-on-color: var(--jn-editor-gray-500);
+  --ck-color-button-on-color: var(--jn-editor-gray-300);
 
   --ck-color-button-action-background: var(--ck-color-base-action);
   --ck-color-button-action-hover-background: var(--jn-editor-green-500);
@@ -348,4 +348,10 @@
 
 .blk-mode .ck-content .todo-list .todo-list__label>input:before {
   border: 1px solid var(--jn-editor-gray-300);
+}
+
+@media (any-hover: none) {
+  .ck.ck-balloon-panel.ck-tooltip {
+    display: none;
+  }
 }

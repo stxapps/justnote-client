@@ -378,4 +378,4 @@
   + edit packages/ckeditor5-build-decoupled-document/package.json
   + edit packages/ckeditor5-build-decoupled-document/src/ckeditor.js
   + add packages/ckeditor5-build-decoupled-document/src/objecturluploadadapter.js
-
+  + run patch.js
