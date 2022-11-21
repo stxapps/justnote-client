@@ -2853,7 +2853,7 @@ export const deleteAllData = () => async (dispatch, getState) => {
 
     // Need to close the settings popup to update the url hash,
     //   as DELETE_ALL_DATA will set isSettingsPopupShown to false.
-    if (getState().settings.isSettingsPopupShown) {
+    if (getState().display.isSettingsPopupShown) {
       updatePopupUrlHash(SETTINGS_POPUP, false, null);
     }
     dispatch({ type: DELETE_ALL_DATA });
