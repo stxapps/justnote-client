@@ -1127,13 +1127,14 @@ export const showNoteListMenuPopup = (rect, doCheckEditing, doReinitEditor) => a
   dispatch(updatePopup(NOTE_LIST_MENU_POPUP, true, rect));
 };
 
-export const onShowNoteListMenuPopup = (title, body) => async (
+export const onShowNoteListMenuPopup = (title, body, keyboardHeight = 0) => async (
   dispatch, getState
 ) => {
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
   if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
+    if (keyboardHeight > 0) dispatch(increaseBlurCount());
     dispatch(updateDiscardAction(DISCARD_ACTION_SHOW_NOTE_LIST_MENU_POPUP));
     dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
     return;
@@ -1175,13 +1176,14 @@ export const showNLIMPopup = (noteId, rect, doCheckEditing, doReinitEditor) => a
   dispatch(updatePopup(NOTE_LIST_ITEM_MENU_POPUP, true, rect));
 };
 
-export const onShowNLIMPopup = (title, body) => async (
+export const onShowNLIMPopup = (title, body, keyboardHeight = 0) => async (
   dispatch, getState
 ) => {
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
   if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
+    if (keyboardHeight > 0) dispatch(increaseBlurCount());
     dispatch(updateDiscardAction(DISCARD_ACTION_SHOW_NLIM_POPUP));
     dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
     return;

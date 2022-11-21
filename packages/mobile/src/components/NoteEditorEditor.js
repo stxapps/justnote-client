@@ -215,9 +215,9 @@ const NoteEditorEditor = (props) => {
     } else if (action === GET_DATA_UPDATE_BULK_EDIT) {
       dispatch(onUpdateBulkEdit(title, body, keyboardHeight.current));
     } else if (action === GET_DATA_SHOW_NOTE_LIST_MENU_POPUP) {
-      dispatch(onShowNoteListMenuPopup(title, body));
+      dispatch(onShowNoteListMenuPopup(title, body, keyboardHeight.current));
     } else if (action === GET_DATA_SHOW_NLIM_POPUP) {
-      dispatch(onShowNLIMPopup(title, body));
+      dispatch(onShowNLIMPopup(title, body, keyboardHeight.current));
     } else throw new Error(`Invalid getDataAction: ${getDataAction.current}`);
   }, [dispatch]);
 
