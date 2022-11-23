@@ -1,4 +1,4 @@
-import { Linking, AppState, Platform, Appearance } from 'react-native';
+import { Linking, AppState, Platform, Appearance, Share } from 'react-native';
 import * as RNIap from 'react-native-iap';
 import { LexoRank } from '@wewatch/lexorank';
 import { is24HourFormat } from 'react-native-device-time-format';
@@ -70,7 +70,7 @@ import {
 } from '../types/const';
 import {
   isEqual, isObject, isString, sleep, separateUrlAndParam,
-  getUserImageUrl, randomString, isNoteBodyEqual,
+  getUserImageUrl, randomString, stripHtml, isNoteBodyEqual,
   clearNoteData, getStaticFPath, deriveFPaths, getListNameObj, getAllListNames,
   getMainId, listNoteIds, getNoteFPaths, getSettingsFPath, getLatestPurchase,
   getValidPurchase, doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins,
@@ -2710,4 +2710,30 @@ export const updateThemeCustomOptions = () => async (dispatch, getState) => {
 
 export const updateIs24HFormat = (is24HFormat) => {
   return { type: UPDATE_IS_24H_FORMAT, payload: is24HFormat };
+};
+
+export const shareNote = () => async (dispatch, getState) => {
+  const { listName, selectingNoteId } = getState().display;
+  const note = getState().notes[listName][selectingNoteId];
+
+  try {
+    const result = await Share.share({
+      message: note.title + '\n\n' + stripHtml(note.body, true),
+    });
+    if (result.action === Share.sharedAction) {
+      if (result.activityType) {
+        console.log('shared with activity type:', result.activityType);
+      }
+      console.log('shareNote shared.');
+    } else if (result.action === Share.dismissedAction) {
+      console.log('shareNote dismissed.');
+    }
+  } catch (error) {
+    console.log('shareNote error: ', error);
+    alert(error.message);
+  }
+};
+
+export const exportNoteAsPdf = () => async (dispatch, getState) => {
+
 };
