@@ -558,7 +558,7 @@ export const stripHtml = (s, doInsertNewLine = false) => {
     s = s.replace(/<\/li>/gi, '\n</li>');
     s = s.replace(/<\/ul>\n<\/li>/gi, '</ul></li>');
 
-    for (const match of `${s}`.matchAll(/<li>([^(<\/li>)]+)<ul>/gi)) {
+    for (const match of `${s}`.matchAll(/<li>([^(</li>)]+)<ul>/gi)) {
       const part = match[1];
       s = s.replace(part, `${part}\n`);
     }
@@ -570,10 +570,10 @@ export const stripHtml = (s, doInsertNewLine = false) => {
   if (doInsertNewLine) s = s.replace(/(<([^>]+)>)/gi, '');
   else s = s.replace(/(<([^>]+)>)/gi, ' ');
 
-  s = s.replace(codeRe, (match, entity) => codeMap[entity])
+  s = s.replace(codeRe, (match, entity) => codeMap[entity]);
 
   if (doInsertNewLine) { /* do nothing here */ }
-  else s = s.replace(/\s+/g, ' ')
+  else s = s.replace(/\s+/g, ' ');
 
   s = s.trim();
   return s;

@@ -2730,7 +2730,6 @@ export const shareNote = () => async (dispatch, getState) => {
     }
   } catch (error) {
     console.log('shareNote error: ', error);
-    alert(error.message);
   }
 };
 
