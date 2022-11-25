@@ -552,6 +552,17 @@ export const getFormattedShortDate = (d, doExcludeYear = false) => {
   return `${month}/${date}/${year}`;
 };
 
+export const getFormattedTimeStamp = (d) => {
+  const year = d.getFullYear();
+  const month = d.getMonth() + 1;
+  const date = d.getDate();
+  const hour = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  const sec = String(d.getSeconds()).padStart(2, '0');
+
+  return `${year}-${month}-${date} ${hour}-${min}-${sec}`;
+};
+
 export const stripHtml = (s, doInsertNewLine = false) => {
   if (doInsertNewLine) {
     s = s.replace(/<\/p>/gi, '\n</p>');

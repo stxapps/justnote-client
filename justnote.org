@@ -280,6 +280,7 @@
 - yarn add @types/react-native --dev
 - yarn add react-native-iap@8.2.1 @wewatch/lexorank axios@0.27.2
 - yarn add https://github.com/stxapps/react-native-device-time-format#63f4a9158a91c391d67317a489ccfe8ec28a7c84
+- yarn add https://github.com/stxapps/react-native-html-to-pdf#f4be7cf4b657be6489dab261a70c95952b4037bb
 - Font
   + Create react-native.config.js
   + Run npx react-native-asset

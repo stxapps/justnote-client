@@ -1,7 +1,11 @@
-import { Linking, AppState, Platform, Appearance, Share } from 'react-native';
+import {
+  Linking, AppState, Platform, Appearance, Share, Alert, PermissionsAndroid,
+} from 'react-native';
 import * as RNIap from 'react-native-iap';
 import { LexoRank } from '@wewatch/lexorank';
 import { is24HourFormat } from 'react-native-device-time-format';
+import RNHTMLtoPDF from 'react-native-html-to-pdf';
+import { FileSystem } from 'react-native-file-access';
 
 import userSession from '../userSession';
 import mmkvStorage from '../mmkvStorage';
@@ -75,11 +79,13 @@ import {
   getMainId, listNoteIds, getNoteFPaths, getSettingsFPath, getLatestPurchase,
   getValidPurchase, doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins,
   getSortedNotes, separatePinnedValues, getRawPins, getFormattedTime,
-  get24HFormattedTime,
+  get24HFormattedTime, getFormattedTimeStamp,
 } from '../utils';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
 import vars from '../vars';
+
+const jhfp = require('../../jhfp');
 
 export const init = () => async (dispatch, getState) => {
 
@@ -2721,18 +2727,68 @@ export const shareNote = () => async (dispatch, getState) => {
       message: note.title + '\n\n' + stripHtml(note.body, true),
     });
     if (result.action === Share.sharedAction) {
-      if (result.activityType) {
-        console.log('shared with activity type:', result.activityType);
-      }
-      console.log('shareNote shared.');
+      let msg = 'shareNote shared'
+      if (result.activityType) msg += ` with activity type: ${result.activityType}`;
+      console.log(msg);
     } else if (result.action === Share.dismissedAction) {
       console.log('shareNote dismissed.');
     }
   } catch (error) {
-    console.log('shareNote error: ', error);
+    Alert.alert('Sharing Note Error!', `Please wait a moment and try again. If the problem persists, please contact us.\n\n${error}`);
   }
 };
 
 export const exportNoteAsPdf = () => async (dispatch, getState) => {
+  const { listName, selectingNoteId } = getState().display;
+  const note = getState().notes[listName][selectingNoteId];
 
+  let html = `${jhfp}`;
+  html = html.replace(/__-title-__/g, note.title ? note.title : '');
+  html = html.replace(/__-body-__/g, note.body ? note.body : '');
+
+  let name = note.title ? `${note.title}` : 'Justnote\'s note';
+  name += ` ${getFormattedTimeStamp(new Date())}`;
+
+  const options = { html, fileName: name };
+  const file = await RNHTMLtoPDF.convert(options)
+
+  if (Platform.OS === 'ios') {
+    try {
+      const result = await Share.share({ url: 'file://' + file.filePath });
+      if (result.action === Share.sharedAction) {
+        let msg = 'exportNoteAsPdf shared'
+        if (result.activityType) msg += ` with activity type: ${result.activityType}`;
+        console.log(msg);
+      } else if (result.action === Share.dismissedAction) {
+        console.log('exportNoteAsPdf dismissed.');
+      }
+    } catch (error) {
+      Alert.alert('Exporting Note Error!', `Please wait a moment and try again. If the problem persists, please contact us.\n\n${error}`);
+    }
+    return;
+  }
+
+  if (Platform.OS === 'android') {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+    );
+    if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+      console.log("Write external storage permission denied");
+      return;
+    }
+
+    try {
+      const fname = name + '.pdf';
+      await FileSystem.cpExternal(file.filePath, fname, 'downloads');
+      Alert.alert(
+        'Export completed',
+        `The exported PDF file - ${fname} - has been saved in Downloads.`,
+      );
+    } catch (error) {
+      Alert.alert('Exporting Note Error!', `Please wait a moment and try again. If the problem persists, please contact us.\n\n${error}`);
+    }
+    return;
+  }
+
+  console.log('Invalid platform: ', Platform.OS);
 };
