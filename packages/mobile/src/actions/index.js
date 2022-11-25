@@ -2727,7 +2727,7 @@ export const shareNote = () => async (dispatch, getState) => {
       message: note.title + '\n\n' + stripHtml(note.body, true),
     });
     if (result.action === Share.sharedAction) {
-      let msg = 'shareNote shared'
+      let msg = 'shareNote shared';
       if (result.activityType) msg += ` with activity type: ${result.activityType}`;
       console.log(msg);
     } else if (result.action === Share.dismissedAction) {
@@ -2769,13 +2769,13 @@ export const exportNoteAsPdf = () => async (dispatch, getState) => {
   name += ` ${getFormattedTimeStamp(new Date())}`;
 
   const options = { html, fileName: name };
-  const file = await RNHTMLtoPDF.convert(options)
+  const file = await RNHTMLtoPDF.convert(options);
 
   if (Platform.OS === 'ios') {
     try {
       const result = await Share.share({ url: 'file://' + file.filePath });
       if (result.action === Share.sharedAction) {
-        let msg = 'exportNoteAsPdf shared'
+        let msg = 'exportNoteAsPdf shared';
         if (result.activityType) msg += ` with activity type: ${result.activityType}`;
         console.log(msg);
       } else if (result.action === Share.dismissedAction) {
@@ -2792,7 +2792,7 @@ export const exportNoteAsPdf = () => async (dispatch, getState) => {
       PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
     );
     if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-      console.log("Write external storage permission denied");
+      console.log('Write external storage permission denied');
       return;
     }
 
