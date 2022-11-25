@@ -79,7 +79,7 @@ import {
   getMainId, listNoteIds, getNoteFPaths, getSettingsFPath, getLatestPurchase,
   getValidPurchase, doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins,
   getSortedNotes, separatePinnedValues, getRawPins, getFormattedTime,
-  get24HFormattedTime, getFormattedTimeStamp,
+  get24HFormattedTime, getFormattedTimeStamp, getMineSubType,
 } from '../utils';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
@@ -2738,13 +2738,32 @@ export const shareNote = () => async (dispatch, getState) => {
   }
 };
 
+const replaceImageUrls = async (body) => {
+  const sources = [];
+  for (const match of body.matchAll(/<img[^>]+?src="([^"]+)"[^>]*>/gi)) {
+    const src = match[1];
+    if (src.startsWith(CD_ROOT + '/')) sources.push(src);
+  }
+
+  for (const src of sources) {
+    const content = await fileApi.getFile(src);
+    if (isString(content)) {
+      const subtype = getMineSubType(src);
+      body = body.replace(src, `data:image/${subtype};base64,${content}`);
+    }
+  }
+
+  return body;
+};
+
 export const exportNoteAsPdf = () => async (dispatch, getState) => {
   const { listName, selectingNoteId } = getState().display;
   const note = getState().notes[listName][selectingNoteId];
+  const body = await replaceImageUrls(note.body);
 
   let html = `${jhfp}`;
-  html = html.replace(/__-title-__/g, note.title ? note.title : '');
-  html = html.replace(/__-body-__/g, note.body ? note.body : '');
+  html = html.replace(/__-title-__/g, note.title);
+  html = html.replace(/__-body-__/g, body);
 
   let name = note.title ? `${note.title}` : 'Justnote\'s note';
   name += ` ${getFormattedTimeStamp(new Date())}`;

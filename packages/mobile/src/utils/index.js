@@ -730,6 +730,18 @@ export const getFileExt = (fname) => {
   return null;
 };
 
+export const getMineSubType = (fname) => {
+  const ext = getFileExt(fname);
+  if (isString(ext)) {
+    if (ext === 'jpg') return 'jpeg';
+    if (ext === 'svg') return 'svg+xml';
+    if (ext === 'ico') return 'x-icon';
+    if (ext === 'tif') return 'tiff';
+    return ext;
+  }
+  return '*';
+};
+
 export const getStaticFPath = (fpath) => {
   fpath = fpath.slice(fpath.indexOf(CD_ROOT + '/'));
   fpath = fpath.slice((CD_ROOT + '/').length);
