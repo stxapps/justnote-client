@@ -135,7 +135,7 @@ const NoteListItemMenuPopup = () => {
       if (pinStatus === PINNED) menu = [...menu, MANAGE_PIN];
       else if (isUserSignedIn && pinStatus === null) menu = [...menu, PIN];
 
-      menu = [...menu, SHARE, EXPORT_AS_PDF];
+      menu = [...menu, EXPORT_AS_PDF, SHARE];
     }
 
     return menu;
