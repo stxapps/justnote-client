@@ -2764,11 +2764,20 @@ export const exportNoteAsPdf = () => async (dispatch, getState) => {
   let html = `${jhfp}`;
   html = html.replace(/__-title-__/g, note.title);
   html = html.replace(/__-body-__/g, body);
+  if (Platform.OS === 'ios') html = html.replace(' mx-12 my-16"', '"');
 
   let name = note.title ? `${note.title}` : 'Justnote\'s note';
   name += ` ${getFormattedTimeStamp(new Date())}`;
 
   const options = { html, fileName: name };
+  if (Platform.OS === 'ios') {
+    options.paddingLeft = 48;
+    options.paddingRight = 48;
+    options.paddingTop = 64;
+    options.paddingBottom = 64;
+    options.bgColor = '#FFFFFF';
+  }
+
   const file = await RNHTMLtoPDF.convert(options);
 
   if (Platform.OS === 'ios') {

@@ -6102,9 +6102,9 @@ react-native-gradle-plugin@^0.70.3:
   resolved "https://registry.yarnpkg.com/react-native-gradle-plugin/-/react-native-gradle-plugin-0.70.3.tgz#cbcf0619cbfbddaa9128701aa2d7b4145f9c4fc8"
   integrity sha512-oOanj84fJEXUg9FoEAQomA8ISG+DVIrTZ3qF7m69VQUJyOGYyDZmPqKcjvRku4KXlEH6hWO9i4ACLzNBh8gC0A==
 
-"react-native-html-to-pdf@https://github.com/stxapps/react-native-html-to-pdf#f4be7cf4b657be6489dab261a70c95952b4037bb":
+"react-native-html-to-pdf@https://github.com/stxapps/react-native-html-to-pdf#77aed8df9caa3b48f7cf19933bc6d6576fe817ce":
   version "0.12.0"
-  resolved "https://github.com/stxapps/react-native-html-to-pdf#f4be7cf4b657be6489dab261a70c95952b4037bb"
+  resolved "https://github.com/stxapps/react-native-html-to-pdf#77aed8df9caa3b48f7cf19933bc6d6576fe817ce"
 
 react-native-iap@8.2.1:
   version "8.2.1"
