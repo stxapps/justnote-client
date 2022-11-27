@@ -329,6 +329,8 @@ PODS:
   - react-native-file-access (2.5.0):
     - React-Core
     - ZIPFoundation (= 0.9.11)
+  - react-native-html-to-pdf (0.12.0):
+    - React
   - react-native-mmkv-storage (0.4.4):
     - MMKV (= 1.2.7)
     - React-Core
@@ -484,6 +486,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - react-native-blockstack (from `../node_modules/react-native-blockstack`)
   - react-native-file-access (from `../node_modules/react-native-file-access`)
+  - react-native-html-to-pdf (from `../node_modules/react-native-html-to-pdf`)
   - react-native-mmkv-storage (from `../node_modules/react-native-mmkv-storage`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-webview (from `../node_modules/react-native-webview`)
@@ -585,6 +588,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-blockstack"
   react-native-file-access:
     :path: "../node_modules/react-native-file-access"
+  react-native-html-to-pdf:
+    :path: "../node_modules/react-native-html-to-pdf"
   react-native-mmkv-storage:
     :path: "../node_modules/react-native-mmkv-storage"
   react-native-safe-area-context:
@@ -678,6 +683,7 @@ SPEC CHECKSUMS:
   React-logger: cffcc09e8aba8a3014be8d18da7f922802e9f19e
   react-native-blockstack: a54aed35a241b7be1e735a334f9c644f6d9237fe
   react-native-file-access: 204693d308701ba232dcf91facef05498fcde9a2
+  react-native-html-to-pdf: ceabb4877a3c0b1e61945142f177be2a8e247c3e
   react-native-mmkv-storage: 209432836f405981816f1b7bfb0e82baaf84f02a
   react-native-safe-area-context: 99b24a0c5acd0d5dcac2b1a7f18c49ea317be99a
   react-native-webview: d33e2db8925d090871ffeb232dfa50cb3a727581
