@@ -3326,6 +3326,7 @@ export const viewNoteAsWebpage = () => async (dispatch, getState) => {
   let html = `${jhfp}`;
   html = html.replace(/__-title-__/g, note.title);
   html = html.replace(/__-body-__/g, body);
+  html = html.replace(' mx-12 my-16"', '"');
 
   const w = window.open();
   w.document.write(html);
