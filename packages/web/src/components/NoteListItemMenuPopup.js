@@ -4,11 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import {
   updatePopupUrlHash, moveNotesWithAction, pinNotes, updateMoveAction,
-  updateDeleteAction, updateListNamesMode,
+  updateDeleteAction, updateListNamesMode, viewNoteAsWebpage,
 } from '../actions';
 import {
-  MY_NOTES, TRASH, ARCHIVE, REMOVE, RESTORE, DELETE, MOVE_TO,
-  PIN, MANAGE_PIN, PINNED, NOTE_ITEM_POPUP_MENU,
+  MY_NOTES, TRASH, ARCHIVE, REMOVE, RESTORE, DELETE, MOVE_TO, PIN, MANAGE_PIN, PINNED,
+  VIEW_AS_WEBPAGE, NOTE_ITEM_POPUP_MENU,
   NOTE_LIST_ITEM_MENU_POPUP, LIST_NAMES_POPUP, PIN_MENU_POPUP, CONFIRM_DELETE_POPUP,
   MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_ITEM_MENU, LIST_NAMES_MODE_MOVE_NOTES,
 } from '../types/const';
@@ -72,6 +72,9 @@ const NoteListItemMenuPopup = () => {
       dispatch(pinNotes([selectingNoteId]));
     } else if (text === MANAGE_PIN) {
       updatePopupUrlHash(PIN_MENU_POPUP, true, anchorPosition, true);
+    } else if (text === VIEW_AS_WEBPAGE) {
+      onCancelBtnClick();
+      dispatch(viewNoteAsWebpage());
     } else {
       console.log(`In NoteListItemMenuPopup, invalid text: ${text}`);
     }
@@ -96,6 +99,8 @@ const NoteListItemMenuPopup = () => {
       // If busy, the menuBtn will be disabled.
       if (pinStatus === PINNED) menu = [...menu, MANAGE_PIN];
       else if (doEnableExtraFeatures && pinStatus === null) menu = [...menu, PIN];
+
+      menu = [...menu, VIEW_AS_WEBPAGE];
     }
 
     return menu;

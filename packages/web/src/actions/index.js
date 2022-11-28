@@ -73,10 +73,12 @@ import {
   getSortedNotes, separatePinnedValues, getRawPins, getFormattedTime,
   get24HFormattedTime,
 } from '../utils';
-import { isUint8Array } from '../utils/index-web';
+import { isUint8Array, isBlob, convertBlobToDataUrl } from '../utils/index-web';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
 import vars from '../vars';
+
+const jhfp = require('../jhfp');
 
 let popStateListener, hashChangeListener;
 export const init = () => async (dispatch, getState) => {
@@ -3295,4 +3297,37 @@ export const updateThemeCustomOptions = () => async (dispatch, getState) => {
 
 export const updateIs24HFormat = (is24HFormat) => {
   return { type: UPDATE_IS_24H_FORMAT, payload: is24HFormat };
+};
+
+const replaceImageUrls = async (body) => {
+  const sources = [];
+  for (const match of body.matchAll(/<img[^>]+?src="([^"]+)"[^>]*>/gi)) {
+    const src = match[1];
+    if (src.startsWith(CD_ROOT + '/')) sources.push(src);
+  }
+
+  for (const src of sources) {
+    let content = await fileApi.getFile(src);
+    if (isUint8Array(content)) content = new Blob([content]);
+    if (isBlob(content)) {
+      const dataUrl = await convertBlobToDataUrl(content);
+      body = body.replace(src, dataUrl);
+    }
+  }
+
+  return body;
+};
+
+export const viewNoteAsWebpage = () => async (dispatch, getState) => {
+  const { listName, selectingNoteId } = getState().display;
+  const note = getState().notes[listName][selectingNoteId];
+  const body = await replaceImageUrls(note.body);
+
+  let html = `${jhfp}`;
+  html = html.replace(/__-title-__/g, note.title);
+  html = html.replace(/__-body-__/g, body);
+
+  const w = window.open();
+  w.document.write(html);
+  w.document.close();
 };

@@ -552,15 +552,42 @@ export const getFormattedShortDate = (d, doExcludeYear = false) => {
   return `${month}/${date}/${year}`;
 };
 
-export const stripHtml = (s) => {
+export const getFormattedTimeStamp = (d) => {
+  const year = d.getFullYear();
+  const month = d.getMonth() + 1;
+  const date = d.getDate();
+  const hour = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  const sec = String(d.getSeconds()).padStart(2, '0');
+
+  return `${year}-${month}-${date} ${hour}-${min}-${sec}`;
+};
+
+export const stripHtml = (s, doInsertNewLine = false) => {
+  if (doInsertNewLine) {
+    s = s.replace(/<\/p>/gi, '\n</p>');
+    s = s.replace(/<\/li>/gi, '\n</li>');
+    s = s.replace(/<\/ul>\n<\/li>/gi, '</ul></li>');
+
+    for (const match of `${s}`.matchAll(/<li>([^(</li>)]+)<ul>/gi)) {
+      const part = match[1];
+      s = s.replace(part, `${part}\n`);
+    }
+  }
+
   const codeRe = /&(nbsp|amp|quot|lt|gt);/g;
   const codeMap = { 'nbsp': ' ', 'amp': '&', 'quot': '"', 'lt': '<', 'gt': '>' };
 
-  return s
-    .replace(/(<([^>]+)>)/gi, ' ')
-    .replace(codeRe, (match, entity) => codeMap[entity])
-    .replace(/\s\s+/g, ' ')
-    .trim();
+  if (doInsertNewLine) s = s.replace(/(<([^>]+)>)/gi, '');
+  else s = s.replace(/(<([^>]+)>)/gi, ' ');
+
+  s = s.replace(codeRe, (match, entity) => codeMap[entity]);
+
+  if (doInsertNewLine) { /* do nothing here */ }
+  else s = s.replace(/\s+/g, ' ');
+
+  s = s.trim();
+  return s;
 };
 
 const sortClassNamesInBody = (body) => {
@@ -701,6 +728,18 @@ export const getFileExt = (fname) => {
     if (ext.length <= 5) return ext.toLowerCase();
   }
   return null;
+};
+
+export const getMineSubType = (fname) => {
+  const ext = getFileExt(fname);
+  if (isString(ext)) {
+    if (ext === 'jpg') return 'jpeg';
+    if (ext === 'svg') return 'svg+xml';
+    if (ext === 'ico') return 'x-icon';
+    if (ext === 'tif') return 'tiff';
+    return ext;
+  }
+  return '*';
 };
 
 export const getStaticFPath = (fpath) => {

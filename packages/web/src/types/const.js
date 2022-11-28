@@ -74,6 +74,10 @@ export const RESTORE = 'Restore';
 export const DELETE = 'Permanently delete';
 export const MOVE_TO = 'Move to';
 
+export const VIEW_AS_WEBPAGE = 'View as Webpage';
+export const SHARE = 'Share';
+export const EXPORT_AS_PDF = 'Export as PDF';
+
 export const NOTE_ITEM_POPUP_MENU = {
   [MY_NOTES]: [ARCHIVE, REMOVE, MOVE_TO],
   [TRASH]: [RESTORE, DELETE],

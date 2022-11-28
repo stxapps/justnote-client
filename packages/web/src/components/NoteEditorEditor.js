@@ -16,7 +16,7 @@ import {
   isString, isNoteBodyEqual, isMobile as _isMobile, replaceObjectUrls, getFileExt,
   debounce,
 } from '../utils';
-import { isUint8Array, isBlob } from '../utils/index-web';
+import { isUint8Array, isBlob, convertDataUrlToBlob } from '../utils/index-web';
 
 import '../stylesheets/ckeditor.css';
 
@@ -30,12 +30,6 @@ const GET_DATA_CHANGE_LIST_NAME = 'GET_DATA_CHANGE_LIST_NAME';
 const GET_DATA_UPDATE_BULK_EDIT_URL_HASH = 'GET_DATA_UPDATE_BULK_EDIT_URL_HASH';
 const GET_DATA_SHOW_NOTE_LIST_MENU_POPUP = 'GET_DATA_SHOW_NOTE_LIST_MENU_POPUP';
 const GET_DATA_SHOW_NLIM_POPUP = 'GET_DATA_SHOW_NLIM_POPUP';
-
-const dataUrlToBlob = async (content) => {
-  const res = await fetch(content);
-  const blob = await res.blob();
-  return blob;
-};
 
 const NoteEditorEditor = (props) => {
 
@@ -127,7 +121,7 @@ const NoteEditorEditor = (props) => {
       return isString(content) && content.startsWith('data:');
     });
     media = await Promise.all(media.map(async ({ name, content }) => {
-      const blob = await dataUrlToBlob(content);
+      const blob = await convertDataUrlToBlob(content);
       return { name, content, blob };
     }));
 
