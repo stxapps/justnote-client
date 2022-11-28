@@ -3319,6 +3319,11 @@ const replaceImageUrls = async (body) => {
 };
 
 export const viewNoteAsWebpage = () => async (dispatch, getState) => {
+  // Safari is blocking window.open() which is made inside an async call.
+  // So need to call it before any awaits.
+  // https://stackoverflow.com/a/39387533
+  const w = window.open();
+
   const { listName, selectingNoteId } = getState().display;
   const note = getState().notes[listName][selectingNoteId];
   const body = await replaceImageUrls(note.body);
@@ -3328,7 +3333,6 @@ export const viewNoteAsWebpage = () => async (dispatch, getState) => {
   html = html.replace(/__-body-__/g, body);
   html = html.replace(' mx-12 my-16"', '"');
 
-  const w = window.open();
   w.document.write(html);
   w.document.close();
 };
