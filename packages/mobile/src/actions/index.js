@@ -2801,7 +2801,10 @@ export const exportNoteAsPdf = () => async (dispatch, getState) => {
       PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
     );
     if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-      console.log('Write external storage permission denied');
+      Alert.alert(
+        'Permission denied',
+        'We don\'t have permission to save the exported PDF file in Downloads.\n\nPlease grant this permission in Settings -> Apps -> Permissions.',
+      );
       return;
     }
 
