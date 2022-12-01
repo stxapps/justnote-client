@@ -8,6 +8,7 @@ import Svg, { Path } from 'react-native-svg';
 import { updatePopup, updateSettingsPopup, updateSettingsViewId } from '../actions';
 import {
   PAYWALL_POPUP, SETTINGS_VIEW_IAP, FEATURE_PIN, FEATURE_APPEARANCE,
+  FEATURE_SECTION_NOTES_BY_MONTH,
 } from '../types/const';
 import { dialogFMV } from '../types/animConfigs';
 import { paywallFeature } from '../vars';
@@ -88,6 +89,9 @@ const PaywallPopup = () => {
   let feature = 'This';
   if (paywallFeature.feature === FEATURE_PIN) feature = 'Pin to the top';
   if (paywallFeature.feature === FEATURE_APPEARANCE) feature = 'Dark appearance';
+  if (paywallFeature.feature === FEATURE_SECTION_NOTES_BY_MONTH) {
+    feature = 'Section by month';
+  }
 
   const canvasStyle = { paddingLeft: 16 + insets.left, paddingRight: 16 + insets.right };
   const popupStyle = {

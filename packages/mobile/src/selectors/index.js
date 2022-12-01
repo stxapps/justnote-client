@@ -394,3 +394,12 @@ export const makeIsTimePickMinuteItemSelected = () => {
     }
   );
 };
+
+export const getDoSectionNotesByMonth = createSelector(
+  state => getDoEnableExtraFeatures(state),
+  state => state.settings.doSectionNotesByMonth,
+  (doEnable, doSectionNotesByMonth) => {
+    if (!doEnable) return false;
+    return doSectionNotesByMonth;
+  },
+);

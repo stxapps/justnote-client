@@ -28,7 +28,8 @@ import {
   MERGE_NOTES_ROLLBACK, UPDATE_LIST_NAME_EDITORS, ADD_LIST_NAMES, UPDATE_LIST_NAMES,
   MOVE_LIST_NAME, MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_SELECTING_LIST_NAME,
   UPDATE_DELETING_LIST_NAME, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, UPDATE_SORT_ON,
-  UPDATE_DO_DESCENDING_ORDER, UPDATE_NOTE_DATE_SHOWING_MODE, UPDATE_SETTINGS,
+  UPDATE_DO_DESCENDING_ORDER, UPDATE_NOTE_DATE_SHOWING_MODE,
+  UPDATE_DO_SECTION_NOTES_BY_MONTH, UPDATE_SETTINGS,
   UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS,
   UPDATE_SETTINGS_VIEW_ID, UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION,
   UPDATE_DISCARD_ACTION, UPDATE_LIST_NAMES_MODE, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
@@ -71,6 +72,7 @@ import {
   COM_JUSTNOTECC_SUPPORTER, SIGNED_TEST_STRING, VALID, INVALID, UNKNOWN, ERROR, ACTIVE,
   SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS,
   WHT_MODE, BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE,
+  FEATURE_SECTION_NOTES_BY_MONTH,
 } from '../types/const';
 import {
   isEqual, isObject, isString, sleep, separateUrlAndParam,
@@ -1305,6 +1307,21 @@ export const updateDoDescendingOrder = (doDescendingOrder) => {
 
 export const updateNoteDateShowingMode = (mode) => {
   return { type: UPDATE_NOTE_DATE_SHOWING_MODE, payload: mode };
+};
+
+export const updateDoSectionNotesByMonth = (doSection) => async (
+  dispatch, getState
+) => {
+  const state = getState();
+  const purchases = state.settings.purchases;
+
+  if (!doEnableExtraFeatures(purchases)) {
+    vars.paywallFeature.feature = FEATURE_SECTION_NOTES_BY_MONTH;
+    dispatch(updatePopup(PAYWALL_POPUP, true));
+    return;
+  }
+
+  dispatch({ type: UPDATE_DO_SECTION_NOTES_BY_MONTH, payload: doSection });
 };
 
 export const updateSelectingListName = (listName) => {

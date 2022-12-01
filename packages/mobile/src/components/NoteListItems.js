@@ -5,9 +5,13 @@ import Svg, { Path } from 'react-native-svg';
 import { Flow } from 'react-native-animated-spinkit';
 
 import { fetchMore, updateFetchedMore } from '../actions';
-import { MY_NOTES, TRASH, ARCHIVE, LG_WIDTH, BLK_MODE } from '../types/const';
-import { getListNameMap, getNotes, getIsFetchingMore, getThemeMode } from '../selectors';
-import { getListNameDisplayName } from '../utils';
+import {
+  MY_NOTES, TRASH, ARCHIVE, LG_WIDTH, BLK_MODE, ADDED_DT, UPDATED_DT,
+} from '../types/const';
+import {
+  getListNameMap, getNotes, getIsFetchingMore, getThemeMode, getDoSectionNotesByMonth,
+} from '../selectors';
+import { getListNameDisplayName, getFullYearMonth } from '../utils';
 import vars from '../vars';
 
 import { useSafeAreaFrame, useTailwind } from '.';
@@ -17,6 +21,7 @@ const SHOW_FETCH_MORE_BTN = 'SHOW_FETCH_MORE_BTN';
 const SHOW_FETCHING_MORE = 'SHOW_FETCHING_MORE';
 const SHOW_UPDATE_FETCHED_BTN = 'SHOW_UPDATE_FETCHED_BTN';
 const SHOW_EMPTY_SPACE = 'SHOW_EMPTY_SPACE';
+const SHOW_MONTH_HEAD = 'SHOW_MONTH_HEAD';
 
 const NoteListItems = () => {
 
@@ -30,6 +35,8 @@ const NoteListItems = () => {
   );
   const isFetchingMore = useSelector(state => getIsFetchingMore(state));
   const listChangedCount = useSelector(state => state.display.listChangedCount);
+  const sortOn = useSelector(state => state.settings.sortOn);
+  const doSectionNotesByMonth = useSelector(state => getDoSectionNotesByMonth(state));
   const themeMode = useSelector(state => getThemeMode(state));
   const flatList = useRef(null);
   const dispatch = useDispatch();
@@ -42,7 +49,26 @@ const NoteListItems = () => {
   }
 
   const data = useMemo(() => {
-    const _data = [...notes];
+    let _data = [...notes];
+    if (doSectionNotesByMonth) {
+      let prevMonth = null;
+
+      _data = [];
+      for (const note of notes) {
+        let dt = note.addedDT;
+        if (sortOn === ADDED_DT) { /* do nothing here */ }
+        else if (sortOn === UPDATED_DT) dt = note.updatedDT;
+        else console.log(`Invalid sortOn: ${sortOn}`);
+
+        const { year, month } = getFullYearMonth(dt);
+        if (month !== prevMonth) {
+          _data.push({ id: `${SHOW_MONTH_HEAD}-${year}-${month}`, year, month });
+        }
+
+        prevMonth = month;
+        _data.push(note);
+      }
+    }
 
     if (!hasMore) { /* Do nothing */ }
     else if (hasFetchedMore) _data.push({ id: SHOW_UPDATE_FETCHED_BTN });
@@ -54,7 +80,10 @@ const NoteListItems = () => {
     }
 
     return _data;
-  }, [notes, hasMore, hasFetchedMore, isFetchingMore, safeAreaWidth]);
+  }, [
+    notes, hasMore, hasFetchedMore, isFetchingMore, safeAreaWidth,
+    sortOn, doSectionNotesByMonth,
+  ]);
 
   const onScrollEnd = useCallback((e) => {
     const contentHeight = e.nativeEvent.contentSize.height;
@@ -174,6 +203,13 @@ const NoteListItems = () => {
   }, [onUpdateFetchedBtnClick, tailwind]);
 
   const renderItem = useCallback(({ item }) => {
+    if (item.id.startsWith(SHOW_MONTH_HEAD)) {
+      return (
+        <View style={tailwind('border-b border-gray-200 bg-gray-100 pl-4 py-1 blk:border-gray-700 blk:bg-gray-800 sm:pl-6')}>
+          <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-400')}>{item.month} {item.year}</Text>
+        </View>
+      );
+    }
     if (item.id === SHOW_FETCH_MORE_BTN) return renderFetchMoreBtn();
     if (item.id === SHOW_FETCHING_MORE) return renderFetchingMore();
     if (item.id === SHOW_UPDATE_FETCHED_BTN) return renderUpdateFetchedBtn();

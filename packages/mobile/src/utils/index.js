@@ -563,6 +563,20 @@ export const getFormattedTimeStamp = (d) => {
   return `${year}-${month}-${date} ${hour}-${min}-${sec}`;
 };
 
+export const getFullYearMonth = (dt) => {
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
+    'September', 'October', 'November', 'December',
+  ];
+
+  const d = new Date(dt);
+
+  const year = d.getFullYear();
+  const month = months[d.getMonth()];
+
+  return { year, month };
+};
+
 export const stripHtml = (s, doInsertNewLine = false) => {
   if (doInsertNewLine) {
     s = s.replace(/<\/p>/gi, '\n</p>');

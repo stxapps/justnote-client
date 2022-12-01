@@ -3,6 +3,7 @@ export const didChange = {
   sortOn: false,
   doDescendingOrder: false,
   noteDateShowingMode: false,
+  doSectionNotesByMonth: false,
   listNameMap: false,
   purchases: false,
 };

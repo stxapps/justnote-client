@@ -4,7 +4,8 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import {
   updateDoDeleteOldNotesInTrash, updateSortOn, updateDoDescendingOrder,
-  updateNoteDateShowingMode, updateTheme, updateUpdatingThemeMode, updatePopup,
+  updateNoteDateShowingMode, updateDoSectionNotesByMonth, updateTheme,
+  updateUpdatingThemeMode, updatePopup,
 } from '../actions';
 import {
   ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE,
@@ -25,6 +26,9 @@ const SettingsPopupMisc = (props) => {
   const sortOn = useSelector(state => state.settings.sortOn);
   const doDescendingOrder = useSelector(state => state.settings.doDescendingOrder);
   const noteDateShowingMode = useSelector(state => state.settings.noteDateShowingMode);
+  const doSectionNotesByMonth = useSelector(
+    state => state.settings.doSectionNotesByMonth
+  );
   const themeMode = useSelector(state => state.localSettings.themeMode);
   const customOptions = useSelector(state => state.localSettings.themeCustomOptions);
   const is24HFormat = useSelector(state => state.window.is24HFormat);
@@ -60,6 +64,10 @@ const SettingsPopupMisc = (props) => {
     } else {
       console.log('Invalid noteDateShowingMode: ', noteDateShowingMode);
     }
+  };
+
+  const onDoSectionBtnClick = () => {
+    dispatch(updateDoSectionNotesByMonth(!doSectionNotesByMonth));
   };
 
   const onThemeInputChange = (value) => {
@@ -306,6 +314,15 @@ const SettingsPopupMisc = (props) => {
         </View>
         <View style={tailwind('ml-4 h-6 w-11 flex-shrink-0 flex-grow-0')}>
           <Switch onValueChange={onDoShowDateBtnClick} value={doShowDate} thumbColor={Platform.OS === 'android' ? doShowDate ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} ios_backgroundColor={switchIosTrackColorOff} />
+        </View>
+      </View>
+      <View style={tailwind('mt-10 mb-4 flex-row items-center justify-between')}>
+        <View style={tailwind('flex-shrink flex-grow')}>
+          <Text style={tailwind('text-base font-medium leading-5 text-gray-800 blk:text-gray-100')}>Section By Month</Text>
+          <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Section notes by month and show the month at the top of each section.</Text>
+        </View>
+        <View style={tailwind('ml-4 h-6 w-11 flex-shrink-0 flex-grow-0')}>
+          <Switch onValueChange={onDoSectionBtnClick} value={doSectionNotesByMonth} thumbColor={Platform.OS === 'android' ? doSectionNotesByMonth ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} ios_backgroundColor={switchIosTrackColorOff} />
         </View>
       </View>
       <View style={tailwind('mt-10 mb-4 flex-row items-center justify-between')}>
