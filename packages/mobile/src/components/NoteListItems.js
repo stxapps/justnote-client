@@ -205,8 +205,8 @@ const NoteListItems = () => {
   const renderItem = useCallback(({ item }) => {
     if (item.id.startsWith(SHOW_MONTH_HEAD)) {
       return (
-        <View style={tailwind('border-b border-gray-200 bg-gray-100 pl-4 py-1 blk:border-gray-700 blk:bg-gray-800 sm:pl-6')}>
-          <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-400')}>{item.month} {item.year}</Text>
+        <View style={tailwind('border-b border-gray-200 bg-gray-100 pl-4 py-1 blk:border-gray-700 blk:bg-gray-800 sm:pl-6 lg:bg-gray-50 lg:blk:bg-gray-800')}>
+          <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-400 lg:text-xs')}>{item.month} {item.year}</Text>
         </View>
       );
     }

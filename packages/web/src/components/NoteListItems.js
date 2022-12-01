@@ -2,13 +2,17 @@ import React, { useEffect, useRef, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { fetchMore, updateFetchedMore } from '../actions';
-import { MY_NOTES, TRASH, ARCHIVE } from '../types/const';
-import { getListNameMap, getNotes, getIsFetchingMore } from '../selectors';
-import { getListNameDisplayName, debounce } from '../utils';
+import { MY_NOTES, TRASH, ARCHIVE, ADDED_DT, UPDATED_DT } from '../types/const';
+import {
+  getListNameMap, getNotes, getIsFetchingMore, getDoSectionNotesByMonth,
+} from '../selectors';
+import { getListNameDisplayName, debounce, getFullYearMonth } from '../utils';
 import vars from '../vars';
 
 import { useTailwind } from '.';
 import NoteListItem from './NoteListItem';
+
+const SHOW_MONTH_HEAD = 'SHOW_MONTH_HEAD';
 
 const NoteListItems = () => {
 
@@ -21,6 +25,8 @@ const NoteListItems = () => {
   );
   const isFetchingMore = useSelector(state => getIsFetchingMore(state));
   const listChangedCount = useSelector(state => state.display.listChangedCount);
+  const sortOn = useSelector(state => state.settings.sortOn);
+  const doSectionNotesByMonth = useSelector(state => getDoSectionNotesByMonth(state));
   const flatList = useRef(null);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
@@ -154,10 +160,40 @@ const NoteListItems = () => {
   };
 
   const renderItems = () => {
+    let prevMonth = null;
+
+    const items = [];
+    for (const note of notes) {
+      if (doSectionNotesByMonth) {
+        let dt = note.addedDT;
+        if (sortOn === ADDED_DT) { /* do nothing here */ }
+        else if (sortOn === UPDATED_DT) dt = note.updatedDT;
+        else console.log(`Invalid sortOn: ${sortOn}`);
+
+        const { year, month } = getFullYearMonth(dt);
+        if (month !== prevMonth) {
+          items.push({ id: `${SHOW_MONTH_HEAD}-${year}-${month}`, year, month });
+        }
+
+        prevMonth = month;
+      }
+
+      items.push(note);
+    }
+
     return (
       <div className={tailwind('mt-5')}>
         <ul className={tailwind('-my-5 divide-y divide-gray-200 blk:divide-gray-700')}>
-          {notes.map(note => <NoteListItem key={note.id} note={note} />)}
+          {items.map(item => {
+            if (item.id.startsWith(SHOW_MONTH_HEAD)) {
+              return (
+                <div key={item.id} className={tailwind('bg-gray-100 pl-4 py-1 blk:bg-gray-800 sm:pl-6 lg:bg-gray-50 lg:blk:bg-gray-800')}>
+                  <p className={tailwind('text-sm font-normal text-gray-500 blk:text-gray-400 lg:text-xs')}>{item.month} {item.year}</p>
+                </div>
+              );
+            }
+            return <NoteListItem key={item.id} note={item} />;
+          })}
         </ul>
       </div>
     );

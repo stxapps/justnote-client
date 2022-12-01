@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { updatePopup, updateSettingsPopup, updateSettingsViewId } from '../actions';
 import {
   PAYWALL_POPUP, SM_WIDTH, SETTINGS_VIEW_IAP, FEATURE_PIN, FEATURE_APPEARANCE,
+  FEATURE_SECTION_NOTES_BY_MONTH,
 } from '../types/const';
 import { dialogBgFMV, dialogFMV } from '../types/animConfigs';
 import { paywallFeature } from '../vars';
@@ -47,6 +48,9 @@ const PaywallPopup = () => {
   let feature = 'This';
   if (paywallFeature.feature === FEATURE_PIN) feature = 'Pin to the top';
   if (paywallFeature.feature === FEATURE_APPEARANCE) feature = 'Dark appearance';
+  if (paywallFeature.feature === FEATURE_SECTION_NOTES_BY_MONTH) {
+    feature = 'Section by month';
+  }
 
   const spanStyle = {};
   if (safeAreaWidth >= SM_WIDTH) spanStyle.height = safeAreaHeight;

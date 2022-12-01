@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import {
   updateDoDeleteOldNotesInTrash, updateSortOn, updateDoDescendingOrder,
-  updateNoteDateShowingMode, updateTheme,
+  updateNoteDateShowingMode, updateDoSectionNotesByMonth, updateTheme,
 } from '../actions';
 import {
   ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE,
@@ -20,6 +20,9 @@ const SettingsPopupMisc = (props) => {
   const sortOn = useSelector(state => state.settings.sortOn);
   const doDescendingOrder = useSelector(state => state.settings.doDescendingOrder);
   const noteDateShowingMode = useSelector(state => state.settings.noteDateShowingMode);
+  const doSectionNotesByMonth = useSelector(
+    state => state.settings.doSectionNotesByMonth
+  );
   const themeMode = useSelector(state => state.localSettings.themeMode);
   const customOptions = useSelector(
     state => state.localSettings.themeCustomOptions
@@ -58,6 +61,10 @@ const SettingsPopupMisc = (props) => {
     } else {
       console.log('Invalid noteDateShowingMode: ', noteDateShowingMode);
     }
+  };
+
+  const onDoSectionBtnClick = () => {
+    dispatch(updateDoSectionNotesByMonth(!doSectionNotesByMonth));
   };
 
   const onThemeInputChange = (e) => {
@@ -104,6 +111,9 @@ const SettingsPopupMisc = (props) => {
 
   const doDeleteBtnClassNames = doDeleteOldNotesInTrash ? 'bg-green-500 blk:bg-green-500' : 'bg-gray-200 blk:bg-gray-700';
   const doDeleteBtnInnerClassNames = doDeleteOldNotesInTrash ? 'translate-x-5' : 'translate-x-0';
+
+  const doSectionBtnClassNames = doSectionNotesByMonth ? 'bg-green-500 blk:bg-green-500' : 'bg-gray-200 blk:bg-gray-700';
+  const doSectionBtnInnerClassNames = doSectionNotesByMonth ? 'translate-x-5' : 'translate-x-0';
 
   const addedDTBtnClassNames = sortOn === ADDED_DT ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
   const addedDTBtnInnerClassNames = sortOn === ADDED_DT ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
@@ -260,6 +270,15 @@ const SettingsPopupMisc = (props) => {
           <span aria-hidden="true" className={tailwind(`inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out blk:bg-gray-300 ${doShowDateBtnInnerClassNames}`)} />
         </span>
       </div>
+      {doEnableExtraFeatures && <div className={tailwind('mt-10 mb-4 flex items-center justify-between space-x-4')}>
+        <div className={tailwind('flex flex-col')}>
+          <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>Section By Month</h4>
+          <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Section notes by month and show the month at the top of each section.</p>
+        </div>
+        <span onClick={onDoSectionBtnClick} role="checkbox" tabIndex={0} aria-checked="true" aria-labelledby="section-month-option-label" aria-describedby="section-month-option-description" className={tailwind(`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:focus:ring-offset-gray-900 ${doSectionBtnClassNames}`)}>
+          <span aria-hidden="true" className={tailwind(`inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out blk:bg-gray-300 ${doSectionBtnInnerClassNames}`)} />
+        </span>
+      </div>}
       <div className={tailwind('mt-10 mb-4 flex items-center justify-between space-x-4')}>
         <div className={tailwind('flex flex-col')}>
           <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>Auto Cleanup</h4>

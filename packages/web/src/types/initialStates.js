@@ -18,6 +18,7 @@ export const initialSettingsState = {
   ],
   purchases: null, // an array with elements as purchase objs
   checkPurchasesDT: null,
+  doSectionNotesByMonth: false,
 };
 
 export const initialLocalSettingsState = {
