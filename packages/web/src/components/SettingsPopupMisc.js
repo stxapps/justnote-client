@@ -3,13 +3,15 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import {
   updateDoDeleteOldNotesInTrash, updateSortOn, updateDoDescendingOrder,
-  updateNoteDateShowingMode, updateDoSectionNotesByMonth, updateTheme,
+  updateNoteDateShowingMode, updateNoteDateFormat, updateDoSectionNotesByMonth,
+  updateTheme,
 } from '../actions';
 import {
-  ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE,
-  NOTE_DATE_SHOWING_MODE_SHOW_DEFAULT, WHT_MODE, BLK_MODE, SYSTEM_MODE, CUSTOM_MODE,
+  ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE, NOTE_DATE_SHOWING_MODE_SHOW,
+  NOTE_DATE_FORMATS, NOTE_DATE_FORMAT_TEXTS, NOTE_DATE_FORMAT_SYSTEM,
+  WHT_MODE, BLK_MODE, SYSTEM_MODE, CUSTOM_MODE,
 } from '../types/const';
-import { getDoEnableExtraFeatures } from '../selectors';
+import { getDoEnableExtraFeatures, getNoteDateExample } from '../selectors';
 
 import { useTailwind } from '.';
 
@@ -20,6 +22,12 @@ const SettingsPopupMisc = (props) => {
   const sortOn = useSelector(state => state.settings.sortOn);
   const doDescendingOrder = useSelector(state => state.settings.doDescendingOrder);
   const noteDateShowingMode = useSelector(state => state.settings.noteDateShowingMode);
+  const noteDateFormat = useSelector(state => state.settings.noteDateFormat);
+  const noteDateIsTwoDigit = useSelector(state => state.settings.noteDateIsTwoDigit);
+  const noteDateIsCurrentYearShown = useSelector(
+    state => state.settings.noteDateIsCurrentYearShown
+  );
+  const noteDateExample = useSelector(state => getNoteDateExample(state));
   const doSectionNotesByMonth = useSelector(
     state => state.settings.doSectionNotesByMonth
   );
@@ -55,12 +63,25 @@ const SettingsPopupMisc = (props) => {
 
   const onDoShowDateBtnClick = () => {
     if (noteDateShowingMode === NOTE_DATE_SHOWING_MODE_HIDE) {
-      dispatch(updateNoteDateShowingMode(NOTE_DATE_SHOWING_MODE_SHOW_DEFAULT));
-    } else if (noteDateShowingMode === NOTE_DATE_SHOWING_MODE_SHOW_DEFAULT) {
+      dispatch(updateNoteDateShowingMode(NOTE_DATE_SHOWING_MODE_SHOW));
+    } else if (noteDateShowingMode === NOTE_DATE_SHOWING_MODE_SHOW) {
       dispatch(updateNoteDateShowingMode(NOTE_DATE_SHOWING_MODE_HIDE));
     } else {
       console.log('Invalid noteDateShowingMode: ', noteDateShowingMode);
     }
+  };
+
+  const onDateFormatInputChange = (e) => {
+    const value = e.target.value;
+    dispatch(updateNoteDateFormat(value));
+  };
+
+  const onTwoDigitBtnClick = () => {
+    dispatch(updateNoteDateFormat(null, !noteDateIsTwoDigit));
+  };
+
+  const onCurrentYearBtnClick = () => {
+    dispatch(updateNoteDateFormat(null, null, !noteDateIsCurrentYearShown));
   };
 
   const onDoSectionBtnClick = () => {
@@ -112,9 +133,6 @@ const SettingsPopupMisc = (props) => {
   const doDeleteBtnClassNames = doDeleteOldNotesInTrash ? 'bg-green-500 blk:bg-green-500' : 'bg-gray-200 blk:bg-gray-700';
   const doDeleteBtnInnerClassNames = doDeleteOldNotesInTrash ? 'translate-x-5' : 'translate-x-0';
 
-  const doSectionBtnClassNames = doSectionNotesByMonth ? 'bg-green-500 blk:bg-green-500' : 'bg-gray-200 blk:bg-gray-700';
-  const doSectionBtnInnerClassNames = doSectionNotesByMonth ? 'translate-x-5' : 'translate-x-0';
-
   const addedDTBtnClassNames = sortOn === ADDED_DT ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
   const addedDTBtnInnerClassNames = sortOn === ADDED_DT ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
   const addedDTRadioClassNames = sortOn === ADDED_DT ? 'focus:ring-offset-green-100 blk:focus:ring-gray-800 blk:focus:ring-offset-green-700' : 'blk:focus:ring-offset-gray-900';
@@ -131,9 +149,18 @@ const SettingsPopupMisc = (props) => {
   const descendingBtnInnerClassNames = doDescendingOrder ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
   const descendingRadioClassNames = doDescendingOrder ? 'focus:ring-offset-green-100 blk:focus:ring-gray-800 blk:focus:ring-offset-green-700' : 'blk:focus:ring-offset-gray-900';
 
-  const doShowDate = noteDateShowingMode === NOTE_DATE_SHOWING_MODE_SHOW_DEFAULT;
+  const doShowDate = noteDateShowingMode === NOTE_DATE_SHOWING_MODE_SHOW;
   const doShowDateBtnClassNames = doShowDate ? 'bg-green-500 blk:bg-green-500' : 'bg-gray-200 blk:bg-gray-700';
   const doShowDateBtnInnerClassNames = doShowDate ? 'translate-x-5' : 'translate-x-0';
+
+  const twoDigitBtnClassNames = noteDateFormat === NOTE_DATE_FORMAT_SYSTEM ? 'border-gray-300 bg-white text-green-500 blk:border-gray-500 blk:bg-gray-900 blk:text-green-700' : 'cursor-pointer border-gray-400 bg-white text-green-500 blk:border-gray-400 blk:bg-gray-900 blk:text-green-500';
+  const twoDigitLabelClassNames = noteDateFormat === NOTE_DATE_FORMAT_SYSTEM ? 'text-gray-400 blk:text-gray-500' : 'cursor-pointer text-gray-500 blk:text-gray-400';
+
+  const currentYearBtnClassNames = noteDateFormat === NOTE_DATE_FORMAT_SYSTEM ? 'border-gray-300 bg-white text-green-500 blk:border-gray-500 blk:bg-gray-900 blk:text-green-700' : 'cursor-pointer border-gray-400 bg-white text-green-500 blk:border-gray-400 blk:bg-gray-900 blk:text-green-500';
+  const currentYearLabelClassNames = noteDateFormat === NOTE_DATE_FORMAT_SYSTEM ? 'text-gray-400 blk:text-gray-500' : 'cursor-pointer text-gray-500 blk:text-gray-400';
+
+  const doSectionBtnClassNames = doSectionNotesByMonth ? 'bg-green-500 blk:bg-green-500' : 'bg-gray-200 blk:bg-gray-700';
+  const doSectionBtnInnerClassNames = doSectionNotesByMonth ? 'translate-x-5' : 'translate-x-0';
 
   const whtBtnClassNames = themeMode === WHT_MODE ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
   const whtBtnInnerClassNames = themeMode === WHT_MODE ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
@@ -149,7 +176,7 @@ const SettingsPopupMisc = (props) => {
   const customRadioClassNames = themeMode === CUSTOM_MODE ? 'focus:ring-offset-green-100 blk:focus:ring-gray-800 blk:focus:ring-offset-green-700' : 'blk:focus:ring-offset-gray-900';
 
   const customTextClassNames = themeMode === CUSTOM_MODE ? 'text-green-700 blk:text-green-200' : 'text-gray-500 blk:text-gray-500';
-  const customInputClassNames = themeMode === CUSTOM_MODE ? 'border-gray-300 bg-white text-gray-600 focus:border-gray-500 focus:ring-gray-500 blk:border-green-200 blk:bg-green-700 blk:text-green-100 focus:border-green-200 blk:focus:ring-green-200' : 'border-gray-300 bg-white text-gray-400 blk:border-gray-600 blk:bg-gray-900 blk:text-gray-500';
+  const customInputClassNames = themeMode === CUSTOM_MODE ? 'cursor-pointer border-gray-300 bg-white text-gray-600 focus:border-gray-500 focus:ring-gray-500 blk:border-green-200 blk:bg-green-700 blk:text-green-100 focus:border-green-200 blk:focus:ring-green-200' : 'border-gray-300 bg-white text-gray-400 blk:border-gray-600 blk:bg-gray-900 blk:text-gray-500';
 
   let whtTime, blkTime;
   for (const option of customOptions) {
@@ -270,6 +297,31 @@ const SettingsPopupMisc = (props) => {
           <span aria-hidden="true" className={tailwind(`inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out blk:bg-gray-300 ${doShowDateBtnInnerClassNames}`)} />
         </span>
       </div>
+      {doEnableExtraFeatures && <div className={tailwind('mt-10 mb-4')}>
+        <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>Note Date Formats</h4>
+        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Choose a date format for note dates</p>
+        <div className={tailwind('mx-auto mt-2.5 w-full max-w-sm rounded-md border border-gray-200 p-5 shadow-sm blk:border-gray-700')}>
+          <div className={tailwind('flex items-center')}>
+            <label htmlFor="date-format-input" className={tailwind('mr-2 block flex-shrink-0 flex-grow-0 text-base text-gray-500 blk:text-gray-400')}>Date format:</label>
+            <select onChange={onDateFormatInputChange} className={tailwind('block flex-shrink flex-grow rounded-md border-gray-300 bg-white py-2 pl-3 pr-10 text-base text-gray-500 focus:border-green-600 focus:outline-none focus:ring-green-600 blk:border-gray-600 blk:bg-gray-900 blk:text-gray-400 sm:text-sm')} value={noteDateFormat} id="date-format-input" name="date-format-input">
+              {NOTE_DATE_FORMATS.map((format, i) => {
+                return (
+                  <option key={format} value={format}>{NOTE_DATE_FORMAT_TEXTS[i]}</option>
+                );
+              })}
+            </select>
+          </div>
+          <div className={tailwind('mt-3.5 flex items-center')}>
+            <input onChange={onTwoDigitBtnClick} checked={noteDateIsTwoDigit} className={tailwind(`h-4 w-4 rounded transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:focus:ring-offset-gray-900 ${twoDigitBtnClassNames}`)} id="two-digit-btn" name="two-digit-btn" type="checkbox" disabled={noteDateFormat === NOTE_DATE_FORMAT_SYSTEM} />
+            <label htmlFor="two-digit-btn" className={tailwind(`ml-2 block text-base ${twoDigitLabelClassNames}`)}>Show date and month in 2 digits</label>
+          </div>
+          <div className={tailwind('mt-3.5 flex items-center')}>
+            <input onChange={onCurrentYearBtnClick} checked={noteDateIsCurrentYearShown} className={tailwind(`h-4 w-4 rounded transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:focus:ring-offset-gray-900 ${currentYearBtnClassNames}`)} id="current-year-btn" name="current-year-btn" type="checkbox" disabled={noteDateFormat === NOTE_DATE_FORMAT_SYSTEM} />
+            <label htmlFor="current-year-btn" className={tailwind(`ml-2 block text-base ${currentYearLabelClassNames}`)}>Show current year</label>
+          </div>
+          <p className={tailwind('mt-4 text-sm text-gray-500 blk:text-gray-400')}>Example: {noteDateExample}</p>
+        </div>
+      </div>}
       {doEnableExtraFeatures && <div className={tailwind('mt-10 mb-4 flex items-center justify-between space-x-4')}>
         <div className={tailwind('flex flex-col')}>
           <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>Section By Month</h4>

@@ -3,17 +3,29 @@ import Url from 'url-parse';
 
 import {
   HASH_FRAGMENT_IDENTIFIER, HTTP, MAX_CHARS, CD_ROOT, STATUS, NOTES, IMAGES, SETTINGS,
-  PINS, DOT_JSON, ADDED, ADDING, UPDATING, MOVING, DELETING, MERGING,
-  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, DIED_MERGING,
-  VALID_URL, NO_URL, ASK_CONFIRM_URL,
-  VALID_LIST_NAME, NO_LIST_NAME, TOO_LONG_LIST_NAME, DUPLICATE_LIST_NAME,
-  COM_JUSTNOTECC_SUPPORTER, ACTIVE, NO_RENEW, GRACE, ON_HOLD, PAUSED, UNKNOWN,
+  PINS, DOT_JSON, ADDED, ADDING, UPDATING, MOVING, DELETING, MERGING, DIED_ADDING,
+  DIED_UPDATING, DIED_MOVING, DIED_DELETING, DIED_MERGING, VALID_URL, NO_URL,
+  ASK_CONFIRM_URL, VALID_LIST_NAME, NO_LIST_NAME, TOO_LONG_LIST_NAME,
+  DUPLICATE_LIST_NAME, COM_JUSTNOTECC_SUPPORTER, ACTIVE, NO_RENEW, GRACE, ON_HOLD,
+  PAUSED, UNKNOWN, NOTE_DATE_FORMAT_SYSTEM, NOTE_DATE_FORMAT_YSMSD,
+  NOTE_DATE_FORMAT_MSDSY, NOTE_DATE_FORMAT_DSMSY, NOTE_DATE_FORMAT_YHMHD,
+  NOTE_DATE_FORMAT_MHDHY, NOTE_DATE_FORMAT_DHMHY, NOTE_DATE_FORMAT_YOMOD,
+  NOTE_DATE_FORMAT_MODOY, NOTE_DATE_FORMAT_DOMOY, NOTE_DATE_FORMAT_YMMMD,
+  NOTE_DATE_FORMAT_MMMDY, NOTE_DATE_FORMAT_DMMMY,
 } from '../types/const';
 import {
   PIN_NOTE, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_ROLLBACK,
   MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_ROLLBACK,
 } from '../types/actionTypes';
 import { _ } from './obj';
+
+const months = [
+  'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
+  'September', 'October', 'November', 'December',
+];
+const shortMonths = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
 
 export const containUrlProtocol = (url) => {
   const urlObj = new Url(url, {});
@@ -517,12 +529,10 @@ export const swapArrayElements = (a, x, y) => (a[x] && a[y] && [
 ]) || a;
 
 export const getFormattedDT = (dt) => {
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
   const d = new Date(dt);
 
   const year = d.getFullYear() % 2000;
-  const month = months[d.getMonth()];
+  const month = shortMonths[d.getMonth()];
   const date = d.getDate();
   const hour = String(d.getHours()).padStart(2, '0');
   const min = String(d.getMinutes()).padStart(2, '0');
@@ -531,12 +541,8 @@ export const getFormattedDT = (dt) => {
 };
 
 export const getFormattedDate = (d) => {
-  const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ];
-
   const year = d.getFullYear();
-  const month = months[d.getMonth()];
+  const month = shortMonths[d.getMonth()];
   const date = d.getDate();
 
   return `${date} ${month} ${year}`;
@@ -563,12 +569,88 @@ export const getFormattedTimeStamp = (d) => {
   return `${year}-${month}-${date} ${hour}-${min}-${sec}`;
 };
 
-export const getFullYearMonth = (dt) => {
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
-    'September', 'October', 'November', 'December',
-  ];
+export const getFormattedNoteDate = (format, isTwoDigit, isCurrentYearShown, dt) => {
+  const currentDate = new Date();
+  const d = new Date(dt);
 
+  const isSameCurrentYear = currentDate.getFullYear() === d.getFullYear();
+
+  if (format === NOTE_DATE_FORMAT_SYSTEM) {
+    let text;
+    if (isSameCurrentYear) {
+      text = d.toLocaleDateString(undefined, { day: 'numeric', month: 'numeric' });
+    } else {
+      text = d.toLocaleDateString(
+        undefined, { day: 'numeric', month: 'numeric', year: '2-digit' }
+      );
+    }
+    return text;
+  }
+
+  const year = String(d.getFullYear() % 2000);
+
+  let month = String(d.getMonth() + 1);
+  if (isTwoDigit) month = month.padStart(2, '0');
+
+  let date = String(d.getDate());
+  if (isTwoDigit) date = date.padStart(2, '0');
+
+  if (format === NOTE_DATE_FORMAT_YSMSD) {
+    if (!isCurrentYearShown && isSameCurrentYear) return `${month}/${date}`;
+    return `${year}/${month}/${date}`;
+  }
+  if (format === NOTE_DATE_FORMAT_MSDSY) {
+    if (!isCurrentYearShown && isSameCurrentYear) return `${month}/${date}`;
+    return `${month}/${date}/${year}`;
+  }
+  if (format === NOTE_DATE_FORMAT_DSMSY) {
+    if (!isCurrentYearShown && isSameCurrentYear) return `${date}/${month}`;
+    return `${date}/${month}/${year}`;
+  }
+  if (format === NOTE_DATE_FORMAT_YHMHD) {
+    if (!isCurrentYearShown && isSameCurrentYear) return `${month}-${date}`;
+    return `${year}-${month}-${date}`;
+  }
+  if (format === NOTE_DATE_FORMAT_MHDHY) {
+    if (!isCurrentYearShown && isSameCurrentYear) return `${month}-${date}`;
+    return `${month}-${date}-${year}`;
+  }
+  if (format === NOTE_DATE_FORMAT_DHMHY) {
+    if (!isCurrentYearShown && isSameCurrentYear) return `${date}-${month}`;
+    return `${date}-${month}-${year}`;
+  }
+  if (format === NOTE_DATE_FORMAT_YOMOD) {
+    if (!isCurrentYearShown && isSameCurrentYear) return `${month}.${date}`;
+    return `${year}.${month}.${date}`;
+  }
+  if (format === NOTE_DATE_FORMAT_MODOY) {
+    if (!isCurrentYearShown && isSameCurrentYear) return `${month}.${date}`;
+    return `${month}.${date}.${year}`;
+  }
+  if (format === NOTE_DATE_FORMAT_DOMOY) {
+    if (!isCurrentYearShown && isSameCurrentYear) return `${date}.${month}`;
+    return `${date}.${month}.${year}`;
+  }
+
+  const shortMonth = shortMonths[d.getMonth()];
+
+  if (format === NOTE_DATE_FORMAT_YMMMD) {
+    if (!isCurrentYearShown && isSameCurrentYear) return `${shortMonth} ${date}`;
+    return `${year}, ${shortMonth} ${date}`;
+  }
+  if (format === NOTE_DATE_FORMAT_MMMDY) {
+    if (!isCurrentYearShown && isSameCurrentYear) return `${shortMonth} ${date}`;
+    return `${shortMonth} ${date}, ${year}`;
+  }
+  if (format === NOTE_DATE_FORMAT_DMMMY) {
+    if (!isCurrentYearShown && isSameCurrentYear) return `${date} ${shortMonth}`;
+    return `${date} ${shortMonth}, ${year}`;
+  }
+
+  return '';
+};
+
+export const getFullYearMonth = (dt) => {
   const d = new Date(dt);
 
   const year = d.getFullYear();

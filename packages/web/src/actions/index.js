@@ -22,7 +22,7 @@ import {
   MERGE_NOTES_ROLLBACK, UPDATE_LIST_NAME_EDITORS, ADD_LIST_NAMES, UPDATE_LIST_NAMES,
   MOVE_LIST_NAME, MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_SELECTING_LIST_NAME,
   UPDATE_DELETING_LIST_NAME, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, UPDATE_SORT_ON,
-  UPDATE_DO_DESCENDING_ORDER, UPDATE_NOTE_DATE_SHOWING_MODE,
+  UPDATE_DO_DESCENDING_ORDER, UPDATE_NOTE_DATE_SHOWING_MODE, UPDATE_NOTE_DATE_FORMAT,
   UPDATE_DO_SECTION_NOTES_BY_MONTH, UPDATE_SETTINGS,
   UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS,
   UPDATE_SETTINGS_VIEW_ID, UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION,
@@ -56,13 +56,14 @@ import {
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
   DISCARD_ACTION_CHANGE_LIST_NAME, DISCARD_ACTION_UPDATE_BULK_EDIT_URL_HASH,
   DISCARD_ACTION_SHOW_NOTE_LIST_MENU_POPUP, DISCARD_ACTION_SHOW_NLIM_POPUP,
-  MY_NOTES, TRASH, ARCHIVE, ID, NEW_NOTE, NEW_NOTE_OBJ,
+  MY_NOTES, TRASH, ARCHIVE, ID, NEW_NOTE, NEW_NOTE_OBJ, ADDED_DT, UPDATED_DT,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES,
   N_DAYS, CD_ROOT, NOTES, IMAGES, SETTINGS, INDEX, DOT_JSON, PINS, LG_WIDTH,
   IMAGE_FILE_EXTS, IAP_STATUS_URL, COM_JUSTNOTECC, SIGNED_TEST_STRING, VALID, ACTIVE,
   SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS,
   WHT_MODE, BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE,
-  FEATURE_SECTION_NOTES_BY_MONTH,
+  FEATURE_SECTION_NOTES_BY_MONTH, NOTE_DATE_SHOWING_MODE_HIDE,
+  NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS,
 } from '../types/const';
 import {
   throttle, extractUrl, urlHashToObj, objToUrlHash, isIPadIPhoneIPod, isBusyStatus,
@@ -1711,6 +1712,20 @@ export const updateNoteDateShowingMode = (mode) => {
   return { type: UPDATE_NOTE_DATE_SHOWING_MODE, payload: mode };
 };
 
+export const updateNoteDateFormat = (dateFormat, isTwoDigit, isCurrentYearShown) => {
+  const payload = {};
+  if (NOTE_DATE_FORMATS.includes(dateFormat)) {
+    payload.noteDateFormat = dateFormat;
+  }
+  if ([true, false].includes(isTwoDigit)) {
+    payload.noteDateIsTwoDigit = isTwoDigit;
+  }
+  if ([true, false].includes(isCurrentYearShown)) {
+    payload.noteDateIsCurrentYearShown = isCurrentYearShown;
+  }
+  return { type: UPDATE_NOTE_DATE_FORMAT, payload };
+};
+
 export const updateDoSectionNotesByMonth = (doSection) => async (
   dispatch, getState
 ) => {
@@ -2152,20 +2167,34 @@ const parseImportedFile = async (dispatch, fileContent) => {
         content = JSON.parse(content);
 
         const settings = { ...initialSettingsState };
-        if ('doDeleteOldNotesInTrash' in content) {
+        if ([true, false].includes(content.doDeleteOldNotesInTrash)) {
           settings.doDeleteOldNotesInTrash = content.doDeleteOldNotesInTrash;
         }
-        if ('sortOn' in content) {
+        if ([ADDED_DT, UPDATED_DT].includes(content.sortOn)) {
           settings.sortOn = content.sortOn;
         }
-        if ('doDescendingOrder' in content) {
+        if ([true, false].includes(content.doDescendingOrder)) {
           settings.doDescendingOrder = content.doDescendingOrder;
         }
-        if ('doAlertScreenRotation' in content) {
+        if ([true, false].includes(content.doAlertScreenRotation)) {
           settings.doAlertScreenRotation = content.doAlertScreenRotation;
         }
-        if ('noteDateShowingMode' in content) {
+        if ([
+          NOTE_DATE_SHOWING_MODE_HIDE, NOTE_DATE_SHOWING_MODE_SHOW,
+        ].includes(content.noteDateShowingMode)) {
           settings.noteDateShowingMode = content.noteDateShowingMode;
+        }
+        if (NOTE_DATE_FORMATS.includes(content.noteDateFormat)) {
+          settings.noteDateFormat = content.noteDateFormat;
+        }
+        if ([true, false].includes(content.noteDateIsTwoDigit)) {
+          settings.noteDateIsTwoDigit = content.noteDateIsTwoDigit;
+        }
+        if ([true, false].includes(content.noteDateIsCurrentYearShown)) {
+          settings.noteDateIsCurrentYearShown = content.noteDateIsCurrentYearShown;
+        }
+        if ([true, false].includes(content.doSectionNotesByMonth)) {
+          settings.doSectionNotesByMonth = content.doSectionNotesByMonth;
         }
         if ('listNameMap' in content && isListNameObjsValid(content.listNameMap)) {
           settings.listNameMap = content.listNameMap;
