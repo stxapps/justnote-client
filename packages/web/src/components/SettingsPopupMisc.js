@@ -4,12 +4,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   updateDoDeleteOldNotesInTrash, updateSortOn, updateDoDescendingOrder,
   updateNoteDateShowingMode, updateNoteDateFormat, updateDoSectionNotesByMonth,
-  updateTheme,
+  updateTheme, updatePopupUrlHash,
 } from '../actions';
 import {
-  ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE, NOTE_DATE_SHOWING_MODE_SHOW,
-  NOTE_DATE_FORMATS, NOTE_DATE_FORMAT_TEXTS, NOTE_DATE_FORMAT_SYSTEM,
-  WHT_MODE, BLK_MODE, SYSTEM_MODE, CUSTOM_MODE,
+  DATE_FORMAT_MENU_POPUP, ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE,
+  NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS, NOTE_DATE_FORMAT_TEXTS,
+  NOTE_DATE_FORMAT_SYSTEM, WHT_MODE, BLK_MODE, SYSTEM_MODE, CUSTOM_MODE,
 } from '../types/const';
 import { getDoEnableExtraFeatures, getNoteDateExample } from '../selectors';
 
@@ -71,9 +71,9 @@ const SettingsPopupMisc = (props) => {
     }
   };
 
-  const onDateFormatInputChange = (e) => {
-    const value = e.target.value;
-    dispatch(updateNoteDateFormat(value));
+  const onDateFormatBtnClick = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    updatePopupUrlHash(DATE_FORMAT_MENU_POPUP, true, rect);
   };
 
   const onTwoDigitBtnClick = () => {
@@ -302,14 +302,15 @@ const SettingsPopupMisc = (props) => {
         <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Choose a date format for note dates</p>
         <div className={tailwind('mx-auto mt-2.5 w-full max-w-sm rounded-md border border-gray-200 p-5 shadow-sm blk:border-gray-700')}>
           <div className={tailwind('flex items-center')}>
-            <label htmlFor="date-format-input" className={tailwind('mr-2 block flex-shrink-0 flex-grow-0 text-base text-gray-500 blk:text-gray-400')}>Date format:</label>
-            <select onChange={onDateFormatInputChange} className={tailwind('block flex-shrink flex-grow rounded-md border-gray-300 bg-white py-2 pl-3 pr-10 text-base text-gray-500 focus:border-green-600 focus:outline-none focus:ring-green-600 blk:border-gray-600 blk:bg-gray-900 blk:text-gray-400 sm:text-sm')} value={noteDateFormat} id="date-format-input" name="date-format-input">
-              {NOTE_DATE_FORMATS.map((format, i) => {
-                return (
-                  <option key={format} value={format}>{NOTE_DATE_FORMAT_TEXTS[i]}</option>
-                );
-              })}
-            </select>
+            <label className={tailwind('mr-2 block flex-shrink-0 flex-grow-0 text-base text-gray-500 blk:text-gray-400')}>Date format:</label>
+            <button onClick={onDateFormatBtnClick} className={tailwind('block flex-shrink flex-grow relative rounded-md border border-gray-300 bg-white py-1.5 pl-3 pr-10 text-left text-base text-gray-500 focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600 blk:border-gray-600 blk:bg-gray-900 blk:text-gray-400 sm:text-sm')}>
+              <span className={tailwind('block truncate')}>{NOTE_DATE_FORMAT_TEXTS[NOTE_DATE_FORMATS.indexOf(noteDateFormat)]}</span>
+              <span className={tailwind('absolute inset-y-0 right-0 flex items-center pr-2')}>
+                <svg className={tailwind('h-5 w-5 text-gray-400')} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z" fillRule="evenodd" clipRule="evenodd" />
+                </svg>
+              </span>
+            </button>
           </div>
           <div className={tailwind('mt-3.5 flex items-center')}>
             <input onChange={onTwoDigitBtnClick} checked={noteDateIsTwoDigit} className={tailwind(`h-4 w-4 rounded transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:focus:ring-offset-gray-900 ${twoDigitBtnClassNames}`)} id="two-digit-btn" name="two-digit-btn" type="checkbox" disabled={noteDateFormat === NOTE_DATE_FORMAT_SYSTEM} />

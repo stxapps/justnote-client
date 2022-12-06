@@ -11,6 +11,7 @@ import NoteListItemMenuPopup from './NoteListItemMenuPopup';
 import PinMenuPopup from './PinMenuPopup';
 import SettingsPopup from './SettingsPopup';
 import SettingsListsMenuPopup from './SettingsListsMenuPopup';
+import DateFormatMenuPopup from './DateFormatMenuPopup';
 import PinErrorPopup from './PinErrorPopup';
 import SettingsErrorPopup from './SettingsErrorPopup';
 import ListNamesPopup from './ListNamesPopup';
@@ -46,6 +47,7 @@ const Main = () => {
       <PinMenuPopup />
       <SettingsPopup />
       <SettingsListsMenuPopup />
+      <DateFormatMenuPopup />
       <PinErrorPopup />
       <SettingsErrorPopup />
       <ListNamesPopup />
