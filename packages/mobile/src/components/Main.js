@@ -13,6 +13,7 @@ import NoteListItemMenuPopup from './NoteListItemMenuPopup';
 import PinMenuPopup from './PinMenuPopup';
 import SettingsPopup from './SettingsPopup';
 import SettingsListsMenuPopup from './SettingsListsMenuPopup';
+import DateFormatMenuPopup from './DateFormatMenuPopup';
 import TimePickPopup from './TimePickPopup';
 import PinErrorPopup from './PinErrorPopup';
 import SettingsErrorPopup from './SettingsErrorPopup';
@@ -38,6 +39,7 @@ const Main = () => {
       <PaywallPopup />
       <SettingsPopup />
       <SettingsListsMenuPopup />
+      <DateFormatMenuPopup />
       <TimePickPopup />
       <PinErrorPopup />
       <SettingsErrorPopup />

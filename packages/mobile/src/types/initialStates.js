@@ -1,6 +1,6 @@
 import {
   MY_NOTES, TRASH, ARCHIVE, ADDED_DT, MODE_VIEW, NOTE_DATE_SHOWING_MODE_HIDE,
-  WHT_MODE, BLK_MODE,
+  NOTE_DATE_FORMAT_SYSTEM, WHT_MODE, BLK_MODE,
 } from '../types/const';
 
 export const myNotesListNameObj = { listName: MY_NOTES, displayName: MY_NOTES };
@@ -13,12 +13,15 @@ export const initialSettingsState = {
   doDescendingOrder: true,
   doAlertScreenRotation: true, // No need anymore but keep it for comparing
   noteDateShowingMode: NOTE_DATE_SHOWING_MODE_HIDE,
+  noteDateFormat: NOTE_DATE_FORMAT_SYSTEM,
+  noteDateIsTwoDigit: false,
+  noteDateIsCurrentYearShown: false,
+  doSectionNotesByMonth: false,
   listNameMap: [
     { ...myNotesListNameObj }, { ...trashListNameObj }, { ...archiveListNameObj },
   ],
   purchases: null, // an array with elements as purchase objs
   checkPurchasesDT: null,
-  doSectionNotesByMonth: false,
 };
 
 export const initialLocalSettingsState = {

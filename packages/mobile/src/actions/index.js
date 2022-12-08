@@ -28,7 +28,7 @@ import {
   MERGE_NOTES_ROLLBACK, UPDATE_LIST_NAME_EDITORS, ADD_LIST_NAMES, UPDATE_LIST_NAMES,
   MOVE_LIST_NAME, MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_SELECTING_LIST_NAME,
   UPDATE_DELETING_LIST_NAME, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, UPDATE_SORT_ON,
-  UPDATE_DO_DESCENDING_ORDER, UPDATE_NOTE_DATE_SHOWING_MODE,
+  UPDATE_DO_DESCENDING_ORDER, UPDATE_NOTE_DATE_SHOWING_MODE, UPDATE_NOTE_DATE_FORMAT,
   UPDATE_DO_SECTION_NOTES_BY_MONTH, UPDATE_SETTINGS,
   UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS,
   UPDATE_SETTINGS_VIEW_ID, UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION,
@@ -71,8 +71,8 @@ import {
   IAP_VERIFY_URL, IAP_STATUS_URL, APPSTORE, PLAYSTORE, COM_JUSTNOTECC,
   COM_JUSTNOTECC_SUPPORTER, SIGNED_TEST_STRING, VALID, INVALID, UNKNOWN, ERROR, ACTIVE,
   SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS,
-  WHT_MODE, BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE,
-  FEATURE_SECTION_NOTES_BY_MONTH,
+  WHT_MODE, BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE, FEATURE_DATE_FORMAT,
+  FEATURE_SECTION_NOTES_BY_MONTH, NOTE_DATE_FORMATS,
 } from '../types/const';
 import {
   isEqual, isObject, isString, sleep, separateUrlAndParam,
@@ -1307,6 +1307,32 @@ export const updateDoDescendingOrder = (doDescendingOrder) => {
 
 export const updateNoteDateShowingMode = (mode) => {
   return { type: UPDATE_NOTE_DATE_SHOWING_MODE, payload: mode };
+};
+
+export const updateNoteDateFormat = (
+  dateFormat, isTwoDigit, isCurrentYearShown
+) => async (dispatch, getState) => {
+  const state = getState();
+  const purchases = state.settings.purchases;
+
+  if (!doEnableExtraFeatures(purchases)) {
+    vars.paywallFeature.feature = FEATURE_DATE_FORMAT;
+    dispatch(updatePopup(PAYWALL_POPUP, true));
+    return;
+  }
+
+  const payload = {};
+  if (NOTE_DATE_FORMATS.includes(dateFormat)) {
+    payload.noteDateFormat = dateFormat;
+  }
+  if ([true, false].includes(isTwoDigit)) {
+    payload.noteDateIsTwoDigit = isTwoDigit;
+  }
+  if ([true, false].includes(isCurrentYearShown)) {
+    payload.noteDateIsCurrentYearShown = isCurrentYearShown;
+  }
+
+  dispatch({ type: UPDATE_NOTE_DATE_FORMAT, payload });
 };
 
 export const updateDoSectionNotesByMonth = (doSection) => async (

@@ -17,10 +17,10 @@ import {
   SIGN_UP_POPUP, SIGN_IN_POPUP, PROFILE_POPUP, NOTE_LIST_MENU_POPUP,
   NOTE_LIST_ITEM_MENU_POPUP, LIST_NAMES_POPUP, PIN_MENU_POPUP, PAYWALL_POPUP,
   SIDEBAR_POPUP, SEARCH_POPUP, SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP,
-  TIME_PICK_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, CONFIRM_AS_DUMMY_POPUP,
-  CONFIRM_EXIT_DUMMY_POPUP, ACCESS_ERROR_POPUP, STALE_ERROR_POPUP, NEW_NOTE, MY_NOTES,
-  TRASH, ARCHIVE, UPDATING, DIED_UPDATING, MAX_SELECTED_NOTE_IDS, SETTINGS_VIEW_ACCOUNT,
-  DELETE_ACTION_LIST_NAME,
+  TIME_PICK_POPUP, DATE_FORMAT_MENU_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP,
+  CONFIRM_AS_DUMMY_POPUP, CONFIRM_EXIT_DUMMY_POPUP, ACCESS_ERROR_POPUP,
+  STALE_ERROR_POPUP, NEW_NOTE, MY_NOTES, TRASH, ARCHIVE, UPDATING, DIED_UPDATING,
+  MAX_SELECTED_NOTE_IDS, SETTINGS_VIEW_ACCOUNT, DELETE_ACTION_LIST_NAME,
 } from '../types/const';
 import { doContainListName, isObject, isString, doContainStaleNotes } from '../utils';
 
@@ -48,6 +48,8 @@ const initialState = {
   settingsListsMenuPopupPosition: null,
   isTimePickPopupShown: false,
   timePickPopupPosition: null,
+  isDateFormatMenuPopupShown: false,
+  dateFormatPopupPosition: null,
   isConfirmDeletePopupShown: false,
   isConfirmDiscardPopupShown: false,
   isConfirmAsDummyPopupShown: false,
@@ -198,6 +200,14 @@ const displayReducer = (state = initialState, action) => {
         ...state,
         isTimePickPopupShown: isShown,
         timePickPopupPosition: anchorPosition,
+      };
+    }
+
+    if (id === DATE_FORMAT_MENU_POPUP) {
+      return {
+        ...state,
+        isDateFormatMenuPopupShown: isShown,
+        dateFormatMenuPopupPosition: anchorPosition,
       };
     }
 

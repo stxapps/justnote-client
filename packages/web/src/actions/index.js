@@ -61,7 +61,7 @@ import {
   N_DAYS, CD_ROOT, NOTES, IMAGES, SETTINGS, INDEX, DOT_JSON, PINS, LG_WIDTH,
   IMAGE_FILE_EXTS, IAP_STATUS_URL, COM_JUSTNOTECC, SIGNED_TEST_STRING, VALID, ACTIVE,
   SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS,
-  WHT_MODE, BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE,
+  WHT_MODE, BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE, FEATURE_DATE_FORMAT,
   FEATURE_SECTION_NOTES_BY_MONTH, NOTE_DATE_SHOWING_MODE_HIDE,
   NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS,
 } from '../types/const';
@@ -1712,7 +1712,18 @@ export const updateNoteDateShowingMode = (mode) => {
   return { type: UPDATE_NOTE_DATE_SHOWING_MODE, payload: mode };
 };
 
-export const updateNoteDateFormat = (dateFormat, isTwoDigit, isCurrentYearShown) => {
+export const updateNoteDateFormat = (
+  dateFormat, isTwoDigit, isCurrentYearShown
+) => async (dispatch, getState) => {
+  const state = getState();
+  const purchases = state.settings.purchases;
+
+  if (!doEnableExtraFeatures(purchases)) {
+    vars.paywallFeature.feature = FEATURE_DATE_FORMAT;
+    dispatch(updatePopup(PAYWALL_POPUP, true));
+    return;
+  }
+
   const payload = {};
   if (NOTE_DATE_FORMATS.includes(dateFormat)) {
     payload.noteDateFormat = dateFormat;
@@ -1723,7 +1734,8 @@ export const updateNoteDateFormat = (dateFormat, isTwoDigit, isCurrentYearShown)
   if ([true, false].includes(isCurrentYearShown)) {
     payload.noteDateIsCurrentYearShown = isCurrentYearShown;
   }
-  return { type: UPDATE_NOTE_DATE_FORMAT, payload };
+
+  dispatch({ type: UPDATE_NOTE_DATE_FORMAT, payload });
 };
 
 export const updateDoSectionNotesByMonth = (doSection) => async (

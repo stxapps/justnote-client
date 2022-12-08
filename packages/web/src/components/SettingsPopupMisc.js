@@ -155,10 +155,10 @@ const SettingsPopupMisc = (props) => {
   const doShowDateBtnClassNames = doShowDate ? 'bg-green-500 blk:bg-green-500' : 'bg-gray-200 blk:bg-gray-700';
   const doShowDateBtnInnerClassNames = doShowDate ? 'translate-x-5' : 'translate-x-0';
 
-  const twoDigitBtnClassNames = noteDateFormat === NOTE_DATE_FORMAT_SYSTEM ? 'border-gray-300 bg-white text-green-500 blk:border-gray-500 blk:bg-gray-900 blk:text-green-700' : 'cursor-pointer border-gray-400 bg-white text-green-500 blk:border-gray-400 blk:bg-gray-900 blk:text-green-500';
+  const twoDigitBtnClassNames = noteDateFormat === NOTE_DATE_FORMAT_SYSTEM ? 'border-gray-300 bg-white text-green-300 blk:border-gray-500 blk:bg-gray-900 blk:text-green-700' : 'cursor-pointer border-gray-400 bg-white text-green-500 blk:border-gray-400 blk:bg-gray-900 blk:text-green-500';
   const twoDigitLabelClassNames = noteDateFormat === NOTE_DATE_FORMAT_SYSTEM ? 'text-gray-400 blk:text-gray-500' : 'cursor-pointer text-gray-500 blk:text-gray-400';
 
-  const currentYearBtnClassNames = noteDateFormat === NOTE_DATE_FORMAT_SYSTEM ? 'border-gray-300 bg-white text-green-500 blk:border-gray-500 blk:bg-gray-900 blk:text-green-700' : 'cursor-pointer border-gray-400 bg-white text-green-500 blk:border-gray-400 blk:bg-gray-900 blk:text-green-500';
+  const currentYearBtnClassNames = noteDateFormat === NOTE_DATE_FORMAT_SYSTEM ? 'border-gray-300 bg-white text-green-300 blk:border-gray-500 blk:bg-gray-900 blk:text-green-700' : 'cursor-pointer border-gray-400 bg-white text-green-500 blk:border-gray-400 blk:bg-gray-900 blk:text-green-500';
   const currentYearLabelClassNames = noteDateFormat === NOTE_DATE_FORMAT_SYSTEM ? 'text-gray-400 blk:text-gray-500' : 'cursor-pointer text-gray-500 blk:text-gray-400';
 
   const doSectionBtnClassNames = doSectionNotesByMonth ? 'bg-green-500 blk:bg-green-500' : 'bg-gray-200 blk:bg-gray-700';
@@ -302,7 +302,7 @@ const SettingsPopupMisc = (props) => {
       {doEnableExtraFeatures && <div className={tailwind('mt-10')}>
         <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>Note Date Formats</h4>
         <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Choose a date format for note dates.</p>
-        <div className={tailwind('mx-auto mt-2.5 w-full max-w-sm rounded-md border border-gray-200 p-5 shadow-sm blk:border-gray-700')}>
+        <div className={tailwind('mx-auto mt-2.5 w-full max-w-sm rounded-md border border-gray-200 bg-white p-5 shadow-sm blk:border-gray-700 blk:bg-gray-900 ')}>
           <div className={tailwind('flex items-center')}>
             <label className={tailwind('mr-2 block flex-shrink-0 flex-grow-0 text-base text-gray-500 blk:text-gray-400')}>Date format:</label>
             <button onClick={onDateFormatBtnClick} className={tailwind('relative block flex-shrink flex-grow rounded-md border border-gray-300 bg-white py-1.5 pl-3 pr-10 text-left text-base text-gray-500 focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600 blk:border-gray-600 blk:bg-gray-900 blk:text-gray-400 sm:text-sm')}>
@@ -315,11 +315,11 @@ const SettingsPopupMisc = (props) => {
             </button>
           </div>
           <div className={tailwind('mt-3.5 flex items-center')}>
-            <input onChange={onTwoDigitBtnClick} checked={noteDateIsTwoDigit} className={tailwind(`h-4 w-4 rounded transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:focus:ring-offset-gray-900 ${twoDigitBtnClassNames}`)} id="two-digit-btn" name="two-digit-btn" type="checkbox" disabled={noteDateFormat === NOTE_DATE_FORMAT_SYSTEM} />
+            <input onChange={onTwoDigitBtnClick} checked={noteDateFormat === NOTE_DATE_FORMAT_SYSTEM ? false : noteDateIsTwoDigit} className={tailwind(`h-4 w-4 rounded transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:focus:ring-offset-gray-900 ${twoDigitBtnClassNames}`)} id="two-digit-btn" name="two-digit-btn" type="checkbox" disabled={noteDateFormat === NOTE_DATE_FORMAT_SYSTEM} />
             <label htmlFor="two-digit-btn" className={tailwind(`ml-2 block text-base ${twoDigitLabelClassNames}`)}>Show date and month in 2 digits</label>
           </div>
           <div className={tailwind('mt-3.5 flex items-center')}>
-            <input onChange={onCurrentYearBtnClick} checked={noteDateIsCurrentYearShown} className={tailwind(`h-4 w-4 rounded transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:focus:ring-offset-gray-900 ${currentYearBtnClassNames}`)} id="current-year-btn" name="current-year-btn" type="checkbox" disabled={noteDateFormat === NOTE_DATE_FORMAT_SYSTEM} />
+            <input onChange={onCurrentYearBtnClick} checked={noteDateFormat === NOTE_DATE_FORMAT_SYSTEM ? false : noteDateIsCurrentYearShown} className={tailwind(`h-4 w-4 rounded transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:focus:ring-offset-gray-900 ${currentYearBtnClassNames}`)} id="current-year-btn" name="current-year-btn" type="checkbox" disabled={noteDateFormat === NOTE_DATE_FORMAT_SYSTEM} />
             <label htmlFor="current-year-btn" className={tailwind(`ml-2 block text-base ${currentYearLabelClassNames}`)}>Show current year</label>
           </div>
           <p className={tailwind('mt-4 text-sm text-gray-500 blk:text-gray-400')}>Example: {noteDateExample}</p>

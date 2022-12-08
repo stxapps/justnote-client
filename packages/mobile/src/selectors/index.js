@@ -1,7 +1,7 @@
 import { createSelectorCreator, defaultMemoize, createSelector } from 'reselect';
 
 import {
-  PINNED, ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE,
+  PINNED, ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE, NOTE_DATE_FORMAT_SYSTEM,
   UPDATING, MOVING, DIED_UPDATING, DIED_MOVING, WHT_MODE, BLK_MODE, SYSTEM_MODE,
   CUSTOM_MODE,
 } from '../types/const';
@@ -9,7 +9,7 @@ import {
   isStringIn, isObject, isArrayEqual, isEqual, getListNameObj,
   getMainId, getValidProduct as _getValidProduct, getValidPurchase as _getValidPurchase,
   listNoteIds, getSortedNotes, sortWithPins, getNoteFPaths, getPinFPaths, getPins,
-  doEnableExtraFeatures,
+  doEnableExtraFeatures, getFormattedNoteDate,
 } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 import { initialListNameEditorState } from '../types/initialStates';
@@ -258,34 +258,56 @@ export const makeGetPinStatus = () => {
 /** @return {function(any, any): any} */
 export const makeGetNoteDate = () => {
   return createSelector(
+    state => getDoEnableExtraFeatures(state),
     state => state.settings.sortOn,
     state => state.settings.noteDateShowingMode,
+    state => state.settings.noteDateFormat,
+    state => state.settings.noteDateIsTwoDigit,
+    state => state.settings.noteDateIsCurrentYearShown,
     (__, note) => note.addedDT,
     (__, note) => note.updatedDT,
-    (sortOn, noteDateShowingMode, addedDT, updatedDT) => {
-      if (noteDateShowingMode === NOTE_DATE_SHOWING_MODE_HIDE) return '';
+    (
+      doEnable, sortOn, showingMode, format, isTwoDigit, isCurrentYearShown, addedDT,
+      updatedDT,
+    ) => {
+      if (showingMode === NOTE_DATE_SHOWING_MODE_HIDE) return '';
 
-      let dt;
-      if (sortOn === ADDED_DT) dt = addedDT;
+      let dt = addedDT;
+      if (sortOn === ADDED_DT) { /* Do nothing here */ }
       else if (sortOn === UPDATED_DT) dt = updatedDT;
-      else throw new Error(`Invalid sortOn: ${sortOn}`);
+      else console.log(`Invalid sortOn: ${sortOn}`);
 
-      const currentDate = new Date();
-      const d = new Date(dt);
+      if (!doEnable) format = NOTE_DATE_FORMAT_SYSTEM;
 
-      let text;
-      if (d.getFullYear() === currentDate.getFullYear()) {
-        text = d.toLocaleDateString(undefined, { day: 'numeric', month: 'numeric' });
-      } else {
-        text = d.toLocaleDateString(
-          undefined, { day: 'numeric', month: 'numeric', year: '2-digit' }
-        );
-      }
-
+      const text = getFormattedNoteDate(format, isTwoDigit, isCurrentYearShown, dt);
       return text;
     },
   );
 };
+
+export const getNoteDateExample = createSelector(
+  state => state.settings.noteDateFormat,
+  state => state.settings.noteDateIsTwoDigit,
+  state => state.settings.noteDateIsCurrentYearShown,
+  (format, isTwoDigit, isCurrentYearShown) => {
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+
+    const dt = (new Date(`${year}-01-28`)).getTime();
+    const text = getFormattedNoteDate(format, isTwoDigit, isCurrentYearShown, dt);
+
+    return text;
+  },
+);
+
+export const getDoSectionNotesByMonth = createSelector(
+  state => getDoEnableExtraFeatures(state),
+  state => state.settings.doSectionNotesByMonth,
+  (doEnable, doSectionNotesByMonth) => {
+    if (!doEnable) return false;
+    return doSectionNotesByMonth;
+  },
+);
 
 let lastCustomOptions = null, lastCurHH = null, lastCurMM = null, lastCurMode = null;
 export const getThemeMode = createSelector(
@@ -394,12 +416,3 @@ export const makeIsTimePickMinuteItemSelected = () => {
     }
   );
 };
-
-export const getDoSectionNotesByMonth = createSelector(
-  state => getDoEnableExtraFeatures(state),
-  state => state.settings.doSectionNotesByMonth,
-  (doEnable, doSectionNotesByMonth) => {
-    if (!doEnable) return false;
-    return doSectionNotesByMonth;
-  },
-);

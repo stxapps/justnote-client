@@ -1,18 +1,20 @@
 import React, { useRef } from 'react';
 import { View, Text, TouchableOpacity, Switch, Platform } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
+import Svg, { Path } from 'react-native-svg';
 
 import {
   updateDoDeleteOldNotesInTrash, updateSortOn, updateDoDescendingOrder,
-  updateNoteDateShowingMode, updateDoSectionNotesByMonth, updateTheme,
-  updateUpdatingThemeMode, updatePopup,
+  updateNoteDateShowingMode, updateNoteDateFormat, updateDoSectionNotesByMonth,
+  updateTheme, updateUpdatingThemeMode, updatePopup,
 } from '../actions';
 import {
-  ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE,
-  NOTE_DATE_SHOWING_MODE_SHOW_DEFAULT, WHT_MODE, BLK_MODE, SYSTEM_MODE, CUSTOM_MODE,
+  DATE_FORMAT_MENU_POPUP, ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE,
+  NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS, NOTE_DATE_FORMAT_TEXTS,
+  NOTE_DATE_FORMAT_SYSTEM, WHT_MODE, BLK_MODE, SYSTEM_MODE, CUSTOM_MODE,
   TIME_PICK_POPUP,
 } from '../types/const';
-import { getThemeMode } from '../selectors';
+import { getThemeMode, getNoteDateExample } from '../selectors';
 import { getFormattedTime } from '../utils';
 
 import { useTailwind } from '.';
@@ -26,6 +28,12 @@ const SettingsPopupMisc = (props) => {
   const sortOn = useSelector(state => state.settings.sortOn);
   const doDescendingOrder = useSelector(state => state.settings.doDescendingOrder);
   const noteDateShowingMode = useSelector(state => state.settings.noteDateShowingMode);
+  const noteDateFormat = useSelector(state => state.settings.noteDateFormat);
+  const noteDateIsTwoDigit = useSelector(state => state.settings.noteDateIsTwoDigit);
+  const noteDateIsCurrentYearShown = useSelector(
+    state => state.settings.noteDateIsCurrentYearShown
+  );
+  const noteDateExample = useSelector(state => getNoteDateExample(state));
   const doSectionNotesByMonth = useSelector(
     state => state.settings.doSectionNotesByMonth
   );
@@ -34,6 +42,7 @@ const SettingsPopupMisc = (props) => {
   const is24HFormat = useSelector(state => state.window.is24HFormat);
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
   const derivedThemeMode = useSelector(state => getThemeMode(state));
+  const dateFormatBtn = useRef(null);
   const whtTimeBtn = useRef(null);
   const blkTimeBtn = useRef(null);
   const dispatch = useDispatch();
@@ -58,12 +67,29 @@ const SettingsPopupMisc = (props) => {
 
   const onDoShowDateBtnClick = () => {
     if (noteDateShowingMode === NOTE_DATE_SHOWING_MODE_HIDE) {
-      dispatch(updateNoteDateShowingMode(NOTE_DATE_SHOWING_MODE_SHOW_DEFAULT));
-    } else if (noteDateShowingMode === NOTE_DATE_SHOWING_MODE_SHOW_DEFAULT) {
+      dispatch(updateNoteDateShowingMode(NOTE_DATE_SHOWING_MODE_SHOW));
+    } else if (noteDateShowingMode === NOTE_DATE_SHOWING_MODE_SHOW) {
       dispatch(updateNoteDateShowingMode(NOTE_DATE_SHOWING_MODE_HIDE));
     } else {
       console.log('Invalid noteDateShowingMode: ', noteDateShowingMode);
     }
+  };
+
+  const onDateFormatBtnClick = () => {
+    dateFormatBtn.current.measure((_fx, _fy, width, height, x, y) => {
+      const rect = {
+        x, y, width, height, top: y, bottom: y + height, left: x, right: x + width,
+      };
+      dispatch(updatePopup(DATE_FORMAT_MENU_POPUP, true, rect));
+    });
+  };
+
+  const onTwoDigitBtnClick = () => {
+    dispatch(updateNoteDateFormat(null, !noteDateIsTwoDigit));
+  };
+
+  const onCurrentYearBtnClick = () => {
+    dispatch(updateNoteDateFormat(null, null, !noteDateIsCurrentYearShown));
   };
 
   const onDoSectionBtnClick = () => {
@@ -98,6 +124,12 @@ const SettingsPopupMisc = (props) => {
     });
   };
 
+  let doTwoDigitCheck = noteDateIsTwoDigit;
+  if (noteDateFormat === NOTE_DATE_FORMAT_SYSTEM) doTwoDigitCheck = false;
+
+  let doCurrentYearCheck = noteDateIsCurrentYearShown;
+  if (noteDateFormat === NOTE_DATE_FORMAT_SYSTEM) doCurrentYearCheck = false;
+
   const switchThumbColorOn = 'rgb(34, 197, 94)';
   const switchThumbColorOff = 'rgb(243, 244, 246)';
   const switchTrackColorOn = Platform.OS === 'android' ? 'rgb(187, 247, 208)' : 'rgb(34, 197, 94)';
@@ -124,7 +156,27 @@ const SettingsPopupMisc = (props) => {
   const descendingRBtnClassNames = doDescendingOrder ? 'border-green-600 blk:border-green-400' : 'border-gray-200 blk:border-gray-600';
   const descendingRBtnInnerClassNames = doDescendingOrder ? 'bg-green-600 blk:bg-green-400' : 'bg-gray-200 blk:bg-gray-900';
 
-  const doShowDate = noteDateShowingMode === NOTE_DATE_SHOWING_MODE_SHOW_DEFAULT;
+  const doShowDate = noteDateShowingMode === NOTE_DATE_SHOWING_MODE_SHOW;
+
+  let twoDigitBtnClassNames;
+  if (noteDateFormat === NOTE_DATE_FORMAT_SYSTEM) {
+    if (doTwoDigitCheck) twoDigitBtnClassNames = 'border-green-300 bg-green-300 blk:border-green-700 blk:bg-green-700';
+    else twoDigitBtnClassNames = 'border-gray-300 bg-white blk:border-gray-500 blk:bg-gray-900';
+  } else {
+    if (doTwoDigitCheck) twoDigitBtnClassNames = 'border-green-500 bg-green-500 blk:border-green-500 blk:bg-green-500';
+    else twoDigitBtnClassNames = 'border-gray-400 bg-white blk:border-gray-400 blk:bg-gray-900';
+  }
+  const twoDigitLabelClassNames = noteDateFormat === NOTE_DATE_FORMAT_SYSTEM ? 'text-gray-400 blk:text-gray-500' : 'text-gray-500 blk:text-gray-400';
+
+  let currentYearBtnClassNames;
+  if (noteDateFormat === NOTE_DATE_FORMAT_SYSTEM) {
+    if (doCurrentYearCheck) currentYearBtnClassNames = 'border-green-300 bg-green-300 blk:border-green-700 blk:bg-green-700';
+    else currentYearBtnClassNames = 'border-gray-300 bg-white blk:border-gray-500 blk:bg-gray-900';
+  } else {
+    if (doCurrentYearCheck) currentYearBtnClassNames = 'border-green-500 bg-green-500 blk:border-green-500 blk:bg-green-500';
+    else currentYearBtnClassNames = 'border-gray-400 bg-white blk:border-gray-400 blk:bg-gray-900';
+  }
+  const currentYearLabelClassNames = noteDateFormat === NOTE_DATE_FORMAT_SYSTEM ? 'text-gray-400 blk:text-gray-500' : 'text-gray-500 blk:text-gray-400';
 
   const whtBtnClassNames = themeMode === WHT_MODE ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
   const whtBtnInnerClassNames = themeMode === WHT_MODE ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
@@ -316,6 +368,42 @@ const SettingsPopupMisc = (props) => {
           <Switch onValueChange={onDoShowDateBtnClick} value={doShowDate} thumbColor={Platform.OS === 'android' ? doShowDate ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} ios_backgroundColor={switchIosTrackColorOff} />
         </View>
       </View>
+      {isUserSignedIn && <View style={tailwind('mt-10')}>
+        <Text style={tailwind('text-base font-medium leading-5 text-gray-800 blk:text-gray-100')}>Note Date Formats</Text>
+        <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Choose a date format for note dates.</Text>
+        <View style={tailwind('mt-2.5 w-full items-center justify-start')}>
+          <View style={tailwind('w-full max-w-sm rounded-md border border-gray-200 bg-white p-5 shadow-sm blk:border-gray-700 blk:bg-gray-900')}>
+            <View style={tailwind('flex-row items-center')}>
+              <Text style={tailwind('mr-2 flex-shrink-0 flex-grow-0 text-base font-normal text-gray-500 blk:text-gray-400')}>Date format:</Text>
+              <TouchableOpacity ref={dateFormatBtn} onPress={onDateFormatBtnClick} style={tailwind('flex-shrink flex-grow rounded-md border border-gray-300 bg-white py-1.5 pl-3 pr-10 blk:border-gray-600 blk:bg-gray-900')}>
+                <Text style={tailwind('text-base font-normal text-gray-500 blk:text-gray-400 sm:text-sm')} numberOfLines={1} ellipsizeMode="tail">{NOTE_DATE_FORMAT_TEXTS[NOTE_DATE_FORMATS.indexOf(noteDateFormat)]}</Text>
+                <View style={tailwind('absolute inset-y-0 right-0 flex-row items-center pr-2')}>
+                  <Svg width={20} height={20} style={tailwind('text-gray-400 font-normal')} viewBox="0 0 20 20" fill="currentColor">
+                    <Path d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z" fillRule="evenodd" clipRule="evenodd" />
+                  </Svg>
+                </View>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity onPress={onTwoDigitBtnClick} style={tailwind('mt-3.5 flex-row items-center')} disabled={noteDateFormat === NOTE_DATE_FORMAT_SYSTEM}>
+              <View style={tailwind(`justify-center items-center border h-4 w-4 rounded ${twoDigitBtnClassNames}`)}>
+                {doTwoDigitCheck && <Svg width={8} height={6} style={tailwind('text-white font-normal')} viewBox="0 0 8 6" fill="currentColor">
+                  <Path fillRule="evenodd" clipRule="evenodd" d="M7.70692 1.70698C7.88908 1.51838 7.98987 1.26578 7.98759 1.00358C7.98532 0.741383 7.88015 0.49057 7.69474 0.305162C7.50933 0.119754 7.25852 0.0145843 6.99632 0.0123059C6.73412 0.0100274 6.48152 0.110823 6.29292 0.292981L2.99992 3.58598L1.70692 2.29298C1.51832 2.11082 1.26571 2.01003 1.00352 2.01231C0.741321 2.01459 0.490509 2.11975 0.305101 2.30516C0.119693 2.49057 0.0145233 2.74138 0.0122448 3.00358C0.00996641 3.26578 0.110762 3.51838 0.29292 3.70698L2.29292 5.70698C2.48045 5.89445 2.73476 5.99977 2.99992 5.99977C3.26508 5.99977 3.51939 5.89445 3.70692 5.70698L7.70692 1.70698Z" />
+                </Svg>}
+              </View>
+              <Text style={tailwind(`ml-2 text-base font-normal ${twoDigitLabelClassNames}`)}>Show date and month in 2 digits</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={onCurrentYearBtnClick} style={tailwind('mt-3.5 flex-row items-center')} disabled={noteDateFormat === NOTE_DATE_FORMAT_SYSTEM}>
+              <View style={tailwind(`justify-center items-center border h-4 w-4 rounded ${currentYearBtnClassNames}`)}>
+                {doCurrentYearCheck && <Svg width={8} height={6} style={tailwind('text-white font-normal')} viewBox="0 0 8 6" fill="currentColor">
+                  <Path fillRule="evenodd" clipRule="evenodd" d="M7.70692 1.70698C7.88908 1.51838 7.98987 1.26578 7.98759 1.00358C7.98532 0.741383 7.88015 0.49057 7.69474 0.305162C7.50933 0.119754 7.25852 0.0145843 6.99632 0.0123059C6.73412 0.0100274 6.48152 0.110823 6.29292 0.292981L2.99992 3.58598L1.70692 2.29298C1.51832 2.11082 1.26571 2.01003 1.00352 2.01231C0.741321 2.01459 0.490509 2.11975 0.305101 2.30516C0.119693 2.49057 0.0145233 2.74138 0.0122448 3.00358C0.00996641 3.26578 0.110762 3.51838 0.29292 3.70698L2.29292 5.70698C2.48045 5.89445 2.73476 5.99977 2.99992 5.99977C3.26508 5.99977 3.51939 5.89445 3.70692 5.70698L7.70692 1.70698Z" />
+                </Svg>}
+              </View>
+              <Text style={tailwind(`ml-2 text-base font-normal ${currentYearLabelClassNames}`)}>Show current year</Text>
+            </TouchableOpacity>
+            <Text style={tailwind('mt-4 text-sm font-normal text-gray-500 blk:text-gray-400')}>Example: {noteDateExample}</Text>
+          </View>
+        </View>
+      </View>}
       <View style={tailwind('mt-10 mb-4 flex-row items-center justify-between')}>
         <View style={tailwind('flex-shrink flex-grow')}>
           <Text style={tailwind('text-base font-medium leading-5 text-gray-800 blk:text-gray-100')}>Section By Month</Text>

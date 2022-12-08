@@ -5,7 +5,7 @@ import {
   INIT, FETCH_COMMIT, ADD_LIST_NAMES, UPDATE_LIST_NAMES, MOVE_LIST_NAME,
   MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH,
   UPDATE_SORT_ON, UPDATE_DO_DESCENDING_ORDER, UPDATE_NOTE_DATE_SHOWING_MODE,
-  UPDATE_DO_SECTION_NOTES_BY_MONTH,
+  UPDATE_NOTE_DATE_FORMAT, UPDATE_DO_SECTION_NOTES_BY_MONTH,
   UPDATE_SETTINGS_COMMIT, CANCEL_DIED_SETTINGS, REQUEST_PURCHASE_COMMIT,
   RESTORE_PURCHASES_COMMIT, REFRESH_PURCHASES_COMMIT, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -45,6 +45,11 @@ const settingsReducer = (state = initialState, action) => {
     if (didChange.noteDateShowingMode) {
       newState.noteDateShowingMode = state.noteDateShowingMode;
     }
+    if (didChange.noteDateFormat) {
+      newState.noteDateFormat = state.noteDateFormat;
+      newState.noteDateIsTwoDigit = state.noteDateIsTwoDigit;
+      newState.noteDateIsCurrentYearShown = state.noteDateIsCurrentYearShown;
+    }
     if (didChange.doSectionNotesByMonth) {
       newState.doSectionNotesByMonth = state.doSectionNotesByMonth;
     }
@@ -63,8 +68,8 @@ const settingsReducer = (state = initialState, action) => {
 
     if ([
       didChange.doDeleteOldNotesInTrash, didChange.sortOn, didChange.doDescendingOrder,
-      didChange.noteDateShowingMode, didChange.doSectionNotesByMonth,
-      didChange.listNameMap, didChange.purchases,
+      didChange.noteDateShowingMode, didChange.noteDateFormat,
+      didChange.doSectionNotesByMonth, didChange.listNameMap, didChange.purchases,
     ].includes(true)) {
       return newState;
     }
@@ -229,6 +234,11 @@ const settingsReducer = (state = initialState, action) => {
     return { ...state, noteDateShowingMode: action.payload };
   }
 
+  if (action.type === UPDATE_NOTE_DATE_FORMAT) {
+    didChange.noteDateFormat = true;
+    return { ...state, ...action.payload };
+  }
+
   if (action.type === UPDATE_DO_SECTION_NOTES_BY_MONTH) {
     didChange.doSectionNotesByMonth = true;
     return { ...state, doSectionNotesByMonth: action.payload };
@@ -239,6 +249,7 @@ const settingsReducer = (state = initialState, action) => {
     didChange.sortOn = false;
     didChange.doDescendingOrder = false;
     didChange.noteDateShowingMode = false;
+    didChange.noteDateFormat = false;
     didChange.doSectionNotesByMonth = false;
     didChange.listNameMap = false;
     didChange.purchases = false;
@@ -251,6 +262,7 @@ const settingsReducer = (state = initialState, action) => {
     didChange.sortOn = false;
     didChange.doDescendingOrder = false;
     didChange.noteDateShowingMode = false;
+    didChange.noteDateFormat = false;
     didChange.doSectionNotesByMonth = false;
     didChange.listNameMap = false;
     didChange.purchases = false;
@@ -300,6 +312,7 @@ const settingsReducer = (state = initialState, action) => {
     didChange.sortOn = false;
     didChange.doDescendingOrder = false;
     didChange.noteDateShowingMode = false;
+    didChange.noteDateFormat = false;
     didChange.doSectionNotesByMonth = false;
     didChange.listNameMap = false;
     didChange.purchases = false;
