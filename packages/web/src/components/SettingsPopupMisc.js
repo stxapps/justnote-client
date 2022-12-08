@@ -18,7 +18,9 @@ import { useTailwind } from '.';
 const SettingsPopupMisc = (props) => {
 
   const { onSidebarOpenBtnClick } = props;
-  const doDeleteOldNotesInTrash = useSelector(state => state.settings.doDeleteOldNotesInTrash);
+  const doDeleteOldNotesInTrash = useSelector(
+    state => state.settings.doDeleteOldNotesInTrash
+  );
   const sortOn = useSelector(state => state.settings.sortOn);
   const doDescendingOrder = useSelector(state => state.settings.doDescendingOrder);
   const noteDateShowingMode = useSelector(state => state.settings.noteDateShowingMode);
@@ -297,13 +299,13 @@ const SettingsPopupMisc = (props) => {
           <span aria-hidden="true" className={tailwind(`inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out blk:bg-gray-300 ${doShowDateBtnInnerClassNames}`)} />
         </span>
       </div>
-      {doEnableExtraFeatures && <div className={tailwind('mt-10 mb-4')}>
+      {doEnableExtraFeatures && <div className={tailwind('mt-10')}>
         <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>Note Date Formats</h4>
-        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Choose a date format for note dates</p>
+        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Choose a date format for note dates.</p>
         <div className={tailwind('mx-auto mt-2.5 w-full max-w-sm rounded-md border border-gray-200 p-5 shadow-sm blk:border-gray-700')}>
           <div className={tailwind('flex items-center')}>
             <label className={tailwind('mr-2 block flex-shrink-0 flex-grow-0 text-base text-gray-500 blk:text-gray-400')}>Date format:</label>
-            <button onClick={onDateFormatBtnClick} className={tailwind('block flex-shrink flex-grow relative rounded-md border border-gray-300 bg-white py-1.5 pl-3 pr-10 text-left text-base text-gray-500 focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600 blk:border-gray-600 blk:bg-gray-900 blk:text-gray-400 sm:text-sm')}>
+            <button onClick={onDateFormatBtnClick} className={tailwind('relative block flex-shrink flex-grow rounded-md border border-gray-300 bg-white py-1.5 pl-3 pr-10 text-left text-base text-gray-500 focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600 blk:border-gray-600 blk:bg-gray-900 blk:text-gray-400 sm:text-sm')}>
               <span className={tailwind('block truncate')}>{NOTE_DATE_FORMAT_TEXTS[NOTE_DATE_FORMATS.indexOf(noteDateFormat)]}</span>
               <span className={tailwind('absolute inset-y-0 right-0 flex items-center pr-2')}>
                 <svg className={tailwind('h-5 w-5 text-gray-400')} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
