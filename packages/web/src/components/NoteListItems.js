@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { fetchMore, updateFetchedMore } from '../actions';
@@ -31,11 +31,38 @@ const NoteListItems = () => {
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
-  let notes = useSelector(getNotes);
-  if (!notes) {
-    console.log(`Invalid notes: ${notes}. Notes cannot be undefined as in NoteSelector and if notes is null, it should be handled in NoteList, not in NoteListItems.`);
-    notes = [];
+  const { conflictedNotes, pinnedNotes, notes } = useSelector(state => getNotes(state));
+  if (!Array.isArray(pinnedNotes) || !Array.isArray(notes)) {
+    console.log(`Invalid pinnedNotes: ${pinnedNotes} or notes: ${notes}. Notes cannot be undefined as in NoteSelector and if notes is null, it should be handled in NoteList, not in NoteListItems.`);
   }
+
+  const items = useMemo(() => {
+    let prevMonth = null;
+
+    const _items = Array.isArray(conflictedNotes) ? [...conflictedNotes] : [];
+    if (Array.isArray(pinnedNotes)) _items.push(...pinnedNotes);
+    if (Array.isArray(notes)) {
+      for (const note of notes) {
+        if (doSectionNotesByMonth) {
+          let dt = note.addedDT;
+          if (sortOn === ADDED_DT) { /* do nothing here */ }
+          else if (sortOn === UPDATED_DT) dt = note.updatedDT;
+          else console.log(`Invalid sortOn: ${sortOn}`);
+
+          const { year, month } = getFullYearMonth(dt);
+          if (month !== prevMonth) {
+            _items.push({ id: `${SHOW_MONTH_HEAD}-${year}-${month}`, year, month });
+          }
+
+          prevMonth = month;
+        }
+
+        _items.push(note);
+      }
+    }
+
+    return _items;
+  }, [conflictedNotes, pinnedNotes, notes, sortOn, doSectionNotesByMonth]);
 
   const updateScrollY = useCallback(() => {
     if (!flatList.current) return;
@@ -160,27 +187,6 @@ const NoteListItems = () => {
   };
 
   const renderItems = () => {
-    let prevMonth = null;
-
-    const items = [];
-    for (const note of notes) {
-      if (doSectionNotesByMonth) {
-        let dt = note.addedDT;
-        if (sortOn === ADDED_DT) { /* do nothing here */ }
-        else if (sortOn === UPDATED_DT) dt = note.updatedDT;
-        else console.log(`Invalid sortOn: ${sortOn}`);
-
-        const { year, month } = getFullYearMonth(dt);
-        if (month !== prevMonth) {
-          items.push({ id: `${SHOW_MONTH_HEAD}-${year}-${month}`, year, month });
-        }
-
-        prevMonth = month;
-      }
-
-      items.push(note);
-    }
-
     return (
       <div className={tailwind('mt-5')}>
         <ul className={tailwind('-my-5 divide-y divide-gray-200 blk:divide-gray-700')}>
@@ -233,8 +239,8 @@ const NoteListItems = () => {
 
   return (
     <div ref={flatList} className={tailwind('flex-shrink flex-grow overflow-y-auto pb-[5.5rem] lg:pb-0')}>
-      {notes.length === 0 && renderEmpty()}
-      {notes.length > 0 && renderItems()}
+      {items.length === 0 && renderEmpty()}
+      {items.length > 0 && renderItems()}
       {fetchMoreBtn}
     </div>
   );

@@ -8,8 +8,8 @@ import {
 import {
   isStringIn, isObject, isArrayEqual, isEqual, getListNameObj,
   getMainId, getValidProduct as _getValidProduct, getValidPurchase as _getValidPurchase,
-  listNoteIds, getSortedNotes, sortWithPins, getNoteFPaths, getPinFPaths, getPins,
-  doEnableExtraFeatures, getFormattedNoteDate,
+  listNoteIds, getSortedNotes, separatePinnedValues, getNoteFPaths, getPinFPaths,
+  getPins, doEnableExtraFeatures, getFormattedNoteDate,
 } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 import { initialListNameEditorState } from '../types/initialStates';
@@ -63,6 +63,11 @@ const createSelectorNotes = createSelectorCreator(
       return false;
     }
     if (prevVal['settings'].doDescendingOrder !== val['settings'].doDescendingOrder) {
+      return false;
+    }
+    if (
+      prevVal['settings'].doSectionNotesByMonth !== val['settings'].doSectionNotesByMonth
+    ) {
       return false;
     }
 
@@ -120,10 +125,10 @@ export const _getNotes = (state) => {
   const pendingPins = state.pendingPins;
 
   let sortedNotes = getSortedNotes(notes, listName, sortOn, doDescendingOrder);
-  if (!sortedNotes) return null;
+  if (!sortedNotes) return { pinnedNotes: null, notes: null };
 
   const { toRootIds } = listNoteIds(noteFPaths);
-  sortedNotes = sortWithPins(sortedNotes, pinFPaths, pendingPins, toRootIds, (note) => {
+  const getValueMainId = (note) => {
     let noteId = note.id;
     if ([UPDATING, MOVING, DIED_UPDATING, DIED_MOVING].includes(note.status)) {
       if (Array.isArray(note.parentIds) && note.parentIds.length > 0) {
@@ -131,15 +136,24 @@ export const _getNotes = (state) => {
       }
     }
     return getMainId(noteId, toRootIds);
+  };
+  const separatedValues = separatePinnedValues(
+    sortedNotes, pinFPaths, pendingPins, toRootIds, getValueMainId,
+  );
+
+  const pinnedNotes = separatedValues[0].map(pinnedValue => pinnedValue.value);
+  const noPinnedNotes = separatedValues[1];
+
+  if (searchString === '') return { pinnedNotes, notes: noPinnedNotes };
+
+  const searchPinnedNotes = pinnedNotes.filter(note => {
+    return isStringIn(note, searchString);
   });
-
-  if (searchString === '') return sortedNotes;
-
-  const searchNotes = sortedNotes.filter(note => {
+  const searchNotes = noPinnedNotes.filter(note => {
     return isStringIn(note, searchString);
   });
 
-  return searchNotes;
+  return { pinnedNotes: searchPinnedNotes, notes: searchNotes };
 };
 
 export const _getConflictedNotes = (state) => {
@@ -162,14 +176,9 @@ export const _getConflictedNotes = (state) => {
 export const getNotes = createSelectorNotes(
   state => state,
   (state) => {
-
-    const notes = _getNotes(state);
+    const { pinnedNotes, notes } = _getNotes(state);
     const conflictedNotes = _getConflictedNotes(state);
-
-    if (!notes && !conflictedNotes) return null;
-    if (!conflictedNotes) return notes;
-    if (!notes) return conflictedNotes;
-    return [...conflictedNotes, ...notes];
+    return { conflictedNotes, pinnedNotes, notes };
   }
 );
 

@@ -9,7 +9,9 @@ import {
   UPDATE_SETTINGS_COMMIT, CANCEL_DIED_SETTINGS, REQUEST_PURCHASE_COMMIT,
   RESTORE_PURCHASES_COMMIT, REFRESH_PURCHASES_COMMIT, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
-import { MY_NOTES, TRASH, ARCHIVE, SWAP_LEFT, SWAP_RIGHT, VALID } from '../types/const';
+import {
+  MY_NOTES, TRASH, ARCHIVE, SWAP_LEFT, SWAP_RIGHT, VALID, NOTE_DATE_SHOWING_MODE_SHOW,
+} from '../types/const';
 import {
   getListNameObj, doContainListName, copyListNameObjs, swapArrayElements,
   deriveSettingsState,
@@ -235,8 +237,11 @@ const settingsReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_NOTE_DATE_FORMAT) {
+    didChange.noteDateShowingMode = true;
     didChange.noteDateFormat = true;
-    return { ...state, ...action.payload };
+    return {
+      ...state, noteDateShowingMode: NOTE_DATE_SHOWING_MODE_SHOW, ...action.payload,
+    };
   }
 
   if (action.type === UPDATE_DO_SECTION_NOTES_BY_MONTH) {

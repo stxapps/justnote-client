@@ -42,30 +42,32 @@ const NoteListItems = () => {
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
-  let notes = useSelector(getNotes);
-  if (!notes) {
-    console.log(`Invalid notes: ${notes}. Notes cannot be undefined as in NoteSelector and if notes is null, it should be handled in NoteList, not in NoteListItems.`);
-    notes = [];
+  const { conflictedNotes, pinnedNotes, notes } = useSelector(state => getNotes(state));
+  if (!Array.isArray(pinnedNotes) || !Array.isArray(notes)) {
+    console.log(`Invalid pinnedNotes: ${pinnedNotes} or notes: ${notes}. Notes cannot be undefined as in NoteSelector and if notes is null, it should be handled in NoteList, not in NoteListItems.`);
   }
 
   const data = useMemo(() => {
-    let _data = [...notes];
-    if (doSectionNotesByMonth) {
-      let prevMonth = null;
+    let prevMonth = null;
 
-      _data = [];
+    const _data = Array.isArray(conflictedNotes) ? [...conflictedNotes] : [];
+    if (Array.isArray(pinnedNotes)) _data.push(...pinnedNotes);
+    if (Array.isArray(notes)) {
       for (const note of notes) {
-        let dt = note.addedDT;
-        if (sortOn === ADDED_DT) { /* do nothing here */ }
-        else if (sortOn === UPDATED_DT) dt = note.updatedDT;
-        else console.log(`Invalid sortOn: ${sortOn}`);
+        if (doSectionNotesByMonth) {
+          let dt = note.addedDT;
+          if (sortOn === ADDED_DT) { /* do nothing here */ }
+          else if (sortOn === UPDATED_DT) dt = note.updatedDT;
+          else console.log(`Invalid sortOn: ${sortOn}`);
 
-        const { year, month } = getFullYearMonth(dt);
-        if (month !== prevMonth) {
-          _data.push({ id: `${SHOW_MONTH_HEAD}-${year}-${month}`, year, month });
+          const { year, month } = getFullYearMonth(dt);
+          if (month !== prevMonth) {
+            _data.push({ id: `${SHOW_MONTH_HEAD}-${year}-${month}`, year, month });
+          }
+
+          prevMonth = month;
         }
 
-        prevMonth = month;
         _data.push(note);
       }
     }
@@ -81,8 +83,8 @@ const NoteListItems = () => {
 
     return _data;
   }, [
-    notes, hasMore, hasFetchedMore, isFetchingMore, safeAreaWidth,
-    sortOn, doSectionNotesByMonth,
+    conflictedNotes, pinnedNotes, notes, hasMore, hasFetchedMore, isFetchingMore,
+    safeAreaWidth, sortOn, doSectionNotesByMonth,
   ]);
 
   const onScrollEnd = useCallback((e) => {
