@@ -11,7 +11,7 @@ import {
   updateEditorUnmount,
 } from '../actions';
 import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, BLK_MODE } from '../types/const';
-import { getThemeMode } from '../selectors';
+import { getThemeMode, getDoMoreEditorFontSizes } from '../selectors';
 import {
   isString, isNoteBodyEqual, isMobile as _isMobile, replaceObjectUrls, getFileExt,
   debounce,
@@ -37,6 +37,7 @@ const NoteEditorEditor = (props) => {
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const isFocused = useSelector(state => state.display.isEditorFocused);
   const isEditorBusy = useSelector(state => state.display.isEditorBusy);
+  const doMoreEditorFontSizes = useSelector(state => getDoMoreEditorFontSizes(state));
   const saveNoteCount = useSelector(state => state.editor.saveNoteCount);
   const discardNoteCount = useSelector(state => state.editor.discardNoteCount);
   const updateNoteIdUrlHashCount = useSelector(
@@ -535,6 +536,20 @@ const NoteEditorEditor = (props) => {
     return {
       placeholder: 'Start writing...',
       removePlugins: ['Autoformat'],
+      fontSize: {
+        options: [
+          'tiny', 'small', 'default', 'big', 'huge',
+          { title: '9', model: '0.5625em' },
+          { title: '12', model: '0.75em' },
+          { title: '14', model: '0.875em' },
+          { title: '18', model: '1.125em' },
+          { title: '24', model: '1.5em' },
+          { title: '30', model: '1.875em' },
+          { title: '36', model: '2.25em' },
+          { title: '48', model: '3em' },
+          { title: '60', model: '3.75em' },
+        ],
+      },
       fontColor: {
         colors: [
           { color: 'rgb(31, 41, 55)', label: 'Black' },
@@ -575,7 +590,7 @@ const NoteEditorEditor = (props) => {
   }, []);
 
   return (
-    <div className={tailwind(`flex flex-1 flex-col overflow-hidden ${themeMode === BLK_MODE ? 'blk-mode' : 'wht-mode'}`)}>
+    <div className={tailwind(`flex flex-1 flex-col overflow-hidden ${themeMode === BLK_MODE ? 'blk-mode' : 'wht-mode'} ${doMoreEditorFontSizes ? 'more-font-sizes' : 'default-font-sizes'}`)}>
       <div ref={scrollView} className={tailwind('z-0 flex-shrink flex-grow overflow-y-auto overflow-x-hidden')}>
         <div className={tailwind(`px-1.5 py-1.5 ${isMobile ? 'border-b border-gray-200 blk:border-gray-700' : ''}`)}>
           <input ref={titleInput} onFocus={onFocus} onChange={onDataChange} type="text" name="titleInput" id="titleInput" className={tailwind('block w-full border-0 bg-white px-1.5 py-1.5 text-xl font-normal text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-0 blk:bg-gray-900 blk:text-gray-200 blk:placeholder:text-gray-400 lg:text-lg')} placeholder="Note Title" disabled={(note.id !== NEW_NOTE && note.status !== ADDED) || isEditorBusy} />

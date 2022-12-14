@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   updateDoDeleteOldNotesInTrash, updateSortOn, updateDoDescendingOrder,
   updateNoteDateShowingMode, updateNoteDateFormat, updateDoSectionNotesByMonth,
-  updateTheme, updatePopupUrlHash,
+  updateDoMoreEditorFontSizes, updateTheme, updatePopupUrlHash,
 } from '../actions';
 import {
   DATE_FORMAT_MENU_POPUP, ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE,
@@ -32,6 +32,9 @@ const SettingsPopupMisc = (props) => {
   const noteDateExample = useSelector(state => getNoteDateExample(state));
   const doSectionNotesByMonth = useSelector(
     state => state.settings.doSectionNotesByMonth
+  );
+  const doMoreEditorFontSizes = useSelector(
+    state => state.settings.doMoreEditorFontSizes
   );
   const themeMode = useSelector(state => state.localSettings.themeMode);
   const customOptions = useSelector(
@@ -88,6 +91,10 @@ const SettingsPopupMisc = (props) => {
 
   const onDoSectionBtnClick = () => {
     dispatch(updateDoSectionNotesByMonth(!doSectionNotesByMonth));
+  };
+
+  const onDoMoreFontSizesBtnClick = () => {
+    dispatch(updateDoMoreEditorFontSizes(!doMoreEditorFontSizes));
   };
 
   const onThemeInputChange = (e) => {
@@ -163,6 +170,9 @@ const SettingsPopupMisc = (props) => {
 
   const doSectionBtnClassNames = doSectionNotesByMonth ? 'bg-green-500 blk:bg-green-500' : 'bg-gray-200 blk:bg-gray-700';
   const doSectionBtnInnerClassNames = doSectionNotesByMonth ? 'translate-x-5' : 'translate-x-0';
+
+  const doMoreFontSizesBtnClassNames = doMoreEditorFontSizes ? 'bg-green-500 blk:bg-green-500' : 'bg-gray-200 blk:bg-gray-700';
+  const doMoreFontSizesBtnInnerClassNames = doMoreEditorFontSizes ? 'translate-x-5' : 'translate-x-0';
 
   const whtBtnClassNames = themeMode === WHT_MODE ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
   const whtBtnInnerClassNames = themeMode === WHT_MODE ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
@@ -301,7 +311,7 @@ const SettingsPopupMisc = (props) => {
       </div>
       {doEnableExtraFeatures && <div className={tailwind('mt-10')}>
         <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>Note Date Formats</h4>
-        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Choose a date format for note dates.</p>
+        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Choose a date format for your note dates.</p>
         <div className={tailwind('mx-auto mt-2.5 w-full max-w-sm rounded-md border border-gray-200 bg-white p-5 shadow-sm blk:border-gray-700 blk:bg-gray-900 ')}>
           <div className={tailwind('flex items-center')}>
             <label className={tailwind('mr-2 block flex-shrink-0 flex-grow-0 text-base text-gray-500 blk:text-gray-400')}>Date format:</label>
@@ -325,13 +335,22 @@ const SettingsPopupMisc = (props) => {
           <p className={tailwind('mt-4 text-sm text-gray-500 blk:text-gray-400')}>Example: {noteDateExample}</p>
         </div>
       </div>}
-      {doEnableExtraFeatures && <div className={tailwind('mt-10 mb-4 flex items-center justify-between space-x-4')}>
+      {doEnableExtraFeatures && <div className={tailwind('mt-10 flex items-center justify-between space-x-4')}>
         <div className={tailwind('flex flex-col')}>
           <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>Section By Month</h4>
-          <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Section notes by month and show the month at the top of each section.</p>
+          <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Section your notes by month and show the month at the top of each section.</p>
         </div>
         <span onClick={onDoSectionBtnClick} role="checkbox" tabIndex={0} aria-checked="true" aria-labelledby="section-month-option-label" aria-describedby="section-month-option-description" className={tailwind(`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:focus:ring-offset-gray-900 ${doSectionBtnClassNames}`)}>
           <span aria-hidden="true" className={tailwind(`inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out blk:bg-gray-300 ${doSectionBtnInnerClassNames}`)} />
+        </span>
+      </div>}
+      {doEnableExtraFeatures && <div className={tailwind('mt-10 flex items-center justify-between space-x-4')}>
+        <div className={tailwind('flex flex-col')}>
+          <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>More Font Sizes</h4>
+          <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Enable more font size options in the note editor.</p>
+        </div>
+        <span onClick={onDoMoreFontSizesBtnClick} role="checkbox" tabIndex={0} aria-checked="true" aria-labelledby="font-size-option-label" aria-describedby="font-size-option-description" className={tailwind(`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:focus:ring-offset-gray-900 ${doMoreFontSizesBtnClassNames}`)}>
+          <span aria-hidden="true" className={tailwind(`inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out blk:bg-gray-300 ${doMoreFontSizesBtnInnerClassNames}`)} />
         </span>
       </div>}
       <div className={tailwind('mt-10 mb-4 flex items-center justify-between space-x-4')}>

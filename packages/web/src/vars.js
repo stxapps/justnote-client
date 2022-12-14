@@ -5,6 +5,7 @@ export const didChange = {
   noteDateShowingMode: false,
   noteDateFormat: false,
   doSectionNotesByMonth: false,
+  doMoreEditorFontSizes: false,
   listNameMap: false,
   purchases: false,
 };

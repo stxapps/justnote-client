@@ -6,8 +6,9 @@ import {
   MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH,
   UPDATE_SORT_ON, UPDATE_DO_DESCENDING_ORDER, UPDATE_NOTE_DATE_SHOWING_MODE,
   UPDATE_NOTE_DATE_FORMAT, UPDATE_DO_SECTION_NOTES_BY_MONTH,
-  UPDATE_SETTINGS_COMMIT, CANCEL_DIED_SETTINGS, REQUEST_PURCHASE_COMMIT,
-  RESTORE_PURCHASES_COMMIT, REFRESH_PURCHASES_COMMIT, DELETE_ALL_DATA, RESET_STATE,
+  UPDATE_DO_MORE_EDITOR_FONT_SIZES, UPDATE_SETTINGS_COMMIT, CANCEL_DIED_SETTINGS,
+  REQUEST_PURCHASE_COMMIT, RESTORE_PURCHASES_COMMIT, REFRESH_PURCHASES_COMMIT,
+  DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   MY_NOTES, TRASH, ARCHIVE, SWAP_LEFT, SWAP_RIGHT, VALID, NOTE_DATE_SHOWING_MODE_SHOW,
@@ -55,6 +56,9 @@ const settingsReducer = (state = initialState, action) => {
     if (didChange.doSectionNotesByMonth) {
       newState.doSectionNotesByMonth = state.doSectionNotesByMonth;
     }
+    if (didChange.doMoreEditorFontSizes) {
+      newState.doMoreEditorFontSizes = state.doMoreEditorFontSizes;
+    }
     if (didChange.listNameMap) {
       newState.listNameMap = state.listNameMap;
     }
@@ -71,7 +75,8 @@ const settingsReducer = (state = initialState, action) => {
     if ([
       didChange.doDeleteOldNotesInTrash, didChange.sortOn, didChange.doDescendingOrder,
       didChange.noteDateShowingMode, didChange.noteDateFormat,
-      didChange.doSectionNotesByMonth, didChange.listNameMap, didChange.purchases,
+      didChange.doSectionNotesByMonth, didChange.doMoreEditorFontSizes,
+      didChange.listNameMap, didChange.purchases,
     ].includes(true)) {
       return newState;
     }
@@ -249,6 +254,11 @@ const settingsReducer = (state = initialState, action) => {
     return { ...state, doSectionNotesByMonth: action.payload };
   }
 
+  if (action.type === UPDATE_DO_MORE_EDITOR_FONT_SIZES) {
+    didChange.doMoreEditorFontSizes = true;
+    return { ...state, doMoreEditorFontSizes: action.payload };
+  }
+
   if (action.type === UPDATE_SETTINGS_COMMIT) {
     didChange.doDeleteOldNotesInTrash = false;
     didChange.sortOn = false;
@@ -256,6 +266,7 @@ const settingsReducer = (state = initialState, action) => {
     didChange.noteDateShowingMode = false;
     didChange.noteDateFormat = false;
     didChange.doSectionNotesByMonth = false;
+    didChange.doMoreEditorFontSizes = false;
     didChange.listNameMap = false;
     didChange.purchases = false;
     return loop(state, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
@@ -269,6 +280,7 @@ const settingsReducer = (state = initialState, action) => {
     didChange.noteDateShowingMode = false;
     didChange.noteDateFormat = false;
     didChange.doSectionNotesByMonth = false;
+    didChange.doMoreEditorFontSizes = false;
     didChange.listNameMap = false;
     didChange.purchases = false;
     return { ...state, ...settings };
@@ -319,6 +331,7 @@ const settingsReducer = (state = initialState, action) => {
     didChange.noteDateShowingMode = false;
     didChange.noteDateFormat = false;
     didChange.doSectionNotesByMonth = false;
+    didChange.doMoreEditorFontSizes = false;
     didChange.listNameMap = false;
     didChange.purchases = false;
     return { ...initialState };

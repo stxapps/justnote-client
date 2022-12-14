@@ -404,7 +404,7 @@ const SettingsPopupMisc = (props) => {
           </View>
         </View>
       </View>}
-      <View style={tailwind('mt-10 mb-4 flex-row items-center justify-between')}>
+      <View style={tailwind('mt-10 flex-row items-center justify-between')}>
         <View style={tailwind('flex-shrink flex-grow')}>
           <Text style={tailwind('text-base font-medium leading-5 text-gray-800 blk:text-gray-100')}>Section By Month</Text>
           <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Section notes by month and show the month at the top of each section.</Text>

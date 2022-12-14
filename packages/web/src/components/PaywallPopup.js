@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { updatePopup, updateSettingsPopup, updateSettingsViewId } from '../actions';
 import {
   PAYWALL_POPUP, SM_WIDTH, SETTINGS_VIEW_IAP, FEATURE_PIN, FEATURE_APPEARANCE,
-  FEATURE_DATE_FORMAT, FEATURE_SECTION_NOTES_BY_MONTH,
+  FEATURE_DATE_FORMAT, FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES,
 } from '../types/const';
 import { dialogBgFMV, dialogFMV } from '../types/animConfigs';
 import { paywallFeature } from '../vars';
@@ -51,6 +51,9 @@ const PaywallPopup = () => {
   if (paywallFeature.feature === FEATURE_DATE_FORMAT) feature = 'Custom date format';
   if (paywallFeature.feature === FEATURE_SECTION_NOTES_BY_MONTH) {
     feature = 'Section by month';
+  }
+  if (paywallFeature.feature === FEATURE_MORE_EDITOR_FONT_SIZES) {
+    feature = 'More font sizes';
   }
 
   const spanStyle = {};
