@@ -243,7 +243,7 @@ const NoteListItems = () => {
         renderItem={renderItem}
         ListEmptyComponent={renderEmpty}
         onEndReached={onEndReached}
-        onEndReachedThreshold={0.9}
+        onEndReachedThreshold={0.2}
         removeClippedSubviews={false}
         onScrollEndDrag={onScrollEnd}
         onMomentumScrollEnd={onScrollEnd}
