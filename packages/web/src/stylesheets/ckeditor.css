@@ -123,6 +123,10 @@
   --ck-toolbar-dropdown-max-width: 96vw;
 }
 
+.not-mobile {
+  --ck-font-size-base: 13px;
+}
+
 .blk-mode {
   --ck-color-base-foreground: var(--jn-editor-gray-900);
   --ck-color-base-background: var(--jn-editor-gray-900);
@@ -299,7 +303,11 @@
 }
 
 .more-font-sizes .ck.ck-dropdown.ck-font-size-dropdown .ck.ck-dropdown__panel {
-  width: 256px;
+  width: 296px;
+}
+
+.not-mobile.more-font-sizes .ck.ck-dropdown.ck-font-size-dropdown .ck.ck-dropdown__panel {
+  width: 258px;
 }
 
 .more-font-sizes .ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list {
@@ -309,6 +317,10 @@
 }
 
 .more-font-sizes .ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list .ck.ck-list__item:last-child .ck.ck-button__label {
+  line-height: 34px;
+}
+
+.not-mobile.more-font-sizes .ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list .ck.ck-list__item:last-child .ck.ck-button__label {
   line-height: 32px;
 }
 

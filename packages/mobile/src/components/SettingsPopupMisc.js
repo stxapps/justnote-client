@@ -6,7 +6,7 @@ import Svg, { Path } from 'react-native-svg';
 import {
   updateDoDeleteOldNotesInTrash, updateSortOn, updateDoDescendingOrder,
   updateNoteDateShowingMode, updateNoteDateFormat, updateDoSectionNotesByMonth,
-  updateTheme, updateUpdatingThemeMode, updatePopup,
+  updateDoMoreEditorFontSizes, updateTheme, updateUpdatingThemeMode, updatePopup,
 } from '../actions';
 import {
   DATE_FORMAT_MENU_POPUP, ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE,
@@ -36,6 +36,9 @@ const SettingsPopupMisc = (props) => {
   const noteDateExample = useSelector(state => getNoteDateExample(state));
   const doSectionNotesByMonth = useSelector(
     state => state.settings.doSectionNotesByMonth
+  );
+  const doMoreEditorFontSizes = useSelector(
+    state => state.settings.doMoreEditorFontSizes
   );
   const themeMode = useSelector(state => state.localSettings.themeMode);
   const customOptions = useSelector(state => state.localSettings.themeCustomOptions);
@@ -94,6 +97,10 @@ const SettingsPopupMisc = (props) => {
 
   const onDoSectionBtnClick = () => {
     dispatch(updateDoSectionNotesByMonth(!doSectionNotesByMonth));
+  };
+
+  const onDoMoreFontSizesBtnClick = () => {
+    dispatch(updateDoMoreEditorFontSizes(!doMoreEditorFontSizes));
   };
 
   const onThemeInputChange = (value) => {
@@ -370,7 +377,7 @@ const SettingsPopupMisc = (props) => {
       </View>
       {isUserSignedIn && <View style={tailwind('mt-10')}>
         <Text style={tailwind('text-base font-medium leading-5 text-gray-800 blk:text-gray-100')}>Note Date Formats</Text>
-        <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Choose a date format for note dates.</Text>
+        <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Choose a date format for your note dates.</Text>
         <View style={tailwind('mt-2.5 w-full items-center justify-start')}>
           <View style={tailwind('w-full max-w-sm rounded-md border border-gray-200 bg-white p-5 shadow-sm blk:border-gray-700 blk:bg-gray-900')}>
             <View style={tailwind('flex-row items-center')}>
@@ -407,10 +414,19 @@ const SettingsPopupMisc = (props) => {
       <View style={tailwind('mt-10 flex-row items-center justify-between')}>
         <View style={tailwind('flex-shrink flex-grow')}>
           <Text style={tailwind('text-base font-medium leading-5 text-gray-800 blk:text-gray-100')}>Section By Month</Text>
-          <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Section notes by month and show the month at the top of each section.</Text>
+          <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Section your notes by month and show the month at the top of each section.</Text>
         </View>
         <View style={tailwind('ml-4 h-6 w-11 flex-shrink-0 flex-grow-0')}>
           <Switch onValueChange={onDoSectionBtnClick} value={doSectionNotesByMonth} thumbColor={Platform.OS === 'android' ? doSectionNotesByMonth ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} ios_backgroundColor={switchIosTrackColorOff} />
+        </View>
+      </View>
+      <View style={tailwind('mt-10 flex-row items-center justify-between')}>
+        <View style={tailwind('flex-shrink flex-grow')}>
+          <Text style={tailwind('text-base font-medium leading-5 text-gray-800 blk:text-gray-100')}>More Font Sizes</Text>
+          <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Enable more font size options in the note editor.</Text>
+        </View>
+        <View style={tailwind('ml-4 h-6 w-11 flex-shrink-0 flex-grow-0')}>
+          <Switch onValueChange={onDoMoreFontSizesBtnClick} value={doMoreEditorFontSizes} thumbColor={Platform.OS === 'android' ? doMoreEditorFontSizes ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} ios_backgroundColor={switchIosTrackColorOff} />
         </View>
       </View>
       <View style={tailwind('mt-10 mb-4 flex-row items-center justify-between')}>

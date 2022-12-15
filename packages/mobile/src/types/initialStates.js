@@ -17,6 +17,7 @@ export const initialSettingsState = {
   noteDateIsTwoDigit: false,
   noteDateIsCurrentYearShown: false,
   doSectionNotesByMonth: false,
+  doMoreEditorFontSizes: false,
   listNameMap: [
     { ...myNotesListNameObj }, { ...trashListNameObj }, { ...archiveListNameObj },
   ],

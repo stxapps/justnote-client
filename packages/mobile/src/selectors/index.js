@@ -318,6 +318,15 @@ export const getDoSectionNotesByMonth = createSelector(
   },
 );
 
+export const getDoMoreEditorFontSizes = createSelector(
+  state => getDoEnableExtraFeatures(state),
+  state => state.settings.doMoreEditorFontSizes,
+  (doEnable, doMoreEditorFontSizes) => {
+    if (!doEnable) return false;
+    return doMoreEditorFontSizes;
+  },
+);
+
 let lastCustomOptions = null, lastCurHH = null, lastCurMM = null, lastCurMode = null;
 export const getThemeMode = createSelector(
   state => state.user.isUserSignedIn,

@@ -11,7 +11,7 @@ import {
   addSavingFPaths, updateEditorIsUploading, updateEditingNote, updateEditorUnmount,
 } from '../actions';
 import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, UTF8 } from '../types/const';
-import { getThemeMode } from '../selectors';
+import { getThemeMode, getDoMoreEditorFontSizes } from '../selectors';
 import {
   replaceObjectUrls, splitOnFirst, escapeDoubleQuotes, getFileExt,
 } from '../utils';
@@ -37,6 +37,7 @@ const NoteEditorEditor = (props) => {
   const { note } = props;
   const isFocused = useSelector(state => state.display.isEditorFocused);
   const isEditorBusy = useSelector(state => state.display.isEditorBusy);
+  const doMoreEditorFontSizes = useSelector(state => getDoMoreEditorFontSizes(state));
   const saveNoteCount = useSelector(state => state.editor.saveNoteCount);
   const discardNoteCount = useSelector(state => state.editor.discardNoteCount);
   const updateNoteIdCount = useSelector(state => state.editor.updateNoteIdCount);
@@ -94,6 +95,10 @@ const NoteEditorEditor = (props) => {
 
   const setThemeMode = (mode) => {
     webView.current.injectJavaScript('window.justnote.setThemeMode(' + mode + '); true;');
+  };
+
+  const setEditorFontSizes = (doMore) => {
+    webView.current.injectJavaScript('window.justnote.setEditorFontSizes(' + doMore + '); true;');
   };
 
   const focusTitleInput = useCallback(() => {
@@ -300,6 +305,11 @@ const NoteEditorEditor = (props) => {
     if (!isEditorReady) return;
     setThemeMode(themeMode);
   }, [isEditorReady, themeMode]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+    setEditorFontSizes(doMoreEditorFontSizes);
+  }, [isEditorReady, doMoreEditorFontSizes]);
 
   useEffect(() => {
     if (!isEditorReady) return;
