@@ -385,23 +385,23 @@ const SettingsPopupMisc = (props) => {
               <TouchableOpacity ref={dateFormatBtn} onPress={onDateFormatBtnClick} style={tailwind('flex-shrink flex-grow rounded-md border border-gray-300 bg-white py-1.5 pl-3 pr-10 blk:border-gray-600 blk:bg-gray-900')}>
                 <Text style={tailwind('text-base font-normal text-gray-500 blk:text-gray-400 sm:text-sm')} numberOfLines={1} ellipsizeMode="tail">{NOTE_DATE_FORMAT_TEXTS[NOTE_DATE_FORMATS.indexOf(noteDateFormat)]}</Text>
                 <View style={tailwind('absolute inset-y-0 right-0 flex-row items-center pr-2')}>
-                  <Svg width={20} height={20} style={tailwind('text-gray-400 font-normal')} viewBox="0 0 20 20" fill="currentColor">
+                  <Svg width={20} height={20} style={tailwind('font-normal text-gray-400')} viewBox="0 0 20 20" fill="currentColor">
                     <Path d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z" fillRule="evenodd" clipRule="evenodd" />
                   </Svg>
                 </View>
               </TouchableOpacity>
             </View>
             <TouchableOpacity onPress={onTwoDigitBtnClick} style={tailwind('mt-3.5 flex-row items-center')} disabled={noteDateFormat === NOTE_DATE_FORMAT_SYSTEM}>
-              <View style={tailwind(`justify-center items-center border h-4 w-4 rounded ${twoDigitBtnClassNames}`)}>
-                {doTwoDigitCheck && <Svg width={8} height={6} style={tailwind('text-white font-normal')} viewBox="0 0 8 6" fill="currentColor">
+              <View style={tailwind(`h-4 w-4 items-center justify-center rounded border ${twoDigitBtnClassNames}`)}>
+                {doTwoDigitCheck && <Svg width={8} height={6} style={tailwind('font-normal text-white')} viewBox="0 0 8 6" fill="currentColor">
                   <Path fillRule="evenodd" clipRule="evenodd" d="M7.70692 1.70698C7.88908 1.51838 7.98987 1.26578 7.98759 1.00358C7.98532 0.741383 7.88015 0.49057 7.69474 0.305162C7.50933 0.119754 7.25852 0.0145843 6.99632 0.0123059C6.73412 0.0100274 6.48152 0.110823 6.29292 0.292981L2.99992 3.58598L1.70692 2.29298C1.51832 2.11082 1.26571 2.01003 1.00352 2.01231C0.741321 2.01459 0.490509 2.11975 0.305101 2.30516C0.119693 2.49057 0.0145233 2.74138 0.0122448 3.00358C0.00996641 3.26578 0.110762 3.51838 0.29292 3.70698L2.29292 5.70698C2.48045 5.89445 2.73476 5.99977 2.99992 5.99977C3.26508 5.99977 3.51939 5.89445 3.70692 5.70698L7.70692 1.70698Z" />
                 </Svg>}
               </View>
               <Text style={tailwind(`ml-2 text-base font-normal ${twoDigitLabelClassNames}`)}>Show date and month in 2 digits</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={onCurrentYearBtnClick} style={tailwind('mt-3.5 flex-row items-center')} disabled={noteDateFormat === NOTE_DATE_FORMAT_SYSTEM}>
-              <View style={tailwind(`justify-center items-center border h-4 w-4 rounded ${currentYearBtnClassNames}`)}>
-                {doCurrentYearCheck && <Svg width={8} height={6} style={tailwind('text-white font-normal')} viewBox="0 0 8 6" fill="currentColor">
+              <View style={tailwind(`h-4 w-4 items-center justify-center rounded border ${currentYearBtnClassNames}`)}>
+                {doCurrentYearCheck && <Svg width={8} height={6} style={tailwind('font-normal text-white')} viewBox="0 0 8 6" fill="currentColor">
                   <Path fillRule="evenodd" clipRule="evenodd" d="M7.70692 1.70698C7.88908 1.51838 7.98987 1.26578 7.98759 1.00358C7.98532 0.741383 7.88015 0.49057 7.69474 0.305162C7.50933 0.119754 7.25852 0.0145843 6.99632 0.0123059C6.73412 0.0100274 6.48152 0.110823 6.29292 0.292981L2.99992 3.58598L1.70692 2.29298C1.51832 2.11082 1.26571 2.01003 1.00352 2.01231C0.741321 2.01459 0.490509 2.11975 0.305101 2.30516C0.119693 2.49057 0.0145233 2.74138 0.0122448 3.00358C0.00996641 3.26578 0.110762 3.51838 0.29292 3.70698L2.29292 5.70698C2.48045 5.89445 2.73476 5.99977 2.99992 5.99977C3.26508 5.99977 3.51939 5.89445 3.70692 5.70698L7.70692 1.70698Z" />
                 </Svg>}
               </View>

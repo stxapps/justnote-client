@@ -121,7 +121,7 @@ const DateFormatMenuPopup = () => {
     </ScrollView>
   );
 
-  let popupClassNames = 'absolute rounded-md overflow-hidden bg-white shadow-xl blk:border blk:border-gray-700 blk:bg-gray-800';
+  let popupClassNames = 'absolute overflow-hidden rounded-md bg-white shadow-xl blk:border blk:border-gray-700 blk:bg-gray-800';
   let panel;
   let bgStyle = { opacity: 0 };
   if (popupSize) {
