@@ -411,7 +411,7 @@ const SettingsPopupMisc = (props) => {
           </View>
         </View>
       </View>}
-      <View style={tailwind('mt-10 flex-row items-center justify-between')}>
+      {isUserSignedIn && <View style={tailwind('mt-10 flex-row items-center justify-between')}>
         <View style={tailwind('flex-shrink flex-grow')}>
           <Text style={tailwind('text-base font-medium leading-5 text-gray-800 blk:text-gray-100')}>Section By Month</Text>
           <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Section your notes by month and show the month at the top of each section.</Text>
@@ -419,8 +419,8 @@ const SettingsPopupMisc = (props) => {
         <View style={tailwind('ml-4 h-6 w-11 flex-shrink-0 flex-grow-0')}>
           <Switch onValueChange={onDoSectionBtnClick} value={doSectionNotesByMonth} thumbColor={Platform.OS === 'android' ? doSectionNotesByMonth ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} ios_backgroundColor={switchIosTrackColorOff} />
         </View>
-      </View>
-      <View style={tailwind('mt-10 flex-row items-center justify-between')}>
+      </View>}
+      {isUserSignedIn && <View style={tailwind('mt-10 flex-row items-center justify-between')}>
         <View style={tailwind('flex-shrink flex-grow')}>
           <Text style={tailwind('text-base font-medium leading-5 text-gray-800 blk:text-gray-100')}>More Font Sizes</Text>
           <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Enable more font size options in the note editor.</Text>
@@ -428,7 +428,7 @@ const SettingsPopupMisc = (props) => {
         <View style={tailwind('ml-4 h-6 w-11 flex-shrink-0 flex-grow-0')}>
           <Switch onValueChange={onDoMoreFontSizesBtnClick} value={doMoreEditorFontSizes} thumbColor={Platform.OS === 'android' ? doMoreEditorFontSizes ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} ios_backgroundColor={switchIosTrackColorOff} />
         </View>
-      </View>
+      </View>}
       <View style={tailwind('mt-10 mb-4 flex-row items-center justify-between')}>
         <View style={tailwind('flex-shrink flex-grow')}>
           <Text style={tailwind('text-base font-medium leading-5 text-gray-800 blk:text-gray-100')}>Auto Cleanup</Text>
