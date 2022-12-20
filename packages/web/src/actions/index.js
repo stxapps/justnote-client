@@ -65,7 +65,7 @@ import {
   NOTE_DATE_SHOWING_MODE_HIDE, NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS,
 } from '../types/const';
 import {
-  throttle, extractUrl, urlHashToObj, objToUrlHash, isIPadIPhoneIPod, isBusyStatus,
+  throttle, extractUrl, urlHashToObj, objToUrlHash, isMobile, isBusyStatus,
   isEqual, separateUrlAndParam, getUserImageUrl, randomString, sleep, isObject,
   isString, isNumber, isListNameObjsValid, indexOfClosingTag, isNoteBodyEqual,
   clearNoteData, getStaticFPath, deriveFPaths, getListNameObj, getAllListNames,
@@ -138,7 +138,7 @@ export const init = () => async (dispatch, getState) => {
   }, 1);
 
   let prevWidth = window.innerWidth;
-  if (isIPadIPhoneIPod()) {
+  if (isMobile() && isObject(window.visualViewport)) {
     window.visualViewport.addEventListener('resize', throttle(() => {
       handleScreenRotation(prevWidth)(dispatch, getState);
       prevWidth = window.innerWidth;
