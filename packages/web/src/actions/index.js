@@ -42,7 +42,8 @@ import {
   PIN_NOTE, PIN_NOTE_COMMIT, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_COMMIT,
   UNPIN_NOTE_ROLLBACK, MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_COMMIT,
   MOVE_PINNED_NOTE_ROLLBACK, CANCEL_DIED_PINS, UPDATE_SYSTEM_THEME_MODE,
-  UPDATE_THEME, UPDATE_UPDATING_THEME_MODE, UPDATE_TIME_PICK, UPDATE_IS_24H_FORMAT,
+  UPDATE_DO_USE_LOCAL_THEME, UPDATE_DEFAULT_THEME, UPDATE_LOCAL_THEME,
+  UPDATE_UPDATING_THEME_MODE, UPDATE_TIME_PICK, UPDATE_IS_24H_FORMAT,
   UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
   UPDATE_DELETE_ALL_DATA_PROGRESS, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -3305,6 +3306,10 @@ export const updateLocalSettings = () => async (dispatch, getState) => {
   await dataApi.putLocalSettings(localSettings);
 };
 
+export const updateDoUseLocalTheme = (doUse) => {
+  return { type: UPDATE_DO_USE_LOCAL_THEME, payload: doUse };
+};
+
 export const updateTheme = (mode, customOptions) => async (dispatch, getState) => {
   const state = getState();
   const purchases = state.settings.purchases;
@@ -3315,14 +3320,18 @@ export const updateTheme = (mode, customOptions) => async (dispatch, getState) =
     return;
   }
 
-  dispatch({ type: UPDATE_THEME, payload: { mode, customOptions } });
+  const doUseLocalTheme = state.localSettings.doUseLocalTheme;
+  const type = doUseLocalTheme ? UPDATE_LOCAL_THEME : UPDATE_DEFAULT_THEME;
+  dispatch({ type, payload: { mode, customOptions } });
 };
 
 export const updateUpdatingThemeMode = (updatingThemeMode) => async (
   dispatch, getState
 ) => {
   const state = getState();
-  const customOptions = state.localSettings.themeCustomOptions;
+  const doUseLocalTheme = state.localSettings.doUseLocalTheme;
+  const customOptions = doUseLocalTheme ?
+    state.localSettings.themeCustomOptions : state.settings.themeCustomOptions;
   const is24HFormat = state.window.is24HFormat;
 
   let option;
@@ -3352,7 +3361,10 @@ export const updateTimePick = (hour, minute, period) => {
 
 export const updateThemeCustomOptions = () => async (dispatch, getState) => {
   const state = getState();
-  const customOptions = state.localSettings.themeCustomOptions;
+  const doUseLocalTheme = state.localSettings.doUseLocalTheme;
+  const customOptions = doUseLocalTheme ?
+    state.localSettings.themeCustomOptions : state.settings.themeCustomOptions;
+
   const { updatingThemeMode, hour, minute, period } = state.timePick;
 
   const _themeMode = CUSTOM_MODE, _customOptions = [];

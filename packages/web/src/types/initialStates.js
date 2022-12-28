@@ -23,9 +23,15 @@ export const initialSettingsState = {
   ],
   purchases: null, // an array with elements as purchase objs
   checkPurchasesDT: null,
+  themeMode: WHT_MODE,
+  themeCustomOptions: [
+    { mode: WHT_MODE, startTime: '06:00' },
+    { mode: BLK_MODE, startTime: '18:00' },
+  ],
 };
 
 export const initialLocalSettingsState = {
+  doUseLocalTheme: false,
   themeMode: WHT_MODE,
   themeCustomOptions: [
     { mode: WHT_MODE, startTime: '06:00' },

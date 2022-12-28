@@ -4,14 +4,17 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   updateDoDeleteOldNotesInTrash, updateSortOn, updateDoDescendingOrder,
   updateNoteDateShowingMode, updateNoteDateFormat, updateDoSectionNotesByMonth,
-  updateDoMoreEditorFontSizes, updateTheme, updatePopupUrlHash,
+  updateDoMoreEditorFontSizes, updateDoUseLocalTheme, updateTheme, updatePopupUrlHash,
 } from '../actions';
 import {
   DATE_FORMAT_MENU_POPUP, ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE,
   NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS, NOTE_DATE_FORMAT_TEXTS,
   NOTE_DATE_FORMAT_SYSTEM, WHT_MODE, BLK_MODE, SYSTEM_MODE, CUSTOM_MODE,
 } from '../types/const';
-import { getDoEnableExtraFeatures, getNoteDateExample } from '../selectors';
+import {
+  getRawThemeMode, getRawThemeCustomOptions, getDoEnableExtraFeatures,
+  getNoteDateExample,
+} from '../selectors';
 
 import { useTailwind } from '.';
 
@@ -36,10 +39,9 @@ const SettingsPopupMisc = (props) => {
   const doMoreEditorFontSizes = useSelector(
     state => state.settings.doMoreEditorFontSizes
   );
-  const themeMode = useSelector(state => state.localSettings.themeMode);
-  const customOptions = useSelector(
-    state => state.localSettings.themeCustomOptions
-  );
+  const doUseLocalTheme = useSelector(state => state.localSettings.doUseLocalTheme);
+  const themeMode = useSelector(state => getRawThemeMode(state));
+  const customOptions = useSelector(state => getRawThemeCustomOptions(state));
   const doEnableExtraFeatures = useSelector(state => getDoEnableExtraFeatures(state));
   const whtTimeInput = useRef(null);
   const blkTimeInput = useRef(null);
@@ -50,14 +52,11 @@ const SettingsPopupMisc = (props) => {
     dispatch(updateDoDeleteOldNotesInTrash(!doDeleteOldNotesInTrash));
   };
 
-  const onSortOnInputChange = (e) => {
-    const sortOn = e.target.value;
-    dispatch(updateSortOn(sortOn));
+  const onSortOnInputChange = (value) => {
+    dispatch(updateSortOn(value));
   };
 
-  const onDoDescendingInputChange = (e) => {
-    const value = e.target.value;
-
+  const onDoDescendingInputChange = (value) => {
     let doDescend;
     if (value === 'ascending') doDescend = false;
     else if (value === 'descending') doDescend = true;
@@ -97,10 +96,12 @@ const SettingsPopupMisc = (props) => {
     dispatch(updateDoMoreEditorFontSizes(!doMoreEditorFontSizes));
   };
 
-  const onThemeInputChange = (e) => {
-    const value = e.target.value;
+  const onDoUseLocalThemeBtnClick = (doUse) => {
+    dispatch(updateDoUseLocalTheme(doUse));
+  };
 
-    const _themeMode = parseInt(value, 10);
+  const onThemeInputChange = (value) => {
+    const _themeMode = value;
     const _customOptions = [
       { mode: WHT_MODE, startTime: whtTimeInput.current.value },
       { mode: BLK_MODE, startTime: blkTimeInput.current.value },
@@ -142,21 +143,27 @@ const SettingsPopupMisc = (props) => {
   const doDeleteBtnClassNames = doDeleteOldNotesInTrash ? 'bg-green-500 blk:bg-green-500' : 'bg-gray-200 blk:bg-gray-700';
   const doDeleteBtnInnerClassNames = doDeleteOldNotesInTrash ? 'translate-x-5' : 'translate-x-0';
 
-  const addedDTBtnClassNames = sortOn === ADDED_DT ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
+  let addedDTBtnClassNames = sortOn === ADDED_DT ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
+  if (sortOn === UPDATED_DT) addedDTBtnClassNames += ' border-b-0';
   const addedDTBtnInnerClassNames = sortOn === ADDED_DT ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
-  const addedDTRadioClassNames = sortOn === ADDED_DT ? 'focus:ring-offset-green-100 blk:focus:ring-gray-800 blk:focus:ring-offset-green-700' : 'blk:focus:ring-offset-gray-900';
+  const addedDTRBtnClassNames = sortOn === ADDED_DT ? 'bg-green-600 group-focus:ring-green-600 group-focus:ring-offset-green-100 blk:bg-green-400 blk:group-focus:ring-gray-800 blk:group-focus:ring-offset-green-700' : 'border border-gray-500 bg-white group-focus:ring-green-600 group-focus:ring-offset-white blk:border-gray-500 blk:bg-gray-900 blk:group-focus:ring-green-600 blk:group-focus:ring-offset-gray-900';
+  const addedDTRBtnInnerClassNames = sortOn === ADDED_DT ? 'bg-white' : 'bg-white blk:bg-gray-900';
 
-  const updatedDTBtnClassNames = sortOn === UPDATED_DT ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
+  const updatedDTBtnClassNames = sortOn === UPDATED_DT ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-t-0 border-gray-200 blk:border-gray-700';
   const updatedDTBtnInnerClassNames = sortOn === UPDATED_DT ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
-  const updatedDTRadioClassNames = sortOn === UPDATED_DT ? 'focus:ring-offset-green-100 blk:focus:ring-gray-800 blk:focus:ring-offset-green-700' : 'blk:focus:ring-offset-gray-900';
+  const updatedDTRBtnClassNames = sortOn === UPDATED_DT ? 'bg-green-600 group-focus:ring-green-600 group-focus:ring-offset-green-100 blk:bg-green-400 blk:group-focus:ring-gray-800 blk:group-focus:ring-offset-green-700' : 'border border-gray-500 bg-white group-focus:ring-green-600 group-focus:ring-offset-white blk:border-gray-500 blk:bg-gray-900 blk:group-focus:ring-green-600 blk:group-focus:ring-offset-gray-900';
+  const updatedDTRBtnInnerClassNames = sortOn === UPDATED_DT ? 'bg-white' : 'bg-white blk:bg-gray-900';
 
-  const ascendingBtnClassNames = !doDescendingOrder ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
+  let ascendingBtnClassNames = !doDescendingOrder ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
+  if (doDescendingOrder) ascendingBtnClassNames += ' border-b-0';
   const ascendingBtnInnerClassNames = !doDescendingOrder ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
-  const ascendingRadioClassNames = !doDescendingOrder ? 'focus:ring-offset-green-100 blk:focus:ring-gray-800 blk:focus:ring-offset-green-700' : 'blk:focus:ring-offset-gray-900';
+  const ascendingRBtnClassNames = !doDescendingOrder ? 'bg-green-600 group-focus:ring-green-600 group-focus:ring-offset-green-100 blk:bg-green-400 blk:group-focus:ring-gray-800 blk:group-focus:ring-offset-green-700' : 'border border-gray-500 bg-white group-focus:ring-green-600 group-focus:ring-offset-white blk:border-gray-500 blk:bg-gray-900 blk:group-focus:ring-green-600 blk:group-focus:ring-offset-gray-900';
+  const ascendingRBtnInnerClassNames = !doDescendingOrder ? 'bg-white' : 'bg-white blk:bg-gray-900';
 
-  const descendingBtnClassNames = doDescendingOrder ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
+  const descendingBtnClassNames = doDescendingOrder ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-t-0 border-gray-200 blk:border-gray-700';
   const descendingBtnInnerClassNames = doDescendingOrder ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
-  const descendingRadioClassNames = doDescendingOrder ? 'focus:ring-offset-green-100 blk:focus:ring-gray-800 blk:focus:ring-offset-green-700' : 'blk:focus:ring-offset-gray-900';
+  const descendingRBtnClassNames = doDescendingOrder ? 'bg-green-600 group-focus:ring-green-600 group-focus:ring-offset-green-100 blk:bg-green-400 blk:group-focus:ring-gray-800 blk:group-focus:ring-offset-green-700' : 'border border-gray-500 bg-white group-focus:ring-green-600 group-focus:ring-offset-white blk:border-gray-500 blk:bg-gray-900 blk:group-focus:ring-green-600 blk:group-focus:ring-offset-gray-900';
+  const descendingRBtnInnerClassNames = doDescendingOrder ? 'bg-white' : 'bg-white blk:bg-gray-900';
 
   const doShowDate = noteDateShowingMode === NOTE_DATE_SHOWING_MODE_SHOW;
   const doShowDateBtnClassNames = doShowDate ? 'bg-green-500 blk:bg-green-500' : 'bg-gray-200 blk:bg-gray-700';
@@ -174,18 +181,31 @@ const SettingsPopupMisc = (props) => {
   const doMoreFontSizesBtnClassNames = doMoreEditorFontSizes ? 'bg-green-500 blk:bg-green-500' : 'bg-gray-200 blk:bg-gray-700';
   const doMoreFontSizesBtnInnerClassNames = doMoreEditorFontSizes ? 'translate-x-5' : 'translate-x-0';
 
-  const whtBtnClassNames = themeMode === WHT_MODE ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
+  const themeDefaultBtnClassNames = !doUseLocalTheme ? 'text-gray-700 blk:text-gray-200' : 'text-gray-500 blk:text-gray-400';
+  const themeLocalBtnClassNames = doUseLocalTheme ? 'text-gray-700 blk:text-gray-200' : 'text-gray-500 blk:text-gray-400';
+
+  let whtBtnClassNames = themeMode === WHT_MODE ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
+  if (themeMode === BLK_MODE) whtBtnClassNames += ' border-b-0';
   const whtBtnInnerClassNames = themeMode === WHT_MODE ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
-  const whtRadioClassNames = themeMode === WHT_MODE ? 'focus:ring-offset-green-100 blk:focus:ring-gray-800 blk:focus:ring-offset-green-700' : 'blk:focus:ring-offset-gray-900';
-  const blkBtnClassNames = themeMode === BLK_MODE ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
+  const whtRBtnClassNames = themeMode === WHT_MODE ? 'bg-green-600 group-focus:ring-green-600 group-focus:ring-offset-green-100 blk:bg-green-400 blk:group-focus:ring-gray-800 blk:group-focus:ring-offset-green-700' : 'border border-gray-500 bg-white group-focus:ring-green-600 group-focus:ring-offset-white blk:border-gray-500 blk:bg-gray-900 blk:group-focus:ring-green-600 blk:group-focus:ring-offset-gray-900';
+  const whtRBtnInnerClassNames = themeMode === WHT_MODE ? 'bg-white' : 'bg-white blk:bg-gray-900';
+
+  let blkBtnClassNames = themeMode === BLK_MODE ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-t-0 border-gray-200 blk:border-gray-700';
+  if (themeMode === SYSTEM_MODE) blkBtnClassNames += ' border-b-0';
   const blkBtnInnerClassNames = themeMode === BLK_MODE ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
-  const blkRadioClassNames = themeMode === BLK_MODE ? 'focus:ring-offset-green-100 blk:focus:ring-gray-800 blk:focus:ring-offset-green-700' : 'blk:focus:ring-offset-gray-900';
-  const systemBtnClassNames = themeMode === SYSTEM_MODE ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
+  const blkRBtnClassNames = themeMode === BLK_MODE ? 'bg-green-600 group-focus:ring-green-600 group-focus:ring-offset-green-100 blk:bg-green-400 blk:group-focus:ring-gray-800 blk:group-focus:ring-offset-green-700' : 'border border-gray-500 bg-white group-focus:ring-green-600 group-focus:ring-offset-white blk:border-gray-500 blk:bg-gray-900 blk:group-focus:ring-green-600 blk:group-focus:ring-offset-gray-900';
+  const blkRBtnInnerClassNames = themeMode === BLK_MODE ? 'bg-white' : 'bg-white blk:bg-gray-900';
+
+  let systemBtnClassNames = themeMode === SYSTEM_MODE ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-t-0 border-gray-200 blk:border-gray-700';
+  if (themeMode === CUSTOM_MODE) systemBtnClassNames += ' border-b-0';
   const systemBtnInnerClassNames = themeMode === SYSTEM_MODE ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
-  const systemRadioClassNames = themeMode === SYSTEM_MODE ? 'focus:ring-offset-green-100 blk:focus:ring-gray-800 blk:focus:ring-offset-green-700' : 'blk:focus:ring-offset-gray-900';
-  const customBtnClassNames = themeMode === CUSTOM_MODE ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-gray-200 blk:border-gray-700';
+  const systemRBtnClassNames = themeMode === SYSTEM_MODE ? 'bg-green-600 group-focus:ring-green-600 group-focus:ring-offset-green-100 blk:bg-green-400 blk:group-focus:ring-gray-800 blk:group-focus:ring-offset-green-700' : 'border border-gray-500 bg-white group-focus:ring-green-600 group-focus:ring-offset-white blk:border-gray-500 blk:bg-gray-900 blk:group-focus:ring-green-600 blk:group-focus:ring-offset-gray-900';
+  const systemRBtnInnerClassNames = themeMode === SYSTEM_MODE ? 'bg-white' : 'bg-white blk:bg-gray-900';
+
+  const customBtnClassNames = themeMode === CUSTOM_MODE ? 'bg-green-100 border-green-200 blk:bg-green-700 blk:border-green-800' : 'border-t-0 border-gray-200 blk:border-gray-700';
   const customBtnInnerClassNames = themeMode === CUSTOM_MODE ? 'text-green-800 blk:text-green-100' : 'text-gray-600 blk:text-gray-300';
-  const customRadioClassNames = themeMode === CUSTOM_MODE ? 'focus:ring-offset-green-100 blk:focus:ring-gray-800 blk:focus:ring-offset-green-700' : 'blk:focus:ring-offset-gray-900';
+  const customRBtnClassNames = themeMode === CUSTOM_MODE ? 'bg-green-600 group-focus:ring-green-600 group-focus:ring-offset-green-100 blk:bg-green-400 blk:group-focus:ring-gray-800 blk:group-focus:ring-offset-green-700' : 'border border-gray-500 bg-white group-focus:ring-green-600 group-focus:ring-offset-white blk:border-gray-500 blk:bg-gray-900 blk:group-focus:ring-green-600 blk:group-focus:ring-offset-gray-900';
+  const customRBtnInnerClassNames = themeMode === CUSTOM_MODE ? 'bg-white' : 'bg-white blk:bg-gray-900';
 
   const customTextClassNames = themeMode === CUSTOM_MODE ? 'text-green-700 blk:text-green-200' : 'text-gray-500 blk:text-gray-500';
   const customInputClassNames = themeMode === CUSTOM_MODE ? 'cursor-pointer border-gray-300 bg-white text-gray-600 focus:border-gray-500 focus:ring-gray-500 blk:border-green-200 blk:bg-green-700 blk:text-green-100 focus:border-green-200 blk:focus:ring-green-200' : 'border-gray-300 bg-white text-gray-400 blk:border-gray-600 blk:bg-gray-900 blk:text-gray-500';
@@ -206,38 +226,50 @@ const SettingsPopupMisc = (props) => {
       </div>
       {doEnableExtraFeatures && <div className={tailwind('mt-6 flex flex-col md:mt-0')}>
         <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>Appearance</h4>
-        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Choose appearance to be <span className={tailwind('font-semibold blk:text-gray-300')}>Light</span>, <span className={tailwind('font-semibold blk:text-gray-300')}>Dark</span>, <span className={tailwind('font-semibold blk:text-gray-300')}>System</span> (uses your device's setting), or <span className={tailwind('font-semibold blk:text-gray-300')}>Custom</span> (schedule times to change appearance automatically). This setting is not synced so you can have a different appearance for each of your devices.</p>
-        <div className={tailwind('mx-auto mt-2.5 w-full max-w-sm -space-y-px rounded-md bg-white shadow-sm blk:bg-gray-900')}>
-          <div className={tailwind(`relative flex rounded-tl-md rounded-tr-md border p-4 ${whtBtnClassNames}`)}>
-            <div className={tailwind('flex h-5 items-center')}>
-              <input onChange={onThemeInputChange} id="theme-mode-option-1" name="theme-mode-option-1" type="radio" className={tailwind(`h-4 w-4 cursor-pointer bg-white text-green-600 transition duration-150 ease-in-out focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:bg-gray-900 blk:text-green-400 ${whtRadioClassNames}`)} checked={themeMode === WHT_MODE} value={WHT_MODE} />
-            </div>
-            <label htmlFor="theme-mode-option-1" className={tailwind('ml-3 flex cursor-pointer flex-col')}>
-              <span className={tailwind(`block text-sm font-medium leading-5 ${whtBtnInnerClassNames}`)}>Light</span>
-            </label>
+        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Choose appearance to be <span className={tailwind('font-semibold blk:text-gray-300')}>Light</span>, <span className={tailwind('font-semibold blk:text-gray-300')}>Dark</span>, <span className={tailwind('font-semibold blk:text-gray-300')}>System</span> (uses your device's setting), or <span className={tailwind('font-semibold blk:text-gray-300')}>Custom</span> (schedule times to change appearance automatically). For Sync, your choosing is synced across your devices. For Device, you can choose and use the setting for this device only.</p>
+        <div className={tailwind('mx-auto mt-2.5 w-full max-w-sm rounded-md bg-white shadow-sm blk:bg-gray-900')}>
+          <div className={tailwind('relative flex justify-evenly')}>
+            <button onClick={() => onDoUseLocalThemeBtnClick(false)} className={tailwind(`relative flex-shrink flex-grow rounded-tl-md border border-b-0 border-gray-300 bg-white py-4 text-center text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-inset blk:border-gray-700 blk:bg-gray-900 ${themeDefaultBtnClassNames}`)} type="button">
+              Sync
+              {!doUseLocalTheme && <div className={tailwind('absolute inset-x-0 bottom-0 h-0.5 bg-green-600 blk:bg-green-500')} />}
+            </button>
+            <button onClick={() => onDoUseLocalThemeBtnClick(true)} className={tailwind(`relative flex-shrink flex-grow rounded-tr-md border border-l-0 border-b-0 border-gray-300 bg-white py-4 text-center text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-inset blk:border-gray-700 blk:bg-gray-900 ${themeLocalBtnClassNames}`)} type="button">
+              Device
+              {doUseLocalTheme && <div className={tailwind('absolute inset-x-0 bottom-0 h-0.5 bg-green-600 blk:bg-green-500')} />}
+            </button>
           </div>
-          <div className={tailwind(`relative flex border p-4 ${blkBtnClassNames}`)}>
+          <button onClick={() => onThemeInputChange(WHT_MODE)} className={tailwind(`group flex w-full border p-4 focus:outline-none ${whtBtnClassNames}`)}>
             <div className={tailwind('flex h-5 items-center')}>
-              <input onChange={onThemeInputChange} id="theme-mode-option-2" name="theme-mode-option-2" type="radio" className={tailwind(`h-4 w-4 cursor-pointer bg-white text-green-600 transition duration-150 ease-in-out focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:bg-gray-900 blk:text-green-400 ${blkRadioClassNames}`)} checked={themeMode === BLK_MODE} value={BLK_MODE} />
+              <div className={tailwind(`flex h-4 w-4 items-center justify-center rounded-full group-focus:ring-2 group-focus:ring-offset-2 ${whtRBtnClassNames}`)}>
+                <div className={tailwind(`h-1.5 w-1.5 rounded-full ${whtRBtnInnerClassNames}`)} />
+              </div>
             </div>
-            <label htmlFor="theme-mode-option-2" className={tailwind('ml-3 flex cursor-pointer flex-col')}>
-              <span className={tailwind(`block text-sm font-medium leading-5 ${blkBtnInnerClassNames}`)}>Dark</span>
-            </label>
-          </div>
-          <div className={tailwind(`relative flex border p-4 ${systemBtnClassNames}`)}>
+            <p className={tailwind(`ml-3 text-sm font-medium leading-5 ${whtBtnInnerClassNames}`)}>Light</p>
+          </button>
+          <button onClick={() => onThemeInputChange(BLK_MODE)} className={tailwind(`group flex w-full border p-4 focus:outline-none ${blkBtnClassNames}`)}>
             <div className={tailwind('flex h-5 items-center')}>
-              <input onChange={onThemeInputChange} id="theme-mode-option-3" name="theme-mode-option-3" type="radio" className={tailwind(`h-4 w-4 cursor-pointer bg-white text-green-600 transition duration-150 ease-in-out focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:bg-gray-900 blk:text-green-400 ${systemRadioClassNames}`)} checked={themeMode === SYSTEM_MODE} value={SYSTEM_MODE} />
+              <div className={tailwind(`flex h-4 w-4 items-center justify-center rounded-full group-focus:ring-2 group-focus:ring-offset-2 ${blkRBtnClassNames}`)}>
+                <div className={tailwind(`h-1.5 w-1.5 rounded-full ${blkRBtnInnerClassNames}`)} />
+              </div>
             </div>
-            <label htmlFor="theme-mode-option-3" className={tailwind('ml-3 flex cursor-pointer flex-col')}>
-              <span className={tailwind(`block text-sm font-medium leading-5 ${systemBtnInnerClassNames}`)}>System</span>
-            </label>
-          </div>
-          <div className={tailwind(`relative flex rounded-bl-md rounded-br-md border p-4 ${customBtnClassNames}`)}>
+            <p className={tailwind(`ml-3 text-sm font-medium leading-5 ${blkBtnInnerClassNames}`)}>Dark</p>
+          </button>
+          <button onClick={() => onThemeInputChange(SYSTEM_MODE)} className={tailwind(`group flex w-full border p-4 focus:outline-none ${systemBtnClassNames}`)}>
             <div className={tailwind('flex h-5 items-center')}>
-              <input onChange={onThemeInputChange} id="theme-mode-option-4" name="theme-mode-option-4" type="radio" className={tailwind(`h-4 w-4 cursor-pointer bg-white text-green-600 transition duration-150 ease-in-out focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:bg-gray-900 blk:text-green-400 ${customRadioClassNames}`)} checked={themeMode === CUSTOM_MODE} value={CUSTOM_MODE} />
+              <div className={tailwind(`flex h-4 w-4 items-center justify-center rounded-full group-focus:ring-2 group-focus:ring-offset-2 ${systemRBtnClassNames}`)}>
+                <div className={tailwind(`h-1.5 w-1.5 rounded-full ${systemRBtnInnerClassNames}`)} />
+              </div>
             </div>
-            <label htmlFor="theme-mode-option-4" className={tailwind('ml-3 flex cursor-pointer flex-col')}>
-              <span className={tailwind(`block text-sm font-medium leading-5 ${customBtnInnerClassNames}`)}>Custom</span>
+            <p className={tailwind(`ml-3 text-sm font-medium leading-5 ${systemBtnInnerClassNames}`)}>System</p>
+          </button>
+          <button onClick={() => onThemeInputChange(CUSTOM_MODE)} className={tailwind(`group flex w-full rounded-bl-md rounded-br-md border p-4 focus:outline-none ${customBtnClassNames}`)}>
+            <div className={tailwind('flex h-5 items-center')}>
+              <div className={tailwind(`flex h-4 w-4 items-center justify-center rounded-full group-focus:ring-2 group-focus:ring-offset-2 ${customRBtnClassNames}`)}>
+                <div className={tailwind(`h-1.5 w-1.5 rounded-full ${customRBtnInnerClassNames}`)} />
+              </div>
+            </div>
+            <div className={tailwind('ml-3 flex flex-col')}>
+              <p className={tailwind(`text-left text-sm font-medium leading-5 ${customBtnInnerClassNames}`)}>Custom</p>
               <div className={tailwind('mt-1.5 sm:flex sm:items-center sm:justify-start')}>
                 <div className={tailwind('flex items-center justify-start')}>
                   <span className={tailwind(`block w-10 text-sm ${customTextClassNames}`)}>Light:</span>
@@ -248,31 +280,31 @@ const SettingsPopupMisc = (props) => {
                   <input ref={blkTimeInput} onChange={onTimeInputChange} onBlur={onBlkTimeInputBlur} type="time" className={tailwind(`ml-1 rounded-md border py-1 pl-1 pr-0.5 text-sm leading-5 ${customInputClassNames}`)} placeholder="HH:mm" value={blkTime} disabled={themeMode !== CUSTOM_MODE} pattern="[0-9]{2}:[0-9]{2}" />
                 </div>
               </div>
-            </label>
-          </div>
+            </div>
+          </button>
         </div>
       </div>}
       <div className={tailwind(`flex flex-col ${doEnableExtraFeatures ? 'mt-10' : 'mt-6 md:mt-0'}`)}>
         <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>List Order On</h4>
         <div className={tailwind('sm:flex sm:items-start sm:justify-between sm:space-x-4')}>
           <p className={tailwind('mt-2.5 flex-shrink flex-grow text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Choose whether your notes are sorted on <span className={tailwind('font-semibold')}>added date</span> or <span className={tailwind('font-semibold')}>updated date</span> when you browse your notes.</p>
-          <div className={tailwind('mx-auto mt-2.5 w-full max-w-48 -space-y-px rounded-md bg-white shadow-sm blk:bg-gray-900 sm:mt-1 sm:w-48 sm:max-w-none sm:flex-shrink-0 sm:flex-grow-0')}>
-            <div className={tailwind(`relative flex rounded-tl-md rounded-tr-md border p-4 ${addedDTBtnClassNames}`)}>
+          <div className={tailwind('mx-auto mt-2.5 w-full max-w-48 rounded-md bg-white shadow-sm blk:bg-gray-900 sm:mt-1 sm:w-48 sm:max-w-none sm:flex-shrink-0 sm:flex-grow-0')}>
+            <button onClick={() => onSortOnInputChange(ADDED_DT)} className={tailwind(`group flex w-full rounded-tl-md rounded-tr-md border p-4 focus:outline-none ${addedDTBtnClassNames}`)}>
               <div className={tailwind('flex h-5 items-center')}>
-                <input onChange={onSortOnInputChange} id="list-order-on-option-1" name="list-order-on-option-1" type="radio" className={tailwind(`h-4 w-4 cursor-pointer bg-white text-green-600 transition duration-150 ease-in-out focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:bg-gray-900 blk:text-green-400 ${addedDTRadioClassNames}`)} checked={sortOn === ADDED_DT} value={ADDED_DT} />
+                <div className={tailwind(`flex h-4 w-4 items-center justify-center rounded-full group-focus:ring-2 group-focus:ring-offset-2 ${addedDTRBtnClassNames}`)}>
+                  <div className={tailwind(`h-1.5 w-1.5 rounded-full ${addedDTRBtnInnerClassNames}`)} />
+                </div>
               </div>
-              <label htmlFor="list-order-on-option-1" className={tailwind('ml-3 flex cursor-pointer flex-col')}>
-                <span className={tailwind(`block text-sm font-medium leading-5 ${addedDTBtnInnerClassNames}`)}>Added Date</span>
-              </label>
-            </div>
-            <div className={tailwind(`relative flex rounded-bl-md rounded-br-md border p-4 ${updatedDTBtnClassNames}`)}>
+              <p className={tailwind(`ml-3 text-sm font-medium leading-5 ${addedDTBtnInnerClassNames}`)}>Added Date</p>
+            </button>
+            <button onClick={() => onSortOnInputChange(UPDATED_DT)} className={tailwind(`group flex w-full rounded-bl-md rounded-br-md border p-4 focus:outline-none ${updatedDTBtnClassNames}`)}>
               <div className={tailwind('flex h-5 items-center')}>
-                <input onChange={onSortOnInputChange} id="list-order-on-option-2" name="list-order-on-option-2" type="radio" className={tailwind(`h-4 w-4 cursor-pointer bg-white text-green-600 transition duration-150 ease-in-out focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:bg-gray-900 blk:text-green-400 ${updatedDTRadioClassNames}`)} checked={sortOn === UPDATED_DT} value={UPDATED_DT} />
+                <div className={tailwind(`flex h-4 w-4 items-center justify-center rounded-full group-focus:ring-2 group-focus:ring-offset-2 ${updatedDTRBtnClassNames}`)}>
+                  <div className={tailwind(`h-1.5 w-1.5 rounded-full ${updatedDTRBtnInnerClassNames}`)} />
+                </div>
               </div>
-              <label htmlFor="list-order-on-option-2" className={tailwind('ml-3 flex cursor-pointer flex-col')}>
-                <span className={tailwind(`block text-sm font-medium leading-5 ${updatedDTBtnInnerClassNames}`)}>Updated Date</span>
-              </label>
-            </div>
+              <p className={tailwind(`ml-3 text-sm font-medium leading-5 ${updatedDTBtnInnerClassNames}`)}>Updated Date</p>
+            </button>
           </div>
         </div>
       </div>
@@ -280,23 +312,23 @@ const SettingsPopupMisc = (props) => {
         <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>List Order Direction</h4>
         <div className={tailwind('sm:flex sm:items-start sm:justify-between sm:space-x-4')}>
           <p className={tailwind('mt-2.5 flex-shrink flex-grow text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Choose whether your notes are sorted in <span className={tailwind('font-semibold blk:text-gray-300')}>ascending order</span> (i.e. notes you create first appear first) or <span className={tailwind('font-semibold blk:text-gray-300')}>descending order</span> (i.e. notes you create last appear first) when you browse your notes.</p>
-          <div className={tailwind('mx-auto mt-2.5 w-full max-w-48 -space-y-px rounded-md bg-white shadow-sm blk:bg-gray-900 sm:mt-1 sm:w-48 sm:max-w-none sm:flex-shrink-0 sm:flex-grow-0')}>
-            <div className={tailwind(`relative flex rounded-tl-md rounded-tr-md border p-4 ${ascendingBtnClassNames}`)}>
+          <div className={tailwind('mx-auto mt-2.5 w-full max-w-48 rounded-md bg-white shadow-sm blk:bg-gray-900 sm:mt-1 sm:w-48 sm:max-w-none sm:flex-shrink-0 sm:flex-grow-0')}>
+            <button onClick={() => onDoDescendingInputChange('ascending')} className={tailwind(`group flex w-full rounded-tl-md rounded-tr-md border p-4 focus:outline-none ${ascendingBtnClassNames}`)}>
               <div className={tailwind('flex h-5 items-center')}>
-                <input onChange={onDoDescendingInputChange} id="list-order-direction-option-1" name="list-order-direction-option-1" type="radio" className={tailwind(`h-4 w-4 cursor-pointer bg-white text-green-600 transition duration-150 ease-in-out focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:bg-gray-900 blk:text-green-400 ${ascendingRadioClassNames}`)} checked={!doDescendingOrder} value="ascending" />
+                <div className={tailwind(`flex h-4 w-4 items-center justify-center rounded-full group-focus:ring-2 group-focus:ring-offset-2 ${ascendingRBtnClassNames}`)}>
+                  <div className={tailwind(`h-1.5 w-1.5 rounded-full ${ascendingRBtnInnerClassNames}`)} />
+                </div>
               </div>
-              <label htmlFor="list-order-direction-option-1" className={tailwind('ml-3 flex cursor-pointer flex-col')}>
-                <span className={tailwind(`block text-sm font-medium leading-5 ${ascendingBtnInnerClassNames}`)}>Ascending order</span>
-              </label>
-            </div>
-            <div className={tailwind(`relative flex rounded-bl-md rounded-br-md border p-4 ${descendingBtnClassNames}`)}>
+              <p className={tailwind(`ml-3 text-sm font-medium leading-5 ${ascendingBtnInnerClassNames}`)}>Ascending order</p>
+            </button>
+            <button onClick={() => onDoDescendingInputChange('descending')} className={tailwind(`group flex w-full rounded-bl-md rounded-br-md border p-4 focus:outline-none ${descendingBtnClassNames}`)}>
               <div className={tailwind('flex h-5 items-center')}>
-                <input onChange={onDoDescendingInputChange} id="list-order-direction-option-2" name="list-order-direction-option-2" type="radio" className={tailwind(`h-4 w-4 cursor-pointer bg-white text-green-600 transition duration-150 ease-in-out focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:bg-gray-900 blk:text-green-400 ${descendingRadioClassNames}`)} checked={doDescendingOrder} value="descending" />
+                <div className={tailwind(`flex h-4 w-4 items-center justify-center rounded-full group-focus:ring-2 group-focus:ring-offset-2 ${descendingRBtnClassNames}`)}>
+                  <div className={tailwind(`h-1.5 w-1.5 rounded-full ${descendingRBtnInnerClassNames}`)} />
+                </div>
               </div>
-              <label htmlFor="list-order-direction-option-2" className={tailwind('ml-3 flex cursor-pointer flex-col')}>
-                <span className={tailwind(`block text-sm font-medium leading-5 ${descendingBtnInnerClassNames}`)}>Descending order</span>
-              </label>
-            </div>
+              <p className={tailwind(`ml-3 text-sm font-medium leading-5 ${descendingBtnInnerClassNames}`)}>Descending order</p>
+            </button>
           </div>
         </div>
       </div>

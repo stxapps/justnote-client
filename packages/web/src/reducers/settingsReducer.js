@@ -8,7 +8,7 @@ import {
   UPDATE_NOTE_DATE_FORMAT, UPDATE_DO_SECTION_NOTES_BY_MONTH,
   UPDATE_DO_MORE_EDITOR_FONT_SIZES, UPDATE_SETTINGS_COMMIT, CANCEL_DIED_SETTINGS,
   REQUEST_PURCHASE_COMMIT, RESTORE_PURCHASES_COMMIT, REFRESH_PURCHASES_COMMIT,
-  DELETE_ALL_DATA, RESET_STATE,
+  UPDATE_DEFAULT_THEME, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   MY_NOTES, TRASH, ARCHIVE, SWAP_LEFT, SWAP_RIGHT, VALID, NOTE_DATE_SHOWING_MODE_SHOW,
@@ -322,6 +322,11 @@ const settingsReducer = (state = initialState, action) => {
     return loop(
       newState, Cmd.run(tryUpdateSettings(), { args: [Cmd.dispatch, Cmd.getState] })
     );
+  }
+
+  if (action.type === UPDATE_DEFAULT_THEME) {
+    const { mode, customOptions } = action.payload;
+    return { ...state, themeMode: mode, themeCustomOptions: customOptions };
   }
 
   if (action.type === DELETE_ALL_DATA || action.type === RESET_STATE) {
