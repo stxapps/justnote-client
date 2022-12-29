@@ -423,15 +423,19 @@ const NoteEditorEditor = (props) => {
     if (!groupedItemsDropdown) return;
 
     if (isMobile) {
-      if (safeAreaWidth < 389) {
-        groupedItemsDropdown.toolbarView.maxWidth = '256px';
+      if (safeAreaWidth < 350) {
+        groupedItemsDropdown.toolbarView.maxWidth = '224px';
       } else if (safeAreaWidth < 428) {
-        groupedItemsDropdown.toolbarView.maxWidth = '218px';
+        groupedItemsDropdown.toolbarView.maxWidth = '256px';
+      } else if (safeAreaWidth < 468) {
+        groupedItemsDropdown.toolbarView.maxWidth = '216px';
       } else {
         groupedItemsDropdown.toolbarView.maxWidth = '';
       }
     } else {
       if (safeAreaWidth < 372) {
+        groupedItemsDropdown.toolbarView.maxWidth = '224px';
+      } else if (safeAreaWidth < 400) {
         groupedItemsDropdown.toolbarView.maxWidth = '188px';
       } else {
         groupedItemsDropdown.toolbarView.maxWidth = '';
@@ -583,6 +587,10 @@ const NoteEditorEditor = (props) => {
         ],
         columns: 6,
         documentColors: 0,
+      },
+      link: {
+        addTargetToExternalLinks: true,
+        defaultProtocol: 'http://',
       },
     };
   }, []);
