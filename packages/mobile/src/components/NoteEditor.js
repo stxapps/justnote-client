@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { View, Text, Keyboard, Platform } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text } from 'react-native';
 import { useSelector } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
 import { DUMMY_NOTE_OBJ } from '../types/const';
 import { isDiedStatus } from '../utils';
 
-import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
+import { useTailwind } from '.';
 import NoteEditorTopBar from './NoteEditorTopBar';
 import NoteEditorEditor from './NoteEditorEditor';
 import NoteEditorBulkEdit from './NoteEditorBulkEdit';
@@ -16,44 +16,9 @@ import NoteEditorRetry from './NoteEditorRetry';
 const NoteEditor = (props) => {
 
   const { note, isFullScreen, onToggleFullScreen, width } = props;
-  const { height: safeAreaHeight } = useSafeAreaFrame();
-  const insets = useSafeAreaInsets();
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const keyboardWillShowListener = useRef(null);
-  const keyboardWillHideListener = useRef(null);
   const isContentEditor = useRef(false);
   const tailwind = useTailwind();
-
-  const style = useMemo(() => {
-    let classNames = 'w-full bg-white blk:bg-gray-900';
-
-    if (Platform.OS === 'ios') {
-      let height = safeAreaHeight;
-      if (keyboardHeight > 0) height = height + insets.bottom - keyboardHeight;
-      return [tailwind(classNames), { height }];
-    }
-
-    return tailwind(`h-full ${classNames}`);
-  }, [safeAreaHeight, insets, keyboardHeight, tailwind]);
-
-  useEffect(() => {
-    if (Platform.OS === 'ios') {
-      keyboardWillShowListener.current = Keyboard.addListener('keyboardWillShow', (e) => {
-        setKeyboardHeight(e.endCoordinates.height);
-      });
-      keyboardWillHideListener.current = Keyboard.addListener('keyboardWillHide', () => {
-        setKeyboardHeight(0);
-      });
-    }
-
-    return () => {
-      if (Platform.OS === 'ios') {
-        keyboardWillShowListener.current.remove();
-        keyboardWillHideListener.current.remove();
-      }
-    };
-  }, []);
 
   const _render = () => {
     isContentEditor.current = false;
@@ -81,7 +46,7 @@ const NoteEditor = (props) => {
     isContentEditor.current = true;
     return (
       <View style={tailwind('h-full w-full bg-white blk:bg-gray-900')}>
-        <View style={style}>
+        <View style={tailwind('h-full w-full bg-white blk:bg-gray-900')}>
           <NoteEditorTopBar note={note} isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} width={width} />
           <NoteEditorEditor key="NoteEditorEditor" note={note} />
         </View>
