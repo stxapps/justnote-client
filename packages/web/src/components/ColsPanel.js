@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useSelector } from 'react-redux';
 
 import { COLS_PANEL_STATE, NEW_NOTE, NEW_NOTE_OBJ } from '../types/const';
-import { throttle } from '../utils';
+import { throttle, isMobile as _isMobile } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 import Sidebar from './Sidebar';
@@ -28,7 +28,9 @@ const ColsPanel = () => {
   const pane2MinWidth = 180;
   const pane2MaxWidth = 480;
 
-  const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
+  const {
+    width: safeAreaWidth, height: safeAreaHeight, windowHeight,
+  } = useSafeAreaFrame();
   const note = useSelector(state => {
     const { listName, noteId } = state.display;
 
@@ -59,6 +61,17 @@ const ColsPanel = () => {
   const whichResizer = useRef(null);
 
   const tailwind = useTailwind();
+
+  const isMobile = useMemo(() => _isMobile(), []);
+  const preventScrollClassNames = useMemo(() => {
+    // When overscroll-none is fixed, no need the empty space to have the scroll.
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=813094
+    // https://github.com/whatwg/html/issues/7732
+    if (isMobile && safeAreaHeight < windowHeight) {
+      return 'overflow-y-scroll overscroll-contain hide-scrollbar';
+    }
+    return '';
+  }, [safeAreaHeight, windowHeight, isMobile]);
 
   const _onLeftResizerTouchStart = (event) => {
     unFocus(document, window);
@@ -188,7 +201,7 @@ const ColsPanel = () => {
   const pane2Classes = !state.isPane3FullScreen ? '' : 'hidden';
   const resizer2Classes = !state.isPane3FullScreen ? '' : 'hidden';
 
-  return (
+  const panel = (
     <div style={{ height: safeAreaHeight }} className={tailwind('flex w-full overflow-hidden bg-white blk:bg-gray-900')}>
       <div style={{ width: state.pane1Width }} className={tailwind(`overflow-hidden bg-white blk:bg-gray-900 ${pane1Classes}`)}>
         <Sidebar />
@@ -214,7 +227,16 @@ const ColsPanel = () => {
       <div className={tailwind('flex-1 overflow-hidden bg-white blk:bg-gray-900')}>
         <NoteEditor note={note} isFullScreen={state.isPane3FullScreen} onToggleFullScreen={onTogglePane3FullScreen} />
       </div>
-    </div >
+    </div>
+  );
+
+  if (!isMobile) return panel;
+
+  return (
+    <div style={{ height: safeAreaHeight }} className={tailwind(`w-full ${preventScrollClassNames}`)}>
+      {panel}
+      {preventScrollClassNames.length > 0 && <div className={tailwind('h-px')} />}
+    </div>
   );
 };
 

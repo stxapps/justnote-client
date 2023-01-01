@@ -183,6 +183,16 @@
     unicode-bidi: bidi-override;
     direction: rtl;
   }
+
+  /* https://www.w3schools.com/howto/howto_css_hide_scrollbars.asp */
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;   /* Chrome, Safari and Opera */
+  }
 }
 
 @layer utilities {

@@ -7,9 +7,9 @@ import axios from '../axiosWrapper';
 import dataApi from '../apis/data';
 import fileApi from '../apis/file';
 import {
-  INIT, UPDATE_HREF, UPDATE_WINDOW_SIZE, UPDATE_USER, UPDATE_HANDLING_SIGN_IN,
-  UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP, UPDATE_SEARCH_STRING,
-  UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY,
+  INIT, UPDATE_HREF, UPDATE_WINDOW_SIZE, UPDATE_VISUAL_SIZE, UPDATE_USER,
+  UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP,
+  UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, UPDATE_SELECTING_NOTE_ID,
   FETCH, FETCH_COMMIT, FETCH_ROLLBACK, FETCH_MORE, FETCH_MORE_COMMIT,
   FETCH_MORE_ROLLBACK, CACHE_FETCHED_MORE, UPDATE_FETCHED_MORE, CANCEL_FETCHED_MORE,
@@ -66,7 +66,7 @@ import {
   NOTE_DATE_SHOWING_MODE_HIDE, NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS,
 } from '../types/const';
 import {
-  throttle, extractUrl, urlHashToObj, objToUrlHash, isMobile, isBusyStatus,
+  throttle, extractUrl, urlHashToObj, objToUrlHash, isBusyStatus,
   isEqual, separateUrlAndParam, getUserImageUrl, randomString, sleep, isObject,
   isString, isNumber, isListNameObjsValid, indexOfClosingTag, isNoteBodyEqual,
   clearNoteData, getStaticFPath, deriveFPaths, getListNameObj, getAllListNames,
@@ -74,7 +74,7 @@ import {
   extractNoteId, listNoteIds, getNoteFPaths, getSettingsFPath, getLatestPurchase,
   getValidPurchase, doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins,
   getSortedNotes, separatePinnedValues, getRawPins, getFormattedTime,
-  get24HFormattedTime,
+  get24HFormattedTime, getWindowSize,
 } from '../utils';
 import { isUint8Array, isBlob, convertBlobToDataUrl } from '../utils/index-web';
 import { _ } from '../utils/obj';
@@ -99,6 +99,8 @@ export const init = () => async (dispatch, getState) => {
 
   handleUrlHash();
 
+  const { windowWidth, windowHeight, visualWidth, visualHeight } = getWindowSize();
+
   const darkMatches = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const is24HFormat = null;
   const localSettings = await dataApi.getLocalSettings();
@@ -111,8 +113,10 @@ export const init = () => async (dispatch, getState) => {
       username,
       userImage,
       href: window.location.href,
-      windowWidth: window.innerWidth,
-      windowHeight: window.innerHeight,
+      windowWidth,
+      windowHeight,
+      visualWidth,
+      visualHeight,
       systemThemeMode: darkMatches ? BLK_MODE : WHT_MODE,
       is24HFormat,
       localSettings,
@@ -139,29 +143,25 @@ export const init = () => async (dispatch, getState) => {
   }, 1);
 
   let prevWidth = window.innerWidth;
-  if (isMobile() && isObject(window.visualViewport)) {
+  window.addEventListener('resize', throttle(() => {
+    handleScreenRotation(prevWidth)(dispatch, getState);
+    prevWidth = window.innerWidth;
+
+    dispatch({
+      type: UPDATE_WINDOW_SIZE,
+      payload: {
+        windowWidth: window.innerWidth,
+        windowHeight: window.innerHeight,
+      },
+    });
+  }, 16));
+  if (isObject(window.visualViewport)) {
     window.visualViewport.addEventListener('resize', throttle(() => {
-      handleScreenRotation(prevWidth)(dispatch, getState);
-      prevWidth = window.innerWidth;
-
       dispatch({
-        type: UPDATE_WINDOW_SIZE,
+        type: UPDATE_VISUAL_SIZE,
         payload: {
-          windowWidth: window.innerWidth,
-          windowHeight: window.visualViewport.height,
-        },
-      });
-    }, 16));
-  } else {
-    window.addEventListener('resize', throttle(() => {
-      handleScreenRotation(prevWidth)(dispatch, getState);
-      prevWidth = window.innerWidth;
-
-      dispatch({
-        type: UPDATE_WINDOW_SIZE,
-        payload: {
-          windowWidth: window.innerWidth,
-          windowHeight: window.innerHeight,
+          visualWidth: window.visualViewport.width,
+          visualHeight: window.visualViewport.height,
         },
       });
     }, 16));

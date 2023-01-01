@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 
@@ -7,6 +7,7 @@ import { SIDEBAR_POPUP, NEW_NOTE, NEW_NOTE_OBJ } from '../types/const';
 import {
   canvasFMV, sideBarOverlayFMV, sideBarFMV, rightPanelFMV,
 } from '../types/animConfigs';
+import { isMobile as _isMobile } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 import Sidebar from './Sidebar';
@@ -15,7 +16,7 @@ import NoteEditor from './NoteEditor';
 
 const NavPanel = () => {
 
-  const { height: safeAreaHeight } = useSafeAreaFrame();
+  const { height: safeAreaHeight, windowHeight } = useSafeAreaFrame();
   const isSidebarPopupShown = useSelector(state => state.display.isSidebarPopupShown);
   const note = useSelector(state => {
     const { listName, noteId } = state.display;
@@ -27,6 +28,17 @@ const NavPanel = () => {
   });
   const [derivedNote, setDerivedNote] = useState(note);
   const tailwind = useTailwind();
+
+  const isMobile = useMemo(() => _isMobile(), []);
+  const preventScrollClassNames = useMemo(() => {
+    // When overscroll-none is fixed, no need the empty space to have the scroll.
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=813094
+    // https://github.com/whatwg/html/issues/7732
+    if (isMobile && safeAreaHeight < windowHeight) {
+      return 'overflow-y-scroll overscroll-contain hide-scrollbar';
+    }
+    return '';
+  }, [safeAreaHeight, windowHeight, isMobile]);
 
   const onSidebarOpenBtnClick = () => {
     updatePopupUrlHash(SIDEBAR_POPUP, true, null);
@@ -45,9 +57,11 @@ const NavPanel = () => {
   }
 
   return (
-    <div style={{ height: safeAreaHeight }} className={tailwind('relative w-full bg-white blk:bg-gray-900')}>
+    <div style={{ height: safeAreaHeight }} className={tailwind(`relative w-full bg-white blk:bg-gray-900 ${preventScrollClassNames}`)}>
       {/* Main panel */}
       <NoteList onSidebarOpenBtnClick={onSidebarOpenBtnClick} />
+      {/* Empty space to have scroll to prevent scroll in layout viewport */}
+      {preventScrollClassNames.length > 0 && <div className={tailwind('h-px')} />}
       {/* Sidebar */}
       <motion.div className={tailwind('absolute inset-0 flex overflow-hidden')} variants={canvasFMV} initial={false} animate={isSidebarPopupShown ? 'visible' : 'hidden'}>
         <motion.button onClick={onSidebarCloseBtnClick} className={tailwind('absolute inset-0 h-full w-full')} variants={sideBarOverlayFMV}>
