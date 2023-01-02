@@ -1,6 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 
 import { LG_WIDTH } from '../types/const';
+import { isMobile as _isMobile } from '../utils';
 
 import { useSafeAreaFrame } from '.';
 import ColsPanel from './ColsPanel';
@@ -23,7 +25,11 @@ import StaleErrorPopup from './StaleErrorPopup';
 
 const Main = () => {
 
-  const { width: safeAreaWidth } = useSafeAreaFrame();
+  const {
+    width: safeAreaWidth, height: safeAreaHeight, windowHeight,
+  } = useSafeAreaFrame();
+  const isSettingsPopupShown = useSelector(state => state.display.isSettingsPopupShown);
+  const isMobile = useMemo(() => _isMobile(), []);
 
   useEffect(() => {
     // Need to add class name: overflow-hidden to <body>
@@ -35,6 +41,22 @@ const Main = () => {
       body.classList.remove('overflow-hidden');
     };
   }, []);
+
+  useEffect(() => {
+    // When soft keyboard appears, layout viewport will be scrollable
+    //   and it might be scrolled to make the focused input visible,
+    //   but only work for SettingsLists, doesn't work for SearchInput and NoteEditor
+    //   (as need to scroll at the panel/view level, not layout viewport level)
+    //   so need to monitor and try to scroll back.
+    if (!isSettingsPopupShown && isMobile && safeAreaHeight < windowHeight) {
+      setTimeout(() => {
+        if (window.pageYOffset > 0) {
+          // scrollTo 0 doesn't work, need scrollBy with big enough number.
+          window.scrollBy({ top: windowHeight * -1, behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [safeAreaHeight, windowHeight, isSettingsPopupShown, isMobile]);
 
   const panel = safeAreaWidth < LG_WIDTH ? <NavPanel /> : <ColsPanel />;
 
