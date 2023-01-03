@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import { LG_WIDTH } from '../types/const';
-import { isMobile as _isMobile } from '../utils';
+import { isMobile as _isMobile, scrollWindowTop } from '../utils';
 
 import { useSafeAreaFrame } from '.';
 import ColsPanel from './ColsPanel';
@@ -49,12 +49,7 @@ const Main = () => {
     //   (as need to scroll at the panel/view level, not layout viewport level)
     //   so need to monitor and try to scroll back.
     if (!isSettingsPopupShown && isMobile && safeAreaHeight < windowHeight) {
-      setTimeout(() => {
-        if (window.pageYOffset > 0) {
-          // scrollTo 0 doesn't work, need scrollBy with big enough number.
-          window.scrollBy({ top: windowHeight * -1, behavior: 'smooth' });
-        }
-      }, 100);
+      scrollWindowTop();
     }
   }, [safeAreaHeight, windowHeight, isSettingsPopupShown, isMobile]);
 

@@ -153,6 +153,8 @@ export const init = () => async (dispatch, getState) => {
       href: null,
       windowWidth: null,
       windowHeight: null,
+      visualWidth: null,
+      visualHeight: null,
       systemThemeMode: darkMatches ? BLK_MODE : WHT_MODE,
       is24HFormat,
       localSettings,

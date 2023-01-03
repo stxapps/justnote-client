@@ -1455,3 +1455,28 @@ export const getWindowSize = () => {
 
   return { windowWidth, windowHeight, visualWidth, visualHeight };
 };
+
+const _scrollWindowTop = () => {
+  // scrollTo 0 doesn't work, need scrollBy with big enough number.
+  window.scrollBy({ top: window.innerHeight * -1, behavior: 'smooth' });
+};
+
+export const scrollWindowTop = () => {
+  setTimeout(() => {
+    if (window.pageYOffset > 0) {
+      _scrollWindowTop();
+    } else {
+      setTimeout(() => {
+        if (window.pageYOffset > 0) {
+          _scrollWindowTop();
+        } else {
+          setTimeout(() => {
+            if (window.pageYOffset > 0) {
+              _scrollWindowTop();
+            }
+          }, 400);
+        }
+      }, 250);
+    }
+  }, 100);
+};

@@ -14,7 +14,7 @@ import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, BLK_MODE } from '../types/const';
 import { getThemeMode, getDoMoreEditorFontSizes } from '../selectors';
 import {
   isString, isNoteBodyEqual, isMobile as _isMobile, replaceObjectUrls, getFileExt,
-  debounce,
+  debounce, scrollWindowTop,
 } from '../utils';
 import { isUint8Array, isBlob, convertDataUrlToBlob } from '../utils/index-web';
 
@@ -187,8 +187,9 @@ const NoteEditorEditor = (props) => {
   }, [note.id, note.title, note.body, note.media, _setInitData]);
 
   const onFocus = useCallback(() => {
+    if (isMobile) scrollWindowTop();
     dispatch(updateEditorFocused(true));
-  }, [dispatch]);
+  }, [isMobile, dispatch]);
 
   const onUpdateIsUploading = useCallback((isUploading) => {
     dispatch(updateEditorIsUploading(isUploading));
@@ -269,6 +270,16 @@ const NoteEditorEditor = (props) => {
       if (groupedItemsDropdown) groupedItemsDropdown.set('isOpen', false);
       onFocus();
     });
+
+    if (isMobile) {
+      const linkUi = editor.plugins.get('LinkUI');
+      if (linkUi) {
+        const urlInput = linkUi.formView.urlInputView;
+        urlInput.on('change:isFocused', (evt, data, isFocused) => {
+          if (isFocused) scrollWindowTop();
+        });
+      }
+    }
 
     window.JustnoteReactWebApp = {
       updateIsUploading: onUpdateIsUploading, addObjectUrlFiles: onAddObjectUrlFiles,

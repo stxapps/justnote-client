@@ -1436,3 +1436,47 @@ export const doContainStaleNotes = (notes) => {
   }
   return false;
 };
+
+export const getWindowSize = () => {
+  let windowWidth = null, windowHeight = null, visualWidth = null, visualHeight = null;
+  if (isObject(window)) {
+    if (isNumber(window.innerWidth)) windowWidth = window.innerWidth;
+    if (isNumber(window.innerHeight)) windowHeight = window.innerHeight;
+
+    if (isObject(window.visualViewport)) {
+      if (isNumber(window.visualViewport.width)) {
+        visualWidth = window.visualViewport.width;
+      }
+      if (isNumber(window.visualViewport.height)) {
+        visualHeight = window.visualViewport.height;
+      }
+    }
+  }
+
+  return { windowWidth, windowHeight, visualWidth, visualHeight };
+};
+
+const _scrollWindowTop = () => {
+  // scrollTo 0 doesn't work, need scrollBy with big enough number.
+  window.scrollBy({ top: window.innerHeight * -1, behavior: 'smooth' });
+};
+
+export const scrollWindowTop = () => {
+  setTimeout(() => {
+    if (window.pageYOffset > 0) {
+      _scrollWindowTop();
+    } else {
+      setTimeout(() => {
+        if (window.pageYOffset > 0) {
+          _scrollWindowTop();
+        } else {
+          setTimeout(() => {
+            if (window.pageYOffset > 0) {
+              _scrollWindowTop();
+            }
+          }, 400);
+        }
+      }, 250);
+    }
+  }, 100);
+};
