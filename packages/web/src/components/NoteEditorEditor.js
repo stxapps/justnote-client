@@ -14,7 +14,7 @@ import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, BLK_MODE } from '../types/const';
 import { getThemeMode, getDoMoreEditorFontSizes } from '../selectors';
 import {
   isString, isNoteBodyEqual, isMobile as _isMobile, replaceObjectUrls, getFileExt,
-  debounce, scrollWindowTop,
+  debounce, scrollWindowTop, containUppercase, isStringTitleIn,
 } from '../utils';
 import { isUint8Array, isBlob, convertDataUrlToBlob } from '../utils/index-web';
 
@@ -37,6 +37,7 @@ const NoteEditorEditor = (props) => {
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const isFocused = useSelector(state => state.display.isEditorFocused);
   const isEditorBusy = useSelector(state => state.display.isEditorBusy);
+  const searchString = useSelector(state => state.display.searchString);
   const doMoreEditorFontSizes = useSelector(state => getDoMoreEditorFontSizes(state));
   const saveNoteCount = useSelector(state => state.editor.saveNoteCount);
   const discardNoteCount = useSelector(state => state.editor.discardNoteCount);
@@ -64,6 +65,7 @@ const NoteEditorEditor = (props) => {
   const bodyEditor = useRef(null);
   const bodyTopToolbar = useRef(null);
   const bodyBottomToolbar = useRef(null);
+  const prevSearchString = useRef(searchString);
   const prevSaveNoteCount = useRef(saveNoteCount);
   const prevDiscardNoteCount = useRef(discardNoteCount);
   const prevUpdateNoteIdUrlHashCount = useRef(updateNoteIdUrlHashCount);
@@ -455,6 +457,29 @@ const NoteEditorEditor = (props) => {
   }, [isEditorReady, isMobile, safeAreaWidth]);
 
   useEffect(() => {
+    setTimeout(() => {
+      if (isEditorReady && bodyEditor.current) {
+        if (searchString !== prevSearchString.current) {
+          if (searchString) {
+            const matchCase = containUppercase(searchString);
+            bodyEditor.current.execute('find', searchString, { matchCase });
+          } else {
+            const ui = bodyEditor.current.plugins.get('FindAndReplaceUI');
+            if (ui) ui.fire('searchReseted');
+          }
+        } else {
+          if (searchString) {
+            const matchCase = containUppercase(searchString);
+            bodyEditor.current.execute('find', searchString, { matchCase });
+          }
+        }
+      }
+
+      prevSearchString.current = searchString;
+    }, 100);
+  }, [isEditorReady, searchString, note.id, isFocused]);
+
+  useEffect(() => {
     const beforeUnloadListener = (e) => {
       if (!isEditorReady) return;
 
@@ -606,11 +631,16 @@ const NoteEditorEditor = (props) => {
     };
   }, []);
 
+  let titleInputClassNames = 'bg-white text-gray-800 placeholder:text-gray-500 blk:bg-gray-900 blk:text-gray-200 blk:placeholder:text-gray-400';
+  if (note.title && searchString && isStringTitleIn(note.title, searchString)) {
+    titleInputClassNames = 'bg-yellow-300 text-gray-800 placeholder:text-gray-500 blk:bg-yellow-300 blk:text-gray-800 blk:placeholder:text-gray-500';
+  }
+
   return (
     <div className={tailwind(`flex flex-1 flex-col overflow-hidden ${isMobile ? 'mobile' : 'not-mobile'} ${themeMode === BLK_MODE ? 'blk-mode' : 'wht-mode'} ${doMoreEditorFontSizes ? 'more-font-sizes' : 'default-font-sizes'}`)}>
       <div ref={scrollView} className={tailwind('z-0 flex-shrink flex-grow overflow-y-auto overflow-x-hidden')}>
         <div className={tailwind(`px-1.5 py-1.5 ${isMobile ? 'border-b border-gray-200 blk:border-gray-700' : ''}`)}>
-          <input ref={titleInput} onFocus={onFocus} onChange={onDataChange} type="text" name="titleInput" id="titleInput" className={tailwind('block w-full border-0 bg-white px-1.5 py-1.5 text-xl font-normal text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-0 blk:bg-gray-900 blk:text-gray-200 blk:placeholder:text-gray-400 lg:text-lg')} placeholder="Note Title" disabled={(note.id !== NEW_NOTE && note.status !== ADDED) || isEditorBusy} />
+          <input ref={titleInput} onFocus={onFocus} onChange={onDataChange} type="text" name="titleInput" id="titleInput" className={tailwind(`block w-full border-0 px-1.5 py-1.5 text-xl font-normal focus:outline-none focus:ring-0 lg:text-lg ${titleInputClassNames}`)} placeholder="Note Title" disabled={(note.id !== NEW_NOTE && note.status !== ADDED) || isEditorBusy} />
         </div>
         <div ref={bodyTopToolbar} className={tailwind('sticky -top-px z-10')}></div>
         <CKEditor editor={ckeditor} config={editorConfig} disabled={(note.id !== NEW_NOTE && note.status !== ADDED) || isEditorBusy} onReady={onReady} onFocus={onFocus} onChange={onDataChange} />

@@ -25,6 +25,8 @@
   --jn-editor-red-500: rgb(239, 68, 68);
   --jn-editor-red-600: rgb(220, 38, 38);
 
+  --jn-editor-yellow-300: rgb(253, 224, 71);
+
   --ck-color-base-foreground: var(--jn-editor-white);
   --ck-color-base-background: var(--jn-editor-white);
   --ck-color-base-border: var(--jn-editor-gray-200);
@@ -108,6 +110,8 @@
   --ck-color-link-default: var(--jn-editor-blue-700);
   --ck-color-link-selected-background: var(--jn-editor-blue-300);
   --ck-color-link-fake-selection: var(--jn-editor-blue-300);
+
+  --ck-color-highlight-background: var(--jn-editor-yellow-300);
 
   --ck-color-widget-blurred-border: hsl(0, 0%, 87%);
   --ck-color-widget-hover-border: var(--jn-editor-green-600);
@@ -211,6 +215,8 @@
   --ck-color-link-default: var(--jn-editor-blue-700);
   --ck-color-link-selected-background: var(--jn-editor-blue-300);
   --ck-color-link-fake-selection: var(--jn-editor-blue-300);
+
+  --ck-color-highlight-background: var(--jn-editor-yellow-300);
 
   --ck-color-widget-blurred-border: var(--jn-editor-gray-800);
   --ck-color-widget-hover-border: var(--jn-editor-green-600);
@@ -382,4 +388,16 @@
 
 .ck.ck-balloon-panel.ck-tooltip {
   display: none;
+}
+
+.ck-find-result {
+  color: var(--jn-editor-gray-800);
+}
+
+.blk-mode .ck-find-result {
+  color: var(--jn-editor-gray-800);
+}
+
+.ck-find-result .ck-find-result_selected {
+  background: transparent;
 }
