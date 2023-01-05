@@ -13,7 +13,8 @@ import {
 import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, UTF8 } from '../types/const';
 import { getThemeMode, getDoMoreEditorFontSizes } from '../selectors';
 import {
-  replaceObjectUrls, splitOnFirst, escapeDoubleQuotes, getFileExt,
+  replaceObjectUrls, splitOnFirst, escapeDoubleQuotes, getFileExt, containUppercase,
+  isStringTitleIn,
 } from '../utils';
 import cache from '../utils/cache';
 
@@ -37,6 +38,7 @@ const NoteEditorEditor = (props) => {
   const { note } = props;
   const isFocused = useSelector(state => state.display.isEditorFocused);
   const isEditorBusy = useSelector(state => state.display.isEditorBusy);
+  const searchString = useSelector(state => state.display.searchString);
   const doMoreEditorFontSizes = useSelector(state => getDoMoreEditorFontSizes(state));
   const saveNoteCount = useSelector(state => state.editor.saveNoteCount);
   const discardNoteCount = useSelector(state => state.editor.discardNoteCount);
@@ -57,6 +59,7 @@ const NoteEditorEditor = (props) => {
   const webView = useRef(null);
   const hackInput = useRef(null);
   const prevIsFocused = useRef(isFocused);
+  const prevSearchString = useRef(searchString);
   const prevSaveNoteCount = useRef(saveNoteCount);
   const prevDiscardNoteCount = useRef(discardNoteCount);
   const prevUpdateNoteIdCount = useRef(updateNoteIdCount);
@@ -446,6 +449,33 @@ const NoteEditorEditor = (props) => {
     webView.current.injectJavaScript('window.justnote.setScrollEnabled(' + isScrollEnabled + '); true;');
     prevIsScrollEnabled.current = isScrollEnabled;
   }, [isEditorReady, isScrollEnabled]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      let doHighlightTitle = false;
+      if (note.title && searchString && isStringTitleIn(note.title, searchString)) {
+        doHighlightTitle = true;
+      }
+
+      if (isEditorReady && webView.current) {
+        if (searchString !== prevSearchString.current) {
+          if (searchString) {
+            const matchCase = containUppercase(searchString);
+            webView.current.injectJavaScript('window.justnote.setFind(' + doHighlightTitle + ', "' + searchString + '", ' + matchCase + '); true;');
+          } else {
+            webView.current.injectJavaScript('window.justnote.clearFind(); true;');
+          }
+        } else {
+          if (searchString) {
+            const matchCase = containUppercase(searchString);
+            webView.current.injectJavaScript('window.justnote.setFind(' + doHighlightTitle + ', "' + searchString + '", ' + matchCase + '); true;');
+          }
+        }
+      }
+
+      prevSearchString.current = searchString;
+    }, 100);
+  }, [isEditorReady, searchString, note.id, note.title, isFocused]);
 
   useEffect(() => {
     const writeHtml = async () => {

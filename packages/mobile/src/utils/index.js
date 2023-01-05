@@ -507,7 +507,6 @@ export const containUppercase = (letters) => {
 };
 
 export const isStringIn = (note, searchString) => {
-
   let title = note.title.slice(0, MAX_CHARS);
   if (!containUppercase(searchString)) title = title.toLowerCase();
 
@@ -518,6 +517,13 @@ export const isStringIn = (note, searchString) => {
   const searchWords = searchString.split(' ');
 
   return searchWords.every(word => content.includes(word));
+};
+
+export const isStringTitleIn = (title, searchString) => {
+  let content = title.slice(0, MAX_CHARS);
+  if (!containUppercase(searchString)) content = content.toLowerCase();
+
+  return content.includes(searchString);
 };
 
 export const swapArrayElements = (a, x, y) => (a[x] && a[y] && [
