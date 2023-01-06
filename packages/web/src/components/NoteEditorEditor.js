@@ -280,6 +280,12 @@ const NoteEditorEditor = (props) => {
         urlInput.on('change:isFocused', (evt, data, isFocused) => {
           if (isFocused) scrollWindowTop();
         });
+
+        const inputElement = urlInput.fieldView.element;
+        if (inputElement) {
+          inputElement.setAttribute('inputmode', 'url');
+          inputElement.setAttribute('autocapitalize', 'none');
+        }
       }
     }
 
