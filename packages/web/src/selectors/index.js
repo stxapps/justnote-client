@@ -9,7 +9,7 @@ import {
   isStringIn, isObject, isArrayEqual, isEqual, getListNameObj,
   getMainId, getValidProduct as _getValidProduct, getValidPurchase as _getValidPurchase,
   listNoteIds, getSortedNotes, separatePinnedValues, getNoteFPaths, getPinFPaths,
-  getPins, doEnableExtraFeatures, getFormattedNoteDate,
+  getPins, doEnableExtraFeatures, getFormattedNoteDate, isNumber, isMobile as _isMobile,
 } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 import { initialListNameEditorState } from '../types/initialStates';
@@ -209,6 +209,26 @@ export const makeGetListNameEditor = () => {
     { memoizeOptions: { resultEqualityCheck: isEqual } },
   );
 };
+
+export const getSafeAreaFrame = createSelector(
+  state => state.window.width,
+  state => state.window.height,
+  state => state.window.visualWidth,
+  state => state.window.visualHeight,
+  (windowWidth, windowHeight, visualWidth, visualHeight) => {
+    const isMobile = _isMobile();
+
+    [windowWidth, windowHeight] = [Math.round(windowWidth), Math.round(windowHeight)];
+    [visualWidth, visualHeight] = [Math.round(visualWidth), Math.round(visualHeight)];
+
+    const width = isMobile && isNumber(visualWidth) ? visualWidth : windowWidth;
+    const height = isMobile && isNumber(visualHeight) ? visualHeight : windowHeight;
+
+    return {
+      x: 0, y: 0, width, height, windowWidth, windowHeight, visualWidth, visualHeight,
+    };
+  }
+);
 
 export const getValidProduct = createSelector(
   state => state.iap.products,

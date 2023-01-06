@@ -1,28 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
-import { getThemeMode, getTailwind } from '../selectors';
-import { isNumber, isMobile as _isMobile } from '../utils';
-
-export const useSafeAreaFrame = () => {
-
-  let windowWidth = useSelector(state => state.window.width);
-  let windowHeight = useSelector(state => state.window.height);
-  let visualWidth = useSelector(state => state.window.visualWidth);
-  let visualHeight = useSelector(state => state.window.visualHeight);
-
-  const isMobile = useMemo(() => _isMobile(), []);
-
-  [windowWidth, windowHeight] = [Math.round(windowWidth), Math.round(windowHeight)];
-  [visualWidth, visualHeight] = [Math.round(visualWidth), Math.round(visualHeight)];
-
-  const width = isMobile && isNumber(visualWidth) ? visualWidth : windowWidth;
-  const height = isMobile && isNumber(visualHeight) ? visualHeight : windowHeight;
-
-  return {
-    x: 0, y: 0, width, height, windowWidth, windowHeight, visualWidth, visualHeight,
-  };
-};
+import { getSafeAreaFrame, getThemeMode, getTailwind } from '../selectors';
 
 export const useStateWithLocalStorage = (defaultValue, localStorageKey) => {
 
@@ -36,6 +15,10 @@ export const useStateWithLocalStorage = (defaultValue, localStorageKey) => {
   }, [localStorageKey, value]);
 
   return [value, setValue];
+};
+
+export const useSafeAreaFrame = () => {
+  return useSelector(state => getSafeAreaFrame(state));
 };
 
 export const useTailwind = () => {
