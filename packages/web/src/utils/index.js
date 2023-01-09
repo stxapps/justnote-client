@@ -1462,9 +1462,18 @@ export const getWindowSize = () => {
   return { windowWidth, windowHeight, visualWidth, visualHeight };
 };
 
+let _isScrollingWindowTop = false;
 const _scrollWindowTop = () => {
+  // Prevent calling while scrolling i.e. change on both visual height and focus.
+  if (_isScrollingWindowTop) return;
+  _isScrollingWindowTop = true;
+
   // scrollTo 0 doesn't work, need scrollBy with big enough number.
   window.scrollBy({ top: window.innerHeight * -1, behavior: 'smooth' });
+
+  setTimeout(() => {
+    _isScrollingWindowTop = false;
+  }, 100);
 };
 
 export const scrollWindowTop = () => {
