@@ -7,6 +7,9 @@ export const myNotesListNameObj = { listName: MY_NOTES, displayName: MY_NOTES };
 export const trashListNameObj = { listName: TRASH, displayName: TRASH };
 export const archiveListNameObj = { listName: ARCHIVE, displayName: ARCHIVE };
 
+export const whtModeThemeCustomOptions = { mode: WHT_MODE, startTime: '06:00' };
+export const blkModeThemeCustomOptions = { mode: BLK_MODE, startTime: '18:00' };
+
 export const initialSettingsState = {
   doDeleteOldNotesInTrash: true,
   sortOn: ADDED_DT,
@@ -25,8 +28,7 @@ export const initialSettingsState = {
   checkPurchasesDT: null,
   themeMode: WHT_MODE,
   themeCustomOptions: [
-    { mode: WHT_MODE, startTime: '06:00' },
-    { mode: BLK_MODE, startTime: '18:00' },
+    { ...whtModeThemeCustomOptions }, { ...blkModeThemeCustomOptions },
   ],
 };
 
@@ -34,10 +36,14 @@ export const initialLocalSettingsState = {
   doUseLocalTheme: false,
   themeMode: WHT_MODE,
   themeCustomOptions: [
-    { mode: WHT_MODE, startTime: '06:00' },
-    { mode: BLK_MODE, startTime: '18:00' },
+    { ...whtModeThemeCustomOptions }, { ...blkModeThemeCustomOptions },
   ],
-  purchases: null, // duplicate from Settings for Loading to support Dark appearance.
+  // Below is duplicate from Settings for Loading to support Dark appearance.
+  purchases: null,
+  defaultThemeMode: WHT_MODE,
+  defaultThemeCustomOptions: [
+    { ...whtModeThemeCustomOptions }, { ...blkModeThemeCustomOptions },
+  ],
 };
 
 export const initialListNameEditorState = {

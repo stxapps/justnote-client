@@ -5,7 +5,11 @@ import {
   INIT, FETCH_COMMIT, UPDATE_SETTINGS_COMMIT, UPDATE_DO_USE_LOCAL_THEME,
   UPDATE_LOCAL_THEME, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
-import { initialLocalSettingsState as initialState } from '../types/initialStates';
+import { WHT_MODE } from '../types/const';
+import {
+  initialLocalSettingsState as initialState, whtModeThemeCustomOptions,
+  blkModeThemeCustomOptions,
+} from '../types/initialStates';
 import { isObject } from '../utils';
 
 const localSettingsReducer = (state = initialState, action) => {
@@ -20,8 +24,17 @@ const localSettingsReducer = (state = initialState, action) => {
     if (!doFetchSettings) return state;
 
     const newState = { ...state };
-    if (isObject(settings)) newState.purchases = settings.purchases;
-    else newState.purchases = null;
+    if (isObject(settings)) {
+      newState.purchases = settings.purchases;
+      newState.defaultThemeMode = settings.themeMode;
+      newState.defaultThemeCustomOptions = settings.themeCustomOptions;
+    } else {
+      newState.purchases = null;
+      newState.defaultThemeMode = WHT_MODE;
+      newState.defaultThemeCustomOptions = [
+        { ...whtModeThemeCustomOptions }, { ...blkModeThemeCustomOptions },
+      ];
+    }
 
     return loop(
       newState, Cmd.run(updateLocalSettings(), { args: [Cmd.dispatch, Cmd.getState] })
@@ -32,8 +45,17 @@ const localSettingsReducer = (state = initialState, action) => {
     const { settings } = action.payload;
 
     const newState = { ...state };
-    if (isObject(settings)) newState.purchases = settings.purchases;
-    else newState.purchases = null;
+    if (isObject(settings)) {
+      newState.purchases = settings.purchases;
+      newState.defaultThemeMode = settings.themeMode;
+      newState.defaultThemeCustomOptions = settings.themeCustomOptions;
+    } else {
+      newState.purchases = null;
+      newState.defaultThemeMode = WHT_MODE;
+      newState.defaultThemeCustomOptions = [
+        { ...whtModeThemeCustomOptions }, { ...blkModeThemeCustomOptions },
+      ];
+    }
 
     return loop(
       newState, Cmd.run(updateLocalSettings(), { args: [Cmd.dispatch, Cmd.getState] })

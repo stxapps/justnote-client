@@ -27,7 +27,12 @@ const settingsReducer = (state = initialState, action) => {
 
   if (action.type === INIT) {
     const { localSettings } = action.payload;
-    return { ...state, purchases: localSettings.purchases };
+    return {
+      ...state,
+      purchases: localSettings.purchases,
+      themeMode: localSettings.defaultThemeMode,
+      themeCustomOptions: localSettings.defaultThemeCustomOptions,
+    };
   }
 
   if (action.type === FETCH_COMMIT) {
