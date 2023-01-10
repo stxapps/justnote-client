@@ -98,6 +98,17 @@ const NoteEditorEditor = (props) => {
 
   const isMobile = useMemo(() => _isMobile(), []);
 
+  const setThemeMode = (mode) => {
+    const wrapper = document.querySelector('.ck-body-wrapper');
+    if (wrapper) {
+      if (mode === 0) wrapper.classList.add('wht-mode');
+      else wrapper.classList.remove('wht-mode');
+
+      if (mode === 1) wrapper.classList.add('blk-mode');
+      else wrapper.classList.remove('blk-mode');
+    }
+  };
+
   const focusTitleInput = () => {
     if (titleInput.current) titleInput.current.blur();
     setTimeout(() => {
@@ -312,6 +323,11 @@ const NoteEditorEditor = (props) => {
     dispatch(updateEditingNote(title, body, media));
     didUpdateEditingNote.current = true;
   }, 1000), [dispatch]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+    setThemeMode(themeMode);
+  }, [isEditorReady, themeMode]);
 
   useEffect(() => {
     if (!isEditorReady) return;
@@ -596,7 +612,7 @@ const NoteEditorEditor = (props) => {
       },
       fontColor: {
         colors: [
-          { color: 'rgb(31, 41, 55)', label: 'Black' },
+          { color: 'rgb(31, 41, 55)', label: 'Black', hasBorder: true },
           { color: 'rgb(107, 114, 128)', label: 'Gray' },
           { color: 'rgb(185, 28, 28)', label: 'Red' },
           { color: 'rgb(252, 211, 77)', label: 'Yellow' },
@@ -614,7 +630,7 @@ const NoteEditorEditor = (props) => {
       },
       fontBackgroundColor: {
         colors: [
-          { color: 'rgb(31, 41, 55)', label: 'Black' },
+          { color: 'rgb(31, 41, 55)', label: 'Black', hasBorder: true },
           { color: 'rgb(107, 114, 128)', label: 'Gray' },
           { color: 'rgb(239, 68, 68)', label: 'Red' },
           { color: 'rgb(252, 211, 77)', label: 'Yellow' },

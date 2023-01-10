@@ -12,15 +12,19 @@
   --jn-editor-gray-800: rgb(31, 41, 55);
   --jn-editor-gray-900: rgb(17, 24, 39);
 
-  --jn-editor-blue-300: rgb(147, 197, 253);
+  --jn-editor-blue-100: rgb(219, 234, 254);
+  --jn-editor-blue-200: rgb(191, 219, 254);
   --jn-editor-blue-400: rgb(96, 165, 250);
+  --jn-editor-blue-500: rgb(59, 130, 246);
   --jn-editor-blue-700: rgb(29, 78, 216);
+  --jn-editor-blue-900: rgb(30, 58, 138);
 
   --jn-editor-green-200: rgb(187, 247, 208);
   --jn-editor-green-300: rgb(134, 239, 172);
   --jn-editor-green-400: rgb(74, 222, 128);
   --jn-editor-green-500: rgb(34, 197, 94);
   --jn-editor-green-600: rgb(22, 163, 74);
+  --jn-editor-green-700: rgb(21, 128, 61);
 
   --jn-editor-red-500: rgb(239, 68, 68);
   --jn-editor-red-600: rgb(220, 38, 38);
@@ -30,7 +34,7 @@
   --ck-color-base-foreground: var(--jn-editor-white);
   --ck-color-base-background: var(--jn-editor-white);
   --ck-color-base-border: var(--jn-editor-gray-200);
-  --ck-color-base-action: var(--jn-editor-green-400);
+  --ck-color-base-action: var(--jn-editor-green-600);
   --ck-color-base-focus: var(--jn-editor-green-600);
   --ck-color-base-text: var(--jn-editor-gray-600);
   --ck-color-base-active: var(--jn-editor-gray-500);
@@ -40,8 +44,15 @@
   --ck-color-focus-border-coordinates: 142, 76%, 36%;
   --ck-color-focus-border: hsl(var(--ck-color-focus-border-coordinates));
   --ck-color-focus-outer-shadow: var(--jn-editor-green-200);
-  --ck-color-focus-disabled-shadow: var(--jn-editor-green-300);
+  --ck-color-focus-disabled-shadow: var(--jn-editor-green-200);
   --ck-color-focus-error-shadow: var(--jn-editor-red-500);
+
+  --ck-focus-outer-shadow-geometry: 0px 0px 0px 2px;
+  --ck-focus-outer-shadow: var(--ck-focus-outer-shadow-geometry) var(--ck-color-focus-outer-shadow);
+  --ck-focus-disabled-outer-shadow: var(--ck-focus-outer-shadow-geometry) var(--ck-color-focus-disabled-shadow);
+  --ck-focus-error-outer-shadow: var(--ck-focus-outer-shadow-geometry) var(--ck-color-focus-error-shadow);
+  --ck-focus-ring: 1px solid var(--ck-color-focus-border);
+
   --ck-color-text: var(--ck-color-base-text);
   --ck-color-shadow-drop: hsla(0, 0%, 0%, 0.15);
   --ck-color-shadow-drop-active: hsla(0, 0%, 0%, 0.2);
@@ -54,8 +65,8 @@
   --ck-color-button-default-disabled-background: transparent;
 
   --ck-color-button-on-background: var(--jn-editor-gray-300);
-  --ck-color-button-on-hover-background: var(--jn-editor-gray-300);
-  --ck-color-button-on-active-background: var(--jn-editor-gray-300);
+  --ck-color-button-on-hover-background: var(--jn-editor-gray-400);
+  --ck-color-button-on-active-background: var(--jn-editor-gray-400);
   --ck-color-button-on-active-shadow: var(--jn-editor-gray-400);
   --ck-color-button-on-disabled-background: var(--jn-editor-gray-300);
   --ck-color-button-on-color: var(--jn-editor-gray-600);
@@ -63,7 +74,7 @@
   --ck-color-button-action-background: var(--ck-color-base-action);
   --ck-color-button-action-hover-background: var(--jn-editor-green-500);
   --ck-color-button-action-active-background: var(--jn-editor-green-500);
-  --ck-color-button-action-active-shadow: var(--jn-editor-green-500);
+  --ck-color-button-action-active-shadow: var(--jn-editor-green-200);
   --ck-color-button-action-disabled-background: var(--jn-editor-green-200);
   --ck-color-button-action-text: var(--ck-color-base-background);
 
@@ -108,8 +119,8 @@
   --ck-color-upload-bar-background: var(--jn-editor-blue-400);
 
   --ck-color-link-default: var(--jn-editor-blue-700);
-  --ck-color-link-selected-background: var(--jn-editor-blue-300);
-  --ck-color-link-fake-selection: var(--jn-editor-blue-300);
+  --ck-color-link-selected-background: var(--jn-editor-blue-100);
+  --ck-color-link-fake-selection: var(--jn-editor-blue-100);
 
   --ck-color-highlight-background: var(--jn-editor-yellow-300);
 
@@ -135,7 +146,7 @@
   --ck-color-base-foreground: var(--jn-editor-gray-900);
   --ck-color-base-background: var(--jn-editor-gray-900);
   --ck-color-base-border: var(--jn-editor-gray-700);
-  --ck-color-base-action: var(--jn-editor-green-400);
+  --ck-color-base-action: var(--jn-editor-green-600);
   --ck-color-base-focus: var(--jn-editor-green-600);
   --ck-color-base-text: var(--jn-editor-gray-300);
   --ck-color-base-active: var(--jn-editor-gray-400);
@@ -144,9 +155,16 @@
 
   --ck-color-focus-border-coordinates: 142, 76%, 36%;
   --ck-color-focus-border: hsl(var(--ck-color-focus-border-coordinates));
-  --ck-color-focus-outer-shadow: var(--jn-editor-green-200);
-  --ck-color-focus-disabled-shadow: var(--jn-editor-green-300);
+  --ck-color-focus-outer-shadow: var(--jn-editor-green-700);
+  --ck-color-focus-disabled-shadow: var(--jn-editor-green-700);
   --ck-color-focus-error-shadow: var(--jn-editor-red-500);
+
+  --ck-focus-outer-shadow-geometry: 0px 0px 0px 1px;
+  --ck-focus-outer-shadow: var(--ck-focus-outer-shadow-geometry) var(--ck-color-focus-outer-shadow);
+  --ck-focus-disabled-outer-shadow: var(--ck-focus-outer-shadow-geometry) var(--ck-color-focus-disabled-shadow);
+  --ck-focus-error-outer-shadow: var(--ck-focus-outer-shadow-geometry) var(--ck-color-focus-error-shadow);
+  --ck-focus-ring: 1px solid var(--ck-color-focus-border);
+
   --ck-color-text: var(--ck-color-base-text);
   --ck-color-shadow-drop: hsla(0, 0%, 0%, 0.15);
   --ck-color-shadow-drop-active: hsla(0, 0%, 0%, 0.2);
@@ -159,8 +177,8 @@
   --ck-color-button-default-disabled-background: transparent;
 
   --ck-color-button-on-background: var(--jn-editor-gray-600);
-  --ck-color-button-on-hover-background: var(--jn-editor-gray-600);
-  --ck-color-button-on-active-background: var(--jn-editor-gray-600);
+  --ck-color-button-on-hover-background: var(--jn-editor-gray-500);
+  --ck-color-button-on-active-background: var(--jn-editor-gray-500);
   --ck-color-button-on-active-shadow: var(--jn-editor-gray-500);
   --ck-color-button-on-disabled-background: var(--jn-editor-gray-600);
   --ck-color-button-on-color: var(--jn-editor-gray-300);
@@ -168,7 +186,7 @@
   --ck-color-button-action-background: var(--ck-color-base-action);
   --ck-color-button-action-hover-background: var(--jn-editor-green-500);
   --ck-color-button-action-active-background: var(--jn-editor-green-500);
-  --ck-color-button-action-active-shadow: var(--jn-editor-green-500);
+  --ck-color-button-action-active-shadow: var(--jn-editor-green-200);
   --ck-color-button-action-disabled-background: var(--jn-editor-green-200);
   --ck-color-button-action-text: var(--ck-color-base-background);
 
@@ -212,9 +230,9 @@
 
   --ck-color-upload-bar-background: var(--jn-editor-blue-400);
 
-  --ck-color-link-default: var(--jn-editor-blue-700);
-  --ck-color-link-selected-background: var(--jn-editor-blue-300);
-  --ck-color-link-fake-selection: var(--jn-editor-blue-300);
+  --ck-color-link-default: var(--jn-editor-blue-500);
+  --ck-color-link-selected-background: var(--jn-editor-blue-900);
+  --ck-color-link-fake-selection: var(--jn-editor-blue-900);
 
   --ck-color-highlight-background: var(--jn-editor-yellow-300);
 
@@ -267,6 +285,14 @@
   cursor: pointer;
 }
 
+.blk-mode .ck.ck-editor__editable p a {
+  color: var(--jn-editor-blue-500);
+}
+
+.blk-mode .ck.ck-editor__editable p a.ck-link_selected {
+  color: var(--jn-editor-blue-200);
+}
+
 .ck.ck-editor__editable p a:hover {
   text-decoration: underline;
 }
@@ -300,6 +326,14 @@
   flex-direction: row;
 }
 
+.blk-mode .ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list {
+  background-color: var(--jn-editor-gray-800);
+}
+
+.blk-mode .ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list .ck.ck-button.ck-off:not(.ck-disabled):hover {
+  background-color: var(--jn-editor-gray-700);
+}
+
 .ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list .ck.ck-list__item {
   min-width: auto;
 }
@@ -330,6 +364,18 @@
   line-height: 32px;
 }
 
+.blk-mode .ck.ck-dropdown.ck-color-ui-dropdown .ck.ck-dropdown__panel {
+  background-color: var(--jn-editor-gray-800);
+}
+
+.blk-mode .ck.ck-dropdown.ck-color-ui-dropdown .ck.ck-dropdown__panel .ck.ck-button.ck-on:not(.ck-disabled):hover {
+  background-color: var(--jn-editor-gray-700);
+}
+
+.blk-mode .ck.ck-dropdown.ck-color-ui-dropdown .ck.ck-dropdown__panel .ck.ck-button.ck-off:not(.ck-disabled):hover {
+  background-color: var(--jn-editor-gray-700);
+}
+
 .ck.ck-dropdown.ck-alignment-dropdown .ck.ck-dropdown__panel {
   max-width: none;
 }
@@ -344,6 +390,22 @@
 .ck.ck-dropdown.ck-alignment-dropdown .ck.ck-toolbar__items .ck-button {
   margin-top: var(--ck-spacing-small);
   margin-bottom: var(--ck-spacing-small);
+}
+
+.blk-mode .ck.ck-dropdown.ck-alignment-dropdown .ck.ck-toolbar {
+  background-color: var(--jn-editor-gray-800);
+}
+
+.blk-mode .ck.ck-dropdown.ck-alignment-dropdown .ck.ck-toolbar .ck.ck-button.ck-off:not(.ck-disabled):hover {
+  background-color: var(--jn-editor-gray-700);
+}
+
+.blk-mode .ck.ck-toolbar__grouped-dropdown .ck.ck-toolbar {
+  background-color: var(--jn-editor-gray-800);
+}
+
+.blk-mode .ck.ck-toolbar__grouped-dropdown .ck.ck-toolbar .ck.ck-button.ck-off:not(.ck-disabled):hover {
+  background-color: var(--jn-editor-gray-700);
 }
 
 .ck.ck-blurred .ck-widget:hover {
@@ -384,6 +446,34 @@
 
 .blk-mode .ck-content .todo-list .todo-list__label>input:before {
   border: 1px solid var(--jn-editor-gray-300);
+}
+
+.blk-mode .ck.ck-balloon-panel {
+  background-color: var(--jn-editor-gray-800);
+}
+
+.blk-mode .ck.ck-balloon-panel[class*=arrow_n]:after {
+  border-color: transparent transparent var(--jn-editor-gray-800) transparent;
+}
+
+.blk-mode .ck.ck-balloon-panel[class*=arrow_s]:after {
+  border-color: var(--jn-editor-gray-800) transparent transparent transparent;
+}
+
+.blk-mode .ck.ck-balloon-panel .ck.ck-button.ck-off:not(.ck-disabled):hover {
+  background-color: var(--jn-editor-gray-700);
+}
+
+.blk-mode .ck.ck-balloon-panel a.ck.ck-button.ck-off:not(.ck-disabled):hover {
+  background: none;
+}
+
+.blk-mode .ck.ck-balloon-panel .ck.ck-input {
+  background-color: var(--jn-editor-gray-800);
+}
+
+.blk-mode .ck.ck-balloon-panel .ck.ck-labeled-field-view>.ck.ck-labeled-field-view__input-wrapper>.ck.ck-label {
+  background-color: var(--jn-editor-gray-800);
 }
 
 .ck.ck-balloon-panel.ck-tooltip {
