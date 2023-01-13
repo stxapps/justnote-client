@@ -32,8 +32,7 @@ const NoteEditorTopBar = (props) => {
 
   const onCancelBtnClick = () => {
     if (didClick.current || isEditorUploading) return;
-    if (note.id !== NEW_NOTE && isEditorFocused) dispatch(increaseDiscardNoteCount());
-    else dispatch(updateNoteId(null, false, true));
+    if (isEditorFocused) dispatch(increaseDiscardNoteCount());
 
     if (note.id === NEW_NOTE && isFullScreen) onToggleFullScreen();
     didClick.current = true;

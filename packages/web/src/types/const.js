@@ -96,6 +96,7 @@ export const NOTES = 'notes';
 export const IMAGES = 'images';
 export const SETTINGS = 'settings';
 export const PINS = 'pins';
+export const UNSAVED_NOTES = 'unsaved-notes';
 export const INDEX = 'index';
 export const DOT_JSON = '.json';
 export const BASE64 = 'base64';

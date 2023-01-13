@@ -238,6 +238,7 @@
 - yarn add @zip.js/zip.js
 - yarn add @wewatch/lexorank axios
 - yarn add tailwindcss-labeled-groups
+- yarn add idb-keyval
 ** Server steps
 *** namecheap
 - use ALIAS for root domain

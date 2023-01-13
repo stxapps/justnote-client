@@ -57,9 +57,13 @@ export const paywallFeature = {
   feature: null,
 };
 
+export const syncMode = {
+  doSyncMode: false,
+};
+
 const vars = {
   cachedFPaths, cachedServerFPaths, scrollPanel, updateNoteId, changeListName,
   updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, deleteOldNotes, updateSettings,
-  paywallFeature,
+  paywallFeature, syncMode,
 };
 export default vars;

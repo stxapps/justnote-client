@@ -77,11 +77,16 @@ const localSettingsReducer = (state = initialState, action) => {
     );
   }
 
-  if (action.type === DELETE_ALL_DATA || action.type === RESET_STATE) {
+  if (action.type === DELETE_ALL_DATA) {
     const newState = { ...initialState };
     return loop(
       newState, Cmd.run(updateLocalSettings(), { args: [Cmd.dispatch, Cmd.getState] })
     );
+  }
+
+  if (action.type === RESET_STATE) {
+    // Delete in localStorage by dataApi.deleteAllLocalFiles.
+    return { ...initialState }
   }
 
   return state;

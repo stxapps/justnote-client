@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ckeditor from '@ckeditor/ckeditor5-build-decoupled-document';
 
-import fileApi from '../apis/file';
+import fileApi from '../apis/localFile';
 import {
   updateEditorFocused, updateEditorBusy, saveNote, discardNote, onUpdateNoteIdUrlHash,
   onUpdateNoteId, onChangeListName, onUpdateBulkEditUrlHash, onShowNoteListMenuPopup,
@@ -246,17 +246,17 @@ const NoteEditorEditor = (props) => {
     } else if (action === GET_DATA_DISCARD_NOTE) {
       dispatch(discardNote(true, title, body));
     } else if (action === GET_DATA_UPDATE_NOTE_ID_URL_HASH) {
-      dispatch(onUpdateNoteIdUrlHash(title, body));
+      dispatch(onUpdateNoteIdUrlHash(title, body, media));
     } else if (action === GET_DATA_UPDATE_NOTE_ID) {
-      dispatch(onUpdateNoteId(title, body));
+      dispatch(onUpdateNoteId(title, body, media));
     } else if (action === GET_DATA_CHANGE_LIST_NAME) {
-      dispatch(onChangeListName(title, body));
+      dispatch(onChangeListName(title, body, media));
     } else if (action === GET_DATA_UPDATE_BULK_EDIT_URL_HASH) {
-      dispatch(onUpdateBulkEditUrlHash(title, body));
+      dispatch(onUpdateBulkEditUrlHash(title, body, media));
     } else if (action === GET_DATA_SHOW_NOTE_LIST_MENU_POPUP) {
-      dispatch(onShowNoteListMenuPopup(title, body));
+      dispatch(onShowNoteListMenuPopup(title, body, media));
     } else if (action === GET_DATA_SHOW_NLIM_POPUP) {
-      dispatch(onShowNLIMPopup(title, body));
+      dispatch(onShowNLIMPopup(title, body, media));
     } else throw new Error(`Invalid getDataAction: ${getDataAction.current}`);
   }, [dispatch]);
 

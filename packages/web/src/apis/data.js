@@ -1,19 +1,27 @@
-import userSession from '../userSession';
+import serverApi from './server';
+import ldbApi from './localDb';
+import fileApi from './localFile';
 import {
-  INDEX, DOT_JSON, N_NOTES, MAX_TRY, TRASH, N_DAYS, LOCAL_SETTINGS_STATE,
+  UNSAVED_NOTES, INDEX, DOT_JSON, CD_ROOT, N_NOTES, MAX_TRY, TRASH, N_DAYS,
+  COLS_PANEL_STATE, LOCAL_SETTINGS_STATE,
 } from '../types/const';
 import {
   isObject, isString, createNoteFPath, createNoteFName, extractNoteFPath, createPinFPath,
   addFPath, deleteFPath, copyFPaths, getMainId, listNoteIds, sortWithPins,
+  getStaticFPath,
 } from '../utils';
-import { cachedFPaths } from '../vars';
+import { syncMode } from '../vars';
 import { initialLocalSettingsState } from '../types/initialStates';
+
+const getApi = () => {
+  return syncMode.doSyncMode ? ldbApi : serverApi;
+};
 
 const _listFPaths = async () => {
   const fpaths = {
     noteFPaths: [], staticFPaths: [], settingsFPath: null, pinFPaths: [],
   };
-  await userSession.listFiles((fpath) => {
+  await getApi().listFiles((fpath) => {
     addFPath(fpaths, fpath);
     return true;
   });
@@ -21,10 +29,12 @@ const _listFPaths = async () => {
 };
 
 const listFPaths = async (doForce = false) => {
-  if (isObject(cachedFPaths.fpaths) && !doForce) return copyFPaths(cachedFPaths.fpaths);
-  cachedFPaths.fpaths = await _listFPaths();
-  return copyFPaths(cachedFPaths.fpaths);
-};
+  if (isObject(getApi().cachedFPaths.fpaths) && !doForce) {
+    return copyFPaths(getApi().cachedFPaths.fpaths);
+  }
+  getApi().cachedFPaths.fpaths = await _listFPaths();
+  return copyFPaths(getApi().cachedFPaths.fpaths);
+}
 
 const batchGetFileWithRetry = async (
   fpaths, callCount, dangerouslyIgnoreError = false
@@ -32,7 +42,7 @@ const batchGetFileWithRetry = async (
 
   const responses = await Promise.all(
     fpaths.map(fpath =>
-      userSession.getFile(fpath)
+      getApi().getFile(fpath)
         .then(content => ({ content, fpath, success: true }))
         .catch(error => ({ content: null, fpath, success: false, error }))
     )
@@ -120,7 +130,7 @@ const fetch = async (params) => {
 
   let settings;
   if (settingsFPath && doFetchSettings) {
-    settings = await userSession.getFile(settingsFPath);
+    settings = await getApi().getFile(settingsFPath);
 
     sortOn = settings.sortOn;
     doDescendingOrder = settings.doDescendingOrder;
@@ -226,14 +236,48 @@ const fetchMore = async (params) => {
   return { notes, hasMore, hasDisorder };
 };
 
+const fetchStaticFiles = async (notes, conflictedNotes) => {
+  if (syncMode.doSyncMode) return;
+
+  const fpaths = [];
+  for (const note of notes) {
+    if (note.media) {
+      for (const { name } of note.media) {
+        if (name.startsWith(CD_ROOT + '/')) fpaths.push(getStaticFPath(name));
+      }
+    }
+  }
+  if (conflictedNotes) {
+    for (const conflictedNote of conflictedNotes) {
+      for (const note of conflictedNote.notes) {
+        if (note.media) {
+          for (const { name } of note.media) {
+            if (name.startsWith(CD_ROOT + '/')) fpaths.push(getStaticFPath(name));
+          }
+        }
+      }
+    }
+  }
+
+  const files = await fileApi.getFiles(fpaths); // Check if already exists locally
+
+  const remainedFPaths = [];
+  for (let i = 0; i < files.fpaths.length; i++) {
+    const fpath = files.fpaths[i], content = files.contents[i];
+    if (content === undefined) remainedFPaths.push(fpath);
+  }
+
+  await getServerFiles(remainedFPaths);
+};
+
 const batchPutFileWithRetry = async (fpaths, contents, callCount) => {
 
   const responses = await Promise.all(
     fpaths.map((fpath, i) =>
-      userSession.putFile(fpath, contents[i])
+      getApi().putFile(fpath, contents[i])
         .then(publicUrl => {
-          addFPath(cachedFPaths.fpaths, fpath);
-          cachedFPaths.fpaths = copyFPaths(cachedFPaths.fpaths);
+          addFPath(getApi().cachedFPaths.fpaths, fpath);
+          getApi().cachedFPaths.fpaths = copyFPaths(getApi().cachedFPaths.fpaths);
           return { publicUrl, fpath, success: true };
         })
         .catch(error => ({ error, fpath, content: contents[i], success: false }))
@@ -279,10 +323,10 @@ export const batchDeleteFileWithRetry = async (fpaths, callCount) => {
 
   const responses = await Promise.all(
     fpaths.map((fpath) =>
-      userSession.deleteFile(fpath)
+      getApi().deleteFile(fpath)
         .then(() => {
-          deleteFPath(cachedFPaths.fpaths, fpath);
-          cachedFPaths.fpaths = copyFPaths(cachedFPaths.fpaths);
+          deleteFPath(getApi().cachedFPaths.fpaths, fpath);
+          getApi().cachedFPaths.fpaths = copyFPaths(getApi().cachedFPaths.fpaths);
           return { fpath, success: true };
         })
         .catch(error => {
@@ -373,6 +417,30 @@ const canDeleteListNames = async (listNames) => {
   return canDeletes;
 };
 
+const putPins = async (params) => {
+  const { pins } = params;
+
+  const fpaths = [], contents = [];
+  for (const pin of pins) {
+    fpaths.push(createPinFPath(pin.rank, pin.updatedDT, pin.addedDT, pin.id));
+    contents.push({});
+  }
+
+  await batchPutFileWithRetry(fpaths, contents, 0);
+  return { pins };
+};
+
+const deletePins = async (params) => {
+
+  const { pins } = params;
+  const pinFPaths = pins.map(pin => {
+    return createPinFPath(pin.rank, pin.updatedDT, pin.addedDT, pin.id);
+  });
+  await batchDeleteFileWithRetry(pinFPaths, 0);
+
+  return { pins };
+};
+
 const getFiles = async (_fpaths, dangerouslyIgnoreError = false) => {
 
   const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
@@ -403,32 +471,8 @@ const deleteFiles = async (fpaths) => {
   }
 };
 
-const putPins = async (params) => {
-  const { pins } = params;
-
-  const fpaths = [], contents = [];
-  for (const pin of pins) {
-    fpaths.push(createPinFPath(pin.rank, pin.updatedDT, pin.addedDT, pin.id));
-    contents.push({});
-  }
-
-  await batchPutFileWithRetry(fpaths, contents, 0);
-  return { pins };
-};
-
-const deletePins = async (params) => {
-
-  const { pins } = params;
-  const pinFPaths = pins.map(pin => {
-    return createPinFPath(pin.rank, pin.updatedDT, pin.addedDT, pin.id);
-  });
-  await batchDeleteFileWithRetry(pinFPaths, 0);
-
-  return { pins };
-};
-
 const getLocalSettings = async () => {
-  let localSettings = { ...initialLocalSettingsState };
+  const localSettings = { ...initialLocalSettingsState };
   try {
     const item = localStorage.getItem(LOCAL_SETTINGS_STATE);
     if (item) {
@@ -448,11 +492,80 @@ const putLocalSettings = async (localSettings) => {
   localStorage.setItem(LOCAL_SETTINGS_STATE, JSON.stringify(localSettings));
 };
 
+const getUnsavedNotes = async () => {
+  const keys = await fileApi.listKeys();
+  const usnKeys = keys.filter(key => key.includes(UNSAVED_NOTES + '/'));
+
+  const _fpaths = usnKeys.map(key => key.slice(key.indexOf(UNSAVED_NOTES + '/')));
+  const { fpaths, contents } = await fileApi.getFiles(_fpaths);
+
+  const unsavedNotes = {};
+  for (let i = 0; i < fpaths.length; i++) {
+    const fpath = fpaths[i], content = contents[i];
+    const id = fpath.slice((UNSAVED_NOTES + '/').length);
+    const note = { title: '', body: '', media: [] };
+    try {
+      const _note = JSON.parse(content);
+      for (const k in note) {
+        if (k in _note) note[k] = _note[k];
+      }
+      unsavedNotes[id] = note;
+    } catch (error) {
+      console.log('Parse unsaved note error: ', error);
+    }
+  }
+
+  return unsavedNotes;
+};
+
+const putUnsavedNote = async (id, title, body, media) => {
+  const fpath = `${UNSAVED_NOTES}/${id}`;
+  const content = JSON.stringify({ title, body, media });
+  await fileApi.putFile(fpath, content);
+};
+
+const deleteUnsavedNotes = async (ids) => {
+  const fpaths = ids.map(id => `${UNSAVED_NOTES}/${id}`);
+  await fileApi.deleteFiles(fpaths);
+};
+
+const deleteAllUnsavedNotes = async () => {
+  const keys = await fileApi.listKeys();
+  const usnKeys = keys.filter(key => key.includes(UNSAVED_NOTES + '/'));
+
+  const fpaths = usnKeys.map(key => key.slice(key.indexOf(UNSAVED_NOTES + '/')));
+  await fileApi.deleteFiles(fpaths);
+};
+
+const getServerFiles = async (_fpaths) => {
+  if (syncMode.doSyncMode) return;
+  const { fpaths, contents } = await getFiles(_fpaths, true);
+  await fileApi.putFiles(fpaths, contents);
+};
+
+const putServerFiles = async (fpaths) => {
+  if (syncMode.doSyncMode) return;
+  const files = await fileApi.getFiles(fpaths);
+  await putFiles(files.fpaths, files.contents);
+};
+
+const deleteServerFiles = async (fpaths) => {
+  if (syncMode.doSyncMode) return;
+  await deleteFiles(fpaths);
+};
+
+const deleteAllLocalFiles = async () => {
+  localStorage.removeItem(COLS_PANEL_STATE);
+  localStorage.removeItem(LOCAL_SETTINGS_STATE);
+  await fileApi.deleteAllFiles();
+};
+
 const data = {
-  listFPaths, batchGetFileWithRetry, toNotes, fetch, fetchMore,
-  batchPutFileWithRetry, putNotes, getOldNotesInTrash, canDeleteListNames, getFiles,
-  putFiles, deleteFiles, putPins, deletePins,
-  getLocalSettings, putLocalSettings,
+  listFPaths, batchGetFileWithRetry, toNotes, fetch, fetchMore, fetchStaticFiles,
+  batchPutFileWithRetry, putNotes, getOldNotesInTrash, canDeleteListNames, putPins,
+  deletePins, getFiles, putFiles, deleteFiles, getLocalSettings, putLocalSettings,
+  getUnsavedNotes, putUnsavedNote, deleteUnsavedNotes, deleteAllUnsavedNotes,
+  getServerFiles, putServerFiles, deleteServerFiles, deleteAllLocalFiles,
 };
 
 export default data;

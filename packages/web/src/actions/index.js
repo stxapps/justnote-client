@@ -5,7 +5,7 @@ import { LexoRank } from '@wewatch/lexorank';
 import userSession from '../userSession';
 import axios from '../axiosWrapper';
 import dataApi from '../apis/data';
-import fileApi from '../apis/file';
+import fileApi from '../apis/localFile';
 import {
   INIT, UPDATE_HREF, UPDATE_WINDOW_SIZE, UPDATE_VISUAL_SIZE, UPDATE_USER,
   UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP,
@@ -34,8 +34,8 @@ import {
   INCREASE_SHOW_NOTE_LIST_MENU_POPUP_COUNT, INCREASE_SHOW_NLIM_POPUP_COUNT,
   CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS,
   UPDATE_EDITOR_IS_UPLOADING, UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_EDITING_NOTE,
-  UPDATE_EDITOR_UNMOUNT, UPDATE_DID_DISCARD_EDITING, UPDATE_STACKS_ACCESS,
-  REQUEST_PURCHASE, RESTORE_PURCHASES, RESTORE_PURCHASES_COMMIT,
+  DELETE_EDITING_NOTES, UPDATE_EDITOR_UNMOUNT, UPDATE_DID_DISCARD_EDITING,
+  UPDATE_STACKS_ACCESS, REQUEST_PURCHASE, RESTORE_PURCHASES, RESTORE_PURCHASES_COMMIT,
   RESTORE_PURCHASES_ROLLBACK, REFRESH_PURCHASES, REFRESH_PURCHASES_COMMIT,
   REFRESH_PURCHASES_ROLLBACK, UPDATE_IAP_PUBLIC_KEY, UPDATE_IAP_PRODUCT_STATUS,
   UPDATE_IAP_PURCHASE_STATUS, UPDATE_IAP_RESTORE_STATUS, UPDATE_IAP_REFRESH_STATUS,
@@ -53,9 +53,6 @@ import {
   CONFIRM_DISCARD_POPUP, NOTE_LIST_MENU_POPUP, NOTE_LIST_ITEM_MENU_POPUP,
   MOVE_ACTION_NOTE_COMMANDS, MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS,
   DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
-  DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
-  DISCARD_ACTION_CHANGE_LIST_NAME, DISCARD_ACTION_UPDATE_BULK_EDIT_URL_HASH,
-  DISCARD_ACTION_SHOW_NOTE_LIST_MENU_POPUP, DISCARD_ACTION_SHOW_NLIM_POPUP,
   MY_NOTES, TRASH, ARCHIVE, ID, NEW_NOTE, NEW_NOTE_OBJ, ADDED_DT, UPDATED_DT,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES,
   N_DAYS, CD_ROOT, NOTES, IMAGES, SETTINGS, INDEX, DOT_JSON, PINS, LG_WIDTH,
@@ -105,6 +102,9 @@ export const init = () => async (dispatch, getState) => {
   const is24HFormat = null;
   const localSettings = await dataApi.getLocalSettings();
 
+  // If bad performance, fetch unsaved notes with other fetches.
+  const unsavedNotes = await dataApi.getUnsavedNotes();
+
   dispatch({
     type: INIT,
     payload: {
@@ -120,6 +120,7 @@ export const init = () => async (dispatch, getState) => {
       systemThemeMode: darkMatches ? BLK_MODE : WHT_MODE,
       is24HFormat,
       localSettings,
+      unsavedNotes,
     },
   });
 
@@ -271,7 +272,7 @@ export const signOut = () => async (dispatch, getState) => {
   userSession.signUserOut();
 
   // clear file storage
-  await fileApi.deleteAllFiles();
+  await dataApi.deleteAllLocalFiles();
 
   // clear cached fpaths
   vars.cachedFPaths.fpaths = null;
@@ -521,20 +522,26 @@ export const updateNoteIdUrlHash = (
         dispatch(increaseUpdateNoteIdUrlHashCount());
         return;
       }
+
+      dispatch(deleteEditingNotes([getState().display.noteId]));
     }
 
     _updateNoteIdUrlHash(id);
   };
 };
 
-export const onUpdateNoteIdUrlHash = (title, body) => async (dispatch, getState) => {
+export const onUpdateNoteIdUrlHash = (title, body, media) => async (
+  dispatch, getState
+) => {
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
-  if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
-    dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH));
-    updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
-    return;
+  if (note) {
+    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+      dispatch(updateEditingNote(title, body, media));
+    } else {
+      dispatch(deleteEditingNotes([noteId]));
+    }
   }
 
   dispatch(updateNoteIdUrlHash(null, true, false));
@@ -608,6 +615,8 @@ export const updateBulkEditUrlHash = (
         dispatch(increaseUpdateBulkEditUrlHashCount());
         return;
       }
+
+      dispatch(deleteEditingNotes([getState().display.noteId]));
     }
 
     _updateBulkEditUrlHash(isBulkEditing);
@@ -617,14 +626,18 @@ export const updateBulkEditUrlHash = (
   };
 };
 
-export const onUpdateBulkEditUrlHash = (title, body) => async (dispatch, getState) => {
+export const onUpdateBulkEditUrlHash = (title, body, media) => async (
+  dispatch, getState
+) => {
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
-  if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
-    dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_BULK_EDIT_URL_HASH));
-    updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
-    return;
+  if (note) {
+    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+      dispatch(updateEditingNote(title, body, media));
+    } else {
+      dispatch(deleteEditingNotes([noteId]));
+    }
   }
 
   dispatch(updateBulkEditUrlHash(true, null, true, false));
@@ -651,26 +664,26 @@ export const changeListName = (listName, doCheckEditing) => async (
       dispatch(increaseChangeListNameCount());
       return;
     }
+
+    dispatch(deleteEditingNotes([getState().display.noteId]));
   }
 
-  dispatch({
-    type: UPDATE_LIST_NAME,
-    payload: listName,
-  });
-
+  dispatch({ type: UPDATE_LIST_NAME, payload: listName });
   await updateFetchedMore(null, _listName)(dispatch, getState);
 };
 
-export const onChangeListName = (title, body) => async (
+export const onChangeListName = (title, body, media) => async (
   dispatch, getState
 ) => {
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
-  if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
-    dispatch(updateDiscardAction(DISCARD_ACTION_CHANGE_LIST_NAME));
-    updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
-    return;
+  if (note) {
+    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+      dispatch(updateEditingNote(title, body, media));
+    } else {
+      dispatch(deleteEditingNotes([noteId]));
+    }
   }
 
   dispatch(changeListName(null, false));
@@ -702,22 +715,26 @@ export const updateNoteId = (id, doGetIdFromState = false, doCheckEditing = fals
         dispatch(increaseUpdateNoteIdCount());
         return;
       }
+
+      dispatch(deleteEditingNotes([getState().display.noteId]));
     }
 
     dispatch(_updateNoteId(id));
   };
 };
 
-export const onUpdateNoteId = (title, body) => async (
+export const onUpdateNoteId = (title, body, media) => async (
   dispatch, getState
 ) => {
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
-  if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
-    dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_NOTE_ID));
-    updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
-    return;
+  if (note) {
+    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+      dispatch(updateEditingNote(title, body, media));
+    } else {
+      dispatch(deleteEditingNotes([noteId]));
+    }
   }
 
   dispatch(updateNoteId(null, true, false));
@@ -765,34 +782,9 @@ export const updateSelectingNoteId = (id) => {
   };
 };
 
-const fetchStaticFiles = async (notes, conflictedNotes) => {
-  const _fpaths = [];
-  for (const note of notes) {
-    if (note.media) {
-      for (const { name } of note.media) {
-        if (name.startsWith(CD_ROOT + '/')) _fpaths.push(getStaticFPath(name));
-      }
-    }
-  }
-  if (conflictedNotes) {
-    for (const conflictedNote of conflictedNotes) {
-      for (const note of conflictedNote.notes) {
-        if (note.media) {
-          for (const { name } of note.media) {
-            if (name.startsWith(CD_ROOT + '/')) _fpaths.push(getStaticFPath(name));
-          }
-        }
-      }
-    }
-  }
-
-  const { fpaths, contents } = await dataApi.getFiles(_fpaths, true);
-  await fileApi.putFiles(fpaths, contents);
-};
-
-export const fetch = (
-  doDeleteOldNotesInTrash, doFetchSettings = false
-) => async (dispatch, getState) => {
+export const fetch = (doDeleteOldNotesInTrash, doFetchSettings = false) => async (
+  dispatch, getState
+) => {
 
   const listName = getState().display.listName;
   const sortOn = getState().settings.sortOn;
@@ -807,8 +799,7 @@ export const fetch = (
       pendingPins,
     };
     const fetched = await dataApi.fetch(params);
-
-    await fetchStaticFiles(fetched.notes, fetched.conflictedNotes);
+    await dataApi.fetchStaticFiles(fetched.notes, fetched.conflictedNotes);
 
     dispatch({ type: FETCH_COMMIT, payload: { ...params, ...fetched } });
   } catch (error) {
@@ -839,7 +830,8 @@ export const fetchMore = () => async (dispatch, getState) => {
 
   try {
     const fetched = await dataApi.fetchMore(payload);
-    await fetchStaticFiles(fetched.notes, null);
+    await dataApi.fetchStaticFiles(fetched.notes, null);
+
     dispatch({ type: FETCH_MORE_COMMIT, payload: { ...payload, ...fetched } });
   } catch (error) {
     console.log('fetchMore error: ', error);
@@ -940,8 +932,7 @@ export const addNote = (title, body, media, listName = null) => async (
   dispatch({ type: ADD_NOTE, payload });
 
   try {
-    const usedFiles = await fileApi.getFiles(usedFPaths);
-    await dataApi.putFiles(usedFiles.fpaths, usedFiles.contents);
+    await dataApi.putServerFiles(usedFPaths);
     await dataApi.putNotes({ listName, notes: [note] });
   } catch (error) {
     console.log('addNote error: ', error);
@@ -983,8 +974,7 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
   dispatch({ type: UPDATE_NOTE, payload });
 
   try {
-    const usedFiles = await fileApi.getFiles(usedFPaths);
-    await dataApi.putFiles(usedFiles.fpaths, usedFiles.contents);
+    await dataApi.putServerFiles(usedFPaths);
     await dataApi.putNotes({ listName, notes: [toNote] });
   } catch (error) {
     console.log('updateNote error: ', error);
@@ -996,7 +986,7 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
 
   try {
     dataApi.putNotes({ listName, notes: [fromNote] });
-    dataApi.deleteFiles(serverUnusedFPaths);
+    dataApi.deleteServerFiles(serverUnusedFPaths);
     fileApi.deleteFiles(localUnusedFPaths);
   } catch (error) {
     console.log('updateNote clean up error: ', error);
@@ -1016,6 +1006,7 @@ export const saveNote = (title, body, media) => async (dispatch, getState) => {
 
   if (note && (note.title === title && isNoteBodyEqual(note.body, body))) {
     dispatch(updateEditorBusy(false));
+    dispatch(deleteEditingNotes([noteId]));
     return;
   }
 
@@ -1023,9 +1014,9 @@ export const saveNote = (title, body, media) => async (dispatch, getState) => {
   else dispatch(updateNote(title, body, media, noteId));
 };
 
-export const discardNote = (
-  doCheckEditing, title = null, body = null
-) => async (dispatch, getState) => {
+export const discardNote = (doCheckEditing, title = null, body = null) => async (
+  dispatch, getState
+) => {
 
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
@@ -1038,8 +1029,13 @@ export const discardNote = (
     }
   }
 
-  dispatch(updateEditorFocused(false));
-  dispatch(increaseSetInitDataCount());
+  if (noteId === NEW_NOTE) {
+    dispatch(_updateNoteId(null));
+  } else {
+    dispatch(updateEditorFocused(false));
+    dispatch(increaseSetInitDataCount());
+  }
+  dispatch(deleteEditingNotes([noteId]))
 };
 
 const _moveNotes = (toListName, ids, fromListName = null) => async (
@@ -1167,7 +1163,7 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
 
   try {
     dataApi.putNotes({ listName, notes: fromNotes });
-    dataApi.deleteFiles(unusedFPaths);
+    dataApi.deleteServerFiles(unusedFPaths);
     fileApi.deleteFiles(unusedFPaths);
   } catch (error) {
     console.log('deleteNotes clean up error: ', error);
@@ -1229,8 +1225,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       dispatch({ type: ADD_NOTE, payload });
 
       try {
-        const usedFiles = await fileApi.getFiles(usedFPaths);
-        await dataApi.putFiles(usedFiles.fpaths, usedFiles.contents);
+        await dataApi.putServerFiles(usedFPaths);
         await dataApi.putNotes({ listName, notes: [note] });
       } catch (error) {
         console.log('retryDiedNotes add error: ', error);
@@ -1251,8 +1246,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       dispatch({ type: UPDATE_NOTE, payload });
 
       try {
-        const usedFiles = await fileApi.getFiles(usedFPaths);
-        await dataApi.putFiles(usedFiles.fpaths, usedFiles.contents);
+        await dataApi.putServerFiles(usedFPaths);
         await dataApi.putNotes({ listName, notes: [toNote] });
       } catch (error) {
         console.log('retryDiedNotes update error: ', error);
@@ -1264,7 +1258,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       try {
         dataApi.putNotes({ listName, notes: [fromNote] });
-        dataApi.deleteFiles(serverUnusedFPaths);
+        dataApi.deleteServerFiles(serverUnusedFPaths);
         fileApi.deleteFiles(localUnusedFPaths);
       } catch (error) {
         console.log('retryDiedNotes update clean up error: ', error);
@@ -1331,7 +1325,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       try {
         dataApi.putNotes({ listName, notes: [fromNote] });
-        dataApi.deleteFiles(unusedFPaths);
+        dataApi.deleteServerFiles(unusedFPaths);
         fileApi.deleteFiles(unusedFPaths);
       } catch (error) {
         console.log('retryDiedNotes delete clean up error: ', error);
@@ -1427,7 +1421,7 @@ export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
 
   try {
     dataApi.putNotes({ listName, notes: fromNotes });
-    dataApi.deleteFiles(unusedFPaths);
+    dataApi.deleteServerFiles(unusedFPaths);
     fileApi.deleteFiles(unusedFPaths);
   } catch (error) {
     console.log('deleteOldNotesInTrash clean up error: ', error);
@@ -1472,8 +1466,7 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
   dispatch({ type: MERGE_NOTES, payload });
 
   try {
-    const usedFiles = await fileApi.getFiles(usedFPaths);
-    await dataApi.putFiles(usedFiles.fpaths, usedFiles.contents);
+    await dataApi.putServerFiles(usedFPaths);
     await dataApi.putNotes({ listName: toListName, notes: [toNote] });
   } catch (error) {
     console.log('mergeNote error: ', error);
@@ -1498,7 +1491,7 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
     for (const [_listName, _notes] of Object.entries(fromNotes)) {
       dataApi.putNotes({ listName: _listName, notes: _notes });
     }
-    dataApi.deleteFiles(serverUnusedFPaths);
+    dataApi.deleteServerFiles(serverUnusedFPaths);
     fileApi.deleteFiles(localUnusedFPaths);
   } catch (error) {
     console.log('mergeNote clean up error: ', error);
@@ -1526,6 +1519,8 @@ export const showNoteListMenuPopup = (rect, doCheckEditing, doReinitEditor) => a
       dispatch(increaseShowNoteListMenuPopupCount());
       return;
     }
+
+    dispatch(deleteEditingNotes([getState().display.noteId]));
   }
 
   if (doReinitEditor) {
@@ -1540,16 +1535,18 @@ export const showNoteListMenuPopup = (rect, doCheckEditing, doReinitEditor) => a
   updatePopupUrlHash(NOTE_LIST_MENU_POPUP, true, rect);
 };
 
-export const onShowNoteListMenuPopup = (title, body) => async (
+export const onShowNoteListMenuPopup = (title, body, media) => async (
   dispatch, getState
 ) => {
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
-  if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
-    dispatch(updateDiscardAction(DISCARD_ACTION_SHOW_NOTE_LIST_MENU_POPUP));
-    updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
-    return;
+  if (note) {
+    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+      dispatch(updateEditingNote(title, body, media));
+    } else {
+      dispatch(deleteEditingNotes([noteId]));
+    }
   }
 
   dispatch(showNoteListMenuPopup(null, false, true));
@@ -1577,6 +1574,8 @@ export const showNLIMPopup = (noteId, rect, doCheckEditing, doReinitEditor) => a
       dispatch(increaseShowNLIMPopupCount());
       return;
     }
+
+    dispatch(deleteEditingNotes([getState().display.noteId]));
   }
 
   if (doReinitEditor) {
@@ -1588,19 +1587,31 @@ export const showNLIMPopup = (noteId, rect, doCheckEditing, doReinitEditor) => a
   updatePopupUrlHash(NOTE_LIST_ITEM_MENU_POPUP, true, rect);
 };
 
-export const onShowNLIMPopup = (title, body) => async (
+export const onShowNLIMPopup = (title, body, media) => async (
   dispatch, getState
 ) => {
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
-  if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
-    dispatch(updateDiscardAction(DISCARD_ACTION_SHOW_NLIM_POPUP));
-    updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
-    return;
+  if (note) {
+    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+      dispatch(updateEditingNote(title, body, media));
+    } else {
+      dispatch(deleteEditingNotes([noteId]));
+    }
   }
 
   dispatch(showNLIMPopup(null, null, false, true));
+};
+
+export const cleanUpStaticFiles = () => async (dispatch, getState) => {
+  // check with cached fpaths.
+
+  // need to check in unsaved notes too.
+
+  // this is for images
+
+  // What about clean up unsaved notes?
 };
 
 export const updateSettingsPopup = (isShown) => async (dispatch, getState) => {
@@ -2001,6 +2012,10 @@ export const updateEditingNote = (title, body, media) => async (dispatch, getSta
     type: UPDATE_EDITING_NOTE,
     payload: { id, title, body, media },
   });
+};
+
+export const deleteEditingNotes = (ids) => {
+  return { type: DELETE_EDITING_NOTES, payload: ids };
 };
 
 export const updateEditorUnmount = (didUnmount) => {
@@ -2901,7 +2916,7 @@ export const deleteAllData = () => async (dispatch, getState) => {
       await deleteAllNotes(dispatch, allNoteIds, total, 0);
     }
     if (staticFPaths.length > 0) {
-      await dataApi.deleteFiles(staticFPaths);
+      await dataApi.deleteServerFiles(staticFPaths);
       dispatch(updateDeleteAllDataProgress({
         total, done: allNoteIds.length + staticFPaths.length,
       }));
@@ -3422,4 +3437,18 @@ export const viewNoteAsWebpage = () => async (dispatch, getState) => {
 
   w.document.write(html);
   w.document.close();
+};
+
+export const putUnsavedNote = (id, title, body, media) => async (
+  dispatch, getState,
+) => {
+  await dataApi.putUnsavedNote(id, title, body, media);
+};
+
+export const deleteUnsavedNotes = (ids) => async (dispatch, getState) => {
+  await dataApi.deleteUnsavedNotes(ids);
+};
+
+export const deleteAllUnsavedNotes = () => async (dispatch, getState) => {
+  await dataApi.deleteAllUnsavedNotes();
 };

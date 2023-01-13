@@ -6,6 +6,7 @@ import hasMoreNotesReducer from './hasMoreNotesReducer';
 import isFetchMoreInterrupted from './isFetchMoreInterrupted';
 import fetchedMoreReducer from './fetchedMoreReducer';
 import conflictedNotesReducer from './conflictedNotesReducer';
+import unsavedNotesReducer from './unsavedNotesReducer';
 import displayReducer from './displayReducer';
 import userReducer from './userReducer';
 import settingsReducer from './settingsReducer';
@@ -26,6 +27,7 @@ const reducers = combineReducers({
   isFetchMoreInterrupted: isFetchMoreInterrupted,
   fetchedMore: fetchedMoreReducer,
   conflictedNotes: conflictedNotesReducer,
+  unsavedNotes: unsavedNotesReducer,
   display: displayReducer,
   user: userReducer,
   settings: settingsReducer,
