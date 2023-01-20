@@ -96,11 +96,14 @@ export const NOTES = 'notes';
 export const IMAGES = 'images';
 export const SETTINGS = 'settings';
 export const PINS = 'pins';
-export const UNSAVED_NOTES = 'unsaved-notes';
 export const INDEX = 'index';
 export const DOT_JSON = '.json';
 export const BASE64 = 'base64';
 export const UTF8 = 'utf8';
+
+export const UNSAVED_NOTES = 'unsaved-notes';
+export const UNSAVED_NOTES_UNSAVED = `${UNSAVED_NOTES}/unsaved`;
+export const UNSAVED_NOTES_SAVED = `${UNSAVED_NOTES}/saved`;
 
 export const N_NOTES = 10;
 export const MAX_TRY = 3;

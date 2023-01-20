@@ -1,9 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { updateNoteIdUrlHash, fetch } from '../actions';
-import { TRASH, NEW_NOTE, MAX_SELECTED_NOTE_IDS } from '../types/const';
+import {
+  TRASH, NEW_NOTE, NEW_NOTE_OBJ, MAX_SELECTED_NOTE_IDS, VALID,
+} from '../types/const';
+import { makeGetUnsavedNote } from '../selectors';
 import { popupFMV } from '../types/animConfigs';
 
 import { useTailwind } from '.';
@@ -14,14 +17,16 @@ import LoadingNoteListItems from './LoadingNoteListItems';
 const NoteList = (props) => {
 
   const { onSidebarOpenBtnClick } = props;
+  const getUnsavedNote = useMemo(makeGetUnsavedNote, []);
   const listName = useSelector(state => state.display.listName);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const isMaxErrorShown = useSelector(state => state.display.isSelectedNoteIdsMaxErrorShown);
-  const didFetch = useSelector(state => state.display.didFetch);
-  const didFetchSettings = useSelector(state => state.display.didFetchSettings);
   const fetchedListNames = useSelector(state => state.display.fetchedListNames);
+  const unsavedNote = useSelector(state => getUnsavedNote(state, NEW_NOTE_OBJ));
   const dispatch = useDispatch();
   const tailwind = useTailwind();
+
+  const isUnsavedValid = unsavedNote.status === VALID;
 
   const onAddBtnClick = () => {
     dispatch(updateNoteIdUrlHash(NEW_NOTE, false, true));
@@ -51,10 +56,8 @@ const NoteList = (props) => {
   };
 
   useEffect(() => {
-    if (!fetchedListNames.includes(listName)) {
-      dispatch(fetch(didFetch ? false : null, !didFetchSettings));
-    }
-  }, [listName, didFetch, didFetchSettings, fetchedListNames, dispatch]);
+    if (!fetchedListNames.includes(listName)) dispatch(fetch());
+  }, [listName, fetchedListNames, dispatch]);
 
   const noteListItems = fetchedListNames.includes(listName) ? <NoteListItems /> : <LoadingNoteListItems />;
 
@@ -66,8 +69,8 @@ const NoteList = (props) => {
       {noteListItems}
       {/* Add button */}
       {!isBulkEditing && (listName !== TRASH) && <button onClick={onAddBtnClick} className={tailwind('absolute right-4 bottom-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-600 text-white shadow-md hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 lg:hidden')}>
-        <svg className={tailwind('h-10 w-10')} viewBox="0 0 40 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-          <path fillRule="evenodd" clipRule="evenodd" d="M20 10C20.5304 10 21.0391 10.2107 21.4142 10.5858C21.7893 10.9609 22 11.4696 22 12V18H28C28.5304 18 29.0391 18.2107 29.4142 18.5858C29.7893 18.9609 30 19.4696 30 20C30 20.5304 29.7893 21.0391 29.4142 21.4142C29.0391 21.7893 28.5304 22 28 22H22V28C22 28.5304 21.7893 29.0391 21.4142 29.4142C21.0391 29.7893 20.5304 30 20 30C19.4696 30 18.9609 29.7893 18.5858 29.4142C18.2107 29.0391 18 28.5304 18 28V22H12C11.4696 22 10.9609 21.7893 10.5858 21.4142C10.2107 21.0391 10 20.5304 10 20C10 19.4696 10.2107 18.9609 10.5858 18.5858C10.9609 18.2107 11.4696 18 12 18H18V12C18 11.4696 18.2107 10.9609 18.5858 10.5858C18.9609 10.2107 19.4696 10 20 10Z" />
+        <svg className={tailwind('h-10 w-10')} viewBox={isUnsavedValid ? '0 0 20 20' : '0 0 40 40'} fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          {isUnsavedValid ? <path d="M13.586 3.58601C13.7705 3.39499 13.9912 3.24262 14.2352 3.13781C14.4792 3.03299 14.7416 2.97782 15.0072 2.97551C15.2728 2.9732 15.5361 3.0238 15.7819 3.12437C16.0277 3.22493 16.251 3.37343 16.4388 3.56122C16.6266 3.74901 16.7751 3.97231 16.8756 4.2181C16.9762 4.46389 17.0268 4.72725 17.0245 4.99281C17.0222 5.25837 16.967 5.52081 16.8622 5.76482C16.7574 6.00883 16.605 6.22952 16.414 6.41401L15.621 7.20701L12.793 4.37901L13.586 3.58601ZM11.379 5.79301L3 14.172V17H5.828L14.208 8.62101L11.378 5.79301H11.379Z" /> : <path fillRule="evenodd" clipRule="evenodd" d="M20 10C20.5304 10 21.0391 10.2107 21.4142 10.5858C21.7893 10.9609 22 11.4696 22 12V18H28C28.5304 18 29.0391 18.2107 29.4142 18.5858C29.7893 18.9609 30 19.4696 30 20C30 20.5304 29.7893 21.0391 29.4142 21.4142C29.0391 21.7893 28.5304 22 28 22H22V28C22 28.5304 21.7893 29.0391 21.4142 29.4142C21.0391 29.7893 20.5304 30 20 30C19.4696 30 18.9609 29.7893 18.5858 29.4142C18.2107 29.0391 18 28.5304 18 28V22H12C11.4696 22 10.9609 21.7893 10.5858 21.4142C10.2107 21.0391 10 20.5304 10 20C10 19.4696 10.2107 18.9609 10.5858 18.5858C10.9609 18.2107 11.4696 18 12 18H18V12C18 11.4696 18.2107 10.9609 18.5858 10.5858C18.9609 10.2107 19.4696 10 20 10Z" />}
         </svg>
       </button>}
       {renderMaxError()}

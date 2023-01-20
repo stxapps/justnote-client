@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   updatePopupUrlHash, discardNote, updateNoteIdUrlHash, updateNoteId, changeListName,
   updateBulkEditUrlHash, showNoteListMenuPopup, showNLIMPopup, clearSavingFPaths,
-  updateDidDiscardEditing,
 } from '../actions';
 import {
   CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT,
@@ -37,7 +36,9 @@ const ConfirmDiscardPopup = () => {
     if (didClick.current) return;
 
     if (discardAction === DISCARD_ACTION_CANCEL_EDIT) {
-      dispatch(discardNote(false));
+      // As this and closing confirmDiscard popup both change url hash,
+      //   need to be in different js clock cycle.
+      setTimeout(() => dispatch(discardNote(false)), 100);
     } else if (discardAction === DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH) {
       // As this and closing confirmDiscard popup both call window.history.back(),
       //   need to be in different js clock cycle.
@@ -61,7 +62,6 @@ const ConfirmDiscardPopup = () => {
     } else throw new Error(`Invalid discard action: ${discardAction}`);
 
     dispatch(clearSavingFPaths());
-    dispatch(updateDidDiscardEditing(true));
 
     onConfirmDiscardCancelBtnClick();
     didClick.current = true;

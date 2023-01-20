@@ -1,8 +1,10 @@
 import { loop, Cmd } from 'redux-loop';
 
-import { putUnsavedNote, deleteUnsavedNotes, deleteAllUnsavedNotes } from '../actions';
 import {
-  INIT, UPDATE_EDITING_NOTE, DELETE_EDITING_NOTES, ADD_NOTE_COMMIT, UPDATE_NOTE_COMMIT,
+  putDbUnsavedNote, deleteDbUnsavedNotes, deleteAllDbUnsavedNotes,
+} from '../actions';
+import {
+  INIT, UPDATE_UNSAVED_NOTE, DELETE_UNSAVED_NOTES, ADD_NOTE_COMMIT, UPDATE_NOTE_COMMIT,
   CANCEL_DIED_NOTES, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import { NEW_NOTE } from '../types/const';
@@ -16,20 +18,28 @@ const unsavedNotesReducer = (state = initialState, action) => {
     return { ...state, ...unsavedNotes };
   }
 
-  if (action.type === UPDATE_EDITING_NOTE) {
-    const { id, title, body, media } = action.payload;
+  if (action.type === UPDATE_UNSAVED_NOTE) {
+    let {
+      id, title, body, media, savedTitle, savedBody, savedMedia, hasContent, didUpdate,
+    } = action.payload;
 
     const newState = { ...state };
-    newState[id] = { title, body, media };
-    return loop(
-      newState,
-      Cmd.run(
-        putUnsavedNote(id, title, body, media), { args: [Cmd.dispatch, Cmd.getState] },
-      ),
-    );
+    newState[id] = { id, title, body, media, savedTitle, savedBody, savedMedia };
+
+    if (hasContent) {
+      if (didUpdate) [savedTitle, savedBody, savedMedia] = [null, null, null];
+      return loop(
+        newState,
+        Cmd.run(
+          putDbUnsavedNote(id, title, body, media, savedTitle, savedBody, savedMedia),
+          { args: [Cmd.dispatch, Cmd.getState] },
+        ),
+      );
+    }
+    return newState;
   }
 
-  if (action.type === DELETE_EDITING_NOTES) {
+  if (action.type === DELETE_UNSAVED_NOTES) {
     const ids = action.payload;
 
     const newState = {};
@@ -40,7 +50,7 @@ const unsavedNotesReducer = (state = initialState, action) => {
 
     return loop(
       newState,
-      Cmd.run(deleteUnsavedNotes(ids), { args: [Cmd.dispatch, Cmd.getState] }),
+      Cmd.run(deleteDbUnsavedNotes(ids), { args: [Cmd.dispatch, Cmd.getState] }),
     );
   }
 
@@ -53,7 +63,7 @@ const unsavedNotesReducer = (state = initialState, action) => {
 
     return loop(
       newState,
-      Cmd.run(deleteUnsavedNotes([NEW_NOTE]), { args: [Cmd.dispatch, Cmd.getState] }),
+      Cmd.run(deleteDbUnsavedNotes([NEW_NOTE]), { args: [Cmd.dispatch, Cmd.getState] }),
     );
   }
 
@@ -68,7 +78,9 @@ const unsavedNotesReducer = (state = initialState, action) => {
 
     return loop(
       newState,
-      Cmd.run(deleteUnsavedNotes([fromNote.id]), { args: [Cmd.dispatch, Cmd.getState] }),
+      Cmd.run(
+        deleteDbUnsavedNotes([fromNote.id]), { args: [Cmd.dispatch, Cmd.getState] },
+      ),
     );
   }
 
@@ -83,14 +95,15 @@ const unsavedNotesReducer = (state = initialState, action) => {
 
     return loop(
       newState,
-      Cmd.run(deleteUnsavedNotes(ids), { args: [Cmd.dispatch, Cmd.getState] }),
+      Cmd.run(deleteDbUnsavedNotes(ids), { args: [Cmd.dispatch, Cmd.getState] }),
     );
   }
 
   if (action.type === DELETE_ALL_DATA) {
     const newState = { ...initialState };
     return loop(
-      newState, Cmd.run(deleteAllUnsavedNotes(), { args: [Cmd.dispatch, Cmd.getState] }),
+      newState,
+      Cmd.run(deleteAllDbUnsavedNotes(), { args: [Cmd.dispatch, Cmd.getState] }),
     );
   }
 

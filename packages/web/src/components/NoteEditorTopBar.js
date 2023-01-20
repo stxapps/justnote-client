@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import {
-  updateNoteIdUrlHash, updateNoteId, increaseSaveNoteCount, increaseDiscardNoteCount,
+  updateNoteIdUrlHash, increaseSaveNoteCount, increaseDiscardNoteCount,
 } from '../actions';
 import { NEW_NOTE, ADDED, LG_WIDTH } from '../types/const';
 
@@ -25,15 +25,14 @@ const NoteEditorTopBar = (props) => {
 
   const onRightPanelCloseBtnClick = () => {
     if (didClick.current || isEditorUploading) return;
-    if (note.id !== NEW_NOTE && isEditorFocused) dispatch(increaseDiscardNoteCount());
+    if (isEditorFocused) dispatch(increaseDiscardNoteCount());
     else dispatch(updateNoteIdUrlHash(null, false, true));
     didClick.current = true;
   };
 
   const onCancelBtnClick = () => {
     if (didClick.current || isEditorUploading) return;
-    if (isEditorFocused) dispatch(increaseDiscardNoteCount());
-
+    dispatch(increaseDiscardNoteCount());
     if (note.id === NEW_NOTE && isFullScreen) onToggleFullScreen();
     didClick.current = true;
   };
@@ -93,7 +92,7 @@ const NoteEditorTopBar = (props) => {
       <div style={style} className={tailwind('flex h-full w-full justify-between lg:items-center lg:px-3')}>
         <div className={tailwind('flex')}>
           <button onClick={onRightPanelCloseBtnClick} type="button" className={tailwind('group inline-flex h-full items-center bg-white px-4 text-sm text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:bg-gray-200 focus-visible:text-gray-700 blk:bg-gray-900 blk:text-gray-400 blk:hover:text-gray-200 blk:focus-visible:bg-gray-700 blk:focus-visible:text-gray-200 lg:hidden')}>
-            {note.id !== NEW_NOTE && isEditorFocused ?
+            {isEditorFocused ?
               <svg className={tailwind('h-5 w-5')} stroke="currentColor" fill="none" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>

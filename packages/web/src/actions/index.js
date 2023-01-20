@@ -32,9 +32,10 @@ import {
   INCREASE_UPDATE_EDITOR_WIDTH_COUNT, INCREASE_RESET_DID_CLICK_COUNT,
   INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT, INCREASE_UPDATE_BULK_EDIT_COUNT,
   INCREASE_SHOW_NOTE_LIST_MENU_POPUP_COUNT, INCREASE_SHOW_NLIM_POPUP_COUNT,
-  CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS,
-  UPDATE_EDITOR_IS_UPLOADING, UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_EDITING_NOTE,
-  DELETE_EDITING_NOTES, UPDATE_EDITOR_UNMOUNT, UPDATE_DID_DISCARD_EDITING,
+  CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS, UPDATE_EDITOR_IS_UPLOADING,
+  UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_EDITING_NOTE,
+  UPDATE_UNSAVED_NOTE, DELETE_UNSAVED_NOTES, CLEAN_UP_STATIC_FILES,
+  CLEAN_UP_STATIC_FILES_COMMIT, CLEAN_UP_STATIC_FILES_ROLLBACK,
   UPDATE_STACKS_ACCESS, REQUEST_PURCHASE, RESTORE_PURCHASES, RESTORE_PURCHASES_COMMIT,
   RESTORE_PURCHASES_ROLLBACK, REFRESH_PURCHASES, REFRESH_PURCHASES_COMMIT,
   REFRESH_PURCHASES_ROLLBACK, UPDATE_IAP_PUBLIC_KEY, UPDATE_IAP_PRODUCT_STATUS,
@@ -102,7 +103,7 @@ export const init = () => async (dispatch, getState) => {
   const is24HFormat = null;
   const localSettings = await dataApi.getLocalSettings();
 
-  // If bad performance, fetch unsaved notes with other fetches.
+  // Need to fetch all here as some note ids might change.
   const unsavedNotes = await dataApi.getUnsavedNotes();
 
   dispatch({
@@ -523,7 +524,7 @@ export const updateNoteIdUrlHash = (
         return;
       }
 
-      dispatch(deleteEditingNotes([getState().display.noteId]));
+      dispatch(deleteUnsavedNotes([getState().display.noteId]));
     }
 
     _updateNoteIdUrlHash(id);
@@ -538,9 +539,9 @@ export const onUpdateNoteIdUrlHash = (title, body, media) => async (
 
   if (note) {
     if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
-      dispatch(updateEditingNote(title, body, media));
+      dispatch(updateUnsavedNote(noteId, title, body, media));
     } else {
-      dispatch(deleteEditingNotes([noteId]));
+      dispatch(deleteUnsavedNotes([noteId]));
     }
   }
 
@@ -616,7 +617,7 @@ export const updateBulkEditUrlHash = (
         return;
       }
 
-      dispatch(deleteEditingNotes([getState().display.noteId]));
+      dispatch(deleteUnsavedNotes([getState().display.noteId]));
     }
 
     _updateBulkEditUrlHash(isBulkEditing);
@@ -634,9 +635,9 @@ export const onUpdateBulkEditUrlHash = (title, body, media) => async (
 
   if (note) {
     if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
-      dispatch(updateEditingNote(title, body, media));
+      dispatch(updateUnsavedNote(noteId, title, body, media));
     } else {
-      dispatch(deleteEditingNotes([noteId]));
+      dispatch(deleteUnsavedNotes([noteId]));
     }
   }
 
@@ -665,7 +666,7 @@ export const changeListName = (listName, doCheckEditing) => async (
       return;
     }
 
-    dispatch(deleteEditingNotes([getState().display.noteId]));
+    dispatch(deleteUnsavedNotes([getState().display.noteId]));
   }
 
   dispatch({ type: UPDATE_LIST_NAME, payload: listName });
@@ -680,9 +681,9 @@ export const onChangeListName = (title, body, media) => async (
 
   if (note) {
     if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
-      dispatch(updateEditingNote(title, body, media));
+      dispatch(updateUnsavedNote(noteId, title, body, media));
     } else {
-      dispatch(deleteEditingNotes([noteId]));
+      dispatch(deleteUnsavedNotes([noteId]));
     }
   }
 
@@ -716,7 +717,7 @@ export const updateNoteId = (id, doGetIdFromState = false, doCheckEditing = fals
         return;
       }
 
-      dispatch(deleteEditingNotes([getState().display.noteId]));
+      dispatch(deleteUnsavedNotes([getState().display.noteId]));
     }
 
     dispatch(_updateNoteId(id));
@@ -731,9 +732,9 @@ export const onUpdateNoteId = (title, body, media) => async (
 
   if (note) {
     if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
-      dispatch(updateEditingNote(title, body, media));
+      dispatch(updateUnsavedNote(noteId, title, body, media));
     } else {
-      dispatch(deleteEditingNotes([noteId]));
+      dispatch(deleteUnsavedNotes([noteId]));
     }
   }
 
@@ -782,21 +783,21 @@ export const updateSelectingNoteId = (id) => {
   };
 };
 
-export const fetch = (doDeleteOldNotesInTrash, doFetchSettings = false) => async (
-  dispatch, getState
-) => {
+export const fetch = () => async (dispatch, getState) => {
 
   const listName = getState().display.listName;
+  const didFetchSettings = getState().display.didFetchSettings;
   const sortOn = getState().settings.sortOn;
   const doDescendingOrder = getState().settings.doDescendingOrder;
   const pendingPins = getState().pendingPins;
+
+  const doFetchSettings = !didFetchSettings;
 
   dispatch({ type: FETCH });
 
   try {
     const params = {
-      listName, sortOn, doDescendingOrder, doDeleteOldNotesInTrash, doFetchSettings,
-      pendingPins,
+      listName, sortOn, doDescendingOrder, doFetchSettings, pendingPins,
     };
     const fetched = await dataApi.fetch(params);
     await dataApi.fetchStaticFiles(fetched.notes, fetched.conflictedNotes);
@@ -1006,7 +1007,7 @@ export const saveNote = (title, body, media) => async (dispatch, getState) => {
 
   if (note && (note.title === title && isNoteBodyEqual(note.body, body))) {
     dispatch(updateEditorBusy(false));
-    dispatch(deleteEditingNotes([noteId]));
+    dispatch(deleteUnsavedNotes([noteId]));
     return;
   }
 
@@ -1030,12 +1031,14 @@ export const discardNote = (doCheckEditing, title = null, body = null) => async 
   }
 
   if (noteId === NEW_NOTE) {
-    dispatch(_updateNoteId(null));
+    const safeAreaWidth = getState().window.width;
+    if (safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(null);
+    else dispatch(updateNoteId(null));
   } else {
     dispatch(updateEditorFocused(false));
     dispatch(increaseSetInitDataCount());
   }
-  dispatch(deleteEditingNotes([noteId]))
+  dispatch(deleteUnsavedNotes([noteId]))
 };
 
 const _moveNotes = (toListName, ids, fromListName = null) => async (
@@ -1356,29 +1359,42 @@ export const cancelDiedNotes = (ids, listName = null) => async (dispatch, getSta
   });
 };
 
-export const deleteOldNotesInTrash = (doDeleteOldNotesInTrash) => async (
-  dispatch, getState
-) => {
-
-  // If null, it's a first call fetch,
-  //   deleteOldNotesInTrash based on settings and always call sync.
-  // If false, it's a subsequence fetch call, no deleteOldNotesInTrash and no sync.
-  if (doDeleteOldNotesInTrash === false) return;
-  if (doDeleteOldNotesInTrash === null) {
-    doDeleteOldNotesInTrash = getState().settings.doDeleteOldNotesInTrash;
-  } else throw new Error(`Invalid doDeleteOldNotesInTrash: ${doDeleteOldNotesInTrash}`);
-
-  if (!doDeleteOldNotesInTrash) {
+let _didRunAFT = false;
+export const runAfterFetchTask = () => async (dispatch, getState) => {
+  // After fetch, need to sync first before doing housework tasks!
+  // If not, settings might be overwritten i.e. by checkPurchases.
+  if (vars.syncMode.doSyncMode && !_didRunAFT) {
     dispatch(sync());
+    _didRunAFT = true;
     return;
   }
+
+  dispatch(randomHouseworkTasks());
+};
+
+let _randomHTDT = 0;
+export const randomHouseworkTasks = () => async (dispatch, getState) => {
+  const now = Date.now();
+  if (now - _randomHTDT < 24 * 60 * 60 * 1000) return;
+
+  const rand = Math.random();
+  if (rand < 0.33) dispatch(deleteOldNotesInTrash());
+  else if (rand < 0.66) dispatch(checkPurchases());
+  else dispatch(cleanUpStaticFiles());
+
+  _randomHTDT = now;
+};
+
+export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
+
+  const doDeleteOldNotesInTrash = getState().settings.doDeleteOldNotesInTrash;
+  if (!doDeleteOldNotesInTrash) return;
 
   const oldNotes = await dataApi.getOldNotesInTrash();
+  if (oldNotes.length === 0) return;
+
   const oldNoteIds = oldNotes.map(note => note.id);
-  if (oldNoteIds.includes(getState().display.noteId)) {
-    dispatch(sync());
-    return;
-  }
+  if (oldNoteIds.includes(getState().display.noteId)) return;
 
   let addedDT = Date.now();
   const toNotes = oldNotes.map(note => {
@@ -1520,7 +1536,7 @@ export const showNoteListMenuPopup = (rect, doCheckEditing, doReinitEditor) => a
       return;
     }
 
-    dispatch(deleteEditingNotes([getState().display.noteId]));
+    dispatch(deleteUnsavedNotes([getState().display.noteId]));
   }
 
   if (doReinitEditor) {
@@ -1543,9 +1559,9 @@ export const onShowNoteListMenuPopup = (title, body, media) => async (
 
   if (note) {
     if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
-      dispatch(updateEditingNote(title, body, media));
+      dispatch(updateUnsavedNote(noteId, title, body, media));
     } else {
-      dispatch(deleteEditingNotes([noteId]));
+      dispatch(deleteUnsavedNotes([noteId]));
     }
   }
 
@@ -1575,7 +1591,7 @@ export const showNLIMPopup = (noteId, rect, doCheckEditing, doReinitEditor) => a
       return;
     }
 
-    dispatch(deleteEditingNotes([getState().display.noteId]));
+    dispatch(deleteUnsavedNotes([getState().display.noteId]));
   }
 
   if (doReinitEditor) {
@@ -1595,23 +1611,43 @@ export const onShowNLIMPopup = (title, body, media) => async (
 
   if (note) {
     if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
-      dispatch(updateEditingNote(title, body, media));
+      dispatch(updateUnsavedNote(noteId, title, body, media));
     } else {
-      dispatch(deleteEditingNotes([noteId]));
+      dispatch(deleteUnsavedNotes([noteId]));
     }
   }
 
   dispatch(showNLIMPopup(null, null, false, true));
 };
 
+const _cleanUpStaticFiles = async (noteFPaths, unsavedNotes) => {
+
+};
+
 export const cleanUpStaticFiles = () => async (dispatch, getState) => {
-  // check with cached fpaths.
+  const state = getState();
 
-  // need to check in unsaved notes too.
+  const { cleanUpStaticFilesDT } = state.localSettings;
+  if (!cleanUpStaticFilesDT) return;
 
-  // this is for images
+  const now = Date.now();
+  let p = 1.0 / (N_DAYS * 24 * 60 * 60 * 1000) * Math.abs(now - cleanUpStaticFilesDT);
+  p = Math.max(0.01, Math.min(p, 0.99));
+  const doCheck = p > Math.random();
 
-  // What about clean up unsaved notes?
+  if (!doCheck) return;
+
+  const noteFPaths = getNoteFPaths(state);
+  const unsavedNotes = state.unsavedNotes;
+
+  dispatch({ type: CLEAN_UP_STATIC_FILES });
+  try {
+    const ids = await _cleanUpStaticFiles(noteFPaths, unsavedNotes);
+    dispatch({ type: CLEAN_UP_STATIC_FILES_COMMIT, payload: { ids } });
+  } catch (error) {
+    console.log('Error when clean up static files: ', error);
+    dispatch({ type: CLEAN_UP_STATIC_FILES_ROLLBACK });
+  }
 };
 
 export const updateSettingsPopup = (isShown) => async (dispatch, getState) => {
@@ -2006,24 +2042,67 @@ export const updateEditorScrollEnabled = (enabled) => {
   return { type: UPDATE_EDITOR_SCROLL_ENABLED, payload: enabled };
 };
 
-export const updateEditingNote = (title, body, media) => async (dispatch, getState) => {
-  const id = getState().display.noteId;
+export const updateEditingNote = (id, title, body, media) => async (
+  dispatch, getState,
+) => {
+  const { listName, noteId } = getState().display;
+  if (noteId !== id) return; // As in debounce, try to be safe.
+
+  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
   dispatch({
     type: UPDATE_EDITING_NOTE,
-    payload: { id, title, body, media },
+    payload: {
+      id: noteId, title, body, media,
+      savedTitle: note.title, savedBody: note.body, savedMedia: note.media,
+    },
   });
 };
 
-export const deleteEditingNotes = (ids) => {
-  return { type: DELETE_EDITING_NOTES, payload: ids };
+export const updateUnsavedNote = (id, title, body, media) => async (
+  dispatch, getState,
+) => {
+  const {
+    editingNoteId, editingNoteTitle, editingNoteBody, editingNoteMedia,
+  } = getState().editor;
+
+  const hasContent = isString(title), didUpdate = editingNoteId === id;
+  if (!hasContent) {
+    if (!didUpdate) return;
+    [title, body, media] = [editingNoteTitle, editingNoteBody, editingNoteMedia];
+  }
+
+  const { listName, noteId } = getState().display;
+  if (noteId !== id) return;
+
+  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
+  dispatch({
+    type: UPDATE_UNSAVED_NOTE,
+    payload: {
+      id: noteId, title, body, media,
+      savedTitle: note.title, savedBody: note.body, savedMedia: note.media,
+      hasContent, didUpdate,
+    },
+  });
 };
 
-export const updateEditorUnmount = (didUnmount) => {
-  return { type: UPDATE_EDITOR_UNMOUNT, payload: didUnmount };
+export const deleteUnsavedNotes = (ids) => {
+  return { type: DELETE_UNSAVED_NOTES, payload: ids };
 };
 
-export const updateDidDiscardEditing = (didDiscardEditing) => {
-  return { type: UPDATE_DID_DISCARD_EDITING, payload: didDiscardEditing };
+export const putDbUnsavedNote = (
+  id, title, body, media, savedTitle, savedBody, savedMedia,
+) => async (dispatch, getState) => {
+  await dataApi.putUnsavedNote(
+    id, title, body, media, savedTitle, savedBody, savedMedia,
+  );
+};
+
+export const deleteDbUnsavedNotes = (ids) => async (dispatch, getState) => {
+  await dataApi.deleteUnsavedNotes(ids);
+};
+
+export const deleteAllDbUnsavedNotes = () => async (dispatch, getState) => {
+  await dataApi.deleteAllUnsavedNotes();
 };
 
 export const updateStacksAccess = (data) => {
@@ -3437,18 +3516,4 @@ export const viewNoteAsWebpage = () => async (dispatch, getState) => {
 
   w.document.write(html);
   w.document.close();
-};
-
-export const putUnsavedNote = (id, title, body, media) => async (
-  dispatch, getState,
-) => {
-  await dataApi.putUnsavedNote(id, title, body, media);
-};
-
-export const deleteUnsavedNotes = (ids) => async (dispatch, getState) => {
-  await dataApi.deleteUnsavedNotes(ids);
-};
-
-export const deleteAllUnsavedNotes = () => async (dispatch, getState) => {
-  await dataApi.deleteAllUnsavedNotes();
 };

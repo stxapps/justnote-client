@@ -2,16 +2,16 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { updateNoteIdUrlHash, updateNoteId } from '../actions';
-import { LG_WIDTH } from '../types/const';
+import { INVALID, LG_WIDTH } from '../types/const';
 import { isDiedStatus } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
 const NoteListItemError = (props) => {
 
-  const { note } = props;
-  const isBulkEditing = useSelector(state => state.display.isBulkEditing);
+  const { note, unsavedNote } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
+  const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
@@ -29,7 +29,12 @@ const NoteListItemError = (props) => {
   } else if (isDiedStatus(note.status)) {
     title = 'Oops..., something went wrong';
     body = 'Select this note and try again.';
-  } else throw new Error(`Invalid id: ${note.id} and status: ${note.status}.`);
+  } else if (unsavedNote.status === INVALID) {
+    title = 'Version Conflicts';
+    body = 'Select this note and manually manage the unsaved version.';
+  } else {
+    console.log('Invalid note or unsavedNote.', note, unsavedNote);
+  }
 
   return (
     <button onClick={onContentBtnClick} className={tailwind('group flex w-full items-center rounded-sm px-3 py-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300 sm:px-5')}>

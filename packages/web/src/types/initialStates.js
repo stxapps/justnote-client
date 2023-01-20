@@ -38,6 +38,7 @@ export const initialLocalSettingsState = {
   themeCustomOptions: [
     { ...whtModeThemeCustomOptions }, { ...blkModeThemeCustomOptions },
   ],
+  cleanUpStaticFilesDT: null,
   // Below is duplicate from Settings for Loading to support Dark appearance.
   purchases: null,
   defaultThemeMode: WHT_MODE,

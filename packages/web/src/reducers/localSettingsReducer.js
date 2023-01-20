@@ -3,7 +3,8 @@ import { loop, Cmd } from 'redux-loop';
 import { updateLocalSettings } from '../actions';
 import {
   INIT, FETCH_COMMIT, UPDATE_SETTINGS_COMMIT, UPDATE_DO_USE_LOCAL_THEME,
-  UPDATE_LOCAL_THEME, DELETE_ALL_DATA, RESET_STATE,
+  UPDATE_LOCAL_THEME, ADD_SAVING_FPATHS, CLEAN_UP_STATIC_FILES_COMMIT,
+  DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import { WHT_MODE } from '../types/const';
 import {
@@ -75,6 +76,17 @@ const localSettingsReducer = (state = initialState, action) => {
     return loop(
       newState, Cmd.run(updateLocalSettings(), { args: [Cmd.dispatch, Cmd.getState] })
     );
+  }
+
+  if (action.type === ADD_SAVING_FPATHS) {
+    if (state.cleanUpStaticFilesDT === null) {
+      return { ...state, cleanUpStaticFilesDT: Date.now() };
+    }
+    return state;
+  }
+
+  if (action.type === CLEAN_UP_STATIC_FILES_COMMIT) {
+    return { ...state, cleanUpStaticFilesDT: Date.now() };
   }
 
   if (action.type === DELETE_ALL_DATA) {

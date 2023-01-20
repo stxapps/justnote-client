@@ -6,22 +6,20 @@ import {
   addSelectedNoteIds, deleteSelectedNoteIds,
 } from '../actions';
 import { LG_WIDTH } from '../types/const';
-import { makeIsNoteIdSelected, makeGetPinStatus, makeGetNoteDate } from '../selectors';
+import { makeIsNoteIdSelected, makeGetNoteDate } from '../selectors';
 import { isBusyStatus, isPinningStatus, stripHtml } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
 const NoteListItemContent = (props) => {
 
-  const { note } = props;
+  const { note, pinStatus } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const [doTitlePb, setDoTitlePb] = useState(false);
   const getIsNoteIdSelected = useMemo(makeIsNoteIdSelected, []);
-  const getPinStatus = useMemo(makeGetPinStatus, []);
   const getNoteDate = useMemo(makeGetNoteDate, []);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const isSelected = useSelector(state => getIsNoteIdSelected(state, note.id));
-  const pinStatus = useSelector(state => getPinStatus(state, note.id));
   const noteDate = useSelector(state => getNoteDate(state, note));
   const body = useMemo(() => stripHtml(note.body), [note.body]);
   const isBusy = useMemo(() => {

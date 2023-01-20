@@ -1,7 +1,7 @@
 import { loop, Cmd } from 'redux-loop';
 
 import {
-  tryUpdateFetchedMore, deleteOldNotesInTrash, unpinNotes, sync, tryUpdateSynced,
+  tryUpdateFetchedMore, runAfterFetchTask, unpinNotes, sync, tryUpdateSynced,
 } from '../actions';
 import {
   FETCH_COMMIT, FETCH_MORE_COMMIT, UPDATE_FETCHED_MORE, ADD_NOTE, ADD_NOTE_COMMIT,
@@ -61,12 +61,9 @@ const notesReducer = (state = initialState, action) => {
       newState[listName] = { ...processingNotes, ...fetchedNotes };
     }
 
-    const { doDeleteOldNotesInTrash } = action.payload;
     return loop(
       newState,
-      Cmd.run(
-        deleteOldNotesInTrash(doDeleteOldNotesInTrash),
-        { args: [Cmd.dispatch, Cmd.getState] })
+      Cmd.run(runAfterFetchTask(), { args: [Cmd.dispatch, Cmd.getState] }),
     );
   }
 

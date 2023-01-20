@@ -8,9 +8,9 @@ import {
   updateEditorFocused, updateEditorBusy, saveNote, discardNote, onUpdateNoteIdUrlHash,
   onUpdateNoteId, onChangeListName, onUpdateBulkEditUrlHash, onShowNoteListMenuPopup,
   onShowNLIMPopup, addSavingFPaths, updateEditorIsUploading, updateEditingNote,
-  updateEditorUnmount,
+  updateUnsavedNote,
 } from '../actions';
-import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, BLK_MODE } from '../types/const';
+import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, BLK_MODE, VALID } from '../types/const';
 import { getThemeMode, getDoMoreEditorFontSizes } from '../selectors';
 import {
   isString, isNoteBodyEqual, isMobile as _isMobile, replaceObjectUrls, getFileExt,
@@ -33,7 +33,7 @@ const GET_DATA_SHOW_NLIM_POPUP = 'GET_DATA_SHOW_NLIM_POPUP';
 
 const NoteEditorEditor = (props) => {
 
-  const { note } = props;
+  const { note, unsavedNote } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const isFocused = useSelector(state => state.display.isEditorFocused);
   const isEditorBusy = useSelector(state => state.display.isEditorBusy);
@@ -85,16 +85,8 @@ const NoteEditorEditor = (props) => {
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
-  const editingNoteId = useSelector(state => state.editor.editingNoteId);
-  const editingNoteTitle = useSelector(state => state.editor.editingNoteTitle);
-  const editingNoteBody = useSelector(state => state.editor.editingNoteBody);
-  const editingNoteMedia = useSelector(state => state.editor.editingNoteMedia);
-  const didEditorUnmount = useSelector(state => state.editor.didEditorUnmount);
-  const didDiscardEditing = useSelector(state => state.editor.didDiscardEditing);
-  const refToIsFocused = useRef(isFocused);
-  const refToIsEditorBusy = useRef(isEditorBusy);
-  const refToIsEditorReady = useRef(isEditorReady);
-  const didUpdateEditingNote = useRef(false);
+  const noteIdRef = useRef(note.id);
+  const isFocusedRef = useRef(isFocused);
 
   const isMobile = useMemo(() => _isMobile(), []);
 
@@ -172,7 +164,13 @@ const NoteEditorEditor = (props) => {
     return body;
   }, []);
 
-  const _setInitData = useCallback(async (id, title, body, media) => {
+  const setInitData = useCallback(async () => {
+    let [title, body, media] = [note.title, note.body, note.media];
+    if (unsavedNote.status === VALID) {
+      const unnote = unsavedNote.note;
+      [title, body, media] = [unnote.title, unnote.body, unnote.media];
+    }
+
     scrollView.current.scrollTo(0, 0);
     titleInput.current.value = title;
 
@@ -192,12 +190,11 @@ const NoteEditorEditor = (props) => {
       console.log('NoteEditorEditor.setInitData: ckeditor.setData error ', error);
     }
 
-    if (id === NEW_NOTE) focusTitleInput();
-  }, [replaceWithContents, replaceWithFiles]);
-
-  const setInitData = useCallback(async () => {
-    await _setInitData(note.id, note.title, note.body, note.media)
-  }, [note.id, note.title, note.body, note.media, _setInitData]);
+    if (note.id === NEW_NOTE || unsavedNote.status === VALID) focusTitleInput();
+  }, [
+    note.id, note.title, note.body, note.media, unsavedNote.status, unsavedNote.note,
+    replaceWithContents, replaceWithFiles,
+  ]);
 
   const onFocus = useCallback(() => {
     if (isMobile) scrollWindowTop();
@@ -311,6 +308,7 @@ const NoteEditorEditor = (props) => {
   const onDataChange = useMemo(() => debounce(() => {
     // At the time, might already unmounted
     if (!titleInput.current || !bodyEditor.current) return;
+    if (!isFocusedRef.current) return;
 
     const title = titleInput.current.value;
     const { body, media } = replaceObjectUrls(
@@ -320,9 +318,13 @@ const NoteEditorEditor = (props) => {
       objectUrlNames.current
     );
 
-    dispatch(updateEditingNote(title, body, media));
-    didUpdateEditingNote.current = true;
+    dispatch(updateEditingNote(noteIdRef.current, title, body, media));
   }, 1000), [dispatch]);
+
+  useEffect(() => {
+    noteIdRef.current = note.id;
+    isFocusedRef.current = isFocused;
+  }, [note.id, isFocused]);
 
   useEffect(() => {
     if (!isEditorReady) return;
@@ -555,42 +557,10 @@ const NoteEditorEditor = (props) => {
   }, []);
 
   useEffect(() => {
-    refToIsFocused.current = isFocused;
-    refToIsEditorBusy.current = isEditorBusy;
-    refToIsEditorReady.current = isEditorReady;
-  }, [isFocused, isEditorBusy, isEditorReady]);
-
-  useEffect(() => {
-    didUpdateEditingNote.current = false;
-  }, [note.id]);
-
-  useEffect(() => {
     return () => {
-      if (
-        refToIsEditorReady.current && !refToIsEditorBusy.current &&
-        refToIsFocused.current && didUpdateEditingNote.current
-      ) dispatch(updateEditorUnmount(true));
+      if (isFocusedRef.current) dispatch(updateUnsavedNote(noteIdRef.current));
     };
   }, [dispatch]);
-
-  useEffect(() => {
-    if (!isEditorReady) return;
-
-    if (didEditorUnmount) {
-      if (
-        isFocused && !isEditorBusy && !didDiscardEditing && note.id === editingNoteId
-      ) {
-        _setInitData(
-          editingNoteId, editingNoteTitle, editingNoteBody, editingNoteMedia
-        );
-      }
-      dispatch(updateEditorUnmount(false));
-    }
-  }, [
-    isFocused, isEditorBusy, isEditorReady, didDiscardEditing, didEditorUnmount,
-    note.id, editingNoteId, editingNoteTitle, editingNoteBody, editingNoteMedia,
-    _setInitData, dispatch,
-  ]);
 
   const editorConfig = useMemo(() => {
     return {

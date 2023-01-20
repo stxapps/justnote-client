@@ -1,6 +1,6 @@
 import { loop, Cmd } from 'redux-loop';
 
-import { tryUpdateSettings, checkPurchases, sync } from '../actions';
+import { tryUpdateSettings, sync } from '../actions';
 import {
   INIT, FETCH_COMMIT, ADD_LIST_NAMES, UPDATE_LIST_NAMES, MOVE_LIST_NAME,
   MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH,
@@ -77,17 +77,7 @@ const settingsReducer = (state = initialState, action) => {
       newState.checkPurchasesDT = state.checkPurchasesDT;
     }
 
-    if ([
-      didChange.doDeleteOldNotesInTrash, didChange.sortOn, didChange.doDescendingOrder,
-      didChange.noteDateShowingMode, didChange.noteDateFormat,
-      didChange.doSectionNotesByMonth, didChange.doMoreEditorFontSizes,
-      didChange.listNameMap, didChange.purchases,
-    ].includes(true)) {
-      return newState;
-    }
-    return loop(
-      newState, Cmd.run(checkPurchases(), { args: [Cmd.dispatch, Cmd.getState] })
-    );
+    return newState;
   }
 
   if (action.type === ADD_LIST_NAMES) {

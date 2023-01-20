@@ -1,20 +1,26 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
+import { INVALID } from '../types/const';
+import { makeGetUnsavedNote } from '../selectors';
 import { isDiedStatus } from '../utils';
 
 import { useTailwind } from '.';
 import NoteEditorTopBar from './NoteEditorTopBar';
 import NoteEditorEditor from './NoteEditorEditor';
 import NoteEditorBulkEdit from './NoteEditorBulkEdit';
-import NoteEditorConflict from './NoteEditorConflict';
+import { NoteEditorSavedConflict, NoteEditorUnsavedConflict } from './NoteEditorConflict';
 import NoteEditorRetry from './NoteEditorRetry';
 
 const NoteEditor = (props) => {
 
   const { note, isFullScreen, onToggleFullScreen } = props;
+  const getUnsavedNote = useMemo(makeGetUnsavedNote, []);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
+  const unsavedNote = useSelector(state => getUnsavedNote(state, note));
   const tailwind = useTailwind();
+
+  const isUnsavedInvalid = unsavedNote.status === INVALID;
 
   if (isBulkEditing) return <NoteEditorBulkEdit />;
   if (!note) {
@@ -33,13 +39,16 @@ const NoteEditor = (props) => {
       </div>
     );
   }
-  if (note.id.startsWith('conflict')) return <NoteEditorConflict note={note} />;
+  if (note.id.startsWith('conflict')) return <NoteEditorSavedConflict note={note} />;
   if (isDiedStatus(note.status)) return <NoteEditorRetry note={note} />;
+  if (isUnsavedInvalid) {
+    return <NoteEditorUnsavedConflict note={note} unsavedNote={unsavedNote} />;
+  }
 
   return (
     <div className={tailwind('flex h-full w-full flex-col bg-white blk:bg-gray-900')}>
       <NoteEditorTopBar note={note} isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} />
-      <NoteEditorEditor note={note} />
+      <NoteEditorEditor note={note} unsavedNote={unsavedNote} />
     </div>
   );
 };

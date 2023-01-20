@@ -2,8 +2,8 @@ import serverApi from './server';
 import ldbApi from './localDb';
 import fileApi from './localFile';
 import {
-  UNSAVED_NOTES, INDEX, DOT_JSON, CD_ROOT, N_NOTES, MAX_TRY, TRASH, N_DAYS,
-  COLS_PANEL_STATE, LOCAL_SETTINGS_STATE,
+  UNSAVED_NOTES, UNSAVED_NOTES_UNSAVED, UNSAVED_NOTES_SAVED, INDEX, DOT_JSON, CD_ROOT,
+  N_NOTES, MAX_TRY, TRASH, N_DAYS, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE,
 } from '../types/const';
 import {
   isObject, isString, createNoteFPath, createNoteFName, extractNoteFPath, createPinFPath,
@@ -499,17 +499,39 @@ const getUnsavedNotes = async () => {
   const _fpaths = usnKeys.map(key => key.slice(key.indexOf(UNSAVED_NOTES + '/')));
   const { fpaths, contents } = await fileApi.getFiles(_fpaths);
 
-  const unsavedNotes = {};
+  const unsavedArr = [], savedMap = {};
   for (let i = 0; i < fpaths.length; i++) {
     const fpath = fpaths[i], content = contents[i];
-    const id = fpath.slice((UNSAVED_NOTES + '/').length);
-    const note = { title: '', body: '', media: [] };
+
+    if (fpath.startsWith(UNSAVED_NOTES_UNSAVED)) {
+      const id = fpath.slice((UNSAVED_NOTES_UNSAVED + '/').length);
+      unsavedArr.push({ id, content });
+      continue;
+    }
+
+    if (fpath.startsWith(UNSAVED_NOTES_SAVED)) {
+      const id = fpath.slice((UNSAVED_NOTES_SAVED + '/').length);
+      savedMap[id] = content;
+      continue;
+    }
+  }
+
+  const unsavedNotes = {};
+  for (const { id, content } of unsavedArr) {
+    const unsavedNote = { title: '', body: '', media: [] };
+    const savedNote = { savedTitle: '', savedBody: '', savedMedia: [] };
+
     try {
-      const _note = JSON.parse(content);
-      for (const k in note) {
-        if (k in _note) note[k] = _note[k];
+      const _unsavedNote = JSON.parse(content);
+      for (const k in unsavedNote) {
+        if (k in _unsavedNote) unsavedNote[k] = _unsavedNote[k];
       }
-      unsavedNotes[id] = note;
+      const _savedNote = JSON.parse(savedMap[id]);
+      for (const k in savedNote) {
+        if (k in _savedNote) savedNote[k] = _savedNote[k];
+      }
+
+      unsavedNotes[id] = { id, ...unsavedNote, ...savedNote };
     } catch (error) {
       console.log('Parse unsaved note error: ', error);
     }
@@ -518,14 +540,26 @@ const getUnsavedNotes = async () => {
   return unsavedNotes;
 };
 
-const putUnsavedNote = async (id, title, body, media) => {
-  const fpath = `${UNSAVED_NOTES}/${id}`;
+const putUnsavedNote = async (
+  id, title, body, media, savedTitle, savedBody, savedMedia,
+) => {
+  const fpath = `${UNSAVED_NOTES_UNSAVED}/${id}`;
   const content = JSON.stringify({ title, body, media });
   await fileApi.putFile(fpath, content);
+
+  if (!isString(savedTitle)) return;
+
+  const savedFPath = `${UNSAVED_NOTES_SAVED}/${id}`;
+  const savedContent = JSON.stringify({ savedTitle, savedBody, savedMedia });
+  await fileApi.putFile(savedFPath, savedContent);
 };
 
 const deleteUnsavedNotes = async (ids) => {
-  const fpaths = ids.map(id => `${UNSAVED_NOTES}/${id}`);
+  const fpaths = [];
+  for (const id of ids) {
+    fpaths.push(`${UNSAVED_NOTES_UNSAVED}/${id}`);
+    fpaths.push(`${UNSAVED_NOTES_SAVED}/${id}`);
+  }
   await fileApi.deleteFiles(fpaths);
 };
 

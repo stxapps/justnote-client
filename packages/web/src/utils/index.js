@@ -1141,6 +1141,28 @@ export const getSettingsFPath = (state) => {
   return null;
 };
 
+export const getNoteParentIds = (leafId, toParents) => {
+  const parentIds = [];
+
+  let pendingIds = [leafId];
+  while (pendingIds.length > 0) {
+    let id = pendingIds[0];
+    pendingIds = pendingIds.slice(1);
+
+    if (!toParents[id]) continue;
+
+    const parents = toParents[id];
+    for (const parentId of parents) {
+      if (!parentIds.includes(parentId)) {
+        parentIds.push(parentId);
+        pendingIds.push(parentId);
+      }
+    }
+  }
+
+  return parentIds;
+};
+
 const getNoteRootIds = (leafId, toParents) => {
   const rootIds = [];
 
@@ -1249,7 +1271,7 @@ const _listNoteIds = (noteFPaths) => {
 
   const conflictWiths = Object.values(toLeafIds).filter(tIds => tIds.length > 1);
 
-  return { noteIds, conflictedIds, conflictWiths, toRootIds };
+  return { noteIds, conflictedIds, conflictWiths, toRootIds, toParents };
 };
 
 export const listNoteIds = createSelector(
