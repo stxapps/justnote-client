@@ -8,10 +8,11 @@ import {
   UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY, INCREASE_SAVE_NOTE_COUNT,
   INCREASE_RESET_DID_CLICK_COUNT, UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION,
   UPDATE_DISCARD_ACTION, UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT,
-  UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS, UPDATE_SETTINGS_VIEW_ID,
-  UPDATE_LIST_NAMES_MODE, SYNC, SYNC_COMMIT, SYNC_ROLLBACK, UPDATE_SYNC_PROGRESS,
-  UPDATE_SYNCED, UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
-  UPDATE_DELETE_ALL_DATA_PROGRESS, DELETE_ALL_DATA, RESET_STATE,
+  UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS, MERGE_SETTINGS_COMMIT,
+  UPDATE_SETTINGS_VIEW_ID, UPDATE_LIST_NAMES_MODE, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
+  UPDATE_SYNC_PROGRESS, UPDATE_SYNCED, UPDATE_IMPORT_ALL_DATA_PROGRESS,
+  UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
+  DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   SIGN_UP_POPUP, SIGN_IN_POPUP, PROFILE_POPUP, NOTE_LIST_MENU_POPUP,
@@ -313,8 +314,8 @@ const displayReducer = (state = initialState, action) => {
     if (doContainStaleNotes(notes)) newState.isStaleErrorPopupShown = true;
 
     // Make sure listName is in listNameMap, if not, set to My Notes.
-    const { listNames, doFetchSettings, settings } = action.payload;
-    if (!doFetchSettings) return newState;
+    const { listNames, doFetchStgsAndInfo, settings } = action.payload;
+    if (!doFetchStgsAndInfo) return newState;
 
     newState.settingsStatus = null;
 
@@ -464,15 +465,20 @@ const displayReducer = (state = initialState, action) => {
     return { ...state, settingsStatus: DIED_UPDATING };
   }
 
-  if (action.type === CANCEL_DIED_SETTINGS) {
-    const { settings } = action.payload;
+  if (action.type === CANCEL_DIED_SETTINGS || action.type === MERGE_SETTINGS_COMMIT) {
+    const { settings, doFetch } = action.payload;
     const doContain = doContainListName(state.listName, settings.listNameMap);
 
-    return {
+    const newState = {
       ...state,
       listName: doContain ? state.listName : MY_NOTES,
       settingsStatus: null,
     };
+    if (doFetch) {
+      newState.fetchedListNames = [];
+      newState.noteId = null;
+    }
+    return newState;
   }
 
   if (action.type === UPDATE_SETTINGS_VIEW_ID) {

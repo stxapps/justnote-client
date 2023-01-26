@@ -10,7 +10,7 @@ import {
   getMainId, getValidProduct as _getValidProduct, getValidPurchase as _getValidPurchase,
   listNoteIds, getSortedNotes, separatePinnedValues, getNoteFPaths, getPinFPaths,
   getPins, doEnableExtraFeatures, getFormattedNoteDate, isNumber, isMobile as _isMobile,
-  getNoteParentIds,
+  getDataParentIds,
 } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 import { initialListNameEditorState } from '../types/initialStates';
@@ -237,12 +237,12 @@ export const getValidProduct = createSelector(
 );
 
 export const getValidPurchase = createSelector(
-  state => state.settings.purchases,
+  state => state.info.purchases,
   purchases => _getValidPurchase(purchases),
 );
 
 export const getDoEnableExtraFeatures = createSelector(
-  state => state.settings.purchases,
+  state => state.info.purchases,
   purchases => doEnableExtraFeatures(purchases),
 );
 
@@ -502,7 +502,7 @@ export const makeGetUnsavedNote = () => {
       if (note.id === NEW_NOTE) return result;
 
       const { toParents } = listNoteIds(noteFPaths);
-      const parentIds = getNoteParentIds(note.id, toParents);
+      const parentIds = getDataParentIds(note.id, toParents);
 
       for (const parentId of parentIds) {
         if (!(parentId in unsavedNotes)) continue;

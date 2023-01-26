@@ -10,7 +10,9 @@ import unsavedNotesReducer from './unsavedNotesReducer';
 import displayReducer from './displayReducer';
 import userReducer from './userReducer';
 import settingsReducer from './settingsReducer';
+import conflictedSettingsReducer from './conflictedSettingsReducer';
 import localSettingsReducer from './localSettingsReducer';
+import infoReducer from './infoReducer';
 import editorReducer from './editorReducer';
 import stacksAccessReducer from './stacksAccessReducer';
 import snapshotReducer from './snapshotReducer';
@@ -31,7 +33,9 @@ const reducers = combineReducers({
   display: displayReducer,
   user: userReducer,
   settings: settingsReducer,
+  conflictedSettings: conflictedSettingsReducer,
   localSettings: localSettingsReducer,
+  info: infoReducer,
   editor: editorReducer,
   stacksAccess: stacksAccessReducer,
   snapshot: snapshotReducer,

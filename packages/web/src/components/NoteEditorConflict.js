@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { motion, AnimatePresence, AnimateSharedLayout } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import {
   updateNoteIdUrlHash, mergeNotes, updateUnsavedNote, deleteUnsavedNotes,
@@ -8,7 +8,7 @@ import {
 import { HASH_SUPPORT, MERGING, DIED_MERGING, LG_WIDTH } from '../types/const';
 import { getListNameMap } from '../selectors';
 import { getListNameDisplayName, getFormattedDT } from '../utils';
-import { slideYFMV, popupFMV } from '../types/animConfigs';
+import { popupFMV } from '../types/animConfigs';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
@@ -78,9 +78,7 @@ const _NoteEditorSavedConflict = (props) => {
         <div className={tailwind('h-16 w-full')} />
         <h3 className={tailwind('pt-5 text-lg font-medium text-gray-800 blk:text-gray-200')}>{conflictedNote.notes.length} Versions found</h3>
         <p className={tailwind('text-sm font-normal text-gray-500 blk:text-gray-400')}>Please choose the correct version of this note.</p>
-        <AnimateSharedLayout>
-          {conflictedNote.notes.map((note, i) => <ConflictItem key={note.id} listName={conflictedNote.listNames[i]} note={note} status={conflictedNote.status} />)}
-        </AnimateSharedLayout>
+        {conflictedNote.notes.map((note, i) => <ConflictItem key={note.id} listName={conflictedNote.listNames[i]} note={note} status={conflictedNote.status} />)}
         <div className={tailwind('absolute top-0 left-0 lg:hidden')}>
           <button onClick={onRightPanelCloseBtnClick} type="button" className={tailwind('bg-white px-4 py-4 text-sm text-gray-500 hover:text-gray-700 focus:bg-gray-200 focus:text-gray-700 focus:outline-none blk:bg-gray-900 blk:text-gray-400 blk:hover:text-gray-200 blk:focus:bg-gray-700 blk:focus:text-gray-200')}>
             <svg className={tailwind('h-5 w-5')} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -147,10 +145,8 @@ const _NoteEditorUnsavedConflict = (props) => {
           </button>
           <button onClick={onDiscardBtnClick} className={tailwind('ml-2 rounded-md border border-white bg-white px-2 py-1.5 text-sm text-gray-500 hover:text-gray-700 focus:bg-gray-200 focus:text-gray-700 focus:outline-none blk:border-gray-900 blk:bg-gray-900 blk:text-gray-400 blk:hover:text-gray-200 blk:focus:bg-gray-700 blk:focus:text-gray-200')}>Discard</button>
         </div>
-        <AnimateSharedLayout>
-          <ConflictItem listName={listName} note={unsavedNote.note} status={note.status} isUnsaved={true} doHideChooseBtn={true} />
-          <ConflictItem listName={listName} note={note} status={note.status} doHideChooseBtn={true} />
-        </AnimateSharedLayout>
+        <ConflictItem listName={listName} note={unsavedNote.note} status={note.status} isUnsaved={true} doHideChooseBtn={true} />
+        <ConflictItem listName={listName} note={note} status={note.status} doHideChooseBtn={true} />
         <div className={tailwind('absolute top-0 left-0 lg:hidden')}>
           <button onClick={onRightPanelCloseBtnClick} type="button" className={tailwind('bg-white px-4 py-4 text-sm text-gray-500 hover:text-gray-700 focus:bg-gray-200 focus:text-gray-700 focus:outline-none blk:bg-gray-900 blk:text-gray-400 blk:hover:text-gray-200 blk:focus:bg-gray-700 blk:focus:text-gray-200')}>
             <svg className={tailwind('h-5 w-5')} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -172,6 +168,8 @@ const _ConflictItem = (props) => {
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
+  const updatedDTStr = useMemo(() => getFormattedDT(note.updatedDT), [note.updatedDT]);
+
   const onOpenBtnClick = () => {
     setIsOpen(!isOpen);
   };
@@ -185,8 +183,6 @@ const _ConflictItem = (props) => {
   useEffect(() => {
     didClick.current = false;
   }, [status]);
-
-  const updatedDTStr = useMemo(() => getFormattedDT(note.updatedDT), [note.updatedDT]);
 
   let arrowSvg;
   if (isOpen) {
@@ -204,13 +200,13 @@ const _ConflictItem = (props) => {
   }
 
   return (
-    <motion.div className={tailwind('mt-6 rounded-lg border border-gray-200 blk:border-gray-700')} layout={true}>
-      <motion.div className={tailwind(`rounded-t-lg bg-gray-50 blk:bg-gray-800 sm:flex sm:items-start sm:justify-between ${!isOpen ? 'rounded-b-lg' : ''}`)} layout={true}>
+    <div className={tailwind('mt-6 rounded-lg border border-gray-200 blk:border-gray-700')}>
+      <div className={tailwind(`rounded-t-lg bg-gray-50 blk:bg-gray-800 sm:flex sm:items-start sm:justify-between ${!isOpen ? 'rounded-b-lg' : ''}`)}>
         <div className={tailwind('sm:flex-shrink sm:flex-grow')}>
           <button onClick={onOpenBtnClick} type="button" className={tailwind('group flex w-full rounded-lg pt-3 pb-1.5 pl-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gray-400 blk:focus-visible:ring-gray-500')}>
             {arrowSvg}
             <div className={tailwind('ml-1')}>
-              <div className={tailwind('text-left text-base font-medium text-gray-800 group-hover:underline blk:text-gray-200 lg:text-sm')}>{isUnsaved ? 'Unsaved version' : `Last update on ${updatedDTStr}`}</div>
+              <div className={tailwind('text-left text-base font-medium text-gray-800 group-hover:underline blk:text-gray-200 lg:text-sm')}>{isUnsaved ? 'Unsaved version' : `Last updated on ${updatedDTStr}`}</div>
               <div className={tailwind('mt-1 text-left text-sm text-gray-600 blk:text-gray-300')}>In {getListNameDisplayName(listName, listNameMap)}</div>
             </div>
           </button>
@@ -223,14 +219,12 @@ const _ConflictItem = (props) => {
             Choose
           </button>
         </div>}
-      </motion.div>
-      <AnimatePresence>
-        {isOpen && <motion.div className={tailwind('px-4 py-5')} variants={slideYFMV} initial="hidden" animate="visible" exit="hidden">
-          <h3 className={tailwind('text-lg font-medium text-gray-800 blk:text-gray-200')}>{note.title}</h3>
-          <p className={tailwind('mt-3 text-base font-normal text-gray-600 blk:text-gray-300')}>{note.body}</p>
-        </motion.div>}
-      </AnimatePresence>
-    </motion.div>
+      </div>
+      {isOpen && <div className={tailwind('px-4 py-5')}>
+        <h3 className={tailwind('text-lg font-medium text-gray-800 blk:text-gray-200')}>{note.title}</h3>
+        <p className={tailwind('mt-3 text-base font-normal text-gray-600 blk:text-gray-300')}>{note.body}</p>
+      </div>}
+    </div>
   );
 };
 

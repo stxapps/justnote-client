@@ -6,9 +6,9 @@ import {
   N_NOTES, MAX_TRY, TRASH, N_DAYS, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE,
 } from '../types/const';
 import {
-  isObject, isString, createNoteFPath, createNoteFName, extractNoteFPath, createPinFPath,
+  isObject, isString, createNoteFPath, createDataFName, extractNoteFPath, createPinFPath,
   addFPath, deleteFPath, copyFPaths, getMainId, listNoteIds, sortWithPins,
-  getStaticFPath,
+  getStaticFPath, getLastSettingsFPaths, excludeNullContents,
 } from '../utils';
 import { syncMode } from '../vars';
 import { initialLocalSettingsState } from '../types/initialStates';
@@ -19,7 +19,8 @@ const getApi = () => {
 
 const _listFPaths = async () => {
   const fpaths = {
-    noteFPaths: [], staticFPaths: [], settingsFPath: null, pinFPaths: [],
+    noteFPaths: [], staticFPaths: [], settingsFPaths: [], infoFPath: null,
+    pinFPaths: [],
   };
   await getApi().listFiles((fpath) => {
     addFPath(fpaths, fpath);
@@ -72,7 +73,6 @@ const batchGetFileWithRetry = async (
 };
 
 const toNotes = (noteIds, fpaths, contents) => {
-
   const notes = [];
   for (const noteId of noteIds) {
     let title = '', body = '', media = [];
@@ -81,8 +81,8 @@ const toNotes = (noteIds, fpaths, contents) => {
 
       const { subName } = extractNoteFPath(fpath);
       if (subName === INDEX + DOT_JSON) {
-        title = content.title;
-        body = content.body;
+        // content can be null if dangerouslyIgnoreError is true.
+        if (isObject(content)) [title, body] = [content.title, content.body];
       } else {
         media.push({ name: subName, content: content });
       }
@@ -125,15 +125,48 @@ const toConflictedNotes = (noteIds, conflictWiths, fpaths, contents) => {
 
 const fetch = async (params) => {
 
-  let { listName, sortOn, doDescendingOrder, doFetchSettings, pendingPins } = params;
-  const { noteFPaths, settingsFPath, pinFPaths } = await listFPaths(doFetchSettings);
+  let { listName, sortOn, doDescendingOrder, doFetchStgsAndInfo, pendingPins } = params;
+  const {
+    noteFPaths, settingsFPaths: _settingsFPaths, infoFPath, pinFPaths,
+  } = await listFPaths(doFetchStgsAndInfo);
+  const {
+    fpaths: settingsFPaths, ids: settingsIds,
+  } = getLastSettingsFPaths(_settingsFPaths);
 
-  let settings;
-  if (settingsFPath && doFetchSettings) {
-    settings = await getApi().getFile(settingsFPath);
+  let settings, conflictedSettings = [], info;
+  if (doFetchStgsAndInfo) {
+    if (settingsFPaths.length > 0) {
+      const files = await getFiles(settingsFPaths, true);
 
-    sortOn = settings.sortOn;
-    doDescendingOrder = settings.doDescendingOrder;
+      // content can be null if dangerouslyIgnoreError is true.
+      const { fpaths, contents } = excludeNullContents(files.fpaths, files.contents)
+      for (let i = 0; i < fpaths.length; i++) {
+        const [fpath, content] = [fpaths[i], contents[i]];
+        if (fpaths.length === 1) {
+          settings = content;
+          [sortOn, doDescendingOrder] = [settings.sortOn, settings.doDescendingOrder];
+          continue;
+        }
+        conflictedSettings.push({
+          ...content, id: settingsIds[settingsFPaths.indexOf(fpath)], fpath,
+        });
+      }
+    }
+
+    if (infoFPath) {
+      const { contents } = await getFiles([infoFPath], true);
+      if (isObject(contents[0])) info = contents[0];
+    }
+
+    // Transition from purchases in settings to info.
+    if (isObject(settings) && !isObject(info)) {
+      if ('purchases' in settings) {
+        info = { purchases: settings.purchases, checkPurchasesDT: null };
+        if ('checkPurchasesDT' in settings) {
+          info.checkPurchasesDT = settings.checkPurchasesDT;
+        }
+      }
+    }
   }
 
   const { noteIds, conflictedIds, conflictWiths, toRootIds } = listNoteIds(noteFPaths);
@@ -168,7 +201,7 @@ const fetch = async (params) => {
 
   const responses = await batchGetFileWithRetry(_fpaths, 0, true);
   const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
-  for (let { fpath, content } of responses) {
+  for (const { fpath, content } of responses) {
     fpaths.push(fpath);
     contents.push(content);
   }
@@ -187,7 +220,7 @@ const fetch = async (params) => {
   listNames = [...new Set(listNames)];
 
   return {
-    notes, hasMore, conflictedNotes, listNames, settingsFPath, settings,
+    notes, hasMore, conflictedNotes, listNames, settings, conflictedSettings, info,
   };
 };
 
@@ -305,7 +338,7 @@ const putNotes = async (params) => {
 
   const fpaths = [], contents = [];
   for (const note of notes) {
-    const fname = createNoteFName(note.id, note.parentIds);
+    const fname = createDataFName(note.id, note.parentIds);
     fpaths.push(createNoteFPath(listName, fname, INDEX + DOT_JSON));
     contents.push({ title: note.title, body: note.body });
     if (note.media) {

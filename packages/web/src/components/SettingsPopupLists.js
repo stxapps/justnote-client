@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { motion, AnimateSharedLayout, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import dataApi from '../apis/data';
 import {
@@ -42,17 +42,15 @@ const SettingsPopupLists = (props) => {
       </div>
       <div className={tailwind('pt-2.5')}>
         <ListNameEditor key="SPL_newListNameEditor" listNameObj={null} validateDisplayName={validateDisplayName} level={0} />
-        <AnimateSharedLayout>
-          <AnimatePresence initial={false}>
-            {listNameMap.map(listNameObj => {
-              return (
-                <motion.div key={listNameObj.listName} layoutId={listNameObj.listName} variants={listsFMV} initial="hidden" animate="visible" exit="exit">
-                  <ListNameEditor listNameObj={listNameObj} validateDisplayName={validateDisplayName} level={0} />
-                </motion.div>
-              )
-            })}
-          </AnimatePresence>
-        </AnimateSharedLayout>
+        <AnimatePresence initial={false}>
+          {listNameMap.map(listNameObj => {
+            return (
+              <motion.div key={listNameObj.listName} layoutId={listNameObj.listName} variants={listsFMV} initial="hidden" animate="visible" exit="exit">
+                <ListNameEditor listNameObj={listNameObj} validateDisplayName={validateDisplayName} level={0} />
+              </motion.div>
+            )
+          })}
+        </AnimatePresence>
       </div>
     </div>
   );

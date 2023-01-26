@@ -95,6 +95,7 @@ export const CD_ROOT = 'cdroot';
 export const NOTES = 'notes';
 export const IMAGES = 'images';
 export const SETTINGS = 'settings';
+export const INFO = 'info';
 export const PINS = 'pins';
 export const INDEX = 'index';
 export const DOT_JSON = '.json';

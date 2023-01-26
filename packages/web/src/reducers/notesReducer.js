@@ -8,8 +8,8 @@ import {
   ADD_NOTE_ROLLBACK, UPDATE_NOTE, UPDATE_NOTE_COMMIT, UPDATE_NOTE_ROLLBACK,
   MOVE_NOTES, MOVE_NOTES_COMMIT, MOVE_NOTES_ROLLBACK, DELETE_NOTES, DELETE_NOTES_COMMIT,
   DELETE_NOTES_ROLLBACK, CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
-  MERGE_NOTES_COMMIT, UPDATE_SETTINGS, CANCEL_DIED_SETTINGS, SYNC_COMMIT,
-  DELETE_ALL_DATA, RESET_STATE,
+  MERGE_NOTES_COMMIT, UPDATE_SETTINGS, CANCEL_DIED_SETTINGS, MERGE_SETTINGS_COMMIT,
+  SYNC_COMMIT, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   MY_NOTES, TRASH, ARCHIVE, ID, STATUS, ADDED, ADDING, DIED_ADDING,
@@ -33,10 +33,10 @@ const toObjAndAddAttrs = (notes, status) => {
 const notesReducer = (state = initialState, action) => {
 
   if (action.type === FETCH_COMMIT) {
-    const { listNames, doFetchSettings, settings } = action.payload;
+    const { listNames, doFetchStgsAndInfo, settings } = action.payload;
 
     const newState = {};
-    if (doFetchSettings) {
+    if (doFetchStgsAndInfo) {
       if (settings) {
         for (const k of getAllListNames(settings.listNameMap)) {
           newState[k] = state[k] || null;
@@ -272,7 +272,11 @@ const notesReducer = (state = initialState, action) => {
     return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
   }
 
-  if (action.type === UPDATE_SETTINGS || action.type === CANCEL_DIED_SETTINGS) {
+  if (
+    action.type === UPDATE_SETTINGS ||
+    action.type === CANCEL_DIED_SETTINGS ||
+    action.type === MERGE_SETTINGS_COMMIT
+  ) {
     const { settings } = action.payload;
     const listNames = getAllListNames(settings.listNameMap);
 

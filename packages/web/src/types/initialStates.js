@@ -24,8 +24,8 @@ export const initialSettingsState = {
   listNameMap: [
     { ...myNotesListNameObj }, { ...trashListNameObj }, { ...archiveListNameObj },
   ],
-  purchases: null, // an array with elements as purchase objs
-  checkPurchasesDT: null,
+  purchases: null, // No need anymore but keep it for comparing
+  checkPurchasesDT: null, // No need anymore but keep it for comparing
   themeMode: WHT_MODE,
   themeCustomOptions: [
     { ...whtModeThemeCustomOptions }, { ...blkModeThemeCustomOptions },
@@ -39,12 +39,18 @@ export const initialLocalSettingsState = {
     { ...whtModeThemeCustomOptions }, { ...blkModeThemeCustomOptions },
   ],
   cleanUpStaticFilesDT: null,
-  // Below is duplicate from Settings for Loading to support Dark appearance.
+  // Below is duplicate from Info for Loading to support Dark appearance.
   purchases: null,
+  // Below is duplicate from Settings for Loading to support Dark appearance.
   defaultThemeMode: WHT_MODE,
   defaultThemeCustomOptions: [
     { ...whtModeThemeCustomOptions }, { ...blkModeThemeCustomOptions },
   ],
+};
+
+export const initialInfoState = {
+  purchases: null, // an array with elements as purchase objs
+  checkPurchasesDT: null,
 };
 
 export const initialListNameEditorState = {

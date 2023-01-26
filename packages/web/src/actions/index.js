@@ -24,7 +24,9 @@ import {
   UPDATE_DO_DESCENDING_ORDER, UPDATE_NOTE_DATE_SHOWING_MODE, UPDATE_NOTE_DATE_FORMAT,
   UPDATE_DO_SECTION_NOTES_BY_MONTH, UPDATE_DO_MORE_EDITOR_FONT_SIZES, UPDATE_SETTINGS,
   UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS,
-  UPDATE_SETTINGS_VIEW_ID, UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION,
+  MERGE_SETTINGS, MERGE_SETTINGS_COMMIT, MERGE_SETTINGS_ROLLBACK,
+  UPDATE_SETTINGS_VIEW_ID, UPDATE_INFO, UPDATE_INFO_COMMIT, UPDATE_INFO_ROLLBACK,
+  UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION,
   UPDATE_DISCARD_ACTION, UPDATE_LIST_NAMES_MODE, INCREASE_SAVE_NOTE_COUNT,
   INCREASE_DISCARD_NOTE_COUNT, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
   INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
@@ -56,7 +58,7 @@ import {
   DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
   MY_NOTES, TRASH, ARCHIVE, ID, NEW_NOTE, NEW_NOTE_OBJ, ADDED_DT, UPDATED_DT,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES,
-  N_DAYS, CD_ROOT, NOTES, IMAGES, SETTINGS, INDEX, DOT_JSON, PINS, LG_WIDTH,
+  N_DAYS, CD_ROOT, NOTES, IMAGES, SETTINGS, INFO, INDEX, DOT_JSON, PINS, LG_WIDTH,
   IMAGE_FILE_EXTS, IAP_STATUS_URL, COM_JUSTNOTECC, SIGNED_TEST_STRING, VALID, ACTIVE,
   SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS,
   WHT_MODE, BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE, FEATURE_DATE_FORMAT,
@@ -68,11 +70,12 @@ import {
   isEqual, separateUrlAndParam, getUserImageUrl, randomString, sleep, isObject,
   isString, isNumber, isListNameObjsValid, indexOfClosingTag, isNoteBodyEqual,
   clearNoteData, getStaticFPath, deriveFPaths, getListNameObj, getAllListNames,
-  getMainId, createNoteFPath, createNoteFName, extractNoteFPath, extractNoteFName,
-  extractNoteId, listNoteIds, getNoteFPaths, getSettingsFPath, getLatestPurchase,
-  getValidPurchase, doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins,
-  getSortedNotes, separatePinnedValues, getRawPins, getFormattedTime,
-  get24HFormattedTime, getWindowSize,
+  getMainId, createNoteFPath, createDataFName, extractNoteFPath, extractDataFName,
+  extractDataId, listNoteIds, getNoteFPaths, createSettingsFPath, getSettingsFPaths,
+  getLastSettingsFPaths, getInfoFPath, getLatestPurchase, getValidPurchase,
+  doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins, getSortedNotes,
+  separatePinnedValues, getRawPins, getFormattedTime, get24HFormattedTime,
+  getWindowSize,
 } from '../utils';
 import { isUint8Array, isBlob, convertBlobToDataUrl } from '../utils/index-web';
 import { _ } from '../utils/obj';
@@ -791,13 +794,13 @@ export const fetch = () => async (dispatch, getState) => {
   const doDescendingOrder = getState().settings.doDescendingOrder;
   const pendingPins = getState().pendingPins;
 
-  const doFetchSettings = !didFetchSettings;
+  const doFetchStgsAndInfo = !didFetchSettings;
 
   dispatch({ type: FETCH });
 
   try {
     const params = {
-      listName, sortOn, doDescendingOrder, doFetchSettings, pendingPins,
+      listName, sortOn, doDescendingOrder, doFetchStgsAndInfo, pendingPins,
     };
     const fetched = await dataApi.fetch(params);
     await dataApi.fetchStaticFiles(fetched.notes, fetched.conflictedNotes);
@@ -1660,7 +1663,7 @@ export const updateSettingsPopup = (isShown) => async (dispatch, getState) => {
       1. FETCH_COMMIT might be after the popup is open
       2. user might open the popup while settings is being updated or rolled back
   */
-  if (!isShown) dispatch(updateSettings());
+  if (!isShown) dispatch(updateStgsAndInfo());
 
   updatePopupUrlHash(SETTINGS_POPUP, isShown, null);
 };
@@ -1763,7 +1766,7 @@ export const updateNoteDateFormat = (
   dateFormat, isTwoDigit, isCurrentYearShown
 ) => async (dispatch, getState) => {
   const state = getState();
-  const purchases = state.settings.purchases;
+  const purchases = state.info.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
     vars.paywallFeature.feature = FEATURE_DATE_FORMAT;
@@ -1789,7 +1792,7 @@ export const updateDoSectionNotesByMonth = (doSection) => async (
   dispatch, getState
 ) => {
   const state = getState();
-  const purchases = state.settings.purchases;
+  const purchases = state.info.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
     vars.paywallFeature.feature = FEATURE_SECTION_NOTES_BY_MONTH;
@@ -1804,7 +1807,7 @@ export const updateDoMoreEditorFontSizes = (doMore) => async (
   dispatch, getState
 ) => {
   const state = getState();
-  const purchases = state.settings.purchases;
+  const purchases = state.info.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
     vars.paywallFeature.feature = FEATURE_MORE_EDITOR_FONT_SIZES;
@@ -1829,31 +1832,29 @@ export const updateDeletingListName = (listName) => {
   };
 };
 
-export const tryUpdateSettings = () => async (dispatch, getState) => {
-  const isSettingsPopupShown = getState().display.isSettingsPopupShown;
-  if (isSettingsPopupShown) return;
-
-  dispatch(updateSettings());
-};
-
-export const updateSettings = () => async (dispatch, getState) => {
+const updateSettings = async (dispatch, getState) => {
   const state = getState();
   const settings = state.settings;
   const snapshotSettings = state.snapshot.settings;
+
   if (isEqual(settings, snapshotSettings)) {
     dispatch(cancelDiedSettings());
     return;
   }
 
   const addedDT = Date.now();
-  const settingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
-  const _settingsFPath = getSettingsFPath(state);
+  const {
+    fpaths: _settingsFPaths, ids: _settingsIds,
+  } = getLastSettingsFPaths(getSettingsFPaths(state));
+
+  const settingsFName = createDataFName(`${addedDT}${randomString(4)}`, _settingsIds);
+  const settingsFPath = createSettingsFPath(settingsFName);
 
   const doFetch = (
     settings.sortOn !== snapshotSettings.sortOn ||
     settings.doDescendingOrder !== snapshotSettings.doDescendingOrder
   );
-  const payload = { settingsFPath, settings, doFetch };
+  const payload = { settings, doFetch };
 
   vars.updateSettings.doFetch = doFetch;
   dispatch({ type: UPDATE_SETTINGS, payload });
@@ -1871,24 +1872,124 @@ export const updateSettings = () => async (dispatch, getState) => {
   vars.updateSettings.doFetch = false;
 
   try {
-    if (_settingsFPath) dataApi.deleteFiles([_settingsFPath]);
+    dataApi.putFiles(_settingsFPaths, _settingsFPaths.map(() => ({})));
   } catch (error) {
     console.log('updateSettings clean up error: ', error);
     // error in this step should be fine
   }
 };
 
+const updateInfo = async (dispatch, getState) => {
+  const state = getState();
+  const info = state.info;
+  const snapshotInfo = state.snapshot.info;
+
+  if (isEqual(info, snapshotInfo)) return;
+
+  const addedDT = Date.now();
+  const infoFPath = `${INFO}${addedDT}${DOT_JSON}`;
+  const _infoFPath = getInfoFPath(state);
+
+  const payload = { infoFPath, info };
+  dispatch({ type: UPDATE_INFO, payload });
+
+  try {
+    await dataApi.putFiles([infoFPath], [info]);
+  } catch (error) {
+    console.log('updateInfo error: ', error);
+    dispatch({ type: UPDATE_INFO_ROLLBACK, payload: { ...payload, error } });
+    return;
+  }
+
+  dispatch({ type: UPDATE_INFO_COMMIT, payload });
+
+  try {
+    if (_infoFPath) dataApi.deleteFiles([_infoFPath]);
+  } catch (error) {
+    console.log('updateInfo clean up error: ', error);
+    // error in this step should be fine
+  }
+};
+
+export const updateStgsAndInfo = () => async (dispatch, getState) => {
+  await updateSettings(dispatch, getState);
+  await updateInfo(dispatch, getState);
+};
+
 export const retryDiedSettings = () => async (dispatch, getState) => {
-  dispatch(updateSettings());
+  await updateSettings(dispatch, getState);
 };
 
 export const cancelDiedSettings = () => async (dispatch, getState) => {
-  const { settings } = getState().snapshot;
-  const payload = { settings };
-  dispatch({
-    type: CANCEL_DIED_SETTINGS,
-    payload: payload,
-  });
+  const state = getState();
+  const settings = state.settings;
+  const snapshotSettings = state.snapshot.settings;
+
+  const doFetch = (
+    settings.sortOn !== snapshotSettings.sortOn ||
+    settings.doDescendingOrder !== snapshotSettings.doDescendingOrder
+  );
+  const payload = { settings: snapshotSettings, doFetch };
+
+  vars.updateSettings.doFetch = doFetch;
+  dispatch({ type: CANCEL_DIED_SETTINGS, payload });
+
+  vars.updateSettings.doFetch = false;
+};
+
+export const tryUpdateInfo = () => async (dispatch, getState) => {
+  const isSettingsPopupShown = getState().display.isSettingsPopupShown;
+  if (isSettingsPopupShown) return;
+
+  await updateInfo(dispatch, getState);
+};
+
+export const mergeSettings = (selectedId) => async (dispatch, getState) => {
+  const state = getState();
+  const currentSettings = state.settings;
+  const contents = state.conflictedSettings.contents;
+
+  const addedDT = Date.now();
+  const _settingsFPaths = contents.map(content => content.fpath);
+  const _settingsIds = contents.map(content => content.id);
+  const _settings = contents.find(content => content.id === selectedId);
+
+  const settingsFName = createDataFName(`${addedDT}${randomString(4)}`, _settingsIds);
+  const settingsFPath = createSettingsFPath(settingsFName);
+
+  const settings = { ...initialSettingsState };
+  for (const k in settings) {
+    // Conflicted settings content has extra attrs i.e. id and fpath.
+    if (k in _settings) settings[k] = _settings[k];
+  }
+
+  const doFetch = (
+    settings.sortOn !== currentSettings.sortOn ||
+    settings.doDescendingOrder !== currentSettings.doDescendingOrder
+  );
+  const payload = { settings, doFetch };
+
+  vars.updateSettings.doFetch = doFetch;
+  dispatch({ type: MERGE_SETTINGS, payload });
+
+  try {
+    await dataApi.putFiles([settingsFPath], [settings]);
+  } catch (error) {
+    console.log('mergeSettings error: ', error);
+    dispatch({ type: MERGE_SETTINGS_ROLLBACK, payload: { ...payload, error } });
+    vars.updateSettings.doFetch = false;
+    return;
+  }
+
+  dispatch({ type: MERGE_SETTINGS_COMMIT, payload });
+  vars.updateSettings.doFetch = false;
+
+  try {
+    dataApi.putFiles(_settingsFPaths, _settingsFPaths.map(() => ({})));
+  } catch (error) {
+    console.log('mergeSettings clean up error: ', error);
+    // error in this step should be fine
+  }
 };
 
 /*
@@ -2141,7 +2242,7 @@ const importAllDataLoop = async (dispatch, fpaths, contents) => {
   }
 };
 
-const parseImportedFile = async (dispatch, fileContent) => {
+const parseImportedFile = async (dispatch, settingsParentIds, fileContent) => {
 
   dispatch(updateImportAllDataProgress({
     total: 'calculating...',
@@ -2162,7 +2263,7 @@ const parseImportedFile = async (dispatch, fileContent) => {
   }
 
   // 1 format: zip file
-  let fpaths = [], contents = [], addedDT = Date.now(), idMap = {};
+  let fpaths = [], contents = [], addedDT = Date.now(), idMap = {}, settingsParts = [];
   let pinFPathParts = [], pinIds = [], pinContents = [];
   let isEvernote = false, enFPaths = [], enContents = [];
   const reader = new zip.ZipReader(
@@ -2205,7 +2306,7 @@ const parseImportedFile = async (dispatch, fileContent) => {
       }
       if (fpathParts[0] !== NOTES) continue;
 
-      const { id, parentIds } = extractNoteFName(fpathParts[2]);
+      const { id, parentIds } = extractDataFName(fpathParts[2]);
       if (!(/^\d+[A-Za-z]+$/.test(id))) continue;
       if (parentIds) {
         if (!parentIds.every(id => (/^\d+[A-Za-z]+$/.test(id)))) continue;
@@ -2233,7 +2334,7 @@ const parseImportedFile = async (dispatch, fileContent) => {
         let rootId = null;
         if (parentIds && parentIds.length > 0) {
           rootId = parentIds[0];
-          const { dt } = extractNoteId(rootId);
+          const { dt } = extractDataId(rootId);
           while (rootId === parentIds[0]) rootId = `${dt}${randomString(4)}`;
 
           const rootFPathParts = [...fpathParts.slice(0, 4)];
@@ -2244,7 +2345,7 @@ const parseImportedFile = async (dispatch, fileContent) => {
         }
 
         let newId = id;
-        const { dt } = extractNoteId(newId);
+        const { dt } = extractDataId(newId);
         while (newId === id) newId = `${dt}${randomString(4)}`;
 
         let newFName = rootId ? `${newId}_${rootId}` : newId;
@@ -2277,6 +2378,7 @@ const parseImportedFile = async (dispatch, fileContent) => {
       pinFPathParts.push(fpathParts);
       pinIds.push(fnameParts[0]);
       pinContents.push(content);
+      continue;
     } else if (fpath.startsWith(SETTINGS)) {
       if (!fpath.endsWith(DOT_JSON)) continue;
 
@@ -2329,9 +2431,9 @@ const parseImportedFile = async (dispatch, fileContent) => {
         continue;
       }
 
-      // Make the settings newest version
-      fpath = `${SETTINGS}${addedDT}${DOT_JSON}`;
-      addedDT += 1;
+      // Choose the latest one.
+      settingsParts.push({ dt, content });
+      continue;
     } else if (fpath.startsWith('Takeout/Keep/')) {
       if (fpathParts.length < 3) continue;
       if (fnameParts.length < 2) continue;
@@ -2351,8 +2453,9 @@ const parseImportedFile = async (dispatch, fileContent) => {
         }
         content = settings;
 
-        fpath = `${SETTINGS}${addedDT}${DOT_JSON}`;
+        settingsParts.push({ dt: addedDT, content });
         addedDT += 1;
+        continue;
       } else if (IMAGE_FILE_EXTS.includes(fext)) {
         const newName = `${randomString(4)}-${randomString(4)}-${randomString(4)}-${randomString(4)}.${fext}`;
         fpath = `${IMAGES}/${newName}`;
@@ -2398,6 +2501,21 @@ const parseImportedFile = async (dispatch, fileContent) => {
       fpaths.push(fpathParts.join('/'));
       contents.push(content);
     }
+  }
+
+  let latestSettingsPart;
+  for (const settingsPart of settingsParts) {
+    if (!isObject(latestSettingsPart)) {
+      latestSettingsPart = settingsPart;
+      continue;
+    }
+    if (latestSettingsPart.dt < settingsPart.dt) latestSettingsPart = settingsPart;
+  }
+  if (isObject(latestSettingsPart)) {
+    const fname = createDataFName(`${addedDT}${randomString(4)}`, settingsParentIds);
+    fpaths.push(createSettingsFPath(fname));
+    contents.push(latestSettingsPart.content);
+    addedDT += 1;
   }
 
   if (isEvernote) {
@@ -2688,13 +2806,15 @@ const parseImportedFile = async (dispatch, fileContent) => {
 };
 
 export const importAllData = () => async (dispatch, getState) => {
+  const state = getState();
+  const { ids: settingsParentIds } = getLastSettingsFPaths(getSettingsFPaths(state));
 
   const onError = () => {
     window.alert('Read failed: could not read content in the file. Please recheck your file.');
   };
 
   const onReaderLoad = (e) => {
-    parseImportedFile(dispatch, e.target.result);
+    parseImportedFile(dispatch, settingsParentIds, e.target.result);
   };
 
   const onInputChange = () => {
@@ -2727,7 +2847,7 @@ export const exportAllData = () => async (dispatch, getState) => {
 
   let fpaths = [], rootIds = {}, toRootIds;
   try {
-    const { noteFPaths, settingsFPath, pinFPaths } = await dataApi.listFPaths(true);
+    const { noteFPaths, settingsFPaths, pinFPaths } = await dataApi.listFPaths(true);
     const { noteIds, conflictedIds, toRootIds: _toRootIds } = listNoteIds(noteFPaths);
 
     for (const noteId of [...noteIds, ...conflictedIds]) {
@@ -2738,7 +2858,8 @@ export const exportAllData = () => async (dispatch, getState) => {
       rootIds[noteId.id] = `${noteId.addedDT}${randomString(4)}`;
     }
 
-    if (settingsFPath) fpaths.push(settingsFPath);
+    const { fpaths: lastSettingsFPaths } = getLastSettingsFPaths(settingsFPaths);
+    if (lastSettingsFPaths.length > 0) fpaths.push(lastSettingsFPaths[0]);
 
     const pins = {};
     for (const fpath of pinFPaths) {
@@ -2791,9 +2912,9 @@ export const exportAllData = () => async (dispatch, getState) => {
 
         if (fpath.startsWith(NOTES)) {
           const { listName, fname, subName } = extractNoteFPath(fpath);
-          const { id, parentIds } = extractNoteFName(fname);
+          const { id, parentIds } = extractDataFName(fname);
           if (parentIds && rootIds[id]) {
-            const newFName = createNoteFName(id, [rootIds[id]]);
+            const newFName = createDataFName(id, [rootIds[id]]);
             fpath = createNoteFPath(listName, newFName, subName);
           }
           idMap[toRootIds[id]] = id;
@@ -2958,14 +3079,14 @@ export const deleteAllData = () => async (dispatch, getState) => {
 
   dispatch(updateDeleteAllDataProgress({ total: 'calculating...', done: 0 }));
 
-  let allNoteIds, staticFPaths, settingsFPath, pins;
+  let allNoteIds, staticFPaths, settingsFPaths, settingsIds, pins;
   try {
     const fpaths = await dataApi.listFPaths(true);
     const noteIds = listNoteIds(fpaths.noteFPaths);
 
     allNoteIds = [...noteIds.noteIds, ...noteIds.conflictedIds];
     staticFPaths = fpaths.staticFPaths;
-    settingsFPath = fpaths.settingsFPath;
+    settingsFPaths = fpaths.settingsFPaths;
 
     pins = getPins(fpaths.pinFPaths, {}, false, noteIds.toRootIds);
     pins = Object.values(pins);
@@ -2978,13 +3099,17 @@ export const deleteAllData = () => async (dispatch, getState) => {
     return;
   }
 
-  if (settingsFPath) {
-    const { contents } = await dataApi.getFiles([settingsFPath], true);
-    if (isEqual(initialSettingsState, contents[0])) settingsFPath = null;
+  const lastSettingsFPaths = getLastSettingsFPaths(settingsFPaths);
+  [settingsFPaths, settingsIds] = [lastSettingsFPaths.fpaths, lastSettingsFPaths.ids];
+  if (settingsFPaths.length === 1) {
+    const { contents } = await dataApi.getFiles(settingsFPaths, true);
+    if (isEqual(initialSettingsState, contents[0])) {
+      [settingsFPaths, settingsIds] = [[], []];
+    }
   }
 
   const total = (
-    allNoteIds.length + staticFPaths.length + (settingsFPath ? 1 : 0) + pins.length
+    allNoteIds.length + staticFPaths.length + settingsFPaths.length + pins.length
   );
   dispatch(updateDeleteAllDataProgress({ total, done: 0 }));
 
@@ -3000,25 +3125,27 @@ export const deleteAllData = () => async (dispatch, getState) => {
         total, done: allNoteIds.length + staticFPaths.length,
       }));
     }
-    if (settingsFPath) {
+    if (settingsFPaths.length > 0) {
       const addedDT = Date.now();
-      const newSettingsFPath = `${SETTINGS}${addedDT}${DOT_JSON}`;
+      const fname = createDataFName(`${addedDT}${randomString(4)}`, settingsIds);
+      const newSettingsFPath = createSettingsFPath(fname);
 
       await dataApi.putFiles([newSettingsFPath], [{ ...initialSettingsState }]);
       try {
-        await dataApi.deleteFiles([settingsFPath]);
+        await dataApi.putFiles(settingsFPaths, settingsFPaths.map(() => ({})));
       } catch (error) {
         console.log('deleteAllData error: ', error);
         // error in this step should be fine
       }
 
       dispatch(updateDeleteAllDataProgress({
-        total, done: allNoteIds.length + staticFPaths.length + 1,
+        total, done: allNoteIds.length + staticFPaths.length + settingsFPaths.length,
       }));
     }
     if (pins.length > 0) {
       await deleteAllPins(
-        dispatch, pins, total, allNoteIds.length + staticFPaths.length + 1
+        dispatch, pins, total,
+        allNoteIds.length + staticFPaths.length + settingsFPaths.length,
       );
     }
     await fileApi.deleteFiles(staticFPaths);
@@ -3113,7 +3240,7 @@ export const refreshPurchases = () => async (dispatch, getState) => {
 };
 
 export const checkPurchases = () => async (dispatch, getState) => {
-  const { purchases, checkPurchasesDT } = getState().settings;
+  const { purchases, checkPurchasesDT } = getState().info;
 
   const purchase = getValidPurchase(purchases);
   if (!purchase) return;
@@ -3171,7 +3298,7 @@ export const updateIapRefreshStatus = (status) => {
 
 export const pinNotes = (ids) => async (dispatch, getState) => {
   const state = getState();
-  const purchases = state.settings.purchases;
+  const purchases = state.info.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
     vars.paywallFeature.feature = FEATURE_PIN;
@@ -3406,7 +3533,7 @@ export const updateDoUseLocalTheme = (doUse) => {
 
 export const updateTheme = (mode, customOptions) => async (dispatch, getState) => {
   const state = getState();
-  const purchases = state.settings.purchases;
+  const purchases = state.info.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
     vars.paywallFeature.feature = FEATURE_APPEARANCE;

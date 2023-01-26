@@ -32,7 +32,7 @@ const StaleErrorPopup = () => {
   if (!isShown) return null;
 
   return (
-    <div className={tailwind('fixed inset-x-0 top-14 z-40 flex items-start justify-center md:top-0')}>
+    <div className={tailwind('fixed inset-x-0 top-14 flex items-start justify-center md:top-0')}>
       <div className={tailwind('relative m-4 max-w-[26rem] rounded-md bg-red-50 p-4 shadow-lg')}>
         <div className={tailwind('flex')}>
           <div className={tailwind('flex-shrink-0')}>
