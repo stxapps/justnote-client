@@ -71,11 +71,11 @@ import {
   isString, isNumber, isListNameObjsValid, indexOfClosingTag, isNoteBodyEqual,
   clearNoteData, getStaticFPath, deriveFPaths, getListNameObj, getAllListNames,
   getMainId, createNoteFPath, createDataFName, extractNoteFPath, extractDataFName,
-  extractDataId, listNoteIds, getNoteFPaths, createSettingsFPath, getSettingsFPaths,
-  getLastSettingsFPaths, getInfoFPath, getLatestPurchase, getValidPurchase,
-  doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins, getSortedNotes,
-  separatePinnedValues, getRawPins, getFormattedTime, get24HFormattedTime,
-  getWindowSize,
+  extractDataId, listNoteIds, getNoteFPaths, getStaticFPaths, createSettingsFPath,
+  getSettingsFPaths, getLastSettingsFPaths, getInfoFPath, getLatestPurchase,
+  getValidPurchase, doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins,
+  getSortedNotes, separatePinnedValues, getRawPins, getFormattedTime,
+  get24HFormattedTime, getWindowSize,
 } from '../utils';
 import { isUint8Array, isBlob, convertBlobToDataUrl } from '../utils/index-web';
 import { _ } from '../utils/obj';
@@ -1623,14 +1623,65 @@ export const onShowNLIMPopup = (title, body, media) => async (
   dispatch(showNLIMPopup(null, null, false, true));
 };
 
-const _cleanUpStaticFiles = async (noteFPaths, unsavedNotes) => {
+const _cleanUpStaticFiles = async (dispatch, getState) => {
+  const noteFPaths = getNoteFPaths(getState());
+  const staticFPaths = getStaticFPaths(getState());
+  const unsavedNotes = getState().unsavedNotes;
 
+  const usedFPaths = [];
+  const { noteIds, conflictedIds } = listNoteIds(noteFPaths);
+  for (const noteId of [...noteIds, ...conflictedIds]) {
+    for (const fpath of noteId.fpaths) {
+      if (fpath.includes(CD_ROOT + '/')) usedFPaths.push(getStaticFPath(fpath));
+    }
+  }
+
+  for (const k in unsavedNotes) {
+    const { media } = unsavedNotes[k];
+    for (const { name: fpath } of media) {
+      if (fpath.includes(CD_ROOT + '/')) usedFPaths.push(getStaticFPath(fpath));
+    }
+  }
+
+  // Delete unused static files in server
+  let unusedFPaths = [];
+  for (const fpath of staticFPaths) {
+    if (usedFPaths.includes(fpath)) continue;
+    unusedFPaths.push(fpath);
+  }
+  unusedFPaths = unusedFPaths.slice(0, N_NOTES);
+
+  await dataApi.batchDeleteFileWithRetry(unusedFPaths, 0);
+  await fileApi.deleteFiles(unusedFPaths);
+
+  // Delete unused static files in local
+  const keys = await fileApi.listKeys();
+  const imgKeys = keys.filter(key => key.includes(IMAGES + '/'));
+  const imgFPaths = imgKeys.map(key => key.slice(key.indexOf(IMAGES + '/')));
+
+  unusedFPaths = [];
+  for (const fpath of imgFPaths) {
+    if (usedFPaths.includes(fpath)) continue;
+    unusedFPaths.push(fpath);
+  }
+  unusedFPaths = unusedFPaths.slice(0, N_NOTES);
+
+  await fileApi.deleteFiles(unusedFPaths);
+
+  // Delete unused unsaved notes
+  let unusedIds = [];
+  for (const k in unsavedNotes) {
+    const { id, title, body, savedTitle, savedBody } = unsavedNotes[k];
+    if (id === getState().display.noteId) continue;
+    if (title === savedTitle && isNoteBodyEqual(body, savedBody)) unusedIds.push(id);
+  }
+  unusedIds = unusedIds.slice(0, N_NOTES);
+
+  if (unusedIds.length > 0) dispatch(deleteUnsavedNotes(unusedIds));
 };
 
 export const cleanUpStaticFiles = () => async (dispatch, getState) => {
-  const state = getState();
-
-  const { cleanUpStaticFilesDT } = state.localSettings;
+  const { cleanUpStaticFilesDT } = getState().localSettings;
   if (!cleanUpStaticFilesDT) return;
 
   const now = Date.now();
@@ -1640,13 +1691,10 @@ export const cleanUpStaticFiles = () => async (dispatch, getState) => {
 
   if (!doCheck) return;
 
-  const noteFPaths = getNoteFPaths(state);
-  const unsavedNotes = state.unsavedNotes;
-
   dispatch({ type: CLEAN_UP_STATIC_FILES });
   try {
-    const ids = await _cleanUpStaticFiles(noteFPaths, unsavedNotes);
-    dispatch({ type: CLEAN_UP_STATIC_FILES_COMMIT, payload: { ids } });
+    await _cleanUpStaticFiles(dispatch, getState);
+    dispatch({ type: CLEAN_UP_STATIC_FILES_COMMIT });
   } catch (error) {
     console.log('Error when clean up static files: ', error);
     dispatch({ type: CLEAN_UP_STATIC_FILES_ROLLBACK });
@@ -1765,8 +1813,7 @@ export const updateNoteDateShowingMode = (mode) => {
 export const updateNoteDateFormat = (
   dateFormat, isTwoDigit, isCurrentYearShown
 ) => async (dispatch, getState) => {
-  const state = getState();
-  const purchases = state.info.purchases;
+  const purchases = getState().info.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
     vars.paywallFeature.feature = FEATURE_DATE_FORMAT;
@@ -1791,8 +1838,7 @@ export const updateNoteDateFormat = (
 export const updateDoSectionNotesByMonth = (doSection) => async (
   dispatch, getState
 ) => {
-  const state = getState();
-  const purchases = state.info.purchases;
+  const purchases = getState().info.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
     vars.paywallFeature.feature = FEATURE_SECTION_NOTES_BY_MONTH;
@@ -1806,8 +1852,7 @@ export const updateDoSectionNotesByMonth = (doSection) => async (
 export const updateDoMoreEditorFontSizes = (doMore) => async (
   dispatch, getState
 ) => {
-  const state = getState();
-  const purchases = state.info.purchases;
+  const purchases = getState().info.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
     vars.paywallFeature.feature = FEATURE_MORE_EDITOR_FONT_SIZES;
@@ -1833,9 +1878,8 @@ export const updateDeletingListName = (listName) => {
 };
 
 const updateSettings = async (dispatch, getState) => {
-  const state = getState();
-  const settings = state.settings;
-  const snapshotSettings = state.snapshot.settings;
+  const settings = getState().settings;
+  const snapshotSettings = getState().snapshot.settings;
 
   if (isEqual(settings, snapshotSettings)) {
     dispatch(cancelDiedSettings());
@@ -1845,7 +1889,7 @@ const updateSettings = async (dispatch, getState) => {
   const addedDT = Date.now();
   const {
     fpaths: _settingsFPaths, ids: _settingsIds,
-  } = getLastSettingsFPaths(getSettingsFPaths(state));
+  } = getLastSettingsFPaths(getSettingsFPaths(getState()));
 
   const settingsFName = createDataFName(`${addedDT}${randomString(4)}`, _settingsIds);
   const settingsFPath = createSettingsFPath(settingsFName);
@@ -1880,15 +1924,14 @@ const updateSettings = async (dispatch, getState) => {
 };
 
 const updateInfo = async (dispatch, getState) => {
-  const state = getState();
-  const info = state.info;
-  const snapshotInfo = state.snapshot.info;
+  const info = getState().info;
+  const snapshotInfo = getState().snapshot.info;
 
   if (isEqual(info, snapshotInfo)) return;
 
   const addedDT = Date.now();
   const infoFPath = `${INFO}${addedDT}${DOT_JSON}`;
-  const _infoFPath = getInfoFPath(state);
+  const _infoFPath = getInfoFPath(getState());
 
   const payload = { infoFPath, info };
   dispatch({ type: UPDATE_INFO, payload });
@@ -1921,9 +1964,8 @@ export const retryDiedSettings = () => async (dispatch, getState) => {
 };
 
 export const cancelDiedSettings = () => async (dispatch, getState) => {
-  const state = getState();
-  const settings = state.settings;
-  const snapshotSettings = state.snapshot.settings;
+  const settings = getState().settings;
+  const snapshotSettings = getState().snapshot.settings;
 
   const doFetch = (
     settings.sortOn !== snapshotSettings.sortOn ||
@@ -1945,9 +1987,8 @@ export const tryUpdateInfo = () => async (dispatch, getState) => {
 };
 
 export const mergeSettings = (selectedId) => async (dispatch, getState) => {
-  const state = getState();
-  const currentSettings = state.settings;
-  const contents = state.conflictedSettings.contents;
+  const currentSettings = getState().settings;
+  const contents = getState().conflictedSettings.contents;
 
   const addedDT = Date.now();
   const _settingsFPaths = contents.map(content => content.fpath);
@@ -2806,8 +2847,8 @@ const parseImportedFile = async (dispatch, settingsParentIds, fileContent) => {
 };
 
 export const importAllData = () => async (dispatch, getState) => {
-  const state = getState();
-  const { ids: settingsParentIds } = getLastSettingsFPaths(getSettingsFPaths(state));
+  const settingsFPaths = getSettingsFPaths(getState());
+  const { ids: settingsParentIds } = getLastSettingsFPaths(settingsFPaths);
 
   const onError = () => {
     window.alert('Read failed: could not read content in the file. Please recheck your file.');
@@ -3297,8 +3338,7 @@ export const updateIapRefreshStatus = (status) => {
 };
 
 export const pinNotes = (ids) => async (dispatch, getState) => {
-  const state = getState();
-  const purchases = state.info.purchases;
+  const purchases = getState().info.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
     vars.paywallFeature.feature = FEATURE_PIN;
@@ -3306,9 +3346,9 @@ export const pinNotes = (ids) => async (dispatch, getState) => {
     return;
   }
 
-  const noteFPaths = getNoteFPaths(state);
-  const pinFPaths = getPinFPaths(state);
-  const pendingPins = state.pendingPins;
+  const noteFPaths = getNoteFPaths(getState());
+  const pinFPaths = getPinFPaths(getState());
+  const pendingPins = getState().pendingPins;
 
   const { toRootIds } = listNoteIds(noteFPaths);
   const currentPins = getPins(pinFPaths, pendingPins, true, toRootIds);
@@ -3347,10 +3387,9 @@ export const pinNotes = (ids) => async (dispatch, getState) => {
 };
 
 export const unpinNotes = (ids) => async (dispatch, getState) => {
-  const state = getState();
-  const noteFPaths = getNoteFPaths(state);
-  const pinFPaths = getPinFPaths(state);
-  const pendingPins = state.pendingPins;
+  const noteFPaths = getNoteFPaths(getState());
+  const pinFPaths = getPinFPaths(getState());
+  const pendingPins = getState().pendingPins;
 
   const { toRootIds } = listNoteIds(noteFPaths);
   let currentPins = getPins(pinFPaths, pendingPins, true, toRootIds);
@@ -3391,13 +3430,12 @@ export const unpinNotes = (ids) => async (dispatch, getState) => {
 };
 
 export const movePinnedNote = (id, direction) => async (dispatch, getState) => {
-  const state = getState();
-  const notes = state.notes;
-  const listName = state.display.listName;
-  const doDescendingOrder = state.settings.doDescendingOrder;
-  const noteFPaths = getNoteFPaths(state);
-  const pinFPaths = getPinFPaths(state);
-  const pendingPins = state.pendingPins;
+  const notes = getState().notes;
+  const listName = getState().display.listName;
+  const doDescendingOrder = getState().settings.doDescendingOrder;
+  const noteFPaths = getNoteFPaths(getState());
+  const pinFPaths = getPinFPaths(getState());
+  const pendingPins = getState().pendingPins;
 
   const sortedNotes = getSortedNotes(notes, listName, doDescendingOrder);
   if (!sortedNotes) {
@@ -3484,9 +3522,8 @@ export const cancelDiedPins = () => {
 };
 
 export const cleanUpPins = () => async (dispatch, getState) => {
-  const state = getState();
-  const noteFPaths = getNoteFPaths(state);
-  const pinFPaths = getPinFPaths(state);
+  const noteFPaths = getNoteFPaths(getState());
+  const pinFPaths = getPinFPaths(getState());
 
   const { toRootIds } = listNoteIds(noteFPaths);
   const pins = getRawPins(pinFPaths, toRootIds);
@@ -3532,8 +3569,7 @@ export const updateDoUseLocalTheme = (doUse) => {
 };
 
 export const updateTheme = (mode, customOptions) => async (dispatch, getState) => {
-  const state = getState();
-  const purchases = state.info.purchases;
+  const purchases = getState().info.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
     vars.paywallFeature.feature = FEATURE_APPEARANCE;
@@ -3541,7 +3577,7 @@ export const updateTheme = (mode, customOptions) => async (dispatch, getState) =
     return;
   }
 
-  const doUseLocalTheme = state.localSettings.doUseLocalTheme;
+  const doUseLocalTheme = getState().localSettings.doUseLocalTheme;
   const type = doUseLocalTheme ? UPDATE_LOCAL_THEME : UPDATE_DEFAULT_THEME;
   dispatch({ type, payload: { mode, customOptions } });
 };
@@ -3549,11 +3585,11 @@ export const updateTheme = (mode, customOptions) => async (dispatch, getState) =
 export const updateUpdatingThemeMode = (updatingThemeMode) => async (
   dispatch, getState
 ) => {
-  const state = getState();
-  const doUseLocalTheme = state.localSettings.doUseLocalTheme;
+  const doUseLocalTheme = getState().localSettings.doUseLocalTheme;
   const customOptions = doUseLocalTheme ?
-    state.localSettings.themeCustomOptions : state.settings.themeCustomOptions;
-  const is24HFormat = state.window.is24HFormat;
+    getState().localSettings.themeCustomOptions :
+    getState().settings.themeCustomOptions;
+  const is24HFormat = getState().window.is24HFormat;
 
   let option;
   for (const opt of customOptions) {
@@ -3581,12 +3617,12 @@ export const updateTimePick = (hour, minute, period) => {
 };
 
 export const updateThemeCustomOptions = () => async (dispatch, getState) => {
-  const state = getState();
-  const doUseLocalTheme = state.localSettings.doUseLocalTheme;
+  const doUseLocalTheme = getState().localSettings.doUseLocalTheme;
   const customOptions = doUseLocalTheme ?
-    state.localSettings.themeCustomOptions : state.settings.themeCustomOptions;
+    getState().localSettings.themeCustomOptions :
+    getState().settings.themeCustomOptions;
 
-  const { updatingThemeMode, hour, minute, period } = state.timePick;
+  const { updatingThemeMode, hour, minute, period } = getState().timePick;
 
   const _themeMode = CUSTOM_MODE, _customOptions = [];
 

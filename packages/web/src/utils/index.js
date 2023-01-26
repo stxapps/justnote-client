@@ -1135,6 +1135,17 @@ export const getNoteFPaths = (state) => {
   return [];
 };
 
+export const getStaticFPaths = (state) => {
+  if (
+    isObject(state.cachedFPaths) &&
+    isObject(state.cachedFPaths.fpaths) &&
+    Array.isArray(state.cachedFPaths.fpaths.staticFPaths)
+  ) {
+    return state.cachedFPaths.fpaths.staticFPaths;
+  }
+  return [];
+};
+
 export const getSettingsFPaths = (state) => {
   if (
     isObject(state.cachedFPaths) &&
