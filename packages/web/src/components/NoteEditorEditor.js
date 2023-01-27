@@ -258,10 +258,16 @@ const NoteEditorEditor = (props) => {
   }, [dispatch]);
 
   const onReady = useCallback((editor) => {
+    // Remove toolbar's children before append a new one
+    //   for CKEditor error with restart=true.
     if (isMobile) {
-      bodyBottomToolbar.current.appendChild(editor.ui.view.toolbar.element);
+      const bbtb = bodyBottomToolbar.current;
+      while (bbtb.firstChild) bbtb.removeChild(bbtb.firstChild);
+      bbtb.appendChild(editor.ui.view.toolbar.element);
     } else {
-      bodyTopToolbar.current.appendChild(editor.ui.view.toolbar.element);
+      const bttb = bodyTopToolbar.current;
+      while (bttb.firstChild) bttb.removeChild(bttb.firstChild);
+      bttb.appendChild(editor.ui.view.toolbar.element);
     }
 
     const groupedItemsDropdown = editor.ui.view.toolbar._behavior.groupedItemsDropdown;
