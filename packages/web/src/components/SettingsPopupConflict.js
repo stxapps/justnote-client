@@ -63,7 +63,7 @@ const SettingsPopupConflict = (props) => {
 
   return (
     <React.Fragment>
-      <div className={tailwind('relative mx-auto max-w-3xl px-4 pb-4 md:px-6 lg:px-8 md:pb-6 lg:pb-8')}>
+      <div className={tailwind('relative mx-auto max-w-3xl px-4 pb-4 md:px-6 md:pb-6 lg:px-8 lg:pb-8')}>
         <div className={tailwind('h-16 w-full')} />
         <h3 className={tailwind('pt-5 text-lg font-medium text-gray-800 blk:text-gray-200')}>{conflictedSettings.contents.length} Versions of Settings found</h3>
         <p className={tailwind('text-sm font-normal text-gray-500 blk:text-gray-400')}>Please choose the correct version of the settings.</p>
@@ -151,7 +151,7 @@ const _ConflictItem = (props) => {
         </div>
       </div>
       {isOpen && <div className={tailwind('w-full overflow-x-auto')}>
-        <pre className={tailwind('inline-block text-base font-normal text-gray-600 px-4 py-5 blk:text-gray-300')}>{contentStr}</pre>
+        <pre className={tailwind('inline-block px-4 py-5 text-base font-normal text-gray-600 blk:text-gray-300')}>{contentStr}</pre>
       </div>}
     </div>
   );
