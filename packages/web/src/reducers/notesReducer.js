@@ -49,9 +49,10 @@ const notesReducer = (state = initialState, action) => {
     }
 
     for (const name of listNames) {
-      if (!(name in newState)) {
-        newState[name] = null;
-      }
+      if (!(name in newState)) newState[name] = null;
+    }
+    for (const name of [MY_NOTES, TRASH, ARCHIVE]) { // In case of invalid settings.
+      if (!(name in newState)) newState[name] = null;
     }
 
     const { listName, notes } = action.payload;

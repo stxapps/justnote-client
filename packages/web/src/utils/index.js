@@ -1181,7 +1181,7 @@ export const extractDataFName = (fname) => {
 
 export const extractDataId = (id) => {
   let i;
-  for (i = id.length - 1; i <= 0; i--) {
+  for (i = id.length - 1; i >= 0; i--) {
     if (/\d/.test(id[i])) break;
   }
 
@@ -1497,6 +1497,8 @@ export const getLastSettingsFPaths = (settingsFPaths) => {
     const { fname } = extractSettingsFPath(fpath);
     const { id } = extractDataFName(fname);
     const { dt } = extractDataId(id);
+
+    if (!isString(id) || id.length === 0 || !isNumber(dt)) continue;
     if (/\d/.test(id[id.length - 1])) _v1FPaths.push({ fpath, id, dt });
     else _v2FPaths.push(fpath);
   }
