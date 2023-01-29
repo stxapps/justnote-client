@@ -56,14 +56,15 @@ import {
   CONFIRM_DISCARD_POPUP, NOTE_LIST_MENU_POPUP, NOTE_LIST_ITEM_MENU_POPUP,
   MOVE_ACTION_NOTE_COMMANDS, MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS,
   DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
-  MY_NOTES, TRASH, ARCHIVE, ID, NEW_NOTE, NEW_NOTE_OBJ, ADDED_DT, UPDATED_DT,
-  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES,
-  N_DAYS, CD_ROOT, NOTES, IMAGES, SETTINGS, INFO, INDEX, DOT_JSON, PINS, LG_WIDTH,
-  IMAGE_FILE_EXTS, IAP_STATUS_URL, COM_JUSTNOTECC, SIGNED_TEST_STRING, VALID, ACTIVE,
-  SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS,
-  WHT_MODE, BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE, FEATURE_DATE_FORMAT,
-  FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES,
-  NOTE_DATE_SHOWING_MODE_HIDE, NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS,
+  DISCARD_ACTION_UPDATE_LIST_NAME, MY_NOTES, TRASH, ARCHIVE, ID, NEW_NOTE,
+  NEW_NOTE_OBJ, ADDED_DT, UPDATED_DT, DIED_ADDING, DIED_UPDATING, DIED_MOVING,
+  DIED_DELETING, N_NOTES, N_DAYS, CD_ROOT, NOTES, IMAGES, SETTINGS, INFO, INDEX,
+  DOT_JSON, PINS, LG_WIDTH, IMAGE_FILE_EXTS, IAP_STATUS_URL, COM_JUSTNOTECC,
+  SIGNED_TEST_STRING, VALID, ACTIVE, SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT,
+  SETTINGS_VIEW_LISTS, MODE_EDIT, WHT_MODE, BLK_MODE, CUSTOM_MODE, FEATURE_PIN,
+  FEATURE_APPEARANCE, FEATURE_DATE_FORMAT, FEATURE_SECTION_NOTES_BY_MONTH,
+  FEATURE_MORE_EDITOR_FONT_SIZES, NOTE_DATE_SHOWING_MODE_HIDE,
+  NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS,
 } from '../types/const';
 import {
   throttle, extractUrl, urlHashToObj, objToUrlHash, isBusyStatus,
@@ -1701,7 +1702,9 @@ export const cleanUpStaticFiles = () => async (dispatch, getState) => {
   }
 };
 
-export const updateSettingsPopup = (isShown) => async (dispatch, getState) => {
+export const updateSettingsPopup = (isShown, doCheckEditing = false) => async (
+  dispatch, getState
+) => {
   /*
     A settings snapshot is made when FETCH_COMMIT and UPDATE_SETTINGS_COMMIT
     For FETCH_COMMIT and UPDATE_SETTINGS_COMMIT, check action type in snapshotReducer
@@ -1711,7 +1714,25 @@ export const updateSettingsPopup = (isShown) => async (dispatch, getState) => {
       1. FETCH_COMMIT might be after the popup is open
       2. user might open the popup while settings is being updated or rolled back
   */
-  if (!isShown) dispatch(updateStgsAndInfo());
+  if (!isShown) {
+    if (doCheckEditing) {
+      const listNameEditors = getState().listNameEditors;
+
+      let isEditing = false;
+      for (const k in listNameEditors) {
+        if (listNameEditors[k].mode === MODE_EDIT) {
+          isEditing = true;
+          break;
+        }
+      }
+      if (isEditing) {
+        dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_LIST_NAME));
+        updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
+        return;
+      }
+    }
+    dispatch(updateStgsAndInfo());
+  }
 
   updatePopupUrlHash(SETTINGS_POPUP, isShown, null);
 };

@@ -5,12 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   updatePopupUrlHash, discardNote, updateNoteIdUrlHash, updateNoteId, changeListName,
   updateBulkEditUrlHash, showNoteListMenuPopup, showNLIMPopup, clearSavingFPaths,
+  updateSettingsPopup,
 } from '../actions';
 import {
   CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT,
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
   DISCARD_ACTION_CHANGE_LIST_NAME, DISCARD_ACTION_UPDATE_BULK_EDIT_URL_HASH,
-  DISCARD_ACTION_SHOW_NOTE_LIST_MENU_POPUP, DISCARD_ACTION_SHOW_NLIM_POPUP, SM_WIDTH,
+  DISCARD_ACTION_SHOW_NOTE_LIST_MENU_POPUP, DISCARD_ACTION_SHOW_NLIM_POPUP,
+  DISCARD_ACTION_UPDATE_LIST_NAME, SM_WIDTH,
 } from '../types/const';
 import { dialogBgFMV, dialogFMV } from '../types/animConfigs';
 
@@ -59,6 +61,10 @@ const ConfirmDiscardPopup = () => {
       // As this and closing confirmDiscard popup both change url hash,
       //   need to be in different js clock cycle.
       setTimeout(() => dispatch(showNLIMPopup(null, null, false, true)), 100);
+    } else if (discardAction === DISCARD_ACTION_UPDATE_LIST_NAME) {
+      // As this and closing confirmDiscard popup both change url hash,
+      //   need to be in different js clock cycle.
+      setTimeout(() => dispatch(updateSettingsPopup(false, false)), 100);
     } else throw new Error(`Invalid discard action: ${discardAction}`);
 
     dispatch(clearSavingFPaths());
@@ -81,6 +87,11 @@ const ConfirmDiscardPopup = () => {
   const spanStyle = {};
   if (safeAreaWidth >= SM_WIDTH) spanStyle.height = safeAreaHeight;
 
+  let msg = 'Are you sure you want to discard your unsaved changes to your note? All of your changes will be permanently deleted. This action cannot be undone.';
+  if (discardAction === DISCARD_ACTION_UPDATE_LIST_NAME) {
+    msg = 'There are some lists still in editing mode. Are you sure you want to discard them?';
+  }
+
   return (
     <AnimatePresence key="AP_CDiscardP">
       <div className={tailwind('fixed inset-0 overflow-y-auto')} aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -100,7 +111,7 @@ const ConfirmDiscardPopup = () => {
                 <h3 className={tailwind('text-lg font-medium leading-6 text-gray-900 blk:text-white')} id="modal-title">Discard unsaved changes?</h3>
                 <div className={tailwind('mt-2')}>
                   <p className={tailwind('text-sm text-gray-500 blk:text-gray-400')}>
-                    Are you sure you want to discard your unsaved changes to your note? All of your changes will be permanently deleted. This action cannot be undone.
+                    {msg}
                   </p>
                 </div>
               </div>

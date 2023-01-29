@@ -61,7 +61,7 @@ const SettingsPopup = () => {
   };
 
   const onPopupCloseBtnClick = () => {
-    dispatch(updateSettingsPopup(false));
+    dispatch(updateSettingsPopup(false, true));
   };
 
   const onSidebarOpenBtnClick = () => {
