@@ -112,7 +112,7 @@ const Landing = () => {
                   <span className={tailwind('block')}>A <span className={tailwind('text-green-600')}>privacy-focused</span> note taking app</span>
                 </h1>
                 <p className={tailwind('mx-auto mt-3 max-w-md text-base text-gray-500 sm:text-lg md:mt-5 md:max-w-3xl md:text-xl')}>
-                  Justnote is a note taking app that you can use it easily, take a note rapidly, and importantly, have full control of your data.
+                  Justnote is a note taking app that you can use easily, take a note rapidly, and importantly, have full control of your data.
                 </p>
                 <div className={tailwind('mx-auto mt-5 max-w-md sm:flex sm:justify-center md:mt-8')}>
                   <button onClick={onSignUpBtnClick} className={tailwind('flex w-full items-center justify-center rounded-md border border-transparent bg-green-600 px-8 py-3 text-base font-medium text-white shadow hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 sm:w-max md:py-4 md:px-10 md:text-lg')}>
@@ -171,7 +171,7 @@ const Landing = () => {
                 <div className={tailwind('mt-5')}>
                   <h3 className={tailwind('text-lg font-medium leading-6 text-gray-900')}>Fast</h3>
                   <p className={tailwind('mt-2 text-base text-gray-500')}>
-                    You can take a note easily and quickly. Justnote is your quick note taking app where you use it for your to-do lists, reminders, shopping lists, memos, thoughts, etc.
+                    You can take a note easily and quickly. Justnote is your quick note taking app that you can use for your to-do lists, reminders, shopping lists, memos, thoughts, etc.
                   </p>
                 </div>
               </div>
@@ -212,7 +212,7 @@ const Landing = () => {
             With privacy at heart powered by <a className={tailwind('rounded text-indigo-600 hover:underline focus:outline-none focus:ring-2 focus:ring-indigo-500')} href="https://www.stacks.co" target="_blank" rel="noreferrer">Stacks</a>
           </p>
           <p className={tailwind('mx-auto mt-5 max-w-prose text-xl text-gray-500')}>
-            Stacks technology empowers Justnote to be a decentralized app on Bitcoin blockchain so you have true ownership of your identity and your data.
+            Stacks technology empowers Justnote to be a decentralized app on the Bitcoin blockchain so you have true ownership of your identity and your data.
           </p>
           <div className={tailwind('mt-12')}>
             <div className={tailwind('grid grid-cols-1 gap-8 lg:grid-cols-3')}>
@@ -255,9 +255,9 @@ const Landing = () => {
                     </div>
                     <h3 className={tailwind('mt-8 text-lg font-medium tracking-tight text-gray-900')}>Data Storage</h3>
                     <p className={tailwind('mt-5 text-left text-base text-gray-500')}>
-                      Your data lives in a storage of your choice and only you with your Secret Key can change it.
+                      Your data lives in the storage of your choice and only you with your Secret Key can change it.
                     </p>
-                    <h4 className={tailwind('mt-7 text-base font-medium tracking-tight text-gray-900')}>No lock out from your own data</h4>
+                    <h4 className={tailwind('mt-7 text-base font-medium tracking-tight text-gray-900')}>No lock out of your own data</h4>
                     <p className={tailwind('mt-3 text-left text-base text-gray-500')}>
                       You can always access your data directly whenever you want as you have full control of your data storage. Plus, you can manage who can access your data too.
                     </p>
@@ -280,7 +280,7 @@ const Landing = () => {
                     </p>
                     <h4 className={tailwind('mt-7 text-base font-medium tracking-tight text-gray-900')}>No targeted ads and No data breach risk</h4>
                     <p className={tailwind('mt-3 text-left text-base text-gray-500')}>
-                      As no one can see the content inside your data, your data cannot be used to make targeted ads on you. Also, there is no risk, if your data is stolen.
+                      As no one can see the content inside your data, your data cannot be used to make targeted ads on you. Also, there is no risk if your data is stolen.
                     </p>
                   </div>
                 </div>
@@ -297,7 +297,7 @@ const Landing = () => {
           <div className={tailwind('md:ml-auto md:w-1/2 md:pl-10')}>
             <h2 className={tailwind('text-base font-semibold uppercase tracking-wider text-gray-300')}>Ubiquitous</h2>
             <p className={tailwind('mt-2 text-3xl font-extrabold tracking-tight text-white sm:text-4xl')}>Justnote Mobile</p>
-            <p className={tailwind('mt-3 text-lg text-gray-300')}>Take notes on the go. Access your notes, edit them, and create new ones anytime anywhere on your any devices.</p>
+            <p className={tailwind('mt-3 text-lg text-gray-300')}>Take notes on the go. Access your notes, edit them, and create new ones anytime anywhere on any of your devices.</p>
             <div className={tailwind('mt-8 flex justify-center md:justify-start')}>
               <a className={tailwind('group block focus:outline-none')} href="https://apps.apple.com/us/app/id1570111019" target="_blank" rel="noreferrer">
                 <img className={tailwind('h-12 rounded shadow group-hover:ring group-focus:ring')} src={availableOnAppStore} alt="Available on App Store" />
@@ -319,10 +319,10 @@ const Landing = () => {
                   <path strokeWidth="2" d="M41.485 15C17.753 31.753 1 59.208 1 89.455c0 24.664 14.891 39.09 32.109 39.09 16.287 0 28.386-13.03 28.386-28.387 0-15.356-10.703-26.524-24.663-26.524-2.792 0-6.515.465-7.446.93 2.327-15.821 17.218-34.435 32.11-43.742L41.485 15zm80.04 0c-23.268 16.753-40.02 44.208-40.02 74.455 0 24.664 14.891 39.09 32.109 39.09 15.822 0 28.386-13.03 28.386-28.387 0-15.356-11.168-26.524-25.129-26.524-2.792 0-6.049.465-6.98.93 2.327-15.821 16.753-34.435 31.644-43.742L121.525 15z" />
                 </svg>
                 <p>
-                  Hi everyone, I want to share with you why I create Justnote. It’s a note taking app I want to have myself. I want to have a simple, small, and fast one without annoying ads. I want an app that I can take a quick small note when I'm on the run and I can get back to it easily when I need infomation in that note. So here I am. I hope that as it’s useful to me and I love it, it’s also useful to you and you love it too.
+                  Hi everyone, I want to share with you why I create Justnote. It’s a note taking app I want to have myself. I want to have a simple, small, and fast one without annoying ads. I want an app that I can take a quick small note when I'm on the run and I can get back to it easily when I need information in that note. So here I am. I hope that as it’s useful to me and I love it, it’s also useful to you and you love it too.
                 </p>
                 <p className={tailwind('pt-6')}>
-                  You can be sure that I don’t be evil and with Stacks technology, I can’t. You can use Justnote with peace of mind. Your identity is always yours. Your data is always yours. No nightmare of you’re banned from your account or you lose all your data whatsoever.
+                  You can be sure that I don’t be evil and with Stacks technology, I can’t. You can use Justnote with peace of mind. Your identity is always yours. Your data is always yours. No nightmare you’re banned from your account or you lose all your data whatsoever.
                 </p>
               </div>
               <footer className={tailwind('mt-8')}>

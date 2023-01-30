@@ -226,7 +226,7 @@ const SettingsPopupMisc = (props) => {
       </div>
       {doEnableExtraFeatures && <div className={tailwind('mt-6 flex flex-col md:mt-0')}>
         <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>Appearance</h4>
-        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Choose appearance to be <span className={tailwind('font-semibold blk:text-gray-300')}>Light</span>, <span className={tailwind('font-semibold blk:text-gray-300')}>Dark</span>, <span className={tailwind('font-semibold blk:text-gray-300')}>System</span> (uses your device's setting), or <span className={tailwind('font-semibold blk:text-gray-300')}>Custom</span> (schedule times to change appearance automatically). For Sync, your choosing is synced across your devices. For Device, you can choose and use the setting for this device only.</p>
+        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Choose appearance to be <span className={tailwind('font-semibold blk:text-gray-300')}>Light</span>, <span className={tailwind('font-semibold blk:text-gray-300')}>Dark</span>, <span className={tailwind('font-semibold blk:text-gray-300')}>System</span> (uses your device's setting), or <span className={tailwind('font-semibold blk:text-gray-300')}>Custom</span> (schedules times to change appearance automatically). For Sync, your choosing is synced across your devices. For Device, you can choose and use the setting for this device only.</p>
         <div className={tailwind('mx-auto mt-2.5 w-full max-w-sm rounded-md bg-white shadow-sm blk:bg-gray-900')}>
           <div className={tailwind('relative flex justify-evenly')}>
             <button onClick={() => onDoUseLocalThemeBtnClick(false)} className={tailwind(`relative flex-shrink flex-grow rounded-tl-md border border-b-0 border-gray-300 bg-white py-4 text-center text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-green-600 blk:border-gray-700 blk:bg-gray-900 ${themeDefaultBtnClassNames}`)} type="button">
@@ -287,7 +287,7 @@ const SettingsPopupMisc = (props) => {
       <div className={tailwind(`flex flex-col ${doEnableExtraFeatures ? 'mt-10' : 'mt-6 md:mt-0'}`)}>
         <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>List Order On</h4>
         <div className={tailwind('sm:flex sm:items-start sm:justify-between sm:space-x-4')}>
-          <p className={tailwind('mt-2.5 flex-shrink flex-grow text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Choose whether your notes are sorted on <span className={tailwind('font-semibold')}>added date</span> or <span className={tailwind('font-semibold')}>updated date</span> when you browse your notes.</p>
+          <p className={tailwind('mt-2.5 flex-shrink flex-grow text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Choose whether your notes are sorted on the <span className={tailwind('font-semibold')}>added date</span> or <span className={tailwind('font-semibold')}>updated date</span> when you browse your notes.</p>
           <div className={tailwind('mx-auto mt-2.5 w-full max-w-48 rounded-md bg-white shadow-sm blk:bg-gray-900 sm:mt-1 sm:w-48 sm:max-w-none sm:flex-shrink-0 sm:flex-grow-0')}>
             <button onClick={() => onSortOnInputChange(ADDED_DT)} className={tailwind(`group flex w-full rounded-tl-md rounded-tr-md border p-4 focus:outline-none ${addedDTBtnClassNames}`)}>
               <div className={tailwind('flex h-5 items-center')}>
@@ -335,7 +335,7 @@ const SettingsPopupMisc = (props) => {
       <div className={tailwind('mt-10 flex items-center justify-between space-x-4')}>
         <div className={tailwind('flex flex-col')}>
           <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>Note Date Showing</h4>
-          <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Show note's added date or updated date when you browse your notes. It will appear on the top right of each note.</p>
+          <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Show notes' added date or updated date when you browse your notes. It will appear on the top right of each note.</p>
         </div>
         <span onClick={onDoShowDateBtnClick} role="checkbox" tabIndex={0} aria-checked="true" aria-labelledby="note-date-option-label" aria-describedby="note-date-option-description" className={tailwind(`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:focus:ring-offset-gray-900 ${doShowDateBtnClassNames}`)}>
           <span aria-hidden="true" className={tailwind(`inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out blk:bg-gray-300 ${doShowDateBtnInnerClassNames}`)} />

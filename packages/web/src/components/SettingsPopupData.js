@@ -27,7 +27,7 @@ const _SettingsPopupData = (props) => {
       </div>
       <div className={tailwind('mt-6 md:mt-0')}>
         <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>Data Server</h4>
-        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Justnote stores your data in a Stacks data server. You can specify which Stacks data server to store your data. By default, your Stacks data server is at <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href="https://hub.blockstack.org/hub_info" target="_blank" rel="noreferrer">hub.blockstack.org</a> provided by <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href="https://www.hiro.so" target="_blank" rel="noreferrer">Hiro Systems</a>. You can also deploy your own Stacks data server. To change your Stacks data server, you need to record your server’s information to Stacks blockchain. Justnote stores your data to the server specified in the blockchain. For more details, please visit <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href="https://docs.stacks.co/docs/gaia" target="_blank" rel="noreferrer">Stacks Gaia</a>.</p>
+        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Justnote stores your data in a Stacks data server. You can specify which Stacks data server to store your data. By default, your Stacks data server is at <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href="https://hub.blockstack.org/hub_info" target="_blank" rel="noreferrer">hub.blockstack.org</a> provided by <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href="https://www.hiro.so" target="_blank" rel="noreferrer">Hiro Systems</a>. You can also deploy your own Stacks data server. To change your Stacks data server, you need to record your server’s information on the Stacks blockchain. Justnote stores your data on the server specified in the blockchain. For more details, please visit <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href="https://docs.stacks.co/docs/gaia" target="_blank" rel="noreferrer">Stacks Gaia</a>.</p>
       </div>
       <div className={tailwind('mt-8')}>
         <button onClick={onToImportAllDataViewBtnClick} className={tailwind('w-full rounded-sm text-left focus:outline-none focus:ring-2 focus:ring-gray-400 blk:focus:ring-gray-500')}>
@@ -39,7 +39,7 @@ const _SettingsPopupData = (props) => {
         <button onClick={onToExportAllDataViewBtnClick} className={tailwind('w-full rounded-sm text-left focus:outline-none focus:ring-2 focus:ring-gray-400 blk:focus:ring-gray-500')}>
           <h4 className={tailwind('text-base font-medium text-gray-800 underline hover:text-gray-900 blk:text-gray-100 blk:hover:text-white')}>Export All Data</h4>
         </button>
-        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Export all your data from server to your device in a zip file.</p>
+        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Export all your data from the server to your device in a zip file.</p>
       </div>
       <div className={tailwind('mt-8 mb-4')}>
         <button onClick={onToDeleteAllDataViewBtnClick} className={tailwind('w-full rounded-sm text-left focus:outline-none focus:ring-2 focus:ring-gray-400 blk:focus:ring-gray-500')}>
@@ -239,7 +239,7 @@ const _SettingsPopupDataExport = (props) => {
         </button>
         <h3 className={tailwind('pb-2 text-xl font-medium leading-none text-gray-800 blk:text-gray-100 md:pb-0')}>Export All Data</h3>
       </div>
-      <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Export all your data from server to your device in a zip file.</p>
+      <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Export all your data from the server to your device in a zip file.</p>
       <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>It may take several minutes to export all your data.</p>
       {actionPanel}
     </div>
