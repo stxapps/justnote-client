@@ -97,13 +97,19 @@ const localSettingsReducer = (state = initialState, action) => {
 
   if (action.type === ADD_SAVING_FPATHS) {
     if (state.cleanUpStaticFilesDT === null) {
-      return { ...state, cleanUpStaticFilesDT: Date.now() };
+      const newState = { ...state, cleanUpStaticFilesDT: Date.now() };
+      return loop(
+        newState, Cmd.run(updateLocalSettings(), { args: [Cmd.dispatch, Cmd.getState] })
+      );
     }
     return state;
   }
 
   if (action.type === CLEAN_UP_STATIC_FILES_COMMIT) {
-    return { ...state, cleanUpStaticFilesDT: Date.now() };
+    const newState = { ...state, cleanUpStaticFilesDT: Date.now() };
+    return loop(
+      newState, Cmd.run(updateLocalSettings(), { args: [Cmd.dispatch, Cmd.getState] })
+    );
   }
 
   if (action.type === DELETE_ALL_DATA) {
@@ -115,7 +121,7 @@ const localSettingsReducer = (state = initialState, action) => {
 
   if (action.type === RESET_STATE) {
     // Delete in localStorage by dataApi.deleteAllLocalFiles.
-    return { ...initialState }
+    return { ...initialState };
   }
 
   return state;

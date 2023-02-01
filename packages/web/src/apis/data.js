@@ -8,7 +8,7 @@ import {
 import {
   isObject, isString, createNoteFPath, createDataFName, extractNoteFPath, createPinFPath,
   addFPath, deleteFPath, copyFPaths, getMainId, listNoteIds, sortWithPins,
-  getStaticFPath, getLastSettingsFPaths, excludeNullContents,
+  getStaticFPath, getLastSettingsFPaths, excludeNotObjContents,
 } from '../utils';
 import { syncMode } from '../vars';
 import { initialLocalSettingsState } from '../types/initialStates';
@@ -19,8 +19,7 @@ const getApi = () => {
 
 const _listFPaths = async () => {
   const fpaths = {
-    noteFPaths: [], staticFPaths: [], settingsFPaths: [], infoFPath: null,
-    pinFPaths: [],
+    noteFPaths: [], staticFPaths: [], settingsFPaths: [], infoFPath: null, pinFPaths: [],
   };
   await getApi().listFiles((fpath) => {
     addFPath(fpaths, fpath);
@@ -139,7 +138,7 @@ const fetch = async (params) => {
       const files = await getFiles(settingsFPaths, true);
 
       // content can be null if dangerouslyIgnoreError is true.
-      const { fpaths, contents } = excludeNullContents(files.fpaths, files.contents)
+      const { fpaths, contents } = excludeNotObjContents(files.fpaths, files.contents);
       for (let i = 0; i < fpaths.length; i++) {
         const [fpath, content] = [fpaths[i], contents[i]];
         if (fpaths.length === 1) {

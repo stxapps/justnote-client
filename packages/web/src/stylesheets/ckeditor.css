@@ -134,6 +134,9 @@
   --ck-color-widget-type-around-button-blurred-editable: var(--ck-color-widget-blurred-border);
   --ck-color-widget-type-around-button-icon: var(--ck-color-base-background);
 
+  --ck-color-split-button-hover-background: var(--ck-color-button-default-hover-background);
+  --ck-color-split-button-hover-border: var(--ck-color-base-border);
+
   --ck-font-size-base: 15px;
   --ck-toolbar-dropdown-max-width: 96vw;
 }
@@ -245,6 +248,9 @@
   --ck-color-widget-type-around-button-hover: var(--ck-color-widget-hover-border);
   --ck-color-widget-type-around-button-blurred-editable: var(--ck-color-widget-blurred-border);
   --ck-color-widget-type-around-button-icon: var(--jn-editor-white);
+
+  --ck-color-split-button-hover-background: var(--ck-color-button-default-hover-background);
+  --ck-color-split-button-hover-border: var(--ck-color-base-border);
 }
 
 .ck.ck-editor__editable {
@@ -473,6 +479,10 @@
 }
 
 .blk-mode .ck.ck-balloon-panel .ck.ck-labeled-field-view>.ck.ck-labeled-field-view__input-wrapper>.ck.ck-label {
+  background-color: var(--jn-editor-gray-800);
+}
+
+.blk-mode .ck.ck-balloon-panel .ck.ck-toolbar {
   background-color: var(--jn-editor-gray-800);
 }
 

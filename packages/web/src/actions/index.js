@@ -80,7 +80,7 @@ import {
 } from '../utils';
 import { isUint8Array, isBlob, convertBlobToDataUrl } from '../utils/index-web';
 import { _ } from '../utils/obj';
-import { initialSettingsState } from '../types/initialStates';
+import { initialSettingsState, initialInfoState } from '../types/initialStates';
 import vars from '../vars';
 
 const jhfp = require('../jhfp');
@@ -2209,7 +2209,7 @@ export const updateEditingNote = (id, title, body, media) => async (
   dispatch, getState,
 ) => {
   const { listName, noteId } = getState().display;
-  if (noteId !== id) return; // As in debounce, try to be safe.
+  if (noteId !== id) return; // As use listName, also check noteId (too much?).
 
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
   dispatch({
@@ -2235,7 +2235,7 @@ export const updateUnsavedNote = (id, title, body, media) => async (
   }
 
   const { listName, noteId } = getState().display;
-  if (noteId !== id) return;
+  if (noteId !== id) return; // As use listName, also check noteId (too much?).
 
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
   dispatch({
@@ -2248,8 +2248,9 @@ export const updateUnsavedNote = (id, title, body, media) => async (
   });
 };
 
-export const deleteUnsavedNotes = (ids) => {
-  return { type: DELETE_UNSAVED_NOTES, payload: ids };
+export const deleteUnsavedNotes = (ids) => async (dispatch, getState) => {
+  ids = ids.filter(id => isString(id) && id.length > 0);
+  if (ids.length > 0) dispatch({ type: DELETE_UNSAVED_NOTES, payload: ids });
 };
 
 export const putDbUnsavedNote = (
@@ -3138,10 +3139,10 @@ export const deleteAllPins = async (dispatch, pins, total, doneCount) => {
 };
 
 export const deleteAllData = () => async (dispatch, getState) => {
+  let doneCount = 0;
+  dispatch(updateDeleteAllDataProgress({ total: 'calculating...', done: doneCount }));
 
-  dispatch(updateDeleteAllDataProgress({ total: 'calculating...', done: 0 }));
-
-  let allNoteIds, staticFPaths, settingsFPaths, settingsIds, pins;
+  let allNoteIds, staticFPaths, settingsFPaths, settingsIds, infoFPath, pins;
   try {
     const fpaths = await dataApi.listFPaths(true);
     const noteIds = listNoteIds(fpaths.noteFPaths);
@@ -3149,7 +3150,7 @@ export const deleteAllData = () => async (dispatch, getState) => {
     allNoteIds = [...noteIds.noteIds, ...noteIds.conflictedIds];
     staticFPaths = fpaths.staticFPaths;
     settingsFPaths = fpaths.settingsFPaths;
-
+    infoFPath = fpaths.infoFpath;
     pins = getPins(fpaths.pinFPaths, {}, false, noteIds.toRootIds);
     pins = Object.values(pins);
   } catch (error) {
@@ -3170,22 +3171,31 @@ export const deleteAllData = () => async (dispatch, getState) => {
     }
   }
 
+  if (infoFPath) {
+    const { contents } = await dataApi.getFiles([infoFPath], true);
+    if (isEqual(initialInfoState, contents[0])) infoFPath = null;
+  }
+
   const total = (
-    allNoteIds.length + staticFPaths.length + settingsFPaths.length + pins.length
+    allNoteIds.length + staticFPaths.length + settingsFPaths.length +
+    (infoFPath ? 1 : 0) + pins.length
   );
-  dispatch(updateDeleteAllDataProgress({ total, done: 0 }));
+  dispatch(updateDeleteAllDataProgress({ total, done: doneCount }));
 
   if (total === 0) return;
 
   try {
     if (allNoteIds.length > 0) {
-      await deleteAllNotes(dispatch, allNoteIds, total, 0);
+      await deleteAllNotes(dispatch, allNoteIds, total, doneCount);
+
+      doneCount += allNoteIds.length;
+      dispatch(updateDeleteAllDataProgress({ total, done: doneCount }));
     }
     if (staticFPaths.length > 0) {
       await dataApi.deleteServerFiles(staticFPaths);
-      dispatch(updateDeleteAllDataProgress({
-        total, done: allNoteIds.length + staticFPaths.length,
-      }));
+
+      doneCount += staticFPaths.length;
+      dispatch(updateDeleteAllDataProgress({ total, done: doneCount }));
     }
     if (settingsFPaths.length > 0) {
       const addedDT = Date.now();
@@ -3200,15 +3210,29 @@ export const deleteAllData = () => async (dispatch, getState) => {
         // error in this step should be fine
       }
 
-      dispatch(updateDeleteAllDataProgress({
-        total, done: allNoteIds.length + staticFPaths.length + settingsFPaths.length,
-      }));
+      doneCount += settingsFPaths.length;
+      dispatch(updateDeleteAllDataProgress({ total, done: doneCount }));
+    }
+    if (infoFPath) {
+      const addedDT = Date.now();
+      const newInfoFPath = `${INFO}${addedDT}${DOT_JSON}`;
+
+      await dataApi.putFiles([newInfoFPath], [{ ...initialInfoState }]);
+      try {
+        await dataApi.deleteFiles([infoFPath]);
+      } catch (error) {
+        console.log('deleteAllData error: ', error);
+        // error in this step should be fine
+      }
+
+      doneCount += 1;
+      dispatch(updateDeleteAllDataProgress({ total, done: doneCount }));
     }
     if (pins.length > 0) {
-      await deleteAllPins(
-        dispatch, pins, total,
-        allNoteIds.length + staticFPaths.length + settingsFPaths.length,
-      );
+      await deleteAllPins(dispatch, pins, total, doneCount);
+
+      doneCount += pins.length;
+      dispatch(updateDeleteAllDataProgress({ total, done: doneCount }));
     }
     await fileApi.deleteFiles(staticFPaths);
 

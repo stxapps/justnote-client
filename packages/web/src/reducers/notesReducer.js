@@ -295,8 +295,11 @@ const notesReducer = (state = initialState, action) => {
       newState[listName] = state[listName];
     }
 
-    for (const k of listNames) {
-      if (newState[k] === undefined) newState[k] = null;
+    for (const name of listNames) {
+      if (!(name in newState)) newState[name] = null;
+    }
+    for (const name of [MY_NOTES, TRASH, ARCHIVE]) { // Just to be safe.
+      if (!(name in newState)) newState[name] = null;
     }
 
     return newState;

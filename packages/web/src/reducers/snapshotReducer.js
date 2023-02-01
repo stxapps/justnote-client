@@ -1,5 +1,5 @@
 import {
-  FETCH_COMMIT, UPDATE_SETTINGS_COMMIT, MERGE_SETTINGS_COMMIT, UPDATE_INFO_COMMIT,
+  INIT, FETCH_COMMIT, UPDATE_SETTINGS_COMMIT, MERGE_SETTINGS_COMMIT, UPDATE_INFO_COMMIT,
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import { deriveSettingsState, deriveInfoState } from '../utils';
@@ -11,6 +11,23 @@ const initialState = {
 };
 
 const snapshotReducer = (state = initialState, action) => {
+
+  if (action.type === INIT) {
+    const { localSettings } = action.payload;
+
+    const newState = { ...state };
+    newState.settings = {
+      ...newState.settings,
+      themeMode: localSettings.defaultThemeMode,
+      themeCustomOptions: localSettings.defaultThemeCustomOptions,
+    };
+    newState.info = {
+      ...newState.info,
+      purchases: localSettings.purchases,
+    };
+
+    return newState;
+  }
 
   if (action.type === FETCH_COMMIT) {
     const { listNames, doFetchStgsAndInfo, settings, info } = action.payload;

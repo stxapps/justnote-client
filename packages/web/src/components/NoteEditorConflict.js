@@ -118,7 +118,7 @@ const _NoteEditorUnsavedConflict = (props) => {
     if (didClick.current) return;
 
     const { id, title, body, media } = unsavedNote.note;
-    dispatch(updateUnsavedNote(id, title, body, media));
+    dispatch(updateUnsavedNote(note.id, title, body, media));
     dispatch(deleteUnsavedNotes([id]));
 
     didClick.current = true;

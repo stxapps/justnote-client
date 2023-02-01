@@ -1165,8 +1165,9 @@ export const getInfoFPath = (state) => {
 };
 
 export const createDataFName = (id, parentIds) => {
-  if (Array.isArray(parentIds) && parentIds.length > 0) {
-    return `${id}_${parentIds.join('-')}`;
+  if (Array.isArray(parentIds)) {
+    parentIds = parentIds.filter(el => isString(el) && el.length > 0);
+    if (parentIds.length > 0) return `${id}_${parentIds.join('-')}`;
   }
   return id;
 };
@@ -1623,7 +1624,7 @@ export const scrollWindowTop = () => {
   }, 100);
 };
 
-export const excludeNullContents = (fpaths, contents) => {
+export const excludeNotObjContents = (fpaths, contents) => {
   const exFPaths = [], exContents = [];
   for (let i = 0; i < fpaths.length; i++) {
     const [fpath, content] = [fpaths[i], contents[i]];

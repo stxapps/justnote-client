@@ -1,9 +1,8 @@
 import {
   FETCH_COMMIT, MERGE_SETTINGS, MERGE_SETTINGS_COMMIT, MERGE_SETTINGS_ROLLBACK,
-  DELETE_ALL_DATA, RESET_STATE,
+  UPDATE_POPUP, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
-import { MERGING, DIED_MERGING } from '../types/const';
-import { _ } from '../utils/obj';
+import { SETTINGS_POPUP, MERGING, DIED_MERGING } from '../types/const';
 
 const initialState = {
   contents: [],
@@ -18,7 +17,7 @@ const conflictedSettingsReducer = (state = initialState, action) => {
   }
 
   if (action.type === MERGE_SETTINGS) {
-    return { state, status: MERGING };
+    return { ...state, status: MERGING };
   }
 
   if (action.type === MERGE_SETTINGS_COMMIT) {
@@ -26,7 +25,16 @@ const conflictedSettingsReducer = (state = initialState, action) => {
   }
 
   if (action.type === MERGE_SETTINGS_ROLLBACK) {
-    return { state, status: DIED_MERGING };
+    return { ...state, status: DIED_MERGING };
+  }
+
+  if (action.type === UPDATE_POPUP) {
+    const { id, isShown } = action.payload;
+
+    if ([SETTINGS_POPUP].includes(id) && isShown) {
+      if (state.status === DIED_MERGING) return { ...state, status: null };
+    }
+    return state;
   }
 
   if (action.type === DELETE_ALL_DATA || action.type === RESET_STATE) {

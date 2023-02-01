@@ -124,19 +124,17 @@ const editorReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_NOTE_ID) {
-    let newState;
-    if (action.payload) newState = { ...state, isScrollEnabled: true };
-    else newState = state;
-
-    newState = {
-      ...newState,
-      editingNoteId: null,
-      editingNoteTitle: '',
-      editingNoteBody: '',
-      editingNoteMedia: [],
-    };
-
-    return newState;
+    if (action.payload) {
+      return {
+        ...state,
+        isScrollEnabled: true,
+        editingNoteId: null,
+        editingNoteTitle: '',
+        editingNoteBody: '',
+        editingNoteMedia: [],
+      };
+    }
+    return state;
   }
 
   if (action.type === UPDATE_EDITING_NOTE) {
