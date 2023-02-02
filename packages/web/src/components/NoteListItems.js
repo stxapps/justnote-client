@@ -6,7 +6,7 @@ import { MY_NOTES, TRASH, ARCHIVE, ADDED_DT, UPDATED_DT } from '../types/const';
 import {
   getListNameMap, getNotes, getIsFetchingMore, getDoSectionNotesByMonth,
 } from '../selectors';
-import { getListNameDisplayName, debounce, getFullYearMonth } from '../utils';
+import { getListNameDisplayName, throttle, getFullYearMonth } from '../utils';
 import vars from '../vars';
 
 import { useTailwind } from '.';
@@ -28,6 +28,9 @@ const NoteListItems = () => {
   const sortOn = useSelector(state => state.settings.sortOn);
   const doSectionNotesByMonth = useSelector(state => getDoSectionNotesByMonth(state));
   const flatList = useRef(null);
+  const hasMoreRef = useRef(hasMore);
+  const hasFetchedMoreRef = useRef(hasFetchedMore);
+  const isFetchingMoreRef = useRef(isFetchingMore);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
@@ -81,11 +84,13 @@ const NoteListItems = () => {
     vars.scrollPanel.layoutHeight = windowHeight;
     vars.scrollPanel.pageYOffset = scrollTop;
 
-    if (!hasMore || hasFetchedMore || isFetchingMore) return;
+    if (
+      !hasMoreRef.current || hasFetchedMoreRef.current || isFetchingMoreRef.current
+    ) return;
 
     const windowBottom = windowHeight + scrollTop;
     if (windowBottom > (scrollHeight * 0.96)) dispatch(fetchMore());
-  }, [hasMore, hasFetchedMore, isFetchingMore, dispatch]);
+  }, [dispatch]);
 
   const onFetchMoreBtnClick = () => {
     dispatch(fetchMore());
@@ -216,9 +221,15 @@ const NoteListItems = () => {
   }, [listChangedCount]);
 
   useEffect(() => {
+    hasMoreRef.current = hasMore;
+    hasFetchedMoreRef.current = hasFetchedMore;
+    isFetchingMoreRef.current = isFetchingMore;
+  }, [hasMore, hasFetchedMore, isFetchingMore]);
+
+  useEffect(() => {
     // throttle may refer to stale updateScrollY with old isFetchingMore,
-    //   use debounce with immediate = true to prevent duplicate fetchMore.
-    const listener = debounce(updateScrollY, 16, true);
+    //   use refs to access current values to prevent duplicate fetchMore.
+    const listener = throttle(updateScrollY, 16);
 
     const _flatList = flatList.current;
     if (_flatList && _flatList.addEventListener) {

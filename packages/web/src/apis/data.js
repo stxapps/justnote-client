@@ -579,9 +579,12 @@ const putUnsavedNote = async (
   const content = JSON.stringify({ title, body, media });
   await fileApi.putFile(fpath, content);
 
-  if (!isString(savedTitle)) return;
-
   const savedFPath = `${UNSAVED_NOTES_SAVED}/${id}`;
+
+  // For better performance, if already exists, no need to save again.
+  const savedFile = await fileApi.getFile(savedFPath);
+  if (isString(savedFile)) return;
+
   const savedContent = JSON.stringify({ savedTitle, savedBody, savedMedia });
   await fileApi.putFile(savedFPath, savedContent);
 };

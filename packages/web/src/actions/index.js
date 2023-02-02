@@ -2152,7 +2152,7 @@ export const updateEditorScrollEnabled = (enabled) => {
 export const updateEditingNote = (id, title, body, media) => async (
   dispatch, getState,
 ) => {
-  const note = id === NEW_NOTE ? NEW_NOTE_OBJ : getNote(id);
+  const note = id === NEW_NOTE ? NEW_NOTE_OBJ : getNote(id, getState().notes);
   if (!isObject(note)) return;
 
   dispatch({
@@ -2171,13 +2171,13 @@ export const handleUnsavedNote = (id, title, body, media) => async (
     editingNoteId, editingNoteTitle, editingNoteBody, editingNoteMedia,
   } = getState().editor;
 
-  const hasContent = isString(title), didUpdate = editingNoteId === id;
+  const hasContent = isString(title);
   if (!hasContent) {
-    if (!didUpdate) return;
+    if (editingNoteId !== id) return;
     [title, body, media] = [editingNoteTitle, editingNoteBody, editingNoteMedia];
   }
 
-  const note = id === NEW_NOTE ? NEW_NOTE_OBJ : getNote(id);
+  const note = id === NEW_NOTE ? NEW_NOTE_OBJ : getNote(id, getState().notes);
   if (!isObject(note)) return;
 
   if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
@@ -2186,7 +2186,7 @@ export const handleUnsavedNote = (id, title, body, media) => async (
       payload: {
         id, title, body, media,
         savedTitle: note.title, savedBody: note.body, savedMedia: note.media,
-        hasContent, didUpdate,
+        hasContent,
       },
     });
   } else {

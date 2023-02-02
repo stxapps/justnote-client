@@ -1637,7 +1637,7 @@ export const excludeNotObjContents = (fpaths, contents) => {
   return { fpaths: exFPaths, contents: exContents };
 };
 
-export const getNote = (notes, id) => {
+export const getNote = (id, notes) => {
   for (const listName in notes) {
     for (const k in notes[listName]) {
       if (k === id) return notes[listName][k];

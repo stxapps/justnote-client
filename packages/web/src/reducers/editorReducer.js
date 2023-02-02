@@ -11,7 +11,7 @@ import {
   CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS, ADD_NOTE_COMMIT, UPDATE_NOTE_COMMIT,
   DISCARD_NOTE, UPDATE_EDITOR_IS_UPLOADING, UPDATE_BULK_EDITING,
   UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_NOTE_ID, UPDATE_EDITING_NOTE,
-  UPDATE_UNSAVED_NOTE, DELETE_UNSAVED_NOTES, DELETE_ALL_DATA, RESET_STATE,
+  DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 
 const initialState = {
@@ -128,16 +128,7 @@ const editorReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_NOTE_ID) {
-    if (action.payload) {
-      return {
-        ...state,
-        isScrollEnabled: true,
-        editingNoteId: null,
-        editingNoteTitle: '',
-        editingNoteBody: '',
-        editingNoteMedia: [],
-      };
-    }
+    if (action.payload) return { ...state, isScrollEnabled: true };
     return state;
   }
 
@@ -152,10 +143,6 @@ const editorReducer = (state = initialState, action) => {
       editingNoteMedia: media,
     };
 
-    if (id === state.editingNoteId) {
-      [savedTitle, savedBody, savedTitle] = [null, null, null];
-    }
-
     return loop(
       newState,
       Cmd.run(
@@ -163,34 +150,6 @@ const editorReducer = (state = initialState, action) => {
         { args: [Cmd.dispatch, Cmd.getState] },
       ),
     );
-  }
-
-  if (action.type === UPDATE_UNSAVED_NOTE) {
-    const { id } = action.payload;
-    if (id === state.editingNoteId) {
-      return {
-        ...state,
-        editingNoteId: null,
-        editingNoteTitle: '',
-        editingNoteBody: '',
-        editingNoteMedia: [],
-      };
-    }
-    return state;
-  }
-
-  if (action.type === DELETE_UNSAVED_NOTES) {
-    const ids = action.payload;
-    if (ids.includes(state.editingNoteId)) {
-      return {
-        ...state,
-        editingNoteId: null,
-        editingNoteTitle: '',
-        editingNoteBody: '',
-        editingNoteMedia: [],
-      };
-    }
-    return state;
   }
 
   if (action.type === DELETE_ALL_DATA) {

@@ -4,9 +4,9 @@ import {
   putDbUnsavedNote, deleteDbUnsavedNotes, deleteAllDbUnsavedNotes,
 } from '../actions';
 import {
-  INIT, UPDATE_UNSAVED_NOTE, DELETE_UNSAVED_NOTES, ADD_NOTE_COMMIT, UPDATE_NOTE_COMMIT,
-  DISCARD_NOTE, DELETE_NOTES_COMMIT, CANCEL_DIED_NOTES, MERGE_NOTES_COMMIT,
-  DELETE_OLD_NOTES_IN_TRASH_COMMIT, DELETE_ALL_DATA, RESET_STATE,
+  INIT, UPDATE_UNSAVED_NOTE, DELETE_UNSAVED_NOTES, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK,
+  UPDATE_NOTE_COMMIT, UPDATE_NOTE_ROLLBACK, DISCARD_NOTE, DELETE_NOTES_COMMIT,
+  MERGE_NOTES_COMMIT, DELETE_OLD_NOTES_IN_TRASH_COMMIT, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import { NEW_NOTE } from '../types/const';
 import { getIdsAndParentIds } from '../utils';
@@ -23,14 +23,13 @@ const unsavedNotesReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_UNSAVED_NOTE) {
     let {
-      id, title, body, media, savedTitle, savedBody, savedMedia, hasContent, didUpdate,
+      id, title, body, media, savedTitle, savedBody, savedMedia, hasContent,
     } = action.payload;
 
     const newState = { ...state };
     newState[id] = { id, title, body, media, savedTitle, savedBody, savedMedia };
 
     if (hasContent) {
-      if (didUpdate) [savedTitle, savedBody, savedMedia] = [null, null, null];
       return loop(
         newState,
         Cmd.run(
@@ -42,23 +41,25 @@ const unsavedNotesReducer = (state = initialState, action) => {
     return newState;
   }
 
+  // Need to delete unsaved notes at commit and rollback to rerender in one go.
   const deleteTypes = [
-    DELETE_UNSAVED_NOTES, ADD_NOTE_COMMIT, UPDATE_NOTE_COMMIT, DISCARD_NOTE,
-    DELETE_NOTES_COMMIT, CANCEL_DIED_NOTES, MERGE_NOTES_COMMIT,
+    DELETE_UNSAVED_NOTES, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK, UPDATE_NOTE_COMMIT,
+    UPDATE_NOTE_ROLLBACK, DISCARD_NOTE, DELETE_NOTES_COMMIT, MERGE_NOTES_COMMIT,
     DELETE_OLD_NOTES_IN_TRASH_COMMIT,
   ];
   if (deleteTypes.includes(action.type)) {
     const { type, payload } = action;
 
-    let ids;
-    if (type === deleteTypes[0]) ids = payload;
-    else if (type === deleteTypes[1]) ids = [NEW_NOTE];
-    else if (type === deleteTypes[2]) ids = [payload.toNote.id];
-    else if (type === deleteTypes[3]) ids = [payload];
-    else if (type === deleteTypes[4]) ids = payload.ids;
-    else if (type === deleteTypes[5]) ids = payload.ids;
-    else if (type === deleteTypes[6]) ids = [payload.toNote.id];
-    else if (type === deleteTypes[7]) ids = payload.ids;
+    let ids; // Bug alert: if not succeed, toNote not in fpaths yet.
+    if (type === DELETE_UNSAVED_NOTES) ids = payload;
+    else if (type === ADD_NOTE_COMMIT) ids = [NEW_NOTE];
+    else if (type === ADD_NOTE_ROLLBACK) ids = [NEW_NOTE];
+    else if (type === UPDATE_NOTE_COMMIT) ids = [payload.toNote.id];
+    else if (type === UPDATE_NOTE_ROLLBACK) ids = [payload.fromNote.id];
+    else if (type === DISCARD_NOTE) ids = [payload];
+    else if (type === DELETE_NOTES_COMMIT) ids = payload.ids;
+    else if (type === MERGE_NOTES_COMMIT) ids = [payload.toNote.id];
+    else if (type === DELETE_OLD_NOTES_IN_TRASH_COMMIT) ids = payload.ids;
     else {
       console.log('In unsavedNotesReducer, invalid delete action:', action);
       return state;
