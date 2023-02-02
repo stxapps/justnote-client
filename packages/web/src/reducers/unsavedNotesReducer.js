@@ -5,9 +5,12 @@ import {
 } from '../actions';
 import {
   INIT, UPDATE_UNSAVED_NOTE, DELETE_UNSAVED_NOTES, ADD_NOTE_COMMIT, UPDATE_NOTE_COMMIT,
-  CANCEL_DIED_NOTES, DELETE_ALL_DATA, RESET_STATE,
+  DISCARD_NOTE, DELETE_NOTES_COMMIT, CANCEL_DIED_NOTES, MERGE_NOTES_COMMIT,
+  DELETE_OLD_NOTES_IN_TRASH_COMMIT, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import { NEW_NOTE } from '../types/const';
+import { getIdsAndParentIds } from '../utils';
+import { getCachedFPaths } from '../vars';
 
 const initialState = {};
 
@@ -39,63 +42,41 @@ const unsavedNotesReducer = (state = initialState, action) => {
     return newState;
   }
 
-  if (action.type === DELETE_UNSAVED_NOTES) {
-    const ids = action.payload;
+  const deleteTypes = [
+    DELETE_UNSAVED_NOTES, ADD_NOTE_COMMIT, UPDATE_NOTE_COMMIT, DISCARD_NOTE,
+    DELETE_NOTES_COMMIT, CANCEL_DIED_NOTES, MERGE_NOTES_COMMIT,
+    DELETE_OLD_NOTES_IN_TRASH_COMMIT,
+  ];
+  if (deleteTypes.includes(action.type)) {
+    const { type, payload } = action;
 
-    const newState = {};
-    for (const id in state) {
-      if (ids.includes(id)) continue;
-      newState[id] = { ...state[id] };
+    let ids;
+    if (type === deleteTypes[0]) ids = payload;
+    else if (type === deleteTypes[1]) ids = [NEW_NOTE];
+    else if (type === deleteTypes[2]) ids = [payload.toNote.id];
+    else if (type === deleteTypes[3]) ids = [payload];
+    else if (type === deleteTypes[4]) ids = payload.ids;
+    else if (type === deleteTypes[5]) ids = payload.ids;
+    else if (type === deleteTypes[6]) ids = [payload.toNote.id];
+    else if (type === deleteTypes[7]) ids = payload.ids;
+    else {
+      console.log('In unsavedNotesReducer, invalid delete action:', action);
+      return state;
     }
 
-    return loop(
-      newState,
-      Cmd.run(deleteDbUnsavedNotes(ids), { args: [Cmd.dispatch, Cmd.getState] }),
-    );
-  }
-
-  if (action.type === ADD_NOTE_COMMIT) {
-    const newState = {};
-    for (const id in state) {
-      if (id === NEW_NOTE) continue;
-      newState[id] = { ...state[id] };
-    }
-
-    return loop(
-      newState,
-      Cmd.run(deleteDbUnsavedNotes([NEW_NOTE]), { args: [Cmd.dispatch, Cmd.getState] }),
-    );
-  }
-
-  if (action.type === UPDATE_NOTE_COMMIT) {
-    const { fromNote } = action.payload;
+    const idsAndParentIds = getIdsAndParentIds(ids, getCachedFPaths());
 
     const newState = {};
     for (const id in state) {
-      if (id === fromNote.id) continue;
+      if (idsAndParentIds.includes(id)) continue;
       newState[id] = { ...state[id] };
     }
 
     return loop(
       newState,
       Cmd.run(
-        deleteDbUnsavedNotes([fromNote.id]), { args: [Cmd.dispatch, Cmd.getState] },
+        deleteDbUnsavedNotes(idsAndParentIds), { args: [Cmd.dispatch, Cmd.getState] }
       ),
-    );
-  }
-
-  if (action.type === CANCEL_DIED_NOTES) {
-    const { ids } = action.payload;
-
-    const newState = {};
-    for (const id in state) {
-      if (ids.includes(id)) continue;
-      newState[id] = { ...state[id] };
-    }
-
-    return loop(
-      newState,
-      Cmd.run(deleteDbUnsavedNotes(ids), { args: [Cmd.dispatch, Cmd.getState] }),
     );
   }
 
@@ -103,7 +84,7 @@ const unsavedNotesReducer = (state = initialState, action) => {
     const newState = { ...initialState };
     return loop(
       newState,
-      Cmd.run(deleteAllDbUnsavedNotes(), { args: [Cmd.dispatch, Cmd.getState] }),
+      Cmd.run(deleteAllDbUnsavedNotes(), { args: [Cmd.dispatch, Cmd.getState] })
     );
   }
 

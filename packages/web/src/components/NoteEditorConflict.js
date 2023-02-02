@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import {
-  updateNoteIdUrlHash, mergeNotes, updateUnsavedNote, deleteUnsavedNotes,
+  updateNoteIdUrlHash, mergeNotes, handleUnsavedNote, deleteUnsavedNotes,
 } from '../actions';
 import { HASH_SUPPORT, MERGING, DIED_MERGING, LG_WIDTH } from '../types/const';
 import { getListNameMap } from '../selectors';
@@ -118,7 +118,7 @@ const _NoteEditorUnsavedConflict = (props) => {
     if (didClick.current) return;
 
     const { id, title, body, media } = unsavedNote.note;
-    dispatch(updateUnsavedNote(note.id, title, body, media));
+    dispatch(handleUnsavedNote(note.id, title, body, media));
     dispatch(deleteUnsavedNotes([id]));
 
     didClick.current = true;

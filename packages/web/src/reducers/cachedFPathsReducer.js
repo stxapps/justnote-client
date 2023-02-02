@@ -1,16 +1,12 @@
 import { RESET_STATE } from '../types/actionTypes';
 import { isObject, copyFPaths } from '../utils';
-import { cachedFPaths, cachedServerFPaths, syncMode } from '../vars';
+import { getCachedFPaths } from '../vars';
 
 const initialState = {
   fpaths: null,
 };
 
 let fpathsRef = null;
-const getCachedFPaths = () => {
-  return syncMode.doSyncMode ? cachedFPaths : cachedServerFPaths;
-};
-
 const cachedFPathsReducer = (state = initialState, action) => {
 
   // Only RESET_STATE, no need to reset state for DELETE_ALL_DATA

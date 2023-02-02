@@ -8,7 +8,7 @@ import {
   updateEditorFocused, updateEditorBusy, saveNote, discardNote, onUpdateNoteIdUrlHash,
   onUpdateNoteId, onChangeListName, onUpdateBulkEditUrlHash, onShowNoteListMenuPopup,
   onShowNLIMPopup, addSavingFPaths, updateEditorIsUploading, updateEditingNote,
-  updateUnsavedNote,
+  handleUnsavedNote,
 } from '../actions';
 import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, BLK_MODE, VALID } from '../types/const';
 import { getThemeMode, getDoMoreEditorFontSizes } from '../selectors';
@@ -564,7 +564,7 @@ const NoteEditorEditor = (props) => {
 
   useEffect(() => {
     return () => {
-      if (isFocusedRef.current) dispatch(updateUnsavedNote(noteIdRef.current));
+      if (isFocusedRef.current) dispatch(handleUnsavedNote(noteIdRef.current));
     };
   }, [dispatch]);
 

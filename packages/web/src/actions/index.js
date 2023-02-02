@@ -14,7 +14,7 @@ import {
   FETCH, FETCH_COMMIT, FETCH_ROLLBACK, FETCH_MORE, FETCH_MORE_COMMIT,
   FETCH_MORE_ROLLBACK, CACHE_FETCHED_MORE, UPDATE_FETCHED_MORE, CANCEL_FETCHED_MORE,
   REFRESH_FETCHED, ADD_NOTE, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK, UPDATE_NOTE,
-  UPDATE_NOTE_COMMIT, UPDATE_NOTE_ROLLBACK, MOVE_NOTES, MOVE_NOTES_COMMIT,
+  UPDATE_NOTE_COMMIT, UPDATE_NOTE_ROLLBACK, DISCARD_NOTE, MOVE_NOTES, MOVE_NOTES_COMMIT,
   MOVE_NOTES_ROLLBACK, DELETE_NOTES, DELETE_NOTES_COMMIT, DELETE_NOTES_ROLLBACK,
   CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
   DELETE_OLD_NOTES_IN_TRASH_ROLLBACK, MERGE_NOTES, MERGE_NOTES_COMMIT,
@@ -76,7 +76,7 @@ import {
   getSettingsFPaths, getLastSettingsFPaths, getInfoFPath, getLatestPurchase,
   getValidPurchase, doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins,
   getSortedNotes, separatePinnedValues, getRawPins, getFormattedTime,
-  get24HFormattedTime, getWindowSize,
+  get24HFormattedTime, getWindowSize, getNote,
 } from '../utils';
 import { isUint8Array, isBlob, convertBlobToDataUrl } from '../utils/index-web';
 import { _ } from '../utils/obj';
@@ -359,12 +359,16 @@ export const onUrlHashChange = (oldUrl, newUrl, dispatch, getState) => {
       // maybe user fast clicks
     }
   } else if ('n' in oldHashObj && !('n' in newHashObj)) {
+    // press back button, need to move editingNote to unsavedNote here.
+    if (!_didUpdateNoteIdUrlHashCall) dispatch(handleUnsavedNote(oldHashObj['n']));
+
     // Unselect note id
     dispatch(updateNoteId(null));
   } else if (!('n' in oldHashObj) && 'n' in newHashObj) {
     // Select note id
     dispatch(updateNoteId(newHashObj['n']));
   }
+  _didUpdateNoteIdUrlHashCall = false;
 
   // Popup
   if ('p' in oldHashObj && 'p' in newHashObj) {
@@ -429,12 +433,16 @@ export const onUrlHashChange = (oldUrl, newUrl, dispatch, getState) => {
       throw new Error(`Shouldn't reach here!`);
     }
   } else if ('stp' in oldHashObj && !('stp' in newHashObj)) {
+    // press back button, need to call save settings and info here.
+    if (!_didUpdateSettingsPopupCall) dispatch(updateStgsAndInfo());
+
     // Close settings popup
     dispatch(updatePopup(SETTINGS_POPUP, false, null));
   } else if (!('stp' in oldHashObj) && 'stp' in newHashObj) {
     // Open settings popup
     dispatch(updatePopup(SETTINGS_POPUP, true, null));
   }
+  _didUpdateSettingsPopupCall = false;
 
   // confirm delete popup
   if ('cdp' in oldHashObj && 'cdp' in newHashObj) {
@@ -493,7 +501,10 @@ export const updateUrlHash = (q, doReplace = false) => {
   } else window.location.hash = updatedHash;
 };
 
+let _didUpdateNoteIdUrlHashCall = false;
 const _updateNoteIdUrlHash = (id) => {
+  _didUpdateNoteIdUrlHashCall = true;
+
   if (!id) {
     window.history.back();
     return;
@@ -527,8 +538,6 @@ export const updateNoteIdUrlHash = (
         dispatch(increaseUpdateNoteIdUrlHashCount());
         return;
       }
-
-      dispatch(deleteUnsavedNotes([getState().display.noteId]));
     }
 
     _updateNoteIdUrlHash(id);
@@ -538,18 +547,9 @@ export const updateNoteIdUrlHash = (
 export const onUpdateNoteIdUrlHash = (title, body, media) => async (
   dispatch, getState
 ) => {
-  const { listName, noteId } = getState().display;
-  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
-
-  if (note) {
-    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
-      dispatch(updateUnsavedNote(noteId, title, body, media));
-    } else {
-      dispatch(deleteUnsavedNotes([noteId]));
-    }
-  }
-
+  const { noteId } = getState().display;
   dispatch(updateNoteIdUrlHash(null, true, false));
+  dispatch(handleUnsavedNote(noteId, title, body, media));
 };
 
 export const updatePopupUrlHash = (id, isShown, anchorPosition, doReplace = false) => {
@@ -620,8 +620,6 @@ export const updateBulkEditUrlHash = (
         dispatch(increaseUpdateBulkEditUrlHashCount());
         return;
       }
-
-      dispatch(deleteUnsavedNotes([getState().display.noteId]));
     }
 
     _updateBulkEditUrlHash(isBulkEditing);
@@ -634,18 +632,9 @@ export const updateBulkEditUrlHash = (
 export const onUpdateBulkEditUrlHash = (title, body, media) => async (
   dispatch, getState
 ) => {
-  const { listName, noteId } = getState().display;
-  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
-
-  if (note) {
-    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
-      dispatch(updateUnsavedNote(noteId, title, body, media));
-    } else {
-      dispatch(deleteUnsavedNotes([noteId]));
-    }
-  }
-
+  const { noteId } = getState().display;
   dispatch(updateBulkEditUrlHash(true, null, true, false));
+  dispatch(handleUnsavedNote(noteId, title, body, media));
 };
 
 export const changeListName = (listName, doCheckEditing) => async (
@@ -669,8 +658,6 @@ export const changeListName = (listName, doCheckEditing) => async (
       dispatch(increaseChangeListNameCount());
       return;
     }
-
-    dispatch(deleteUnsavedNotes([getState().display.noteId]));
   }
 
   dispatch({ type: UPDATE_LIST_NAME, payload: listName });
@@ -680,18 +667,9 @@ export const changeListName = (listName, doCheckEditing) => async (
 export const onChangeListName = (title, body, media) => async (
   dispatch, getState
 ) => {
-  const { listName, noteId } = getState().display;
-  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
-
-  if (note) {
-    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
-      dispatch(updateUnsavedNote(noteId, title, body, media));
-    } else {
-      dispatch(deleteUnsavedNotes([noteId]));
-    }
-  }
-
+  const { noteId } = getState().display;
   dispatch(changeListName(null, false));
+  dispatch(handleUnsavedNote(noteId, title, body, media));
 };
 
 const _updateNoteId = (id) => {
@@ -720,8 +698,6 @@ export const updateNoteId = (id, doGetIdFromState = false, doCheckEditing = fals
         dispatch(increaseUpdateNoteIdCount());
         return;
       }
-
-      dispatch(deleteUnsavedNotes([getState().display.noteId]));
     }
 
     dispatch(_updateNoteId(id));
@@ -731,18 +707,9 @@ export const updateNoteId = (id, doGetIdFromState = false, doCheckEditing = fals
 export const onUpdateNoteId = (title, body, media) => async (
   dispatch, getState
 ) => {
-  const { listName, noteId } = getState().display;
-  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
-
-  if (note) {
-    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
-      dispatch(updateUnsavedNote(noteId, title, body, media));
-    } else {
-      dispatch(deleteUnsavedNotes([noteId]));
-    }
-  }
-
+  const { noteId } = getState().display;
   dispatch(updateNoteId(null, true, false));
+  dispatch(handleUnsavedNote(noteId, title, body, media));
 };
 
 export const updatePopup = (id, isShown, anchorPosition) => {
@@ -1038,11 +1005,11 @@ export const discardNote = (doCheckEditing, title = null, body = null) => async 
     const safeAreaWidth = getState().window.width;
     if (safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(null);
     else dispatch(updateNoteId(null));
+    // Let transition done before causing rerender.
+    setTimeout(() => dispatch(deleteUnsavedNotes([noteId])), 100);
   } else {
-    dispatch(updateEditorFocused(false));
-    dispatch(increaseSetInitDataCount());
+    dispatch({ type: DISCARD_NOTE, payload: noteId });
   }
-  dispatch(deleteUnsavedNotes([noteId]))
 };
 
 const _moveNotes = (toListName, ids, fromListName = null) => async (
@@ -1452,8 +1419,8 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
 export const mergeNotes = (selectedId) => async (dispatch, getState) => {
 
   const addedDT = Date.now();
-  const noteId = getState().display.noteId;
-  const conflictedNote = getState().conflictedNotes[getState().display.listName][noteId];
+  const { listName, noteId } = getState().display;
+  const conflictedNote = getState().conflictedNotes[listName][noteId];
 
   let toListName, toNote;
   const fromNotes = {}, noteMedia = [];
@@ -1539,13 +1506,9 @@ export const showNoteListMenuPopup = (rect, doCheckEditing, doReinitEditor) => a
       dispatch(increaseShowNoteListMenuPopupCount());
       return;
     }
-
-    dispatch(deleteUnsavedNotes([getState().display.noteId]));
   }
 
   if (doReinitEditor) {
-    dispatch(updateEditorFocused(false));
-
     // No need updateNoteIdUrlHash here as shouldn't be possible
     //   to show the popup while editing in NavPanel.
     if (_noteId === NEW_NOTE) dispatch(updateNoteId(null));
@@ -1558,18 +1521,9 @@ export const showNoteListMenuPopup = (rect, doCheckEditing, doReinitEditor) => a
 export const onShowNoteListMenuPopup = (title, body, media) => async (
   dispatch, getState
 ) => {
-  const { listName, noteId } = getState().display;
-  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
-
-  if (note) {
-    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
-      dispatch(updateUnsavedNote(noteId, title, body, media));
-    } else {
-      dispatch(deleteUnsavedNotes([noteId]));
-    }
-  }
-
+  const { noteId } = getState().display;
   dispatch(showNoteListMenuPopup(null, false, true));
+  dispatch(handleUnsavedNote(noteId, title, body, media));
 };
 
 export const showNLIMPopup = (noteId, rect, doCheckEditing, doReinitEditor) => async (
@@ -1594,14 +1548,9 @@ export const showNLIMPopup = (noteId, rect, doCheckEditing, doReinitEditor) => a
       dispatch(increaseShowNLIMPopupCount());
       return;
     }
-
-    dispatch(deleteUnsavedNotes([getState().display.noteId]));
   }
 
-  if (doReinitEditor) {
-    dispatch(updateEditorFocused(false));
-    dispatch(increaseSetInitDataCount());
-  }
+  if (doReinitEditor) dispatch(increaseSetInitDataCount());
 
   dispatch(updateSelectingNoteId(noteId));
   updatePopupUrlHash(NOTE_LIST_ITEM_MENU_POPUP, true, rect);
@@ -1610,18 +1559,9 @@ export const showNLIMPopup = (noteId, rect, doCheckEditing, doReinitEditor) => a
 export const onShowNLIMPopup = (title, body, media) => async (
   dispatch, getState
 ) => {
-  const { listName, noteId } = getState().display;
-  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
-
-  if (note) {
-    if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
-      dispatch(updateUnsavedNote(noteId, title, body, media));
-    } else {
-      dispatch(deleteUnsavedNotes([noteId]));
-    }
-  }
-
+  const { noteId } = getState().display;
   dispatch(showNLIMPopup(null, null, false, true));
+  dispatch(handleUnsavedNote(noteId, title, body, media));
 };
 
 const _cleanUpStaticFiles = async (dispatch, getState) => {
@@ -1702,6 +1642,7 @@ export const cleanUpStaticFiles = () => async (dispatch, getState) => {
   }
 };
 
+let _didUpdateSettingsPopupCall = false;
 export const updateSettingsPopup = (isShown, doCheckEditing = false) => async (
   dispatch, getState
 ) => {
@@ -1734,6 +1675,7 @@ export const updateSettingsPopup = (isShown, doCheckEditing = false) => async (
     dispatch(updateStgsAndInfo());
   }
 
+  _didUpdateSettingsPopupCall = true;
   updatePopupUrlHash(SETTINGS_POPUP, isShown, null);
 };
 
@@ -1902,6 +1844,7 @@ const updateSettings = async (dispatch, getState) => {
   const settings = getState().settings;
   const snapshotSettings = getState().snapshot.settings;
 
+  // It's ok if MERGE_SETTINGS, IMPORT, DELETE_ALL in progress. Let it be conflict.
   if (isEqual(settings, snapshotSettings)) {
     dispatch(cancelDiedSettings());
     return;
@@ -1948,6 +1891,7 @@ const updateInfo = async (dispatch, getState) => {
   const info = getState().info;
   const snapshotInfo = getState().snapshot.info;
 
+  // It's ok if IAP in progess as when complete, it'll update again.
   if (isEqual(info, snapshotInfo)) return;
 
   const addedDT = Date.now();
@@ -2208,21 +2152,20 @@ export const updateEditorScrollEnabled = (enabled) => {
 export const updateEditingNote = (id, title, body, media) => async (
   dispatch, getState,
 ) => {
-  const { listName, noteId } = getState().display;
-  if (noteId !== id) return; // As use listName, also check noteId (too much?).
+  const note = id === NEW_NOTE ? NEW_NOTE_OBJ : getNote(id);
+  if (!isObject(note)) return;
 
-  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
   dispatch({
     type: UPDATE_EDITING_NOTE,
     payload: {
-      id: noteId, title, body, media,
+      id, title, body, media,
       savedTitle: note.title, savedBody: note.body, savedMedia: note.media,
     },
   });
 };
 
-export const updateUnsavedNote = (id, title, body, media) => async (
-  dispatch, getState,
+export const handleUnsavedNote = (id, title, body, media) => async (
+  dispatch, getState
 ) => {
   const {
     editingNoteId, editingNoteTitle, editingNoteBody, editingNoteMedia,
@@ -2234,18 +2177,21 @@ export const updateUnsavedNote = (id, title, body, media) => async (
     [title, body, media] = [editingNoteTitle, editingNoteBody, editingNoteMedia];
   }
 
-  const { listName, noteId } = getState().display;
-  if (noteId !== id) return; // As use listName, also check noteId (too much?).
+  const note = id === NEW_NOTE ? NEW_NOTE_OBJ : getNote(id);
+  if (!isObject(note)) return;
 
-  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
-  dispatch({
-    type: UPDATE_UNSAVED_NOTE,
-    payload: {
-      id: noteId, title, body, media,
-      savedTitle: note.title, savedBody: note.body, savedMedia: note.media,
-      hasContent, didUpdate,
-    },
-  });
+  if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+    dispatch({
+      type: UPDATE_UNSAVED_NOTE,
+      payload: {
+        id, title, body, media,
+        savedTitle: note.title, savedBody: note.body, savedMedia: note.media,
+        hasContent, didUpdate,
+      },
+    });
+  } else {
+    dispatch(deleteUnsavedNotes([id]));
+  }
 };
 
 export const deleteUnsavedNotes = (ids) => async (dispatch, getState) => {
@@ -3239,6 +3185,7 @@ export const deleteAllData = () => async (dispatch, getState) => {
     // Need to close the settings popup to update the url hash,
     //   as DELETE_ALL_DATA will set isSettingsPopupShown to false.
     if (getState().display.isSettingsPopupShown) {
+      _didUpdateSettingsPopupCall = true;
       updatePopupUrlHash(SETTINGS_POPUP, false, null);
     }
     dispatch({ type: DELETE_ALL_DATA });

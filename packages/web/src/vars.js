@@ -61,6 +61,10 @@ export const syncMode = {
   doSyncMode: false,
 };
 
+export const getCachedFPaths = () => {
+  return syncMode.doSyncMode ? cachedFPaths : cachedServerFPaths;
+};
+
 const vars = {
   cachedFPaths, cachedServerFPaths, scrollPanel, updateNoteId, changeListName,
   updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, deleteOldNotes, updateSettings,

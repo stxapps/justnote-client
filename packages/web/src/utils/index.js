@@ -1331,6 +1331,7 @@ const _listNoteIds = (noteFPaths) => {
 export const listNoteIds = createSelector(
   noteFPaths => noteFPaths,
   _listNoteIds,
+  { memoizeOptions: { maxSize: 2 } }, // One for vars and one for reducer hopefully.
 );
 
 export const getMainId = (id, toRootIds) => {
@@ -1634,4 +1635,26 @@ export const excludeNotObjContents = (fpaths, contents) => {
     exContents.push(content);
   }
   return { fpaths: exFPaths, contents: exContents };
+};
+
+export const getNote = (notes, id) => {
+  for (const listName in notes) {
+    for (const k in notes[listName]) {
+      if (k === id) return notes[listName][k];
+    }
+  }
+  return null;
+};
+
+export const getIdsAndParentIds = (ids, cachedFPaths) => {
+  const noteFPaths = getNoteFPaths({ cachedFPaths });
+  const { toParents } = listNoteIds(noteFPaths);
+
+  const parentIds = [];
+  for (const id of ids) {
+    const _parentIds = getDataParentIds(id, toParents);
+    parentIds.push(..._parentIds);
+  }
+
+  return [...ids, ...parentIds];
 };
