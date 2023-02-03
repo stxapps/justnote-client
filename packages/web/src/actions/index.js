@@ -1323,11 +1323,14 @@ export const cancelDiedNotes = (ids, listName = null) => async (dispatch, getSta
     await sleep(100);
   }
 
-  const payload = { listName, ids };
-  dispatch({
-    type: CANCEL_DIED_NOTES,
-    payload,
-  });
+  const deleteUnsavedNoteIds = [];
+  for (const id of ids) {
+    const { status, fromNote } = getState().notes[listName][id];
+    if (status === DIED_UPDATING) deleteUnsavedNoteIds.push(fromNote.id);
+  }
+
+  const payload = { listName, ids, deleteUnsavedNoteIds };
+  dispatch({ type: CANCEL_DIED_NOTES, payload });
 };
 
 let _didRunAFT = false;
