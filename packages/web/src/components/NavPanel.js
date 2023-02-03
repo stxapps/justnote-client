@@ -54,9 +54,9 @@ const NavPanel = () => {
   };
 
   const onRightPanelAnimEnd = () => {
-    if (!note && note !== derivedNote) {
-      setDerivedNote(note);
-      setDerivedUnsavedNote(unsavedNote);
+    if (!note) {
+      if (note !== derivedNote) setDerivedNote(note);
+      if (unsavedNote !== derivedUnsavedNote) setDerivedUnsavedNote(unsavedNote);
     }
   };
 
@@ -64,9 +64,9 @@ const NavPanel = () => {
     vars.rightPanelFMV.doAnimateHidden = false;
   }, [note]);
 
-  if (note && note !== derivedNote) {
-    setDerivedNote(note);
-    setDerivedUnsavedNote(unsavedNote);
+  if (note) {
+    if (note !== derivedNote) setDerivedNote(note);
+    if (unsavedNote !== derivedUnsavedNote) setDerivedUnsavedNote(unsavedNote);
   }
 
   return (

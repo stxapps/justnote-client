@@ -360,7 +360,11 @@ export const onUrlHashChange = (oldUrl, newUrl, dispatch, getState) => {
     }
   } else if ('n' in oldHashObj && !('n' in newHashObj)) {
     // press back button, need to move editingNote to unsavedNote here.
-    if (!_didUpdateNoteIdUrlHashCall) dispatch(handleUnsavedNote(oldHashObj['n']));
+    if (!_didUpdateNoteIdUrlHashCall) {
+      // Can't use oldHashObj['n'] as new saved/updated noteId not apply to the hash.
+      const { noteId, isEditorFocused } = getState().display;
+      if (isEditorFocused) dispatch(handleUnsavedNote(noteId));
+    }
 
     // Unselect note id
     dispatch(updateNoteId(null));

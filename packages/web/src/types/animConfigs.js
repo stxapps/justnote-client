@@ -42,6 +42,10 @@ export const canvasFMV = /** @type {any} */ ({
   visible: {
     visibility: 'visible',
   },
+  vanish: {
+    transition: { when: 'afterChildren' },
+    transitionEnd: { visibility: 'hidden' },
+  },
 });
 
 export const sideBarOverlayFMV = {
