@@ -504,6 +504,7 @@ export const updateUrlHash = (q, doReplace = false) => {
 let _didUpdateNoteIdUrlHashCall = false;
 const _updateNoteIdUrlHash = (id) => {
   _didUpdateNoteIdUrlHashCall = true;
+  vars.rightPanelFMV.doAnimateHidden = true;
 
   if (!id) {
     window.history.back();

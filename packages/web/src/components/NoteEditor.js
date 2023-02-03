@@ -1,8 +1,7 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { INVALID } from '../types/const';
-import { makeGetUnsavedNote } from '../selectors';
 import { isDiedStatus } from '../utils';
 
 import { useTailwind } from '.';
@@ -14,10 +13,8 @@ import NoteEditorRetry from './NoteEditorRetry';
 
 const NoteEditor = (props) => {
 
-  const { note, isFullScreen, onToggleFullScreen } = props;
-  const getUnsavedNote = useMemo(makeGetUnsavedNote, []);
+  const { note, unsavedNote, isFullScreen, onToggleFullScreen } = props;
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
-  const unsavedNote = useSelector(state => getUnsavedNote(state, note));
   const tailwind = useTailwind();
 
   const isUnsavedInvalid = unsavedNote.status === INVALID;

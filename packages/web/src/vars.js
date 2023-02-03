@@ -57,6 +57,10 @@ export const paywallFeature = {
   feature: null,
 };
 
+const rightPanelFMV = {
+  doAnimateHidden: false,
+};
+
 export const syncMode = {
   doSyncMode: false,
 };
@@ -68,6 +72,6 @@ export const getCachedFPaths = () => {
 const vars = {
   cachedFPaths, cachedServerFPaths, scrollPanel, updateNoteId, changeListName,
   updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, deleteOldNotes, updateSettings,
-  paywallFeature, syncMode,
+  paywallFeature, rightPanelFMV, syncMode,
 };
 export default vars;

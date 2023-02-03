@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 
@@ -7,7 +7,9 @@ import { SIDEBAR_POPUP, NEW_NOTE, NEW_NOTE_OBJ } from '../types/const';
 import {
   canvasFMV, sideBarOverlayFMV, sideBarFMV, rightPanelFMV,
 } from '../types/animConfigs';
+import { makeGetUnsavedNote } from '../selectors';
 import { isMobile as _isMobile } from '../utils';
+import vars from '../vars';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 import Sidebar from './Sidebar';
@@ -17,6 +19,7 @@ import NoteEditor from './NoteEditor';
 const NavPanel = () => {
 
   const { height: safeAreaHeight, windowHeight } = useSafeAreaFrame();
+  const getUnsavedNote = useMemo(makeGetUnsavedNote, []);
   const isSidebarPopupShown = useSelector(state => state.display.isSidebarPopupShown);
   const note = useSelector(state => {
     const { listName, noteId } = state.display;
@@ -26,7 +29,9 @@ const NavPanel = () => {
     if (noteId.startsWith('conflict')) return state.conflictedNotes[listName][noteId];
     return state.notes[listName][noteId];
   });
+  const unsavedNote = useSelector(state => getUnsavedNote(state, note));
   const [derivedNote, setDerivedNote] = useState(note);
+  const [derivedUnsavedNote, setDerivedUnsavedNote] = useState(unsavedNote);
   const tailwind = useTailwind();
 
   const isMobile = useMemo(() => _isMobile(), []);
@@ -49,11 +54,19 @@ const NavPanel = () => {
   };
 
   const onRightPanelAnimEnd = () => {
-    if (!note && note !== derivedNote) setDerivedNote(note);
+    if (!note && note !== derivedNote) {
+      setDerivedNote(note);
+      setDerivedUnsavedNote(unsavedNote);
+    }
   };
+
+  useEffect(() => {
+    vars.rightPanelFMV.doAnimateHidden = false;
+  }, [note]);
 
   if (note && note !== derivedNote) {
     setDerivedNote(note);
+    setDerivedUnsavedNote(unsavedNote);
   }
 
   return (
@@ -82,9 +95,9 @@ const NavPanel = () => {
         </div>
       </motion.div>
       {/* Right panel */}
-      <motion.div className={tailwind('absolute inset-0 overflow-hidden')} variants={canvasFMV} initial={false} animate={note ? 'visible' : 'hidden'} onAnimationComplete={onRightPanelAnimEnd}>
+      <motion.div className={tailwind('absolute inset-0 overflow-hidden')} variants={canvasFMV} initial={false} animate={note ? 'visible' : vars.rightPanelFMV.doAnimateHidden ? 'hidden' : 'vanish'} onAnimationComplete={onRightPanelAnimEnd}>
         <motion.div className={tailwind('h-full w-full')} variants={rightPanelFMV}>
-          <NoteEditor note={derivedNote} />
+          <NoteEditor note={derivedNote} unsavedNote={derivedUnsavedNote} />
         </motion.div>
       </motion.div>
     </div>

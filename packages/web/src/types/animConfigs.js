@@ -69,6 +69,10 @@ export const rightPanelFMV = {
     translateX: '0%',
     transition: { ease: 'easeOut', duration: 0.2 },
   },
+  vanish: {
+    translateX: '100%',
+    transition: { ease: 'easeIn', duration: 0 },
+  },
 };
 
 export const listsFMV = {

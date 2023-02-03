@@ -490,6 +490,7 @@ export const makeGetUnsavedNote = () => {
       // null - Not found or not different
       const result = { status: null, note: null };
       if (!isObject(note)) return result;
+      if (note.id.startsWith('conflict')) return result;
 
       if (note.id in unsavedNotes) {
         const { title, body } = unsavedNotes[note.id];

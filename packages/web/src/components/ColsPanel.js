@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useSelector } from 'react-redux';
 
 import { COLS_PANEL_STATE, NEW_NOTE, NEW_NOTE_OBJ } from '../types/const';
+import { makeGetUnsavedNote } from '../selectors';
 import { throttle, isMobile as _isMobile } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
@@ -31,6 +32,7 @@ const ColsPanel = () => {
   const {
     width: safeAreaWidth, height: safeAreaHeight, windowHeight,
   } = useSafeAreaFrame();
+  const getUnsavedNote = useMemo(makeGetUnsavedNote, []);
   const note = useSelector(state => {
     const { listName, noteId } = state.display;
 
@@ -39,6 +41,7 @@ const ColsPanel = () => {
     if (noteId.startsWith('conflict')) return state.conflictedNotes[listName][noteId];
     return state.notes[listName][noteId];
   });
+  const unsavedNote = useSelector(state => getUnsavedNote(state, note));
 
   const storageKey = COLS_PANEL_STATE;
   const storedState = useMemo(() => localStorage.getItem(storageKey), [storageKey]);
@@ -225,7 +228,7 @@ const ColsPanel = () => {
       </div>
       <div onMouseDown={onRightResizerMouseDown} onTouchStart={onRightResizerTouchStart} onTouchEnd={onTouchEnd} className={tailwind(`relative cursor-resize overflow-visible border-l border-gray-100 bg-white pr-1 blk:border-gray-800 blk:bg-gray-900 ${resizer2Classes}`)} />
       <div className={tailwind('flex-1 overflow-hidden bg-white blk:bg-gray-900')}>
-        <NoteEditor note={note} isFullScreen={state.isPane3FullScreen} onToggleFullScreen={onTogglePane3FullScreen} />
+        <NoteEditor note={note} unsavedNote={unsavedNote} isFullScreen={state.isPane3FullScreen} onToggleFullScreen={onTogglePane3FullScreen} />
       </div>
     </div>
   );
