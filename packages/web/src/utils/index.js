@@ -3,9 +3,9 @@ import Url from 'url-parse';
 
 import {
   HASH_FRAGMENT_IDENTIFIER, HTTP, MAX_CHARS, CD_ROOT, STATUS, NOTES, IMAGES, SETTINGS,
-  INFO, PINS, DOT_JSON, ADDED, ADDING, UPDATING, MOVING, DELETING, MERGING, DIED_ADDING,
-  DIED_UPDATING, DIED_MOVING, DIED_DELETING, DIED_MERGING, VALID_URL, NO_URL,
-  ASK_CONFIRM_URL, VALID_LIST_NAME, NO_LIST_NAME, TOO_LONG_LIST_NAME,
+  INFO, PINS, INDEX, DOT_JSON, ADDED, ADDING, UPDATING, MOVING, DELETING, MERGING,
+  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, DIED_MERGING, VALID_URL,
+  NO_URL, ASK_CONFIRM_URL, VALID_LIST_NAME, NO_LIST_NAME, TOO_LONG_LIST_NAME,
   DUPLICATE_LIST_NAME, COM_JUSTNOTECC_SUPPORTER, ACTIVE, NO_RENEW, GRACE, ON_HOLD,
   PAUSED, UNKNOWN, NOTE_DATE_FORMAT_SYSTEM, NOTE_DATE_FORMAT_YSMSD,
   NOTE_DATE_FORMAT_MSDSY, NOTE_DATE_FORMAT_DSMSY, NOTE_DATE_FORMAT_YHMHD,
@@ -1243,18 +1243,19 @@ const getDataOldestRootId = (rootIds) => {
   return rootId;
 };
 
-const _listDataIds = (dataFPaths, extractDataFPath) => {
+const _listDataIds = (dataFPaths, extractDataFPath, workingSubName) => {
   const ids = [];
   const toFPaths = {};
   const toParents = {};
   const toChildren = {};
   for (const fpath of dataFPaths) {
-    const { fname } = extractDataFPath(fpath);
+    const { fname, subName } = extractDataFPath(fpath);
     const { id, parentIds } = extractDataFName(fname);
 
     if (!toFPaths[id]) toFPaths[id] = [];
     toFPaths[id].push(fpath);
 
+    if (subName !== workingSubName) continue;
     if (ids.includes(id)) continue;
     ids.push(id);
 
@@ -1322,9 +1323,12 @@ const _listDataIds = (dataFPaths, extractDataFPath) => {
 };
 
 const _listNoteIds = (noteFPaths) => {
+  // Possible to have cdroot paths but not index.json and vice versa.
+  //   i.e. update/move error and cancel died notes.
+  // So use only index.json for listDataIds.
   const {
     dataIds, conflictedIds, conflictWiths, toRootIds, toParents,
-  } = _listDataIds(noteFPaths, extractNoteFPath);
+  } = _listDataIds(noteFPaths, extractNoteFPath, INDEX + DOT_JSON);
   return { noteIds: dataIds, conflictedIds, conflictWiths, toRootIds, toParents };
 };
 
@@ -1489,7 +1493,7 @@ export const getSortedNotes = (notes, listName, sortOn, doDescendingOrder) => {
 export const _listSettingsIds = (settingsFPaths) => {
   const {
     dataIds, conflictedIds, conflictWiths, toRootIds, toParents,
-  } = _listDataIds(settingsFPaths, extractSettingsFPath);
+  } = _listDataIds(settingsFPaths, extractSettingsFPath, undefined);
   return { settingsIds: dataIds, conflictedIds, conflictWiths, toRootIds, toParents };
 };
 

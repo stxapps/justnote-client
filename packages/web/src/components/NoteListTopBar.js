@@ -25,7 +25,7 @@ const NoteListTopBar = (props) => {
 
   const onMenuBtnClick = () => {
     const rect = menuBtn.current.getBoundingClientRect();
-    dispatch(showNoteListMenuPopup(rect, true, false));
+    dispatch(showNoteListMenuPopup(rect, true));
   };
 
   const onSearchBtnClick = () => {

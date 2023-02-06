@@ -678,6 +678,7 @@ export const onChangeListName = (title, body, media) => async (
 };
 
 const _updateNoteId = (id) => {
+  vars.noteEditorEditor.didUpdateNoteId = true;
   return {
     type: UPDATE_NOTE_ID,
     payload: id,
@@ -909,8 +910,7 @@ export const addNote = (title, body, media, listName = null) => async (
   dispatch({ type: ADD_NOTE, payload });
 
   try {
-    await dataApi.putServerFiles(usedFPaths);
-    await dataApi.putNotes({ listName, notes: [note] });
+    await dataApi.putNotes({ listName, notes: [note], staticFPaths: usedFPaths });
   } catch (error) {
     console.log('addNote error: ', error);
     dispatch({ type: ADD_NOTE_ROLLBACK, payload: { ...payload, error } });
@@ -951,8 +951,7 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
   dispatch({ type: UPDATE_NOTE, payload });
 
   try {
-    await dataApi.putServerFiles(usedFPaths);
-    await dataApi.putNotes({ listName, notes: [toNote] });
+    await dataApi.putNotes({ listName, notes: [toNote], staticFPaths: usedFPaths });
   } catch (error) {
     console.log('updateNote error: ', error);
     dispatch({ type: UPDATE_NOTE_ROLLBACK, payload: { ...payload, error } });
@@ -1017,6 +1016,19 @@ export const discardNote = (doCheckEditing, title = null, body = null) => async 
   }
 };
 
+const _getFromNotes = (notes, toNotes) => {
+  const fromNotes = [];
+  for (const toNote of toNotes) {
+    const note = notes.find(n => n.id === toNote.parentIds[0]);
+    if (!isObject(note)) {
+      console.log('In _getFromNotes, found invalid note', notes, toNotes);
+      continue;
+    }
+    fromNotes.push(clearNoteData(note));
+  }
+  return fromNotes;
+};
+
 const _moveNotes = (toListName, ids, fromListName = null) => async (
   dispatch, getState
 ) => {
@@ -1035,13 +1047,30 @@ const _moveNotes = (toListName, ids, fromListName = null) => async (
     addedDT += 1;
     return toNote;
   });
-  const fromNotes = notes.map(note => clearNoteData(note));
+  let fromNotes = notes.map(note => clearNoteData(note));
 
-  const payload = { fromListName, fromNotes: notes, toListName, toNotes };
+  let payload = { fromListName, fromNotes: notes, toListName, toNotes };
   dispatch({ type: MOVE_NOTES, payload });
 
   try {
-    await dataApi.putNotes({ listName: toListName, notes: toNotes });
+    const result = await dataApi.putNotes({
+      listName: toListName, notes: toNotes, manuallyManageError: true,
+    });
+    if (result.errorNotes.length > 0) {
+      fromNotes = _getFromNotes(notes, result.successNotes);
+      payload = { ...payload, fromNotes, toNotes: result.successNotes };
+
+      const errorFromNotes = _getFromNotes(notes, result.errorNotes);
+
+      const error = result.errorNotes[0].error;
+      console.log('moveNotes error: ', error);
+      dispatch({
+        type: MOVE_NOTES_ROLLBACK,
+        payload: {
+          ...payload, fromNotes: errorFromNotes, toNotes: result.errorNotes, error,
+        },
+      });
+    }
   } catch (error) {
     console.log('moveNotes error: ', error);
     dispatch({ type: MOVE_NOTES_ROLLBACK, payload: { ...payload, error } });
@@ -1101,8 +1130,23 @@ export const moveNotes = (toListName) => async (dispatch, getState) => {
   dispatch(moveNotesWithAction(toListName, moveAction));
 };
 
-const _deleteNotes = (ids) => async (dispatch, getState) => {
+const _getUnusedFPaths = (notes, toNotes) => {
+  const unusedFPaths = [];
+  for (const toNote of toNotes) {
+    const note = notes.find(n => n.id === toNote.parentIds[0]);
+    if (!isObject(note)) {
+      console.log('In _getUnusedFPaths, found invalid note', notes, toNotes);
+      continue;
+    }
 
+    for (const { name } of note.media) {
+      if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
+    }
+  }
+  return unusedFPaths;
+};
+
+const _deleteNotes = (ids) => async (dispatch, getState) => {
   let addedDT = Date.now();
   const listName = getState().display.listName;
 
@@ -1118,20 +1162,35 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
     addedDT += 1;
     return toNote;
   });
-  const fromNotes = notes.map(note => clearNoteData(note));
+  let fromNotes = notes.map(note => clearNoteData(note));
 
-  const unusedFPaths = [];
+  let unusedFPaths = [];
   for (const note of notes) {
     for (const { name } of note.media) {
       if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
     }
   }
 
-  const payload = { listName, ids };
+  let payload = { listName, ids };
   dispatch({ type: DELETE_NOTES, payload });
 
   try {
-    await dataApi.putNotes({ listName, notes: toNotes });
+    const result = await dataApi.putNotes({
+      listName, notes: toNotes, manuallyManageError: true,
+    });
+    if (result.errorNotes.length > 0) {
+      fromNotes = _getFromNotes(notes, result.successNotes);
+      unusedFPaths = _getUnusedFPaths(notes, result.successNotes);
+
+      payload = { ...payload, ids: result.successNotes.map(note => note.id) };
+
+      const error = result.errorNotes[0].error;
+      console.log('deleteNotes error: ', error);
+      dispatch({
+        type: DELETE_NOTES_ROLLBACK,
+        payload: { ...payload, ids: result.errorNotes.map(note => note.id), error },
+      });
+    }
   } catch (error) {
     console.log('deleteNotes error: ', error);
     dispatch({ type: DELETE_NOTES_ROLLBACK, payload: { ...payload, error } });
@@ -1204,8 +1263,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       dispatch({ type: ADD_NOTE, payload });
 
       try {
-        await dataApi.putServerFiles(usedFPaths);
-        await dataApi.putNotes({ listName, notes: [note] });
+        await dataApi.putNotes({ listName, notes: [note], staticFPaths: usedFPaths });
       } catch (error) {
         console.log('retryDiedNotes add error: ', error);
         dispatch({ type: ADD_NOTE_ROLLBACK, payload: { ...payload, error } });
@@ -1225,8 +1283,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       dispatch({ type: UPDATE_NOTE, payload });
 
       try {
-        await dataApi.putServerFiles(usedFPaths);
-        await dataApi.putNotes({ listName, notes: [toNote] });
+        await dataApi.putNotes({ listName, notes: [toNote], staticFPaths: usedFPaths });
       } catch (error) {
         console.log('retryDiedNotes update error: ', error);
         dispatch({ type: UPDATE_NOTE_ROLLBACK, payload: { ...payload, error } });
@@ -1461,8 +1518,9 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
   dispatch({ type: MERGE_NOTES, payload });
 
   try {
-    await dataApi.putServerFiles(usedFPaths);
-    await dataApi.putNotes({ listName: toListName, notes: [toNote] });
+    await dataApi.putNotes({
+      listName: toListName, notes: [toNote], staticFPaths: usedFPaths,
+    });
   } catch (error) {
     console.log('mergeNote error: ', error);
     dispatch({ type: MERGE_NOTES_ROLLBACK, payload: { ...payload, error } });
@@ -1494,11 +1552,9 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
   }
 };
 
-export const showNoteListMenuPopup = (rect, doCheckEditing, doReinitEditor) => async (
+export const showNoteListMenuPopup = (rect, doCheckEditing) => async (
   dispatch, getState
 ) => {
-
-  const _noteId = getState().display.noteId;
 
   if (!rect) rect = vars.showNoteListMenuPopup.selectedRect;
 
@@ -1516,13 +1572,6 @@ export const showNoteListMenuPopup = (rect, doCheckEditing, doReinitEditor) => a
     }
   }
 
-  if (doReinitEditor) {
-    // No need updateNoteIdUrlHash here as shouldn't be possible
-    //   to show the popup while editing in NavPanel.
-    if (_noteId === NEW_NOTE) dispatch(updateNoteId(null));
-    else dispatch(increaseSetInitDataCount());
-  }
-
   updatePopupUrlHash(NOTE_LIST_MENU_POPUP, true, rect);
 };
 
@@ -1530,11 +1579,11 @@ export const onShowNoteListMenuPopup = (title, body, media) => async (
   dispatch, getState
 ) => {
   const { noteId } = getState().display;
-  dispatch(showNoteListMenuPopup(null, false, true));
+  dispatch(showNoteListMenuPopup(null, false));
   dispatch(handleUnsavedNote(noteId, title, body, media));
 };
 
-export const showNLIMPopup = (noteId, rect, doCheckEditing, doReinitEditor) => async (
+export const showNLIMPopup = (noteId, rect, doCheckEditing) => async (
   dispatch, getState
 ) => {
 
@@ -1558,8 +1607,6 @@ export const showNLIMPopup = (noteId, rect, doCheckEditing, doReinitEditor) => a
     }
   }
 
-  if (doReinitEditor) dispatch(increaseSetInitDataCount());
-
   dispatch(updateSelectingNoteId(noteId));
   updatePopupUrlHash(NOTE_LIST_ITEM_MENU_POPUP, true, rect);
 };
@@ -1568,7 +1615,7 @@ export const onShowNLIMPopup = (title, body, media) => async (
   dispatch, getState
 ) => {
   const { noteId } = getState().display;
-  dispatch(showNLIMPopup(null, null, false, true));
+  dispatch(showNLIMPopup(null, null, false));
   dispatch(handleUnsavedNote(noteId, title, body, media));
 };
 
@@ -1600,7 +1647,11 @@ const _cleanUpStaticFiles = async (dispatch, getState) => {
   }
   unusedFPaths = unusedFPaths.slice(0, N_NOTES);
 
-  await dataApi.batchDeleteFileWithRetry(unusedFPaths, 0);
+  // Too risky. Clean up locally for now.
+  //await dataApi.batchDeleteFileWithRetry(unusedFPaths, 0);
+  if (unusedFPaths.length > 0) {
+    console.log('In cleanUpStaticFiles, found unused fpaths on server:', unusedFPaths);
+  }
   await fileApi.deleteFiles(unusedFPaths);
 
   // Delete unused static files in local
@@ -2862,6 +2913,9 @@ export const updateImportAllDataProgress = (progress) => {
 export const exportAllData = () => async (dispatch, getState) => {
   dispatch(updateExportAllDataProgress({ total: 'calculating...', done: 0 }));
 
+  // Need to manually call it to wait for it properly!
+  await sync(true, 2)(dispatch, getState);
+
   let fpaths = [], rootIds = {}, toRootIds;
   try {
     const { noteFPaths, settingsFPaths, pinFPaths } = await dataApi.listFPaths(true);
@@ -3095,6 +3149,9 @@ export const deleteAllPins = async (dispatch, pins, total, doneCount) => {
 export const deleteAllData = () => async (dispatch, getState) => {
   let doneCount = 0;
   dispatch(updateDeleteAllDataProgress({ total: 'calculating...', done: doneCount }));
+
+  // Need to manually call it to wait for it properly!
+  await sync(true, 2)(dispatch, getState);
 
   let allNoteIds, staticFPaths, settingsFPaths, settingsIds, infoFPath, pins;
   try {
@@ -3528,7 +3585,7 @@ export const cleanUpPins = () => async (dispatch, getState) => {
   const { toRootIds } = listNoteIds(noteFPaths);
   const pins = getRawPins(pinFPaths, toRootIds);
 
-  const unusedPins = [];
+  let unusedPins = [];
   for (const fpath of pinFPaths) {
     const { rank, updatedDT, addedDT, id } = extractPinFPath(fpath);
 
@@ -3548,15 +3605,18 @@ export const cleanUpPins = () => async (dispatch, getState) => {
       unusedPins.push({ rank, updatedDT, addedDT, id });
     }
   }
+  unusedPins = unusedPins.slice(0, N_NOTES);
 
-  try {
-    dataApi.deletePins({ pins: unusedPins });
-  } catch (error) {
-    console.log('cleanUpPins error: ', error);
-    // error in this step should be fine
+  if (unusedPins.length > 0) {
+    try {
+      dataApi.deletePins({ pins: unusedPins });
+    } catch (error) {
+      console.log('cleanUpPins error: ', error);
+      // error in this step should be fine
+    }
+
+    dispatch(sync());
   }
-
-  dispatch(sync());
 };
 
 export const updateLocalSettings = () => async (dispatch, getState) => {

@@ -61,6 +61,10 @@ const rightPanelFMV = {
   doAnimateHidden: false,
 };
 
+const noteEditorEditor = {
+  didUpdateNoteId: false,
+};
+
 export const syncMode = {
   doSyncMode: false,
 };
@@ -72,6 +76,6 @@ export const getCachedFPaths = () => {
 const vars = {
   cachedFPaths, cachedServerFPaths, scrollPanel, updateNoteId, changeListName,
   updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, deleteOldNotes, updateSettings,
-  paywallFeature, rightPanelFMV, syncMode,
+  paywallFeature, rightPanelFMV, noteEditorEditor, syncMode,
 };
 export default vars;

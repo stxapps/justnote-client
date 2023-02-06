@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { motion, AnimatePresence } from 'framer-motion';
 
 import dataApi from '../apis/data';
 import {
@@ -14,7 +13,6 @@ import {
 } from '../types/const';
 import { getListNameMap, makeGetListNameEditor } from '../selectors';
 import { validateListNameDisplayName, getAllListNames } from '../utils';
-import { listsFMV } from '../types/animConfigs';
 import { initialListNameEditorState } from '../types/initialStates';
 
 import { useSafeAreaFrame, useTailwind } from '.';
@@ -42,15 +40,7 @@ const SettingsPopupLists = (props) => {
       </div>
       <div className={tailwind('pt-2.5')}>
         <ListNameEditor key="SPL_newListNameEditor" listNameObj={null} validateDisplayName={validateDisplayName} level={0} />
-        <AnimatePresence initial={false}>
-          {listNameMap.map(listNameObj => {
-            return (
-              <motion.div key={listNameObj.listName} layoutId={listNameObj.listName} variants={listsFMV} initial="hidden" animate="visible" exit="exit">
-                <ListNameEditor listNameObj={listNameObj} validateDisplayName={validateDisplayName} level={0} />
-              </motion.div>
-            )
-          })}
-        </AnimatePresence>
+        {listNameMap.map(listNameObj => <ListNameEditor key={listNameObj.listName} listNameObj={listNameObj} validateDisplayName={validateDisplayName} level={0} />)}
       </div>
     </div>
   );

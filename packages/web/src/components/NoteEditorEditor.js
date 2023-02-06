@@ -17,6 +17,7 @@ import {
   debounce, scrollWindowTop, containUppercase, isStringTitleIn,
 } from '../utils';
 import { isUint8Array, isBlob, convertDataUrlToBlob } from '../utils/index-web';
+import vars from '../vars';
 
 import '../stylesheets/ckeditor.css';
 
@@ -171,8 +172,7 @@ const NoteEditorEditor = (props) => {
       [title, body, media] = [unnote.title, unnote.body, unnote.media];
     }
 
-    scrollView.current.scrollTo(0, 0);
-    titleInput.current.value = title;
+    if (titleInput.current) titleInput.current.value = title;
 
     clearNoteMedia();
 
@@ -190,7 +190,11 @@ const NoteEditorEditor = (props) => {
       console.log('NoteEditorEditor.setInitData: ckeditor.setData error ', error);
     }
 
-    if (note.id === NEW_NOTE || unsavedNote.status === VALID) focusTitleInput();
+    if (vars.noteEditorEditor.didUpdateNoteId) {
+      if (note.id === NEW_NOTE || unsavedNote.status === VALID) focusTitleInput();
+      if (scrollView.current) scrollView.current.scrollTo(0, 0);
+    }
+    vars.noteEditorEditor.didUpdateNoteId = false;
   }, [
     note.id, note.title, note.body, note.media, unsavedNote.status, unsavedNote.note,
     replaceWithContents, replaceWithFiles,
@@ -258,16 +262,23 @@ const NoteEditorEditor = (props) => {
   }, [dispatch]);
 
   const onReady = useCallback((editor) => {
+    // Possible that when onReady is called, already unmount and refs are null
+    //   i.e. while retrying, status is xxxing and then back to rollback.
+
     // Remove toolbar's children before append a new one
     //   for CKEditor error with restart=true.
     if (isMobile) {
       const bbtb = bodyBottomToolbar.current;
-      while (bbtb.firstChild) bbtb.removeChild(bbtb.firstChild);
-      bbtb.appendChild(editor.ui.view.toolbar.element);
+      if (bbtb) {
+        while (bbtb.firstChild) bbtb.removeChild(bbtb.firstChild);
+        bbtb.appendChild(editor.ui.view.toolbar.element);
+      }
     } else {
       const bttb = bodyTopToolbar.current;
-      while (bttb.firstChild) bttb.removeChild(bttb.firstChild);
-      bttb.appendChild(editor.ui.view.toolbar.element);
+      if (bttb) {
+        while (bttb.firstChild) bttb.removeChild(bttb.firstChild);
+        bttb.appendChild(editor.ui.view.toolbar.element);
+      }
     }
 
     const groupedItemsDropdown = editor.ui.view.toolbar._behavior.groupedItemsDropdown;

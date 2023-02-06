@@ -56,11 +56,11 @@ const ConfirmDiscardPopup = () => {
     } else if (discardAction === DISCARD_ACTION_SHOW_NOTE_LIST_MENU_POPUP) {
       // As this and closing confirmDiscard popup both change url hash,
       //   need to be in different js clock cycle.
-      setTimeout(() => dispatch(showNoteListMenuPopup(null, false, true)), 100);
+      setTimeout(() => dispatch(showNoteListMenuPopup(null, false)), 100);
     } else if (discardAction === DISCARD_ACTION_SHOW_NLIM_POPUP) {
       // As this and closing confirmDiscard popup both change url hash,
       //   need to be in different js clock cycle.
-      setTimeout(() => dispatch(showNLIMPopup(null, null, false, true)), 100);
+      setTimeout(() => dispatch(showNLIMPopup(null, null, false)), 100);
     } else if (discardAction === DISCARD_ACTION_UPDATE_LIST_NAME) {
       // As this and closing confirmDiscard popup both change url hash,
       //   need to be in different js clock cycle.

@@ -121,7 +121,7 @@ const NoteListItemContent = (props) => {
       x: newX, y: newY, width: newWidth, height: newHeight,
       top: newY, bottom: newY + newHeight, left: newX, right: newX + newWidth,
     };
-    dispatch(showNLIMPopup(note.id, rect, true, false));
+    dispatch(showNLIMPopup(note.id, rect, true));
   };
 
   useEffect(() => {
