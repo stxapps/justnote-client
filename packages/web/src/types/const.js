@@ -107,7 +107,7 @@ export const UNSAVED_NOTES_UNSAVED = `${UNSAVED_NOTES}/unsaved`;
 export const UNSAVED_NOTES_SAVED = `${UNSAVED_NOTES}/saved`;
 
 export const N_NOTES = 10;
-export const MAX_TRY = 3;
+export const MAX_TRY = 1;
 export const N_DAYS = 45;
 export const MAX_SELECTED_NOTE_IDS = 10;
 export const MAX_CHARS = 600;

@@ -47,8 +47,9 @@ import {
   MOVE_PINNED_NOTE_ROLLBACK, CANCEL_DIED_PINS, UPDATE_SYSTEM_THEME_MODE,
   UPDATE_DO_USE_LOCAL_THEME, UPDATE_DEFAULT_THEME, UPDATE_LOCAL_THEME,
   UPDATE_UPDATING_THEME_MODE, UPDATE_TIME_PICK, UPDATE_IS_24H_FORMAT,
-  UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
-  UPDATE_DELETE_ALL_DATA_PROGRESS, DELETE_ALL_DATA, RESET_STATE,
+  UPDATE_PAYWALL_FEATURE, UPDATE_IMPORT_ALL_DATA_PROGRESS,
+  UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS, DELETE_ALL_DATA,
+  RESET_STATE,
 } from '../types/actionTypes';
 import {
   HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY, HASH_SUPPORT,
@@ -61,7 +62,7 @@ import {
   DIED_DELETING, N_NOTES, N_DAYS, CD_ROOT, NOTES, IMAGES, SETTINGS, INFO, INDEX,
   DOT_JSON, PINS, LG_WIDTH, IMAGE_FILE_EXTS, IAP_STATUS_URL, COM_JUSTNOTECC,
   SIGNED_TEST_STRING, VALID, ACTIVE, SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT,
-  SETTINGS_VIEW_LISTS, MODE_EDIT, WHT_MODE, BLK_MODE, CUSTOM_MODE, FEATURE_PIN,
+  SETTINGS_VIEW_LISTS, WHT_MODE, BLK_MODE, CUSTOM_MODE, FEATURE_PIN,
   FEATURE_APPEARANCE, FEATURE_DATE_FORMAT, FEATURE_SECTION_NOTES_BY_MONTH,
   FEATURE_MORE_EDITOR_FONT_SIZES, NOTE_DATE_SHOWING_MODE_HIDE,
   NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS,
@@ -76,7 +77,7 @@ import {
   getSettingsFPaths, getLastSettingsFPaths, getInfoFPath, getLatestPurchase,
   getValidPurchase, doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins,
   getSortedNotes, separatePinnedValues, getRawPins, getFormattedTime,
-  get24HFormattedTime, getWindowSize, getNote,
+  get24HFormattedTime, getWindowSize, getNote, containEditingMode,
 } from '../utils';
 import { isUint8Array, isBlob, convertBlobToDataUrl } from '../utils/index-web';
 import { _ } from '../utils/obj';
@@ -191,7 +192,7 @@ export const init = () => async (dispatch, getState) => {
         for (const noteId in conflictedNotes[listName]) {
           if (isBusyStatus(conflictedNotes[listName][noteId].status)) {
             e.preventDefault();
-            return e.returnValue = 'It looks like your selection on conflicted notes hasn\'t been saved. Do you want to leave this site and discard your changes?';
+            return e.returnValue = 'It looks like your selection on conflicted notes haven\'t been saved. Do you want to leave this site and discard your changes?';
           }
         }
       }
@@ -200,7 +201,14 @@ export const init = () => async (dispatch, getState) => {
       const snapshotSettings = getState().snapshot.settings;
       if (!isEqual(settings, snapshotSettings)) {
         e.preventDefault();
-        return e.returnValue = 'It looks like your changes to the settings hasn\'t been saved. Do you want to leave this site and discard your changes?';
+        return e.returnValue = 'It looks like your changes to the settings haven\'t been saved. Do you want to leave this site and discard your changes?';
+      }
+
+      const listNameEditors = getState().listNameEditors;
+      const isEditing = containEditingMode(listNameEditors);
+      if (isEditing) {
+        e.preventDefault();
+        return e.returnValue = 'It looks like your changes to the list names haven\'t been saved. Do you want to leave this site and discard your changes?';
       }
     }
   }, { capture: true });
@@ -508,7 +516,7 @@ export const updateUrlHash = (q, doReplace = false) => {
 let _didUpdateNoteIdUrlHashCall = false;
 const _updateNoteIdUrlHash = (id) => {
   _didUpdateNoteIdUrlHashCall = true;
-  vars.rightPanelFMV.doAnimateHidden = true;
+  vars.displayReducer.doRightPanelAnimateHidden = true;
 
   if (!id) {
     window.history.back();
@@ -678,7 +686,6 @@ export const onChangeListName = (title, body, media) => async (
 };
 
 const _updateNoteId = (id) => {
-  vars.noteEditorEditor.didUpdateNoteId = true;
   return {
     type: UPDATE_NOTE_ID,
     payload: id,
@@ -1181,14 +1188,15 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
     if (result.errorNotes.length > 0) {
       fromNotes = _getFromNotes(notes, result.successNotes);
       unusedFPaths = _getUnusedFPaths(notes, result.successNotes);
+      payload = { ...payload, ids: fromNotes.map(note => note.id) };
 
-      payload = { ...payload, ids: result.successNotes.map(note => note.id) };
+      const errorFromNotes = _getFromNotes(notes, result.errorNotes);
 
       const error = result.errorNotes[0].error;
       console.log('deleteNotes error: ', error);
       dispatch({
         type: DELETE_NOTES_ROLLBACK,
-        payload: { ...payload, ids: result.errorNotes.map(note => note.id), error },
+        payload: { ...payload, ids: errorFromNotes.map(note => note.id), error },
       });
     }
   } catch (error) {
@@ -1317,6 +1325,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
         return;
       }
 
+      vars.editorReducer.didRetryMovingNote = true;
       dispatch({ type: MOVE_NOTES_COMMIT, payload });
 
       try {
@@ -1717,14 +1726,7 @@ export const updateSettingsPopup = (isShown, doCheckEditing = false) => async (
   if (!isShown) {
     if (doCheckEditing) {
       const listNameEditors = getState().listNameEditors;
-
-      let isEditing = false;
-      for (const k in listNameEditors) {
-        if (listNameEditors[k].mode === MODE_EDIT) {
-          isEditing = true;
-          break;
-        }
-      }
+      const isEditing = containEditingMode(listNameEditors);
       if (isEditing) {
         dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_LIST_NAME));
         updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
@@ -1838,7 +1840,7 @@ export const updateNoteDateFormat = (
   const purchases = getState().info.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
-    vars.paywallFeature.feature = FEATURE_DATE_FORMAT;
+    dispatch(updatePaywallFeature(FEATURE_DATE_FORMAT))
     dispatch(updatePopup(PAYWALL_POPUP, true));
     return;
   }
@@ -1863,7 +1865,7 @@ export const updateDoSectionNotesByMonth = (doSection) => async (
   const purchases = getState().info.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
-    vars.paywallFeature.feature = FEATURE_SECTION_NOTES_BY_MONTH;
+    dispatch(updatePaywallFeature(FEATURE_SECTION_NOTES_BY_MONTH));
     dispatch(updatePopup(PAYWALL_POPUP, true));
     return;
   }
@@ -1877,7 +1879,7 @@ export const updateDoMoreEditorFontSizes = (doMore) => async (
   const purchases = getState().info.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
-    vars.paywallFeature.feature = FEATURE_MORE_EDITOR_FONT_SIZES;
+    dispatch(updatePaywallFeature(FEATURE_MORE_EDITOR_FONT_SIZES));
     dispatch(updatePopup(PAYWALL_POPUP, true));
     return;
   }
@@ -2276,6 +2278,10 @@ export const deleteAllDbUnsavedNotes = () => async (dispatch, getState) => {
 
 export const updateStacksAccess = (data) => {
   return { type: UPDATE_STACKS_ACCESS, payload: data };
+};
+
+export const updatePaywallFeature = (feature) => {
+  return { type: UPDATE_PAYWALL_FEATURE, payload: feature };
 };
 
 const importAllDataLoop = async (dispatch, fpaths, contents) => {
@@ -3398,7 +3404,7 @@ export const pinNotes = (ids) => async (dispatch, getState) => {
   const purchases = getState().info.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
-    vars.paywallFeature.feature = FEATURE_PIN;
+    dispatch(updatePaywallFeature(FEATURE_PIN));
     dispatch(updatePopup(PAYWALL_POPUP, true));
     return;
   }
@@ -3632,7 +3638,7 @@ export const updateTheme = (mode, customOptions) => async (dispatch, getState) =
   const purchases = getState().info.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
-    vars.paywallFeature.feature = FEATURE_APPEARANCE;
+    dispatch(updatePaywallFeature(FEATURE_APPEARANCE));
     dispatch(updatePopup(PAYWALL_POPUP, true));
     return;
   }

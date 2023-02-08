@@ -11,7 +11,7 @@ import {
   NOTE_DATE_FORMAT_MSDSY, NOTE_DATE_FORMAT_DSMSY, NOTE_DATE_FORMAT_YHMHD,
   NOTE_DATE_FORMAT_MHDHY, NOTE_DATE_FORMAT_DHMHY, NOTE_DATE_FORMAT_YOMOD,
   NOTE_DATE_FORMAT_MODOY, NOTE_DATE_FORMAT_DOMOY, NOTE_DATE_FORMAT_YMMMD,
-  NOTE_DATE_FORMAT_MMMDY, NOTE_DATE_FORMAT_DMMMY,
+  NOTE_DATE_FORMAT_MMMDY, NOTE_DATE_FORMAT_DMMMY, MODE_EDIT,
 } from '../types/const';
 import {
   PIN_NOTE, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_ROLLBACK,
@@ -1661,4 +1661,15 @@ export const getIdsAndParentIds = (ids, cachedFPaths) => {
   }
 
   return [...ids, ...parentIds];
+};
+
+export const containEditingMode = (listNameEditors) => {
+  let doContain = false;
+  for (const k in listNameEditors) {
+    if (listNameEditors[k].mode === MODE_EDIT) {
+      doContain = true;
+      break;
+    }
+  }
+  return doContain;
 };

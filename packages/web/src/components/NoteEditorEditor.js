@@ -17,7 +17,6 @@ import {
   debounce, scrollWindowTop, containUppercase, isStringTitleIn,
 } from '../utils';
 import { isUint8Array, isBlob, convertDataUrlToBlob } from '../utils/index-web';
-import vars from '../vars';
 
 import '../stylesheets/ckeditor.css';
 
@@ -40,6 +39,7 @@ const NoteEditorEditor = (props) => {
   const isEditorBusy = useSelector(state => state.display.isEditorBusy);
   const searchString = useSelector(state => state.display.searchString);
   const doMoreEditorFontSizes = useSelector(state => getDoMoreEditorFontSizes(state));
+  const checkToFocusCount = useSelector(state => state.editor.checkToFocusCount);
   const saveNoteCount = useSelector(state => state.editor.saveNoteCount);
   const discardNoteCount = useSelector(state => state.editor.discardNoteCount);
   const updateNoteIdUrlHashCount = useSelector(
@@ -67,6 +67,7 @@ const NoteEditorEditor = (props) => {
   const bodyTopToolbar = useRef(null);
   const bodyBottomToolbar = useRef(null);
   const prevSearchString = useRef(searchString);
+  const prevCheckToFocusCount = useRef(0); // First mount always checks.
   const prevSaveNoteCount = useRef(saveNoteCount);
   const prevDiscardNoteCount = useRef(discardNoteCount);
   const prevUpdateNoteIdUrlHashCount = useRef(updateNoteIdUrlHashCount);
@@ -107,6 +108,10 @@ const NoteEditorEditor = (props) => {
     setTimeout(() => {
       if (titleInput.current) titleInput.current.focus();
     }, 1);
+  };
+
+  const blurTitleInput = () => {
+    if (titleInput.current) titleInput.current.blur();
   };
 
   const clearNoteMedia = () => {
@@ -189,14 +194,8 @@ const NoteEditorEditor = (props) => {
       //   guess it's the same reason.
       console.log('NoteEditorEditor.setInitData: ckeditor.setData error ', error);
     }
-
-    if (vars.noteEditorEditor.didUpdateNoteId) {
-      if (note.id === NEW_NOTE || unsavedNote.status === VALID) focusTitleInput();
-      if (scrollView.current) scrollView.current.scrollTo(0, 0);
-    }
-    vars.noteEditorEditor.didUpdateNoteId = false;
   }, [
-    note.id, note.title, note.body, note.media, unsavedNote.status, unsavedNote.note,
+    note.title, note.body, note.media, unsavedNote.status, unsavedNote.note,
     replaceWithContents, replaceWithFiles,
   ]);
 
@@ -355,6 +354,17 @@ const NoteEditorEditor = (props) => {
 
   useEffect(() => {
     if (!isEditorReady) return;
+    if (checkToFocusCount !== prevCheckToFocusCount.current) {
+      if (note.id === NEW_NOTE || unsavedNote.status === VALID) focusTitleInput();
+      else blurTitleInput();
+
+      if (scrollView.current) scrollView.current.scrollTo(0, 0);
+      prevCheckToFocusCount.current = checkToFocusCount;
+    }
+  }, [isEditorReady, checkToFocusCount, note.id, unsavedNote.status]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
     if (saveNoteCount !== prevSaveNoteCount.current) {
       getDataAction.current = GET_DATA_SAVE_NOTE;
       onGetData();
@@ -404,13 +414,14 @@ const NoteEditorEditor = (props) => {
 
       Focus flow:
         1.1 User clicks on titleInput or bodyEditor
-        1.2 Or programatically call focusTitleInput
+        1.2 Or programatically call focusTitleCount
         2. When titleInput or bodyEditor get focused, event listener onFocus is called
         3. onFocus dispatches updateEditorFocused(true)
       Blur flow:
         1.1 User clicks save, cancel, or back buttons
         1.2 An action dispatches updateEditorFocused(false)
-        1.3 Blur is called automatically when the element loses its focus
+        1.3 When isFocused is changed from true to false, blur is called
+        2.1 Or programatically call blur i.e. just showing discard confirm
      */
     if (!isEditorReady) return;
     if (focusTitleCount !== prevFocusTitleCount.current) {

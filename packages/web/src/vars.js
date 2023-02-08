@@ -53,16 +53,12 @@ const updateSettings = {
   doFetch: false,
 };
 
-export const paywallFeature = {
-  feature: null,
+const displayReducer = {
+  doRightPanelAnimateHidden: false,
 };
 
-const rightPanelFMV = {
-  doAnimateHidden: false,
-};
-
-const noteEditorEditor = {
-  didUpdateNoteId: false,
+const editorReducer = {
+  didRetryMovingNote: false,
 };
 
 export const syncMode = {
@@ -76,6 +72,6 @@ export const getCachedFPaths = () => {
 const vars = {
   cachedFPaths, cachedServerFPaths, scrollPanel, updateNoteId, changeListName,
   updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, deleteOldNotes, updateSettings,
-  paywallFeature, rightPanelFMV, noteEditorEditor, syncMode,
+  displayReducer, editorReducer, syncMode,
 };
 export default vars;

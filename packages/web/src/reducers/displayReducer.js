@@ -10,9 +10,9 @@ import {
   UPDATE_DELETE_ACTION, UPDATE_DISCARD_ACTION, UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT,
   UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS, MERGE_SETTINGS_COMMIT,
   UPDATE_SETTINGS_VIEW_ID, UPDATE_LIST_NAMES_MODE, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
-  UPDATE_SYNC_PROGRESS, UPDATE_SYNCED, UPDATE_IMPORT_ALL_DATA_PROGRESS,
-  UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
-  DELETE_ALL_DATA, RESET_STATE,
+  UPDATE_SYNC_PROGRESS, UPDATE_SYNCED, UPDATE_PAYWALL_FEATURE,
+  UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
+  UPDATE_DELETE_ALL_DATA_PROGRESS, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   SIGN_UP_POPUP, SIGN_IN_POPUP, PROFILE_POPUP, NOTE_LIST_MENU_POPUP,
@@ -24,6 +24,7 @@ import {
   MAX_SELECTED_NOTE_IDS, SETTINGS_VIEW_ACCOUNT, DELETE_ACTION_LIST_NAME,
 } from '../types/const';
 import { doContainListName, isObject, isString, doContainStaleNotes } from '../utils';
+import vars from '../vars';
 
 const initialState = {
   isHandlingSignIn: false,
@@ -82,6 +83,8 @@ const initialState = {
   updateSettingsViewIdCount: 0,
   listNamesMode: null,
   syncProgress: null,
+  paywallFeature: null,
+  doRightPanelAnimateHidden: false,
   importAllDataProgress: null,
   exportAllDataProgress: null,
   deleteAllDataProgress: null,
@@ -109,6 +112,10 @@ const displayReducer = (state = initialState, action) => {
   if (action.type === UPDATE_NOTE_ID) {
     const newState = { ...state, isEditorFocused: false, isEditorBusy: false };
     newState.noteId = state.noteId === action.payload ? null : action.payload;
+
+    newState.doRightPanelAnimateHidden = vars.displayReducer.doRightPanelAnimateHidden;
+    vars.displayReducer.doRightPanelAnimateHidden = false;
+
     return newState;
   }
 
@@ -536,6 +543,10 @@ const displayReducer = (state = initialState, action) => {
     return {
       ...state, syncProgress: null, didFetchSettings: false, fetchedListNames: [],
     };
+  }
+
+  if (action.type === UPDATE_PAYWALL_FEATURE) {
+    return { ...state, paywallFeature: action.payload };
   }
 
   if (action.type === UPDATE_IMPORT_ALL_DATA_PROGRESS) {
