@@ -21,7 +21,7 @@ const getFile = async (fpath, dir = Dirs.DocumentDir) => {
   fpath = deriveFPath(fpath, dir);
   if (fpath in cachedContents) return cachedContents[fpath];
 
-  let content = undefined; // If no key, val will be undefined.
+  let content; // If no key, val will be undefined.
   try {
     content = await idb.get(fpath);
   } catch (error) {

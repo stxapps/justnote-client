@@ -9,7 +9,7 @@ let cachedContents = {};
 const getFile = async (fpath, dangerouslyIgnoreUndefined = false) => {
   if (fpath in cachedContents) return cachedContents[fpath];
 
-  let content = undefined; // If no key, val will be undefined.
+  let content; // If no key, val will be undefined.
   try {
     content = await idb.get(fpath);
   } catch (error) {

@@ -28,6 +28,10 @@ const keyboard = {
   height: 0,
 };
 
+const updateNoteIdUrlHash = {
+  didCall: false,
+};
+
 const updateNoteId = {
   updatingNoteId: null,
 };
@@ -57,6 +61,10 @@ const updateSettings = {
   doFetch: false,
 };
 
+const updateSettingsPopup = {
+  didCall: false,
+};
+
 const displayReducer = {
   doRightPanelAnimateHidden: false,
 };
@@ -75,8 +83,9 @@ export const getCachedFPaths = () => {
 };
 
 const vars = {
-  cachedFPaths, cachedServerFPaths, scrollPanel, keyboard, updateNoteId, changeListName,
-  updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, deleteOldNotes, updateSettings,
-  displayReducer, editorReducer, syncMode,
+  cachedFPaths, cachedServerFPaths, scrollPanel, keyboard, updateNoteIdUrlHash,
+  updateNoteId, changeListName, updateBulkEdit, showNoteListMenuPopup, showNLIMPopup,
+  deleteOldNotes, updateSettings, updateSettingsPopup, displayReducer, editorReducer,
+  syncMode,
 };
 export default vars;

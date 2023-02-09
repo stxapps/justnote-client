@@ -14,6 +14,7 @@ import { syncMode } from '../vars';
 import { initialLocalSettingsState } from '../types/initialStates';
 
 const getApi = () => {
+  // Beware arguments are not exactly the same!
   return syncMode.doSyncMode ? ldbApi : serverApi;
 };
 

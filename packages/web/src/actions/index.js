@@ -26,8 +26,8 @@ import {
   UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS,
   MERGE_SETTINGS, MERGE_SETTINGS_COMMIT, MERGE_SETTINGS_ROLLBACK,
   UPDATE_SETTINGS_VIEW_ID, UPDATE_INFO, UPDATE_INFO_COMMIT, UPDATE_INFO_ROLLBACK,
-  UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION,
-  UPDATE_DISCARD_ACTION, UPDATE_LIST_NAMES_MODE, INCREASE_SAVE_NOTE_COUNT,
+  UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION, UPDATE_DISCARD_ACTION,
+  UPDATE_LIST_NAMES_MODE, UPDATE_SYNCED, INCREASE_SAVE_NOTE_COUNT,
   INCREASE_DISCARD_NOTE_COUNT, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
   INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
   INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT,
@@ -37,11 +37,12 @@ import {
   CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS, UPDATE_EDITOR_IS_UPLOADING,
   UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_EDITING_NOTE,
   UPDATE_UNSAVED_NOTE, DELETE_UNSAVED_NOTES, CLEAN_UP_STATIC_FILES,
-  CLEAN_UP_STATIC_FILES_COMMIT, CLEAN_UP_STATIC_FILES_ROLLBACK,
-  UPDATE_STACKS_ACCESS, REQUEST_PURCHASE, RESTORE_PURCHASES, RESTORE_PURCHASES_COMMIT,
+  CLEAN_UP_STATIC_FILES_COMMIT, CLEAN_UP_STATIC_FILES_ROLLBACK, UPDATE_STACKS_ACCESS,
+  REQUEST_PURCHASE, RESTORE_PURCHASES, RESTORE_PURCHASES_COMMIT,
   RESTORE_PURCHASES_ROLLBACK, REFRESH_PURCHASES, REFRESH_PURCHASES_COMMIT,
-  REFRESH_PURCHASES_ROLLBACK, UPDATE_IAP_PUBLIC_KEY, UPDATE_IAP_PRODUCT_STATUS,
-  UPDATE_IAP_PURCHASE_STATUS, UPDATE_IAP_RESTORE_STATUS, UPDATE_IAP_REFRESH_STATUS,
+  REFRESH_PURCHASES_ROLLBACK,
+  UPDATE_IAP_PUBLIC_KEY, UPDATE_IAP_PRODUCT_STATUS, UPDATE_IAP_PURCHASE_STATUS,
+  UPDATE_IAP_RESTORE_STATUS, UPDATE_IAP_REFRESH_STATUS,
   PIN_NOTE, PIN_NOTE_COMMIT, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_COMMIT,
   UNPIN_NOTE_ROLLBACK, MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_COMMIT,
   MOVE_PINNED_NOTE_ROLLBACK, CANCEL_DIED_PINS, UPDATE_SYSTEM_THEME_MODE,
@@ -57,27 +58,26 @@ import {
   CONFIRM_DISCARD_POPUP, NOTE_LIST_MENU_POPUP, NOTE_LIST_ITEM_MENU_POPUP,
   MOVE_ACTION_NOTE_COMMANDS, MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS,
   DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
-  DISCARD_ACTION_UPDATE_LIST_NAME, MY_NOTES, TRASH, ARCHIVE, ID, NEW_NOTE,
-  NEW_NOTE_OBJ, ADDED_DT, UPDATED_DT, DIED_ADDING, DIED_UPDATING, DIED_MOVING,
-  DIED_DELETING, N_NOTES, N_DAYS, CD_ROOT, NOTES, IMAGES, SETTINGS, INFO, INDEX,
-  DOT_JSON, PINS, LG_WIDTH, IMAGE_FILE_EXTS, IAP_STATUS_URL, COM_JUSTNOTECC,
-  SIGNED_TEST_STRING, VALID, ACTIVE, SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT,
-  SETTINGS_VIEW_LISTS, WHT_MODE, BLK_MODE, CUSTOM_MODE, FEATURE_PIN,
-  FEATURE_APPEARANCE, FEATURE_DATE_FORMAT, FEATURE_SECTION_NOTES_BY_MONTH,
-  FEATURE_MORE_EDITOR_FONT_SIZES, NOTE_DATE_SHOWING_MODE_HIDE,
-  NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS,
+  DISCARD_ACTION_UPDATE_LIST_NAME, MY_NOTES, TRASH, ARCHIVE, ID, NEW_NOTE, NEW_NOTE_OBJ,
+  ADDED_DT, UPDATED_DT, DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES,
+  N_DAYS, CD_ROOT, NOTES, IMAGES, SETTINGS, INFO, INDEX, DOT_JSON, SHOW_SYNCED, PINS,
+  LG_WIDTH, IMAGE_FILE_EXTS, IAP_STATUS_URL, COM_JUSTNOTECC, SIGNED_TEST_STRING, VALID,
+  ACTIVE, SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS, WHT_MODE,
+  BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE, FEATURE_DATE_FORMAT,
+  FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES,
+  NOTE_DATE_SHOWING_MODE_HIDE, NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS,
 } from '../types/const';
 import {
-  throttle, extractUrl, urlHashToObj, objToUrlHash, isBusyStatus,
-  isEqual, separateUrlAndParam, getUserImageUrl, randomString, sleep, isObject,
-  isString, isNumber, isListNameObjsValid, indexOfClosingTag, isNoteBodyEqual,
-  clearNoteData, getStaticFPath, deriveFPaths, getListNameObj, getAllListNames,
-  getMainId, createNoteFPath, createDataFName, extractNoteFPath, extractDataFName,
-  extractDataId, listNoteIds, getNoteFPaths, getStaticFPaths, createSettingsFPath,
-  getSettingsFPaths, getLastSettingsFPaths, getInfoFPath, getLatestPurchase,
-  getValidPurchase, doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins,
-  getSortedNotes, separatePinnedValues, getRawPins, getFormattedTime,
-  get24HFormattedTime, getWindowSize, getNote, containEditingMode,
+  throttle, extractUrl, urlHashToObj, objToUrlHash, isBusyStatus, isEqual,
+  separateUrlAndParam, getUserImageUrl, randomString, sleep, isObject, isString,
+  isNumber, isListNameObjsValid, indexOfClosingTag, isNoteBodyEqual, clearNoteData,
+  getStaticFPath, deriveFPaths, getListNameObj, getAllListNames, getMainId,
+  createNoteFPath, createDataFName, extractNoteFPath, extractDataFName, extractDataId,
+  listNoteIds, getNoteFPaths, getStaticFPaths, createSettingsFPath, getSettingsFPaths,
+  getLastSettingsFPaths, getInfoFPath, getLatestPurchase, getValidPurchase,
+  doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins, getSortedNotes,
+  separatePinnedValues, getRawPins, getFormattedTime, get24HFormattedTime,
+  getWindowSize, getNote, containEditingMode,
 } from '../utils';
 import { isUint8Array, isBlob, convertBlobToDataUrl } from '../utils/index-web';
 import { _ } from '../utils/obj';
@@ -368,7 +368,7 @@ export const onUrlHashChange = (oldUrl, newUrl, dispatch, getState) => {
     }
   } else if ('n' in oldHashObj && !('n' in newHashObj)) {
     // press back button, need to move editingNote to unsavedNote here.
-    if (!_didUpdateNoteIdUrlHashCall) {
+    if (!vars.updateNoteIdUrlHash.didCall) {
       // Can't use oldHashObj['n'] as new saved/updated noteId not apply to the hash.
       const { noteId, isEditorFocused } = getState().display;
       if (isEditorFocused) dispatch(handleUnsavedNote(noteId));
@@ -380,7 +380,7 @@ export const onUrlHashChange = (oldUrl, newUrl, dispatch, getState) => {
     // Select note id
     dispatch(updateNoteId(newHashObj['n']));
   }
-  _didUpdateNoteIdUrlHashCall = false;
+  vars.updateNoteIdUrlHash.didCall = false;
 
   // Popup
   if ('p' in oldHashObj && 'p' in newHashObj) {
@@ -446,7 +446,7 @@ export const onUrlHashChange = (oldUrl, newUrl, dispatch, getState) => {
     }
   } else if ('stp' in oldHashObj && !('stp' in newHashObj)) {
     // press back button, need to call save settings and info here.
-    if (!_didUpdateSettingsPopupCall) dispatch(updateStgsAndInfo());
+    if (!vars.updateSettingsPopup.didCall) dispatch(updateStgsAndInfo());
 
     // Close settings popup
     dispatch(updatePopup(SETTINGS_POPUP, false, null));
@@ -454,7 +454,7 @@ export const onUrlHashChange = (oldUrl, newUrl, dispatch, getState) => {
     // Open settings popup
     dispatch(updatePopup(SETTINGS_POPUP, true, null));
   }
-  _didUpdateSettingsPopupCall = false;
+  vars.updateSettingsPopup.didCall = false;
 
   // confirm delete popup
   if ('cdp' in oldHashObj && 'cdp' in newHashObj) {
@@ -513,9 +513,8 @@ export const updateUrlHash = (q, doReplace = false) => {
   } else window.location.hash = updatedHash;
 };
 
-let _didUpdateNoteIdUrlHashCall = false;
 const _updateNoteIdUrlHash = (id) => {
-  _didUpdateNoteIdUrlHashCall = true;
+  vars.updateNoteIdUrlHash.didCall = true;
   vars.displayReducer.doRightPanelAnimateHidden = true;
 
   if (!id) {
@@ -673,14 +672,23 @@ export const changeListName = (listName, doCheckEditing) => async (
     }
   }
 
+  const syncProgress = getState().display.syncProgress;
+  if (syncProgress && syncProgress.status === SHOW_SYNCED) {
+    dispatch({ type: UPDATE_SYNCED });
+  }
+
   dispatch({ type: UPDATE_LIST_NAME, payload: listName });
-  await updateFetchedMore(null, _listName)(dispatch, getState);
+
+  if (!(syncProgress && syncProgress.status === SHOW_SYNCED)) {
+    await updateFetchedMore(null, _listName)(dispatch, getState);
+  }
 };
 
 export const onChangeListName = (title, body, media) => async (
   dispatch, getState
 ) => {
   const { noteId } = getState().display;
+  if (vars.keyboard.height > 0) dispatch(increaseBlurCount());
   dispatch(changeListName(null, false));
   dispatch(handleUnsavedNote(noteId, title, body, media));
 };
@@ -721,6 +729,14 @@ export const onUpdateNoteId = (title, body, media) => async (
   dispatch, getState
 ) => {
   const { noteId } = getState().display;
+  if (
+    vars.updateNoteId.updatingNoteId === null ||
+    vars.updateNoteId.updatingNoteId === noteId
+  ) {
+    // Can hide keyboard here only if noteId is null or the same.
+    // If diff, need to hide in Editor to prevent blink.
+    if (vars.keyboard.height > 0) dispatch(increaseBlurCount());
+  }
   dispatch(updateNoteId(null, true, false));
   dispatch(handleUnsavedNote(noteId, title, body, media));
 };
@@ -886,7 +902,9 @@ export const refreshFetched = () => async (dispatch, getState) => {
   const noteId = getState().display.noteId;
   const safeAreaWidth = getState().window.width;
 
-  if (noteId !== null && safeAreaWidth < LG_WIDTH) {
+  // Check safeAreaWidth is a number to execute on web only
+  //   as safeAreaWidth on mobile is always null.
+  if (noteId !== null && isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
     updateNoteIdUrlHash(null);
     // Might not need to await but just in case.
     await sleep(100);
@@ -951,7 +969,7 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
 
   const savingFPaths = getState().editor.savingFPaths;
   const {
-    usedFPaths, serverUnusedFPaths, localUnusedFPaths
+    usedFPaths, serverUnusedFPaths, localUnusedFPaths,
   } = deriveFPaths(media, note.media, savingFPaths);
 
   const payload = { listName, fromNote: note, toNote };
@@ -1006,6 +1024,7 @@ export const discardNote = (doCheckEditing, title = null, body = null) => async 
 
   if (doCheckEditing) {
     if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
+      if (vars.keyboard.height > 0) dispatch(increaseBlurCount());
       dispatch(updateDiscardAction(DISCARD_ACTION_CANCEL_EDIT));
       updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
       return;
@@ -1014,7 +1033,7 @@ export const discardNote = (doCheckEditing, title = null, body = null) => async 
 
   if (noteId === NEW_NOTE) {
     const safeAreaWidth = getState().window.width;
-    if (safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(null);
+    if (isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(null);
     else dispatch(updateNoteId(null));
     // Let transition done before causing rerender.
     setTimeout(() => dispatch(deleteUnsavedNotes([noteId])), 100);
@@ -1110,8 +1129,9 @@ export const moveNotesWithAction = (toListName, moveAction) => async (
     )
   ) {
     const safeAreaWidth = getState().window.width;
-    if (safeAreaWidth < LG_WIDTH && !isBulkEditing) updateNoteIdUrlHash(null);
-    else dispatch(updateNoteId(null));
+    if (!isBulkEditing && isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
+      updateNoteIdUrlHash(null);
+    } else dispatch(updateNoteId(null));
   }
 
   if (moveAction === MOVE_ACTION_NOTE_COMMANDS) {
@@ -1231,8 +1251,9 @@ export const deleteNotes = () => async (dispatch, getState) => {
     )
   ) {
     const safeAreaWidth = getState().window.width;
-    if (safeAreaWidth < LG_WIDTH && !isBulkEditing) updateNoteIdUrlHash(null);
-    else dispatch(updateNoteId(null));
+    if (!isBulkEditing && isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
+      updateNoteIdUrlHash(null);
+    } else dispatch(updateNoteId(null));
   }
 
   if (deleteAction === DELETE_ACTION_NOTE_COMMANDS) {
@@ -1352,8 +1373,9 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       }
 
       const safeAreaWidth = getState().window.width;
-      if (safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(null);
-      else dispatch(updateNoteId(null));
+      if (isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
+        updateNoteIdUrlHash(null);
+      } else dispatch(updateNoteId(null));
 
       const payload = { listName, ids: [id] };
       dispatch({ type: DELETE_NOTES, payload });
@@ -1387,7 +1409,7 @@ export const cancelDiedNotes = (ids, listName = null) => async (dispatch, getSta
   if (!listName) listName = getState().display.listName;
 
   const safeAreaWidth = getState().window.width;
-  if (safeAreaWidth < LG_WIDTH) {
+  if (isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
     updateNoteIdUrlHash(null);
     // Need this to make sure noteId is null before deleting notes in notesReducer.
     // moveNotes and deleteNotes don't need this because of awaiting dataApi.
@@ -1491,7 +1513,6 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
 };
 
 export const mergeNotes = (selectedId) => async (dispatch, getState) => {
-
   const addedDT = Date.now();
   const { listName, noteId } = getState().display;
   const conflictedNote = getState().conflictedNotes[listName][noteId];
@@ -1500,11 +1521,11 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
   const fromNotes = {}, noteMedia = [];
   for (let i = 0; i < conflictedNote.notes.length; i++) {
 
-    const listName = conflictedNote.listNames[i];
+    const _listName = conflictedNote.listNames[i];
     const note = conflictedNote.notes[i];
 
     if (note.id === selectedId) {
-      toListName = listName;
+      toListName = _listName;
       toNote = {
         parentIds: conflictedNote.notes.map(n => n.id),
         id: `${addedDT}${randomString(4)}`,
@@ -1513,8 +1534,8 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
       };
     }
 
-    if (!fromNotes[listName]) fromNotes[listName] = [];
-    fromNotes[listName].push(clearNoteData(note));
+    if (!fromNotes[_listName]) fromNotes[_listName] = [];
+    fromNotes[_listName].push(clearNoteData(note));
 
     noteMedia.push(...note.media);
   }
@@ -1541,7 +1562,11 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
   }));
 
   const safeAreaWidth = getState().window.width;
-  if (safeAreaWidth < LG_WIDTH && getState().display.listName !== toListName) {
+  if (
+    getState().display.listName !== toListName &&
+    isNumber(safeAreaWidth) &&
+    safeAreaWidth < LG_WIDTH
+  ) {
     updateNoteIdUrlHash(null);
     // Need this to make sure noteId is null before deleting notes in conflictedNotes.
     await sleep(100);
@@ -1588,6 +1613,7 @@ export const onShowNoteListMenuPopup = (title, body, media) => async (
   dispatch, getState
 ) => {
   const { noteId } = getState().display;
+  if (vars.keyboard.height > 0) dispatch(increaseBlurCount());
   dispatch(showNoteListMenuPopup(null, false));
   dispatch(handleUnsavedNote(noteId, title, body, media));
 };
@@ -1624,6 +1650,7 @@ export const onShowNLIMPopup = (title, body, media) => async (
   dispatch, getState
 ) => {
   const { noteId } = getState().display;
+  if (vars.keyboard.height > 0) dispatch(increaseBlurCount());
   dispatch(showNLIMPopup(null, null, false));
   dispatch(handleUnsavedNote(noteId, title, body, media));
 };
@@ -1710,7 +1737,6 @@ export const cleanUpStaticFiles = () => async (dispatch, getState) => {
   }
 };
 
-let _didUpdateSettingsPopupCall = false;
 export const updateSettingsPopup = (isShown, doCheckEditing = false) => async (
   dispatch, getState
 ) => {
@@ -1736,8 +1762,8 @@ export const updateSettingsPopup = (isShown, doCheckEditing = false) => async (
     dispatch(updateStgsAndInfo());
   }
 
-  _didUpdateSettingsPopupCall = true;
-  updatePopupUrlHash(SETTINGS_POPUP, isShown, null);
+  vars.updateSettingsPopup.didCall = true;
+  updatePopupUrlHash(SETTINGS_POPUP, isShown);
 };
 
 export const updateSettingsViewId = (
@@ -1840,7 +1866,7 @@ export const updateNoteDateFormat = (
   const purchases = getState().info.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
-    dispatch(updatePaywallFeature(FEATURE_DATE_FORMAT))
+    dispatch(updatePaywallFeature(FEATURE_DATE_FORMAT));
     dispatch(updatePopup(PAYWALL_POPUP, true));
     return;
   }
@@ -2064,8 +2090,8 @@ export const mergeSettings = (selectedId) => async (dispatch, getState) => {
  * _newSyncObj: there is a new update and need to sync again
  *
  * updateAction: 0 - normal, update immediately or show notification
- *               1 - force, update immediately no matter what
- *               2 - no update even there is a change
+ * 1 - force, update immediately no matter what
+ * 2 - no update even there is a change
  */
 export const sync = (
   doForceServerListFPaths = false, updateAction = 0, haveUpdate = false
@@ -2079,8 +2105,8 @@ export const tryUpdateSynced = (updateAction, haveUpdate) => async (
   // Do nothing on web. This is for mobile.
 };
 
-export const updateSynced = (doCheckEditing = false) => async (dispatch, getState) => {
-  // Do nothing on web. This is for mobile.
+export const updateSynced = () => {
+  return { type: UPDATE_SYNCED };
 };
 
 export const updateEditorFocused = (isFocused) => {
@@ -2211,7 +2237,7 @@ export const updateEditorScrollEnabled = (enabled) => {
 };
 
 export const updateEditingNote = (id, title, body, media) => async (
-  dispatch, getState,
+  dispatch, getState
 ) => {
   const note = id === NEW_NOTE ? NEW_NOTE_OBJ : getNote(id, getState().notes);
   if (!isObject(note)) return;
@@ -3256,8 +3282,8 @@ export const deleteAllData = () => async (dispatch, getState) => {
     // Need to close the settings popup to update the url hash,
     //   as DELETE_ALL_DATA will set isSettingsPopupShown to false.
     if (getState().display.isSettingsPopupShown) {
-      _didUpdateSettingsPopupCall = true;
-      updatePopupUrlHash(SETTINGS_POPUP, false, null);
+      vars.updateSettingsPopup.didCall = true;
+      updatePopupUrlHash(SETTINGS_POPUP, false);
     }
     dispatch({ type: DELETE_ALL_DATA });
   } catch (error) {
