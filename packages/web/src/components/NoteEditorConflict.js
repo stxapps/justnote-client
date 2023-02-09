@@ -9,6 +9,7 @@ import { HASH_SUPPORT, MERGING, DIED_MERGING, LG_WIDTH } from '../types/const';
 import { getListNameMap } from '../selectors';
 import { getListNameDisplayName, getFormattedDT } from '../utils';
 import { popupFMV } from '../types/animConfigs';
+import vars from '../vars';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
@@ -118,6 +119,7 @@ const _NoteEditorUnsavedConflict = (props) => {
     if (didClick.current) return;
 
     const { id, title, body, media } = unsavedNote.note;
+    vars.editorReducer.didClickEditUnsaved = true;
     dispatch(handleUnsavedNote(note.id, title, body, media));
     dispatch(deleteUnsavedNotes([id]));
 

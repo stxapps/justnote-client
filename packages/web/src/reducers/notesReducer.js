@@ -306,8 +306,9 @@ const notesReducer = (state = initialState, action) => {
   }
 
   if (action.type === SYNC_COMMIT) {
-    const { updateAction, haveUpdate } = action.payload;
+    const { updateAction, haveUpdate, haveNewSync } = action.payload;
 
+    if (haveNewSync) return state;
     return loop(
       state,
       Cmd.run(

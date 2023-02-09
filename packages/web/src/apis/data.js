@@ -34,7 +34,7 @@ const listFPaths = async (doForce = false) => {
   }
   getApi().cachedFPaths.fpaths = await _listFPaths();
   return copyFPaths(getApi().cachedFPaths.fpaths);
-}
+};
 
 const batchGetFileWithRetry = async (
   fpaths, callCount, dangerouslyIgnoreError = false
@@ -572,11 +572,9 @@ const putLocalSettings = async (localSettings) => {
 };
 
 const getUnsavedNotes = async () => {
-  const keys = await fileApi.listKeys();
-  const usnKeys = keys.filter(key => key.includes(UNSAVED_NOTES + '/'));
-
-  const _fpaths = usnKeys.map(key => key.slice(key.indexOf(UNSAVED_NOTES + '/')));
-  const { fpaths, contents } = await fileApi.getFiles(_fpaths);
+  const keys = await ldbApi.listKeys();
+  const _fpaths = keys.filter(key => key.startsWith(UNSAVED_NOTES + '/'));
+  const { fpaths, contents } = await ldbApi.getFiles(_fpaths, true);
 
   const unsavedArr = [], savedMap = {};
   for (let i = 0; i < fpaths.length; i++) {
@@ -624,16 +622,16 @@ const putUnsavedNote = async (
 ) => {
   const fpath = `${UNSAVED_NOTES_UNSAVED}/${id}`;
   const content = JSON.stringify({ title, body, media });
-  await fileApi.putFile(fpath, content);
+  await ldbApi.putFile(fpath, content);
 
   const savedFPath = `${UNSAVED_NOTES_SAVED}/${id}`;
 
   // For better performance, if already exists, no need to save again.
-  const savedFile = await fileApi.getFile(savedFPath);
+  const savedFile = await ldbApi.getFile(savedFPath, true);
   if (isString(savedFile)) return;
 
   const savedContent = JSON.stringify({ savedTitle, savedBody, savedMedia });
-  await fileApi.putFile(savedFPath, savedContent);
+  await ldbApi.putFile(savedFPath, savedContent);
 };
 
 const deleteUnsavedNotes = async (ids) => {
@@ -642,15 +640,13 @@ const deleteUnsavedNotes = async (ids) => {
     fpaths.push(`${UNSAVED_NOTES_UNSAVED}/${id}`);
     fpaths.push(`${UNSAVED_NOTES_SAVED}/${id}`);
   }
-  await fileApi.deleteFiles(fpaths);
+  await ldbApi.deleteFiles(fpaths);
 };
 
 const deleteAllUnsavedNotes = async () => {
-  const keys = await fileApi.listKeys();
-  const usnKeys = keys.filter(key => key.includes(UNSAVED_NOTES + '/'));
-
-  const fpaths = usnKeys.map(key => key.slice(key.indexOf(UNSAVED_NOTES + '/')));
-  await fileApi.deleteFiles(fpaths);
+  const keys = await ldbApi.listKeys();
+  const fpaths = keys.filter(key => key.startsWith(UNSAVED_NOTES + '/'));
+  await ldbApi.deleteFiles(fpaths);
 };
 
 const getServerFiles = async (_fpaths) => {
@@ -673,6 +669,7 @@ const deleteServerFiles = async (fpaths) => {
 const deleteAllLocalFiles = async () => {
   localStorage.removeItem(COLS_PANEL_STATE);
   localStorage.removeItem(LOCAL_SETTINGS_STATE);
+  await ldbApi.deleteAllFiles();
   await fileApi.deleteAllFiles();
 };
 

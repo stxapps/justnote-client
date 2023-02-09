@@ -148,7 +148,7 @@ const editorReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_EDITING_NOTE) {
-    let { id, title, body, media, savedTitle, savedBody, savedMedia } = action.payload;
+    const { id, title, body, media, savedTitle, savedBody, savedMedia } = action.payload;
 
     const newState = {
       ...state,
@@ -171,8 +171,20 @@ const editorReducer = (state = initialState, action) => {
     // In case multiple calls i.e. update noteId to null and NoteEditor is unmounted,
     //   reset so no need to do it again.
     const { id } = action.payload;
-    if (id === state.editingNoteId) return { ...state, ...initialEditingNoteState };
-    else return state;
+    if (id !== state.editingNoteId && !vars.editorReducer.didClickEditUnsaved) {
+      return state;
+    }
+
+    let newState = { ...state };
+    if (id === state.editingNoteId) {
+      newState = { ...newState, ...initialEditingNoteState };
+    }
+    if (vars.editorReducer.didClickEditUnsaved) {
+      newState.checkToFocusCount = newState.checkToFocusCount + 1;
+      vars.editorReducer.didClickEditUnsaved = false;
+    }
+
+    return newState;
   }
 
   if (action.type === DELETE_UNSAVED_NOTES) {

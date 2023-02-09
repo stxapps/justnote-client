@@ -79,12 +79,13 @@ const deleteFiles = async (fpaths, dir = Dirs.DocumentDir) => {
 };
 
 const deleteAllFiles = async (dir = Dirs.DocumentDir) => {
-  // BUG Alert: There might be some files should not be deleted?
-  try {
+  // BUG Alert: localDb also uses IndexedDB too!
+  // Use localDb for delete all files in both localDb and localFile for now!
+  /*try {
     await idb.clear();
   } catch (error) {
     console.log('In localFile.deleteAllFiles, IndexedDB error:', error);
-  }
+  }*/
 
   cachedContents = {};
 };
@@ -95,8 +96,9 @@ const listKeys = async () => {
     keys = await idb.keys();
   } catch (error) {
     console.log('In localFile.listKeys, IndexedDB error:', error);
+    keys = Object.keys(cachedContents);
   }
-  return keys;
+  return /** @type string[] */(keys);
 };
 
 const localFile = {

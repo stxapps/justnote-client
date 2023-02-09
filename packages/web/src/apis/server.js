@@ -6,24 +6,24 @@ import { cachedServerFPaths } from '../vars';
 
 const _userSession = userSession._userSession;
 
-const getFile = async (path, options = {}) => {
+const getFile = async (fpath, options = {}) => {
   const storage = new Storage({ userSession: _userSession });
-  let content = /** @type {any} */(await storage.getFile(path, options));
-  if (path.endsWith(DOT_JSON)) content = JSON.parse(content);
+  let content = /** @type {any} */(await storage.getFile(fpath, options));
+  if (fpath.endsWith(DOT_JSON)) content = JSON.parse(content);
   return content;
 };
 
 const putFileOptions = { dangerouslyIgnoreEtag: true };
-const putFile = (path, content, options = putFileOptions) => {
-  if (path.endsWith(DOT_JSON)) content = JSON.stringify(content);
+const putFile = (fpath, content, options = putFileOptions) => {
+  if (fpath.endsWith(DOT_JSON)) content = JSON.stringify(content);
 
   const storage = new Storage({ userSession: _userSession });
-  return storage.putFile(path, content, options);
+  return storage.putFile(fpath, content, options);
 };
 
-const deleteFile = (path, options = {}) => {
+const deleteFile = (fpath, options = {}) => {
   const storage = new Storage({ userSession: _userSession });
-  return storage.deleteFile(path, options);
+  return storage.deleteFile(fpath, options);
 };
 
 const listFiles = (callback) => {

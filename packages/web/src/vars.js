@@ -24,6 +24,10 @@ const scrollPanel = {
   pageYOffset: 0,
 };
 
+const keyboard = {
+  height: 0,
+};
+
 const updateNoteId = {
   updatingNoteId: null,
 };
@@ -59,6 +63,7 @@ const displayReducer = {
 
 const editorReducer = {
   didRetryMovingNote: false,
+  didClickEditUnsaved: false,
 };
 
 export const syncMode = {
@@ -70,7 +75,7 @@ export const getCachedFPaths = () => {
 };
 
 const vars = {
-  cachedFPaths, cachedServerFPaths, scrollPanel, updateNoteId, changeListName,
+  cachedFPaths, cachedServerFPaths, scrollPanel, keyboard, updateNoteId, changeListName,
   updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, deleteOldNotes, updateSettings,
   displayReducer, editorReducer, syncMode,
 };
