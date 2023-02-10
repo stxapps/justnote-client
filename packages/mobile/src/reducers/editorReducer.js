@@ -1,3 +1,6 @@
+import { loop, Cmd } from 'redux-loop';
+
+import { putDbUnsavedNote } from '../actions';
 import {
   INCREASE_SAVE_NOTE_COUNT, INCREASE_DISCARD_NOTE_COUNT,
   INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT, INCREASE_UPDATE_NOTE_ID_COUNT,
@@ -5,13 +8,21 @@ import {
   INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
   INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT, INCREASE_UPDATE_BULK_EDIT_COUNT,
   INCREASE_SHOW_NOTE_LIST_MENU_POPUP_COUNT, INCREASE_SHOW_NLIM_POPUP_COUNT,
-  CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS,
-  ADD_NOTE_COMMIT, UPDATE_NOTE_COMMIT, UPDATE_EDITOR_IS_UPLOADING, UPDATE_BULK_EDITING,
+  CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS, ADD_NOTE_COMMIT, UPDATE_NOTE_COMMIT,
+  DISCARD_NOTE, MOVE_NOTES_COMMIT, UPDATE_EDITOR_IS_UPLOADING, UPDATE_BULK_EDITING,
   UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_NOTE_ID, UPDATE_EDITING_NOTE,
-  UPDATE_EDITOR_UNMOUNT, UPDATE_DID_DISCARD_EDITING, DELETE_ALL_DATA, RESET_STATE,
+  UPDATE_UNSAVED_NOTE, DELETE_UNSAVED_NOTES, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
+import vars from '../vars';
 
+const initialEditingNoteState = {
+  editingNoteId: null,
+  editingNoteTitle: '',
+  editingNoteBody: '',
+  editingNoteMedia: [],
+};
 const initialState = {
+  checkToFocusCount: 0,
   saveNoteCount: 0,
   discardNoteCount: 0,
   updateNoteIdUrlHashCount: 0,
@@ -28,12 +39,7 @@ const initialState = {
   savingFPaths: [],
   isUploading: false,
   isScrollEnabled: true,
-  editingNoteId: null,
-  editingNoteTitle: '',
-  editingNoteBody: '',
-  editingNoteMedia: [],
-  didEditorUnmount: false,
-  didDiscardEditing: false,
+  ...initialEditingNoteState,
 };
 
 const editorReducer = (state = initialState, action) => {
@@ -110,6 +116,16 @@ const editorReducer = (state = initialState, action) => {
     return { ...state, savingFPaths: [] };
   }
 
+  if (action.type === DISCARD_NOTE) {
+    return { ...state, setInitDataCount: state.setInitDataCount + 1 };
+  }
+
+  if (action.type === MOVE_NOTES_COMMIT) {
+    if (!vars.editorReducer.didRetryMovingNote) return state;
+    vars.editorReducer.didRetryMovingNote = false;
+    return { ...state, checkToFocusCount: state.checkToFocusCount + 1 };
+  }
+
   if (action.type === UPDATE_EDITOR_IS_UPLOADING) {
     return { ...state, isUploading: action.payload };
   }
@@ -123,33 +139,66 @@ const editorReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_NOTE_ID) {
-    if (action.payload) return { ...state, isScrollEnabled: true };
+    if (action.payload) {
+      return {
+        ...state, checkToFocusCount: state.checkToFocusCount + 1, isScrollEnabled: true,
+      };
+    }
     return state;
   }
 
   if (action.type === UPDATE_EDITING_NOTE) {
-    const { id, title, body, media } = action.payload;
-    return {
+    const { id, title, body, media, savedTitle, savedBody, savedMedia } = action.payload;
+
+    const newState = {
       ...state,
       editingNoteId: id,
       editingNoteTitle: title,
       editingNoteBody: body,
       editingNoteMedia: media,
-      didDiscardEditing: false,
     };
+
+    return loop(
+      newState,
+      Cmd.run(
+        putDbUnsavedNote(id, title, body, media, savedTitle, savedBody, savedMedia),
+        { args: [Cmd.dispatch, Cmd.getState] },
+      ),
+    );
   }
 
-  if (action.type === UPDATE_EDITOR_UNMOUNT) {
-    return { ...state, didEditorUnmount: action.payload };
+  if (action.type === UPDATE_UNSAVED_NOTE) {
+    // In case multiple calls i.e. update noteId to null and NoteEditor is unmounted,
+    //   reset so no need to do it again.
+    const { id } = action.payload;
+    if (id !== state.editingNoteId && !vars.editorReducer.didClickEditUnsaved) {
+      return state;
+    }
+
+    let newState = { ...state };
+    if (id === state.editingNoteId) {
+      newState = { ...newState, ...initialEditingNoteState };
+    }
+    if (vars.editorReducer.didClickEditUnsaved) {
+      newState.checkToFocusCount = newState.checkToFocusCount + 1;
+      vars.editorReducer.didClickEditUnsaved = false;
+    }
+
+    return newState;
   }
 
-  if (action.type === UPDATE_DID_DISCARD_EDITING) {
-    return { ...state, didDiscardEditing: action.payload };
+  if (action.type === DELETE_UNSAVED_NOTES) {
+    const ids = action.payload;
+    if (ids.includes(state.editingNoteId)) {
+      return { ...state, ...initialEditingNoteState };
+    }
+    return state;
   }
 
   if (action.type === DELETE_ALL_DATA) {
     return {
       ...initialState,
+      checkToFocusCount: state.checkToFocusCount,
       saveNoteCount: state.saveNoteCount,
       discardNoteCount: state.discardNoteCount,
       updateNoteIdUrlHashCount: state.updateNoteIdUrlHashCount,

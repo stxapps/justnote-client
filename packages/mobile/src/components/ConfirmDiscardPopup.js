@@ -7,13 +7,13 @@ import Svg, { Path } from 'react-native-svg';
 
 import {
   updatePopup, discardNote, updateNoteId, changeListName, updateBulkEdit, updateSynced,
-  showNoteListMenuPopup, showNLIMPopup, clearSavingFPaths, updateDidDiscardEditing,
+  showNoteListMenuPopup, showNLIMPopup, clearSavingFPaths, updateSettingsPopup,
 } from '../actions';
 import {
   CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_NOTE_ID,
   DISCARD_ACTION_CHANGE_LIST_NAME, DISCARD_ACTION_UPDATE_BULK_EDIT,
   DISCARD_ACTION_UPDATE_SYNCED, DISCARD_ACTION_SHOW_NOTE_LIST_MENU_POPUP,
-  DISCARD_ACTION_SHOW_NLIM_POPUP,
+  DISCARD_ACTION_SHOW_NLIM_POPUP, DISCARD_ACTION_UPDATE_LIST_NAME,
 } from '../types/const';
 import { dialogFMV } from '../types/animConfigs';
 
@@ -52,13 +52,14 @@ const ConfirmDiscardPopup = () => {
     } else if (discardAction === DISCARD_ACTION_UPDATE_BULK_EDIT) {
       dispatch(updateBulkEdit(true, null, true, false));
     } else if (discardAction === DISCARD_ACTION_SHOW_NOTE_LIST_MENU_POPUP) {
-      dispatch(showNoteListMenuPopup(null, false, true));
+      dispatch(showNoteListMenuPopup(null, false));
     } else if (discardAction === DISCARD_ACTION_SHOW_NLIM_POPUP) {
-      dispatch(showNLIMPopup(null, null, false, true));
+      dispatch(showNLIMPopup(null, null, false));
+    } else if (discardAction === DISCARD_ACTION_UPDATE_LIST_NAME) {
+      dispatch(updateSettingsPopup(false, false));
     } else throw new Error(`Invalid discard action: ${discardAction}`);
 
     dispatch(clearSavingFPaths());
-    dispatch(updateDidDiscardEditing(true));
 
     onConfirmDiscardCancelBtnClick();
     didClick.current = true;
@@ -117,6 +118,11 @@ const ConfirmDiscardPopup = () => {
   };
   const bgStyle = { opacity: popupAnim };
 
+  let msg = 'Are you sure you want to discard your unsaved changes to your note? All of your changes will be permanently deleted. This action cannot be undone.';
+  if (discardAction === DISCARD_ACTION_UPDATE_LIST_NAME) {
+    msg = 'There are some lists still in editing mode. Are you sure you want to discard them?';
+  }
+
   return (
     <View style={[tailwind('absolute inset-0 items-center justify-end px-4 pt-4 pb-20 sm:justify-center sm:p-0 elevation-xl'), canvasStyle]}>
       <TouchableWithoutFeedback onPress={onConfirmDiscardCancelBtnClick}>
@@ -132,7 +138,7 @@ const ConfirmDiscardPopup = () => {
           <View style={tailwind('mt-3 flex-shrink flex-grow sm:mt-0 sm:ml-4')}>
             <Text style={tailwind('text-center text-lg font-medium leading-6 text-gray-900 blk:text-white sm:text-left')}>Discard unsaved changes?</Text>
             <View style={tailwind('mt-2')}>
-              <Text style={tailwind('text-center text-sm font-normal text-gray-500 blk:text-gray-400 sm:text-left')}>Are you sure you want to discard your unsaved changes to your note? All of your changes will be permanently deleted. This action cannot be undone.</Text>
+              <Text style={tailwind('text-center text-sm font-normal text-gray-500 blk:text-gray-400 sm:text-left')}>{msg}</Text>
             </View>
           </View>
         </View>

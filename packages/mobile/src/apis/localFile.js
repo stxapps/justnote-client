@@ -1,6 +1,6 @@
 import { Dirs, FileSystem } from 'react-native-file-access';
 
-import { CD_ROOT, BASE64 } from '../types/const';
+import { CD_ROOT, IMAGES, BASE64 } from '../types/const';
 
 const deriveFPath = (fpath, dir) => {
   if (fpath.includes(CD_ROOT + '/')) {
@@ -15,14 +15,20 @@ const deriveFPath = (fpath, dir) => {
 const getFile = async (fpath, dir = Dirs.DocumentDir, encoding = BASE64) => {
   fpath = deriveFPath(fpath, dir);
 
-  /* @ts-ignore */
-  const content = await FileSystem.readFile(fpath, encoding);
+  let content; // If NotFound, return undefined.
+  try {
+    /* @ts-ignore */
+    content = await FileSystem.readFile(fpath, encoding);
+  } catch (error) {
+    console.log('In localFile.getFile, error:', error);
+  }
+
   return content;
 };
 
 const getFiles = async (fpaths, dir = Dirs.DocumentDir, encoding = BASE64) => {
   const contents = [];
-  for (let fpath of fpaths) {
+  for (const fpath of fpaths) {
     const content = await getFile(fpath, dir, encoding);
     contents.push(content);
   }
@@ -57,21 +63,32 @@ const deleteFile = async (fpath, dir = Dirs.DocumentDir) => {
     // Treat not found error as not an error as local data might be out-dated.
     //   i.e. user tries to delete a not-existing file, it's ok.
     // Anyway, if the file should be there, this will hide the real error!
-    console.log('fileApi.deleteFile error: ', error);
+    console.log('In localFile.deleteFile, error: ', error);
   }
 };
 
 const deleteFiles = async (fpaths, dir = Dirs.DocumentDir) => {
-  for (let fpath of fpaths) {
+  for (const fpath of fpaths) {
     await deleteFile(fpath, dir);
   }
 };
 
-const deleteAllFiles = async (dpath, dir = Dirs.DocumentDir) => {
-  dpath = deriveFPath(dpath, dir);
+const deleteAllFiles = async (dir = Dirs.DocumentDir) => {
+  // There might be some other files too,
+  //   can't just delete all files but need to specify dirs.
+  const dpaths = [IMAGES];
 
-  const fnames = await FileSystem.ls(dpath);
-  for (const fname of fnames) await FileSystem.unlink(dpath + '/' + fname);
+  for (const dpath of dpaths) {
+    const ddpath = deriveFPath(dpath, dir);
+
+    const fnames = await FileSystem.ls(ddpath);
+    for (const fname of fnames) await FileSystem.unlink(ddpath + '/' + fname);
+  }
+};
+
+const listKeys = async () => {
+  const keys = await FileSystem.ls(Dirs.DocumentDir);
+  return keys.map(key => Dirs.DocumentDir + '/' + key);
 };
 
 const exists = async (fpath, dir = Dirs.DocumentDir) => {
@@ -84,9 +101,9 @@ const mkdir = async (fpath, dir = Dirs.DocumentDir) => {
   await FileSystem.mkdir(fpath);
 };
 
-const file = {
+const localFile = {
   getFile, getFiles, putFile, putFiles, deleteFile, deleteFiles, deleteAllFiles,
-  exists, mkdir,
+  listKeys, exists, mkdir,
 };
 
-export default file;
+export default localFile;

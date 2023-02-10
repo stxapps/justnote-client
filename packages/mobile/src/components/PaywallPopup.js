@@ -11,7 +11,6 @@ import {
   FEATURE_DATE_FORMAT, FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES,
 } from '../types/const';
 import { dialogFMV } from '../types/animConfigs';
-import { paywallFeature } from '../vars';
 
 import { useSafeAreaInsets, useTailwind } from '.';
 
@@ -19,6 +18,7 @@ const PaywallPopup = () => {
 
   const insets = useSafeAreaInsets();
   const isShown = useSelector(state => state.display.isPaywallPopupShown);
+  const feature = useSelector(state => state.display.paywallFeature);
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
   const [derivedIsShown, setDerivedIsShown] = useState(isShown);
   const popupAnim = useRef(new Animated.Value(0)).current;
@@ -86,16 +86,12 @@ const PaywallPopup = () => {
 
   if (!isShown && didCloseAnimEnd) return null;
 
-  let feature = 'This';
-  if (paywallFeature.feature === FEATURE_PIN) feature = 'Pin to the top';
-  if (paywallFeature.feature === FEATURE_APPEARANCE) feature = 'Dark appearance';
-  if (paywallFeature.feature === FEATURE_DATE_FORMAT) feature = 'Custom date format';
-  if (paywallFeature.feature === FEATURE_SECTION_NOTES_BY_MONTH) {
-    feature = 'Section by month';
-  }
-  if (paywallFeature.feature === FEATURE_MORE_EDITOR_FONT_SIZES) {
-    feature = 'More font sizes';
-  }
+  let featureText = 'This';
+  if (feature === FEATURE_PIN) featureText = 'Pin to the top';
+  if (feature === FEATURE_APPEARANCE) featureText = 'Dark appearance';
+  if (feature === FEATURE_DATE_FORMAT) featureText = 'Custom date format';
+  if (feature === FEATURE_SECTION_NOTES_BY_MONTH) featureText = 'Section by month';
+  if (feature === FEATURE_MORE_EDITOR_FONT_SIZES) featureText = 'More font sizes';
 
   const canvasStyle = { paddingLeft: 16 + insets.left, paddingRight: 16 + insets.right };
   const popupStyle = {
@@ -123,7 +119,7 @@ const PaywallPopup = () => {
           <View style={tailwind('mt-3 sm:mt-5')}>
             <Text style={tailwind('text-center text-lg font-medium leading-6 text-gray-900')}>Purchase a subscription</Text>
             <View style={tailwind('mt-2')}>
-              <Text style={tailwind('text-center text-sm font-normal text-gray-500')}>{feature} is an extra feature. Please purchase a subscription to support us and unlock extra features.</Text>
+              <Text style={tailwind('text-center text-sm font-normal text-gray-500')}>{featureText} is an extra feature. Please purchase a subscription to support us and unlock extra features.</Text>
             </View>
           </View>
         </View>

@@ -3,22 +3,24 @@ import { View, Text } from 'react-native';
 import { useSelector } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
-import { DUMMY_NOTE_OBJ } from '../types/const';
+import { DUMMY_NOTE_OBJ, INVALID } from '../types/const';
 import { isDiedStatus } from '../utils';
 
 import { useTailwind } from '.';
 import NoteEditorTopBar from './NoteEditorTopBar';
 import NoteEditorEditor from './NoteEditorEditor';
 import NoteEditorBulkEdit from './NoteEditorBulkEdit';
-import NoteEditorConflict from './NoteEditorConflict';
+import { NoteEditorSavedConflict, NoteEditorUnsavedConflict } from './NoteEditorConflict';
 import NoteEditorRetry from './NoteEditorRetry';
 
 const NoteEditor = (props) => {
 
-  const { note, isFullScreen, onToggleFullScreen, width } = props;
+  const { note, unsavedNote, isFullScreen, onToggleFullScreen, width } = props;
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const isContentEditor = useRef(false);
   const tailwind = useTailwind();
+
+  const isUnsavedInvalid = unsavedNote.status === INVALID;
 
   const _render = () => {
     isContentEditor.current = false;
@@ -40,15 +42,20 @@ const NoteEditor = (props) => {
         </View>
       );
     }
-    if (note.id.startsWith('conflict')) return <NoteEditorConflict note={note} width={width} />;
+    if (note.id.startsWith('conflict')) {
+      return <NoteEditorSavedConflict note={note} width={width} />;
+    }
     if (isDiedStatus(note.status)) return <NoteEditorRetry note={note} width={width} />;
+    if (isUnsavedInvalid) {
+      return <NoteEditorUnsavedConflict note={note} unsavedNote={unsavedNote} />;
+    }
 
     isContentEditor.current = true;
     return (
       <View style={tailwind('h-full w-full bg-white blk:bg-gray-900')}>
         <View style={tailwind('h-full w-full bg-white blk:bg-gray-900')}>
           <NoteEditorTopBar note={note} isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} width={width} />
-          <NoteEditorEditor key="NoteEditorEditor" note={note} />
+          <NoteEditorEditor key="NoteEditorEditor" note={note} unsavedNote={unsavedNote} />
         </View>
       </View>
     );
@@ -61,7 +68,7 @@ const NoteEditor = (props) => {
       <React.Fragment>
         <View style={tailwind('absolute -top-1 -left-1 h-1 w-1 overflow-hidden')}>
           <View style={tailwind('h-full w-full bg-white blk:bg-gray-900')}>
-            <NoteEditorEditor key="NoteEditorEditor" note={DUMMY_NOTE_OBJ} />
+            <NoteEditorEditor key="NoteEditorEditor" note={DUMMY_NOTE_OBJ} unsavedNote={unsavedNote} />
           </View>
         </View>
         {content}

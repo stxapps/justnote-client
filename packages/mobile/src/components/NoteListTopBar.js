@@ -34,7 +34,7 @@ const NoteListTopBar = (props) => {
       const rect = {
         x, y, width, height, top: y, right: x + width, bottom: y + height, left: x,
       };
-      dispatch(showNoteListMenuPopup(rect, true, false));
+      dispatch(showNoteListMenuPopup(rect, true));
     });
   };
 

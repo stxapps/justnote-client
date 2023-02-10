@@ -44,7 +44,7 @@ const Landing = () => {
         </View>
         <View style={cache('L_middleView', [tailwind('max-w-lg flex-1 items-start justify-center self-center p-6 lg:p-8'), { minHeight: 256 }])}>
           <SvgXml width={135} height={40} xml={logoFull} />
-          <Text style={tailwind('pt-3 text-xl font-normal text-gray-500')}>A note taking app that you can use it easily, take a note rapidly, and importantly, have full control of your own data.</Text>
+          <Text style={tailwind('pt-3 text-xl font-normal text-gray-500')}>A note taking app that you can use easily, take a note rapidly, and importantly, have full control of your data.</Text>
         </View>
         <View style={tailwind('items-center justify-center p-6 lg:p-8')}>
           <TouchableOpacity onPress={onSignUpBtnClick} style={tailwind(`flex-row items-center justify-center rounded-md border border-transparent bg-green-600 px-8 py-3 shadow md:py-4 md:px-10 ${safeAreaWidth < SM_WIDTH ? 'w-full' : ''}`)}>

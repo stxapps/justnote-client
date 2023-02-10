@@ -95,14 +95,19 @@ export const CD_ROOT = 'cdroot';
 export const NOTES = 'notes';
 export const IMAGES = 'images';
 export const SETTINGS = 'settings';
+export const INFO = 'info';
 export const PINS = 'pins';
 export const INDEX = 'index';
 export const DOT_JSON = '.json';
 export const BASE64 = 'base64';
 export const UTF8 = 'utf8';
 
+export const UNSAVED_NOTES = 'unsaved-notes';
+export const UNSAVED_NOTES_UNSAVED = `${UNSAVED_NOTES}/unsaved`;
+export const UNSAVED_NOTES_SAVED = `${UNSAVED_NOTES}/saved`;
+
 export const N_NOTES = 10;
-export const MAX_TRY = 3;
+export const MAX_TRY = 1;
 export const N_DAYS = 45;
 export const MAX_SELECTED_NOTE_IDS = 10;
 export const MAX_CHARS = 600;
@@ -143,6 +148,7 @@ export const DISCARD_ACTION_UPDATE_BULK_EDIT_URL_HASH = 5;
 export const DISCARD_ACTION_UPDATE_BULK_EDIT = 6;
 export const DISCARD_ACTION_SHOW_NOTE_LIST_MENU_POPUP = 8;
 export const DISCARD_ACTION_SHOW_NLIM_POPUP = 7;
+export const DISCARD_ACTION_UPDATE_LIST_NAME = 9;
 
 export const MODE_VIEW = 'MODE_VIEW';
 export const MODE_EDIT = 'MODE_EDIT';

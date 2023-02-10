@@ -14,6 +14,7 @@ import reducers from './reducers';
 import { BLK_MODE } from './types/const';
 import { getThemeMode } from './selectors';
 import cache from './utils/cache';
+import vars from './vars';
 
 import App from './components/App';
 
@@ -22,6 +23,8 @@ Text.defaultProps.allowFontScaling = false;
 
 TextInput.defaultProps = TextInput.defaultProps || {};
 TextInput.defaultProps.allowFontScaling = false;
+
+vars.syncMode.doSyncMode = true;
 
 /** @ts-ignore */
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

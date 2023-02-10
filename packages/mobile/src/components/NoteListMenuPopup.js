@@ -30,6 +30,7 @@ const NoteListMenuPopup = () => {
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
   const [derivedIsShown, setDerivedIsShown] = useState(isShown);
   const [derivedAnchorPosition, setDerivedAnchorPosition] = useState(anchorPosition);
+  const [derivedIsBulkEditing, setDerivedIsBulkEditing] = useState(isBulkEditing);
   const popupAnim = useRef(new Animated.Value(0)).current;
   const popupBackHandler = useRef(null);
   const syncAnim = useRef(new Animated.Value(0)).current;
@@ -44,7 +45,7 @@ const NoteListMenuPopup = () => {
   const onSyncBtnClick = () => {
     onNoteListMenuCancelBtnClick();
     if (syncProgress && syncProgress.status === SHOW_SYNCED) {
-      dispatch(updateSynced(true));
+      dispatch(updateSynced());
     } else {
       dispatch(sync(true, 0));
     }
@@ -198,6 +199,7 @@ const NoteListMenuPopup = () => {
   }, [syncProgress, syncAnim]);
 
   if (derivedIsShown !== isShown) {
+    if (!derivedIsShown && isShown) setDerivedIsBulkEditing(isBulkEditing);
     if (derivedIsShown && !isShown) setDidCloseAnimEnd(false);
     setDerivedIsShown(isShown);
   }
@@ -231,7 +233,7 @@ const NoteListMenuPopup = () => {
     });
   } else {
     popupStyle.left = derivedAnchorPosition.left + 4;
-    if (isBulkEditing) {
+    if (derivedIsBulkEditing) {
       popupStyle.transform.push({
         translateX: popupAnim.interpolate({
           inputRange: [0, 1], outputRange: [-1 * 0.05 * 88, 0],
@@ -256,7 +258,7 @@ const NoteListMenuPopup = () => {
   const bgStyle = { opacity: popupAnim };
 
   let buttons;
-  if (isBulkEditing) {
+  if (derivedIsBulkEditing) {
     buttons = (
       <TouchableOpacity onPress={onExitBtnClick} style={tailwind('w-full flex-row items-center px-4 py-3')}>
         <Svg width={20} height={20} style={tailwind('mr-3 font-normal text-gray-400 blk:text-gray-400')} viewBox="0 0 20 20" fill="currentColor">

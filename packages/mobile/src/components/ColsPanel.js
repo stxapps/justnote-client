@@ -3,8 +3,9 @@ import { View, TouchableOpacity, PanResponder } from 'react-native';
 import { useSelector } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
-import mmkvStorage from '../mmkvStorage';
+import lbdApi from '../apis/localDb';
 import { COLS_PANEL_STATE, NEW_NOTE, NEW_NOTE_OBJ } from '../types/const';
+import { makeGetUnsavedNote } from '../selectors';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 import Loading from './Loading';
@@ -22,6 +23,7 @@ const ColsPanel = () => {
   const pane2MaxWidth = 480;
 
   const { width: safeAreaWidth } = useSafeAreaFrame();
+  const getUnsavedNote = useMemo(makeGetUnsavedNote, []);
   const note = useSelector(state => {
     const { listName, noteId } = state.display;
 
@@ -30,6 +32,7 @@ const ColsPanel = () => {
     if (noteId.startsWith('conflict')) return state.conflictedNotes[listName][noteId];
     return state.notes[listName][noteId];
   });
+  const unsavedNote = useSelector(state => getUnsavedNote(state, note));
 
   const [state, setState] = useState({
     isPane1Shown: true,
@@ -146,7 +149,7 @@ const ColsPanel = () => {
   useEffect(() => {
     let didMount = true;
     const getState = async () => {
-      const storedState = await mmkvStorage.getItem(COLS_PANEL_STATE);
+      const storedState = await lbdApi.getItem(COLS_PANEL_STATE);
       if (didMount) {
         if (storedState) {
           const s = JSON.parse(storedState);
@@ -169,7 +172,7 @@ const ColsPanel = () => {
 
   useEffect(() => {
     if (didGetState && prevDidGetState.current) {
-      mmkvStorage.setItem(COLS_PANEL_STATE, JSON.stringify(state));
+      lbdApi.setItem(COLS_PANEL_STATE, JSON.stringify(state));
     }
     prevDidGetState.current = didGetState;
   }, [didGetState, state]);
@@ -211,7 +214,7 @@ const ColsPanel = () => {
       </View>
       <View {...rightPanResponder.panHandlers} style={tailwind(`overflow-visible border-l border-gray-100 bg-white pr-1 blk:border-gray-800 blk:bg-gray-900 ${resizer2Classes}`)} />
       <View style={tailwind('flex-1 overflow-hidden bg-white blk:bg-gray-900')}>
-        <NoteEditor note={note} isFullScreen={state.isPane3FullScreen} onToggleFullScreen={onTogglePane3FullScreen} width={editorWidth} />
+        <NoteEditor note={note} unsavedNote={unsavedNote} isFullScreen={state.isPane3FullScreen} onToggleFullScreen={onTogglePane3FullScreen} width={editorWidth} />
       </View>
     </View>
   );

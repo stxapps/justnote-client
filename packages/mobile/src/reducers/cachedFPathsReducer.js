@@ -1,6 +1,6 @@
 import { RESET_STATE } from '../types/actionTypes';
 import { isObject, copyFPaths } from '../utils';
-import { cachedFPaths } from '../vars';
+import { getCachedFPaths } from '../vars';
 
 const initialState = {
   fpaths: null,
@@ -11,17 +11,18 @@ const cachedFPathsReducer = (state = initialState, action) => {
 
   // Only RESET_STATE, no need to reset state for DELETE_ALL_DATA
   if (action.type === RESET_STATE) {
-    cachedFPaths.fpaths = null;
-    fpathsRef = cachedFPaths.fpaths;
+    fpathsRef = getCachedFPaths().fpaths;
     return { ...initialState };
   }
 
-  if (fpathsRef !== cachedFPaths.fpaths) {
+  if (fpathsRef !== getCachedFPaths().fpaths) {
     // No new object for fpaths for reference comparison
-    fpathsRef = cachedFPaths.fpaths;
+    fpathsRef = getCachedFPaths().fpaths;
 
-    const newState = { ...state, fpaths: cachedFPaths.fpaths };
-    if (isObject(cachedFPaths.fpaths)) newState.fpaths = copyFPaths(cachedFPaths.fpaths);
+    const newState = { ...state, fpaths: getCachedFPaths().fpaths };
+    if (isObject(getCachedFPaths().fpaths)) {
+      newState.fpaths = copyFPaths(getCachedFPaths().fpaths);
+    }
     return newState;
   }
 

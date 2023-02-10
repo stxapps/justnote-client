@@ -3,15 +3,15 @@ import Url from 'url-parse';
 
 import {
   HASH_FRAGMENT_IDENTIFIER, HTTP, MAX_CHARS, CD_ROOT, STATUS, NOTES, IMAGES, SETTINGS,
-  PINS, DOT_JSON, ADDED, ADDING, UPDATING, MOVING, DELETING, MERGING, DIED_ADDING,
-  DIED_UPDATING, DIED_MOVING, DIED_DELETING, DIED_MERGING, VALID_URL, NO_URL,
-  ASK_CONFIRM_URL, VALID_LIST_NAME, NO_LIST_NAME, TOO_LONG_LIST_NAME,
+  INFO, PINS, INDEX, DOT_JSON, ADDED, ADDING, UPDATING, MOVING, DELETING, MERGING,
+  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, DIED_MERGING, VALID_URL,
+  NO_URL, ASK_CONFIRM_URL, VALID_LIST_NAME, NO_LIST_NAME, TOO_LONG_LIST_NAME,
   DUPLICATE_LIST_NAME, COM_JUSTNOTECC_SUPPORTER, ACTIVE, NO_RENEW, GRACE, ON_HOLD,
   PAUSED, UNKNOWN, NOTE_DATE_FORMAT_SYSTEM, NOTE_DATE_FORMAT_YSMSD,
   NOTE_DATE_FORMAT_MSDSY, NOTE_DATE_FORMAT_DSMSY, NOTE_DATE_FORMAT_YHMHD,
   NOTE_DATE_FORMAT_MHDHY, NOTE_DATE_FORMAT_DHMHY, NOTE_DATE_FORMAT_YOMOD,
   NOTE_DATE_FORMAT_MODOY, NOTE_DATE_FORMAT_DOMOY, NOTE_DATE_FORMAT_YMMMD,
-  NOTE_DATE_FORMAT_MMMDY, NOTE_DATE_FORMAT_DMMMY,
+  NOTE_DATE_FORMAT_MMMDY, NOTE_DATE_FORMAT_DMMMY, MODE_EDIT,
 } from '../types/const';
 import {
   PIN_NOTE, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_ROLLBACK,
@@ -973,6 +973,10 @@ export const deriveSettingsState = (listNames, settings, initialState) => {
   return state;
 };
 
+export const deriveInfoState = (info, initialState) => {
+  return info ? { ...initialState, ...info } : { ...initialState };
+};
+
 export const getValidProduct = (products) => {
   if (!Array.isArray(products) || products.length === 0) return null;
   for (const product of products) {
@@ -1022,11 +1026,6 @@ export const createNoteFPath = (listName, fname, subName) => {
   return `${NOTES}/${listName}/${fname}/${subName}`;
 };
 
-export const createNoteFName = (id, parentIds) => {
-  if (parentIds) return `${id}_${parentIds.join('-')}`;
-  return id;
-};
-
 export const extractNoteFPath = (fpath) => {
   const rest1 = splitOnFirst(fpath, '/')[1];
   const [listName, rest2] = splitOnFirst(rest1, '/');
@@ -1034,21 +1033,13 @@ export const extractNoteFPath = (fpath) => {
   return { listName, fname, subName };
 };
 
-export const extractNoteFName = (fname) => {
-  if (!fname.includes('_')) return { id: fname, parentIds: null };
-
-  const [id, _parentIds] = fname.split('_');
-  const parentIds = _parentIds.split('-');
-  return { id, parentIds };
+export const createSettingsFPath = (fname) => {
+  return `${SETTINGS}${fname}${DOT_JSON}`;
 };
 
-export const extractNoteId = (id) => {
-  let i;
-  for (i = id.length - 1; i <= 0; i--) {
-    if (/\d/.test(id[i])) break;
-  }
-
-  return { dt: parseInt(id.slice(0, i + 1), 10) };
+export const extractSettingsFPath = (fpath) => {
+  const fname = fpath.slice(SETTINGS.length, -1 * DOT_JSON.length);
+  return { fname };
 };
 
 export const createPinFPath = (rank, updatedDT, addedDT, id) => {
@@ -1076,13 +1067,15 @@ export const addFPath = (fpaths, fpath) => {
   } else if (fpath.startsWith(IMAGES)) {
     if (!fpaths.staticFPaths.includes(fpath)) fpaths.staticFPaths.push(fpath);
   } else if (fpath.startsWith(SETTINGS)) {
-    if (!fpaths.settingsFPath) fpaths.settingsFPath = fpath;
+    if (!fpaths.settingsFPaths.includes(fpath)) fpaths.settingsFPaths.push(fpath);
+  } else if (fpath.startsWith(INFO)) {
+    if (!fpaths.infoFPath) fpaths.infoFPath = fpath;
     else {
       const dt = parseInt(
-        fpaths.settingsFPath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10
+        fpaths.infoFPath.slice(INFO.length, -1 * DOT_JSON.length), 10
       );
-      const _dt = parseInt(fpath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10);
-      if (isNumber(dt) && isNumber(_dt) && dt < _dt) fpaths.settingsFPath = fpath;
+      const _dt = parseInt(fpath.slice(INFO.length, -1 * DOT_JSON.length), 10);
+      if (isNumber(dt) && isNumber(_dt) && dt < _dt) fpaths.infoFPath = fpath;
     }
   } else if (fpath.startsWith(PINS)) {
     if (!fpaths.pinFPaths.includes(fpath)) fpaths.pinFPaths.push(fpath);
@@ -1097,7 +1090,9 @@ export const deleteFPath = (fpaths, fpath) => {
   } else if (fpath.startsWith(IMAGES)) {
     fpaths.staticFPaths = fpaths.staticFPaths.filter(el => el !== fpath);
   } else if (fpath.startsWith(SETTINGS)) {
-    if (fpaths.settingsFPath === fpath) fpaths.settingsFPath = null;
+    fpaths.settingsFPaths = fpaths.settingsFPaths.filter(el => el !== fpath);
+  } else if (fpath.startsWith(INFO)) {
+    if (fpaths.infoFPath === fpath) fpaths.infoFPath = null;
   } else if (fpath.startsWith(PINS)) {
     fpaths.pinFPaths = fpaths.pinFPaths.filter(el => el !== fpath);
   } else {
@@ -1112,6 +1107,11 @@ export const copyFPaths = (fpaths) => {
   let newStaticFPaths = [];
   if (Array.isArray(fpaths.staticFPaths)) newStaticFPaths = [...fpaths.staticFPaths];
 
+  let newSettingsFPaths = [];
+  if (Array.isArray(fpaths.settingsFPaths)) {
+    newSettingsFPaths = [...fpaths.settingsFPaths];
+  }
+
   let newPinFPaths = [];
   if (Array.isArray(fpaths.pinFPaths)) newPinFPaths = [...fpaths.pinFPaths];
 
@@ -1119,6 +1119,7 @@ export const copyFPaths = (fpaths) => {
     ...fpaths,
     noteFPaths: newNoteFPaths,
     staticFPaths: newStaticFPaths,
+    settingsFPaths: newSettingsFPaths,
     pinFPaths: newPinFPaths,
   };
 };
@@ -1134,14 +1135,83 @@ export const getNoteFPaths = (state) => {
   return [];
 };
 
-export const getSettingsFPath = (state) => {
+export const getStaticFPaths = (state) => {
+  if (
+    isObject(state.cachedFPaths) &&
+    isObject(state.cachedFPaths.fpaths) &&
+    Array.isArray(state.cachedFPaths.fpaths.staticFPaths)
+  ) {
+    return state.cachedFPaths.fpaths.staticFPaths;
+  }
+  return [];
+};
+
+export const getSettingsFPaths = (state) => {
+  if (
+    isObject(state.cachedFPaths) &&
+    isObject(state.cachedFPaths.fpaths) &&
+    Array.isArray(state.cachedFPaths.fpaths.settingsFPaths)
+  ) {
+    return state.cachedFPaths.fpaths.settingsFPaths;
+  }
+  return [];
+};
+
+export const getInfoFPath = (state) => {
   if (isObject(state.cachedFPaths) && isObject(state.cachedFPaths.fpaths)) {
-    return state.cachedFPaths.fpaths.settingsFPath;
+    return state.cachedFPaths.fpaths.infoFPath;
   }
   return null;
 };
 
-const getNoteRootIds = (leafId, toParents) => {
+export const createDataFName = (id, parentIds) => {
+  if (Array.isArray(parentIds)) {
+    parentIds = parentIds.filter(el => isString(el) && el.length > 0);
+    if (parentIds.length > 0) return `${id}_${parentIds.join('-')}`;
+  }
+  return id;
+};
+
+export const extractDataFName = (fname) => {
+  if (!fname.includes('_')) return { id: fname, parentIds: null };
+
+  const [id, _parentIds] = fname.split('_');
+  const parentIds = _parentIds.split('-');
+  return { id, parentIds };
+};
+
+export const extractDataId = (id) => {
+  let i;
+  for (i = id.length - 1; i >= 0; i--) {
+    if (/\d/.test(id[i])) break;
+  }
+
+  return { dt: parseInt(id.slice(0, i + 1), 10) };
+};
+
+export const getDataParentIds = (leafId, toParents) => {
+  const parentIds = [];
+
+  let pendingIds = [leafId];
+  while (pendingIds.length > 0) {
+    let id = pendingIds[0];
+    pendingIds = pendingIds.slice(1);
+
+    if (!toParents[id]) continue;
+
+    const parents = toParents[id];
+    for (const parentId of parents) {
+      if (!parentIds.includes(parentId)) {
+        parentIds.push(parentId);
+        pendingIds.push(parentId);
+      }
+    }
+  }
+
+  return parentIds;
+};
+
+const getDataRootIds = (leafId, toParents) => {
   const rootIds = [];
 
   let pendingIds = [leafId];
@@ -1161,10 +1231,10 @@ const getNoteRootIds = (leafId, toParents) => {
   return rootIds;
 };
 
-const getNoteOldestRootId = (rootIds) => {
+const getDataOldestRootId = (rootIds) => {
   let rootId, addedDT;
   for (const id of [...rootIds].sort()) {
-    const { dt } = extractNoteId(id);
+    const { dt } = extractDataId(id);
     if (!isNumber(addedDT) || dt < addedDT) {
       addedDT = dt;
       rootId = id;
@@ -1173,19 +1243,19 @@ const getNoteOldestRootId = (rootIds) => {
   return rootId;
 };
 
-const _listNoteIds = (noteFPaths) => {
-
+const _listDataIds = (dataFPaths, extractDataFPath, workingSubName) => {
   const ids = [];
   const toFPaths = {};
   const toParents = {};
   const toChildren = {};
-  for (const fpath of noteFPaths) {
-    const { fname } = extractNoteFPath(fpath);
-    const { id, parentIds } = extractNoteFName(fname);
+  for (const fpath of dataFPaths) {
+    const { fname, subName } = extractDataFPath(fpath);
+    const { id, parentIds } = extractDataFName(fname);
 
     if (!toFPaths[id]) toFPaths[id] = [];
     toFPaths[id].push(fpath);
 
+    if (subName !== workingSubName) continue;
     if (ids.includes(id)) continue;
     ids.push(id);
 
@@ -1210,8 +1280,8 @@ const _listNoteIds = (noteFPaths) => {
 
   const toRootIds = {};
   for (const id of ids) {
-    const rootIds = getNoteRootIds(id, toParents);
-    const rootId = getNoteOldestRootId(rootIds);
+    const rootIds = getDataRootIds(id, toParents);
+    const rootId = getDataOldestRootId(rootIds);
     toRootIds[id] = rootId;
   }
 
@@ -1223,38 +1293,49 @@ const _listNoteIds = (noteFPaths) => {
     toLeafIds[rootId].push(id);
   }
 
-  const noteIds = [];
+  const dataIds = [];
   const conflictedIds = [];
   for (const id of leafIds) {
     const parentIds = toParents[id];
 
     const rootId = toRootIds[id];
-    const { dt: addedDT } = extractNoteId(rootId);
-    const { dt: updatedDT } = extractNoteId(id);
+    const { dt: addedDT } = extractDataId(rootId);
+    const { dt: updatedDT } = extractDataId(id);
 
     const tIds = toLeafIds[rootId];
     const isConflicted = tIds.length > 1;
     const conflictWith = isConflicted ? tIds : null;
 
     const fpaths = toFPaths[id];
-    const { listName } = extractNoteFPath(fpaths[0]);
+    const { listName } = extractDataFPath(fpaths[0]);
 
-    const noteId = {
+    const dataId = {
       parentIds, id, addedDT, updatedDT, isConflicted, conflictWith, fpaths, listName,
     };
 
-    if (isConflicted) conflictedIds.push(noteId);
-    else noteIds.push(noteId);
+    if (isConflicted) conflictedIds.push(dataId);
+    else dataIds.push(dataId);
   }
 
   const conflictWiths = Object.values(toLeafIds).filter(tIds => tIds.length > 1);
 
-  return { noteIds, conflictedIds, conflictWiths, toRootIds };
+  return { dataIds, conflictedIds, conflictWiths, toRootIds, toParents };
+};
+
+const _listNoteIds = (noteFPaths) => {
+  // Possible to have cdroot paths but not index.json and vice versa.
+  //   i.e. update/move error and cancel died notes.
+  // So use only index.json for listDataIds.
+  const {
+    dataIds, conflictedIds, conflictWiths, toRootIds, toParents,
+  } = _listDataIds(noteFPaths, extractNoteFPath, INDEX + DOT_JSON);
+  return { noteIds: dataIds, conflictedIds, conflictWiths, toRootIds, toParents };
 };
 
 export const listNoteIds = createSelector(
   noteFPaths => noteFPaths,
   _listNoteIds,
+  { memoizeOptions: { maxSize: 2 } }, // One for vars and one for reducer hopefully.
 );
 
 export const getMainId = (id, toRootIds) => {
@@ -1409,6 +1490,58 @@ export const getSortedNotes = (notes, listName, sortOn, doDescendingOrder) => {
   return sortedNotes;
 };
 
+export const _listSettingsIds = (settingsFPaths) => {
+  const {
+    dataIds, conflictedIds, conflictWiths, toRootIds, toParents,
+  } = _listDataIds(settingsFPaths, extractSettingsFPath, undefined);
+  return { settingsIds: dataIds, conflictedIds, conflictWiths, toRootIds, toParents };
+};
+
+export const getLastSettingsFPaths = (settingsFPaths) => {
+  const _v1FPaths = [], _v2FPaths = [];
+  for (const fpath of settingsFPaths) {
+    const { fname } = extractSettingsFPath(fpath);
+    const { id } = extractDataFName(fname);
+    const { dt } = extractDataId(id);
+
+    if (!isString(id) || id.length === 0 || !isNumber(dt)) continue;
+    if (/\d/.test(id[id.length - 1])) _v1FPaths.push({ fpath, id, dt });
+    else _v2FPaths.push(fpath);
+  }
+
+  let v1FPath;
+  for (const _v1FPath of _v1FPaths) {
+    if (!isObject(v1FPath)) {
+      v1FPath = _v1FPath;
+      continue;
+    }
+    if (v1FPath.dt < _v1FPath.dt) v1FPath = _v1FPath;
+  }
+
+  const v2FPaths = [];
+  const { settingsIds, conflictedIds } = _listSettingsIds(_v2FPaths);
+  for (const settingsId of [...settingsIds, ...conflictedIds]) {
+    for (const fpath of settingsId.fpaths) {
+      v2FPaths.push({ fpath, id: settingsId.id, dt: settingsId.updatedDT });
+    }
+  }
+
+  let _lastFPaths = [...v2FPaths];
+  if (isObject(v1FPath)) {
+    if (v2FPaths.every(el => el.dt < v1FPath.dt)) _lastFPaths.push(v1FPath);
+  }
+  _lastFPaths = _lastFPaths.sort((a, b) => b.dt - a.dt);
+
+  const lastFPaths = [], lastIds = [];
+  for (const lastFPath of _lastFPaths) {
+    if (lastFPaths.includes(lastFPath.fpath)) continue;
+    lastFPaths.push(lastFPath.fpath);
+    lastIds.push(lastFPath.id);
+  }
+
+  return { fpaths: lastFPaths, ids: lastIds };
+};
+
 export const getFormattedTime = (timeStr, is24HFormat) => {
   const [hStr, mStr] = timeStr.trim().split(':');
   if (is24HFormat) return { time: timeStr, hour: hStr, minute: mStr, period: null };
@@ -1494,4 +1627,49 @@ export const scrollWindowTop = () => {
       }, 250);
     }
   }, 100);
+};
+
+export const excludeNotObjContents = (fpaths, contents) => {
+  const exFPaths = [], exContents = [];
+  for (let i = 0; i < fpaths.length; i++) {
+    const [fpath, content] = [fpaths[i], contents[i]];
+    if (!isObject(content)) continue;
+
+    exFPaths.push(fpath);
+    exContents.push(content);
+  }
+  return { fpaths: exFPaths, contents: exContents };
+};
+
+export const getNote = (id, notes) => {
+  for (const listName in notes) {
+    for (const k in notes[listName]) {
+      if (k === id) return notes[listName][k];
+    }
+  }
+  return null;
+};
+
+export const getIdsAndParentIds = (ids, cachedFPaths) => {
+  const noteFPaths = getNoteFPaths({ cachedFPaths });
+  const { toParents } = listNoteIds(noteFPaths);
+
+  const parentIds = [];
+  for (const id of ids) {
+    const _parentIds = getDataParentIds(id, toParents);
+    parentIds.push(..._parentIds);
+  }
+
+  return [...ids, ...parentIds];
+};
+
+export const containEditingMode = (listNameEditors) => {
+  let doContain = false;
+  for (const k in listNameEditors) {
+    if (listNameEditors[k].mode === MODE_EDIT) {
+      doContain = true;
+      break;
+    }
+  }
+  return doContain;
 };

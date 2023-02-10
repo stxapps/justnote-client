@@ -1,17 +1,16 @@
 import { loop, Cmd } from 'redux-loop';
 
-import { tryUpdateSettings, checkPurchases, sync } from '../actions';
+import { sync } from '../actions';
 import {
   INIT, FETCH_COMMIT, ADD_LIST_NAMES, UPDATE_LIST_NAMES, MOVE_LIST_NAME,
   MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH,
   UPDATE_SORT_ON, UPDATE_DO_DESCENDING_ORDER, UPDATE_NOTE_DATE_SHOWING_MODE,
   UPDATE_NOTE_DATE_FORMAT, UPDATE_DO_SECTION_NOTES_BY_MONTH,
-  UPDATE_DO_MORE_EDITOR_FONT_SIZES, UPDATE_SETTINGS_COMMIT, CANCEL_DIED_SETTINGS,
-  REQUEST_PURCHASE_COMMIT, RESTORE_PURCHASES_COMMIT, REFRESH_PURCHASES_COMMIT,
-  UPDATE_DEFAULT_THEME, DELETE_ALL_DATA, RESET_STATE,
+  UPDATE_DO_MORE_EDITOR_FONT_SIZES, UPDATE_DEFAULT_THEME, UPDATE_SETTINGS_COMMIT,
+  CANCEL_DIED_SETTINGS, MERGE_SETTINGS_COMMIT, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
-  MY_NOTES, TRASH, ARCHIVE, SWAP_LEFT, SWAP_RIGHT, VALID, NOTE_DATE_SHOWING_MODE_SHOW,
+  MY_NOTES, TRASH, ARCHIVE, SWAP_LEFT, SWAP_RIGHT, NOTE_DATE_SHOWING_MODE_SHOW,
 } from '../types/const';
 import {
   getListNameObj, doContainListName, copyListNameObjs, swapArrayElements,
@@ -29,15 +28,14 @@ const settingsReducer = (state = initialState, action) => {
     const { localSettings } = action.payload;
     return {
       ...state,
-      purchases: localSettings.purchases,
       themeMode: localSettings.defaultThemeMode,
       themeCustomOptions: localSettings.defaultThemeCustomOptions,
     };
   }
 
   if (action.type === FETCH_COMMIT) {
-    const { listNames, doFetchSettings, settings } = action.payload;
-    if (!doFetchSettings) return state;
+    const { listNames, doFetchStgsAndInfo, settings } = action.payload;
+    if (!doFetchStgsAndInfo) return state;
 
     const newState = deriveSettingsState(listNames, settings, initialState);
 
@@ -67,27 +65,8 @@ const settingsReducer = (state = initialState, action) => {
     if (didChange.listNameMap) {
       newState.listNameMap = state.listNameMap;
     }
-    if (didChange.purchases) {
-      // It can happen that FETCH_COMMIT is after just purchased
-      //  and not close the settings popup yet
-      //  i.e. 1. just open the app and go to purchase
-      //       2. back to foreground and fetch again
-      //  and replace the newly purchase with old value in settings from server.
-      newState.purchases = state.purchases;
-      newState.checkPurchasesDT = state.checkPurchasesDT;
-    }
 
-    if ([
-      didChange.doDeleteOldNotesInTrash, didChange.sortOn, didChange.doDescendingOrder,
-      didChange.noteDateShowingMode, didChange.noteDateFormat,
-      didChange.doSectionNotesByMonth, didChange.doMoreEditorFontSizes,
-      didChange.listNameMap, didChange.purchases,
-    ].includes(true)) {
-      return newState;
-    }
-    return loop(
-      newState, Cmd.run(checkPurchases(), { args: [Cmd.dispatch, Cmd.getState] })
-    );
+    return newState;
   }
 
   if (action.type === ADD_LIST_NAMES) {
@@ -264,6 +243,11 @@ const settingsReducer = (state = initialState, action) => {
     return { ...state, doMoreEditorFontSizes: action.payload };
   }
 
+  if (action.type === UPDATE_DEFAULT_THEME) {
+    const { mode, customOptions } = action.payload;
+    return { ...state, themeMode: mode, themeCustomOptions: customOptions };
+  }
+
   if (action.type === UPDATE_SETTINGS_COMMIT) {
     didChange.doDeleteOldNotesInTrash = false;
     didChange.sortOn = false;
@@ -273,7 +257,6 @@ const settingsReducer = (state = initialState, action) => {
     didChange.doSectionNotesByMonth = false;
     didChange.doMoreEditorFontSizes = false;
     didChange.listNameMap = false;
-    didChange.purchases = false;
     return loop(state, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
   }
 
@@ -287,51 +270,23 @@ const settingsReducer = (state = initialState, action) => {
     didChange.doSectionNotesByMonth = false;
     didChange.doMoreEditorFontSizes = false;
     didChange.listNameMap = false;
-    didChange.purchases = false;
     return { ...state, ...settings };
   }
 
-  if (action.type === REQUEST_PURCHASE_COMMIT) {
-    const { status, purchase } = action.payload;
-    if (status !== VALID || !purchase) return state;
-
-    const newState = { ...state, checkPurchasesDT: Date.now() };
-
-    if (Array.isArray(newState.purchases)) {
-      newState.purchases = [...newState.purchases, { ...purchase }];
-    } else newState.purchases = [{ ...purchase }];
-
-    didChange.purchases = true;
-
+  if (action.type === MERGE_SETTINGS_COMMIT) {
+    const { settings } = action.payload;
+    didChange.doDeleteOldNotesInTrash = false;
+    didChange.sortOn = false;
+    didChange.doDescendingOrder = false;
+    didChange.noteDateShowingMode = false;
+    didChange.noteDateFormat = false;
+    didChange.doSectionNotesByMonth = false;
+    didChange.doMoreEditorFontSizes = false;
+    didChange.listNameMap = false;
     return loop(
-      newState, Cmd.run(tryUpdateSettings(), { args: [Cmd.dispatch, Cmd.getState] })
+      { ...state, ...settings },
+      Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] })
     );
-  }
-
-  if (
-    action.type === RESTORE_PURCHASES_COMMIT ||
-    action.type === REFRESH_PURCHASES_COMMIT
-  ) {
-    // It can happen that checkPurchases is after just purchased
-    //  and replace old purchases with the current newly one.
-    if (didChange.purchases) return state;
-
-    const { status, purchases } = action.payload;
-    if (status !== VALID || !purchases) return state;
-
-    const newState = { ...state, checkPurchasesDT: Date.now() };
-
-    if (purchases.length === 0) newState.purchases = null;
-    else newState.purchases = purchases.map(p => ({ ...p }));
-
-    return loop(
-      newState, Cmd.run(tryUpdateSettings(), { args: [Cmd.dispatch, Cmd.getState] })
-    );
-  }
-
-  if (action.type === UPDATE_DEFAULT_THEME) {
-    const { mode, customOptions } = action.payload;
-    return { ...state, themeMode: mode, themeCustomOptions: customOptions };
   }
 
   if (action.type === DELETE_ALL_DATA || action.type === RESET_STATE) {
@@ -343,7 +298,6 @@ const settingsReducer = (state = initialState, action) => {
     didChange.doSectionNotesByMonth = false;
     didChange.doMoreEditorFontSizes = false;
     didChange.listNameMap = false;
-    didChange.purchases = false;
     return { ...initialState };
   }
 

@@ -4,13 +4,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
 import { updateNoteId } from '../actions';
+import { INVALID } from '../types/const';
 import { isDiedStatus } from '../utils';
 
 import { useTailwind } from '.';
 
 const NoteListItemError = (props) => {
 
-  const { note } = props;
+  const { note, unsavedNote } = props;
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
@@ -26,7 +27,12 @@ const NoteListItemError = (props) => {
   } else if (isDiedStatus(note.status)) {
     title = 'Oops..., something went wrong';
     body = 'Select this note and try again.';
-  } else throw new Error(`Invalid id: ${note.id} and status: ${note.status}.`);
+  } else if (unsavedNote.status === INVALID) {
+    title = 'Version Conflicts';
+    body = 'Select this note and manually manage the unsaved version.';
+  } else {
+    console.log('In NoteListItemError, invalid note or unsavedNote.', note, unsavedNote);
+  }
 
   return (
     <TouchableOpacity activeOpacity={1.0} onPress={onContentBtnClick} style={tailwind('w-full flex-row items-center rounded-sm px-3 py-4 sm:px-5')}>

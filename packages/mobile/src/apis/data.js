@@ -1,19 +1,29 @@
-import mmkvStorage from '../mmkvStorage';
+import serverApi from './server';
+import lsgApi from './localSg';
+import ldbApi from './localDb';
+import fileApi from './localFile';
 import {
-  INDEX, DOT_JSON, N_NOTES, MAX_TRY, TRASH, N_DAYS, LOCAL_SETTINGS_STATE,
+  UNSAVED_NOTES, UNSAVED_NOTES_UNSAVED, UNSAVED_NOTES_SAVED, INDEX, DOT_JSON, CD_ROOT,
+  N_NOTES, MAX_TRY, TRASH, N_DAYS, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE,
 } from '../types/const';
 import {
-  isObject, createNoteFPath, createNoteFName, extractNoteFPath, createPinFPath,
+  isObject, isString, createNoteFPath, createDataFName, extractNoteFPath, createPinFPath,
   addFPath, deleteFPath, copyFPaths, getMainId, listNoteIds, sortWithPins,
+  getStaticFPath, getLastSettingsFPaths, excludeNotObjContents,
 } from '../utils';
-import { cachedFPaths } from '../vars';
+import { syncMode } from '../vars';
 import { initialLocalSettingsState } from '../types/initialStates';
+
+const getApi = () => {
+  // Beware arguments are not exactly the same!
+  return syncMode.doSyncMode ? ldbApi : serverApi;
+};
 
 const _listFPaths = async () => {
   const fpaths = {
-    noteFPaths: [], staticFPaths: [], settingsFPath: null, pinFPaths: [],
+    noteFPaths: [], staticFPaths: [], settingsFPaths: [], infoFPath: null, pinFPaths: [],
   };
-  await mmkvStorage.listFiles((fpath) => {
+  await getApi().listFiles((fpath) => {
     addFPath(fpaths, fpath);
     return true;
   });
@@ -21,9 +31,11 @@ const _listFPaths = async () => {
 };
 
 const listFPaths = async (doForce = false) => {
-  if (isObject(cachedFPaths.fpaths) && !doForce) return copyFPaths(cachedFPaths.fpaths);
-  cachedFPaths.fpaths = await _listFPaths();
-  return copyFPaths(cachedFPaths.fpaths);
+  if (isObject(getApi().cachedFPaths.fpaths) && !doForce) {
+    return copyFPaths(getApi().cachedFPaths.fpaths);
+  }
+  getApi().cachedFPaths.fpaths = await _listFPaths();
+  return copyFPaths(getApi().cachedFPaths.fpaths);
 };
 
 const batchGetFileWithRetry = async (
@@ -32,9 +44,9 @@ const batchGetFileWithRetry = async (
 
   const responses = await Promise.all(
     fpaths.map(fpath =>
-      mmkvStorage.getFile(fpath)
+      getApi().getFile(fpath)
         .then(content => ({ content, fpath, success: true }))
-        .catch(error => ({ content: null, fpath, success: false, error }))
+        .catch(error => ({ error, fpath, content: null, success: false }))
     )
   );
 
@@ -44,7 +56,7 @@ const batchGetFileWithRetry = async (
   if (failedResponses.length) {
     if (callCount + 1 >= MAX_TRY) {
       if (dangerouslyIgnoreError) {
-        console.log('data/batchGetFileWithRetry error: ', failedResponses[0].error);
+        console.log('batchGetFileWithRetry error: ', failedResponses[0].error);
         return responses;
       }
       throw failedResponses[0].error;
@@ -62,7 +74,6 @@ const batchGetFileWithRetry = async (
 };
 
 const toNotes = (noteIds, fpaths, contents) => {
-
   const notes = [];
   for (const noteId of noteIds) {
     let title = '', body = '', media = [];
@@ -71,8 +82,8 @@ const toNotes = (noteIds, fpaths, contents) => {
 
       const { subName } = extractNoteFPath(fpath);
       if (subName === INDEX + DOT_JSON) {
-        title = content.title;
-        body = content.body;
+        // content can be null if dangerouslyIgnoreError is true.
+        if (isObject(content)) [title, body] = [content.title, content.body];
       } else {
         media.push({ name: subName, content: content });
       }
@@ -115,15 +126,48 @@ const toConflictedNotes = (noteIds, conflictWiths, fpaths, contents) => {
 
 const fetch = async (params) => {
 
-  let { listName, sortOn, doDescendingOrder, doFetchSettings, pendingPins } = params;
-  const { noteFPaths, settingsFPath, pinFPaths } = await listFPaths(doFetchSettings);
+  let { listName, sortOn, doDescendingOrder, doFetchStgsAndInfo, pendingPins } = params;
+  const {
+    noteFPaths, settingsFPaths: _settingsFPaths, infoFPath, pinFPaths,
+  } = await listFPaths(doFetchStgsAndInfo);
+  const {
+    fpaths: settingsFPaths, ids: settingsIds,
+  } = getLastSettingsFPaths(_settingsFPaths);
 
-  let settings;
-  if (settingsFPath && doFetchSettings) {
-    settings = await mmkvStorage.getFile(settingsFPath);
+  let settings, conflictedSettings = [], info;
+  if (doFetchStgsAndInfo) {
+    if (settingsFPaths.length > 0) {
+      const files = await getFiles(settingsFPaths, true);
 
-    sortOn = settings.sortOn;
-    doDescendingOrder = settings.doDescendingOrder;
+      // content can be null if dangerouslyIgnoreError is true.
+      const { fpaths, contents } = excludeNotObjContents(files.fpaths, files.contents);
+      for (let i = 0; i < fpaths.length; i++) {
+        const [fpath, content] = [fpaths[i], contents[i]];
+        if (fpaths.length === 1) {
+          settings = content;
+          [sortOn, doDescendingOrder] = [settings.sortOn, settings.doDescendingOrder];
+          continue;
+        }
+        conflictedSettings.push({
+          ...content, id: settingsIds[settingsFPaths.indexOf(fpath)], fpath,
+        });
+      }
+    }
+
+    if (infoFPath) {
+      const { contents } = await getFiles([infoFPath], true);
+      if (isObject(contents[0])) info = contents[0];
+    }
+
+    // Transition from purchases in settings to info.
+    if (isObject(settings) && !isObject(info)) {
+      if ('purchases' in settings) {
+        info = { purchases: settings.purchases, checkPurchasesDT: null };
+        if ('checkPurchasesDT' in settings) {
+          info.checkPurchasesDT = settings.checkPurchasesDT;
+        }
+      }
+    }
   }
 
   const { noteIds, conflictedIds, conflictWiths, toRootIds } = listNoteIds(noteFPaths);
@@ -158,7 +202,7 @@ const fetch = async (params) => {
 
   const responses = await batchGetFileWithRetry(_fpaths, 0, true);
   const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
-  for (let { fpath, content } of responses) {
+  for (const { fpath, content } of responses) {
     fpaths.push(fpath);
     contents.push(content);
   }
@@ -177,7 +221,7 @@ const fetch = async (params) => {
   listNames = [...new Set(listNames)];
 
   return {
-    notes, hasMore, conflictedNotes, listNames, settingsFPath, settings,
+    notes, hasMore, conflictedNotes, listNames, settings, conflictedSettings, info,
   };
 };
 
@@ -226,14 +270,50 @@ const fetchMore = async (params) => {
   return { notes, hasMore, hasDisorder };
 };
 
-const batchPutFileWithRetry = async (fpaths, contents, callCount) => {
+const fetchStaticFiles = async (notes, conflictedNotes) => {
+  if (syncMode.doSyncMode) return;
+
+  const fpaths = [];
+  for (const note of notes) {
+    if (note.media) {
+      for (const { name } of note.media) {
+        if (name.startsWith(CD_ROOT + '/')) fpaths.push(getStaticFPath(name));
+      }
+    }
+  }
+  if (conflictedNotes) {
+    for (const conflictedNote of conflictedNotes) {
+      for (const note of conflictedNote.notes) {
+        if (note.media) {
+          for (const { name } of note.media) {
+            if (name.startsWith(CD_ROOT + '/')) fpaths.push(getStaticFPath(name));
+          }
+        }
+      }
+    }
+  }
+
+  const files = await fileApi.getFiles(fpaths); // Check if already exists locally
+
+  const remainedFPaths = [];
+  for (let i = 0; i < files.fpaths.length; i++) {
+    const fpath = files.fpaths[i], content = files.contents[i];
+    if (content === undefined) remainedFPaths.push(fpath);
+  }
+
+  await getServerFiles(remainedFPaths);
+};
+
+const batchPutFileWithRetry = async (
+  fpaths, contents, callCount, dangerouslyIgnoreError = false
+) => {
 
   const responses = await Promise.all(
     fpaths.map((fpath, i) =>
-      mmkvStorage.putFile(fpath, contents[i])
+      getApi().putFile(fpath, contents[i])
         .then(publicUrl => {
-          addFPath(cachedFPaths.fpaths, fpath);
-          cachedFPaths.fpaths = copyFPaths(cachedFPaths.fpaths);
+          addFPath(getApi().cachedFPaths.fpaths, fpath);
+          getApi().cachedFPaths.fpaths = copyFPaths(getApi().cachedFPaths.fpaths);
           return { publicUrl, fpath, success: true };
         })
         .catch(error => ({ error, fpath, content: contents[i], success: false }))
@@ -245,11 +325,19 @@ const batchPutFileWithRetry = async (fpaths, contents, callCount) => {
   const failedContents = failedResponses.map(({ content }) => content);
 
   if (failedResponses.length) {
-    if (callCount + 1 >= MAX_TRY) throw failedResponses[0].error;
+    if (callCount + 1 >= MAX_TRY) {
+      if (dangerouslyIgnoreError) {
+        console.log('batchPutFileWithRetry error: ', failedResponses[0].error);
+        return responses;
+      }
+      throw failedResponses[0].error;
+    }
 
     return [
       ...responses.filter(({ success }) => success),
-      ...(await batchPutFileWithRetry(failedFPaths, failedContents, callCount + 1)),
+      ...(await batchPutFileWithRetry(
+        failedFPaths, failedContents, callCount + 1, dangerouslyIgnoreError
+      )),
     ];
   }
 
@@ -257,36 +345,83 @@ const batchPutFileWithRetry = async (fpaths, contents, callCount) => {
 };
 
 const putNotes = async (params) => {
-  const { listName, notes } = params;
+  const { listName, notes, staticFPaths, manuallyManageError } = params;
 
-  const fpaths = [], contents = [];
+  const fpaths = [], contents = [], mediaFPaths = [], mediaContents = [];
+  if (!syncMode.doSyncMode && Array.isArray(staticFPaths)) {
+    const files = await fileApi.getFiles(staticFPaths);
+    for (let i = 0; i < files.fpaths.length; i++) {
+      mediaFPaths.push(files.fpaths[i]);
+      mediaContents.push(files.contents[i]);
+    }
+  }
+
+  const noteMap = {}, successNotes = [], errorNotes = [];
   for (const note of notes) {
-    const fname = createNoteFName(note.id, note.parentIds);
-    fpaths.push(createNoteFPath(listName, fname, INDEX + DOT_JSON));
+    const fname = createDataFName(note.id, note.parentIds);
+    const fpath = createNoteFPath(listName, fname, INDEX + DOT_JSON);
+    noteMap[fpath] = note;
+
+    fpaths.push(fpath);
     contents.push({ title: note.title, body: note.body });
     if (note.media) {
       for (const { name, content } of note.media) {
-        fpaths.push(createNoteFPath(listName, fname, name));
-        contents.push(content);
+        mediaFPaths.push(createNoteFPath(listName, fname, name));
+        mediaContents.push(content);
       }
     }
   }
 
-  await batchPutFileWithRetry(fpaths, contents, 0);
+  // Put static files and cdroot fpaths first, and index.json file last.
+  // So if errors, can leave the added fpaths as is. They won't interfere.
+  await putFiles(mediaFPaths, mediaContents);
+
+  // Beware size should be max at N_NOTES, so can call batchPutFileWithRetry directly.
+  // Use dangerouslyIgnoreError=true to manage which succeeded/failed manually.
+  const responses = await batchPutFileWithRetry(
+    fpaths, contents, 0, !!manuallyManageError
+  );
+  for (const response of responses) {
+    if (response.success) successNotes.push(noteMap[response.fpath]);
+    else errorNotes.push({ ...noteMap[response.fpath], error: response.error });
+  }
+
+  return { successNotes, errorNotes };
 };
 
-export const batchDeleteFileWithRetry = async (fpaths, callCount) => {
+const batchDeleteFileWithRetry = async (fpaths, callCount) => {
 
   const responses = await Promise.all(
     fpaths.map((fpath) =>
-      mmkvStorage.deleteFile(fpath)
+      getApi().deleteFile(fpath)
         .then(() => {
-          deleteFPath(cachedFPaths.fpaths, fpath);
-          cachedFPaths.fpaths = copyFPaths(cachedFPaths.fpaths);
+          deleteFPath(getApi().cachedFPaths.fpaths, fpath);
+          getApi().cachedFPaths.fpaths = copyFPaths(getApi().cachedFPaths.fpaths);
           return { fpath, success: true };
         })
         .catch(error => {
-          // For MMKV, there is no error when does_not_exist or file_not_found
+          // BUG ALERT
+          // Treat not found error as not an error as local data might be out-dated.
+          //   i.e. user tries to delete a not-existing file, it's ok.
+          // Anyway, if the file should be there, this will hide the real error!
+          if (
+            isObject(error) &&
+            isString(error.message) &&
+            (
+              (
+                error.message.includes('failed to delete') &&
+                error.message.includes('404')
+              ) ||
+              (
+                error.message.includes('deleteFile Error') &&
+                error.message.includes('GaiaError error 5')
+              ) ||
+              error.message.includes('does_not_exist') ||
+              error.message.includes('file_not_found')
+            )
+          ) {
+            return { fpath, success: true };
+          }
           return { error, fpath, success: false };
         })
     )
@@ -352,40 +487,6 @@ const canDeleteListNames = async (listNames) => {
   return canDeletes;
 };
 
-const getFiles = async (_fpaths, dangerouslyIgnoreError = false) => {
-
-  const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
-  for (let i = 0, j = _fpaths.length; i < j; i += N_NOTES) {
-    const selectedFPaths = _fpaths.slice(i, i + N_NOTES);
-    const responses = await batchGetFileWithRetry(
-      selectedFPaths, 0, dangerouslyIgnoreError
-    );
-    fpaths.push(...responses.map(({ fpath }) => fpath));
-    contents.push(...responses.map(({ content }) => content));
-  }
-
-  return { fpaths, contents };
-};
-
-const putFiles = async (fpaths, contents) => {
-  for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
-    const _fpaths = fpaths.slice(i, i + N_NOTES);
-    const _contents = contents.slice(i, i + N_NOTES);
-    await batchPutFileWithRetry(_fpaths, _contents, 0);
-  }
-};
-
-const deleteFiles = async (fpaths) => {
-  for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
-    const _fpaths = fpaths.slice(i, i + N_NOTES);
-    await batchDeleteFileWithRetry(_fpaths, 0);
-  }
-};
-
-const deleteAllFiles = async () => {
-  await mmkvStorage.deleteAllFiles();
-};
-
 const putPins = async (params) => {
   const { pins } = params;
 
@@ -395,6 +496,10 @@ const putPins = async (params) => {
     contents.push({});
   }
 
+  // Beware size should be max at N_NOTES, so can call batchPutFileWithRetry directly.
+  // Use dangerouslyIgnoreError=true to manage which succeeded/failed manually.
+  // Bug alert: if several pins and error, rollback is incorrect
+  //   as some are successful but some aren't.
   await batchPutFileWithRetry(fpaths, contents, 0);
   return { pins };
 };
@@ -410,10 +515,47 @@ const deletePins = async (params) => {
   return { pins };
 };
 
+const getFiles = async (_fpaths, dangerouslyIgnoreError = false) => {
+
+  const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
+  for (let i = 0, j = _fpaths.length; i < j; i += N_NOTES) {
+    const selectedFPaths = _fpaths.slice(i, i + N_NOTES);
+    const responses = await batchGetFileWithRetry(
+      selectedFPaths, 0, dangerouslyIgnoreError
+    );
+    fpaths.push(...responses.map(({ fpath }) => fpath));
+    contents.push(...responses.map(({ content }) => content));
+  }
+
+  return { fpaths, contents };
+};
+
+const putFiles = async (fpaths, contents, dangerouslyIgnoreError = false) => {
+
+  const responses = []; // No order guarantee btw fpaths and responses
+  for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
+    const _fpaths = fpaths.slice(i, i + N_NOTES);
+    const _contents = contents.slice(i, i + N_NOTES);
+    const _responses = await batchPutFileWithRetry(
+      _fpaths, _contents, 0, dangerouslyIgnoreError
+    );
+    responses.push(..._responses);
+  }
+
+  return responses;
+};
+
+const deleteFiles = async (fpaths) => {
+  for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
+    const _fpaths = fpaths.slice(i, i + N_NOTES);
+    await batchDeleteFileWithRetry(_fpaths, 0);
+  }
+};
+
 const getLocalSettings = async () => {
-  let localSettings = { ...initialLocalSettingsState };
+  const localSettings = { ...initialLocalSettingsState };
   try {
-    const item = await mmkvStorage.getItem(LOCAL_SETTINGS_STATE);
+    const item = await lsgApi.getItem(LOCAL_SETTINGS_STATE);
     if (item) {
       const _localSettings = JSON.parse(item);
       for (const k in localSettings) {
@@ -428,14 +570,117 @@ const getLocalSettings = async () => {
 };
 
 const putLocalSettings = async (localSettings) => {
-  await mmkvStorage.setItem(LOCAL_SETTINGS_STATE, JSON.stringify(localSettings));
+  await lsgApi.setItem(LOCAL_SETTINGS_STATE, JSON.stringify(localSettings));
+};
+
+const getUnsavedNotes = async () => {
+  const keys = await ldbApi.listKeys();
+  const _fpaths = keys.filter(key => key.startsWith(UNSAVED_NOTES + '/'));
+  const { fpaths, contents } = await ldbApi.getFiles(_fpaths, true);
+
+  const unsavedArr = [], savedMap = {};
+  for (let i = 0; i < fpaths.length; i++) {
+    const fpath = fpaths[i], content = contents[i];
+
+    if (fpath.startsWith(UNSAVED_NOTES_UNSAVED)) {
+      const id = fpath.slice((UNSAVED_NOTES_UNSAVED + '/').length, -1 * DOT_JSON.length);
+      unsavedArr.push({ id, content });
+      continue;
+    }
+
+    if (fpath.startsWith(UNSAVED_NOTES_SAVED)) {
+      const id = fpath.slice((UNSAVED_NOTES_SAVED + '/').length, -1 * DOT_JSON.length);
+      savedMap[id] = content;
+      continue;
+    }
+  }
+
+  const unsavedNotes = {};
+  for (const { id, content } of unsavedArr) {
+    const unsavedNote = { title: '', body: '', media: [] };
+    const savedNote = { savedTitle: '', savedBody: '', savedMedia: [] };
+
+    try {
+      for (const k in unsavedNote) {
+        if (k in content) unsavedNote[k] = content[k];
+      }
+      const _savedNote = savedMap[id];
+      for (const k in savedNote) {
+        if (k in _savedNote) savedNote[k] = _savedNote[k];
+      }
+
+      unsavedNotes[id] = { id, ...unsavedNote, ...savedNote };
+    } catch (error) {
+      console.log('Parse unsaved note error: ', error);
+    }
+  }
+
+  return unsavedNotes;
+};
+
+const putUnsavedNote = async (
+  id, title, body, media, savedTitle, savedBody, savedMedia,
+) => {
+  const fpath = `${UNSAVED_NOTES_UNSAVED}/${id}${DOT_JSON}`;
+  const content = { title, body, media };
+  await ldbApi.putFile(fpath, content);
+
+  const savedFPath = `${UNSAVED_NOTES_SAVED}/${id}${DOT_JSON}`;
+
+  // For better performance, if already exists, no need to save again.
+  const doExist = await ldbApi.exists(savedFPath);
+  if (doExist) return;
+
+  const savedContent = { savedTitle, savedBody, savedMedia };
+  await ldbApi.putFile(savedFPath, savedContent);
+};
+
+const deleteUnsavedNotes = async (ids) => {
+  const fpaths = [];
+  for (const id of ids) {
+    fpaths.push(`${UNSAVED_NOTES_UNSAVED}/${id}${DOT_JSON}`);
+    fpaths.push(`${UNSAVED_NOTES_SAVED}/${id}${DOT_JSON}`);
+  }
+  await ldbApi.deleteFiles(fpaths);
+};
+
+const deleteAllUnsavedNotes = async () => {
+  const keys = await ldbApi.listKeys();
+  const fpaths = keys.filter(key => key.startsWith(UNSAVED_NOTES + '/'));
+  await ldbApi.deleteFiles(fpaths);
+};
+
+const getServerFiles = async (_fpaths) => {
+  if (syncMode.doSyncMode) return;
+  const { fpaths, contents } = await getFiles(_fpaths, true);
+  await fileApi.putFiles(fpaths, contents);
+};
+
+const putServerFiles = async (fpaths) => {
+  if (syncMode.doSyncMode) return;
+  const files = await fileApi.getFiles(fpaths);
+  await putFiles(files.fpaths, files.contents);
+};
+
+const deleteServerFiles = async (fpaths) => {
+  if (syncMode.doSyncMode) return;
+  await deleteFiles(fpaths);
+};
+
+const deleteAllLocalFiles = async () => {
+  await lsgApi.removeItem(COLS_PANEL_STATE);
+  await lsgApi.removeItem(LOCAL_SETTINGS_STATE);
+  await ldbApi.deleteAllFiles();
+  await fileApi.deleteAllFiles();
 };
 
 const data = {
-  listFPaths, batchGetFileWithRetry, toNotes, fetch, fetchMore,
-  batchPutFileWithRetry, putNotes, getOldNotesInTrash, canDeleteListNames, getFiles,
-  putFiles, deleteFiles, deleteAllFiles, putPins, deletePins,
-  getLocalSettings, putLocalSettings,
+  listFPaths, batchGetFileWithRetry, toNotes, fetch, fetchMore, fetchStaticFiles,
+  batchPutFileWithRetry, putNotes, batchDeleteFileWithRetry, getOldNotesInTrash,
+  canDeleteListNames, putPins, deletePins, getFiles, putFiles, deleteFiles,
+  getLocalSettings, putLocalSettings, getUnsavedNotes, putUnsavedNote,
+  deleteUnsavedNotes, deleteAllUnsavedNotes,
+  getServerFiles, putServerFiles, deleteServerFiles, deleteAllLocalFiles,
 };
 
 export default data;

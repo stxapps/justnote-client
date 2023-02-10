@@ -16,7 +16,9 @@ import SettingsListsMenuPopup from './SettingsListsMenuPopup';
 import DateFormatMenuPopup from './DateFormatMenuPopup';
 import TimePickPopup from './TimePickPopup';
 import PinErrorPopup from './PinErrorPopup';
-import SettingsErrorPopup from './SettingsErrorPopup';
+import {
+  SettingsUpdateErrorPopup, SettingsConflictErrorPopup,
+} from './SettingsErrorPopup';
 import ListNamesPopup from './ListNamesPopup';
 import ConfirmDeletePopup from './ConfirmDeletePopup';
 import ConfirmDiscardPopup from './ConfirmDiscardPopup';
@@ -42,7 +44,8 @@ const Main = () => {
       <DateFormatMenuPopup />
       <TimePickPopup />
       <PinErrorPopup />
-      <SettingsErrorPopup />
+      <SettingsConflictErrorPopup />
+      <SettingsUpdateErrorPopup />
       <ListNamesPopup />
       <ConfirmDeletePopup />
       <ConfirmDiscardPopup />

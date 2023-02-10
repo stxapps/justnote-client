@@ -3,14 +3,15 @@ import {
   UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, ADD_SELECTED_NOTE_IDS,
   DELETE_SELECTED_NOTE_IDS, UPDATE_SELECTING_NOTE_ID, UPDATE_SELECTING_LIST_NAME,
   UPDATE_DELETING_LIST_NAME, FETCH_COMMIT, FETCH_ROLLBACK, UPDATE_FETCHED_MORE,
-  REFRESH_FETCHED, ADD_NOTE, UPDATE_NOTE, MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES,
-  DELETE_OLD_NOTES_IN_TRASH_COMMIT, DELETE_LIST_NAMES,
+  REFRESH_FETCHED, ADD_NOTE, UPDATE_NOTE, DISCARD_NOTE, MERGE_NOTES_COMMIT,
+  CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH_COMMIT, DELETE_LIST_NAMES,
   UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY, INCREASE_SAVE_NOTE_COUNT,
-  INCREASE_RESET_DID_CLICK_COUNT, UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION,
-  UPDATE_DISCARD_ACTION, UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT,
-  UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS, UPDATE_SETTINGS_VIEW_ID,
-  UPDATE_LIST_NAMES_MODE, SYNC, SYNC_COMMIT, SYNC_ROLLBACK, UPDATE_SYNC_PROGRESS,
-  UPDATE_SYNCED, UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
+  INCREASE_SET_INIT_DATA_COUNT, INCREASE_RESET_DID_CLICK_COUNT, UPDATE_MOVE_ACTION,
+  UPDATE_DELETE_ACTION, UPDATE_DISCARD_ACTION, UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT,
+  UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS, MERGE_SETTINGS_COMMIT,
+  UPDATE_SETTINGS_VIEW_ID, UPDATE_LIST_NAMES_MODE, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
+  UPDATE_SYNC_PROGRESS, UPDATE_SYNCED, UPDATE_PAYWALL_FEATURE,
+  UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
   UPDATE_DELETE_ALL_DATA_PROGRESS, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
@@ -23,6 +24,7 @@ import {
   MAX_SELECTED_NOTE_IDS, SETTINGS_VIEW_ACCOUNT, DELETE_ACTION_LIST_NAME,
 } from '../types/const';
 import { doContainListName, isObject, isString, doContainStaleNotes } from '../utils';
+import vars from '../vars';
 
 const initialState = {
   isHandlingSignIn: false,
@@ -81,6 +83,8 @@ const initialState = {
   updateSettingsViewIdCount: 0,
   listNamesMode: null,
   syncProgress: null,
+  paywallFeature: null,
+  doRightPanelAnimateHidden: false,
   importAllDataProgress: null,
   exportAllDataProgress: null,
   deleteAllDataProgress: null,
@@ -108,6 +112,10 @@ const displayReducer = (state = initialState, action) => {
   if (action.type === UPDATE_NOTE_ID) {
     const newState = { ...state, isEditorFocused: false, isEditorBusy: false };
     newState.noteId = state.noteId === action.payload ? null : action.payload;
+
+    newState.doRightPanelAnimateHidden = vars.displayReducer.doRightPanelAnimateHidden;
+    vars.displayReducer.doRightPanelAnimateHidden = false;
+
     return newState;
   }
 
@@ -313,8 +321,8 @@ const displayReducer = (state = initialState, action) => {
     if (doContainStaleNotes(notes)) newState.isStaleErrorPopupShown = true;
 
     // Make sure listName is in listNameMap, if not, set to My Notes.
-    const { listNames, doFetchSettings, settings } = action.payload;
-    if (!doFetchSettings) return newState;
+    const { listNames, doFetchStgsAndInfo, settings } = action.payload;
+    if (!doFetchStgsAndInfo) return newState;
 
     newState.settingsStatus = null;
 
@@ -385,6 +393,10 @@ const displayReducer = (state = initialState, action) => {
     return { ...state, noteId: toNote.id, isEditorBusy: false };
   }
 
+  if (action.type === DISCARD_NOTE) {
+    return { ...state, isEditorFocused: false };
+  }
+
   if (action.type === MERGE_NOTES_COMMIT) {
     const { toListName, toNote } = action.payload;
     // Need to set NoteId here for consistency with notesReducer
@@ -418,6 +430,10 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === INCREASE_SAVE_NOTE_COUNT) {
     return { ...state, isEditorFocused: false, isEditorBusy: true };
+  }
+
+  if (action.type === INCREASE_SET_INIT_DATA_COUNT) {
+    return { ...state, isEditorFocused: false };
   }
 
   if (action.type === UPDATE_MOVE_ACTION) {
@@ -464,15 +480,20 @@ const displayReducer = (state = initialState, action) => {
     return { ...state, settingsStatus: DIED_UPDATING };
   }
 
-  if (action.type === CANCEL_DIED_SETTINGS) {
-    const { settings } = action.payload;
+  if (action.type === CANCEL_DIED_SETTINGS || action.type === MERGE_SETTINGS_COMMIT) {
+    const { settings, doFetch } = action.payload;
     const doContain = doContainListName(state.listName, settings.listNameMap);
 
-    return {
+    const newState = {
       ...state,
       listName: doContain ? state.listName : MY_NOTES,
       settingsStatus: null,
     };
+    if (doFetch) {
+      newState.fetchedListNames = [];
+      newState.noteId = null;
+    }
+    return newState;
   }
 
   if (action.type === UPDATE_SETTINGS_VIEW_ID) {
@@ -522,6 +543,10 @@ const displayReducer = (state = initialState, action) => {
     return {
       ...state, syncProgress: null, didFetchSettings: false, fetchedListNames: [],
     };
+  }
+
+  if (action.type === UPDATE_PAYWALL_FEATURE) {
+    return { ...state, paywallFeature: action.payload };
   }
 
   if (action.type === UPDATE_IMPORT_ALL_DATA_PROGRESS) {

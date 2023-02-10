@@ -3,13 +3,14 @@ import { createSelectorCreator, defaultMemoize, createSelector } from 'reselect'
 import {
   PINNED, ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE, NOTE_DATE_FORMAT_SYSTEM,
   UPDATING, MOVING, DIED_UPDATING, DIED_MOVING, WHT_MODE, BLK_MODE, SYSTEM_MODE,
-  CUSTOM_MODE,
+  CUSTOM_MODE, NEW_NOTE, VALID, INVALID,
 } from '../types/const';
 import {
-  isStringIn, isObject, isArrayEqual, isEqual, getListNameObj,
+  isStringIn, isObject, isString, isArrayEqual, isEqual, isNoteBodyEqual, getListNameObj,
   getMainId, getValidProduct as _getValidProduct, getValidPurchase as _getValidPurchase,
   listNoteIds, getSortedNotes, separatePinnedValues, getNoteFPaths, getPinFPaths,
   getPins, doEnableExtraFeatures, getFormattedNoteDate, isNumber, isMobile as _isMobile,
+  getDataParentIds,
 } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 import { initialListNameEditorState } from '../types/initialStates';
@@ -236,12 +237,12 @@ export const getValidProduct = createSelector(
 );
 
 export const getValidPurchase = createSelector(
-  state => state.settings.purchases,
+  state => state.info.purchases,
   purchases => _getValidPurchase(purchases),
 );
 
 export const getDoEnableExtraFeatures = createSelector(
-  state => state.settings.purchases,
+  state => state.info.purchases,
   purchases => doEnableExtraFeatures(purchases),
 );
 
@@ -251,17 +252,19 @@ export const makeGetPinStatus = () => {
     state => getNoteFPaths(state),
     state => getPinFPaths(state),
     state => state.pendingPins,
-    (state, noteId) => {
-      for (const listName in state.notes) {
-        if (isObject(state.notes[listName]) && noteId in state.notes[listName]) {
-          return state.notes[listName][noteId];
+    (state, noteIdOrObj) => {
+      if (isObject(noteIdOrObj)) return noteIdOrObj;
+      if (isString(noteIdOrObj)) {
+        for (const listName in state.notes) {
+          if (isObject(state.notes[listName]) && noteIdOrObj in state.notes[listName]) {
+            return state.notes[listName][noteIdOrObj];
+          }
         }
       }
       return null;
     },
     (noteFPaths, pinFPaths, pendingPins, note) => {
-
-      if (!note) return null;
+      if (!isObject(note)) return null;
 
       const { toRootIds } = listNoteIds(noteFPaths);
       const pins = getPins(pinFPaths, pendingPins, false, toRootIds);
@@ -472,5 +475,61 @@ export const makeIsTimePickMinuteItemSelected = () => {
     (minute, item) => {
       return minute === item;
     }
+  );
+};
+
+/** @return {function(any, any): any} */
+export const makeGetUnsavedNote = () => {
+  return createSelector(
+    state => getNoteFPaths(state),
+    state => state.unsavedNotes,
+    (state, note) => note,
+    (noteFPaths, unsavedNotes, note) => {
+      // Valid - found an unsaved note
+      // Invalid - found a confliced unsaved note
+      // null - Not found or not different
+      const result = { status: null, note: null };
+      if (!isObject(note)) return result;
+      if (note.id.startsWith('conflict')) return result;
+
+      if (note.id in unsavedNotes) {
+        const { title, body } = unsavedNotes[note.id];
+        if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+          [result.status, result.note] = [VALID, unsavedNotes[note.id]];
+          return result;
+        }
+      }
+
+      if (note.id === NEW_NOTE) return result;
+
+      const { toParents } = listNoteIds(noteFPaths);
+      const parentIds = getDataParentIds(note.id, toParents);
+
+      for (const parentId of parentIds) {
+        if (!(parentId in unsavedNotes)) continue;
+
+        const { title, body, savedTitle, savedBody } = unsavedNotes[parentId];
+        // Is the unsaved note and current note different?
+        const isUcDiff = note.title !== title || !isNoteBodyEqual(note.body, body);
+        // Is the unsaved note and original note different?
+        const isUoDiff = savedTitle !== title || !isNoteBodyEqual(savedBody, body);
+        // Is the current note and original note different?
+        const isCoDiff = (
+          note.title !== savedTitle || !isNoteBodyEqual(note.body, savedBody)
+        );
+
+        if (isUcDiff && isUoDiff && isCoDiff) { // Conflict
+          [result.status, result.note] = [INVALID, unsavedNotes[parentId]];
+          return result;
+        }
+        if (isUcDiff && isUoDiff && !isCoDiff) { // Moved note
+          [result.status, result.note] = [VALID, unsavedNotes[parentId]];
+          return result;
+        }
+      }
+
+      return result;
+    },
+    { memoizeOptions: { resultEqualityCheck: isEqual } },
   );
 };

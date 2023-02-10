@@ -7,6 +7,7 @@ import Svg, { Path } from 'react-native-svg';
 
 import { updateNoteId, updatePopup, updateEditorScrollEnabled } from '../actions';
 import { NEW_NOTE, NEW_NOTE_OBJ, SIDEBAR_POPUP } from '../types/const';
+import { makeGetUnsavedNote } from '../selectors';
 import { sidebarFMV } from '../types/animConfigs';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
@@ -18,6 +19,7 @@ const NavPanel = () => {
 
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const insets = useSafeAreaInsets();
+  const getUnsavedNote = useMemo(makeGetUnsavedNote, []);
   const note = useSelector(state => {
     const { listName, noteId } = state.display;
 
@@ -26,7 +28,9 @@ const NavPanel = () => {
     if (noteId.startsWith('conflict')) return state.conflictedNotes[listName][noteId];
     return state.notes[listName][noteId];
   });
+  const unsavedNote = useSelector(state => getUnsavedNote(state, note));
   const [derivedNote, setDerivedNote] = useState(note);
+  const [derivedUnsavedNote, setDerivedUnsavedNote] = useState(unsavedNote);
   const tailwind = useTailwind();
 
   const isSidebarShown = useSelector(state => state.display.isSidebarPopupShown);
@@ -205,7 +209,10 @@ const NavPanel = () => {
       Animated.timing(rightPanelAnim, { toValue: 0, ...sidebarFMV.visible }).start();
     } else {
       Animated.timing(rightPanelAnim, { toValue: 1, ...sidebarFMV.hidden }).start(() => {
-        if (didMount && !note && note !== derivedNote) setDerivedNote(note);
+        if (didMount && !note) {
+          if (note !== derivedNote) setDerivedNote(note);
+          if (unsavedNote !== derivedUnsavedNote) setDerivedUnsavedNote(unsavedNote);
+        }
       });
     }
 
@@ -214,15 +221,19 @@ const NavPanel = () => {
       didMount = false;
       registerRightPanelBackHandler(false);
     };
-  }, [note, derivedNote, rightPanelAnim, registerRightPanelBackHandler]);
+  }, [
+    note, derivedNote, unsavedNote, derivedUnsavedNote, rightPanelAnim,
+    registerRightPanelBackHandler,
+  ]);
 
   if (derivedIsSidebarShown !== isSidebarShown) {
     setDidSidebarAnimEnd(false);
     setDerivedIsSidebarShown(isSidebarShown);
   }
 
-  if (note && note !== derivedNote) {
-    setDerivedNote(note);
+  if (note) {
+    if (note !== derivedNote) setDerivedNote(note);
+    if (unsavedNote !== derivedUnsavedNote) setDerivedUnsavedNote(unsavedNote);
   }
 
   const leftCanvasClassNames = !isSidebarShown && didSidebarAnimEnd ? 'hidden relative' : 'absolute inset-0 flex flex-row';
@@ -272,7 +283,7 @@ const NavPanel = () => {
       {/* Right panel */}
       <View style={tailwind(rightCanvasClassNames)}>
         <Animated.View style={[tailwind('h-full w-full'), rightPanelStyle]}>
-          <NoteEditor note={derivedNote} width={safeAreaWidth} />
+          <NoteEditor note={derivedNote} unsavedNote={derivedUnsavedNote} width={safeAreaWidth} />
         </Animated.View>
       </View>
     </View>

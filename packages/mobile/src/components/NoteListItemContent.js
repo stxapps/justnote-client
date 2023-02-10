@@ -7,21 +7,19 @@ import {
   updateNoteId, updateBulkEdit, showNLIMPopup, addSelectedNoteIds,
   deleteSelectedNoteIds,
 } from '../actions';
-import { makeIsNoteIdSelected, makeGetPinStatus, makeGetNoteDate } from '../selectors';
+import { makeIsNoteIdSelected, makeGetNoteDate } from '../selectors';
 import { isBusyStatus, isPinningStatus, stripHtml } from '../utils';
 
 import { useTailwind } from '.';
 
 const NoteListItemContent = (props) => {
 
-  const { note } = props;
+  const { note, pinStatus } = props;
   const [doTitlePb, setDoTitlePb] = useState(false);
   const getIsNoteIdSelected = useMemo(makeIsNoteIdSelected, []);
-  const getPinStatus = useMemo(makeGetPinStatus, []);
   const getNoteDate = useMemo(makeGetNoteDate, []);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const isSelected = useSelector(state => getIsNoteIdSelected(state, note.id));
-  const pinStatus = useSelector(state => getPinStatus(state, note.id));
   const noteDate = useSelector(state => getNoteDate(state, note));
   const body = useMemo(() => stripHtml(note.body), [note.body]);
   const isBusy = useMemo(() => {
@@ -59,7 +57,7 @@ const NoteListItemContent = (props) => {
         x: newX, y: newY, width: newWidth, height: newHeight,
         top: newY, bottom: newY + newHeight, left: newX, right: newX + newWidth,
       };
-      dispatch(showNLIMPopup(note.id, rect, true, false));
+      dispatch(showNLIMPopup(note.id, rect, true));
     });
   };
 
