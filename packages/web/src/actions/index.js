@@ -1005,6 +1005,8 @@ export const saveNote = (title, body, media) => async (dispatch, getState) => {
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
+  if (vars.keyboard.height > 0) dispatch(increaseBlurCount());
+
   if (note && (note.title === title && isNoteBodyEqual(note.body, body))) {
     dispatch(updateEditorBusy(false));
     dispatch(deleteUnsavedNotes([noteId]));
@@ -1022,9 +1024,10 @@ export const discardNote = (doCheckEditing, title = null, body = null) => async 
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
+  if (vars.keyboard.height > 0) dispatch(increaseBlurCount());
+
   if (doCheckEditing) {
     if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
-      if (vars.keyboard.height > 0) dispatch(increaseBlurCount());
       dispatch(updateDiscardAction(DISCARD_ACTION_CANCEL_EDIT));
       updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
       return;

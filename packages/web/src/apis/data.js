@@ -1,4 +1,5 @@
 import serverApi from './server';
+import lsgApi from './localSg';
 import ldbApi from './localDb';
 import fileApi from './localFile';
 import {
@@ -554,7 +555,7 @@ const deleteFiles = async (fpaths) => {
 const getLocalSettings = async () => {
   const localSettings = { ...initialLocalSettingsState };
   try {
-    const item = localStorage.getItem(LOCAL_SETTINGS_STATE);
+    const item = await lsgApi.getItem(LOCAL_SETTINGS_STATE);
     if (item) {
       const _localSettings = JSON.parse(item);
       for (const k in localSettings) {
@@ -569,7 +570,7 @@ const getLocalSettings = async () => {
 };
 
 const putLocalSettings = async (localSettings) => {
-  localStorage.setItem(LOCAL_SETTINGS_STATE, JSON.stringify(localSettings));
+  await lsgApi.setItem(LOCAL_SETTINGS_STATE, JSON.stringify(localSettings));
 };
 
 const getUnsavedNotes = async () => {
@@ -582,13 +583,13 @@ const getUnsavedNotes = async () => {
     const fpath = fpaths[i], content = contents[i];
 
     if (fpath.startsWith(UNSAVED_NOTES_UNSAVED)) {
-      const id = fpath.slice((UNSAVED_NOTES_UNSAVED + '/').length);
+      const id = fpath.slice((UNSAVED_NOTES_UNSAVED + '/').length, -1 * DOT_JSON.length);
       unsavedArr.push({ id, content });
       continue;
     }
 
     if (fpath.startsWith(UNSAVED_NOTES_SAVED)) {
-      const id = fpath.slice((UNSAVED_NOTES_SAVED + '/').length);
+      const id = fpath.slice((UNSAVED_NOTES_SAVED + '/').length, -1 * DOT_JSON.length);
       savedMap[id] = content;
       continue;
     }
@@ -600,11 +601,10 @@ const getUnsavedNotes = async () => {
     const savedNote = { savedTitle: '', savedBody: '', savedMedia: [] };
 
     try {
-      const _unsavedNote = JSON.parse(content);
       for (const k in unsavedNote) {
-        if (k in _unsavedNote) unsavedNote[k] = _unsavedNote[k];
+        if (k in content) unsavedNote[k] = content[k];
       }
-      const _savedNote = JSON.parse(savedMap[id]);
+      const _savedNote = savedMap[id];
       for (const k in savedNote) {
         if (k in _savedNote) savedNote[k] = _savedNote[k];
       }
@@ -621,25 +621,25 @@ const getUnsavedNotes = async () => {
 const putUnsavedNote = async (
   id, title, body, media, savedTitle, savedBody, savedMedia,
 ) => {
-  const fpath = `${UNSAVED_NOTES_UNSAVED}/${id}`;
-  const content = JSON.stringify({ title, body, media });
+  const fpath = `${UNSAVED_NOTES_UNSAVED}/${id}${DOT_JSON}`;
+  const content = { title, body, media };
   await ldbApi.putFile(fpath, content);
 
-  const savedFPath = `${UNSAVED_NOTES_SAVED}/${id}`;
+  const savedFPath = `${UNSAVED_NOTES_SAVED}/${id}${DOT_JSON}`;
 
   // For better performance, if already exists, no need to save again.
   const doExist = await ldbApi.exists(savedFPath);
   if (doExist) return;
 
-  const savedContent = JSON.stringify({ savedTitle, savedBody, savedMedia });
+  const savedContent = { savedTitle, savedBody, savedMedia };
   await ldbApi.putFile(savedFPath, savedContent);
 };
 
 const deleteUnsavedNotes = async (ids) => {
   const fpaths = [];
   for (const id of ids) {
-    fpaths.push(`${UNSAVED_NOTES_UNSAVED}/${id}`);
-    fpaths.push(`${UNSAVED_NOTES_SAVED}/${id}`);
+    fpaths.push(`${UNSAVED_NOTES_UNSAVED}/${id}${DOT_JSON}`);
+    fpaths.push(`${UNSAVED_NOTES_SAVED}/${id}${DOT_JSON}`);
   }
   await ldbApi.deleteFiles(fpaths);
 };
@@ -668,8 +668,8 @@ const deleteServerFiles = async (fpaths) => {
 };
 
 const deleteAllLocalFiles = async () => {
-  localStorage.removeItem(COLS_PANEL_STATE);
-  localStorage.removeItem(LOCAL_SETTINGS_STATE);
+  await lsgApi.removeItem(COLS_PANEL_STATE);
+  await lsgApi.removeItem(LOCAL_SETTINGS_STATE);
   await ldbApi.deleteAllFiles();
   await fileApi.deleteAllFiles();
 };
