@@ -628,8 +628,8 @@ const putUnsavedNote = async (
   const savedFPath = `${UNSAVED_NOTES_SAVED}/${id}`;
 
   // For better performance, if already exists, no need to save again.
-  const savedFile = await ldbApi.getFile(savedFPath, true);
-  if (isString(savedFile)) return;
+  const doExist = await ldbApi.exists(savedFPath);
+  if (doExist) return;
 
   const savedContent = JSON.stringify({ savedTitle, savedBody, savedMedia });
   await ldbApi.putFile(savedFPath, savedContent);

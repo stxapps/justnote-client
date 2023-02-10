@@ -33,7 +33,7 @@ const NoteListItemError = (props) => {
     title = 'Version Conflicts';
     body = 'Select this note and manually manage the unsaved version.';
   } else {
-    console.log('Invalid note or unsavedNote.', note, unsavedNote);
+    console.log('In NoteListItemError, invalid note or unsavedNote.', note, unsavedNote);
   }
 
   return (

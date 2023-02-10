@@ -106,9 +106,14 @@ const listKeys = async () => {
   return /** @type string[] */(keys);
 };
 
+const exists = async (fpath) => {
+  const file = await getFile(fpath, true);
+  return file !== undefined;
+};
+
 const localDb = {
   cachedFPaths, getFile, getFiles, putFile, putFiles, deleteFile, deleteFiles,
-  deleteAllFiles, listFiles, listKeys,
+  deleteAllFiles, listFiles, listKeys, exists,
 };
 
 export default localDb;

@@ -152,7 +152,7 @@ const SettingsPopup = () => {
             </div>
           </button>
         </div>
-      </div >
+      </div>
     );
   };
 

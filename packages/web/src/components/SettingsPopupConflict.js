@@ -67,7 +67,7 @@ const SettingsPopupConflict = (props) => {
         <div className={tailwind('h-16 w-full')} />
         <h3 className={tailwind('pt-5 text-lg font-medium text-gray-800 blk:text-gray-200')}>{conflictedSettings.contents.length} Versions of Settings found</h3>
         <p className={tailwind('text-sm font-normal text-gray-500 blk:text-gray-400')}>Please choose the correct version of the settings.</p>
-        {conflictedSettings.contents.map((content, i) => <ConflictItem key={content.id} content={content} status={conflictedSettings.status} />)}
+        {conflictedSettings.contents.map(content => <ConflictItem key={content.id} content={content} status={conflictedSettings.status} />)}
       </div>
       {renderLoading()}
       {renderMergeError()}
