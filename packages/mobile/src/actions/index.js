@@ -1781,7 +1781,7 @@ export const sync = (
   try {
     const {
       noteFPaths, staticFPaths, settingsFPaths, infoFPath, pinFPaths,
-    } = await serverApi.listFPaths(doForceListFPaths);
+    } = await dataApi.listServerFPaths(doForceListFPaths);
     const { noteIds, conflictedIds } = listNoteIds(noteFPaths);
 
     const leafFPaths = [];

@@ -4,12 +4,13 @@ import ldbApi from './localDb';
 import fileApi from './localFile';
 import {
   UNSAVED_NOTES, UNSAVED_NOTES_UNSAVED, UNSAVED_NOTES_SAVED, INDEX, DOT_JSON, CD_ROOT,
-  N_NOTES, MAX_TRY, TRASH, N_DAYS, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE,
+  N_NOTES, TRASH, N_DAYS, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE,
 } from '../types/const';
 import {
-  isObject, isString, createNoteFPath, createDataFName, extractNoteFPath, createPinFPath,
-  addFPath, deleteFPath, copyFPaths, getMainId, listNoteIds, sortWithPins,
-  getStaticFPath, getLastSettingsFPaths, excludeNotObjContents,
+  isObject, createNoteFPath, createDataFName, extractNoteFPath, createPinFPath,
+  addFPath, copyFPaths, getMainId, listNoteIds, sortWithPins, getStaticFPath,
+  getLastSettingsFPaths, excludeNotObjContents, batchGetFileWithRetry,
+  batchPutFileWithRetry, batchDeleteFileWithRetry,
 } from '../utils';
 import { syncMode } from '../vars';
 import { initialLocalSettingsState } from '../types/initialStates';
@@ -19,11 +20,11 @@ const getApi = () => {
   return syncMode.doSyncMode ? ldbApi : serverApi;
 };
 
-const _listFPaths = async () => {
+const _listFPaths = async (listFiles) => {
   const fpaths = {
     noteFPaths: [], staticFPaths: [], settingsFPaths: [], infoFPath: null, pinFPaths: [],
   };
-  await getApi().listFiles((fpath) => {
+  await listFiles((fpath) => {
     addFPath(fpaths, fpath);
     return true;
   });
@@ -34,43 +35,16 @@ const listFPaths = async (doForce = false) => {
   if (isObject(getApi().cachedFPaths.fpaths) && !doForce) {
     return copyFPaths(getApi().cachedFPaths.fpaths);
   }
-  getApi().cachedFPaths.fpaths = await _listFPaths();
+  getApi().cachedFPaths.fpaths = await _listFPaths(getApi().listFiles);
   return copyFPaths(getApi().cachedFPaths.fpaths);
 };
 
-const batchGetFileWithRetry = async (
-  fpaths, callCount, dangerouslyIgnoreError = false
-) => {
-
-  const responses = await Promise.all(
-    fpaths.map(fpath =>
-      getApi().getFile(fpath)
-        .then(content => ({ content, fpath, success: true }))
-        .catch(error => ({ error, fpath, content: null, success: false }))
-    )
-  );
-
-  const failedResponses = responses.filter(({ success }) => !success);
-  const failedFPaths = failedResponses.map(({ fpath }) => fpath);
-
-  if (failedResponses.length) {
-    if (callCount + 1 >= MAX_TRY) {
-      if (dangerouslyIgnoreError) {
-        console.log('batchGetFileWithRetry error: ', failedResponses[0].error);
-        return responses;
-      }
-      throw failedResponses[0].error;
-    }
-
-    return [
-      ...responses.filter(({ success }) => success),
-      ...(await batchGetFileWithRetry(
-        failedFPaths, callCount + 1, dangerouslyIgnoreError
-      )),
-    ];
+const listServerFPaths = async (doForce = false) => {
+  if (isObject(serverApi.cachedFPaths.fpaths) && !doForce) {
+    return copyFPaths(serverApi.cachedFPaths.fpaths);
   }
-
-  return responses;
+  serverApi.cachedFPaths.fpaths = await _listFPaths(serverApi.listFiles);
+  return copyFPaths(serverApi.cachedFPaths.fpaths);
 };
 
 const toNotes = (noteIds, fpaths, contents) => {
@@ -200,7 +174,7 @@ const fetch = async (params) => {
   for (const id of selectedNoteIds) _fpaths.push(...id.fpaths);
   for (const id of selectedConflictedIds) _fpaths.push(...id.fpaths);
 
-  const responses = await batchGetFileWithRetry(_fpaths, 0, true);
+  const responses = await batchGetFileWithRetry(getApi().getFile, _fpaths, 0, true);
   const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
   for (const { fpath, content } of responses) {
     fpaths.push(fpath);
@@ -257,7 +231,7 @@ const fetchMore = async (params) => {
   const _fpaths = [];
   for (const id of selectedNoteIds) _fpaths.push(...id.fpaths);
 
-  const responses = await batchGetFileWithRetry(_fpaths, 0, true);
+  const responses = await batchGetFileWithRetry(getApi().getFile, _fpaths, 0, true);
   const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
   for (let { fpath, content } of responses) {
     fpaths.push(fpath);
@@ -301,47 +275,7 @@ const fetchStaticFiles = async (notes, conflictedNotes) => {
     if (content === undefined) remainedFPaths.push(fpath);
   }
 
-  await getServerFiles(remainedFPaths);
-};
-
-const batchPutFileWithRetry = async (
-  fpaths, contents, callCount, dangerouslyIgnoreError = false
-) => {
-
-  const responses = await Promise.all(
-    fpaths.map((fpath, i) =>
-      getApi().putFile(fpath, contents[i])
-        .then(publicUrl => {
-          addFPath(getApi().cachedFPaths.fpaths, fpath);
-          getApi().cachedFPaths.fpaths = copyFPaths(getApi().cachedFPaths.fpaths);
-          return { publicUrl, fpath, success: true };
-        })
-        .catch(error => ({ error, fpath, content: contents[i], success: false }))
-    )
-  );
-
-  const failedResponses = responses.filter(({ success }) => !success);
-  const failedFPaths = failedResponses.map(({ fpath }) => fpath);
-  const failedContents = failedResponses.map(({ content }) => content);
-
-  if (failedResponses.length) {
-    if (callCount + 1 >= MAX_TRY) {
-      if (dangerouslyIgnoreError) {
-        console.log('batchPutFileWithRetry error: ', failedResponses[0].error);
-        return responses;
-      }
-      throw failedResponses[0].error;
-    }
-
-    return [
-      ...responses.filter(({ success }) => success),
-      ...(await batchPutFileWithRetry(
-        failedFPaths, failedContents, callCount + 1, dangerouslyIgnoreError
-      )),
-    ];
-  }
-
-  return responses;
+  await getServerFilesToLocal(remainedFPaths);
 };
 
 const putNotes = async (params) => {
@@ -379,7 +313,7 @@ const putNotes = async (params) => {
   // Beware size should be max at N_NOTES, so can call batchPutFileWithRetry directly.
   // Use dangerouslyIgnoreError=true to manage which succeeded/failed manually.
   const responses = await batchPutFileWithRetry(
-    fpaths, contents, 0, !!manuallyManageError
+    getApi().putFile, getApi().cachedFPaths, fpaths, contents, 0, !!manuallyManageError
   );
   for (const response of responses) {
     if (response.success) successNotes.push(noteMap[response.fpath]);
@@ -387,59 +321,6 @@ const putNotes = async (params) => {
   }
 
   return { successNotes, errorNotes };
-};
-
-const batchDeleteFileWithRetry = async (fpaths, callCount) => {
-
-  const responses = await Promise.all(
-    fpaths.map((fpath) =>
-      getApi().deleteFile(fpath)
-        .then(() => {
-          deleteFPath(getApi().cachedFPaths.fpaths, fpath);
-          getApi().cachedFPaths.fpaths = copyFPaths(getApi().cachedFPaths.fpaths);
-          return { fpath, success: true };
-        })
-        .catch(error => {
-          // BUG ALERT
-          // Treat not found error as not an error as local data might be out-dated.
-          //   i.e. user tries to delete a not-existing file, it's ok.
-          // Anyway, if the file should be there, this will hide the real error!
-          if (
-            isObject(error) &&
-            isString(error.message) &&
-            (
-              (
-                error.message.includes('failed to delete') &&
-                error.message.includes('404')
-              ) ||
-              (
-                error.message.includes('deleteFile Error') &&
-                error.message.includes('GaiaError error 5')
-              ) ||
-              error.message.includes('does_not_exist') ||
-              error.message.includes('file_not_found')
-            )
-          ) {
-            return { fpath, success: true };
-          }
-          return { error, fpath, success: false };
-        })
-    )
-  );
-
-  const failedResponses = responses.filter(({ success }) => !success);
-  const failedFPaths = failedResponses.map(({ fpath }) => fpath);
-
-  if (failedResponses.length) {
-    if (callCount + 1 >= MAX_TRY) throw failedResponses[0].error;
-
-    return [
-      ...responses.filter(({ success }) => success),
-      ...(await batchDeleteFileWithRetry(failedFPaths, callCount + 1)),
-    ];
-  }
-
-  return responses;
 };
 
 const getOldNotesInTrash = async () => {
@@ -500,7 +381,9 @@ const putPins = async (params) => {
   // Use dangerouslyIgnoreError=true to manage which succeeded/failed manually.
   // Bug alert: if several pins and error, rollback is incorrect
   //   as some are successful but some aren't.
-  await batchPutFileWithRetry(fpaths, contents, 0);
+  await batchPutFileWithRetry(
+    getApi().putFile, getApi().cachedFPaths, fpaths, contents, 0
+  );
   return { pins };
 };
 
@@ -510,7 +393,9 @@ const deletePins = async (params) => {
   const pinFPaths = pins.map(pin => {
     return createPinFPath(pin.rank, pin.updatedDT, pin.addedDT, pin.id);
   });
-  await batchDeleteFileWithRetry(pinFPaths, 0);
+  await batchDeleteFileWithRetry(
+    getApi().deleteFile, getApi().cachedFPaths, pinFPaths, 0
+  );
 
   return { pins };
 };
@@ -521,7 +406,7 @@ const getFiles = async (_fpaths, dangerouslyIgnoreError = false) => {
   for (let i = 0, j = _fpaths.length; i < j; i += N_NOTES) {
     const selectedFPaths = _fpaths.slice(i, i + N_NOTES);
     const responses = await batchGetFileWithRetry(
-      selectedFPaths, 0, dangerouslyIgnoreError
+      getApi().getFile, selectedFPaths, 0, dangerouslyIgnoreError
     );
     fpaths.push(...responses.map(({ fpath }) => fpath));
     contents.push(...responses.map(({ content }) => content));
@@ -537,7 +422,8 @@ const putFiles = async (fpaths, contents, dangerouslyIgnoreError = false) => {
     const _fpaths = fpaths.slice(i, i + N_NOTES);
     const _contents = contents.slice(i, i + N_NOTES);
     const _responses = await batchPutFileWithRetry(
-      _fpaths, _contents, 0, dangerouslyIgnoreError
+      getApi().putFile, getApi().cachedFPaths, _fpaths, _contents, 0,
+      dangerouslyIgnoreError
     );
     responses.push(..._responses);
   }
@@ -548,8 +434,27 @@ const putFiles = async (fpaths, contents, dangerouslyIgnoreError = false) => {
 const deleteFiles = async (fpaths) => {
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
     const _fpaths = fpaths.slice(i, i + N_NOTES);
-    await batchDeleteFileWithRetry(_fpaths, 0);
+    await batchDeleteFileWithRetry(
+      getApi().deleteFile, getApi().cachedFPaths, _fpaths, 0
+    );
   }
+};
+
+const getServerFilesToLocal = async (_fpaths) => {
+  if (syncMode.doSyncMode) return;
+  const { fpaths, contents } = await getFiles(_fpaths, true);
+  await fileApi.putFiles(fpaths, contents);
+};
+
+const putLocalFilesToServer = async (fpaths) => {
+  if (syncMode.doSyncMode) return;
+  const files = await fileApi.getFiles(fpaths);
+  await putFiles(files.fpaths, files.contents);
+};
+
+const deleteServerFiles = async (fpaths) => {
+  if (syncMode.doSyncMode) return;
+  await deleteFiles(fpaths);
 };
 
 const getLocalSettings = async () => {
@@ -650,23 +555,6 @@ const deleteAllUnsavedNotes = async () => {
   await ldbApi.deleteFiles(fpaths);
 };
 
-const getServerFiles = async (_fpaths) => {
-  if (syncMode.doSyncMode) return;
-  const { fpaths, contents } = await getFiles(_fpaths, true);
-  await fileApi.putFiles(fpaths, contents);
-};
-
-const putServerFiles = async (fpaths) => {
-  if (syncMode.doSyncMode) return;
-  const files = await fileApi.getFiles(fpaths);
-  await putFiles(files.fpaths, files.contents);
-};
-
-const deleteServerFiles = async (fpaths) => {
-  if (syncMode.doSyncMode) return;
-  await deleteFiles(fpaths);
-};
-
 const deleteAllLocalFiles = async () => {
   await lsgApi.removeItem(COLS_PANEL_STATE);
   await lsgApi.removeItem(LOCAL_SETTINGS_STATE);
@@ -675,12 +563,11 @@ const deleteAllLocalFiles = async () => {
 };
 
 const data = {
-  listFPaths, batchGetFileWithRetry, toNotes, fetch, fetchMore, fetchStaticFiles,
-  batchPutFileWithRetry, putNotes, batchDeleteFileWithRetry, getOldNotesInTrash,
-  canDeleteListNames, putPins, deletePins, getFiles, putFiles, deleteFiles,
+  getApi, listFPaths, listServerFPaths, toNotes, fetch, fetchMore, fetchStaticFiles,
+  putNotes, getOldNotesInTrash, canDeleteListNames, putPins, deletePins, getFiles,
+  putFiles, deleteFiles, getServerFilesToLocal, putLocalFilesToServer, deleteServerFiles,
   getLocalSettings, putLocalSettings, getUnsavedNotes, putUnsavedNote,
-  deleteUnsavedNotes, deleteAllUnsavedNotes,
-  getServerFiles, putServerFiles, deleteServerFiles, deleteAllLocalFiles,
+  deleteUnsavedNotes, deleteAllUnsavedNotes, deleteAllLocalFiles,
 };
 
 export default data;

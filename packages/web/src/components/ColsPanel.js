@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
+import lsgApi from '../apis/localSg';
 import { COLS_PANEL_STATE, NEW_NOTE, NEW_NOTE_OBJ } from '../types/const';
 import { makeGetUnsavedNote } from '../selectors';
 import { throttle, isMobile as _isMobile } from '../utils';
@@ -44,7 +45,7 @@ const ColsPanel = () => {
   const unsavedNote = useSelector(state => getUnsavedNote(state, note));
 
   const storageKey = COLS_PANEL_STATE;
-  const storedState = useMemo(() => localStorage.getItem(storageKey), [storageKey]);
+  const storedState = useMemo(() => lsgApi.getItemSync(storageKey), [storageKey]);
   const initialState = {
     isPane1Shown: true,
     isPane3FullScreen: false,
@@ -196,7 +197,7 @@ const ColsPanel = () => {
   }, [onMouseMove, onTouchMove, onMouseUp]);
 
   useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(state));
+    lsgApi.setItemSync(storageKey, JSON.stringify(state));
   }, [storageKey, state]);
 
   const pane1Classes = state.isPane1Shown && !state.isPane3FullScreen ? '' : 'hidden';

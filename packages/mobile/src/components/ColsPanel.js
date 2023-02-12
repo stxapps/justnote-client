@@ -3,7 +3,7 @@ import { View, TouchableOpacity, PanResponder } from 'react-native';
 import { useSelector } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
-import lbdApi from '../apis/localDb';
+import lsgApi from '../apis/localSg';
 import { COLS_PANEL_STATE, NEW_NOTE, NEW_NOTE_OBJ } from '../types/const';
 import { makeGetUnsavedNote } from '../selectors';
 
@@ -149,7 +149,7 @@ const ColsPanel = () => {
   useEffect(() => {
     let didMount = true;
     const getState = async () => {
-      const storedState = await lbdApi.getItem(COLS_PANEL_STATE);
+      const storedState = await lsgApi.getItem(COLS_PANEL_STATE);
       if (didMount) {
         if (storedState) {
           const s = JSON.parse(storedState);
@@ -172,7 +172,7 @@ const ColsPanel = () => {
 
   useEffect(() => {
     if (didGetState && prevDidGetState.current) {
-      lbdApi.setItem(COLS_PANEL_STATE, JSON.stringify(state));
+      lsgApi.setItem(COLS_PANEL_STATE, JSON.stringify(state));
     }
     prevDidGetState.current = didGetState;
   }, [didGetState, state]);

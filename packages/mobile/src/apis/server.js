@@ -2,7 +2,10 @@
 import RNBlockstackSdk from 'react-native-blockstack';
 import { Dirs } from 'react-native-file-access';
 
-import { DOT_JSON } from '../types/const';
+import { DOT_JSON, N_NOTES } from '../types/const';
+import {
+  batchGetFileWithRetry, batchPutFileWithRetry, batchDeleteFileWithRetry,
+} from '../utils';
 import { cachedServerFPaths } from '../vars';
 
 const getFileOptions = { decrypt: true, dir: Dirs.DocumentDir };
@@ -17,6 +20,21 @@ const getFile = async (fpath, options = getFileOptions) => {
   return content;
 };
 
+const getFiles = async (_fpaths, dangerouslyIgnoreError = false) => {
+
+  const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
+  for (let i = 0, j = _fpaths.length; i < j; i += N_NOTES) {
+    const selectedFPaths = _fpaths.slice(i, i + N_NOTES);
+    const responses = await batchGetFileWithRetry(
+      getFile, selectedFPaths, 0, dangerouslyIgnoreError
+    );
+    fpaths.push(...responses.map(({ fpath }) => fpath));
+    contents.push(...responses.map(({ content }) => content));
+  }
+
+  return { fpaths, contents };
+};
+
 const putFileOptions = { encrypt: true, dir: Dirs.DocumentDir };
 const putFile = async (fpath, content, options = putFileOptions) => {
   if (fpath.endsWith(DOT_JSON)) content = JSON.stringify(content);
@@ -24,9 +42,24 @@ const putFile = async (fpath, content, options = putFileOptions) => {
   return fileUrl;
 };
 
+const putFiles = async (fpaths, contents) => {
+  for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
+    const _fpaths = fpaths.slice(i, i + N_NOTES);
+    const _contents = contents.slice(i, i + N_NOTES);
+    await batchPutFileWithRetry(putFile, cachedServerFPaths, _fpaths, _contents, 0);
+  }
+};
+
 const deleteFile = async (fpath, options = { wasSigned: false }) => {
   const { deleted } = await RNBlockstackSdk.deleteFile(fpath, options);
   return deleted;
+};
+
+const deleteFiles = async (fpaths) => {
+  for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
+    const _fpaths = fpaths.slice(i, i + N_NOTES);
+    await batchDeleteFileWithRetry(deleteFile, cachedServerFPaths, _fpaths, 0);
+  }
 };
 
 const listFiles = async (callback) => {
@@ -36,7 +69,8 @@ const listFiles = async (callback) => {
 };
 
 const server = {
-  cachedFPaths: cachedServerFPaths, getFile, putFile, deleteFile, listFiles,
+  cachedFPaths: cachedServerFPaths, getFile, getFiles, putFile, putFiles, deleteFile,
+  deleteFiles, listFiles,
 };
 
 export default server;

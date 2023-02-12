@@ -11,7 +11,7 @@ import {
   NOTE_DATE_FORMAT_MSDSY, NOTE_DATE_FORMAT_DSMSY, NOTE_DATE_FORMAT_YHMHD,
   NOTE_DATE_FORMAT_MHDHY, NOTE_DATE_FORMAT_DHMHY, NOTE_DATE_FORMAT_YOMOD,
   NOTE_DATE_FORMAT_MODOY, NOTE_DATE_FORMAT_DOMOY, NOTE_DATE_FORMAT_YMMMD,
-  NOTE_DATE_FORMAT_MMMDY, NOTE_DATE_FORMAT_DMMMY, MODE_EDIT,
+  NOTE_DATE_FORMAT_MMMDY, NOTE_DATE_FORMAT_DMMMY, MODE_EDIT, MAX_TRY,
 } from '../types/const';
 import {
   PIN_NOTE, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_ROLLBACK,
@@ -1672,4 +1672,137 @@ export const containEditingMode = (listNameEditors) => {
     }
   }
   return doContain;
+};
+
+export const batchGetFileWithRetry = async (
+  getFile, fpaths, callCount, dangerouslyIgnoreError = false
+) => {
+
+  const responses = await Promise.all(
+    fpaths.map(fpath =>
+      getFile(fpath)
+        .then(content => ({ content, fpath, success: true }))
+        .catch(error => ({ error, fpath, content: null, success: false }))
+    )
+  );
+
+  const failedResponses = responses.filter(({ success }) => !success);
+  const failedFPaths = failedResponses.map(({ fpath }) => fpath);
+
+  if (failedResponses.length) {
+    if (callCount + 1 >= MAX_TRY) {
+      if (dangerouslyIgnoreError) {
+        console.log('batchGetFileWithRetry error: ', failedResponses[0].error);
+        return responses;
+      }
+      throw failedResponses[0].error;
+    }
+
+    return [
+      ...responses.filter(({ success }) => success),
+      ...(await batchGetFileWithRetry(
+        getFile, failedFPaths, callCount + 1, dangerouslyIgnoreError
+      )),
+    ];
+  }
+
+  return responses;
+};
+
+export const batchPutFileWithRetry = async (
+  putFile, cachedFPaths, fpaths, contents, callCount, dangerouslyIgnoreError = false
+) => {
+
+  const responses = await Promise.all(
+    fpaths.map((fpath, i) =>
+      putFile(fpath, contents[i])
+        .then(publicUrl => {
+          addFPath(cachedFPaths.fpaths, fpath);
+          cachedFPaths.fpaths = copyFPaths(cachedFPaths.fpaths);
+          return { publicUrl, fpath, success: true };
+        })
+        .catch(error => ({ error, fpath, content: contents[i], success: false }))
+    )
+  );
+
+  const failedResponses = responses.filter(({ success }) => !success);
+  const failedFPaths = failedResponses.map(({ fpath }) => fpath);
+  const failedContents = failedResponses.map(({ content }) => content);
+
+  if (failedResponses.length) {
+    if (callCount + 1 >= MAX_TRY) {
+      if (dangerouslyIgnoreError) {
+        console.log('batchPutFileWithRetry error: ', failedResponses[0].error);
+        return responses;
+      }
+      throw failedResponses[0].error;
+    }
+
+    return [
+      ...responses.filter(({ success }) => success),
+      ...(await batchPutFileWithRetry(
+        putFile, cachedFPaths, failedFPaths, failedContents, callCount + 1,
+        dangerouslyIgnoreError
+      )),
+    ];
+  }
+
+  return responses;
+};
+
+export const batchDeleteFileWithRetry = async (
+  deleteFile, cachedFPaths, fpaths, callCount,
+) => {
+
+  const responses = await Promise.all(
+    fpaths.map((fpath) =>
+      deleteFile(fpath)
+        .then(() => {
+          deleteFPath(cachedFPaths.fpaths, fpath);
+          cachedFPaths.fpaths = copyFPaths(cachedFPaths.fpaths);
+          return { fpath, success: true };
+        })
+        .catch(error => {
+          // BUG ALERT
+          // Treat not found error as not an error as local data might be out-dated.
+          //   i.e. user tries to delete a not-existing file, it's ok.
+          // Anyway, if the file should be there, this will hide the real error!
+          if (
+            isObject(error) &&
+            isString(error.message) &&
+            (
+              (
+                error.message.includes('failed to delete') &&
+                error.message.includes('404')
+              ) ||
+              (
+                error.message.includes('deleteFile Error') &&
+                error.message.includes('GaiaError error 5')
+              ) ||
+              error.message.includes('does_not_exist') ||
+              error.message.includes('file_not_found')
+            )
+          ) {
+            return { fpath, success: true };
+          }
+          return { error, fpath, success: false };
+        })
+    )
+  );
+
+  const failedResponses = responses.filter(({ success }) => !success);
+  const failedFPaths = failedResponses.map(({ fpath }) => fpath);
+
+  if (failedResponses.length) {
+    if (callCount + 1 >= MAX_TRY) throw failedResponses[0].error;
+
+    return [
+      ...responses.filter(({ success }) => success),
+      ...(await batchDeleteFileWithRetry(
+        deleteFile, cachedFPaths, failedFPaths, callCount + 1
+      )),
+    ];
+  }
+
+  return responses;
 };

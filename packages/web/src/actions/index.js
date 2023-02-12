@@ -77,7 +77,8 @@ import {
   getLastSettingsFPaths, getInfoFPath, getLatestPurchase, getValidPurchase,
   doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins, getSortedNotes,
   separatePinnedValues, getRawPins, getFormattedTime, get24HFormattedTime,
-  getWindowSize, getNote, containEditingMode,
+  getWindowSize, getNote, containEditingMode, batchGetFileWithRetry,
+  batchPutFileWithRetry,
 } from '../utils';
 import { isUint8Array, isBlob, convertBlobToDataUrl } from '../utils/index-web';
 import { _ } from '../utils/obj';
@@ -2321,7 +2322,9 @@ const importAllDataLoop = async (dispatch, fpaths, contents) => {
     for (let i = 0; i < fpaths.length; i += N_NOTES) {
       const _fpaths = fpaths.slice(i, i + N_NOTES);
       const _contents = contents.slice(i, i + N_NOTES);
-      await dataApi.batchPutFileWithRetry(_fpaths, _contents, 0);
+      await batchPutFileWithRetry(
+        dataApi.getApi().putFile, dataApi.getApi().cachedFPaths, _fpaths, _contents, 0
+      );
 
       doneCount += _fpaths.length;
       dispatch(updateImportAllDataProgress({ total, done: doneCount }));
@@ -3006,7 +3009,9 @@ export const exportAllData = () => async (dispatch, getState) => {
     const pinFPaths = [], pinContents = [], idMap = {};
     for (let i = 0; i < fpaths.length; i += N_NOTES) {
       const selectedFPaths = fpaths.slice(i, i + N_NOTES);
-      const responses = await dataApi.batchGetFileWithRetry(selectedFPaths, 0, true);
+      const responses = await batchGetFileWithRetry(
+        dataApi.getApi().getFile, selectedFPaths, 0, true
+      );
 
       const filteredResponses = [];
       for (let { fpath, content } of responses) {

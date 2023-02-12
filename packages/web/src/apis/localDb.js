@@ -90,6 +90,7 @@ const listFiles = async (callback) => {
     console.log('In localDb.listFiles, IndexedDB error:', error);
     keys = Object.keys(cachedContents);
   }
+  keys = keys.map(key => `${key}`).filter(key => !key.startsWith(UNSAVED_NOTES));
 
   for (const key of keys) callback(key);
   return keys.length;
@@ -103,7 +104,9 @@ const listKeys = async () => {
     console.log('In localDb.listKeys, IndexedDB error:', error);
     keys = Object.keys(cachedContents);
   }
-  return /** @type string[] */(keys);
+  keys = keys.map(key => `${key}`); // Force key to be only string, no number.
+
+  return keys;
 };
 
 const exists = async (fpath) => {
