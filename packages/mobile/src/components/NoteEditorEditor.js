@@ -17,6 +17,7 @@ import {
   isStringTitleIn,
 } from '../utils';
 import cache from '../utils/cache';
+import vars from '../vars';
 
 const ckeditor = require('../../ckeditor');
 
@@ -89,11 +90,11 @@ const NoteEditorEditor = (props) => {
   const isFocusedRef = useRef(isFocused);
 
   const setThemeMode = (mode) => {
-    webView.current.injectJavaScript('window.justnote.setThemeMode(' + mode + '); true;');
+    if (webView.current) webView.current.injectJavaScript('window.justnote.setThemeMode(' + mode + '); true;');
   };
 
   const setEditorFontSizes = (doMore) => {
-    webView.current.injectJavaScript('window.justnote.setEditorFontSizes(' + doMore + '); true;');
+    if (webView.current) webView.current.injectJavaScript('window.justnote.setEditorFontSizes(' + doMore + '); true;');
   };
 
   const focusTitleInput = useCallback(() => {
@@ -111,11 +112,23 @@ const NoteEditorEditor = (props) => {
   }, []);
 
   const blurTitleInput = () => {
-    hackInput.current.focus();
-    hackInput.current.blur();
+    if (vars.keyboard.height > 0) {
+      if (hackInput.current) {
+        hackInput.current.focus();
+        hackInput.current.blur();
+      }
+      return;
+    }
+
+    if (webView.current) {
+      webView.current.injectJavaScript('document.querySelector("#titleInput").blur(); true;');
+      webView.current.injectJavaScript('window.editor.ui.view.editable.element.blur(); true;');
+    }
   };
 
   const setInitData = useCallback(() => {
+    if (!webView.current) return;
+
     let [title, body, media] = [note.title, note.body, note.media];
     if (unsavedNote.status === VALID) {
       const unnote = unsavedNote.note;
@@ -154,7 +167,7 @@ const NoteEditorEditor = (props) => {
     //const titleDisabled = editable ? 'false' : 'true';
     //const isBodyReadOnly = editable ? 'false' : 'true';
     //webView.current.injectJavaScript('document.querySelector("#titleInput").disabled = ' + titleDisabled + '; window.editor.isReadOnly = ' + isBodyReadOnly + '; true;');
-    webView.current.injectJavaScript('window.justnote.setEditable(' + editable + '); true;');
+    if (webView.current) webView.current.injectJavaScript('window.justnote.setEditable(' + editable + '); true;');
   };
 
   const onFocus = useCallback(() => {
@@ -291,7 +304,7 @@ const NoteEditorEditor = (props) => {
 
   const onContentProcessDidTerminate = useCallback(() => {
     setEditorReady(false);
-    webView.current.reload();
+    if (webView.current) webView.current.reload();
   }, []);
 
   useEffect(() => {
@@ -320,20 +333,18 @@ const NoteEditorEditor = (props) => {
   }, [isEditorReady, note.id, note.status, isEditorBusy]);
 
   useEffect(() => {
-    if (!isEditorReady) return;
+    if (!isEditorReady || !webView.current) return;
     if (checkToFocusCount !== prevCheckToFocusCount.current) {
       if (note.id === NEW_NOTE || unsavedNote.status === VALID) focusTitleInput();
       else blurTitleInput();
 
-      if (webView.current) {
-        webView.current.injectJavaScript('window.justnote.scrollTo(0, 0); true;');
-      }
+      webView.current.injectJavaScript('window.justnote.scrollTo(0, 0); true;');
       prevCheckToFocusCount.current = checkToFocusCount;
     }
   }, [isEditorReady, checkToFocusCount, note.id, unsavedNote.status, focusTitleInput]);
 
   useEffect(() => {
-    if (!isEditorReady) return;
+    if (!isEditorReady || !webView.current) return;
     if (saveNoteCount !== prevSaveNoteCount.current) {
       getDataAction.current = GET_DATA_SAVE_NOTE;
       webView.current.injectJavaScript('window.justnote.getData(); true;');
@@ -342,7 +353,7 @@ const NoteEditorEditor = (props) => {
   }, [isEditorReady, saveNoteCount]);
 
   useEffect(() => {
-    if (!isEditorReady) return;
+    if (!isEditorReady || !webView.current) return;
     if (discardNoteCount !== prevDiscardNoteCount.current) {
       getDataAction.current = GET_DATA_DISCARD_NOTE;
       webView.current.injectJavaScript('window.justnote.getData(); true;');
@@ -351,7 +362,7 @@ const NoteEditorEditor = (props) => {
   }, [isEditorReady, discardNoteCount]);
 
   useEffect(() => {
-    if (!isEditorReady) return;
+    if (!isEditorReady || !webView.current) return;
     if (updateNoteIdCount !== prevUpdateNoteIdCount.current) {
       getDataAction.current = GET_DATA_UPDATE_NOTE_ID;
       webView.current.injectJavaScript('window.justnote.getData(); true;');
@@ -360,7 +371,7 @@ const NoteEditorEditor = (props) => {
   }, [isEditorReady, updateNoteIdCount]);
 
   useEffect(() => {
-    if (!isEditorReady) return;
+    if (!isEditorReady || !webView.current) return;
     if (changeListNameCount !== prevChangeListNameCount.current) {
       getDataAction.current = GET_DATA_CHANGE_LIST_NAME;
       webView.current.injectJavaScript('window.justnote.getData(); true;');
@@ -408,7 +419,7 @@ const NoteEditorEditor = (props) => {
   }, [isEditorReady, blurCount]);
 
   useEffect(() => {
-    if (!isEditorReady) return;
+    if (!isEditorReady || !webView.current) return;
     if (updateBulkEditCount !== prevUpdateBulkEditCount.current) {
       getDataAction.current = GET_DATA_UPDATE_BULK_EDIT;
       webView.current.injectJavaScript('window.justnote.getData(); true;');
@@ -417,7 +428,7 @@ const NoteEditorEditor = (props) => {
   }, [isEditorReady, updateBulkEditCount]);
 
   useEffect(() => {
-    if (!isEditorReady) return;
+    if (!isEditorReady || !webView.current) return;
     if (showNoteListMenuPopupCount !== prevShowNoteListMenuPopupCount.current) {
       getDataAction.current = GET_DATA_SHOW_NOTE_LIST_MENU_POPUP;
       webView.current.injectJavaScript('window.justnote.getData(); true;');
@@ -426,7 +437,7 @@ const NoteEditorEditor = (props) => {
   }, [isEditorReady, showNoteListMenuPopupCount]);
 
   useEffect(() => {
-    if (!isEditorReady) return;
+    if (!isEditorReady || !webView.current) return;
     if (showNLIMPopupCount !== prevShowNLIMPopupCount.current) {
       getDataAction.current = GET_DATA_SHOW_NLIM_POPUP;
       webView.current.injectJavaScript('window.justnote.getData(); true;');
@@ -444,7 +455,7 @@ const NoteEditorEditor = (props) => {
       return;
     }
 
-    webView.current.injectJavaScript('window.justnote.setScrollEnabled(' + isScrollEnabled + '); true;');
+    if (webView.current) webView.current.injectJavaScript('window.justnote.setScrollEnabled(' + isScrollEnabled + '); true;');
     prevIsScrollEnabled.current = isScrollEnabled;
   }, [isEditorReady, isScrollEnabled]);
 

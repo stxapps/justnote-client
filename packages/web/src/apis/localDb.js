@@ -18,8 +18,9 @@ const getFile = async (fpath, dangerouslyIgnoreUndefined = false) => {
   if (content === undefined && !dangerouslyIgnoreUndefined) {
     throw new Error(`DoesNotExist: localDb.getFile ${fpath} failed.`);
   }
-
-  if (fpath.endsWith(DOT_JSON)) content = JSON.parse(content);
+  if (content !== undefined) {
+    if (fpath.endsWith(DOT_JSON)) content = JSON.parse(content);
+  }
 
   // Only cache unsaved notes to not use too much memory.
   if (fpath.startsWith(UNSAVED_NOTES)) cachedContents[fpath] = content;

@@ -28,6 +28,14 @@ const keyboard = {
   height: 0,
 };
 
+const runAfterFetchTask = {
+  didRun: false,
+};
+
+const randomHouseworkTasks = {
+  dt: 0,
+};
+
 const updateNoteIdUrlHash = {
   didCall: false,
 };
@@ -72,6 +80,7 @@ const displayReducer = {
 const editorReducer = {
   didRetryMovingNote: false,
   didClickEditUnsaved: false,
+  didIncreaseBlurCount: false,
 };
 
 export const syncMode = {
@@ -83,9 +92,9 @@ export const getCachedFPaths = () => {
 };
 
 const vars = {
-  cachedFPaths, cachedServerFPaths, scrollPanel, keyboard, updateNoteIdUrlHash,
-  updateNoteId, changeListName, updateBulkEdit, showNoteListMenuPopup, showNLIMPopup,
-  deleteOldNotes, updateSettings, updateSettingsPopup, displayReducer, editorReducer,
-  syncMode,
+  cachedFPaths, cachedServerFPaths, scrollPanel, keyboard, runAfterFetchTask,
+  randomHouseworkTasks, updateNoteIdUrlHash, updateNoteId, changeListName,
+  updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, deleteOldNotes, updateSettings,
+  updateSettingsPopup, displayReducer, editorReducer, syncMode,
 };
 export default vars;

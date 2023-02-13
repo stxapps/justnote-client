@@ -292,6 +292,10 @@ export const signOut = () => async (dispatch, getState) => {
   vars.cachedFPaths.fpaths = null;
   vars.cachedServerFPaths.fpaths = null;
 
+  // clear vars
+  vars.runAfterFetchTask.didRun = false;
+  vars.randomHouseworkTasks.dt = 0;
+
   // clear all user data!
   dispatch({
     type: RESET_STATE,
@@ -734,9 +738,12 @@ export const onUpdateNoteId = (title, body, media) => async (
     vars.updateNoteId.updatingNoteId === null ||
     vars.updateNoteId.updatingNoteId === noteId
   ) {
-    // Can hide keyboard here only if noteId is null or the same.
+    // Can hide keyboard here only if updating noteId is null or the same.
     // If diff, need to hide in Editor to prevent blink.
-    if (vars.keyboard.height > 0) dispatch(increaseBlurCount());
+    if (vars.keyboard.height > 0) {
+      dispatch(increaseBlurCount());
+      vars.editorReducer.didIncreaseBlurCount = true;
+    }
   }
   dispatch(updateNoteId(null, true, false));
   dispatch(handleUnsavedNote(noteId, title, body, media));
@@ -1430,30 +1437,28 @@ export const cancelDiedNotes = (ids, listName = null) => async (dispatch, getSta
   dispatch({ type: CANCEL_DIED_NOTES, payload });
 };
 
-let _didRunAFT = false;
 export const runAfterFetchTask = () => async (dispatch, getState) => {
   // After fetch, need to sync first before doing housework tasks!
   // If not, settings might be overwritten i.e. by checkPurchases.
-  if (vars.syncMode.doSyncMode && !_didRunAFT) {
+  if (vars.syncMode.doSyncMode && !vars.runAfterFetchTask.didRun) {
     dispatch(sync());
-    _didRunAFT = true;
+    vars.runAfterFetchTask.didRun = true;
     return;
   }
 
   dispatch(randomHouseworkTasks());
 };
 
-let _randomHTDT = 0;
 export const randomHouseworkTasks = () => async (dispatch, getState) => {
   const now = Date.now();
-  if (now - _randomHTDT < 24 * 60 * 60 * 1000) return;
+  if (now - vars.randomHouseworkTasks.dt < 24 * 60 * 60 * 1000) return;
 
   const rand = Math.random();
   if (rand < 0.33) dispatch(deleteOldNotesInTrash());
   else if (rand < 0.66) dispatch(checkPurchases());
   else dispatch(cleanUpStaticFiles());
 
-  _randomHTDT = now;
+  vars.randomHouseworkTasks.dt = now;
 };
 
 export const deleteOldNotesInTrash = () => async (dispatch, getState) => {

@@ -139,12 +139,13 @@ const editorReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_NOTE_ID) {
+    let newState = state;
     if (action.payload) {
-      return {
-        ...state, checkToFocusCount: state.checkToFocusCount + 1, isScrollEnabled: true,
-      };
+      newState = { ...state, isScrollEnabled: true };
+      if (!vars.editorReducer.didIncreaseBlurCount) newState.checkToFocusCount += 1;
     }
-    return state;
+    vars.editorReducer.didIncreaseBlurCount = false;
+    return newState;
   }
 
   if (action.type === UPDATE_EDITING_NOTE) {

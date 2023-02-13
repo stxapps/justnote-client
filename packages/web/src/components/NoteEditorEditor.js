@@ -231,8 +231,10 @@ const NoteEditorEditor = (props) => {
   }, [onUpdateIsUploading, dispatch]);
 
   const onGetData = useCallback(() => {
+    // At the time, might already unmounted
+    if (!titleInput.current || !bodyEditor.current) return;
 
-    const title = titleInput.current.value;
+    const title = titleInput.current.value.trimEnd();
     const { body, media } = replaceObjectUrls(
       bodyEditor.current.getData(),
       objectUrlContents.current,
@@ -326,7 +328,7 @@ const NoteEditorEditor = (props) => {
     if (!titleInput.current || !bodyEditor.current) return;
     if (!isFocusedRef.current) return;
 
-    const title = titleInput.current.value;
+    const title = titleInput.current.value.trimEnd();
     const { body, media } = replaceObjectUrls(
       bodyEditor.current.getData(),
       objectUrlContents.current,
@@ -535,7 +537,7 @@ const NoteEditorEditor = (props) => {
     const beforeUnloadListener = (e) => {
       if (!isEditorReady) return;
 
-      const title = titleInput.current.value;
+      const title = titleInput.current.value.trimEnd();
       const { body } = replaceObjectUrls(
         bodyEditor.current.getData(),
         objectUrlContents.current,
