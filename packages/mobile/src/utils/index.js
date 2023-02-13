@@ -1751,7 +1751,7 @@ export const batchPutFileWithRetry = async (
 };
 
 export const batchDeleteFileWithRetry = async (
-  deleteFile, cachedFPaths, fpaths, callCount,
+  deleteFile, cachedFPaths, fpaths, callCount
 ) => {
 
   const responses = await Promise.all(

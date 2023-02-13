@@ -149,7 +149,7 @@ const _ConflictItem = (props) => {
     <View style={tailwind('mt-6 rounded-lg border border-gray-200 blk:border-gray-700')}>
       <View style={tailwind(`rounded-t-lg bg-gray-50 blk:bg-gray-800 sm:flex-row sm:items-center sm:justify-between ${!isOpen ? 'rounded-b-lg' : ''}`)}>
         <View style={tailwind('sm:flex-shrink sm:flex-grow')}>
-          <TouchableOpacity onPress={onOpenBtnClick} style={tailwind('w-full flex-row items-center w-full rounded-lg py-3 pl-2')}>
+          <TouchableOpacity onPress={onOpenBtnClick} style={tailwind('w-full flex-row items-center rounded-lg py-3 pl-2')}>
             {arrowSvg}
             <View style={tailwind('ml-1')}>
               <Text style={tailwind('text-left text-base font-medium text-gray-800 blk:text-gray-200 lg:text-sm')}>Last updated on {updatedDTStr}</Text>
