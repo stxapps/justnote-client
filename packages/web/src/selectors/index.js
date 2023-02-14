@@ -6,11 +6,11 @@ import {
   CUSTOM_MODE, NEW_NOTE, VALID, INVALID,
 } from '../types/const';
 import {
-  isStringIn, isObject, isString, isArrayEqual, isEqual, isNoteBodyEqual, getListNameObj,
-  getMainId, getValidProduct as _getValidProduct, getValidPurchase as _getValidPurchase,
-  listNoteIds, getSortedNotes, separatePinnedValues, getNoteFPaths, getPinFPaths,
-  getPins, doEnableExtraFeatures, getFormattedNoteDate, isNumber, isMobile as _isMobile,
-  getDataParentIds,
+  isStringIn, isObject, isString, isArrayEqual, isEqual, isTitleEqual, isBodyEqual,
+  getListNameObj, getMainId, getValidProduct as _getValidProduct,
+  getValidPurchase as _getValidPurchase, listNoteIds, getSortedNotes,
+  separatePinnedValues, getNoteFPaths, getPinFPaths, getPins, doEnableExtraFeatures,
+  getFormattedNoteDate, isNumber, isMobile as _isMobile, getDataParentIds,
 } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 import { initialListNameEditorState } from '../types/initialStates';
@@ -494,7 +494,7 @@ export const makeGetUnsavedNote = () => {
 
       if (note.id in unsavedNotes) {
         const { title, body } = unsavedNotes[note.id];
-        if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+        if (!isTitleEqual(note.title, title) || !isBodyEqual(note.body, body)) {
           [result.status, result.note] = [VALID, unsavedNotes[note.id]];
           return result;
         }
@@ -510,12 +510,16 @@ export const makeGetUnsavedNote = () => {
 
         const { title, body, savedTitle, savedBody } = unsavedNotes[parentId];
         // Is the unsaved note and current note different?
-        const isUcDiff = note.title !== title || !isNoteBodyEqual(note.body, body);
+        const isUcDiff = (
+          !isTitleEqual(note.title, title) || !isBodyEqual(note.body, body)
+        );
         // Is the unsaved note and original note different?
-        const isUoDiff = savedTitle !== title || !isNoteBodyEqual(savedBody, body);
+        const isUoDiff = (
+          !isTitleEqual(savedTitle, title) || !isBodyEqual(savedBody, body)
+        );
         // Is the current note and original note different?
         const isCoDiff = (
-          note.title !== savedTitle || !isNoteBodyEqual(note.body, savedBody)
+          !isTitleEqual(note.title, savedTitle) || !isBodyEqual(note.body, savedBody)
         );
 
         if (isUcDiff && isUoDiff && isCoDiff) { // Conflict

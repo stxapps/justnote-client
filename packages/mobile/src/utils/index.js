@@ -706,7 +706,11 @@ const sortClassNamesInBody = (body) => {
   return body;
 };
 
-export const isNoteBodyEqual = (s1, s2) => {
+export const isTitleEqual = (t1, t2) => {
+  return t1.trimEnd() === t2.trimEnd();
+};
+
+export const isBodyEqual = (s1, s2) => {
   // Remove spaces in rgb(r, g, b)
   const pattern = /rgb\((\d+),\s*(\d+),\s*(\d+)\)/gi;
   const substitute = 'rgb($1,$2,$3)';

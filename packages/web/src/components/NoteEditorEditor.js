@@ -13,8 +13,8 @@ import {
 import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, BLK_MODE, VALID } from '../types/const';
 import { getThemeMode, getDoMoreEditorFontSizes } from '../selectors';
 import {
-  isString, isNoteBodyEqual, isMobile as _isMobile, replaceObjectUrls, getFileExt,
-  debounce, scrollWindowTop, containUppercase, isStringTitleIn,
+  isString, isTitleEqual, isBodyEqual, isMobile as _isMobile, replaceObjectUrls,
+  getFileExt, debounce, scrollWindowTop, containUppercase, isStringTitleIn,
 } from '../utils';
 import { isUint8Array, isBlob, convertDataUrlToBlob } from '../utils/index-web';
 
@@ -544,7 +544,7 @@ const NoteEditorEditor = (props) => {
         objectUrlFiles.current,
         objectUrlNames.current
       );
-      if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+      if (!isTitleEqual(note.title, title) || !isBodyEqual(note.body, body)) {
         e.preventDefault();
         return e.returnValue = 'It looks like your note hasn\'t been saved. Do you want to leave this site and discard your changes?';
       }

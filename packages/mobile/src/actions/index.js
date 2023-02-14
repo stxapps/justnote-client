@@ -77,9 +77,9 @@ import {
 } from '../types/const';
 import {
   isEqual, isObject, isString, isNumber, sleep, separateUrlAndParam, getUserImageUrl,
-  randomString, stripHtml, isNoteBodyEqual, clearNoteData, getStaticFPath, deriveFPaths,
-  getListNameObj, getAllListNames, getMainId, createDataFName, listNoteIds,
-  getNoteFPaths, getStaticFPaths, createSettingsFPath, getSettingsFPaths,
+  randomString, stripHtml, isTitleEqual, isBodyEqual, clearNoteData, getStaticFPath,
+  deriveFPaths, getListNameObj, getAllListNames, getMainId, createDataFName,
+  listNoteIds, getNoteFPaths, getStaticFPaths, createSettingsFPath, getSettingsFPaths,
   getLastSettingsFPaths, getInfoFPath, getLatestPurchase, getValidPurchase,
   doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins, getSortedNotes,
   separatePinnedValues, getRawPins, getFormattedTime, get24HFormattedTime,
@@ -676,7 +676,7 @@ export const saveNote = (title, body, media) => async (dispatch, getState) => {
 
   if (vars.keyboard.height > 0) dispatch(increaseBlurCount());
 
-  if (note && (note.title === title && isNoteBodyEqual(note.body, body))) {
+  if (note && (isTitleEqual(note.title, title) && isBodyEqual(note.body, body))) {
     dispatch(updateEditorBusy(false));
     dispatch(deleteUnsavedNotes([noteId]));
     return;
@@ -696,7 +696,7 @@ export const discardNote = (doCheckEditing, title = null, body = null) => async 
   if (vars.keyboard.height > 0) dispatch(increaseBlurCount());
 
   if (doCheckEditing) {
-    if (note && (note.title !== title || !isNoteBodyEqual(note.body, body))) {
+    if (note && (!isTitleEqual(note.title, title) || !isBodyEqual(note.body, body))) {
       dispatch(updateDiscardAction(DISCARD_ACTION_CANCEL_EDIT));
       updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
       return;
@@ -1379,7 +1379,9 @@ const _cleanUpStaticFiles = async (dispatch, getState) => {
   for (const k in unsavedNotes) {
     const { id, title, body, savedTitle, savedBody } = unsavedNotes[k];
     if (id === getState().display.noteId) continue;
-    if (title === savedTitle && isNoteBodyEqual(body, savedBody)) unusedIds.push(id);
+    if (isTitleEqual(title, savedTitle) && isBodyEqual(body, savedBody)) {
+      unusedIds.push(id);
+    }
   }
   unusedIds = unusedIds.slice(0, N_NOTES);
 
@@ -2322,7 +2324,7 @@ export const handleUnsavedNote = (id, title, body, media) => async (
   const note = id === NEW_NOTE ? NEW_NOTE_OBJ : getNote(id, getState().notes);
   if (!isObject(note)) return;
 
-  if (note.title !== title || !isNoteBodyEqual(note.body, body)) {
+  if (!isTitleEqual(note.title, title) || !isBodyEqual(note.body, body)) {
     dispatch({
       type: UPDATE_UNSAVED_NOTE,
       payload: {
