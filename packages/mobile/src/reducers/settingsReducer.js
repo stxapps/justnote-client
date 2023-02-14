@@ -1,6 +1,3 @@
-import { loop, Cmd } from 'redux-loop';
-
-import { sync } from '../actions';
 import {
   INIT, FETCH_COMMIT, ADD_LIST_NAMES, UPDATE_LIST_NAMES, MOVE_LIST_NAME,
   MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH,
@@ -257,7 +254,7 @@ const settingsReducer = (state = initialState, action) => {
     didChange.doSectionNotesByMonth = false;
     didChange.doMoreEditorFontSizes = false;
     didChange.listNameMap = false;
-    return loop(state, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
+    return state;
   }
 
   if (action.type === CANCEL_DIED_SETTINGS) {
@@ -283,10 +280,7 @@ const settingsReducer = (state = initialState, action) => {
     didChange.doSectionNotesByMonth = false;
     didChange.doMoreEditorFontSizes = false;
     didChange.listNameMap = false;
-    return loop(
-      { ...state, ...settings },
-      Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] })
-    );
+    return { ...state, ...settings };
   }
 
   if (action.type === DELETE_ALL_DATA || action.type === RESET_STATE) {

@@ -953,11 +953,13 @@ export const addNote = (title, body, media, listName = null) => async (
   dispatch({ type: ADD_NOTE_COMMIT, payload });
 
   try {
-    fileApi.deleteFiles(localUnusedFPaths);
+    await fileApi.deleteFiles(localUnusedFPaths);
   } catch (error) {
     console.log('addNote clean up error: ', error);
     // error in this step should be fine
   }
+
+  await sync()(dispatch, getState);
 };
 
 export const updateNote = (title, body, media, id) => async (dispatch, getState) => {
@@ -994,13 +996,15 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
   dispatch({ type: UPDATE_NOTE_COMMIT, payload });
 
   try {
-    dataApi.putNotes({ listName, notes: [fromNote] });
-    dataApi.deleteServerFiles(serverUnusedFPaths);
-    fileApi.deleteFiles(localUnusedFPaths);
+    await dataApi.putNotes({ listName, notes: [fromNote] });
+    await dataApi.deleteServerFiles(serverUnusedFPaths);
+    await fileApi.deleteFiles(localUnusedFPaths);
   } catch (error) {
     console.log('updateNote clean up error: ', error);
     // error in this step should be fine
   }
+
+  await sync()(dispatch, getState);
 };
 
 export const saveNote = (title, body, media) => async (dispatch, getState) => {
@@ -1117,11 +1121,13 @@ const _moveNotes = (toListName, ids, fromListName = null) => async (
   dispatch({ type: MOVE_NOTES_COMMIT, payload });
 
   try {
-    dataApi.putNotes({ listName: fromListName, notes: fromNotes });
+    await dataApi.putNotes({ listName: fromListName, notes: fromNotes });
   } catch (error) {
     console.log('moveNotes clean up error: ', error);
     // error in this step should be fine
   }
+
+  await sync()(dispatch, getState);
 };
 
 export const moveNotesWithAction = (toListName, moveAction) => async (
@@ -1239,13 +1245,15 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
   dispatch({ type: DELETE_NOTES_COMMIT, payload });
 
   try {
-    dataApi.putNotes({ listName, notes: fromNotes });
-    dataApi.deleteServerFiles(unusedFPaths);
-    fileApi.deleteFiles(unusedFPaths);
+    await dataApi.putNotes({ listName, notes: fromNotes });
+    await dataApi.deleteServerFiles(unusedFPaths);
+    await fileApi.deleteFiles(unusedFPaths);
   } catch (error) {
     console.log('deleteNotes clean up error: ', error);
     // error in this step should be fine
   }
+
+  await sync()(dispatch, getState);
 };
 
 export const deleteNotes = () => async (dispatch, getState) => {
@@ -1311,6 +1319,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       }
 
       dispatch({ type: ADD_NOTE_COMMIT, payload });
+      await sync()(dispatch, getState);
     } else if (status === DIED_UPDATING) {
       const toNote = note;
       const fromNote = clearNoteData(note.fromNote);
@@ -1333,13 +1342,15 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       dispatch({ type: UPDATE_NOTE_COMMIT, payload });
 
       try {
-        dataApi.putNotes({ listName, notes: [fromNote] });
-        dataApi.deleteServerFiles(serverUnusedFPaths);
-        fileApi.deleteFiles(localUnusedFPaths);
+        await dataApi.putNotes({ listName, notes: [fromNote] });
+        await dataApi.deleteServerFiles(serverUnusedFPaths);
+        await fileApi.deleteFiles(localUnusedFPaths);
       } catch (error) {
         console.log('retryDiedNotes update clean up error: ', error);
         // error in this step should be fine
       }
+
+      await sync()(dispatch, getState);
     } else if (status === DIED_MOVING) {
       const [toListName, toNote, fromListName] = [listName, note, note.fromListName];
       const fromNote = clearNoteData(note.fromNote);
@@ -1361,11 +1372,13 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       dispatch({ type: MOVE_NOTES_COMMIT, payload });
 
       try {
-        dataApi.putNotes({ listName: fromListName, notes: [fromNote] });
+        await dataApi.putNotes({ listName: fromListName, notes: [fromNote] });
       } catch (error) {
         console.log('retryDiedNotes move clean up error: ', error);
         // error in this step should be fine
       }
+
+      await sync()(dispatch, getState);
     } else if (status === DIED_DELETING) {
       const toNote = {
         ...note,
@@ -1402,13 +1415,15 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       dispatch({ type: DELETE_NOTES_COMMIT, payload });
 
       try {
-        dataApi.putNotes({ listName, notes: [fromNote] });
-        dataApi.deleteServerFiles(unusedFPaths);
-        fileApi.deleteFiles(unusedFPaths);
+        await dataApi.putNotes({ listName, notes: [fromNote] });
+        await dataApi.deleteServerFiles(unusedFPaths);
+        await fileApi.deleteFiles(unusedFPaths);
       } catch (error) {
         console.log('retryDiedNotes delete clean up error: ', error);
         // error in this step should be fine
       }
+
+      await sync()(dispatch, getState);
     } else {
       throw new Error(`Invalid status: ${status} of id: ${id}`);
     }
@@ -1512,13 +1527,15 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
   vars.deleteOldNotes.ids = null;
 
   try {
-    dataApi.putNotes({ listName, notes: fromNotes });
-    dataApi.deleteServerFiles(unusedFPaths);
-    fileApi.deleteFiles(unusedFPaths);
+    await dataApi.putNotes({ listName, notes: fromNotes });
+    await dataApi.deleteServerFiles(unusedFPaths);
+    await fileApi.deleteFiles(unusedFPaths);
   } catch (error) {
     console.log('deleteOldNotesInTrash clean up error: ', error);
     // error in this step should be fine
   }
+
+  await sync()(dispatch, getState);
 };
 
 export const mergeNotes = (selectedId) => async (dispatch, getState) => {
@@ -1585,14 +1602,16 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
 
   try {
     for (const [_listName, _notes] of Object.entries(fromNotes)) {
-      dataApi.putNotes({ listName: _listName, notes: _notes });
+      await dataApi.putNotes({ listName: _listName, notes: _notes });
     }
-    dataApi.deleteServerFiles(serverUnusedFPaths);
-    fileApi.deleteFiles(localUnusedFPaths);
+    await dataApi.deleteServerFiles(serverUnusedFPaths);
+    await fileApi.deleteFiles(localUnusedFPaths);
   } catch (error) {
     console.log('mergeNote clean up error: ', error);
     // error in this step should be fine
   }
+
+  await sync()(dispatch, getState);
 };
 
 export const showNoteListMenuPopup = (rect, doCheckEditing) => async (
@@ -1692,7 +1711,7 @@ const _cleanUpStaticFiles = async (dispatch, getState) => {
   }
   unusedFPaths = unusedFPaths.slice(0, N_NOTES);
 
-  // Too risky. Clean up locally for now.
+  // Too risky. Clean up locally for now. If do, need to sync!
   //await dataApi.batchDeleteFileWithRetry(unusedFPaths, 0);
   if (unusedFPaths.length > 0) {
     console.log('In cleanUpStaticFiles, found unused fpaths on server:', unusedFPaths);
@@ -1978,11 +1997,13 @@ const updateSettings = async (dispatch, getState) => {
   vars.updateSettings.doFetch = false;
 
   try {
-    dataApi.putFiles(_settingsFPaths, _settingsFPaths.map(() => ({})));
+    await dataApi.putFiles(_settingsFPaths, _settingsFPaths.map(() => ({})));
   } catch (error) {
     console.log('updateSettings clean up error: ', error);
     // error in this step should be fine
   }
+
+  await sync()(dispatch, getState);
 };
 
 const updateInfo = async (dispatch, getState) => {
@@ -2010,11 +2031,13 @@ const updateInfo = async (dispatch, getState) => {
   dispatch({ type: UPDATE_INFO_COMMIT, payload });
 
   try {
-    if (_infoFPath) dataApi.deleteFiles([_infoFPath]);
+    if (_infoFPath) await dataApi.deleteFiles([_infoFPath]);
   } catch (error) {
     console.log('updateInfo clean up error: ', error);
     // error in this step should be fine
   }
+
+  await sync()(dispatch, getState);
 };
 
 export const updateStgsAndInfo = () => async (dispatch, getState) => {
@@ -2089,11 +2112,13 @@ export const mergeSettings = (selectedId) => async (dispatch, getState) => {
   vars.updateSettings.doFetch = false;
 
   try {
-    dataApi.putFiles(_settingsFPaths, _settingsFPaths.map(() => ({})));
+    await dataApi.putFiles(_settingsFPaths, _settingsFPaths.map(() => ({})));
   } catch (error) {
     console.log('mergeSettings clean up error: ', error);
     // error in this step should be fine
   }
+
+  await sync()(dispatch, getState);
 };
 
 /*
@@ -3301,6 +3326,8 @@ export const deleteAllData = () => async (dispatch, getState) => {
       updatePopupUrlHash(SETTINGS_POPUP, false);
     }
     dispatch({ type: DELETE_ALL_DATA });
+
+    await sync(false, 1)(dispatch, getState);
   } catch (error) {
     dispatch(updateDeleteAllDataProgress({
       total: -1,
@@ -3656,13 +3683,13 @@ export const cleanUpPins = () => async (dispatch, getState) => {
 
   if (unusedPins.length > 0) {
     try {
-      dataApi.deletePins({ pins: unusedPins });
+      await dataApi.deletePins({ pins: unusedPins });
     } catch (error) {
       console.log('cleanUpPins error: ', error);
       // error in this step should be fine
     }
 
-    dispatch(sync());
+    await sync()(dispatch, getState);
   }
 };
 

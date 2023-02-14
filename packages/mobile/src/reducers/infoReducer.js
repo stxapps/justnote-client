@@ -1,6 +1,6 @@
 import { loop, Cmd } from 'redux-loop';
 
-import { tryUpdateInfo, sync } from '../actions';
+import { tryUpdateInfo } from '../actions';
 import {
   INIT, FETCH_COMMIT, UPDATE_INFO_COMMIT, UPDATE_INFO_ROLLBACK, REQUEST_PURCHASE_COMMIT,
   RESTORE_PURCHASES_COMMIT, REFRESH_PURCHASES_COMMIT, DELETE_ALL_DATA, RESET_STATE,
@@ -39,7 +39,7 @@ const infoReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_INFO_COMMIT) {
     didChange.purchases = false;
-    return loop(state, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
+    return state;
   }
 
   if (action.type === UPDATE_INFO_ROLLBACK) {

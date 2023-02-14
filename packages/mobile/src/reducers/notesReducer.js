@@ -1,7 +1,7 @@
 import { loop, Cmd } from 'redux-loop';
 
 import {
-  tryUpdateFetchedMore, runAfterFetchTask, unpinNotes, sync, tryUpdateSynced,
+  tryUpdateFetchedMore, runAfterFetchTask, unpinNotes, tryUpdateSynced,
 } from '../actions';
 import {
   FETCH_COMMIT, FETCH_MORE_COMMIT, UPDATE_FETCHED_MORE, ADD_NOTE, ADD_NOTE_COMMIT,
@@ -101,7 +101,7 @@ const notesReducer = (state = initialState, action) => {
     const newState = { ...state };
     newState[listName] = _.update(newState[listName], ID, note.id, STATUS, ADDED);
 
-    return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
+    return newState;
   }
 
   if (action.type === ADD_NOTE_ROLLBACK) {
@@ -131,7 +131,7 @@ const notesReducer = (state = initialState, action) => {
     const newState = { ...state };
     newState[listName] = _.update(newState[listName], ID, toNote.id, STATUS, ADDED);
 
-    return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
+    return newState;
   }
 
   if (action.type === UPDATE_NOTE_ROLLBACK) {
@@ -178,7 +178,7 @@ const notesReducer = (state = initialState, action) => {
         newState, Cmd.run(unpinNotes(ids), { args: [Cmd.dispatch, Cmd.getState] })
       );
     }
-    return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
+    return newState;
   }
 
   if (action.type === MOVE_NOTES_ROLLBACK) {
@@ -207,7 +207,7 @@ const notesReducer = (state = initialState, action) => {
     const newState = { ...state };
     newState[listName] = _.exclude(newState[listName], ID, ids);
 
-    return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
+    return newState;
   }
 
   if (action.type === DELETE_NOTES_ROLLBACK) {
@@ -259,7 +259,7 @@ const notesReducer = (state = initialState, action) => {
       newState[listName] = _.exclude(state[listName], ID, ids);
     }
 
-    return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
+    return newState;
   }
 
   if (action.type === MERGE_NOTES_COMMIT) {
@@ -270,7 +270,7 @@ const notesReducer = (state = initialState, action) => {
       ...newState[toListName], ...toObjAndAddAttrs([toNote], ADDED),
     };
 
-    return loop(newState, Cmd.run(sync(), { args: [Cmd.dispatch, Cmd.getState] }));
+    return newState;
   }
 
   if (
@@ -325,10 +325,7 @@ const notesReducer = (state = initialState, action) => {
       }
     }
 
-    return loop(
-      newState,
-      Cmd.run(sync(false, 1), { args: [Cmd.dispatch, Cmd.getState] })
-    );
+    return newState;
   }
 
   if (action.type === RESET_STATE) {
