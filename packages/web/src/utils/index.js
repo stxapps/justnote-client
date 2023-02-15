@@ -1201,13 +1201,13 @@ export const getDataParentIds = (leafId, toParents) => {
     let id = pendingIds[0];
     pendingIds = pendingIds.slice(1);
 
-    if (!toParents[id]) continue;
-
     const parents = toParents[id];
+    if (!parents) continue;
+
     for (const parentId of parents) {
       if (!parentIds.includes(parentId)) {
-        parentIds.push(parentId);
         pendingIds.push(parentId);
+        parentIds.push(parentId);
       }
     }
   }
@@ -1218,18 +1218,39 @@ export const getDataParentIds = (leafId, toParents) => {
 const getDataRootIds = (leafId, toParents) => {
   const rootIds = [];
 
-  let pendingIds = [leafId];
+  let pendingIds = [leafId], passedIds = [leafId];
   while (pendingIds.length > 0) {
     let id = pendingIds[0];
     pendingIds = pendingIds.slice(1);
 
+    let doBreak = false;
     while (toParents[id]) {
       const parents = toParents[id];
-      id = parents[0];
-      pendingIds.push(...parents.slice(1));
+
+      let i = 0, doFound = false;
+      for (; i < parents.length; i++) {
+        const parentId = parents[i];
+        if (!passedIds.includes(parentId)) {
+          [id, doFound] = [parentId, true];
+          passedIds.push(parentId);
+          break;
+        }
+      }
+      if (!doFound) {
+        doBreak = true;
+        break;
+      }
+
+      for (; i < parents.length; i++) {
+        const parentId = parents[i];
+        if (!passedIds.includes(parentId)) {
+          pendingIds.push(parentId);
+          passedIds.push(parentId);
+        }
+      }
     }
 
-    if (!rootIds.includes(id)) rootIds.push(id);
+    if (!doBreak && !rootIds.includes(id)) rootIds.push(id);
   }
 
   return rootIds;
