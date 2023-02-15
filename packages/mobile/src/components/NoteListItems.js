@@ -117,6 +117,7 @@ const NoteListItems = () => {
   const renderEmpty = useCallback(() => {
 
     const displayName = getListNameDisplayName(listName, listNameMap);
+    vars.scrollPanel.pageYOffset = 0;
 
     if (searchString !== '') {
       return (
@@ -228,6 +229,7 @@ const NoteListItems = () => {
       setTimeout(() => {
         if (flatList.current) {
           flatList.current.scrollToOffset({ offset: 0, animated: true });
+          vars.scrollPanel.pageYOffset = 0;
         }
       }, 1);
     }
