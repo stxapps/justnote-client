@@ -2113,7 +2113,7 @@ export const sync = (
     }
     await dataApi.putFiles(fpaths, contents);
 
-    // 4. Local side: delete obsolete pinFpaths
+    // 4. Local side: delete obsolete pinFPaths
     fpaths = []; contents = [];
     for (const fpath of _pinFPaths) {
       if (leafPinFPaths.includes(fpath)) continue;
@@ -2521,7 +2521,7 @@ export const deleteAllData = () => async (dispatch, getState) => {
     allNoteIds = [...noteIds.noteIds, ...noteIds.conflictedIds];
     staticFPaths = fpaths.staticFPaths;
     settingsFPaths = fpaths.settingsFPaths;
-    infoFPath = fpaths.infoFpath;
+    infoFPath = fpaths.infoFPath;
     pins = getPins(fpaths.pinFPaths, {}, false, noteIds.toRootIds);
     pins = Object.values(pins);
   } catch (error) {

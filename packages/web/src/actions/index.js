@@ -3044,9 +3044,10 @@ export const exportAllData = () => async (dispatch, getState) => {
       const responses = await batchGetFileWithRetry(
         dataApi.getApi().getFile, selectedFPaths, 0, true
       );
+      const successResponses = responses.filter(r => r.success);
 
       const filteredResponses = [];
-      for (let { fpath, content } of responses) {
+      for (let { fpath, content } of successResponses) {
         if (fpath.startsWith(PINS)) {
           pinFPaths.push(fpath);
           pinContents.push(content);
@@ -3233,7 +3234,7 @@ export const deleteAllData = () => async (dispatch, getState) => {
     allNoteIds = [...noteIds.noteIds, ...noteIds.conflictedIds];
     staticFPaths = fpaths.staticFPaths;
     settingsFPaths = fpaths.settingsFPaths;
-    infoFPath = fpaths.infoFpath;
+    infoFPath = fpaths.infoFPath;
     pins = getPins(fpaths.pinFPaths, {}, false, noteIds.toRootIds);
     pins = Object.values(pins);
   } catch (error) {
