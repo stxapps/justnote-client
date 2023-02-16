@@ -353,14 +353,17 @@
   + List notes, fetch more
   + New note, edit note, move note, delete note
   + Bulk edit: move notes, permanently delete notes
+  + Retry add, edit, move, delete notes
   + Search
   + Sync, Conflict notes
   + List list names, change list name
   + New list name, edit list name, move list name, delete list name
   + Popups: ConfirmDelete, ConfirmDiscard, AlertRotate, MoveTo, ListMenu, Profile
-  + Settings: account, subscription, data, lists, misc, about
+  + Settings: account, subscription, data, lists, misc, about, Info: purchases
+  + Conflict settings
   + Pin, unpin, move pin
   + WHT_MODE, BLK_MODE
+  + Unsaved notes
 * servers
 ** test server
 - https://d2kp6vvq64w651.cloudfront.net

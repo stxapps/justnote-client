@@ -112,6 +112,7 @@ const NoteEditorEditor = (props) => {
 
   const blurTitleInput = () => {
     if (titleInput.current) titleInput.current.blur();
+    if (bodyEditor.current) bodyEditor.current.ui.view.editable.element.blur();
   };
 
   const clearNoteMedia = () => {
