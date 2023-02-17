@@ -1014,7 +1014,7 @@ export const saveNote = (title, body, media) => async (dispatch, getState) => {
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
-  if (vars.keyboard.height > 0) dispatch(increaseBlurCount());
+  dispatch(increaseBlurCount());
 
   if (note && (isTitleEqual(note.title, title) && isBodyEqual(note.body, body))) {
     dispatch(updateEditorBusy(false));
@@ -1033,7 +1033,7 @@ export const discardNote = (doCheckEditing, title = null, body = null) => async 
   const { listName, noteId } = getState().display;
   const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
 
-  if (vars.keyboard.height > 0) dispatch(increaseBlurCount());
+  dispatch(increaseBlurCount());
 
   if (doCheckEditing) {
     if (note && (!isTitleEqual(note.title, title) || !isBodyEqual(note.body, body))) {
