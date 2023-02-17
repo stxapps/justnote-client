@@ -8,7 +8,6 @@ import {
   INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
   INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT, INCREASE_UPDATE_BULK_EDIT_COUNT,
   INCREASE_SHOW_NOTE_LIST_MENU_POPUP_COUNT, INCREASE_SHOW_NLIM_POPUP_COUNT,
-  CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS, ADD_NOTE_COMMIT, UPDATE_NOTE_COMMIT,
   DISCARD_NOTE, MOVE_NOTES_COMMIT, UPDATE_EDITOR_IS_UPLOADING, UPDATE_BULK_EDITING,
   UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_NOTE_ID, UPDATE_EDITING_NOTE,
   UPDATE_UNSAVED_NOTE, DELETE_UNSAVED_NOTES, DELETE_ALL_DATA, RESET_STATE,
@@ -36,7 +35,6 @@ const initialState = {
   updateBulkEditCount: 0,
   showNoteListMenuPopupCount: 0,
   showNLIMPopupCount: 0,
-  savingFPaths: [],
   isUploading: false,
   isScrollEnabled: true,
   ...initialEditingNoteState,
@@ -102,18 +100,6 @@ const editorReducer = (state = initialState, action) => {
     return {
       ...state, showNLIMPopupCount: state.showNLIMPopupCount + 1,
     };
-  }
-
-  if (action.type === CLEAR_SAVING_FPATHS) {
-    return { ...state, savingFPaths: [] };
-  }
-
-  if (action.type === ADD_SAVING_FPATHS) {
-    return { ...state, savingFPaths: [...state.savingFPaths, ...action.payload] };
-  }
-
-  if (action.type === ADD_NOTE_COMMIT || action.type === UPDATE_NOTE_COMMIT) {
-    return { ...state, savingFPaths: [] };
   }
 
   if (action.type === DISCARD_NOTE) {

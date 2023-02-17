@@ -7,7 +7,7 @@ import Svg, { Path } from 'react-native-svg';
 
 import {
   updatePopup, discardNote, updateNoteId, changeListName, updateBulkEdit, updateSynced,
-  showNoteListMenuPopup, showNLIMPopup, clearSavingFPaths, updateSettingsPopup,
+  showNoteListMenuPopup, showNLIMPopup, updateSettingsPopup,
 } from '../actions';
 import {
   CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_NOTE_ID,
@@ -58,8 +58,6 @@ const ConfirmDiscardPopup = () => {
     } else if (discardAction === DISCARD_ACTION_UPDATE_LIST_NAME) {
       dispatch(updateSettingsPopup(false, false));
     } else throw new Error(`Invalid discard action: ${discardAction}`);
-
-    dispatch(clearSavingFPaths());
 
     onConfirmDiscardCancelBtnClick();
     didClick.current = true;

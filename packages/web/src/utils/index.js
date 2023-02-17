@@ -854,7 +854,7 @@ export const getStaticFPath = (fpath) => {
   return fpath;
 };
 
-export const deriveFPaths = (media, noteMedia, savingFPaths) => {
+export const deriveFPaths = (media, noteMedia) => {
   const usedFPaths = [], serverUnusedFPaths = [], localUnusedFPaths = [];
 
   for (const { name } of media) {
@@ -871,13 +871,6 @@ export const deriveFPaths = (media, noteMedia, savingFPaths) => {
       const staticFPath = getStaticFPath(name);
       serverUnusedFPaths.push(staticFPath);
       localUnusedFPaths.push(staticFPath);
-    }
-  }
-
-  if (savingFPaths) {
-    for (const fpath of savingFPaths) {
-      if (media.some(m => m.name === fpath)) continue;
-      localUnusedFPaths.push(getStaticFPath(fpath));
     }
   }
 

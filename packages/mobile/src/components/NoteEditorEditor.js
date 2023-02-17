@@ -8,7 +8,7 @@ import fileApi from '../apis/localFile';
 import {
   updateEditorFocused, updateEditorBusy, saveNote, discardNote, onUpdateNoteId,
   onChangeListName, onUpdateBulkEdit, onShowNoteListMenuPopup, onShowNLIMPopup,
-  addSavingFPaths, updateEditorIsUploading, updateEditingNote, handleUnsavedNote,
+  updateEditorIsUploading, updateEditingNote, handleUnsavedNote,
 } from '../actions';
 import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, UTF8, VALID } from '../types/const';
 import { getThemeMode, getDoMoreEditorFontSizes } from '../selectors';
@@ -192,7 +192,6 @@ const NoteEditorEditor = (props) => {
         await fileApi.putFile(fpart, content);
 
         const cfpart = CD_ROOT + '/' + fpart;
-        dispatch(addSavingFPaths([cfpart]));
         objectUrlFiles.current[objectUrl] = { fname: cfpart, content: '' };
       } catch (error) {
         console.log(`NoteEditorEditor: onAddObjectUrlFiles with fpart: ${fpart} error: `, error);
@@ -202,7 +201,7 @@ const NoteEditorEditor = (props) => {
       objectUrlFiles.current[objectUrl] = { fname, content };
     }
     onUpdateIsUploading(false);
-  }, [onUpdateIsUploading, dispatch]);
+  }, [onUpdateIsUploading]);
 
   const onGetData = useCallback((value) => {
 

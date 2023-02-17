@@ -4,8 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import {
   updatePopupUrlHash, discardNote, updateNoteIdUrlHash, updateNoteId, changeListName,
-  updateBulkEditUrlHash, showNoteListMenuPopup, showNLIMPopup, clearSavingFPaths,
-  updateSettingsPopup,
+  updateBulkEditUrlHash, showNoteListMenuPopup, showNLIMPopup, updateSettingsPopup,
 } from '../actions';
 import {
   CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT,
@@ -66,8 +65,6 @@ const ConfirmDiscardPopup = () => {
       //   need to be in different js clock cycle.
       setTimeout(() => dispatch(updateSettingsPopup(false, false)), 100);
     } else throw new Error(`Invalid discard action: ${discardAction}`);
-
-    dispatch(clearSavingFPaths());
 
     onConfirmDiscardCancelBtnClick();
     didClick.current = true;

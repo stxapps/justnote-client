@@ -42,8 +42,7 @@ import {
   INCREASE_UPDATE_EDITOR_WIDTH_COUNT, INCREASE_RESET_DID_CLICK_COUNT,
   INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT, INCREASE_UPDATE_BULK_EDIT_COUNT,
   INCREASE_SHOW_NOTE_LIST_MENU_POPUP_COUNT, INCREASE_SHOW_NLIM_POPUP_COUNT,
-  CLEAR_SAVING_FPATHS, ADD_SAVING_FPATHS, UPDATE_EDITOR_IS_UPLOADING,
-  UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_EDITING_NOTE,
+  UPDATE_EDITOR_IS_UPLOADING, UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_EDITING_NOTE,
   UPDATE_UNSAVED_NOTE, DELETE_UNSAVED_NOTES, CLEAN_UP_STATIC_FILES,
   CLEAN_UP_STATIC_FILES_COMMIT, CLEAN_UP_STATIC_FILES_ROLLBACK, UPDATE_STACKS_ACCESS,
   GET_PRODUCTS, GET_PRODUCTS_COMMIT, GET_PRODUCTS_ROLLBACK,
@@ -597,8 +596,7 @@ export const addNote = (title, body, media, listName = null) => async (
     updatedDT: addedDT,
   };
 
-  const savingFPaths = getState().editor.savingFPaths;
-  const { usedFPaths, localUnusedFPaths } = deriveFPaths(media, null, savingFPaths);
+  const { usedFPaths, localUnusedFPaths } = deriveFPaths(media, null);
 
   const payload = { listName, note };
   dispatch({ type: ADD_NOTE, payload });
@@ -638,10 +636,9 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
   };
   const fromNote = clearNoteData(note);
 
-  const savingFPaths = getState().editor.savingFPaths;
   const {
     usedFPaths, serverUnusedFPaths, localUnusedFPaths,
-  } = deriveFPaths(media, note.media, savingFPaths);
+  } = deriveFPaths(media, note.media);
 
   const payload = { listName, fromNote: note, toNote };
   dispatch({ type: UPDATE_NOTE, payload });
@@ -965,8 +962,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
     const note = getState().notes[listName][id];
     const { status } = note;
     if (status === DIED_ADDING) {
-      // Don't delete files in savingFPaths as they might not for this note.
-      const { usedFPaths } = deriveFPaths(note.media, null, null);
+      const { usedFPaths } = deriveFPaths(note.media, null);
 
       const payload = { listName, note };
       dispatch({ type: ADD_NOTE, payload });
@@ -987,7 +983,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       const {
         usedFPaths, serverUnusedFPaths, localUnusedFPaths,
-      } = deriveFPaths(toNote.media, note.fromNote.media, null);
+      } = deriveFPaths(toNote.media, note.fromNote.media);
 
       const payload = { listName, fromNote: note.fromNote, toNote };
       dispatch({ type: UPDATE_NOTE, payload });
@@ -1229,7 +1225,7 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
 
   const {
     usedFPaths, serverUnusedFPaths, localUnusedFPaths,
-  } = deriveFPaths(toNote.media, noteMedia, null);
+  } = deriveFPaths(toNote.media, noteMedia);
 
   const payload = { conflictedNote, toListName, toNote };
   dispatch({ type: MERGE_NOTES, payload });
@@ -1372,12 +1368,18 @@ const _cleanUpStaticFiles = async (dispatch, getState) => {
   }
   unusedFPaths = unusedFPaths.slice(0, N_NOTES);
 
-  // Too risky. Clean up locally for now. If do, need to sync!
-  //await dataApi.batchDeleteFileWithRetry(unusedFPaths, 0);
   if (unusedFPaths.length > 0) {
     console.log('In cleanUpStaticFiles, found unused fpaths on server:', unusedFPaths);
+    // Too risky. Clean up locally for now. If do, need to sync!
+    //await dataApi.batchDeleteFileWithRetry(unusedFPaths, 0);
+    await fileApi.deleteFiles(unusedFPaths);
   }
-  await fileApi.deleteFiles(unusedFPaths);
+
+  if (
+    getState().display.isEditorFocused ||
+    getState().display.isEditorBusy ||
+    getState().editor.isUploading
+  ) return;
 
   // Delete unused static files in local
   const keys = await fileApi.listKeys();
@@ -2294,21 +2296,6 @@ export const increaseShowNoteListMenuPopupCount = () => {
 
 export const increaseShowNLIMPopupCount = () => {
   return { type: INCREASE_SHOW_NLIM_POPUP_COUNT };
-};
-
-export const clearSavingFPaths = () => async (dispatch, getState) => {
-  const savingFPaths = getState().editor.savingFPaths;
-  try {
-    await fileApi.deleteFiles(savingFPaths);
-  } catch (error) {
-    console.log('clearSavingFiles error: ', error);
-    // error in this step should be fine
-  }
-  dispatch({ type: CLEAR_SAVING_FPATHS });
-};
-
-export const addSavingFPaths = (fpaths) => {
-  return { type: ADD_SAVING_FPATHS, payload: fpaths };
 };
 
 export const updateEditorIsUploading = (isUploading) => {
