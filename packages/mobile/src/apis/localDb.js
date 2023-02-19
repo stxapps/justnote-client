@@ -3,6 +3,7 @@ import MMKVStorage from 'react-native-mmkv-storage';
 import {
   IS_USER_DUMMY, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE, DOT_JSON, UNSAVED_NOTES,
 } from '../types/const';
+import { isObject, copyFPaths, addFPath, deleteFPath } from '../utils';
 import { cachedFPaths } from '../vars';
 
 let _instance = null;
@@ -62,6 +63,12 @@ const putFile = async (fpath, content) => {
   if (fpath.endsWith(DOT_JSON)) await getInstance().setMapAsync(fpath, content);
   else await getInstance().setStringAsync(fpath, content);
 
+  if (isObject(cachedFPaths.fpaths)) {
+    const fpaths = copyFPaths(cachedFPaths.fpaths);
+    addFPath(fpaths, fpath);
+    cachedFPaths.fpaths = fpaths;
+  }
+
   return fpath;
 };
 
@@ -73,6 +80,13 @@ const putFiles = async (fpaths, contents) => {
 
 const deleteFile = async (fpath) => {
   await getInstance().removeItem(fpath);
+
+  if (isObject(cachedFPaths.fpaths)) {
+    const fpaths = copyFPaths(cachedFPaths.fpaths);
+    deleteFPath(fpaths, fpath);
+    cachedFPaths.fpaths = fpaths;
+  }
+
   return true;
 };
 
@@ -84,6 +98,7 @@ const deleteFiles = async (fpaths) => {
 
 const deleteAllFiles = async () => {
   await getInstance().clearStore();
+  cachedFPaths.fpaths = null;
 };
 
 const listFiles = async (callback) => {

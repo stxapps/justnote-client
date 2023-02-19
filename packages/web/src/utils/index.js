@@ -1728,17 +1728,13 @@ export const batchGetFileWithRetry = async (
 };
 
 export const batchPutFileWithRetry = async (
-  putFile, cachedFPaths, fpaths, contents, callCount, dangerouslyIgnoreError = false
+  putFile, fpaths, contents, callCount, dangerouslyIgnoreError = false
 ) => {
 
   const responses = await Promise.all(
     fpaths.map((fpath, i) =>
       putFile(fpath, contents[i])
-        .then(publicUrl => {
-          addFPath(cachedFPaths.fpaths, fpath);
-          cachedFPaths.fpaths = copyFPaths(cachedFPaths.fpaths);
-          return { publicUrl, fpath, success: true };
-        })
+        .then(publicUrl => ({ publicUrl, fpath, success: true }))
         .catch(error => ({ error, fpath, content: contents[i], success: false }))
     )
   );
@@ -1759,8 +1755,7 @@ export const batchPutFileWithRetry = async (
     return [
       ...responses.filter(({ success }) => success),
       ...(await batchPutFileWithRetry(
-        putFile, cachedFPaths, failedFPaths, failedContents, callCount + 1,
-        dangerouslyIgnoreError
+        putFile, failedFPaths, failedContents, callCount + 1, dangerouslyIgnoreError
       )),
     ];
   }
@@ -1768,18 +1763,12 @@ export const batchPutFileWithRetry = async (
   return responses;
 };
 
-export const batchDeleteFileWithRetry = async (
-  deleteFile, cachedFPaths, fpaths, callCount
-) => {
+export const batchDeleteFileWithRetry = async (deleteFile, fpaths, callCount) => {
 
   const responses = await Promise.all(
     fpaths.map((fpath) =>
       deleteFile(fpath)
-        .then(() => {
-          deleteFPath(cachedFPaths.fpaths, fpath);
-          cachedFPaths.fpaths = copyFPaths(cachedFPaths.fpaths);
-          return { fpath, success: true };
-        })
+        .then(() => ({ fpath, success: true }))
         .catch(error => {
           // BUG ALERT
           // Treat not found error as not an error as local data might be out-dated.
@@ -1816,9 +1805,7 @@ export const batchDeleteFileWithRetry = async (
 
     return [
       ...responses.filter(({ success }) => success),
-      ...(await batchDeleteFileWithRetry(
-        deleteFile, cachedFPaths, failedFPaths, callCount + 1
-      )),
+      ...(await batchDeleteFileWithRetry(deleteFile, failedFPaths, callCount + 1)),
     ];
   }
 

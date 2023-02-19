@@ -3,7 +3,8 @@ import { Storage } from '@stacks/storage/dist/esm';
 import userSession from '../userSession';
 import { DOT_JSON, N_NOTES } from '../types/const';
 import {
-  batchGetFileWithRetry, batchPutFileWithRetry, batchDeleteFileWithRetry,
+  isObject, copyFPaths, addFPath, deleteFPath, batchGetFileWithRetry,
+  batchPutFileWithRetry, batchDeleteFileWithRetry,
 } from '../utils';
 import { cachedServerFPaths } from '../vars';
 
@@ -32,30 +33,46 @@ const getFiles = async (_fpaths, dangerouslyIgnoreError = false) => {
 };
 
 const putFileOptions = { dangerouslyIgnoreEtag: true };
-const putFile = (fpath, content, options = putFileOptions) => {
+const putFile = async (fpath, content, options = putFileOptions) => {
   if (fpath.endsWith(DOT_JSON)) content = JSON.stringify(content);
 
   const storage = new Storage({ userSession: _userSession });
-  return storage.putFile(fpath, content, options);
+  const publicUrl = await storage.putFile(fpath, content, options);
+
+  if (isObject(cachedServerFPaths.fpaths)) {
+    const fpaths = copyFPaths(cachedServerFPaths.fpaths);
+    addFPath(fpaths, fpath);
+    cachedServerFPaths.fpaths = fpaths;
+  }
+
+  return publicUrl;
 };
 
 const putFiles = async (fpaths, contents) => {
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
     const _fpaths = fpaths.slice(i, i + N_NOTES);
     const _contents = contents.slice(i, i + N_NOTES);
-    await batchPutFileWithRetry(putFile, cachedServerFPaths, _fpaths, _contents, 0);
+    await batchPutFileWithRetry(putFile, _fpaths, _contents, 0);
   }
 };
 
-const deleteFile = (fpath, options = {}) => {
+const deleteFile = async (fpath, options = {}) => {
   const storage = new Storage({ userSession: _userSession });
-  return storage.deleteFile(fpath, options);
+  const result = storage.deleteFile(fpath, options);
+
+  if (isObject(cachedServerFPaths.fpaths)) {
+    const fpaths = copyFPaths(cachedServerFPaths.fpaths);
+    deleteFPath(fpaths, fpath);
+    cachedServerFPaths.fpaths = fpaths;
+  }
+
+  return result;
 };
 
 const deleteFiles = async (fpaths) => {
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
     const _fpaths = fpaths.slice(i, i + N_NOTES);
-    await batchDeleteFileWithRetry(deleteFile, cachedServerFPaths, _fpaths, 0);
+    await batchDeleteFileWithRetry(deleteFile, _fpaths, 0);
   }
 };
 

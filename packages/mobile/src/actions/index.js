@@ -224,7 +224,7 @@ export const signOut = () => async (dispatch, getState) => {
   await dataApi.deleteAllLocalFiles();
 
   // clear cached fpaths
-  vars.cachedFPaths.fpaths = null;
+  //vars.cachedFPaths.fpaths = null; // Done in localDb
   vars.cachedServerFPaths.fpaths = null;
 
   // clear vars

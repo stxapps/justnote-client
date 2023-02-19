@@ -288,7 +288,7 @@ export const signOut = () => async (dispatch, getState) => {
   await dataApi.deleteAllLocalFiles();
 
   // clear cached fpaths
-  vars.cachedFPaths.fpaths = null;
+  //vars.cachedFPaths.fpaths = null; // Done in localDb
   vars.cachedServerFPaths.fpaths = null;
 
   // clear vars
@@ -2341,9 +2341,7 @@ const importAllDataLoop = async (dispatch, fpaths, contents) => {
     for (let i = 0; i < fpaths.length; i += N_NOTES) {
       const _fpaths = fpaths.slice(i, i + N_NOTES);
       const _contents = contents.slice(i, i + N_NOTES);
-      await batchPutFileWithRetry(
-        dataApi.getApi().putFile, dataApi.getApi().cachedFPaths, _fpaths, _contents, 0
-      );
+      await batchPutFileWithRetry(dataApi.getApi().putFile, _fpaths, _contents, 0);
 
       doneCount += _fpaths.length;
       dispatch(updateImportAllDataProgress({ total, done: doneCount }));

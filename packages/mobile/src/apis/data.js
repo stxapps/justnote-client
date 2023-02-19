@@ -8,9 +8,9 @@ import {
 } from '../types/const';
 import {
   isObject, createNoteFPath, createDataFName, extractNoteFPath, createPinFPath,
-  addFPath, copyFPaths, getMainId, listNoteIds, sortWithPins, getStaticFPath,
-  getLastSettingsFPaths, excludeNotObjContents, batchGetFileWithRetry,
-  batchPutFileWithRetry, batchDeleteFileWithRetry,
+  addFPath, getMainId, listNoteIds, sortWithPins, getStaticFPath, getLastSettingsFPaths,
+  excludeNotObjContents, batchGetFileWithRetry, batchPutFileWithRetry,
+  batchDeleteFileWithRetry,
 } from '../utils';
 import { syncMode } from '../vars';
 import { initialLocalSettingsState } from '../types/initialStates';
@@ -33,18 +33,18 @@ const _listFPaths = async (listFiles) => {
 
 const listFPaths = async (doForce = false) => {
   if (isObject(getApi().cachedFPaths.fpaths) && !doForce) {
-    return copyFPaths(getApi().cachedFPaths.fpaths);
+    return getApi().cachedFPaths.fpaths;
   }
   getApi().cachedFPaths.fpaths = await _listFPaths(getApi().listFiles);
-  return copyFPaths(getApi().cachedFPaths.fpaths);
+  return getApi().cachedFPaths.fpaths;
 };
 
 const listServerFPaths = async (doForce = false) => {
   if (isObject(serverApi.cachedFPaths.fpaths) && !doForce) {
-    return copyFPaths(serverApi.cachedFPaths.fpaths);
+    return serverApi.cachedFPaths.fpaths;
   }
   serverApi.cachedFPaths.fpaths = await _listFPaths(serverApi.listFiles);
-  return copyFPaths(serverApi.cachedFPaths.fpaths);
+  return serverApi.cachedFPaths.fpaths;
 };
 
 const toNotes = (noteIds, fpaths, contents) => {
@@ -313,7 +313,7 @@ const putNotes = async (params) => {
   // Beware size should be max at N_NOTES, so can call batchPutFileWithRetry directly.
   // Use dangerouslyIgnoreError=true to manage which succeeded/failed manually.
   const responses = await batchPutFileWithRetry(
-    getApi().putFile, getApi().cachedFPaths, fpaths, contents, 0, !!manuallyManageError
+    getApi().putFile, fpaths, contents, 0, !!manuallyManageError
   );
   for (const response of responses) {
     if (response.success) successNotes.push(noteMap[response.fpath]);
@@ -381,9 +381,7 @@ const putPins = async (params) => {
   // Use dangerouslyIgnoreError=true to manage which succeeded/failed manually.
   // Bug alert: if several pins and error, rollback is incorrect
   //   as some are successful but some aren't.
-  await batchPutFileWithRetry(
-    getApi().putFile, getApi().cachedFPaths, fpaths, contents, 0
-  );
+  await batchPutFileWithRetry(getApi().putFile, fpaths, contents, 0);
   return { pins };
 };
 
@@ -393,9 +391,7 @@ const deletePins = async (params) => {
   const pinFPaths = pins.map(pin => {
     return createPinFPath(pin.rank, pin.updatedDT, pin.addedDT, pin.id);
   });
-  await batchDeleteFileWithRetry(
-    getApi().deleteFile, getApi().cachedFPaths, pinFPaths, 0
-  );
+  await batchDeleteFileWithRetry(getApi().deleteFile, pinFPaths, 0);
 
   return { pins };
 };
@@ -422,8 +418,7 @@ const putFiles = async (fpaths, contents, dangerouslyIgnoreError = false) => {
     const _fpaths = fpaths.slice(i, i + N_NOTES);
     const _contents = contents.slice(i, i + N_NOTES);
     const _responses = await batchPutFileWithRetry(
-      getApi().putFile, getApi().cachedFPaths, _fpaths, _contents, 0,
-      dangerouslyIgnoreError
+      getApi().putFile, _fpaths, _contents, 0, dangerouslyIgnoreError
     );
     responses.push(..._responses);
   }
@@ -434,9 +429,7 @@ const putFiles = async (fpaths, contents, dangerouslyIgnoreError = false) => {
 const deleteFiles = async (fpaths) => {
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
     const _fpaths = fpaths.slice(i, i + N_NOTES);
-    await batchDeleteFileWithRetry(
-      getApi().deleteFile, getApi().cachedFPaths, _fpaths, 0
-    );
+    await batchDeleteFileWithRetry(getApi().deleteFile, _fpaths, 0);
   }
 };
 

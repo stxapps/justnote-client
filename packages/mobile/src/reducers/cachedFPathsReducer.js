@@ -19,11 +19,9 @@ const cachedFPathsReducer = (state = initialState, action) => {
     // No new object for fpaths for reference comparison
     fpathsRef = getCachedFPaths().fpaths;
 
-    const newState = { ...state, fpaths: getCachedFPaths().fpaths };
-    if (isObject(getCachedFPaths().fpaths)) {
-      newState.fpaths = copyFPaths(getCachedFPaths().fpaths);
-    }
-    return newState;
+    let fpaths = null;
+    if (isObject(getCachedFPaths().fpaths)) fpaths = copyFPaths(getCachedFPaths().fpaths);
+    return { ...state, fpaths };
   }
 
   return state;

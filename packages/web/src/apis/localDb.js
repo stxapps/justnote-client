@@ -1,6 +1,7 @@
 import * as idb from 'idb-keyval';
 
 import { DOT_JSON, UNSAVED_NOTES } from '../types/const';
+import { isObject, copyFPaths, addFPath, deleteFPath } from '../utils';
 import { cachedFPaths } from '../vars';
 
 // Need cache to work even without IndexedDB.
@@ -41,6 +42,12 @@ const putFile = async (fpath, content) => {
 
   try {
     await idb.set(fpath, content);
+
+    if (isObject(cachedFPaths.fpaths)) {
+      const fpaths = copyFPaths(cachedFPaths.fpaths);
+      addFPath(fpaths, fpath);
+      cachedFPaths.fpaths = fpaths;
+    }
   } catch (error) {
     console.log('In localDb.putFile, IndexedDB error:', error);
   }
@@ -58,6 +65,12 @@ const putFiles = async (fpaths, contents) => {
 const deleteFile = async (fpath) => {
   try {
     await idb.del(fpath);
+
+    if (isObject(cachedFPaths.fpaths)) {
+      const fpaths = copyFPaths(cachedFPaths.fpaths);
+      deleteFPath(fpaths, fpath);
+      cachedFPaths.fpaths = fpaths;
+    }
   } catch (error) {
     console.log('In localDb.deleteFile, IndexedDB error:', error);
   }
@@ -76,6 +89,7 @@ const deleteAllFiles = async () => {
   // Make sure also want to delete all files in localFile as well!
   try {
     await idb.clear();
+    cachedFPaths.fpaths = null;
   } catch (error) {
     console.log('In localDb.deleteAllFiles, IndexedDB error:', error);
   }
