@@ -41,6 +41,7 @@ const updateNoteIdUrlHash = {
 };
 
 const updateNoteId = {
+  dt: 0,
   updatingNoteId: null,
 };
 

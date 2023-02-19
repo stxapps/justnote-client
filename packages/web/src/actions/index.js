@@ -542,6 +542,9 @@ export const updateNoteIdUrlHash = (
     // id can be both null and non-null so need doGetIdFromState, can't just check if.
     if (doGetIdFromState) id = vars.updateNoteId.updatingNoteId;
     if (doCheckEditing) {
+      if (Date.now() - vars.updateNoteId.dt < 400) return;
+      vars.updateNoteId.dt = Date.now();
+
       if (vars.updateSettings.doFetch) return;
       if (vars.deleteOldNotes.ids && vars.deleteOldNotes.ids.includes(id)) return;
 
@@ -711,6 +714,9 @@ export const updateNoteId = (id, doGetIdFromState = false, doCheckEditing = fals
     // id can be both null and non-null so need doGetIdFromState, can't just check if.
     if (doGetIdFromState) id = vars.updateNoteId.updatingNoteId;
     if (doCheckEditing) {
+      if (Date.now() - vars.updateNoteId.dt < 400) return;
+      vars.updateNoteId.dt = Date.now();
+
       if (vars.updateSettings.doFetch) return;
       if (vars.deleteOldNotes.ids && vars.deleteOldNotes.ids.includes(id)) return;
 
