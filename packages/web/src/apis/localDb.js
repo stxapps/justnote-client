@@ -43,7 +43,7 @@ const putFile = async (fpath, content) => {
   try {
     await idb.set(fpath, content);
 
-    if (isObject(cachedFPaths.fpaths)) {
+    if (isObject(cachedFPaths.fpaths) && !fpath.startsWith(UNSAVED_NOTES)) {
       const fpaths = copyFPaths(cachedFPaths.fpaths);
       addFPath(fpaths, fpath);
       cachedFPaths.fpaths = fpaths;
@@ -66,7 +66,7 @@ const deleteFile = async (fpath) => {
   try {
     await idb.del(fpath);
 
-    if (isObject(cachedFPaths.fpaths)) {
+    if (isObject(cachedFPaths.fpaths) && !fpath.startsWith(UNSAVED_NOTES)) {
       const fpaths = copyFPaths(cachedFPaths.fpaths);
       deleteFPath(fpaths, fpath);
       cachedFPaths.fpaths = fpaths;

@@ -63,7 +63,7 @@ const putFile = async (fpath, content) => {
   if (fpath.endsWith(DOT_JSON)) await getInstance().setMapAsync(fpath, content);
   else await getInstance().setStringAsync(fpath, content);
 
-  if (isObject(cachedFPaths.fpaths)) {
+  if (isObject(cachedFPaths.fpaths) && !fpath.startsWith(UNSAVED_NOTES)) {
     const fpaths = copyFPaths(cachedFPaths.fpaths);
     addFPath(fpaths, fpath);
     cachedFPaths.fpaths = fpaths;
@@ -81,7 +81,7 @@ const putFiles = async (fpaths, contents) => {
 const deleteFile = async (fpath) => {
   await getInstance().removeItem(fpath);
 
-  if (isObject(cachedFPaths.fpaths)) {
+  if (isObject(cachedFPaths.fpaths) && !fpath.startsWith(UNSAVED_NOTES)) {
     const fpaths = copyFPaths(cachedFPaths.fpaths);
     deleteFPath(fpaths, fpath);
     cachedFPaths.fpaths = fpaths;
