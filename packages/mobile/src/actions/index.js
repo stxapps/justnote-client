@@ -1448,7 +1448,8 @@ export const updateSettingsPopup = (isShown, doCheckEditing = false) => async (
   if (!isShown) {
     if (doCheckEditing) {
       const listNameEditors = getState().listNameEditors;
-      const editingLNEs = getEditingListNameEditors(listNameEditors);
+      const listNameMap = getState().settings.listNameMap;
+      const editingLNEs = getEditingListNameEditors(listNameEditors, listNameMap);
       if (isObject(editingLNEs)) {
         for (const k in editingLNEs) {
           if (!isNumber(editingLNEs[k].blurCount)) editingLNEs[k].blurCount = 0;

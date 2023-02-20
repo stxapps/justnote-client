@@ -1681,13 +1681,20 @@ export const getIdsAndParentIds = (ids, cachedFPaths) => {
   return [...ids, ...parentIds];
 };
 
-export const getEditingListNameEditors = (listNameEditors) => {
+export const getEditingListNameEditors = (listNameEditors, listNameObjs) => {
   let editingLNEs = null;
   for (const k in listNameEditors) {
-    if (listNameEditors[k].mode === MODE_EDIT) {
-      if (!isObject(editingLNEs)) editingLNEs = {};
-      editingLNEs[k] = { ...listNameEditors[k] };
-    }
+    if (listNameEditors[k].mode !== MODE_EDIT) continue;
+    if (!isString(listNameEditors[k].value)) continue;
+
+    let displayName = ''; // Empty string and no listNameObj for newListNameEditor
+    const { listNameObj } = getListNameObj(k, listNameObjs);
+    if (isObject(listNameObj)) displayName = listNameObj.displayName;
+
+    if (listNameEditors[k].value === displayName) continue;
+
+    if (!isObject(editingLNEs)) editingLNEs = {};
+    editingLNEs[k] = { ...listNameEditors[k] };
   }
   return editingLNEs;
 };

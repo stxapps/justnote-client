@@ -205,7 +205,8 @@ export const init = () => async (dispatch, getState) => {
       }
 
       const listNameEditors = getState().listNameEditors;
-      const editingLNEs = getEditingListNameEditors(listNameEditors);
+      const listNameMap = getState().settings.listNameMap;
+      const editingLNEs = getEditingListNameEditors(listNameEditors, listNameMap);
       if (isObject(editingLNEs)) {
         e.preventDefault();
         return e.returnValue = 'It looks like your changes to the list names haven\'t been saved. Do you want to leave this site and discard your changes?';
@@ -1790,7 +1791,8 @@ export const updateSettingsPopup = (isShown, doCheckEditing = false) => async (
   if (!isShown) {
     if (doCheckEditing) {
       const listNameEditors = getState().listNameEditors;
-      const editingLNEs = getEditingListNameEditors(listNameEditors);
+      const listNameMap = getState().settings.listNameMap;
+      const editingLNEs = getEditingListNameEditors(listNameEditors, listNameMap);
       if (isObject(editingLNEs)) {
         for (const k in editingLNEs) {
           if (!isNumber(editingLNEs[k].blurCount)) editingLNEs[k].blurCount = 0;
