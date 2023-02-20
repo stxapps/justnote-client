@@ -153,7 +153,7 @@ const _ListNameEditor = (props) => {
     dispatch(updateListNameEditors({
       [key]: { ...initialListNameEditorState, focusCount: state.focusCount },
     }));
-    input.current.blur();
+    if (input.current) input.current.blur();
   };
 
   const onEditOkBtnClick = () => {
@@ -182,7 +182,7 @@ const _ListNameEditor = (props) => {
         focusCount: state.focusCount,
       },
     }));
-    input.current.blur();
+    if (input.current) input.current.blur();
   };
 
   const onCancelBtnPress = () => {
@@ -194,7 +194,7 @@ const _ListNameEditor = (props) => {
     dispatch(updateListNameEditors({
       [key]: { mode: MODE_VIEW, value, msg: '' },
     }));
-    input.current.blur();
+    if (input.current) input.current.blur();
   };
 
   const onMoveUpBtnClick = () => {
@@ -230,7 +230,9 @@ const _ListNameEditor = (props) => {
 
   useEffect(() => {
     // state.focusCount can be undefined when the popup is close, so can't use !==
-    if (state.focusCount > prevFocusCount.current) input.current.focus();
+    if (state.focusCount > prevFocusCount.current) {
+      if (input.current) input.current.focus();
+    }
     prevFocusCount.current = state.focusCount;
   }, [state.focusCount]);
 

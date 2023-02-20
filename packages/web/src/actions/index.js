@@ -76,7 +76,7 @@ import {
   getSettingsFPaths, getLastSettingsFPaths, getInfoFPath, getLatestPurchase,
   getValidPurchase, doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins,
   getSortedNotes, separatePinnedValues, getRawPins, getFormattedTime,
-  get24HFormattedTime, getWindowSize, getNote, containEditingMode,
+  get24HFormattedTime, getWindowSize, getNote, getEditingListNameEditors,
   batchGetFileWithRetry, batchPutFileWithRetry,
 } from '../utils';
 import { isUint8Array, isBlob, convertBlobToDataUrl } from '../utils/index-web';
@@ -205,8 +205,8 @@ export const init = () => async (dispatch, getState) => {
       }
 
       const listNameEditors = getState().listNameEditors;
-      const isEditing = containEditingMode(listNameEditors);
-      if (isEditing) {
+      const editingLNEs = getEditingListNameEditors(listNameEditors);
+      if (isObject(editingLNEs)) {
         e.preventDefault();
         return e.returnValue = 'It looks like your changes to the list names haven\'t been saved. Do you want to leave this site and discard your changes?';
       }
@@ -1790,8 +1790,14 @@ export const updateSettingsPopup = (isShown, doCheckEditing = false) => async (
   if (!isShown) {
     if (doCheckEditing) {
       const listNameEditors = getState().listNameEditors;
-      const isEditing = containEditingMode(listNameEditors);
-      if (isEditing) {
+      const editingLNEs = getEditingListNameEditors(listNameEditors);
+      if (isObject(editingLNEs)) {
+        for (const k in editingLNEs) {
+          if (!isNumber(editingLNEs[k].blurCount)) editingLNEs[k].blurCount = 0;
+          editingLNEs[k].blurCount += 1;
+        }
+        dispatch(updateListNameEditors(editingLNEs));
+
         dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_LIST_NAME));
         updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
         return;

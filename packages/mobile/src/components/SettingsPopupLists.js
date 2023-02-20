@@ -79,6 +79,7 @@ const _ListNameEditor = (props) => {
   const state = useSelector(s => getListNameEditor(s, key));
   const themeMode = useSelector(s => getThemeMode(s));
   const prevFocusCount = useRef(state.focusCount);
+  const prevBlurCount = useRef(state.blurCount);
   const prevDisplayName = useRef(null);
   const input = useRef(null);
   const menuBtn = useRef(null);
@@ -169,7 +170,7 @@ const _ListNameEditor = (props) => {
     dispatch(updateListNameEditors({
       [key]: { ...initialListNameEditorState, focusCount: state.focusCount },
     }));
-    input.current.blur();
+    if (input.current) input.current.blur();
   };
 
   const onEditOkBtnClick = () => {
@@ -198,7 +199,7 @@ const _ListNameEditor = (props) => {
         focusCount: state.focusCount,
       },
     }));
-    input.current.blur();
+    if (input.current) input.current.blur();
   };
 
   const onCancelBtnPress = () => {
@@ -210,7 +211,7 @@ const _ListNameEditor = (props) => {
     dispatch(updateListNameEditors({
       [key]: { mode: MODE_VIEW, value, msg: '' },
     }));
-    input.current.blur();
+    if (input.current) input.current.blur();
   };
 
   const onMoveUpBtnClick = () => {
@@ -230,6 +231,7 @@ const _ListNameEditor = (props) => {
   };
 
   const onMenuBtnClick = () => {
+    if (!menuBtn.current) return;
     menuBtn.current.measure((_fx, _fy, width, height, x, y) => {
       const rect = {
         x, y, width, height, top: y, right: x + width, bottom: y + height, left: x,
@@ -258,9 +260,18 @@ const _ListNameEditor = (props) => {
 
   useEffect(() => {
     // state.focusCount can be undefined when the popup is close, so can't use !==
-    if (state.focusCount > prevFocusCount.current) input.current.focus();
+    if (state.focusCount > prevFocusCount.current) {
+      if (input.current) input.current.focus();
+    }
     prevFocusCount.current = state.focusCount;
   }, [state.focusCount]);
+
+  useEffect(() => {
+    if (state.blurCount > prevBlurCount.current && Platform.OS === 'ios') {
+      if (input.current) input.current.blur();
+    }
+    prevBlurCount.current = state.blurCount;
+  }, [state.blurCount]);
 
   useEffect(() => {
     const deleteListName = async () => {

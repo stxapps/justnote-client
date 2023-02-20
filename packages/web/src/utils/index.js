@@ -1681,15 +1681,15 @@ export const getIdsAndParentIds = (ids, cachedFPaths) => {
   return [...ids, ...parentIds];
 };
 
-export const containEditingMode = (listNameEditors) => {
-  let doContain = false;
+export const getEditingListNameEditors = (listNameEditors) => {
+  let editingLNEs = null;
   for (const k in listNameEditors) {
     if (listNameEditors[k].mode === MODE_EDIT) {
-      doContain = true;
-      break;
+      if (!isObject(editingLNEs)) editingLNEs = {};
+      editingLNEs[k] = { ...listNameEditors[k] };
     }
   }
-  return doContain;
+  return editingLNEs;
 };
 
 export const batchGetFileWithRetry = async (

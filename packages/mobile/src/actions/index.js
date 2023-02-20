@@ -82,7 +82,7 @@ import {
   getLastSettingsFPaths, getInfoFPath, getLatestPurchase, getValidPurchase,
   doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins, getSortedNotes,
   separatePinnedValues, getRawPins, getFormattedTime, get24HFormattedTime,
-  getFormattedTimeStamp, getMineSubType, getNote, containEditingMode,
+  getFormattedTimeStamp, getMineSubType, getNote, getEditingListNameEditors,
 } from '../utils';
 import { _ } from '../utils/obj';
 import { initialSettingsState, initialInfoState } from '../types/initialStates';
@@ -1448,8 +1448,14 @@ export const updateSettingsPopup = (isShown, doCheckEditing = false) => async (
   if (!isShown) {
     if (doCheckEditing) {
       const listNameEditors = getState().listNameEditors;
-      const isEditing = containEditingMode(listNameEditors);
-      if (isEditing) {
+      const editingLNEs = getEditingListNameEditors(listNameEditors);
+      if (isObject(editingLNEs)) {
+        for (const k in editingLNEs) {
+          if (!isNumber(editingLNEs[k].blurCount)) editingLNEs[k].blurCount = 0;
+          editingLNEs[k].blurCount += 1;
+        }
+        dispatch(updateListNameEditors(editingLNEs));
+
         dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_LIST_NAME));
         updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
         return;

@@ -60,4 +60,5 @@ export const initialListNameEditorState = {
   isCheckingCanDelete: false,
   doExpand: false,
   focusCount: 0,
+  blurCount: 0,
 };
