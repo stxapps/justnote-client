@@ -12,7 +12,9 @@ const initialState = {
 const conflictedSettingsReducer = (state = initialState, action) => {
 
   if (action.type === FETCH_COMMIT) {
-    const { conflictedSettings } = action.payload;
+    const { doFetchStgsAndInfo, conflictedSettings } = action.payload;
+    if (!doFetchStgsAndInfo) return state;
+
     return { ...state, contents: [...conflictedSettings] };
   }
 

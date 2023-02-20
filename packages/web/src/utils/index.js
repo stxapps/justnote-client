@@ -456,6 +456,14 @@ export const getAllListNames = (listNameObjs) => {
   return listNames;
 };
 
+export const getListNamesFromNoteIds = (noteIds, conflictedIds) => {
+  let listNames = [];
+  listNames.push(...noteIds.map(id => id.listName));
+  listNames.push(...conflictedIds.map(id => id.listName));
+  listNames = [...new Set(listNames)];
+  return listNames;
+};
+
 export const isDiedStatus = (status) => {
   return [
     DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, DIED_MERGING,

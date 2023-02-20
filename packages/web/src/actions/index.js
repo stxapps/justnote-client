@@ -77,7 +77,7 @@ import {
   getValidPurchase, doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins,
   getSortedNotes, separatePinnedValues, getRawPins, getFormattedTime,
   get24HFormattedTime, getWindowSize, getNote, getEditingListNameEditors,
-  batchGetFileWithRetry, batchPutFileWithRetry,
+  batchGetFileWithRetry, batchPutFileWithRetry, getListNamesFromNoteIds,
 } from '../utils';
 import { isUint8Array, isBlob, convertBlobToDataUrl } from '../utils/index-web';
 import { _ } from '../utils/obj';
@@ -2069,11 +2069,15 @@ export const cancelDiedSettings = () => async (dispatch, getState) => {
   const settings = getState().settings;
   const snapshotSettings = getState().snapshot.settings;
 
+  const noteFPaths = getNoteFPaths(getState());
+  const { noteIds, conflictedIds } = listNoteIds(noteFPaths);
+
+  const listNames = getListNamesFromNoteIds(noteIds, conflictedIds);
   const doFetch = (
     settings.sortOn !== snapshotSettings.sortOn ||
     settings.doDescendingOrder !== snapshotSettings.doDescendingOrder
   );
-  const payload = { settings: snapshotSettings, doFetch };
+  const payload = { listNames, settings: snapshotSettings, doFetch };
 
   vars.updateSettings.doFetch = doFetch;
   dispatch({ type: CANCEL_DIED_SETTINGS, payload });
@@ -2106,11 +2110,15 @@ export const mergeSettings = (selectedId) => async (dispatch, getState) => {
     if (k in _settings) settings[k] = _settings[k];
   }
 
+  const noteFPaths = getNoteFPaths(getState());
+  const { noteIds, conflictedIds } = listNoteIds(noteFPaths);
+
+  const listNames = getListNamesFromNoteIds(noteIds, conflictedIds);
   const doFetch = (
     settings.sortOn !== currentSettings.sortOn ||
     settings.doDescendingOrder !== currentSettings.doDescendingOrder
   );
-  const payload = { settings, doFetch };
+  const payload = { listNames, settings, doFetch };
 
   vars.updateSettings.doFetch = doFetch;
   dispatch({ type: MERGE_SETTINGS, payload });

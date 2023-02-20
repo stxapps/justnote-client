@@ -10,7 +10,7 @@ import {
   isObject, createNoteFPath, createDataFName, extractNoteFPath, createPinFPath,
   addFPath, getMainId, listNoteIds, sortWithPins, getStaticFPath, getLastSettingsFPaths,
   excludeNotObjContents, batchGetFileWithRetry, batchPutFileWithRetry,
-  batchDeleteFileWithRetry,
+  batchDeleteFileWithRetry, getListNamesFromNoteIds,
 } from '../utils';
 import { syncMode } from '../vars';
 import { initialLocalSettingsState } from '../types/initialStates';
@@ -189,10 +189,7 @@ const fetch = async (params) => {
 
   // List names should be retrieve from settings
   //   but also retrive from file paths in case the settings is gone.
-  let listNames = [];
-  listNames.push(...noteIds.map(id => id.listName));
-  listNames.push(...conflictedIds.map(id => id.listName));
-  listNames = [...new Set(listNames)];
+  const listNames = getListNamesFromNoteIds(noteIds, conflictedIds);
 
   return {
     notes, hasMore, conflictedNotes, listNames, settings, conflictedSettings, info,

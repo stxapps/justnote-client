@@ -258,7 +258,7 @@ const settingsReducer = (state = initialState, action) => {
   }
 
   if (action.type === CANCEL_DIED_SETTINGS) {
-    const { settings } = action.payload;
+    const { listNames, settings } = action.payload;
     didChange.doDeleteOldNotesInTrash = false;
     didChange.sortOn = false;
     didChange.doDescendingOrder = false;
@@ -267,11 +267,11 @@ const settingsReducer = (state = initialState, action) => {
     didChange.doSectionNotesByMonth = false;
     didChange.doMoreEditorFontSizes = false;
     didChange.listNameMap = false;
-    return { ...state, ...settings };
+    return deriveSettingsState(listNames, settings, initialState);
   }
 
   if (action.type === MERGE_SETTINGS_COMMIT) {
-    const { settings } = action.payload;
+    const { listNames, settings } = action.payload;
     didChange.doDeleteOldNotesInTrash = false;
     didChange.sortOn = false;
     didChange.doDescendingOrder = false;
@@ -280,7 +280,7 @@ const settingsReducer = (state = initialState, action) => {
     didChange.doSectionNotesByMonth = false;
     didChange.doMoreEditorFontSizes = false;
     didChange.listNameMap = false;
-    return { ...state, ...settings };
+    return deriveSettingsState(listNames, settings, initialState);
   }
 
   if (action.type === DELETE_ALL_DATA || action.type === RESET_STATE) {
