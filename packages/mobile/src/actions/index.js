@@ -198,17 +198,7 @@ const handlePendingSignIn = (url) => async (dispatch, getState) => {
   }
 
   const isUserSignedIn = await userSession.isUserSignedIn();
-  if (isUserSignedIn) {
-    const userData = await userSession.loadUserData();
-    dispatch({
-      type: UPDATE_USER,
-      payload: {
-        isUserSignedIn: true,
-        username: userData.username,
-        image: getUserImageUrl(userData),
-      },
-    });
-  }
+  if (isUserSignedIn) dispatch(updateUserSignedIn());
 
   // Stop show loading
   dispatch({
@@ -218,9 +208,43 @@ const handlePendingSignIn = (url) => async (dispatch, getState) => {
 };
 
 export const signOut = () => async (dispatch, getState) => {
-
   await userSession.signUserOut();
+  await resetState(dispatch);
+};
 
+export const updateUserData = (data) => async (dispatch, getState) => {
+  await userSession.updateUserData(data);
+
+  const isUserSignedIn = await userSession.isUserSignedIn();
+  if (isUserSignedIn) dispatch(updateUserSignedIn());
+};
+
+export const updateUserSignedIn = () => async (dispatch, getState) => {
+  const isUserDummy = getState().user.isUserDummy;
+  if (!isUserDummy) await resetState(dispatch);
+
+  const userData = await userSession.loadUserData();
+  dispatch({
+    type: UPDATE_USER,
+    payload: {
+      isUserSignedIn: true,
+      username: userData.username,
+      image: getUserImageUrl(userData),
+    },
+  });
+};
+
+export const updateUserDummy = (isUserDummy) => async (dispatch, getState) => {
+  await resetState(dispatch);
+
+  await ldbApi.updateUserDummy(isUserDummy);
+  dispatch({
+    type: UPDATE_USER,
+    payload: { isUserDummy: isUserDummy },
+  });
+};
+
+const resetState = async (dispatch) => {
   // clear file storage
   await dataApi.deleteAllLocalFiles();
 
@@ -233,34 +257,7 @@ export const signOut = () => async (dispatch, getState) => {
   vars.randomHouseworkTasks.dt = 0;
 
   // clear all user data!
-  dispatch({
-    type: RESET_STATE,
-  });
-};
-
-export const updateUserData = (data) => async (dispatch, getState) => {
-  await userSession.updateUserData(data);
-
-  const isUserSignedIn = await userSession.isUserSignedIn();
-  if (isUserSignedIn) {
-    const userData = await userSession.loadUserData();
-    dispatch({
-      type: UPDATE_USER,
-      payload: {
-        isUserSignedIn: true,
-        username: userData.username,
-        image: getUserImageUrl(userData),
-      },
-    });
-  }
-};
-
-export const updateUserDummy = (isUserDummy) => async (dispatch, getState) => {
-  await ldbApi.updateUserDummy(isUserDummy);
-  dispatch({
-    type: UPDATE_USER,
-    payload: { isUserDummy: isUserDummy },
-  });
+  dispatch({ type: RESET_STATE });
 };
 
 export const updateNoteIdUrlHash = (id) => {

@@ -244,6 +244,9 @@ const handlePendingSignIn = () => async (dispatch, getState) => {
   const { separatedUrl } = separateUrlAndParam(window.location.href, 'authResponse');
   window.history.replaceState(window.history.state, '', separatedUrl);
 
+  const isUserSignedIn = userSession.isUserSignedIn();
+  if (isUserSignedIn) await resetState(dispatch);
+
   // Stop show loading
   dispatch({
     type: UPDATE_HANDLING_SIGN_IN,
@@ -282,9 +285,34 @@ const handleScreenRotation = (prevWidth) => (dispatch, getState) => {
 };
 
 export const signOut = () => async (dispatch, getState) => {
-
   userSession.signUserOut();
+  await resetState(dispatch);
+};
 
+export const updateUserData = (data) => async (dispatch, getState) => {
+  userSession.updateUserData(data);
+
+  const isUserSignedIn = userSession.isUserSignedIn();
+  if (isUserSignedIn) dispatch(updateUserSignedIn());
+};
+
+export const updateUserSignedIn = () => async (dispatch, getState) => {
+  await resetState(dispatch);
+
+  const userData = userSession.loadUserData();
+  dispatch({
+    type: UPDATE_USER,
+    payload: {
+      isUserSignedIn: true,
+      username: userData.username,
+      image: getUserImageUrl(userData),
+    },
+  });
+
+  redirectToMain();
+};
+
+const resetState = async (dispatch) => {
   // clear file storage
   await dataApi.deleteAllLocalFiles();
 
@@ -297,25 +325,7 @@ export const signOut = () => async (dispatch, getState) => {
   vars.randomHouseworkTasks.dt = 0;
 
   // clear all user data!
-  dispatch({
-    type: RESET_STATE,
-  });
-};
-
-export const updateUserData = (data) => async (dispatch, getState) => {
-  userSession.updateUserData(data);
-
-  if (userSession.isUserSignedIn()) {
-    const userData = userSession.loadUserData();
-    dispatch({
-      type: UPDATE_USER,
-      payload: {
-        isUserSignedIn: true,
-        username: userData.username,
-        image: getUserImageUrl(userData),
-      },
-    });
-  }
+  dispatch({ type: RESET_STATE });
 };
 
 export const handleUrlHash = () => {
