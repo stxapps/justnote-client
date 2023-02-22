@@ -13,7 +13,7 @@ import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, BLK_MODE, VALID } from '../types/cons
 import { getThemeMode, getDoMoreEditorFontSizes } from '../selectors';
 import {
   isString, isTitleEqual, isBodyEqual, isMobile as _isMobile, replaceObjectUrls,
-  getFileExt, debounce, scrollWindowTop, containUppercase, isStringTitleIn,
+  getFileExt, debounce, containUppercase, isStringTitleIn,
 } from '../utils';
 import { isUint8Array, isBlob, convertDataUrlToBlob } from '../utils/index-web';
 
@@ -200,9 +200,8 @@ const NoteEditorEditor = (props) => {
   ]);
 
   const onFocus = useCallback(() => {
-    if (isMobile) scrollWindowTop();
     dispatch(updateEditorFocused(true));
-  }, [isMobile, dispatch]);
+  }, [dispatch]);
 
   const onUpdateIsUploading = useCallback((isUploading) => {
     dispatch(updateEditorIsUploading(isUploading));
@@ -302,10 +301,6 @@ const NoteEditorEditor = (props) => {
       const linkUi = editor.plugins.get('LinkUI');
       if (linkUi) {
         const urlInput = linkUi.formView.urlInputView;
-        urlInput.on('change:isFocused', (evt, data, isFocused) => {
-          if (isFocused) scrollWindowTop();
-        });
-
         const inputElement = urlInput.fieldView.element;
         if (inputElement) {
           inputElement.setAttribute('inputmode', 'url');

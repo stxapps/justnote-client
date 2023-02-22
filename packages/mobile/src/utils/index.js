@@ -1621,6 +1621,18 @@ export const getWindowSize = () => {
   return { windowWidth, windowHeight, visualWidth, visualHeight };
 };
 
+export const getVisualViewPortOffsetTop = () => {
+  let offsetTop = 0;
+  if (
+    isObject(window) &&
+    isObject(window.visualViewport) &&
+    isNumber(window.visualViewport.offsetTop)
+  ) {
+    offsetTop = window.visualViewport.offsetTop;
+  }
+  return offsetTop;
+};
+
 let _isScrollingWindowTop = false;
 const _scrollWindowTop = () => {
   // Prevent calling while scrolling i.e. change on both visual height and focus.
@@ -1636,23 +1648,69 @@ const _scrollWindowTop = () => {
 };
 
 export const scrollWindowTop = () => {
+  if (window.pageYOffset > 0 || getVisualViewPortOffsetTop() > 0) {
+    _scrollWindowTop();
+  } else {
+    setTimeout(() => {
+      if (window.pageYOffset > 0 || getVisualViewPortOffsetTop() > 0) {
+        _scrollWindowTop();
+      } else {
+        setTimeout(() => {
+          if (window.pageYOffset > 0 || getVisualViewPortOffsetTop() > 0) {
+            _scrollWindowTop();
+          } else {
+            setTimeout(() => {
+              if (window.pageYOffset > 0 || getVisualViewPortOffsetTop() > 0) {
+                _scrollWindowTop();
+              }
+            }, 400);
+          }
+        }, 300);
+      }
+    }, 250);
+  }
+};
+
+let _isScrollingWindowIntoView = false;
+const _scrollWindowIntoView = () => {
+  if (_isScrollingWindowIntoView) return;
+  _isScrollingWindowIntoView = true;
+
+  const topBar = document.querySelector('#NoteEditorTopBar');
+  if (topBar) topBar.scrollIntoView({ block: 'start', behavior: 'smooth' });
+
   setTimeout(() => {
-    if (window.pageYOffset > 0) {
-      _scrollWindowTop();
-    } else {
-      setTimeout(() => {
-        if (window.pageYOffset > 0) {
-          _scrollWindowTop();
-        } else {
-          setTimeout(() => {
-            if (window.pageYOffset > 0) {
-              _scrollWindowTop();
-            }
-          }, 400);
-        }
-      }, 250);
-    }
+    _isScrollingWindowIntoView = false;
   }, 100);
+};
+
+export const scrollWindowIntoView = () => {
+  if (window.pageYOffset > 0 || getVisualViewPortOffsetTop() > 0) {
+    _scrollWindowIntoView();
+  } else {
+    setTimeout(() => {
+      if (window.pageYOffset > 0 || getVisualViewPortOffsetTop() > 0) {
+        _scrollWindowIntoView();
+      } else {
+        setTimeout(() => {
+          if (window.pageYOffset > 0 || getVisualViewPortOffsetTop() > 0) {
+            _scrollWindowIntoView();
+          } else {
+            setTimeout(() => {
+              if (window.pageYOffset > 0 || getVisualViewPortOffsetTop() > 0) {
+                _scrollWindowIntoView();
+              }
+            }, 400);
+          }
+        }, 300);
+      }
+    }, 250);
+  }
+};
+
+export const scrollWindowTopOrIntoView = () => {
+  if (isIPadIPhoneIPod()) scrollWindowTop();
+  else scrollWindowIntoView();
 };
 
 export const excludeNotObjContents = (fpaths, contents) => {

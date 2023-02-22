@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import { LG_WIDTH } from '../types/const';
-import { isMobile as _isMobile, scrollWindowTop } from '../utils';
+import { debounce, isMobile as _isMobile, scrollWindowTopOrIntoView } from '../utils';
 
 import { useSafeAreaFrame } from '.';
 import ColsPanel from './ColsPanel';
@@ -27,9 +27,7 @@ import StaleErrorPopup from './StaleErrorPopup';
 
 const Main = () => {
 
-  const {
-    width: safeAreaWidth, height: safeAreaHeight, windowHeight,
-  } = useSafeAreaFrame();
+  const { width: safeAreaWidth } = useSafeAreaFrame();
   const isSettingsPopupShown = useSelector(state => state.display.isSettingsPopupShown);
   const isMobile = useMemo(() => _isMobile(), []);
 
@@ -50,10 +48,16 @@ const Main = () => {
     //   but only work for SettingsLists, doesn't work for SearchInput and NoteEditor
     //   (as need to scroll at the panel/view level, not layout viewport level)
     //   so need to monitor and try to scroll back.
-    if (!isSettingsPopupShown && isMobile && safeAreaHeight < windowHeight) {
-      scrollWindowTop();
-    }
-  }, [safeAreaHeight, windowHeight, isSettingsPopupShown, isMobile]);
+    if (!window.visualViewport || isSettingsPopupShown || !isMobile) return;
+
+    const scrollListener = debounce(() => scrollWindowTopOrIntoView(), 100);
+    window.visualViewport.addEventListener('scroll', scrollListener);
+
+    return () => {
+      if (!window.visualViewport || isSettingsPopupShown || !isMobile) return;
+      window.visualViewport.removeEventListener('scroll', scrollListener);
+    };
+  }, [isSettingsPopupShown, isMobile]);
 
   const panel = safeAreaWidth < LG_WIDTH ? <NavPanel /> : <ColsPanel />;
 

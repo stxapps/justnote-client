@@ -114,7 +114,7 @@ const NoteEditorTopBar = (props) => {
   if (derivedIsEditorFocused === null) commands = null;
 
   return (
-    <div className={tailwind('h-16 w-full flex-shrink-0 flex-grow-0 overflow-x-auto border-b border-gray-200 blk:border-gray-700')}>
+    <div id="NoteEditorTopBar" className={tailwind('h-16 w-full flex-shrink-0 flex-grow-0 overflow-x-auto border-b border-gray-200 blk:border-gray-700')}>
       <div style={style} className={tailwind('flex h-full w-full justify-between lg:items-center lg:px-3')}>
         <div className={tailwind('flex')}>
           <button onClick={onRightPanelCloseBtnClick} type="button" className={tailwind('group inline-flex h-full items-center bg-white px-4 text-sm text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:bg-gray-200 focus-visible:text-gray-700 blk:bg-gray-900 blk:text-gray-400 blk:hover:text-gray-200 blk:focus-visible:bg-gray-700 blk:focus-visible:text-gray-200 lg:hidden')}>
