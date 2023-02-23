@@ -47,7 +47,7 @@ const NoteEditor = (props) => {
     }
     if (isDiedStatus(note.status)) return <NoteEditorRetry note={note} width={width} />;
     if (isUnsavedInvalid) {
-      return <NoteEditorUnsavedConflict note={note} unsavedNote={unsavedNote} />;
+      return <NoteEditorUnsavedConflict note={note} unsavedNote={unsavedNote} width={width} />;
     }
 
     isContentEditor.current = true;
