@@ -36,6 +36,7 @@ export const ARCHIVE = 'Archive';
 export const NEW_NOTE = 'NEW_NOTE';
 export const NEW_NOTE_OBJ = { id: NEW_NOTE, title: '', body: '', media: [] };
 export const DUMMY_NOTE_OBJ = { id: null, title: '', body: '', media: [] };
+export const DUMMY_UNSAVED_NOTE_OBJ = { status: null, note: null };
 
 export const SIGN_UP_POPUP = 'SIGN_UP_POPUP';
 export const SIGN_IN_POPUP = 'SIGN_IN_POPUP';

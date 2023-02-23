@@ -44,7 +44,7 @@ const NoteEditor = (props) => {
 
   return (
     <div className={tailwind('flex h-full w-full flex-col bg-white blk:bg-gray-900')}>
-      <NoteEditorTopBar note={note} isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} />
+      <NoteEditorTopBar note={note} unsavedNote={unsavedNote} isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} />
       <NoteEditorEditor note={note} unsavedNote={unsavedNote} />
     </div>
   );

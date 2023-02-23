@@ -349,6 +349,12 @@ const NoteEditorEditor = (props) => {
   }, [isEditorReady, setInitData]);
 
   useEffect(() => {
+    // Need checkToFocusCount, can't just depend on changes in notes and unsaved
+    //   i.e. saving a note generates a new note id but don't want to scroll
+    //   so call blurCount and setInitData.
+    // If depend on changes, can't separate between updateNoteId and saveNote.
+    // This might create inconsistency in NoteEditorTopBar
+    //   when already show focusedCommands, but here never set focus to true.
     if (!isEditorReady) return;
     if (checkToFocusCount !== prevCheckToFocusCount.current) {
       if (note.id === NEW_NOTE || unsavedNote.status === VALID) focusTitleInput();

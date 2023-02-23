@@ -3,7 +3,7 @@ import { View, Text } from 'react-native';
 import { useSelector } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
-import { DUMMY_NOTE_OBJ, INVALID } from '../types/const';
+import { DUMMY_NOTE_OBJ, DUMMY_UNSAVED_NOTE_OBJ, INVALID } from '../types/const';
 import { isDiedStatus } from '../utils';
 
 import { useTailwind } from '.';
@@ -54,7 +54,7 @@ const NoteEditor = (props) => {
     return (
       <View style={tailwind('h-full w-full bg-white blk:bg-gray-900')}>
         <View style={tailwind('h-full w-full bg-white blk:bg-gray-900')}>
-          <NoteEditorTopBar note={note} isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} width={width} />
+          <NoteEditorTopBar note={note} unsavedNote={unsavedNote} isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} width={width} />
           <NoteEditorEditor key="NoteEditorEditor" note={note} unsavedNote={unsavedNote} />
         </View>
       </View>
@@ -68,7 +68,7 @@ const NoteEditor = (props) => {
       <React.Fragment>
         <View style={tailwind('absolute -top-1 -left-1 h-1 w-1 overflow-hidden')}>
           <View style={tailwind('h-full w-full bg-white blk:bg-gray-900')}>
-            <NoteEditorEditor key="NoteEditorEditor" note={DUMMY_NOTE_OBJ} unsavedNote={unsavedNote} />
+            <NoteEditorEditor key="NoteEditorEditor" note={DUMMY_NOTE_OBJ} unsavedNote={DUMMY_UNSAVED_NOTE_OBJ} />
           </View>
         </View>
         {content}

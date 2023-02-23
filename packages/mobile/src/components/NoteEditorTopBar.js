@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
@@ -7,7 +7,7 @@ import { Circle } from 'react-native-animated-spinkit';
 import {
   updateNoteId, increaseSaveNoteCount, increaseDiscardNoteCount,
 } from '../actions';
-import { NEW_NOTE, ADDED, LG_WIDTH, BLK_MODE } from '../types/const';
+import { NEW_NOTE, ADDED, VALID, LG_WIDTH, BLK_MODE } from '../types/const';
 import { getThemeMode } from '../selectors/index';
 
 import { useSafeAreaFrame, useTailwind } from '.';
@@ -15,7 +15,7 @@ import NoteCommands from './NoteCommands';
 
 const NoteEditorTopBar = (props) => {
 
-  const { note, isFullScreen, onToggleFullScreen, width } = props;
+  const { note, unsavedNote, isFullScreen, onToggleFullScreen, width } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const isEditorFocused = useSelector(state => state.display.isEditorFocused);
   const isEditorBusy = useSelector(state => state.display.isEditorBusy);
@@ -24,9 +24,7 @@ const NoteEditorTopBar = (props) => {
     state => state.display.isConfirmDiscardPopupShown
   );
   const themeMode = useSelector(state => getThemeMode(state));
-  const [derivedIsEditorFocused, setDerivedIsEditorFocused] = useState(null);
   const didClick = useRef(false);
-  const timerId = useRef(null);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
@@ -80,29 +78,6 @@ const NoteEditorTopBar = (props) => {
     didClick.current = false;
   }, [note, isEditorFocused, isConfirmDiscardPopupShown]);
 
-  useEffect(() => {
-    // Try to delay changing isEditorFocused to prevent blinking
-    //   i.e. change note ids with both unsaved notes.
-    if (isEditorFocused === derivedIsEditorFocused) return;
-
-    if (timerId.current) {
-      clearTimeout(timerId.current);
-      timerId.current = null;
-
-      setDerivedIsEditorFocused(isEditorFocused);
-      return;
-    }
-
-    if (isEditorFocused) {
-      setDerivedIsEditorFocused(isEditorFocused);
-      return;
-    }
-
-    timerId.current = setTimeout(() => {
-      setDerivedIsEditorFocused(isEditorFocused);
-    }, 100);
-  }, [isEditorFocused, derivedIsEditorFocused]);
-
   const style = {
     width: safeAreaWidth < LG_WIDTH ? Math.max(180, width) : Math.max(496, width),
   };
@@ -110,13 +85,16 @@ const NoteEditorTopBar = (props) => {
   let commands = null;
   if (note.id === NEW_NOTE) {
     if (isEditorBusy) commands = renderLoading();
-    if (derivedIsEditorFocused) commands = renderFocusedCommands();
+    else commands = renderFocusedCommands();
   } else if (note.status !== ADDED || isEditorBusy) {
     commands = renderLoading();
   } else {
-    commands = derivedIsEditorFocused ? renderFocusedCommands() : <NoteCommands isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} />;
+    if (isEditorFocused || unsavedNote.status === VALID) {
+      commands = renderFocusedCommands();
+    } else {
+      commands = <NoteCommands isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} />;
+    }
   }
-  if (derivedIsEditorFocused === null) commands = null;
 
   return (
     <View style={tailwind('h-16 w-full flex-shrink-0 flex-grow-0 border-b border-gray-200 blk:border-gray-700')}>
@@ -124,7 +102,7 @@ const NoteEditorTopBar = (props) => {
         <View style={[tailwind('h-full flex-row justify-between lg:items-center lg:px-3'), style]}>
           <View style={tailwind('flex-row')}>
             <TouchableOpacity onPress={onRightPanelCloseBtnClick} style={tailwind('h-full justify-center rounded-md bg-white px-4 blk:bg-gray-900 lg:hidden')}>
-              {derivedIsEditorFocused ?
+              {isEditorFocused ?
                 <Svg width={20} height={20} style={tailwind('font-normal text-gray-500 blk:text-gray-400')} stroke="currentColor" fill="none" viewBox="0 0 24 24">
                   <Path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </Svg>

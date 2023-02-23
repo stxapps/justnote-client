@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import {
   updateNoteIdUrlHash, increaseSaveNoteCount, increaseDiscardNoteCount,
 } from '../actions';
-import { NEW_NOTE, ADDED, LG_WIDTH } from '../types/const';
+import { NEW_NOTE, ADDED, VALID, LG_WIDTH } from '../types/const';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 import NoteCommands from './NoteCommands';
 
 const NoteEditorTopBar = (props) => {
 
-  const { note, isFullScreen, onToggleFullScreen } = props;
+  const { note, unsavedNote, isFullScreen, onToggleFullScreen } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const isEditorFocused = useSelector(state => state.display.isEditorFocused);
   const isEditorBusy = useSelector(state => state.display.isEditorBusy);
@@ -19,9 +19,7 @@ const NoteEditorTopBar = (props) => {
   const isConfirmDiscardPopupShown = useSelector(
     state => state.display.isConfirmDiscardPopupShown
   );
-  const [derivedIsEditorFocused, setDerivedIsEditorFocused] = useState(null);
   const didClick = useRef(false);
-  const timerId = useRef(null);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
@@ -77,48 +75,30 @@ const NoteEditorTopBar = (props) => {
     didClick.current = false;
   }, [note, isEditorFocused, isConfirmDiscardPopupShown]);
 
-  useEffect(() => {
-    // Try to delay changing isEditorFocused to prevent blinking
-    //   i.e. change note ids with both unsaved notes.
-    if (isEditorFocused === derivedIsEditorFocused) return;
-
-    if (timerId.current) {
-      clearTimeout(timerId.current);
-      timerId.current = null;
-
-      setDerivedIsEditorFocused(isEditorFocused);
-      return;
-    }
-
-    if (isEditorFocused) {
-      setDerivedIsEditorFocused(isEditorFocused);
-      return;
-    }
-
-    timerId.current = setTimeout(() => {
-      setDerivedIsEditorFocused(isEditorFocused);
-    }, 100);
-  }, [isEditorFocused, derivedIsEditorFocused]);
-
   const style = safeAreaWidth < LG_WIDTH ? {} : { minWidth: 496 };
 
+  // For NEW_NOTE and valid unsaved,
+  //   isEditorFocused can be false, but show focusedCommands!
   let commands = null;
   if (note.id === NEW_NOTE) {
     if (isEditorBusy) commands = renderLoading();
-    if (derivedIsEditorFocused) commands = renderFocusedCommands();
+    else commands = renderFocusedCommands();
   } else if (note.status !== ADDED || isEditorBusy) {
     commands = renderLoading();
   } else {
-    commands = derivedIsEditorFocused ? renderFocusedCommands() : <NoteCommands isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} />;
+    if (isEditorFocused || unsavedNote.status === VALID) {
+      commands = renderFocusedCommands();
+    } else {
+      commands = <NoteCommands isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} />;
+    }
   }
-  if (derivedIsEditorFocused === null) commands = null;
 
   return (
     <div id="NoteEditorTopBar" className={tailwind('h-16 w-full flex-shrink-0 flex-grow-0 overflow-x-auto border-b border-gray-200 blk:border-gray-700')}>
       <div style={style} className={tailwind('flex h-full w-full justify-between lg:items-center lg:px-3')}>
         <div className={tailwind('flex')}>
           <button onClick={onRightPanelCloseBtnClick} type="button" className={tailwind('group inline-flex h-full items-center bg-white px-4 text-sm text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:bg-gray-200 focus-visible:text-gray-700 blk:bg-gray-900 blk:text-gray-400 blk:hover:text-gray-200 blk:focus-visible:bg-gray-700 blk:focus-visible:text-gray-200 lg:hidden')}>
-            {derivedIsEditorFocused ?
+            {isEditorFocused ?
               <svg className={tailwind('h-5 w-5')} stroke="currentColor" fill="none" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
