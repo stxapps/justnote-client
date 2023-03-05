@@ -469,8 +469,6 @@ export const fetch = () => async (dispatch, getState) => {
       listName, sortOn, doDescendingOrder, doFetchStgsAndInfo, pendingPins,
     };
     const fetched = await dataApi.fetch(params);
-    await dataApi.fetchStaticFiles(fetched.notes, fetched.conflictedNotes);
-
     dispatch({ type: FETCH_COMMIT, payload: { ...params, ...fetched } });
   } catch (error) {
     console.log('fetch error: ', error);
@@ -500,8 +498,6 @@ export const fetchMore = () => async (dispatch, getState) => {
 
   try {
     const fetched = await dataApi.fetchMore(payload);
-    await dataApi.fetchStaticFiles(fetched.notes, null);
-
     dispatch({ type: FETCH_MORE_COMMIT, payload: { ...payload, ...fetched } });
   } catch (error) {
     console.log('fetchMore error: ', error);

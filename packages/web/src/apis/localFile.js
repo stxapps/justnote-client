@@ -98,7 +98,9 @@ const listKeys = async () => {
     console.log('In localFile.listKeys, IndexedDB error:', error);
     keys = Object.keys(cachedContents);
   }
-  return /** @type string[] */(keys);
+  keys = keys.map(key => `${key}`); // Force key to be only string, no number.
+
+  return keys;
 };
 
 const localFile = {

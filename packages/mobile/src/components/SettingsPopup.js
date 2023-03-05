@@ -12,7 +12,6 @@ import {
   SETTINGS_VIEW_DATA, SETTINGS_VIEW_DATA_DELETE, SETTINGS_VIEW_LISTS,
   SETTINGS_VIEW_MISC, SETTINGS_VIEW_ABOUT, MD_WIDTH, LG_WIDTH,
 } from '../types/const';
-import { getThemeMode } from '../selectors';
 import cache from '../utils/cache';
 import { dialogFMV, sidebarFMV } from '../types/animConfigs';
 
@@ -53,7 +52,6 @@ const SettingsPopup = () => {
   const conflictedSettingsContents = useSelector(
     state => state.conflictedSettings.contents
   );
-  const themeMode = useSelector(state => getThemeMode(state));
   const [derivedIsShown, setDerivedIsShown] = useState(isShown);
   const popupAnim = useRef(new Animated.Value(0)).current;
   const sidebarAnim = useRef(new Animated.Value(0)).current;
@@ -382,7 +380,7 @@ const SettingsPopup = () => {
     );
 
     return (
-      <View {...viewPanResponder.panHandlers} style={cache('SP_modal', [tailwind('absolute inset-0 bg-white blk:bg-gray-900'), modalStyle], [insets.top, insets.bottom, insets.left, insets.right, themeMode])}>
+      <View {...viewPanResponder.panHandlers} style={cache('SP_modal', [tailwind('absolute inset-0 bg-white blk:bg-gray-900'), modalStyle], [insets.top, insets.bottom, insets.left, insets.right, tailwind])}>
         {_renderPanel(contentWithSidebar)}
         {/* Sidebar for mobile */}
         <View key="sidebar-for-mobile" style={[tailwind(`md:relative md:hidden ${sidebarCanvasStyleClasses}`), modalStyle]}>
@@ -518,7 +516,7 @@ const SettingsPopup = () => {
       <SettingsPopupConflict />
     );
     return (
-      <View style={cache('SP_modal', [tailwind('absolute inset-0 bg-white blk:bg-gray-900'), modalStyle], [insets.top, insets.bottom, insets.left, insets.right, themeMode])}>
+      <View style={cache('SP_modal', [tailwind('absolute inset-0 bg-white blk:bg-gray-900'), modalStyle], [insets.top, insets.bottom, insets.left, insets.right, tailwind])}>
         {_renderPanel(content)}
       </View>
     );

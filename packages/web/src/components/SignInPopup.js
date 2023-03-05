@@ -4,9 +4,7 @@ import { showConnect } from '@stacks/connect/dist/index.esm';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import userSession from '../userSession';
-import {
-  updatePopupUrlHash, updateUserData, updateUserSignedIn,
-} from '../actions';
+import { updatePopupUrlHash, updateUserData, updateUserSignedIn } from '../actions';
 import {
   DOMAIN_NAME, APP_NAME, APP_ICON_NAME, APP_SCOPES, SIGN_UP_POPUP, SIGN_IN_POPUP,
 } from '../types/const';

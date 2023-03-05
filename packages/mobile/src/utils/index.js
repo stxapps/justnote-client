@@ -1052,14 +1052,22 @@ export const createPinFPath = (rank, updatedDT, addedDT, id) => {
 };
 
 export const extractPinFPath = (fpath) => {
-  const [rank, updatedDTStr, addedDTStr, fname] = fpath.split('/').slice(1);
+  const arr = fpath.split('/');
+  if (arr.length !== 5) console.log(`In extractPinFPath, invalid fpath: ${fpath}`);
+
+  let id, ext;
+  const [rank, fname] = [arr[1] || '', arr[4] || ''];
+  const [updatedDTStr, addedDTStr] = [arr[2] || '', arr[3] || ''];
 
   const updatedDT = parseInt(updatedDTStr, 10);
   const addedDT = parseInt(addedDTStr, 10);
 
   const dotIndex = fname.lastIndexOf('.');
-  const ext = fname.substring(dotIndex + 1);
-  const id = fname.substring(0, dotIndex);
+  if (dotIndex === -1) {
+    [id, ext] = [fname, ''];
+  } else {
+    [id, ext] = [fname.substring(0, dotIndex), fname.substring(dotIndex + 1)];
+  }
 
   return { rank, updatedDT, addedDT, id, ext };
 };
@@ -1836,7 +1844,9 @@ export const batchPutFileWithRetry = async (
   return responses;
 };
 
-export const batchDeleteFileWithRetry = async (deleteFile, fpaths, callCount) => {
+export const batchDeleteFileWithRetry = async (
+  deleteFile, fpaths, callCount, dangerouslyIgnoreError = false
+) => {
 
   const responses = await Promise.all(
     fpaths.map((fpath) =>
@@ -1874,11 +1884,19 @@ export const batchDeleteFileWithRetry = async (deleteFile, fpaths, callCount) =>
   const failedFPaths = failedResponses.map(({ fpath }) => fpath);
 
   if (failedResponses.length) {
-    if (callCount + 1 >= MAX_TRY) throw failedResponses[0].error;
+    if (callCount + 1 >= MAX_TRY) {
+      if (dangerouslyIgnoreError) {
+        console.log('batchDeleteFileWithRetry error: ', failedResponses[0].error);
+        return responses;
+      }
+      throw failedResponses[0].error;
+    }
 
     return [
       ...responses.filter(({ success }) => success),
-      ...(await batchDeleteFileWithRetry(deleteFile, failedFPaths, callCount + 1)),
+      ...(await batchDeleteFileWithRetry(
+        deleteFile, failedFPaths, callCount + 1, dangerouslyIgnoreError
+      )),
     ];
   }
 

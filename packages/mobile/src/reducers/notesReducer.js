@@ -279,7 +279,11 @@ const notesReducer = (state = initialState, action) => {
     action.type === MERGE_SETTINGS_COMMIT
   ) {
     const { settings } = action.payload;
+
     const listNames = getAllListNames(settings.listNameMap);
+    if (action.type === CANCEL_DIED_SETTINGS || action.type === MERGE_SETTINGS_COMMIT) {
+      listNames.push(...action.payload.listNames);
+    }
 
     const newState = {};
     for (const listName in state) {

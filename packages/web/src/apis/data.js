@@ -191,6 +191,8 @@ const fetch = async (params) => {
   //   but also retrive from file paths in case the settings is gone.
   const listNames = getListNamesFromNoteIds(noteIds, conflictedIds);
 
+  await fetchStaticFiles(notes, conflictedNotes);
+
   return {
     notes, hasMore, conflictedNotes, listNames, settings, conflictedSettings, info,
   };
@@ -237,6 +239,8 @@ const fetchMore = async (params) => {
 
   const notes = toNotes(selectedNoteIds, fpaths, contents);
   const hasMore = filteredNoteIds.length > N_NOTES;
+
+  await fetchStaticFiles(notes, null);
 
   return { notes, hasMore, hasDisorder };
 };
@@ -373,22 +377,21 @@ const putPins = async (params) => {
     fpaths.push(createPinFPath(pin.rank, pin.updatedDT, pin.addedDT, pin.id));
     contents.push({});
   }
-
-  // Beware size should be max at N_NOTES, so can call batchPutFileWithRetry directly.
   // Use dangerouslyIgnoreError=true to manage which succeeded/failed manually.
   // Bug alert: if several pins and error, rollback is incorrect
   //   as some are successful but some aren't.
-  await batchPutFileWithRetry(getApi().putFile, fpaths, contents, 0);
+  await putFiles(fpaths, contents);
+
   return { pins };
 };
 
 const deletePins = async (params) => {
-
   const { pins } = params;
+
   const pinFPaths = pins.map(pin => {
     return createPinFPath(pin.rank, pin.updatedDT, pin.addedDT, pin.id);
   });
-  await batchDeleteFileWithRetry(getApi().deleteFile, pinFPaths, 0);
+  await deleteFiles(pinFPaths);
 
   return { pins };
 };
@@ -553,7 +556,7 @@ const deleteAllLocalFiles = async () => {
 };
 
 const data = {
-  getApi, listFPaths, listServerFPaths, toNotes, fetch, fetchMore, fetchStaticFiles,
+  getApi, listFPaths, listServerFPaths, toNotes, fetch, fetchMore,
   putNotes, getOldNotesInTrash, canDeleteListNames, putPins, deletePins, getFiles,
   putFiles, deleteFiles, getServerFilesToLocal, putLocalFilesToServer, deleteServerFiles,
   getLocalSettings, putLocalSettings, getUnsavedNotes, putUnsavedNote,

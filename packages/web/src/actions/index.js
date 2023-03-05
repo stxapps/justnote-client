@@ -77,7 +77,7 @@ import {
   getValidPurchase, doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins,
   getSortedNotes, separatePinnedValues, getRawPins, getFormattedTime,
   get24HFormattedTime, getWindowSize, getNote, getEditingListNameEditors,
-  batchGetFileWithRetry, batchPutFileWithRetry, getListNamesFromNoteIds,
+  batchGetFileWithRetry, getListNamesFromNoteIds,
 } from '../utils';
 import { isUint8Array, isBlob, convertBlobToDataUrl } from '../utils/index-web';
 import { _ } from '../utils/obj';
@@ -192,7 +192,7 @@ export const init = () => async (dispatch, getState) => {
         for (const noteId in conflictedNotes[listName]) {
           if (isBusyStatus(conflictedNotes[listName][noteId].status)) {
             e.preventDefault();
-            return e.returnValue = 'It looks like your selection on conflicted notes haven\'t been saved. Do you want to leave this site and discard your changes?';
+            return e.returnValue = 'It looks like your selection on conflicted notes hasn\'t been saved. Do you want to leave this site and discard your changes?';
           }
         }
       }
@@ -824,8 +824,6 @@ export const fetch = () => async (dispatch, getState) => {
       listName, sortOn, doDescendingOrder, doFetchStgsAndInfo, pendingPins,
     };
     const fetched = await dataApi.fetch(params);
-    await dataApi.fetchStaticFiles(fetched.notes, fetched.conflictedNotes);
-
     dispatch({ type: FETCH_COMMIT, payload: { ...params, ...fetched } });
   } catch (error) {
     console.log('fetch error: ', error);
@@ -855,8 +853,6 @@ export const fetchMore = () => async (dispatch, getState) => {
 
   try {
     const fetched = await dataApi.fetchMore(payload);
-    await dataApi.fetchStaticFiles(fetched.notes, null);
-
     dispatch({ type: FETCH_MORE_COMMIT, payload: { ...payload, ...fetched } });
   } catch (error) {
     console.log('fetchMore error: ', error);
@@ -2373,7 +2369,7 @@ const importAllDataLoop = async (dispatch, fpaths, contents) => {
     for (let i = 0; i < fpaths.length; i += N_NOTES) {
       const _fpaths = fpaths.slice(i, i + N_NOTES);
       const _contents = contents.slice(i, i + N_NOTES);
-      await batchPutFileWithRetry(dataApi.getApi().putFile, _fpaths, _contents, 0);
+      await dataApi.putFiles(_fpaths, _contents);
 
       doneCount += _fpaths.length;
       dispatch(updateImportAllDataProgress({ total, done: doneCount }));
@@ -2399,10 +2395,7 @@ const importAllDataLoop = async (dispatch, fpaths, contents) => {
 
 const parseImportedFile = async (dispatch, settingsParentIds, fileContent) => {
 
-  dispatch(updateImportAllDataProgress({
-    total: 'calculating...',
-    done: 0,
-  }));
+  dispatch(updateImportAllDataProgress({ total: 'calculating...', done: 0 }));
 
   let zip;
   try {
@@ -2998,7 +2991,8 @@ export const updateImportAllDataProgress = (progress) => {
 };
 
 export const exportAllData = () => async (dispatch, getState) => {
-  dispatch(updateExportAllDataProgress({ total: 'calculating...', done: 0 }));
+  let doneCount = 0;
+  dispatch(updateExportAllDataProgress({ total: 'calculating...', done: doneCount }));
 
   // Need to manually call it to wait for it properly!
   await sync(true, 2)(dispatch, getState);
@@ -3046,8 +3040,9 @@ export const exportAllData = () => async (dispatch, getState) => {
     return;
   }
 
-  let total = fpaths.length, doneCount = 0;
+  const total = fpaths.length;
   dispatch(updateExportAllDataProgress({ total, done: doneCount }));
+
   if (total === 0) return;
 
   try {
@@ -3055,13 +3050,17 @@ export const exportAllData = () => async (dispatch, getState) => {
     const zip = await import('@zip.js/zip.js');
     const zipWriter = new zip.ZipWriter(new zip.BlobWriter('application/zip'));
 
-    const pinFPaths = [], pinContents = [], idMap = {};
+    const errorResponses = [], pinFPaths = [], pinContents = [], idMap = {};
     for (let i = 0; i < fpaths.length; i += N_NOTES) {
+      const successResponses = [];
       const selectedFPaths = fpaths.slice(i, i + N_NOTES);
       const responses = await batchGetFileWithRetry(
         dataApi.getApi().getFile, selectedFPaths, 0, true
       );
-      const successResponses = responses.filter(r => r.success);
+      for (const response of responses) {
+        if (response.success) successResponses.push(response);
+        else errorResponses.push(response);
+      }
 
       const filteredResponses = [];
       for (let { fpath, content } of successResponses) {
@@ -3103,7 +3102,9 @@ export const exportAllData = () => async (dispatch, getState) => {
       }));
 
       doneCount += selectedFPaths.length;
-      dispatch(updateExportAllDataProgress({ total, done: doneCount }));
+      if (doneCount < total || errorResponses.length === 0) {
+        dispatch(updateExportAllDataProgress({ total, done: doneCount }));
+      }
     }
 
     // Need idMap to be all populated before mapping pinId to a new id.
@@ -3128,6 +3129,14 @@ export const exportAllData = () => async (dispatch, getState) => {
 
     const blob = await zipWriter.close();
     saveAs(blob, 'justnote-data.zip');
+
+    if (errorResponses.length > 0) {
+      dispatch(updateExportAllDataProgress({
+        total: -1,
+        done: -1,
+        error: 'Some download requests failed. Data might be missing in the exported file.',
+      }));
+    }
   } catch (error) {
     dispatch(updateExportAllDataProgress({
       total: -1,

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import {
-  View, Text, TouchableOpacity, TextInput, Keyboard, Platform, LayoutAnimation,
+  View, Text, TouchableOpacity, TextInput, Keyboard, Platform,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
@@ -19,7 +19,6 @@ import {
 } from '../types/const';
 import { getListNameMap, makeGetListNameEditor, getThemeMode } from '../selectors';
 import { validateListNameDisplayName, getAllListNames } from '../utils';
-import { listsFMV } from '../types/animConfigs';
 import { initialListNameEditorState } from '../types/initialStates';
 
 import { useSafeAreaFrame, useTailwind } from '.';
@@ -215,18 +214,10 @@ const _ListNameEditor = (props) => {
   };
 
   const onMoveUpBtnClick = () => {
-    if (Platform.OS === 'ios') {
-      const animConfig = listsFMV();
-      LayoutAnimation.configureNext(animConfig);
-    }
     dispatch(moveListName(listNameObj.listName, SWAP_LEFT));
   };
 
   const onMoveDownBtnClick = () => {
-    if (Platform.OS === 'ios') {
-      const animConfig = listsFMV();
-      LayoutAnimation.configureNext(animConfig);
-    }
     dispatch(moveListName(listNameObj.listName, SWAP_RIGHT));
   };
 
