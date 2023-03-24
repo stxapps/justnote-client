@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useRef, useMemo } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 
+import { endIapConnection } from '../actions';
 import { LG_WIDTH } from '../types/const';
 import { debounce, isMobile as _isMobile, scrollWindowTopOrIntoView } from '../utils';
 
@@ -30,6 +31,10 @@ const Main = () => {
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const isSettingsPopupShown = useSelector(state => state.display.isSettingsPopupShown);
   const isMobile = useMemo(() => _isMobile(), []);
+  const dispatch = useDispatch();
+
+  // To make sure useEffect is componentWillUnmount
+  const dispatchRef = useRef(dispatch);
 
   useEffect(() => {
     // Need to add class name: overflow-hidden to <body>
@@ -58,6 +63,16 @@ const Main = () => {
       window.visualViewport.removeEventListener('scroll', scrollListener);
     };
   }, [isSettingsPopupShown, isMobile]);
+
+  useEffect(() => {
+    dispatchRef.current = dispatch;
+  }, [dispatch]);
+
+  useEffect(() => {
+    return () => {
+      dispatchRef.current(endIapConnection());
+    };
+  }, []);
 
   const panel = safeAreaWidth < LG_WIDTH ? <NavPanel /> : <ColsPanel />;
 

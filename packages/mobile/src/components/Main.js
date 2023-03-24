@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { useDispatch } from 'react-redux';
 
+import { endIapConnection } from '../actions';
 import { LG_WIDTH } from '../types/const';
 
 import { useSafeAreaFrame } from '.';
@@ -29,6 +31,21 @@ import AccessErrorPopup from './AccessErrorPopup';
 const Main = () => {
 
   const { width: safeAreaWidth } = useSafeAreaFrame();
+  const dispatch = useDispatch();
+
+  // To make sure useEffect is componentWillUnmount
+  const dispatchRef = useRef(dispatch);
+
+  useEffect(() => {
+    dispatchRef.current = dispatch;
+  }, [dispatch]);
+
+  useEffect(() => {
+    return () => {
+      dispatchRef.current(endIapConnection());
+    };
+  }, []);
+
   const panel = safeAreaWidth < LG_WIDTH ? <NavPanel /> : <ColsPanel />;
 
   return (

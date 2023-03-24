@@ -12,8 +12,7 @@ import {
   NOTE_DATE_FORMAT_SYSTEM, WHT_MODE, BLK_MODE, SYSTEM_MODE, CUSTOM_MODE,
 } from '../types/const';
 import {
-  getRawThemeMode, getRawThemeCustomOptions, getDoEnableExtraFeatures,
-  getNoteDateExample,
+  getRawThemeMode, getRawThemeCustomOptions, getNoteDateExample,
 } from '../selectors';
 
 import { useTailwind } from '.';
@@ -42,7 +41,6 @@ const SettingsPopupMisc = (props) => {
   const doUseLocalTheme = useSelector(state => state.localSettings.doUseLocalTheme);
   const themeMode = useSelector(state => getRawThemeMode(state));
   const customOptions = useSelector(state => getRawThemeCustomOptions(state));
-  const doEnableExtraFeatures = useSelector(state => getDoEnableExtraFeatures(state));
   const whtTimeInput = useRef(null);
   const blkTimeInput = useRef(null);
   const dispatch = useDispatch();
@@ -224,7 +222,7 @@ const SettingsPopupMisc = (props) => {
         </button>
         <h3 className={tailwind('pb-2 text-xl font-medium leading-none text-gray-800 blk:text-gray-100')}>Misc.</h3>
       </div>
-      {doEnableExtraFeatures && <div className={tailwind('mt-6 flex flex-col md:mt-0')}>
+      <div className={tailwind('mt-6 flex flex-col md:mt-0')}>
         <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>Appearance</h4>
         <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Choose appearance to be <span className={tailwind('font-semibold blk:text-gray-300')}>Light</span>, <span className={tailwind('font-semibold blk:text-gray-300')}>Dark</span>, <span className={tailwind('font-semibold blk:text-gray-300')}>System</span> (uses your device's setting), or <span className={tailwind('font-semibold blk:text-gray-300')}>Custom</span> (schedules times to change appearance automatically). For Sync, your choosing is synced across your devices. For Device, you can choose and use the setting for this device only.</p>
         <div className={tailwind('mx-auto mt-2.5 w-full max-w-sm rounded-md bg-white shadow-sm blk:bg-gray-900')}>
@@ -283,8 +281,8 @@ const SettingsPopupMisc = (props) => {
             </div>
           </button>
         </div>
-      </div>}
-      <div className={tailwind(`flex flex-col ${doEnableExtraFeatures ? 'mt-10' : 'mt-6 md:mt-0'}`)}>
+      </div>
+      <div className={tailwind('mt-10 flex flex-col')}>
         <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>List Order On</h4>
         <div className={tailwind('sm:flex sm:items-start sm:justify-between sm:space-x-4')}>
           <p className={tailwind('mt-2.5 flex-shrink flex-grow text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Choose whether your notes are sorted on the <span className={tailwind('font-semibold')}>added date</span> or <span className={tailwind('font-semibold')}>updated date</span> when you browse your notes.</p>
@@ -341,7 +339,7 @@ const SettingsPopupMisc = (props) => {
           <span aria-hidden="true" className={tailwind(`inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out blk:bg-gray-300 ${doShowDateBtnInnerClassNames}`)} />
         </span>
       </div>
-      {doEnableExtraFeatures && <div className={tailwind('mt-10')}>
+      <div className={tailwind('mt-10')}>
         <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>Note Date Formats</h4>
         <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Choose a date format for your note dates.</p>
         <div className={tailwind('mx-auto mt-2.5 w-full max-w-sm rounded-md border border-gray-200 bg-white p-5 shadow-sm blk:border-gray-700 blk:bg-gray-900')}>
@@ -366,8 +364,8 @@ const SettingsPopupMisc = (props) => {
           </div>
           <p className={tailwind('mt-4 text-sm text-gray-500 blk:text-gray-400')}>Example: {noteDateExample}</p>
         </div>
-      </div>}
-      {doEnableExtraFeatures && <div className={tailwind('mt-10 flex items-center justify-between space-x-4')}>
+      </div>
+      <div className={tailwind('mt-10 flex items-center justify-between space-x-4')}>
         <div className={tailwind('flex flex-col')}>
           <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>Section By Month</h4>
           <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Section your notes by month and show the month at the top of each section.</p>
@@ -375,8 +373,8 @@ const SettingsPopupMisc = (props) => {
         <span onClick={onDoSectionBtnClick} role="checkbox" tabIndex={0} aria-checked="true" aria-labelledby="section-month-option-label" aria-describedby="section-month-option-description" className={tailwind(`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:focus:ring-offset-gray-900 ${doSectionBtnClassNames}`)}>
           <span aria-hidden="true" className={tailwind(`inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out blk:bg-gray-300 ${doSectionBtnInnerClassNames}`)} />
         </span>
-      </div>}
-      {doEnableExtraFeatures && <div className={tailwind('mt-10 flex items-center justify-between space-x-4')}>
+      </div>
+      <div className={tailwind('mt-10 flex items-center justify-between space-x-4')}>
         <div className={tailwind('flex flex-col')}>
           <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>More Font Sizes</h4>
           <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Enable more font size options in the note editor.</p>
@@ -384,7 +382,7 @@ const SettingsPopupMisc = (props) => {
         <span onClick={onDoMoreFontSizesBtnClick} role="checkbox" tabIndex={0} aria-checked="true" aria-labelledby="font-size-option-label" aria-describedby="font-size-option-description" className={tailwind(`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:focus:ring-offset-gray-900 ${doMoreFontSizesBtnClassNames}`)}>
           <span aria-hidden="true" className={tailwind(`inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out blk:bg-gray-300 ${doMoreFontSizesBtnInnerClassNames}`)} />
         </span>
-      </div>}
+      </div>
       <div className={tailwind('mt-10 mb-4 flex items-center justify-between space-x-4')}>
         <div className={tailwind('flex flex-col')}>
           <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>Auto Cleanup</h4>

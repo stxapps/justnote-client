@@ -4,8 +4,10 @@ import { LexoRank } from '@wewatch/lexorank';
 
 import userSession from '../userSession';
 import axios from '../axiosWrapper';
+import iapApi from '../paddleWrapper';
 import dataApi from '../apis/data';
 import fileApi from '../apis/localFile';
+import lsgApi from '../apis/localSg';
 import {
   INIT, UPDATE_HREF, UPDATE_WINDOW_SIZE, UPDATE_VISUAL_SIZE, UPDATE_USER,
   UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP,
@@ -37,13 +39,13 @@ import {
   UPDATE_EDITOR_IS_UPLOADING, UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_EDITING_NOTE,
   UPDATE_UNSAVED_NOTE, DELETE_UNSAVED_NOTES, CLEAN_UP_STATIC_FILES,
   CLEAN_UP_STATIC_FILES_COMMIT, CLEAN_UP_STATIC_FILES_ROLLBACK, UPDATE_STACKS_ACCESS,
-  REQUEST_PURCHASE, RESTORE_PURCHASES, RESTORE_PURCHASES_COMMIT,
-  RESTORE_PURCHASES_ROLLBACK, REFRESH_PURCHASES, REFRESH_PURCHASES_COMMIT,
-  REFRESH_PURCHASES_ROLLBACK,
-  UPDATE_IAP_PUBLIC_KEY, UPDATE_IAP_PRODUCT_STATUS, UPDATE_IAP_PURCHASE_STATUS,
-  UPDATE_IAP_RESTORE_STATUS, UPDATE_IAP_REFRESH_STATUS,
-  PIN_NOTE, PIN_NOTE_COMMIT, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_COMMIT,
-  UNPIN_NOTE_ROLLBACK, MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_COMMIT,
+  GET_PRODUCTS, GET_PRODUCTS_COMMIT, GET_PRODUCTS_ROLLBACK, REQUEST_PURCHASE,
+  REQUEST_PURCHASE_COMMIT, REQUEST_PURCHASE_ROLLBACK, RESTORE_PURCHASES,
+  RESTORE_PURCHASES_COMMIT, RESTORE_PURCHASES_ROLLBACK, REFRESH_PURCHASES,
+  REFRESH_PURCHASES_COMMIT, REFRESH_PURCHASES_ROLLBACK, UPDATE_IAP_PUBLIC_KEY,
+  UPDATE_IAP_PRODUCT_STATUS, UPDATE_IAP_PURCHASE_STATUS, UPDATE_IAP_RESTORE_STATUS,
+  UPDATE_IAP_REFRESH_STATUS, PIN_NOTE, PIN_NOTE_COMMIT, PIN_NOTE_ROLLBACK, UNPIN_NOTE,
+  UNPIN_NOTE_COMMIT, UNPIN_NOTE_ROLLBACK, MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_COMMIT,
   MOVE_PINNED_NOTE_ROLLBACK, CANCEL_DIED_PINS, UPDATE_SYSTEM_THEME_MODE,
   UPDATE_DO_USE_LOCAL_THEME, UPDATE_DEFAULT_THEME, UPDATE_LOCAL_THEME,
   UPDATE_UPDATING_THEME_MODE, UPDATE_TIME_PICK, UPDATE_IS_24H_FORMAT,
@@ -60,11 +62,13 @@ import {
   DISCARD_ACTION_UPDATE_LIST_NAME, MY_NOTES, TRASH, ARCHIVE, ID, NEW_NOTE, NEW_NOTE_OBJ,
   ADDED_DT, UPDATED_DT, DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES,
   N_DAYS, CD_ROOT, NOTES, IMAGES, SETTINGS, INFO, INDEX, DOT_JSON, SHOW_SYNCED, PINS,
-  LG_WIDTH, IMAGE_FILE_EXTS, IAP_STATUS_URL, COM_JUSTNOTECC, SIGNED_TEST_STRING, VALID,
-  ACTIVE, SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS, WHT_MODE,
+  LG_WIDTH, IMAGE_FILE_EXTS, IAP_VERIFY_URL, IAP_STATUS_URL, PADDLE, COM_JUSTNOTECC,
+  COM_JUSTNOTECC_SUPPORTER, SIGNED_TEST_STRING, VALID, INVALID, ACTIVE, UNKNOWN,
+  SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS, WHT_MODE,
   BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE, FEATURE_DATE_FORMAT,
   FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES,
   NOTE_DATE_SHOWING_MODE_HIDE, NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS,
+  PADDLE_RANDOM_ID,
 } from '../types/const';
 import {
   throttle, extractUrl, urlHashToObj, objToUrlHash, isBusyStatus, isEqual,
@@ -313,6 +317,8 @@ export const updateUserSignedIn = () => async (dispatch, getState) => {
 };
 
 const resetState = async (dispatch) => {
+  lsgApi.removeItemSync(PADDLE_RANDOM_ID);
+
   // clear file storage
   await dataApi.deleteAllLocalFiles();
 
@@ -3372,8 +3378,40 @@ export const updateDeleteAllDataProgress = (progress) => {
   };
 };
 
+const verifyPurchase = async (rawPurchase) => {
+  if (!rawPurchase) return { status: INVALID };
+
+  const source = PADDLE;
+
+  const sigObj = await userSession.signECDSA(SIGNED_TEST_STRING);
+  const userId = sigObj.publicKey;
+
+  const productId = rawPurchase.productId;
+  const token = rawPurchase.purchaseToken;
+  const paddleUserId = rawPurchase.paddleUserId;
+  const passthrough = rawPurchase.passthrough;
+
+  if (!token) {
+    console.log('No purchaseToken in rawPurchase');
+    return { status: INVALID };
+  }
+
+  const reqBody = { source, userId, productId, token, paddleUserId, passthrough };
+
+  let verifyResult;
+  try {
+    const res = await axios.post(IAP_VERIFY_URL, reqBody);
+    verifyResult = res.data;
+  } catch (error) {
+    console.log(`Error when contact IAP server to verify with reqBody: ${JSON.stringify(reqBody)}, Error: `, error);
+    return { status: UNKNOWN };
+  }
+
+  return verifyResult;
+};
+
 const getIapStatus = async (doForce) => {
-  const sigObj = userSession.signECDSA(SIGNED_TEST_STRING);
+  const sigObj = await userSession.signECDSA(SIGNED_TEST_STRING);
   const reqBody = {
     userId: sigObj.publicKey,
     signature: sigObj.signature,
@@ -3424,6 +3462,98 @@ const getPurchases = (
   dispatch({ type: commitAction, payload: statusResult });
 };
 
+const iapUpdatedListener = (dispatch, getState) => async (rawPurchase) => {
+  const verifyResult = await verifyPurchase(rawPurchase);
+  dispatch({
+    type: REQUEST_PURCHASE_COMMIT,
+    payload: { ...verifyResult, rawPurchase },
+  });
+};
+
+const iapErrorListener = (dispatch, getState) => async (error) => {
+  console.log('Error in iapErrorListener: ', error);
+  if (error.code === 'E_USER_CANCELLED') {
+    dispatch(updateIapPurchaseStatus(null, null));
+  } else {
+    dispatch({ type: REQUEST_PURCHASE_ROLLBACK });
+  }
+};
+
+const registerIapListeners = (doRegister, dispatch, getState) => {
+  if (doRegister) {
+    if (!vars.iap.updatedEventEmitter) {
+      vars.iap.updatedEventEmitter = iapApi.purchaseUpdatedListener(
+        iapUpdatedListener(dispatch, getState)
+      );
+    }
+    if (!vars.iap.errorEventEmitter) {
+      vars.iap.errorEventEmitter = iapApi.purchaseErrorListener(
+        iapErrorListener(dispatch, getState)
+      );
+    }
+  } else {
+    if (vars.iap.updatedEventEmitter) {
+      vars.iap.updatedEventEmitter.remove();
+      vars.iap.updatedEventEmitter = null;
+    }
+    if (vars.iap.errorEventEmitter) {
+      vars.iap.errorEventEmitter.remove();
+      vars.iap.errorEventEmitter = null;
+    }
+  }
+};
+
+export const endIapConnection = (isInit = false) => async (dispatch, getState) => {
+  registerIapListeners(false, dispatch, getState);
+
+  if (!isInit) {
+    vars.iap.didGetProducts = false;
+    dispatch(updateIapProductStatus(null, null, null));
+  }
+};
+
+export const initIapConnectionAndGetProducts = (doForce) => async (
+  dispatch, getState
+) => {
+  if (vars.iap.didGetProducts && !doForce) return;
+  vars.iap.didGetProducts = true;
+  dispatch({ type: GET_PRODUCTS });
+
+  if (doForce) await endIapConnection(true)(dispatch, getState);
+
+  try {
+    const canMakePayments = await iapApi.initConnection();
+    registerIapListeners(true, dispatch, getState);
+
+    let products = null;
+    if (canMakePayments) {
+      products = await iapApi.getSubscriptions([COM_JUSTNOTECC_SUPPORTER]);
+    }
+
+    dispatch({
+      type: GET_PRODUCTS_COMMIT,
+      payload: { canMakePayments, products },
+    });
+  } catch (error) {
+    console.log('Error when init iap and get products: ', error);
+    dispatch({ type: GET_PRODUCTS_ROLLBACK });
+  }
+};
+
+export const requestPurchase = (product) => async (dispatch, getState) => {
+  dispatch({ type: REQUEST_PURCHASE });
+  try {
+    await iapApi.requestSubscription(product.productId);
+  } catch (error) {
+    console.log('Error when request purchase: ', error);
+    if (error.code === 'E_USER_CANCELLED') {
+      dispatch(updateIapPurchaseStatus(null, null));
+    } else {
+      dispatch({ type: REQUEST_PURCHASE_ROLLBACK });
+    }
+  }
+};
+
 export const restorePurchases = () => async (dispatch, getState) => {
   await getPurchases(
     RESTORE_PURCHASES, RESTORE_PURCHASES_COMMIT, RESTORE_PURCHASES_ROLLBACK,
@@ -3462,8 +3592,19 @@ export const checkPurchases = () => async (dispatch, getState) => {
   )(dispatch, getState);
 };
 
+export const retryVerifyPurchase = () => async (dispatch, getState) => {
+  const rawPurchase = getState().iap.rawPurchase;
+
+  dispatch({ type: REQUEST_PURCHASE });
+  const verifyResult = await verifyPurchase(rawPurchase);
+  dispatch({
+    type: REQUEST_PURCHASE_COMMIT,
+    payload: { ...verifyResult, rawPurchase },
+  });
+};
+
 export const updateIapPublicKey = () => async (dispatch, getState) => {
-  const sigObj = userSession.signECDSA(SIGNED_TEST_STRING);
+  const sigObj = await userSession.signECDSA(SIGNED_TEST_STRING);
   dispatch({ type: UPDATE_IAP_PUBLIC_KEY, payload: sigObj.publicKey });
 };
 

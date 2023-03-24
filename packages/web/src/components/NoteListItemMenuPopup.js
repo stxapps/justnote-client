@@ -12,9 +12,7 @@ import {
   NOTE_LIST_ITEM_MENU_POPUP, LIST_NAMES_POPUP, PIN_MENU_POPUP, CONFIRM_DELETE_POPUP,
   MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_ITEM_MENU, LIST_NAMES_MODE_MOVE_NOTES,
 } from '../types/const';
-import {
-  getListNameMap, getDoEnableExtraFeatures, makeGetPinStatus,
-} from '../selectors';
+import { getListNameMap, makeGetPinStatus } from '../selectors';
 import { getListNameDisplayName, getAllListNames } from '../utils';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
 
@@ -33,7 +31,6 @@ const NoteListItemMenuPopup = () => {
   const listNameMap = useSelector(state => getListNameMap(state));
   const selectingNoteId = useSelector(state => state.display.selectingNoteId);
   const pinStatus = useSelector(state => getPinStatus(state, selectingNoteId));
-  const doEnableExtraFeatures = useSelector(state => getDoEnableExtraFeatures(state));
   const [popupSize, setPopupSize] = useState(null);
   const popup = useRef(null);
   const cancelBtn = useRef(null);
@@ -98,7 +95,7 @@ const NoteListItemMenuPopup = () => {
       // Only when no other pending actions and list name is not TRASH.
       // If busy, the menuBtn will be disabled.
       if (pinStatus === PINNED) menu = [...menu, MANAGE_PIN];
-      else if (doEnableExtraFeatures && pinStatus === null) menu = [...menu, PIN];
+      else if (pinStatus === null) menu = [...menu, PIN];
 
       menu = [...menu, VIEW_AS_WEBPAGE];
     }

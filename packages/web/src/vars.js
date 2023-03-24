@@ -84,6 +84,12 @@ const editorReducer = {
   didIncreaseBlurCount: false,
 };
 
+const iap = {
+  didGetProducts: false,
+  updatedEventEmitter: null,
+  errorEventEmitter: null,
+};
+
 export const syncMode = {
   doSyncMode: false,
 };
@@ -96,6 +102,6 @@ const vars = {
   cachedFPaths, cachedServerFPaths, scrollPanel, keyboard, runAfterFetchTask,
   randomHouseworkTasks, updateNoteIdUrlHash, updateNoteId, changeListName,
   updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, deleteOldNotes, updateSettings,
-  updateSettingsPopup, displayReducer, editorReducer, syncMode,
+  updateSettingsPopup, displayReducer, editorReducer, iap, syncMode,
 };
 export default vars;

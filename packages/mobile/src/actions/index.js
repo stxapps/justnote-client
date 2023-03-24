@@ -1,7 +1,7 @@
 import {
   Linking, AppState, Platform, Appearance, Share, Alert, PermissionsAndroid,
 } from 'react-native';
-import * as RNIap from 'react-native-iap';
+import * as iapApi from 'react-native-iap';
 import { LexoRank } from '@wewatch/lexorank';
 import { is24HourFormat } from 'react-native-device-time-format';
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
@@ -45,14 +45,13 @@ import {
   UPDATE_EDITOR_IS_UPLOADING, UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_EDITING_NOTE,
   UPDATE_UNSAVED_NOTE, DELETE_UNSAVED_NOTES, CLEAN_UP_STATIC_FILES,
   CLEAN_UP_STATIC_FILES_COMMIT, CLEAN_UP_STATIC_FILES_ROLLBACK, UPDATE_STACKS_ACCESS,
-  GET_PRODUCTS, GET_PRODUCTS_COMMIT, GET_PRODUCTS_ROLLBACK,
-  REQUEST_PURCHASE, REQUEST_PURCHASE_COMMIT, REQUEST_PURCHASE_ROLLBACK,
-  RESTORE_PURCHASES, RESTORE_PURCHASES_COMMIT, RESTORE_PURCHASES_ROLLBACK,
-  REFRESH_PURCHASES, REFRESH_PURCHASES_COMMIT, REFRESH_PURCHASES_ROLLBACK,
-  UPDATE_IAP_PUBLIC_KEY, UPDATE_IAP_PRODUCT_STATUS, UPDATE_IAP_PURCHASE_STATUS,
-  UPDATE_IAP_RESTORE_STATUS, UPDATE_IAP_REFRESH_STATUS,
-  PIN_NOTE, PIN_NOTE_COMMIT, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_COMMIT,
-  UNPIN_NOTE_ROLLBACK, MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_COMMIT,
+  GET_PRODUCTS, GET_PRODUCTS_COMMIT, GET_PRODUCTS_ROLLBACK, REQUEST_PURCHASE,
+  REQUEST_PURCHASE_COMMIT, REQUEST_PURCHASE_ROLLBACK, RESTORE_PURCHASES,
+  RESTORE_PURCHASES_COMMIT, RESTORE_PURCHASES_ROLLBACK, REFRESH_PURCHASES,
+  REFRESH_PURCHASES_COMMIT, REFRESH_PURCHASES_ROLLBACK, UPDATE_IAP_PUBLIC_KEY,
+  UPDATE_IAP_PRODUCT_STATUS, UPDATE_IAP_PURCHASE_STATUS, UPDATE_IAP_RESTORE_STATUS,
+  UPDATE_IAP_REFRESH_STATUS, PIN_NOTE, PIN_NOTE_COMMIT, PIN_NOTE_ROLLBACK, UNPIN_NOTE,
+  UNPIN_NOTE_COMMIT, UNPIN_NOTE_ROLLBACK, MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_COMMIT,
   MOVE_PINNED_NOTE_ROLLBACK, CANCEL_DIED_PINS, UPDATE_SYSTEM_THEME_MODE,
   UPDATE_DO_USE_LOCAL_THEME, UPDATE_DEFAULT_THEME, UPDATE_LOCAL_THEME,
   UPDATE_UPDATING_THEME_MODE, UPDATE_TIME_PICK, UPDATE_IS_24H_FORMAT,
@@ -2674,7 +2673,7 @@ const verifyPurchase = async (rawPurchase) => {
 
   try {
     if (Platform.OS !== 'android') {
-      await RNIap.finishTransaction(rawPurchase, false);
+      await iapApi.finishTransaction(rawPurchase, false);
     }
   } catch (error) {
     console.log('Error when finishTransaction: ', error);
@@ -2750,7 +2749,7 @@ const getPurchases = (
     // As iapUpdatedListener can be missed, need to getAvailablePurchases
     const validPurchases = [], originalOrderIds = [];
 
-    const rawPurchases = await RNIap.getAvailablePurchases();
+    const rawPurchases = await iapApi.getAvailablePurchases();
     for (const rawPurchase of rawPurchases) {
       let originalOrderId;
       if (Platform.OS === 'ios') {
@@ -2803,42 +2802,40 @@ const iapErrorListener = (dispatch, getState) => async (error) => {
   }
 };
 
-let iapUpdatedEventEmitter = null, iapErrorEventEmitter = null;
 const registerIapListeners = (doRegister, dispatch, getState) => {
   if (doRegister) {
-    if (!iapUpdatedEventEmitter) {
-      iapUpdatedEventEmitter = RNIap.purchaseUpdatedListener(
+    if (!vars.iap.updatedEventEmitter) {
+      vars.iap.updatedEventEmitter = iapApi.purchaseUpdatedListener(
         iapUpdatedListener(dispatch, getState)
       );
     }
-    if (!iapErrorEventEmitter) {
-      iapErrorEventEmitter = RNIap.purchaseErrorListener(
+    if (!vars.iap.errorEventEmitter) {
+      vars.iap.errorEventEmitter = iapApi.purchaseErrorListener(
         iapErrorListener(dispatch, getState)
       );
     }
   } else {
-    if (iapUpdatedEventEmitter) {
-      iapUpdatedEventEmitter.remove();
-      iapUpdatedEventEmitter = null;
+    if (vars.iap.updatedEventEmitter) {
+      vars.iap.updatedEventEmitter.remove();
+      vars.iap.updatedEventEmitter = null;
     }
-    if (iapErrorEventEmitter) {
-      iapErrorEventEmitter.remove();
-      iapErrorEventEmitter = null;
+    if (vars.iap.errorEventEmitter) {
+      vars.iap.errorEventEmitter.remove();
+      vars.iap.errorEventEmitter = null;
     }
   }
 };
 
-let didGetProducts = false;
 export const endIapConnection = (isInit = false) => async (dispatch, getState) => {
   registerIapListeners(false, dispatch, getState);
   try {
-    await RNIap.endConnection();
+    await iapApi.endConnection();
   } catch (error) {
     console.log('Error when end IAP connection: ', error);
   }
 
   if (!isInit) {
-    didGetProducts = false;
+    vars.iap.didGetProducts = false;
     dispatch(updateIapProductStatus(null, null, null));
   }
 };
@@ -2846,19 +2843,19 @@ export const endIapConnection = (isInit = false) => async (dispatch, getState) =
 export const initIapConnectionAndGetProducts = (doForce) => async (
   dispatch, getState
 ) => {
-  if (didGetProducts && !doForce) return;
-  didGetProducts = true;
+  if (vars.iap.didGetProducts && !doForce) return;
+  vars.iap.didGetProducts = true;
   dispatch({ type: GET_PRODUCTS });
 
   if (doForce) await endIapConnection(true)(dispatch, getState);
 
   try {
-    const canMakePayments = await RNIap.initConnection();
+    const canMakePayments = await iapApi.initConnection();
     registerIapListeners(true, dispatch, getState);
 
     let products = null;
     if (canMakePayments) {
-      products = await RNIap.getSubscriptions([COM_JUSTNOTECC_SUPPORTER]);
+      products = await iapApi.getSubscriptions([COM_JUSTNOTECC_SUPPORTER]);
     }
 
     dispatch({
@@ -2874,7 +2871,7 @@ export const initIapConnectionAndGetProducts = (doForce) => async (
 export const requestPurchase = (product) => async (dispatch, getState) => {
   dispatch({ type: REQUEST_PURCHASE });
   try {
-    await RNIap.requestSubscription(product.productId);
+    await iapApi.requestSubscription(product.productId);
   } catch (error) {
     console.log('Error when request purchase: ', error);
     if (error.code === 'E_USER_CANCELLED') {
@@ -2924,9 +2921,9 @@ export const checkPurchases = () => async (dispatch, getState) => {
 };
 
 export const retryVerifyPurchase = () => async (dispatch, getState) => {
-  dispatch({ type: REQUEST_PURCHASE });
-
   const rawPurchase = getState().iap.rawPurchase;
+
+  dispatch({ type: REQUEST_PURCHASE });
   const verifyResult = await verifyPurchase(rawPurchase);
   dispatch({
     type: REQUEST_PURCHASE_COMMIT,

@@ -21,4 +21,5 @@ declare module '*.json' {
 interface Window {
   PasswordCredential?: any;
   JustnoteReactWebApp?: any;
+  Paddle?: any;
 }
