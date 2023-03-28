@@ -1822,6 +1822,16 @@ export const updateSettingsPopup = (isShown, doCheckEditing = false) => async (
 
   vars.updateSettingsPopup.didCall = true;
   updatePopupUrlHash(SETTINGS_POPUP, isShown);
+
+  // Paddle with Master card causes closing the settings popup not working.
+  // Like there are several same items in history stack and need to back serveral times.
+  if (!isShown) {
+    await sleep(250);
+    if (window.location.hash.includes('stp=true')) {
+      console.log('Seem settings popup is still showing, force reset.');
+      window.location.hash = ''; // Need to reset i.e. close search popup too.
+    }
+  }
 };
 
 export const updateSettingsViewId = (
