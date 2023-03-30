@@ -87,7 +87,7 @@ const NoteListItems = () => {
     safeAreaWidth, sortOn, doSectionNotesByMonth,
   ]);
 
-  const onScrollEnd = useCallback((e) => {
+  const onScroll = useCallback((e) => {
     const contentHeight = e.nativeEvent.contentSize.height;
     const layoutHeight = e.nativeEvent.layoutMeasurement.height;
     const pageYOffset = e.nativeEvent.contentOffset.y;
@@ -117,7 +117,6 @@ const NoteListItems = () => {
   const renderEmpty = useCallback(() => {
 
     const displayName = getListNameDisplayName(listName, listNameMap);
-    vars.scrollPanel.pageYOffset = 0;
 
     if (searchString !== '') {
       return (
@@ -225,14 +224,12 @@ const NoteListItems = () => {
   }, [renderFetchMoreBtn, renderFetchingMore, renderUpdateFetchedBtn, tailwind]);
 
   useEffect(() => {
-    if (flatList.current) {
-      setTimeout(() => {
-        if (flatList.current) {
-          flatList.current.scrollToOffset({ offset: 0, animated: true });
-          vars.scrollPanel.pageYOffset = 0;
-        }
-      }, 1);
-    }
+    setTimeout(() => {
+      if (flatList.current) {
+        flatList.current.scrollToOffset({ offset: 0, animated: true });
+      }
+      vars.scrollPanel.pageYOffset = 0;
+    }, 1);
   }, [listChangedCount]);
 
   return (
@@ -247,8 +244,8 @@ const NoteListItems = () => {
         onEndReached={onEndReached}
         onEndReachedThreshold={0.2}
         removeClippedSubviews={false}
-        onScrollEndDrag={onScrollEnd}
-        onMomentumScrollEnd={onScrollEnd}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         overScrollMode="always" />
     </View>
   );
