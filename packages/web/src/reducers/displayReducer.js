@@ -341,20 +341,22 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === FETCH_ROLLBACK) {
+    const { error } = action.payload;
+
     const newState = { ...state };
     if (
       (
-        isObject(action.payload) &&
-        isString(action.payload.message) &&
+        isObject(error) &&
+        isString(error.message) &&
         (
-          action.payload.message.includes('401') ||
-          action.payload.message.includes('GaiaError error 7')
+          error.message.includes('401') ||
+          error.message.includes('GaiaError error 7')
         )
       ) ||
       (
-        isObject(action.payload) &&
-        isObject(action.payload.hubError) &&
-        action.payload.hubError.statusCode === 401
+        isObject(error) &&
+        isObject(error.hubError) &&
+        error.hubError.statusCode === 401
       )
     ) {
       newState.isAccessErrorPopupShown = true;

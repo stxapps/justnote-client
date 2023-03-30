@@ -74,6 +74,10 @@ const updateSettingsPopup = {
   didCall: false,
 };
 
+const notesReducer = {
+  interveningNoteIds: {},
+};
+
 const displayReducer = {
   doRightPanelAnimateHidden: false,
 };
@@ -102,6 +106,6 @@ const vars = {
   cachedFPaths, cachedServerFPaths, scrollPanel, keyboard, runAfterFetchTask,
   randomHouseworkTasks, updateNoteIdUrlHash, updateNoteId, changeListName,
   updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, deleteOldNotes, updateSettings,
-  updateSettingsPopup, displayReducer, editorReducer, iap, syncMode,
+  updateSettingsPopup, notesReducer, displayReducer, editorReducer, iap, syncMode,
 };
 export default vars;

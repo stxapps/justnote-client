@@ -823,17 +823,17 @@ export const fetch = () => async (dispatch, getState) => {
 
   const doFetchStgsAndInfo = !didFetchSettings;
 
-  dispatch({ type: FETCH });
+  const payload = {
+    listName, sortOn, doDescendingOrder, doFetchStgsAndInfo, pendingPins,
+  };
+  dispatch({ type: FETCH, payload });
 
   try {
-    const params = {
-      listName, sortOn, doDescendingOrder, doFetchStgsAndInfo, pendingPins,
-    };
-    const fetched = await dataApi.fetch(params);
-    dispatch({ type: FETCH_COMMIT, payload: { ...params, ...fetched } });
+    const fetched = await dataApi.fetch(payload);
+    dispatch({ type: FETCH_COMMIT, payload: { ...payload, ...fetched } });
   } catch (error) {
     console.log('fetch error: ', error);
-    dispatch({ type: FETCH_ROLLBACK, payload: error });
+    dispatch({ type: FETCH_ROLLBACK, payload: { ...payload, error } });
   }
 };
 

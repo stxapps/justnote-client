@@ -4,7 +4,7 @@ import {
   tryUpdateFetchedMore, runAfterFetchTask, unpinNotes, tryUpdateSynced,
 } from '../actions';
 import {
-  FETCH_COMMIT, FETCH_MORE_COMMIT, UPDATE_FETCHED_MORE, ADD_NOTE, ADD_NOTE_COMMIT,
+  FETCH, FETCH_COMMIT, FETCH_MORE_COMMIT, UPDATE_FETCHED_MORE, ADD_NOTE, ADD_NOTE_COMMIT,
   ADD_NOTE_ROLLBACK, UPDATE_NOTE, UPDATE_NOTE_COMMIT, UPDATE_NOTE_ROLLBACK,
   MOVE_NOTES, MOVE_NOTES_COMMIT, MOVE_NOTES_ROLLBACK, DELETE_NOTES, DELETE_NOTES_COMMIT,
   DELETE_NOTES_ROLLBACK, CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
@@ -17,6 +17,7 @@ import {
 } from '../types/const';
 import { isEqual, getAllListNames } from '../utils';
 import { _ } from '../utils/obj';
+import vars from '../vars';
 
 const initialState = {
   [MY_NOTES]: null,
@@ -31,6 +32,12 @@ const toObjAndAddAttrs = (notes, status) => {
 };
 
 const notesReducer = (state = initialState, action) => {
+
+  if (action.type === FETCH) {
+    const { listName } = action.payload;
+    vars.notesReducer.interveningNoteIds[listName] = [];
+    return state;
+  }
 
   if (action.type === FETCH_COMMIT) {
     const { listNames, doFetchStgsAndInfo, settings } = action.payload;
@@ -57,10 +64,19 @@ const notesReducer = (state = initialState, action) => {
 
     const { listName, notes } = action.payload;
     if (listName in newState) {
+      // Adding/moving fpaths are not there when start fetching.
+      //   F FC A AC, A AC F FC -> Fine
+      //   F A FC AC, A F FC AC -> Processing
+      //   F A AC FC, A F AC FC -> Intervening
       const processingNotes = _.exclude(state[listName], STATUS, ADDED);
+      const interveningNotes = _.select(
+        state[listName], ID, vars.notesReducer.interveningNoteIds[listName]
+      );
       const fetchedNotes = toObjAndAddAttrs(notes, ADDED);
-      newState[listName] = { ...processingNotes, ...fetchedNotes };
+      newState[listName] = { ...processingNotes, ...interveningNotes, ...fetchedNotes };
     }
+
+    vars.notesReducer.interveningNoteIds[listName] = null;
 
     return loop(
       newState,
@@ -100,6 +116,10 @@ const notesReducer = (state = initialState, action) => {
 
     const newState = { ...state };
     newState[listName] = _.update(newState[listName], ID, note.id, STATUS, ADDED);
+
+    if (Array.isArray(vars.notesReducer.interveningNoteIds[listName])) {
+      vars.notesReducer.interveningNoteIds[listName].push(note.id);
+    }
 
     return newState;
   }
@@ -166,10 +186,14 @@ const notesReducer = (state = initialState, action) => {
   if (action.type === MOVE_NOTES_COMMIT) {
     const { toListName, toNotes } = action.payload;
 
+    const toNoteIds = _.extract(toNotes, ID);
+
     const newState = { ...state };
-    newState[toListName] = _.update(
-      newState[toListName], ID, _.extract(toNotes, ID), STATUS, ADDED
-    );
+    newState[toListName] = _.update(newState[toListName], ID, toNoteIds, STATUS, ADDED);
+
+    if (Array.isArray(vars.notesReducer.interveningNoteIds[toListName])) {
+      vars.notesReducer.interveningNoteIds[toListName].push(...toNoteIds);
+    }
 
     if ([ARCHIVE, TRASH].includes(toListName)) {
       const { fromNotes } = action.payload;
