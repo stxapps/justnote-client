@@ -345,7 +345,7 @@ const _ConflictItem = (props) => {
   }
 
   return (
-    <View style={tailwind('mt-6 rounded-lg border border-gray-200 blk:border-gray-700')}>
+    <View style={tailwind('mt-6 overflow-hidden rounded-lg border border-gray-200 blk:border-gray-700')}>
       <View style={tailwind(`rounded-t-lg bg-gray-50 blk:bg-gray-800 sm:flex-row sm:items-start sm:justify-between ${!isOpen ? 'rounded-b-lg' : ''}`)}>
         <View style={tailwind('sm:flex-shrink sm:flex-grow')}>
           <TouchableOpacity onPress={onOpenBtnClick} style={tailwind(`w-full flex-row rounded-lg pt-3 pl-2 ${doHideChooseBtn ? 'pb-3' : ''}`)}>

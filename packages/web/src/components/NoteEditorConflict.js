@@ -397,7 +397,7 @@ const _ConflictItem = (props) => {
   }
 
   return (
-    <div className={tailwind('mt-6 rounded-lg border border-gray-200 blk:border-gray-700')}>
+    <div className={tailwind('mt-6 overflow-hidden rounded-lg border border-gray-200 blk:border-gray-700')}>
       <div className={tailwind(`rounded-t-lg bg-gray-50 blk:bg-gray-800 sm:flex sm:items-start sm:justify-between ${!isOpen ? 'rounded-b-lg' : ''}`)}>
         <div className={tailwind('sm:flex-shrink sm:flex-grow')}>
           <button onClick={onOpenBtnClick} type="button" className={tailwind(`group flex w-full rounded-lg pt-3 pl-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gray-400 blk:focus-visible:ring-gray-500 ${doHideChooseBtn ? 'pb-3' : ''}`)}>
