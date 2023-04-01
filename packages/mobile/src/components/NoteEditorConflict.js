@@ -1,23 +1,33 @@
-import React, { useState, useRef, useMemo, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
-  ScrollView, View, Text, TouchableOpacity, Animated, Linking,
+  ScrollView, View, Text, TouchableOpacity, Animated, Linking, Platform,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
+import { WebView } from 'react-native-webview';
+import { Dirs } from 'react-native-file-access';
 import { Circle } from 'react-native-animated-spinkit';
 
+import fileApi from '../apis/localFile';
 import {
   updateNoteId, mergeNotes, handleUnsavedNote, deleteUnsavedNotes,
 } from '../actions';
 import {
-  DOMAIN_NAME, HASH_SUPPORT, MERGING, DIED_MERGING, LG_WIDTH, BLK_MODE,
+  DOMAIN_NAME, HASH_SUPPORT, MERGING, DIED_MERGING, LG_WIDTH, BLK_MODE, IMAGES, UTF8,
 } from '../types/const';
 import { getListNameMap, getThemeMode } from '../selectors';
-import { getListNameDisplayName, getFormattedDT } from '../utils';
+import {
+  getListNameDisplayName, getFormattedDT, splitOnFirst, escapeDoubleQuotes,
+} from '../utils';
 import { popupFMV } from '../types/animConfigs';
+import cache from '../utils/cache';
 import vars from '../vars';
 
+const ckeditor = require('../../ckeditor');
+
 import { useSafeAreaFrame, useTailwind } from '.';
+
+const HTML_FNAME = 'ckeditor.html';
 
 const _NoteEditorSavedConflict = (props) => {
 
@@ -192,7 +202,13 @@ const _ConflictItem = (props) => {
 
   const { listName, note, status, isUnsaved, doHideChooseBtn } = props;
   const listNameMap = useSelector(getListNameMap);
+  const themeMode = useSelector(state => getThemeMode(state));
   const [isOpen, setIsOpen] = useState(false);
+  const [didOpen, setDidOpen] = useState(false);
+  const [isHtmlReady, setHtmlReady] = useState(Platform.OS === 'ios' ? false : true);
+  const [isEditorReady, setEditorReady] = useState(false);
+  const webView = useRef(null);
+  const imagesDir = useRef(null);
   const didClick = useRef(false);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
@@ -200,7 +216,9 @@ const _ConflictItem = (props) => {
   const updatedDTStr = useMemo(() => getFormattedDT(note.updatedDT), [note.updatedDT]);
 
   const onOpenBtnClick = () => {
-    setIsOpen(!isOpen);
+    const next = !isOpen;
+    setIsOpen(next);
+    if (next) setDidOpen(true);
   };
 
   const onChooseBtnClick = () => {
@@ -209,9 +227,107 @@ const _ConflictItem = (props) => {
     didClick.current = true;
   };
 
+  const setThemeMode = (mode) => {
+    if (webView.current) webView.current.injectJavaScript('window.justnote.setThemeMode(' + mode + '); true;');
+  };
+
+  const setInitData = useCallback(() => {
+    if (!webView.current) return;
+
+    let [title, body, media] = [note.title, note.body, note.media];
+
+    const escapedTitle = escapeDoubleQuotes(title);
+    webView.current.injectJavaScript('window.justnote.setTitle("' + escapedTitle + '"); true;');
+
+    const dir = Dirs.DocumentDir;
+    const escapedDir = escapeDoubleQuotes(dir);
+    webView.current.injectJavaScript('window.justnote.setDir("' + escapedDir + '"); true;');
+
+    webView.current.injectJavaScript('window.justnote.clearNoteMedia(); true;');
+    for (const { name, content } of media) {
+      const escapedName = escapeDoubleQuotes(name);
+      const escapedContent = escapeDoubleQuotes(content);
+      webView.current.injectJavaScript('window.justnote.addNoteMedia("' + escapedName + '", "' + escapedContent + '"); true;');
+    }
+
+    const escapedBody = escapeDoubleQuotes(body);
+    webView.current.injectJavaScript('window.justnote.setBody("' + escapedBody + '"); true;');
+  }, [note.title, note.body, note.media]);
+
+  const setPreviewMode = () => {
+    if (webView.current) webView.current.injectJavaScript('window.justnote.setPreviewMode(); true;');
+  };
+
+  const onMessage = useCallback(async (e) => {
+    const data = e.nativeEvent.data;
+    const [change, rest1] = splitOnFirst(data, ':');
+    const [to, value] = splitOnFirst(rest1, ':');
+
+    if (change === 'editor' && to === 'isReady') {
+      setEditorReady(value === 'true');
+    }
+  }, []);
+
+  const onShouldStartLoadWithRequest = useCallback((e) => {
+    if (e.url.slice(0, 4) === 'http') {
+      Linking.openURL(e.url);
+      return false;
+    }
+    return true;
+  }, []);
+
+  const onContentProcessDidTerminate = useCallback(() => {
+    setEditorReady(false);
+    if (webView.current) webView.current.reload();
+  }, []);
+
   useEffect(() => {
     didClick.current = false;
   }, [status]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+    setThemeMode(themeMode);
+  }, [isEditorReady, themeMode]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+    setInitData();
+    setPreviewMode();
+  }, [isEditorReady, setInitData]);
+
+  useEffect(() => {
+    const writeHtml = async () => {
+      await fileApi.putFile(HTML_FNAME, ckeditor, Dirs.DocumentDir, UTF8);
+      setHtmlReady(true);
+    };
+
+    const deleteHtml = () => {
+      fileApi.deleteFile(HTML_FNAME);
+    };
+
+    if (Platform.OS === 'ios') writeHtml();
+
+    return () => {
+      if (Platform.OS === 'ios') deleteHtml();
+    };
+  }, []);
+
+  useEffect(() => {
+    const makeImagesDir = async () => {
+      try {
+        const doExist = await fileApi.exists(IMAGES);
+        if (!doExist) await fileApi.mkdir(IMAGES);
+        imagesDir.current = IMAGES;
+      } catch (error) {
+        console.log('Can\'t make images dir with error: ', error);
+      }
+    };
+
+    makeImagesDir();
+  }, []);
+
+  if (Platform.OS === 'ios' && !isHtmlReady) return null;
 
   let arrowSvg;
   if (isOpen) {
@@ -251,9 +367,12 @@ const _ConflictItem = (props) => {
           </TouchableOpacity>
         </View>}
       </View>
-      {isOpen && <View style={tailwind('px-4 py-5')}>
-        <Text style={tailwind('text-lg font-medium text-gray-800 blk:text-gray-200')}>{note.title}</Text>
-        <Text style={tailwind('mt-3 text-base font-normal text-gray-600 blk:text-gray-300')}>{note.body}</Text>
+      {didOpen && <View style={tailwind(`h-80 ${isOpen ? '' : 'absolute top-full left-full'}`)}>
+        {Platform.OS === 'ios' ?
+          <WebView ref={webView} style={tailwind('flex-1 bg-white blk:bg-gray-900')} source={cache('NEE_webView_source_ios', { uri: Dirs.DocumentDir + '/' + HTML_FNAME })} originWhitelist={cache('NEE_webView_originWhitelist_ios', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} hideKeyboardAccessoryView={true} textZoom={100} allowFileAccessFromFileURLs={true} allowUniversalAccessFromFileURLs={true} allowingReadAccessToURL={Dirs.DocumentDir} cacheEnabled={false} onShouldStartLoadWithRequest={onShouldStartLoadWithRequest} onContentProcessDidTerminate={onContentProcessDidTerminate} onRenderProcessGone={onContentProcessDidTerminate} />
+          :
+          <WebView ref={webView} style={tailwind('flex-1 bg-white blk:bg-gray-900')} source={cache('NEE_webView_source', { baseUrl: '', html: ckeditor })} originWhitelist={cache('NEE_webView_originWhitelist', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} hideKeyboardAccessoryView={true} textZoom={100} androidLayerType="hardware" allowFileAccess={true} cacheEnabled={false} onShouldStartLoadWithRequest={onShouldStartLoadWithRequest} onContentProcessDidTerminate={onContentProcessDidTerminate} onRenderProcessGone={onContentProcessDidTerminate} nestedScrollEnabled={true} />
+        }
       </View>}
     </View>
   );

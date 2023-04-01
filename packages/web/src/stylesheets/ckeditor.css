@@ -137,6 +137,8 @@
   --ck-color-split-button-hover-background: var(--ck-color-button-default-hover-background);
   --ck-color-split-button-hover-border: var(--ck-color-base-border);
 
+  --ck-color-editable-blur-selection: hsl(0, 0%, 85%);
+
   --ck-font-size-base: 15px;
   --ck-toolbar-dropdown-max-width: 96vw;
 }
@@ -251,10 +253,11 @@
 
   --ck-color-split-button-hover-background: var(--ck-color-button-default-hover-background);
   --ck-color-split-button-hover-border: var(--ck-color-base-border);
+
+  --ck-color-editable-blur-selection: hsl(0, 0%, 35%);
 }
 
 .ck.ck-editor__editable {
-  color: var(--jn-editor-gray-800);
   font-size: 17px;
 }
 
@@ -264,8 +267,20 @@
   }
 }
 
+.ck.ck-editor__editable {
+  color: var(--jn-editor-gray-800);
+}
+
+.preview-mode .ck.ck-editor__editable {
+  color: var(--jn-editor-gray-600);
+}
+
 .blk-mode .ck.ck-editor__editable {
   color: var(--jn-editor-gray-200);
+}
+
+.blk-mode .preview-mode .ck.ck-editor__editable {
+  color: var(--jn-editor-gray-300);
 }
 
 .ck.ck-editor__editable ul {

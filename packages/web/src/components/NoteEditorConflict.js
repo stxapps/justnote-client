@@ -1,13 +1,15 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ckeditor from '@ckeditor/ckeditor5-build-decoupled-document';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import {
   updateNoteIdUrlHash, mergeNotes, handleUnsavedNote, deleteUnsavedNotes,
 } from '../actions';
-import { HASH_SUPPORT, MERGING, DIED_MERGING, LG_WIDTH } from '../types/const';
-import { getListNameMap } from '../selectors';
-import { getListNameDisplayName, getFormattedDT } from '../utils';
+import { HASH_SUPPORT, MERGING, DIED_MERGING, LG_WIDTH, BLK_MODE } from '../types/const';
+import { getListNameMap, getThemeMode } from '../selectors';
+import { getListNameDisplayName, getFormattedDT, isMobile as _isMobile } from '../utils';
 import { popupFMV } from '../types/animConfigs';
 import vars from '../vars';
 
@@ -165,12 +167,14 @@ const _ConflictItem = (props) => {
 
   const { listName, note, status, isUnsaved, doHideChooseBtn } = props;
   const listNameMap = useSelector(getListNameMap);
+  const themeMode = useSelector(state => getThemeMode(state));
   const [isOpen, setIsOpen] = useState(false);
   const didClick = useRef(false);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
   const updatedDTStr = useMemo(() => getFormattedDT(note.updatedDT), [note.updatedDT]);
+  const isMobile = useMemo(() => _isMobile(), []);
 
   const onOpenBtnClick = () => {
     setIsOpen(!isOpen);
@@ -224,9 +228,11 @@ const _ConflictItem = (props) => {
           </button>
         </div>}
       </div>
-      {isOpen && <div className={tailwind('px-4 py-5')}>
-        <h3 className={tailwind('text-lg font-medium text-gray-800 blk:text-gray-200')}>{note.title}</h3>
-        <p className={tailwind('mt-3 text-base font-normal text-gray-600 blk:text-gray-300')}>{note.body}</p>
+      {isOpen && <div className={tailwind(`py-5 ${isMobile ? 'mobile' : 'not-mobile'} ${themeMode === BLK_MODE ? 'blk-mode' : 'wht-mode'}`)}>
+        <h3 className={tailwind('px-4 text-lg font-medium text-gray-800 blk:text-gray-200')}>{note.title}</h3>
+        <div className={tailwind('px-1.5 preview-mode')}>
+          <CKEditor editor={ckeditor} data={note.body} disabled={true} />
+        </div>
       </div>}
     </div>
   );
