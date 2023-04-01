@@ -1,15 +1,21 @@
-import React, { useState, useRef, useMemo, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ckeditor from '@ckeditor/ckeditor5-build-decoupled-document';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import fileApi from '../apis/localFile';
 import {
   updateNoteIdUrlHash, mergeNotes, handleUnsavedNote, deleteUnsavedNotes,
 } from '../actions';
-import { HASH_SUPPORT, MERGING, DIED_MERGING, LG_WIDTH, BLK_MODE } from '../types/const';
+import {
+  HASH_SUPPORT, MERGING, DIED_MERGING, LG_WIDTH, CD_ROOT, BLK_MODE,
+} from '../types/const';
 import { getListNameMap, getThemeMode } from '../selectors';
-import { getListNameDisplayName, getFormattedDT, isMobile as _isMobile } from '../utils';
+import {
+  isString, getListNameDisplayName, getFormattedDT, isMobile as _isMobile,
+} from '../utils';
+import { isUint8Array, isBlob, convertDataUrlToBlob } from '../utils/index-web';
 import { popupFMV } from '../types/animConfigs';
 import vars from '../vars';
 
@@ -169,6 +175,12 @@ const _ConflictItem = (props) => {
   const listNameMap = useSelector(getListNameMap);
   const themeMode = useSelector(state => getThemeMode(state));
   const [isOpen, setIsOpen] = useState(false);
+  const [didOpen, setDidOpen] = useState(false);
+  const [isEditorReady, setEditorReady] = useState(false);
+  const bodyEditor = useRef(null);
+  const objectUrlContents = useRef({});
+  const objectUrlFiles = useRef({});
+  const objectUrlNames = useRef({});
   const didClick = useRef(false);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
@@ -177,7 +189,9 @@ const _ConflictItem = (props) => {
   const isMobile = useMemo(() => _isMobile(), []);
 
   const onOpenBtnClick = () => {
-    setIsOpen(!isOpen);
+    const next = !isOpen;
+    setIsOpen(next);
+    if (next) setDidOpen(true);
   };
 
   const onChooseBtnClick = () => {
@@ -186,9 +200,186 @@ const _ConflictItem = (props) => {
     didClick.current = true;
   };
 
+  const clearNoteMedia = () => {
+    for (const objectUrl in objectUrlContents.current) {
+      URL.revokeObjectURL(objectUrl);
+    }
+    objectUrlContents.current = {};
+
+    for (const objectUrl in objectUrlFiles.current) {
+      URL.revokeObjectURL(objectUrl);
+    }
+    objectUrlFiles.current = {};
+
+    objectUrlNames.current = {};
+  };
+
+  const replaceWithContents = useCallback(async (body, media) => {
+    media = media.filter(({ content }) => {
+      return isString(content) && content.startsWith('data:');
+    });
+    media = await Promise.all(media.map(async ({ name, content }) => {
+      const blob = await convertDataUrlToBlob(content);
+      return { name, content, blob };
+    }));
+
+    for (const { name, content, blob } of media) {
+      const objectUrl = URL.createObjectURL(blob);
+
+      objectUrlContents.current[objectUrl] = { fname: name, content };
+      objectUrlNames.current[objectUrl] = name;
+
+      body = body.replaceAll(name, objectUrl);
+    }
+
+    return body;
+  }, []);
+
+  const replaceWithFiles = useCallback(async (body, media) => {
+    media = media.filter(({ name }) => {
+      return isString(name) && name.startsWith(CD_ROOT + '/');
+    });
+
+    for (const { name, content } of media) {
+      let file = await fileApi.getFile(name);
+      if (isUint8Array(file)) file = new Blob([file]);
+      if (!isBlob(file)) continue;
+
+      const objectUrl = URL.createObjectURL(file);
+
+      objectUrlFiles.current[objectUrl] = { fname: name, content };
+      objectUrlNames.current[objectUrl] = name;
+
+      body = body.replaceAll(name, objectUrl);
+    }
+
+    return body;
+  }, []);
+
+  const setInitData = useCallback(async () => {
+    let [body, media] = [note.body, note.media];
+
+    clearNoteMedia();
+
+    body = await replaceWithContents(body, media);
+    body = await replaceWithFiles(body, media);
+    try {
+      bodyEditor.current.setData(body);
+    } catch (error) {
+      // Got Uncaught TypeError: Cannot read properties of null (reading 'model')
+      //   after dispatching UPDATE_NOTE_ROLLBACK
+      //   guess because CKEditor.setData still working on updated version
+      //   then suddenly got upmounted.
+      // Also, in handleScreenRotation, calling updateNoteIdUrlHash(null)
+      //   guess it's the same reason.
+      console.log('NoteEditorEditor.setInitData: ckeditor.setData error ', error);
+    }
+  }, [note.body, note.media, replaceWithContents, replaceWithFiles]);
+
+  const onReady = useCallback((editor) => {
+    bodyEditor.current = editor;
+    setEditorReady(true);
+  }, [setEditorReady]);
+
   useEffect(() => {
     didClick.current = false;
   }, [status]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+    setInitData();
+  }, [isEditorReady, setInitData]);
+
+  useEffect(() => {
+    // Need to place <link> of tailwind.css + ckeditor.css below <style> of CKEditor
+    //   so that custom styles override default styles.
+    const head = document.head || document.getElementsByTagName('head')[0];
+    const last = head.lastElementChild;
+    if (
+      last.tagName.toLowerCase() === 'link' &&
+      /* @ts-ignore */
+      last.href && last.href.includes('/static/css/') && last.href.endsWith('.css')
+    ) {
+      return;
+    }
+
+    const hrefs = [];
+    for (const link of head.getElementsByTagName('link')) {
+      if (
+        link.href && link.href.includes('/static/css/') && link.href.endsWith('.css')
+      ) {
+        hrefs.push(link.href);
+      }
+    }
+
+    for (const href of hrefs) {
+      const link = document.createElement('link');
+      link.href = href;
+      link.rel = 'stylesheet';
+      head.appendChild(link);
+    }
+  }, []);
+
+  const editorConfig = useMemo(() => {
+    return {
+      placeholder: 'Start writing...',
+      removePlugins: ['Autoformat'],
+      fontSize: {
+        options: [
+          'tiny', 'small', 'default', 'big', 'huge',
+          { title: '9', model: '0.5625em' },
+          { title: '12', model: '0.75em' },
+          { title: '14', model: '0.875em' },
+          { title: '18', model: '1.125em' },
+          { title: '24', model: '1.5em' },
+          { title: '30', model: '1.875em' },
+          { title: '36', model: '2.25em' },
+          { title: '48', model: '3em' },
+          { title: '60', model: '3.75em' },
+        ],
+      },
+      fontColor: {
+        colors: [
+          { color: 'rgb(31, 41, 55)', label: 'Black', hasBorder: true },
+          { color: 'rgb(107, 114, 128)', label: 'Gray' },
+          { color: 'rgb(185, 28, 28)', label: 'Red' },
+          { color: 'rgb(252, 211, 77)', label: 'Yellow' },
+          { color: 'rgb(217, 119, 6)', label: 'Orange' },
+          { color: 'rgb(120, 53, 15)', label: 'Brown' },
+          { color: 'rgb(21, 128, 61)', label: 'Green' },
+          { color: 'rgb(29, 78, 216)', label: 'Blue' },
+          { color: 'rgb(91, 33, 182)', label: 'Purple' },
+          { color: 'rgb(219, 39, 119)', label: 'Pink' },
+          { color: 'rgb(229, 231, 235)', label: 'Light gray' },
+          { color: 'rgb(255, 255, 255)', label: 'White', hasBorder: true },
+        ],
+        columns: 6,
+        documentColors: 0,
+      },
+      fontBackgroundColor: {
+        colors: [
+          { color: 'rgb(31, 41, 55)', label: 'Black', hasBorder: true },
+          { color: 'rgb(107, 114, 128)', label: 'Gray' },
+          { color: 'rgb(239, 68, 68)', label: 'Red' },
+          { color: 'rgb(252, 211, 77)', label: 'Yellow' },
+          { color: 'rgb(245, 158, 11)', label: 'Orange' },
+          { color: 'rgb(180, 83, 9)', label: 'Brown' },
+          { color: 'rgb(74, 222, 128)', label: 'Green' },
+          { color: 'rgb(147, 197, 253)', label: 'Blue' },
+          { color: 'rgb(196, 181, 253)', label: 'Purple' },
+          { color: 'rgb(251, 207, 232)', label: 'Pink' },
+          { color: 'rgb(229, 231, 235)', label: 'Light gray' },
+          { color: 'rgb(255, 255, 255)', label: 'White', hasBorder: true },
+        ],
+        columns: 6,
+        documentColors: 0,
+      },
+      link: {
+        addTargetToExternalLinks: true,
+        defaultProtocol: 'http://',
+      },
+    };
+  }, []);
 
   let arrowSvg;
   if (isOpen) {
@@ -228,10 +419,10 @@ const _ConflictItem = (props) => {
           </button>
         </div>}
       </div>
-      {isOpen && <div className={tailwind(`py-5 ${isMobile ? 'mobile' : 'not-mobile'} ${themeMode === BLK_MODE ? 'blk-mode' : 'wht-mode'}`)}>
+      {didOpen && <div className={tailwind(`py-5 ${isMobile ? 'mobile' : 'not-mobile'} ${themeMode === BLK_MODE ? 'blk-mode' : 'wht-mode'} ${isOpen ? '' : 'fixed top-full left-full'}`)}>
         <h3 className={tailwind('px-4 text-lg font-medium text-gray-800 blk:text-gray-200')}>{note.title}</h3>
         <div className={tailwind('px-1.5 preview-mode')}>
-          <CKEditor editor={ckeditor} data={note.body} disabled={true} />
+          <CKEditor editor={ckeditor} config={editorConfig} disabled={true} onReady={onReady} />
         </div>
       </div>}
     </div>
