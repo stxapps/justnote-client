@@ -212,7 +212,12 @@ export const signOut = () => async (dispatch, getState) => {
 };
 
 export const updateUserData = (data) => async (dispatch, getState) => {
-  await userSession.updateUserData(data);
+  try {
+    await userSession.updateUserData(data);
+  } catch (error) {
+    Alert.alert('Update user data failed!', `Please wait a moment and try again. If the problem persists, please contact us.\n\n${error}`);
+    return;
+  }
 
   const isUserSignedIn = await userSession.isUserSignedIn();
   if (isUserSignedIn) dispatch(updateUserSignedIn());
