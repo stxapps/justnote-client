@@ -81,6 +81,9 @@ const deleteAllFiles = async (dir = Dirs.DocumentDir) => {
   for (const dpath of dpaths) {
     const ddpath = deriveFPath(dpath, dir);
 
+    const doExist = await FileSystem.exists(ddpath);
+    if (!doExist) continue;
+
     const fnames = await FileSystem.ls(ddpath);
     for (const fname of fnames) await FileSystem.unlink(ddpath + '/' + fname);
   }
