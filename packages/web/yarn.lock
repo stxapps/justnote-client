@@ -9721,9 +9721,9 @@ typeforce@^1.11.3, typeforce@^1.11.5:
   integrity sha512-7uc1O8h1M1g0rArakJdf0uLRSSgFcYexrVoKo+bzJd32gd4gDy2L/Z+8/FjPnU9ydY3pEnVPtr9FyscYY60K1g==
 
 uglify-js@^3.1.9:
-  version "3.17.1"
-  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.17.1.tgz#1258a2a488147a8266b3034499ce6959978ba7f4"
-  integrity sha512-+juFBsLLw7AqMaqJ0GFvlsGZwdQfI2ooKQB39PSBgMnMakcFosi9O8jCwE+2/2nMNcc0z63r9mwjoDG8zr+q0Q==
+  version "3.17.4"
+  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.17.4.tgz#61678cf5fa3f5b7eb789bb345df29afb8257c22c"
+  integrity sha512-T9q82TJI9e/C1TAxYvfb16xO120tMVFZrGA3f9/P4424DNu6ypK103y0GPFVa17yotwSyZW5iYXgjYHkGrJW/g==
 
 unbox-primitive@^1.0.2:
   version "1.0.2"
