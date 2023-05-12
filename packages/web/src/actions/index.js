@@ -3031,8 +3031,14 @@ export const exportAllData = () => async (dispatch, getState) => {
       rootIds[noteId.id] = `${noteId.addedDT}${randomString(4)}`;
     }
 
-    const { fpaths: lastSettingsFPaths } = getLastSettingsFPaths(settingsFPaths);
-    if (lastSettingsFPaths.length > 0) fpaths.push(lastSettingsFPaths[0]);
+    const lastSettingsFPaths = getLastSettingsFPaths(settingsFPaths);
+    if (lastSettingsFPaths.fpaths.length > 0) {
+      const lastSettingsFPath = lastSettingsFPaths.fpaths[0];
+      const { contents } = await dataApi.getFiles([lastSettingsFPath], true);
+      if (!isEqual(initialSettingsState, contents[0])) {
+        fpaths.push(lastSettingsFPath);
+      }
+    }
 
     const pins = {};
     for (const fpath of pinFPaths) {
