@@ -17,7 +17,7 @@ import {
   indexOfClosingTag, clearNoteData, getStaticFPath, getMainId, createNoteFPath,
   createDataFName, extractNoteFPath, extractDataFName, extractDataId, listNoteIds,
   createSettingsFPath, getSettingsFPaths, getLastSettingsFPaths, extractPinFPath,
-  getPins, batchGetFileWithRetry, extractFPath,
+  getPins, batchGetFileWithRetry, extractFPath, copyListNameObjs,
 } from '../utils';
 import { isUint8Array } from '../utils/index-web';
 import { initialSettingsState, initialInfoState } from '../types/initialStates';
@@ -294,6 +294,7 @@ const parseGKeepImportedFile = async (dispatch, getState, zip, entries) => {
   const labelIdMap = {};
   if (labelsEntries.length > 0) {
     const settings = { ...initialSettingsState };
+    settings.listNameMap = copyListNameObjs(settings.listNameMap);
 
     for (const labelsEntry of labelsEntries) {
       const content = await labelsEntry.getData(new zip.TextWriter());
@@ -524,6 +525,7 @@ const parseRawImportedFile = async (dispatch, getState, zip, entries) => {
   const idMap = {};
   if (!isDirMapEmpty) {
     const settings = { ...initialSettingsState };
+    settings.listNameMap = copyListNameObjs(settings.listNameMap);
 
     const nowObj = { now };
     _addListNameObj(settings.listNameMap, dirMap, idMap, nowObj);
@@ -569,7 +571,7 @@ const parseRawImportedFile = async (dispatch, getState, zip, entries) => {
       const title = fnameParts.slice(0, -1).join('.') || '';
       let body = '';
       if (['txt'].includes(fext.toLowerCase())) {
-        body = '<p>' + content + '</p>';
+        body = '<p>' + content.replace(/\r?\n/g, '<br />') + '</p>';
       } else if (HTML_FILE_EXTS.includes(fext.toLowerCase())) {
         const bMatch = content.match(/<body[^>]*>([\s\S]+?)<\/body>/i);
         if (bMatch) body = bMatch[1].trim();
