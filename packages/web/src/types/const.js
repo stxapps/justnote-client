@@ -158,6 +158,7 @@ export const IMAGE_FILE_EXTS = [
   'apng', 'avif', 'gif', 'jpg', 'jpeg', 'jfif', 'pjpeg', 'pjp', 'png', 'svg', 'webp',
   'bmp', 'ico', 'cur', 'tif', 'tiff',
 ];
+export const HTML_FILE_EXTS = ['html', 'htm'];
 
 export const IAP_URL = 'https://iap-001.uc.r.appspot.com'; //'http://192.168.1.44:8088';
 export const IAP_VERIFY_URL = IAP_URL + '/verify';

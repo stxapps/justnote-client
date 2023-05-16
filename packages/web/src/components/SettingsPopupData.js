@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   importAllData, updateImportAllDataProgress, exportAllData, updateExportAllDataProgress,
   deleteAllData, updateDeleteAllDataProgress,
-} from '../actions';
+} from '../actions/data';
 import { HASH_SUPPORT, SM_WIDTH } from '../types/const';
 
 import { useSafeAreaFrame, useTailwind } from '.';
