@@ -243,7 +243,7 @@ const NoteListItemMenuPopup = () => {
   }
 
   return (
-    <View style={tailwind('absolute inset-0 bg-transparent shadow-lg')}>
+    <View style={tailwind('absolute inset-0')}>
       <TouchableWithoutFeedback onPress={onCancelBtnClick}>
         <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
       </TouchableWithoutFeedback>

@@ -1,11 +1,12 @@
 import {
-  Linking, AppState, Platform, Appearance, Share, Alert, PermissionsAndroid,
+  Linking, AppState, Platform, Appearance, Alert, PermissionsAndroid,
 } from 'react-native';
 import * as iapApi from 'react-native-iap';
 import { LexoRank } from '@wewatch/lexorank';
 import { is24HourFormat } from 'react-native-device-time-format';
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
 import { FileSystem } from 'react-native-file-access';
+import Share from 'react-native-share';
 
 import userSession from '../userSession';
 import axios from '../axiosWrapper';
@@ -3283,17 +3284,22 @@ export const shareNote = () => async (dispatch, getState) => {
   const note = getState().notes[listName][selectingNoteId];
 
   try {
-    const result = await Share.share({
+    await Share.open({
       message: note.title + '\n\n' + stripHtml(note.body, true),
     });
-    if (result.action === Share.sharedAction) {
-      let msg = 'shareNote shared';
-      if (result.activityType) msg += ` with activity type: ${result.activityType}`;
-      console.log(msg);
-    } else if (result.action === Share.dismissedAction) {
-      console.log('shareNote dismissed.');
-    }
   } catch (error) {
+    if (isObject(error)) {
+      if (
+        isObject(error.error) &&
+        isString(error.error.message) &&
+        error.error.message.includes('The operation was cancelled')
+      ) return;
+      if (
+        isString(error.message) &&
+        error.message.includes('User did not share')
+      ) return;
+    }
+
     Alert.alert('Sharing Note Error!', `Please wait a moment and try again. If the problem persists, please contact us.\n\n${error}`);
   }
 };
@@ -3342,15 +3348,20 @@ export const exportNoteAsPdf = () => async (dispatch, getState) => {
 
   if (Platform.OS === 'ios') {
     try {
-      const result = await Share.share({ url: 'file://' + file.filePath });
-      if (result.action === Share.sharedAction) {
-        let msg = 'exportNoteAsPdf shared';
-        if (result.activityType) msg += ` with activity type: ${result.activityType}`;
-        console.log(msg);
-      } else if (result.action === Share.dismissedAction) {
-        console.log('exportNoteAsPdf dismissed.');
-      }
+      await Share.open({ url: 'file://' + file.filePath });
     } catch (error) {
+      if (isObject(error)) {
+        if (
+          isObject(error.error) &&
+          isString(error.error.message) &&
+          error.error.message.includes('The operation was cancelled')
+        ) return;
+        if (
+          isString(error.message) &&
+          error.message.includes('User did not share')
+        ) return;
+      }
+
       Alert.alert('Exporting Note Error!', `Please wait a moment and try again. If the problem persists, please contact us.\n\n${error}`);
     }
     return;

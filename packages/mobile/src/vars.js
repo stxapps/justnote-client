@@ -102,10 +102,15 @@ export const getCachedFPaths = () => {
   return syncMode.doSyncMode ? cachedFPaths : cachedServerFPaths;
 };
 
+const importAllData = {
+  didPick: false,
+};
+
 const vars = {
   cachedFPaths, cachedServerFPaths, scrollPanel, keyboard, runAfterFetchTask,
   randomHouseworkTasks, updateNoteIdUrlHash, updateNoteId, changeListName,
   updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, deleteOldNotes, updateSettings,
   updateSettingsPopup, notesReducer, displayReducer, editorReducer, iap, syncMode,
+  importAllData,
 };
 export default vars;

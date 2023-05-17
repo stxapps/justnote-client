@@ -122,7 +122,7 @@ const ConfirmDiscardPopup = () => {
   }
 
   return (
-    <View style={[tailwind('absolute inset-0 items-center justify-end px-4 pt-4 pb-20 sm:justify-center sm:p-0 elevation-xl'), canvasStyle]}>
+    <View style={[tailwind('absolute inset-0 items-center justify-end px-4 pt-4 pb-20 sm:justify-center sm:p-0'), canvasStyle]}>
       <TouchableWithoutFeedback onPress={onConfirmDiscardCancelBtnClick}>
         <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
       </TouchableWithoutFeedback>

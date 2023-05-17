@@ -103,9 +103,6 @@
 
     "elevation": 6
   },
-  "elevation-xl": {
-    "elevation": 12
-  },
   "w-auto": {
     "width": "auto"
   },
