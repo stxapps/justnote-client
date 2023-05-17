@@ -808,22 +808,20 @@ const parseJustnoteNotes = async (
       }
 
       // If already exist, skip. So if errors, can continue where it left off.
-      // Or no exist, add as is.
-      let rootFPath;
+      // Or if no exist, add as is.
+      // Need to check per file too as error can happen on any files.
       if (parentId) {
         const rootFPathParts = [...fpathParts.slice(0, 4)];
         rootFPathParts[2] = parentId;
         rootFPathParts[3] = INDEX + DOT_JSON;
-        rootFPath = rootFPathParts.join('/');
-      }
+        const rootFPath = rootFPathParts.join('/');
 
-      // Need to check per file too as error can happen on any files.
-      if (
-        rootFPath && !existFPaths.includes(rootFPath) && !fpaths.includes(rootFPath)
-      ) {
-        // If there's a parent, add a parent id with empty note content.
-        fpaths.push(rootFPath);
-        contents.push({ title: '', body: '' });
+        if (!existFPaths.includes(rootFPath) && !idMap[rootFPath]) {
+          // If there's a parent, add a parent id with empty note content.
+          fpaths.push(rootFPath);
+          contents.push({ title: '', body: '' });
+          idMap[rootFPath] = parentId; // Just for checking already added the parent.
+        }
       }
       if (!existFPaths.includes(fpath)) {
         fpaths.push(fpath);
