@@ -2,7 +2,7 @@ import { saveAs } from 'file-saver';
 
 import dataApi from '../apis/data';
 import fileApi from '../apis/localFile';
-import { updatePopupUrlHash, sync } from './index';
+import { updatePopupUrlHash, sync } from '../actions';
 import {
   UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
   UPDATE_DELETE_ALL_DATA_PROGRESS, DELETE_ALL_DATA,
@@ -13,8 +13,8 @@ import {
   NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS, IMAGE_FILE_EXTS, HTML_FILE_EXTS,
 } from '../types/const';
 import {
-  isEqual, randomString, sleep, isObject, isString, isNumber, isListNameObjsValid,
-  indexOfClosingTag, clearNoteData, getStaticFPath, getMainId, createNoteFPath,
+  isEqual, isObject, isString, isNumber, sleep, randomString, clearNoteData,
+  getStaticFPath, getMainId, isListNameObjsValid, indexOfClosingTag, createNoteFPath,
   createDataFName, extractNoteFPath, extractDataFName, extractDataId, listNoteIds,
   createSettingsFPath, getSettingsFPaths, getLastSettingsFPaths, extractPinFPath,
   getPins, batchGetFileWithRetry, extractFPath, copyListNameObjs,
@@ -142,9 +142,9 @@ const parseEvernoteImportedFile = async (dispatch, getState, zip, entries) => {
       }
 
       // task tags
-      let i = -1;
-      while ((i = body.indexOf('<div class="taskgroup">', i + 1)) !== -1) {
-        let html = body.slice(i);
+      let pos = -1;
+      while ((pos = body.indexOf('<div class="taskgroup">', pos + 1)) !== -1) {
+        let html = body.slice(pos);
 
         const endIndex = indexOfClosingTag(html);
         if (endIndex < 0) continue;
@@ -177,7 +177,7 @@ const parseEvernoteImportedFile = async (dispatch, getState, zip, entries) => {
               todoHtml += '</span></label></li>';
             }
             todoHtml += '</ul>';
-            body = body.slice(0, i) + todoHtml + body.slice(i + endIndex);
+            body = body.slice(0, pos) + todoHtml + body.slice(pos + endIndex);
           }
         } catch (error) {
           console.log('Evernote task tag error', error);
@@ -426,6 +426,7 @@ const parseGKeepImportedFile = async (dispatch, getState, zip, entries) => {
           }
         }
       }
+
       if (
         content.listContent &&
         Array.isArray(content.listContent) &&
@@ -443,7 +444,7 @@ const parseGKeepImportedFile = async (dispatch, getState, zip, entries) => {
           listHtml += listItem.text;
           listHtml += '</span></label></li>';
         }
-        listHtml += '</ul>'
+        listHtml += '</ul>';
         body += listHtml;
       }
 
@@ -477,7 +478,7 @@ const _addListNameObj = (listNameObjs, dirObj, idMap, nowObj) => {
 
     if (!isEqual(value, {})) {
       listNameObj.children = [];
-      _addListNameObj(listNameObj.children, value, idMap, nowObj)
+      _addListNameObj(listNameObj.children, value, idMap, nowObj);
     }
   }
 };
@@ -736,15 +737,15 @@ const parseJustnoteNotes = async (
 
       let parentId;
       if (parentIds) {
-        if (!parentIds.every(id => (/^\d+[A-Za-z]+$/.test(id)))) continue;
-        if (parentIds.length > 0) parentId = parentIds[0]
+        if (!parentIds.every(_id => (/^\d+[A-Za-z]+$/.test(_id)))) continue;
+        if (parentIds.length > 0) parentId = parentIds[0];
       }
 
       let content;
       if (fpath.endsWith(INDEX + DOT_JSON) || fpath.includes(CD_ROOT + '/')) {
         content = await entry.getData(new zip.TextWriter());
       } else {
-        content = await entry.getData(new zip.BlobWriter());
+        continue;
       }
       if (!fpath.includes(CD_ROOT + '/') && !content) continue;
 
@@ -1238,8 +1239,8 @@ const deleteAllNotes = async (dispatch, noteIds, progress) => {
     for (const id of selectedNoteIds) fpaths.push(...id.fpaths);
 
     const contents = [];
-    for (let i = 0; i < fpaths.length; i++) {
-      if (fpaths[i].endsWith(INDEX + DOT_JSON)) contents.push({ title: '', body: '' });
+    for (let k = 0; k < fpaths.length; k++) {
+      if (fpaths[k].endsWith(INDEX + DOT_JSON)) contents.push({ title: '', body: '' });
       else contents.push('');
     }
 
@@ -1247,9 +1248,9 @@ const deleteAllNotes = async (dispatch, noteIds, progress) => {
 
     let now = Date.now();
     const toNotes = {}, fromNotes = {};
-    for (let i = 0; i < selectedNoteIds.length; i++) {
-      const noteId = selectedNoteIds[i];
-      const note = selectedNotes[i];
+    for (let k = 0; k < selectedNoteIds.length; k++) {
+      const noteId = selectedNoteIds[k];
+      const note = selectedNotes[k];
 
       if (!toNotes[noteId.listName]) toNotes[noteId.listName] = [];
       toNotes[noteId.listName].push({

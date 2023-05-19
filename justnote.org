@@ -20,6 +20,8 @@
 ** github.com/OmGodse/Notally
 ** github.com/twitter/TwitterTextEditor
 ** www.serenity.re/en/notes
+** skiff.com
+** notesnook.com
 * Same Name
 ** jusnote.com - The most powerful software for managing the legal practice
 ** justnotepad.com
@@ -282,6 +284,8 @@
 - yarn add react-native-iap@8.2.1 @wewatch/lexorank axios@0.27.2
 - yarn add https://github.com/stxapps/react-native-device-time-format#63f4a9158a91c391d67317a489ccfe8ec28a7c84
 - yarn add https://github.com/stxapps/react-native-html-to-pdf#77aed8df9caa3b48f7cf19933bc6d6576fe817ce
+- yarn add react-native-document-picker react-native-share react-native-zip-archive
+- yarn add htmlparser2
 - Font
   + Create react-native.config.js
   + Run npx react-native-asset
