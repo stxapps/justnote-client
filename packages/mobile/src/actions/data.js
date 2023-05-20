@@ -5,7 +5,7 @@ import { zip, unzip } from 'react-native-zip-archive';
 import DocumentPicker, {
   types as DocumentPickerTypes,
 } from 'react-native-document-picker';
-import { parseDocument } from 'htmlparser2';
+import { parseDocument, DomUtils } from 'htmlparser2';
 
 import dataApi from '../apis/data';
 import fileApi from '../apis/localFile';
@@ -46,7 +46,9 @@ const parseEvernoteImportedFile = async (dispatch, getState, importDPath, entrie
 
   const htmlEntries = [], imgEntries = [];
   for (const entry of entries) {
-    const { fpath, fext } = extractFPath(entry);
+    if (entry.directory) continue;
+
+    const { fpath, fext } = extractFPath(entry.filename);
 
     if (fpath.endsWith('Evernote_index.html')) continue;
     if (HTML_FILE_EXTS.includes(fext.toLowerCase())) {
@@ -69,7 +71,7 @@ const parseEvernoteImportedFile = async (dispatch, getState, importDPath, entrie
     const selectedEntries = imgEntries.slice(i, i + N_NOTES);
 
     for (const entry of selectedEntries) {
-      const { fpathParts, fnameParts, fext } = extractFPath(entry);
+      const { fpathParts, fnameParts, fext } = extractFPath(entry.filename);
 
       const fpath = `${IMAGES}/${randomString(4)}-${randomString(4)}-${randomString(4)}-${randomString(4)}.${fext}`;
 
@@ -82,7 +84,7 @@ const parseEvernoteImportedFile = async (dispatch, getState, importDPath, entrie
       const destDPath = Util.dirname(destFPath);
       const doExist = await FileSystem.exists(destDPath);
       if (!doExist) await FileSystem.mkdir(destDPath);
-      await FileSystem.cp(`${importDPath}/${entry}`, destFPath);
+      await FileSystem.cp(`${importDPath}/${entry.filename}`, destFPath);
     }
 
     progress.done += selectedEntries.length;
@@ -96,7 +98,8 @@ const parseEvernoteImportedFile = async (dispatch, getState, importDPath, entrie
 
     const fpaths = [], contents = [];
     for (const entry of selectedEntries) {
-      const content = await FileSystem.readFile(`${importDPath}/${entry}`, UTF8);
+      const htmlFPath = `${importDPath}/${entry.filename}`;
+      const content = await FileSystem.readFile(htmlFPath, UTF8);
       if (!content) continue;
 
       let dt, dtMatch = content.match(/<meta itemprop="created" content="(.+)">/i);
@@ -157,16 +160,17 @@ const parseEvernoteImportedFile = async (dispatch, getState, importDPath, entrie
           const dom = parseDocument(html);
 
           const taskObjs = [];
-          const elem = dom.firstChild;
-          /*for (const node of elem.children) {
+          const elem = /** @type {any} */(dom.firstChild);
+          for (const node of elem.childNodes) {
             let isCompleted = false;
-            if (node instanceof HTMLElement && node.dataset && node.dataset.completed) {
-              isCompleted = node.dataset.completed === 'true';
+            if (node.attribs && node.attribs['data-completed']) {
+              isCompleted = node.attribs['data-completed'] === 'true';
             }
 
-            const text = node.firstChild.firstChild.lastChild.firstChild.textContent;
+            const child = node.firstChild.firstChild.lastChild.firstChild;
+            const text = DomUtils.textContent(child);
             taskObjs.push({ text: text.trim(), isCompleted });
-          }*/
+          }
 
           if (taskObjs.length > 0) {
             let todoHtml = '<ul class="todo-list">';
@@ -193,16 +197,16 @@ const parseEvernoteImportedFile = async (dispatch, getState, importDPath, entrie
           const dom = parseDocument(html);
 
           const todoObjs = [];
-          const elem = dom.firstChild;
-          /*for (const node of elem.children) {
+          const elem = /** @type {any} */(dom.firstChild);
+          for (const node of elem.childNodes) {
             let isCompleted = false;
-            if (node instanceof HTMLElement && node.dataset && node.dataset.checked) {
-              isCompleted = node.dataset.checked === 'true';
+            if (node.attribs && node.attribs['data-checked']) {
+              isCompleted = node.attribs['data-checked'] === 'true';
             }
 
-            const text = node.lastChild.firstChild.textContent;
+            const text = DomUtils.textContent(node.lastChild.firstChild);
             todoObjs.push({ text: text.trim(), isCompleted });
-          }*/
+          }
 
           if (todoObjs.length > 0) {
             let todoHtml = '<ul class="todo-list">';
@@ -229,10 +233,10 @@ const parseEvernoteImportedFile = async (dispatch, getState, importDPath, entrie
           const dom = parseDocument(html);
 
           const lines = [];
-          const elem = dom.firstChild;
-          /*for (const node of elem.children) {
-            lines.push(node.textContent);
-          }*/
+          const elem = /** @type {any} */(dom.firstChild);
+          for (const node of elem.childNodes) {
+            lines.push(DomUtils.textContent(node));
+          }
 
           if (lines.length > 0) {
             let codeHtml = '<pre><code>';
@@ -263,7 +267,9 @@ const parseGKeepImportedFile = async (dispatch, getState, importDPath, entries) 
 
   const jsonEntries = [], imgEntries = [], labelsEntries = [];
   for (const entry of entries) {
-    const { fname, fext } = extractFPath(entry);
+    if (entry.directory) continue;
+
+    const { fname, fext } = extractFPath(entry.filename);
 
     if (fname === 'Labels.txt') {
       labelsEntries.push(entry);
@@ -294,7 +300,8 @@ const parseGKeepImportedFile = async (dispatch, getState, importDPath, entries) 
     settings.listNameMap = copyListNameObjs(settings.listNameMap);
 
     for (const labelsEntry of labelsEntries) {
-      const content = await FileSystem.readFile(`${importDPath}/${labelsEntry}`, UTF8);
+      const labelsFPath = `${importDPath}/${labelsEntry.filename}`;
+      const content = await FileSystem.readFile(labelsFPath, UTF8);
       if (!isString(content)) continue;
 
       for (const label of content.split('\n')) {
@@ -327,7 +334,7 @@ const parseGKeepImportedFile = async (dispatch, getState, importDPath, entries) 
     const selectedEntries = imgEntries.slice(i, i + N_NOTES);
 
     for (const entry of selectedEntries) {
-      const { fnameParts, fext } = extractFPath(entry);
+      const { fnameParts, fext } = extractFPath(entry.filename);
       if (fnameParts.length < 2) continue;
 
       const fpath = `${IMAGES}/${randomString(4)}-${randomString(4)}-${randomString(4)}-${randomString(4)}.${fext}`;
@@ -340,7 +347,7 @@ const parseGKeepImportedFile = async (dispatch, getState, importDPath, entries) 
       const destDPath = Util.dirname(destFPath);
       const doExist = await FileSystem.exists(destDPath);
       if (!doExist) await FileSystem.mkdir(destDPath);
-      await FileSystem.cp(`${importDPath}/${entry}`, destFPath);
+      await FileSystem.cp(`${importDPath}/${entry.filename}`, destFPath);
     }
 
     progress.done += selectedEntries.length;
@@ -353,7 +360,7 @@ const parseGKeepImportedFile = async (dispatch, getState, importDPath, entries) 
     const fpaths = [], contents = [];
     for (const entry of selectedEntries) {
       /** @type {any} */
-      let content = await FileSystem.readFile(`${importDPath}/${entry}`, UTF8);
+      let content = await FileSystem.readFile(`${importDPath}/${entry.filename}`, UTF8);
       if (!content) continue;
 
       try {
@@ -482,7 +489,9 @@ const parseRawImportedFile = async (dispatch, getState, importDPath, entries) =>
 
   const rawFPaths = [], rawEntries = [];
   for (const entry of entries) {
-    const { fpath, fext } = extractFPath(entry);
+    if (entry.directory) continue;
+
+    const { fpath, fext } = extractFPath(entry.filename);
 
     if (
       ['txt'].includes(fext.toLowerCase()) ||
@@ -545,9 +554,9 @@ const parseRawImportedFile = async (dispatch, getState, importDPath, entries) =>
 
     const fpaths = [], contents = [];
     for (const entry of selectedEntries) {
-      const { fpathParts, fnameParts, fext } = extractFPath(entry);
+      const { fpathParts, fnameParts, fext } = extractFPath(entry.filename);
 
-      let content = await FileSystem.readFile(`${importDPath}/${entry}`, UTF8);
+      let content = await FileSystem.readFile(`${importDPath}/${entry.filename}`, UTF8);
       if (!content) continue;
 
       let listName = MY_NOTES;
@@ -587,14 +596,14 @@ const parseRawImportedFile = async (dispatch, getState, importDPath, entries) =>
 const _parseJustnoteSettings = async (getState, importDPath, settingsEntries) => {
   const settingsParts = [];
   for (const entry of settingsEntries) {
-    const { fpath } = extractFPath(entry);
+    const { fpath } = extractFPath(entry.filename);
     if (!fpath.endsWith(DOT_JSON)) continue;
 
     let dt = parseInt(fpath.slice(SETTINGS.length, -1 * DOT_JSON.length), 10);
     if (!isNumber(dt)) continue;
 
     /** @type {any} */
-    let content = await FileSystem.readFile(`${importDPath}/${entry}`, UTF8);
+    let content = await FileSystem.readFile(`${importDPath}/${entry.filename}`, UTF8);
     if (!content) continue;
 
     try {
@@ -689,7 +698,7 @@ const parseJustnoteImages = async (
     const selectedEntries = imgEntries.slice(i, i + N_NOTES);
 
     for (const entry of selectedEntries) {
-      const { fpath, fpathParts, fnameParts } = extractFPath(entry);
+      const { fpath, fpathParts, fnameParts } = extractFPath(entry.filename);
       if (fpathParts.length !== 2 || fpathParts[0] !== IMAGES) continue;
       if (fnameParts.length !== 2) continue;
 
@@ -699,7 +708,7 @@ const parseJustnoteImages = async (
       const destDPath = Util.dirname(destFPath);
       const doExist = await FileSystem.exists(destDPath);
       if (!doExist) await FileSystem.mkdir(destDPath);
-      await FileSystem.cp(`${importDPath}/${entry}`, destFPath);
+      await FileSystem.cp(`${importDPath}/${entry.filename}`, destFPath);
     }
 
     progress.done += selectedEntries.length;
@@ -715,7 +724,7 @@ const parseJustnoteNotes = async (
 
     const fpaths = [], contents = [];
     for (const entry of selectedEntries) {
-      const { fpath, fpathParts } = extractFPath(entry);
+      const { fpath, fpathParts } = extractFPath(entry.filename);
       if (fpath.includes(CD_ROOT + '/')) {
         if (fpathParts.length !== 6) continue;
       } else {
@@ -734,7 +743,7 @@ const parseJustnoteNotes = async (
 
       let content;
       if (fpath.endsWith(INDEX + DOT_JSON) || fpath.includes(CD_ROOT + '/')) {
-        content = await FileSystem.readFile(`${importDPath}/${entry}`, UTF8);
+        content = await FileSystem.readFile(`${importDPath}/${entry.filename}`, UTF8);
       } else {
         continue;
       }
@@ -846,7 +855,7 @@ const parseJustnotePins = async (
       if (!(/^\d+$/.test(addedDT))) continue;
       if (!fname.endsWith('.json')) continue;
 
-      let content = await FileSystem.readFile(`${importDPath}/${entry}`, UTF8);
+      let content = await FileSystem.readFile(`${importDPath}/${entry.filename}`, UTF8);
       if (!content) continue;
 
       try {
@@ -916,7 +925,9 @@ const parseJustnoteImportedFile = async (dispatch, getState, importDPath, entrie
 
   const noteEntries = [], pinEntries = [], imgEntries = [], settingsEntries = [];
   for (const entry of entries) {
-    const { fpath } = extractFPath(entry);
+    if (entry.directory) continue;
+
+    const { fpath } = extractFPath(entry.filename);
 
     if (fpath.startsWith(NOTES)) {
       noteEntries.push(entry);
@@ -961,9 +972,12 @@ const parseJustnoteImportedFile = async (dispatch, getState, importDPath, entrie
 const parseImportedFile = async (dispatch, getState, importDPath) => {
   try {
     let isEvernote = false, isGKeep = false, isTxt = false, isHtml = false;
-    const entries = await FileSystem.ls(importDPath);
+    const entries = await getFileEntries(importDPath);
+
     for (const entry of entries) {
-      const { fpath, fext } = extractFPath(entry);
+      if (entry.directory) continue;
+
+      const { fpath, fext } = extractFPath(entry.filename);
 
       if (fpath.endsWith('Evernote_index.html')) {
         isEvernote = true;
@@ -1488,4 +1502,32 @@ export const updateDeleteAllDataProgress = (progress) => {
     type: UPDATE_DELETE_ALL_DATA_PROGRESS,
     payload: progress,
   };
+};
+
+const _getFileEntries = async (dpath) => {
+  const entries = [];
+
+  const fnames = await FileSystem.ls(dpath);
+  for (const fname of fnames) {
+    const fpath = `${dpath}/${fname}`;
+    const isDir = await FileSystem.isDir(fpath);
+
+    // Use filename here so to be the same as zip library in web
+    entries.push({ filename: fpath, directory: isDir });
+    if (isDir) {
+      const _entries = await _getFileEntries(fpath);
+      entries.push(..._entries);
+    }
+  }
+
+  return entries;
+};
+
+const getFileEntries = async (dpath) => {
+  const _entries = await _getFileEntries(dpath);
+  const entries = _entries.map(entry => {
+    const filename = entry.filename.slice(dpath.length + 1);
+    return { ...entry, filename };
+  });
+  return entries;
 };
