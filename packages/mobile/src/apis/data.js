@@ -3,8 +3,8 @@ import lsgApi from './localSg';
 import ldbApi from './localDb';
 import fileApi from './localFile';
 import {
-  UNSAVED_NOTES, UNSAVED_NOTES_UNSAVED, UNSAVED_NOTES_SAVED, INDEX, DOT_JSON, CD_ROOT,
-  N_NOTES, TRASH, N_DAYS, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE,
+  UNSAVED_NOTES_UNSAVED, UNSAVED_NOTES_SAVED, INDEX, DOT_JSON, CD_ROOT, N_NOTES, TRASH,
+  N_DAYS, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE,
 } from '../types/const';
 import {
   isObject, createNoteFPath, createDataFName, extractNoteFPath, createPinFPath,
@@ -32,6 +32,7 @@ const _listFPaths = async (listFiles) => {
 };
 
 const listFPaths = async (doForce = false) => {
+  // Beware if ldbApi, staticFPaths will always be empty!
   if (isObject(getApi().cachedFPaths.fpaths) && !doForce) {
     return getApi().cachedFPaths.fpaths;
   }
@@ -473,8 +474,7 @@ const putLocalSettings = async (localSettings) => {
 };
 
 const getUnsavedNotes = async () => {
-  const keys = await ldbApi.listKeys();
-  const _fpaths = keys.filter(key => key.startsWith(UNSAVED_NOTES + '/'));
+  const _fpaths = await ldbApi.getUnsavedNoteFPaths();
   const { fpaths, contents } = await ldbApi.getFiles(_fpaths, true);
 
   const unsavedArr = [], savedMap = {};
@@ -544,8 +544,7 @@ const deleteUnsavedNotes = async (ids) => {
 };
 
 const deleteAllUnsavedNotes = async () => {
-  const keys = await ldbApi.listKeys();
-  const fpaths = keys.filter(key => key.startsWith(UNSAVED_NOTES + '/'));
+  const fpaths = await ldbApi.getUnsavedNoteFPaths();
   await ldbApi.deleteFiles(fpaths);
 };
 

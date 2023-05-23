@@ -910,6 +910,8 @@ const parseJustnoteImportedFile = async (dispatch, getState, importDPath, entrie
   let existFPaths = [], toRootIds, leafIds = [];
 
   const fpaths = await dataApi.listFPaths(true);
+  if (vars.syncMode.doSyncMode) fpaths.staticFPaths = await fileApi.getStaticFPaths();
+
   existFPaths.push(...fpaths.noteFPaths);
   existFPaths.push(...fpaths.pinFPaths);
   existFPaths.push(...fpaths.staticFPaths);
@@ -1264,11 +1266,16 @@ export const exportAllData = () => async (dispatch, getState) => {
     }
 
     for (const fpath of fileFPaths) {
-      const dpath = Util.dirname(`${exportDPath}/${fpath}`);
-      const doExist = await FileSystem.exists(dpath);
-      if (!doExist) await FileSystem.mkdir(dpath);
+      const srcFPath = `${Dirs.DocumentDir}/${fpath}`;
+      let doExist = await FileSystem.exists(srcFPath);
+      if (!doExist) continue;
 
-      await FileSystem.cp(`${Dirs.DocumentDir}/${fpath}`, `${exportDPath}/${fpath}`);
+      const destFPath = `${exportDPath}/${fpath}`;
+      const destDPath = Util.dirname(destFPath);
+      doExist = await FileSystem.exists(destDPath);
+      if (!doExist) await FileSystem.mkdir(destDPath);
+
+      await FileSystem.cp(srcFPath, destFPath);
 
       progress.done += 1;
       if (progress.done < progress.total || errorResponses.length === 0) {
@@ -1394,6 +1401,8 @@ export const deleteAllData = () => async (dispatch, getState) => {
   let allNoteIds, staticFPaths, settingsFPaths, settingsIds, infoFPath, pins;
   try {
     const fpaths = await dataApi.listFPaths(true);
+    if (vars.syncMode.doSyncMode) fpaths.staticFPaths = await fileApi.getStaticFPaths();
+
     const noteIds = listNoteIds(fpaths.noteFPaths);
 
     allNoteIds = [...noteIds.noteIds, ...noteIds.conflictedIds];

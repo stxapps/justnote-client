@@ -910,6 +910,8 @@ const parseJustnoteImportedFile = async (dispatch, getState, zip, entries) => {
   let existFPaths = [], toRootIds, leafIds = [];
 
   const fpaths = await dataApi.listFPaths(true);
+  if (vars.syncMode.doSyncMode) fpaths.staticFPaths = await fileApi.getStaticFPaths();
+
   existFPaths.push(...fpaths.noteFPaths);
   existFPaths.push(...fpaths.pinFPaths);
   existFPaths.push(...fpaths.staticFPaths);
@@ -1320,6 +1322,8 @@ export const deleteAllData = () => async (dispatch, getState) => {
   let allNoteIds, staticFPaths, settingsFPaths, settingsIds, infoFPath, pins;
   try {
     const fpaths = await dataApi.listFPaths(true);
+    if (vars.syncMode.doSyncMode) fpaths.staticFPaths = await fileApi.getStaticFPaths();
+
     const noteIds = listNoteIds(fpaths.noteFPaths);
 
     allNoteIds = [...noteIds.noteIds, ...noteIds.conflictedIds];

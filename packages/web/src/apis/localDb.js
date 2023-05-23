@@ -1,6 +1,6 @@
 import * as idb from 'idb-keyval';
 
-import { DOT_JSON, UNSAVED_NOTES } from '../types/const';
+import { NOTES, SETTINGS, INFO, PINS, UNSAVED_NOTES, DOT_JSON } from '../types/const';
 import { isObject, copyFPaths, addFPath, deleteFPath } from '../utils';
 import { cachedFPaths } from '../vars';
 
@@ -98,30 +98,23 @@ const deleteAllFiles = async () => {
 };
 
 const listFiles = async (callback) => {
-  let keys = [];
+  let keys;
   try {
     keys = await idb.keys();
   } catch (error) {
     console.log('In localDb.listFiles, IndexedDB error:', error);
-    keys = Object.keys(cachedContents);
+    keys = [];
   }
-  keys = keys.map(key => `${key}`).filter(key => !key.startsWith(UNSAVED_NOTES));
 
-  for (const key of keys) callback(key);
-  return keys.length;
-};
+  let count = 0;
+  for (let key of keys) {
+    key = `${key}`; // Force key to be only string, no number.
+    if (![NOTES, SETTINGS, INFO, PINS].some(el => key.startsWith(el))) continue;
 
-const listKeys = async () => {
-  let keys = [];
-  try {
-    keys = await idb.keys();
-  } catch (error) {
-    console.log('In localDb.listKeys, IndexedDB error:', error);
-    keys = Object.keys(cachedContents);
+    callback(key);
+    count += 1;
   }
-  keys = keys.map(key => `${key}`); // Force key to be only string, no number.
-
-  return keys;
+  return count;
 };
 
 const exists = async (fpath) => {
@@ -129,9 +122,26 @@ const exists = async (fpath) => {
   return file !== undefined;
 };
 
+const getUnsavedNoteFPaths = async () => {
+  let keys;
+  try {
+    keys = await idb.keys();
+  } catch (error) {
+    console.log('In localDb.getUnsavedNoteFPaths, IndexedDB error:', error);
+    keys = Object.keys(cachedContents);
+  }
+
+  const fpaths = [];
+  for (let key of keys) {
+    key = `${key}`; // Force key to be only string, no number.
+    if (key.startsWith(UNSAVED_NOTES + '/')) fpaths.push(key);
+  }
+  return fpaths;
+};
+
 const localDb = {
   cachedFPaths, getFile, getFiles, putFile, putFiles, deleteFile, deleteFiles,
-  deleteAllFiles, listFiles, listKeys, exists,
+  deleteAllFiles, listFiles, exists, getUnsavedNoteFPaths,
 };
 
 export default localDb;

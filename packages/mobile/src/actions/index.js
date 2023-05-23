@@ -65,7 +65,7 @@ import {
   DELETE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
   DISCARD_ACTION_UPDATE_LIST_NAME, MY_NOTES, TRASH, ID, NEW_NOTE, NEW_NOTE_OBJ,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES, N_DAYS, CD_ROOT,
-  IMAGES, INFO, INDEX, DOT_JSON, SHOW_SYNCED, LG_WIDTH, IAP_VERIFY_URL, IAP_STATUS_URL,
+  INFO, INDEX, DOT_JSON, SHOW_SYNCED, LG_WIDTH, IAP_VERIFY_URL, IAP_STATUS_URL,
   APPSTORE, PLAYSTORE, COM_JUSTNOTECC, COM_JUSTNOTECC_SUPPORTER, SIGNED_TEST_STRING,
   VALID, INVALID, UNKNOWN, ERROR, ACTIVE, SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT,
   SETTINGS_VIEW_LISTS, WHT_MODE, BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE,
@@ -1342,7 +1342,6 @@ export const onShowNLIMPopup = (title, body, media) => async (
 
 const _cleanUpStaticFiles = async (dispatch, getState) => {
   const noteFPaths = getNoteFPaths(getState());
-  const staticFPaths = getStaticFPaths(getState());
   const unsavedNotes = getState().unsavedNotes;
 
   const usedFPaths = [];
@@ -1361,6 +1360,9 @@ const _cleanUpStaticFiles = async (dispatch, getState) => {
   }
 
   // Delete unused static files in server
+  let staticFPaths = getStaticFPaths(getState());
+  // if syncMode, staticFPaths is always empty.
+
   let unusedFPaths = [];
   for (const fpath of staticFPaths) {
     if (usedFPaths.includes(fpath)) continue;
@@ -1382,18 +1384,18 @@ const _cleanUpStaticFiles = async (dispatch, getState) => {
   ) return;
 
   // Delete unused static files in local
-  const keys = await fileApi.listKeys();
-  const imgKeys = keys.filter(key => key.includes(IMAGES + '/'));
-  const imgFPaths = imgKeys.map(key => key.slice(key.indexOf(IMAGES + '/')));
+  staticFPaths = await fileApi.getStaticFPaths();
 
   unusedFPaths = [];
-  for (const fpath of imgFPaths) {
+  for (const fpath of staticFPaths) {
     if (usedFPaths.includes(fpath)) continue;
     unusedFPaths.push(fpath);
   }
   unusedFPaths = unusedFPaths.slice(0, N_NOTES);
 
-  await fileApi.deleteFiles(unusedFPaths);
+  if (unusedFPaths.length > 0) {
+    await fileApi.deleteFiles(unusedFPaths);
+  }
 
   // Delete unused unsaved notes
   let unusedIds = [];
@@ -1840,11 +1842,11 @@ export const sync = (
 
     const {
       noteFPaths: _noteFPaths,
-      staticFPaths: _staticFPaths,
       settingsFPaths: _settingsFPaths,
       infoFPath: _infoFPath,
       pinFPaths: _pinFPaths,
     } = await dataApi.listFPaths(doForceListFPaths);
+    const _staticFPaths = await fileApi.getStaticFPaths();
     const {
       noteIds: _noteIds, conflictedIds: _conflictedIds,
     } = listNoteIds(_noteFPaths);
@@ -1872,6 +1874,18 @@ export const sync = (
     // 1. Server side: upload all fpaths
     let fpaths = [], contents = [];
     for (const fpath of _noteFPaths) {
+      if (fpath.includes(CD_ROOT + '/')) {
+        const staticFPath = getStaticFPath(fpath);
+        if (
+          allLeafStaticFPaths.includes(staticFPath) &&
+          !staticFPaths.includes(staticFPath)
+        ) {
+          // if no file locally, will just ignore by Blockstack mobile libraries.
+          fpaths.push('file://' + staticFPath);
+          contents.push('');
+        }
+      }
+
       if (noteFPaths.includes(fpath)) continue;
 
       let content;
@@ -1884,17 +1898,6 @@ export const sync = (
       }
       fpaths.push(fpath);
       contents.push(content);
-
-      if (fpath.includes(CD_ROOT + '/')) {
-        const staticFPath = getStaticFPath(fpath);
-        if (
-          allLeafStaticFPaths.includes(staticFPath) &&
-          !staticFPaths.includes(staticFPath)
-        ) {
-          fpaths.push('file://' + staticFPath);
-          contents.push('');
-        }
-      }
     }
     await serverApi.putFiles(fpaths, contents);
 
@@ -1902,15 +1905,6 @@ export const sync = (
     fpaths = []; contents = [];
     let deletedFPaths = [];
     for (const fpath of leafFPaths) {
-      if (allLeafFPaths.includes(fpath)) continue;
-
-      let content;
-      if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
-      else content = '';
-
-      fpaths.push(fpath);
-      contents.push(content);
-
       if (fpath.includes(CD_ROOT + '/')) {
         const staticFPath = getStaticFPath(fpath);
         if (
@@ -1920,6 +1914,15 @@ export const sync = (
           deletedFPaths.push(staticFPath);
         }
       }
+
+      if (allLeafFPaths.includes(fpath)) continue;
+
+      let content;
+      if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
+      else content = '';
+
+      fpaths.push(fpath);
+      contents.push(content);
     }
     await serverApi.putFiles(fpaths, contents);
     await serverApi.deleteFiles(deletedFPaths);
@@ -1928,22 +1931,23 @@ export const sync = (
     fpaths = []; contents = [];
     let _gFPaths = [], gStaticFPaths = [];
     for (const fpath of noteFPaths) {
+      if (fpath.includes(CD_ROOT + '/')) {
+        const staticFPath = getStaticFPath(fpath);
+        if (
+          allLeafStaticFPaths.includes(staticFPath) &&
+          !_staticFPaths.includes(staticFPath)
+        ) {
+          // if no directories, will create by Blockstack mobile libraries.
+          gStaticFPaths.push('file://' + staticFPath);
+          haveUpdate = true;
+        }
+      }
+
       if (_noteFPaths.includes(fpath)) continue;
       haveUpdate = true;
 
       if (allLeafFPaths.includes(fpath)) {
         _gFPaths.push(fpath);
-
-        if (fpath.includes(CD_ROOT + '/')) {
-          const staticFPath = getStaticFPath(fpath);
-          if (
-            allLeafStaticFPaths.includes(staticFPath) &&
-            !_staticFPaths.includes(staticFPath)
-          ) {
-            gStaticFPaths.push('file://' + staticFPath);
-          }
-        }
-
         continue;
       }
 
@@ -1962,15 +1966,6 @@ export const sync = (
     // 4. Local side: loop used to be leaves in local and set to empty
     fpaths = []; contents = []; deletedFPaths = [];
     for (const fpath of _leafFPaths) {
-      if (allLeafFPaths.includes(fpath)) continue;
-
-      let content;
-      if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
-      else content = '';
-
-      fpaths.push(fpath);
-      contents.push(content);
-
       if (fpath.includes(CD_ROOT + '/')) {
         const staticFPath = getStaticFPath(fpath);
         if (
@@ -1980,6 +1975,15 @@ export const sync = (
           deletedFPaths.push(staticFPath);
         }
       }
+
+      if (allLeafFPaths.includes(fpath)) continue;
+
+      let content;
+      if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
+      else content = '';
+
+      fpaths.push(fpath);
+      contents.push(content);
     }
     await dataApi.putFiles(fpaths, contents);
     await fileApi.deleteFiles(deletedFPaths);

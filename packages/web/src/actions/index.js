@@ -57,14 +57,12 @@ import {
   MOVE_ACTION_NOTE_COMMANDS, MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS,
   DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
   DISCARD_ACTION_UPDATE_LIST_NAME, MY_NOTES, TRASH, ID, NEW_NOTE, NEW_NOTE_OBJ,
-  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES,
-  N_DAYS, CD_ROOT, IMAGES, INFO, DOT_JSON, SHOW_SYNCED,
-  LG_WIDTH, IAP_VERIFY_URL, IAP_STATUS_URL, PADDLE,
+  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES, N_DAYS, CD_ROOT,
+  INFO, DOT_JSON, SHOW_SYNCED, LG_WIDTH, IAP_VERIFY_URL, IAP_STATUS_URL, PADDLE,
   COM_JUSTNOTECC, COM_JUSTNOTECC_SUPPORTER, SIGNED_TEST_STRING, VALID, INVALID, ACTIVE,
   UNKNOWN, SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS, WHT_MODE,
   BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE, FEATURE_DATE_FORMAT,
-  FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES,
-  NOTE_DATE_FORMATS,
+  FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES, NOTE_DATE_FORMATS,
   PADDLE_RANDOM_ID,
 } from '../types/const';
 import {
@@ -1700,7 +1698,6 @@ export const onShowNLIMPopup = (title, body, media) => async (
 
 const _cleanUpStaticFiles = async (dispatch, getState) => {
   const noteFPaths = getNoteFPaths(getState());
-  const staticFPaths = getStaticFPaths(getState());
   const unsavedNotes = getState().unsavedNotes;
 
   const usedFPaths = [];
@@ -1719,6 +1716,9 @@ const _cleanUpStaticFiles = async (dispatch, getState) => {
   }
 
   // Delete unused static files in server
+  let staticFPaths = getStaticFPaths(getState());
+  // if syncMode, staticFPaths is always empty.
+
   let unusedFPaths = [];
   for (const fpath of staticFPaths) {
     if (usedFPaths.includes(fpath)) continue;
@@ -1740,18 +1740,18 @@ const _cleanUpStaticFiles = async (dispatch, getState) => {
   ) return;
 
   // Delete unused static files in local
-  const keys = await fileApi.listKeys();
-  const imgKeys = keys.filter(key => key.includes(IMAGES + '/'));
-  const imgFPaths = imgKeys.map(key => key.slice(key.indexOf(IMAGES + '/')));
+  staticFPaths = await fileApi.getStaticFPaths();
 
   unusedFPaths = [];
-  for (const fpath of imgFPaths) {
+  for (const fpath of staticFPaths) {
     if (usedFPaths.includes(fpath)) continue;
     unusedFPaths.push(fpath);
   }
   unusedFPaths = unusedFPaths.slice(0, N_NOTES);
 
-  await fileApi.deleteFiles(unusedFPaths);
+  if (unusedFPaths.length > 0) {
+    await fileApi.deleteFiles(unusedFPaths);
+  }
 
   // Delete unused unsaved notes
   let unusedIds = [];

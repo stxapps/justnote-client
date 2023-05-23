@@ -84,14 +84,8 @@ const deleteAllFiles = async (dir = Dirs.DocumentDir) => {
     const doExist = await FileSystem.exists(ddpath);
     if (!doExist) continue;
 
-    const fnames = await FileSystem.ls(ddpath);
-    for (const fname of fnames) await FileSystem.unlink(ddpath + '/' + fname);
+    await FileSystem.unlink(ddpath);
   }
-};
-
-const listKeys = async () => {
-  const keys = await FileSystem.ls(Dirs.DocumentDir);
-  return keys.map(key => Dirs.DocumentDir + '/' + key);
 };
 
 const exists = async (fpath, dir = Dirs.DocumentDir) => {
@@ -104,9 +98,42 @@ const mkdir = async (fpath, dir = Dirs.DocumentDir) => {
   await FileSystem.mkdir(fpath);
 };
 
+const _getFilePaths = async (dpath = Dirs.DocumentDir) => {
+  const fpaths = [];
+
+  const fnames = await FileSystem.ls(dpath);
+  for (const fname of fnames) {
+    const fpath = `${dpath}/${fname}`;
+    const isDir = await FileSystem.isDir(fpath);
+
+    if (isDir) {
+      const _fpaths = await _getFilePaths(fpath);
+      fpaths.push(..._fpaths);
+      continue;
+    }
+    fpaths.push(fpath);
+  }
+
+  return fpaths;
+};
+
+const getStaticFPaths = async () => {
+  const keys = await _getFilePaths();
+
+  const fpaths = [];
+  for (let key of keys) {
+    key = `${key}`; // Force key to be only string, no number.
+    if (key.startsWith(Dirs.DocumentDir)) {
+      key = key.slice(Dirs.DocumentDir.length + 1);
+      if (key.startsWith(IMAGES + '/')) fpaths.push(key);
+    }
+  }
+  return fpaths;
+};
+
 const localFile = {
   getFile, getFiles, putFile, putFiles, deleteFile, deleteFiles, deleteAllFiles,
-  listKeys, exists, mkdir,
+  exists, mkdir, getStaticFPaths,
 };
 
 export default localFile;

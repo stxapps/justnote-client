@@ -1,7 +1,7 @@
 import MMKVStorage from 'react-native-mmkv-storage';
 
 import {
-  IS_USER_DUMMY, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE, DOT_JSON, UNSAVED_NOTES,
+  IS_USER_DUMMY, NOTES, SETTINGS, INFO, PINS, UNSAVED_NOTES, DOT_JSON,
 } from '../types/const';
 import { isObject, copyFPaths, addFPath, deleteFPath } from '../utils';
 import { cachedFPaths } from '../vars';
@@ -102,25 +102,17 @@ const deleteAllFiles = async () => {
 };
 
 const listFiles = async (callback) => {
-  const ignoredKeys = [
-    IS_USER_DUMMY, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE,
-    'default',
-    'boolIndex', 'numberIndex', 'stringIndex', 'arrayIndex', 'mapIndex',
-    'boolsIndex', 'numbersIndex', 'stringsIndex', 'arraysIndex', 'mapsIndex',
-  ];
-
-  let keys = await getInstance().indexer.getKeys();
-  keys = keys.filter(key => {
-    return !ignoredKeys.includes(key) && !key.startsWith(UNSAVED_NOTES);
-  });
-
-  for (const key of keys) callback(key);
-  return keys.length;
-};
-
-const listKeys = async () => {
   const keys = await getInstance().indexer.getKeys();
-  return keys;
+
+  let count = 0;
+  for (let key of keys) {
+    key = `${key}`; // Force key to be only string, no number.
+    if (![NOTES, SETTINGS, INFO, PINS].some(el => key.startsWith(el))) continue;
+
+    callback(key);
+    count += 1;
+  }
+  return count;
 };
 
 const exists = async (fpath) => {
@@ -128,10 +120,21 @@ const exists = async (fpath) => {
   return hasKey;
 };
 
+const getUnsavedNoteFPaths = async () => {
+  const keys = await getInstance().indexer.getKeys();
+
+  const fpaths = [];
+  for (let key of keys) {
+    key = `${key}`; // Force key to be only string, no number.
+    if (key.startsWith(UNSAVED_NOTES + '/')) fpaths.push(key);
+  }
+  return fpaths;
+};
+
 const localDb = {
   isUserDummy, updateUserDummy, getItem, setItem, removeItem,
   cachedFPaths, getFile, getFiles, putFile, putFiles, deleteFile, deleteFiles,
-  deleteAllFiles, listFiles, listKeys, exists,
+  deleteAllFiles, listFiles, exists, getUnsavedNoteFPaths,
 };
 
 export default localDb;
