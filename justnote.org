@@ -275,7 +275,7 @@
   + Add proguard rules
   + require iOS target to 11.0
 - yarn add https://github.com/stxapps/tailwind-rn#96848a8d2c2370e4f5e57a773ace172c4073157d
-- yarn add 'https://gitpkg.now.sh/stxapps/blockstack-react-native/BlockstackSDK?75854753bb20b72c0da94e16bb4b5e56a385578f'
+- yarn add 'https://gitpkg.now.sh/stxapps/blockstack-react-native/BlockstackSDK?509b207c1f9090e07faefe4bbbc7b130672654e6'
 - yarn add babel-plugin-inline-import --dev
   + Update babel.config.js to work with .svg
 - yarn add @welldone-software/why-did-you-render --dev
