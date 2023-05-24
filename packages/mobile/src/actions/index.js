@@ -1881,8 +1881,11 @@ export const sync = (
           !staticFPaths.includes(staticFPath)
         ) {
           // if no file locally, will just ignore by Blockstack mobile libraries.
-          fpaths.push('file://' + staticFPath);
-          contents.push('');
+          const fileFPath = 'file://' + staticFPath;
+          if (!fpaths.includes(fileFPath)) {
+            fpaths.push(fileFPath);
+            contents.push('');
+          }
         }
       }
 
@@ -1911,7 +1914,7 @@ export const sync = (
           !allLeafStaticFPaths.includes(staticFPath) &&
           staticFPaths.includes(staticFPath)
         ) {
-          deletedFPaths.push(staticFPath);
+          if (!deletedFPaths.includes(staticFPath)) deletedFPaths.push(staticFPath);
         }
       }
 
@@ -1938,8 +1941,11 @@ export const sync = (
           !_staticFPaths.includes(staticFPath)
         ) {
           // if no directories, will create by Blockstack mobile libraries.
-          gStaticFPaths.push('file://' + staticFPath);
-          haveUpdate = true;
+          const fileFPath = 'file://' + staticFPath;
+          if (!gStaticFPaths.includes(fileFPath)) {
+            gStaticFPaths.push(fileFPath);
+            haveUpdate = true;
+          }
         }
       }
 
@@ -1972,7 +1978,7 @@ export const sync = (
           !allLeafStaticFPaths.includes(staticFPath) &&
           _staticFPaths.includes(staticFPath)
         ) {
-          deletedFPaths.push(staticFPath);
+          if (!deletedFPaths.includes(staticFPath)) deletedFPaths.push(staticFPath);
         }
       }
 
