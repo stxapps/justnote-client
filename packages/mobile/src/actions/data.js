@@ -25,7 +25,7 @@ import {
   getStaticFPath, getMainId, isListNameObjsValid, indexOfClosingTag, createNoteFPath,
   createDataFName, extractNoteFPath, extractDataFName, extractDataId, listNoteIds,
   createSettingsFPath, getSettingsFPaths, getLastSettingsFPaths, extractPinFPath,
-  getPins, batchGetFileWithRetry, extractFPath, copyListNameObjs,
+  getPins, batchGetFileWithRetry, extractFPath, copyListNameObjs, getFormattedTimeStamp,
 } from '../utils';
 import { initialSettingsState, initialInfoState } from '../types/initialStates';
 import vars from '../vars';
@@ -1008,6 +1008,8 @@ const parseImportedFile = async (dispatch, getState, importDPath) => {
     } else {
       await parseJustnoteImportedFile(dispatch, getState, importDPath, entries);
     }
+
+    await sync(false, 1)(dispatch, getState);
   } catch (error) {
     dispatch(updateImportAllDataProgress({
       total: -1,
@@ -1061,7 +1063,7 @@ export const updateImportAllDataProgress = (progress) => {
   };
 };
 
-export const saveAs = async (fileName, filePath) => {
+export const saveAs = async (filePath, fileName) => {
   if (Platform.OS === 'ios') {
     try {
       await Share.open({ url: 'file://' + filePath });
@@ -1118,7 +1120,7 @@ export const exportAllData = () => async (dispatch, getState) => {
   // Need to manually call it to wait for it properly!
   await sync(true, 2)(dispatch, getState);
 
-  let fpaths = [], rootIds = {}, toRootIds;
+  let fpaths = [], toRootIds;
   try {
     const { noteFPaths, settingsFPaths, pinFPaths } = await dataApi.listFPaths(true);
     const { noteIds, conflictedIds, toRootIds: _toRootIds } = listNoteIds(noteFPaths);
@@ -1128,7 +1130,6 @@ export const exportAllData = () => async (dispatch, getState) => {
         fpaths.push(fpath);
         if (fpath.includes(CD_ROOT + '/')) fpaths.push(getStaticFPath(fpath));
       }
-      rootIds[noteId.id] = `${noteId.addedDT}${randomString(4)}`;
     }
 
     const lastSettingsFPaths = getLastSettingsFPaths(settingsFPaths);
@@ -1211,8 +1212,8 @@ export const exportAllData = () => async (dispatch, getState) => {
         if (fpath.startsWith(NOTES)) {
           const { listName, fname, subName } = extractNoteFPath(fpath);
           const { id, parentIds } = extractDataFName(fname);
-          if (parentIds && rootIds[id]) {
-            const newFName = createDataFName(id, [rootIds[id]]);
+          if (parentIds && toRootIds[id]) {
+            const newFName = createDataFName(id, [toRootIds[id]]);
             fpath = createNoteFPath(listName, newFName, subName);
           }
           idMap[toRootIds[id]] = id;
@@ -1232,7 +1233,7 @@ export const exportAllData = () => async (dispatch, getState) => {
       }
 
       progress.done += filteredResponses.length;
-      if (progress.done < progress.total || errorResponses.length === 0) {
+      if (progress.done < progress.total) {
         dispatch(updateExportAllDataProgress(progress));
       }
     }
@@ -1260,7 +1261,7 @@ export const exportAllData = () => async (dispatch, getState) => {
       await FileSystem.writeFile(`${exportDPath}/${fpath}`, content, UTF8);
 
       progress.done += 1;
-      if (progress.done < progress.total || errorResponses.length === 0) {
+      if (progress.done < progress.total) {
         dispatch(updateExportAllDataProgress(progress));
       }
     }
@@ -1278,23 +1279,26 @@ export const exportAllData = () => async (dispatch, getState) => {
       await FileSystem.cp(srcFPath, destFPath);
 
       progress.done += 1;
-      if (progress.done < progress.total || errorResponses.length === 0) {
+      if (progress.done < progress.total) {
         dispatch(updateExportAllDataProgress(progress));
       }
     }
 
-    const fileName = 'justnote-data.zip';
-    const filePath = `${Dirs.CacheDir}/${fileName}`;
+    const filePath = `${Dirs.CacheDir}/justnote-data.zip`;
+    const doFileExist = await FileSystem.exists(filePath);
+    if (doFileExist) await FileSystem.unlink(filePath);
+
     await zip(exportDPath, filePath);
-    await saveAs(fileName, filePath);
+
+    const fileName = `Justnote data ${getFormattedTimeStamp(new Date())}.zip`;
+    await saveAs(filePath, fileName);
 
     if (errorResponses.length > 0) {
-      dispatch(updateExportAllDataProgress({
-        total: -1,
-        done: -1,
-        error: 'Some download requests failed. Data might be missing in the exported file.',
-      }));
+      progress.total = -1;
+      progress.done = -1;
+      progress.error = 'Some download requests failed. Data might be missing in the exported file.';
     }
+    dispatch(updateExportAllDataProgress(progress));
   } catch (error) {
     dispatch(updateExportAllDataProgress({
       total: -1,
