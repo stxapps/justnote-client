@@ -1030,6 +1030,8 @@ const _importAllData = async (dispatch, getState) => {
     });
     const result = results[0];
     if (!isObject(result) || !isString(result.fileCopyUri)) {
+      dispatch(updateImportAllDataProgress(null));
+
       const error = result.copyError || '';
       Alert.alert('Read file failed!', `Could not read content in the file. Please recheck your file.\n\n${error}`);
       return;
@@ -1039,7 +1041,8 @@ const _importAllData = async (dispatch, getState) => {
     const doExist = await FileSystem.exists(importDPath);
     if (doExist) await FileSystem.unlink(importDPath);
 
-    await unzip(result.fileCopyUri, importDPath);
+    // unzip requires file path, not uri
+    await unzip(decodeURI(result.fileCopyUri), importDPath);
     await parseImportedFile(dispatch, getState, importDPath);
   } catch (error) {
     dispatch(updateImportAllDataProgress(null));
