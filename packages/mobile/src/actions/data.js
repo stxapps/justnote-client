@@ -1041,8 +1041,9 @@ const _importAllData = async (dispatch, getState) => {
     const doExist = await FileSystem.exists(importDPath);
     if (doExist) await FileSystem.unlink(importDPath);
 
-    // unzip requires file path, not uri
-    await unzip(decodeURI(result.fileCopyUri), importDPath);
+    // unzip requires file path, not uri, use stat to convert/decode it.
+    const { path: fileCopyPath } = await FileSystem.stat(result.fileCopyUri);
+    await unzip(fileCopyPath, importDPath);
     await parseImportedFile(dispatch, getState, importDPath);
   } catch (error) {
     dispatch(updateImportAllDataProgress(null));
