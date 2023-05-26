@@ -468,15 +468,17 @@ const NoteEditorEditor = (props) => {
       if (isEditorReady && webView.current) {
         if (searchString !== prevSearchString.current) {
           if (searchString) {
+            const escapedSearchString = escapeDoubleQuotes(searchString);
             const matchCase = containUppercase(searchString);
-            webView.current.injectJavaScript('window.justnote.setFind(' + doHighlightTitle + ', "' + searchString + '", ' + matchCase + '); true;');
+            webView.current.injectJavaScript('window.justnote.setFind(' + doHighlightTitle + ', "' + escapedSearchString + '", ' + matchCase + '); true;');
           } else {
             webView.current.injectJavaScript('window.justnote.clearFind(); true;');
           }
         } else {
           if (searchString) {
+            const escapedSearchString = escapeDoubleQuotes(searchString);
             const matchCase = containUppercase(searchString);
-            webView.current.injectJavaScript('window.justnote.setFind(' + doHighlightTitle + ', "' + searchString + '", ' + matchCase + '); true;');
+            webView.current.injectJavaScript('window.justnote.setFind(' + doHighlightTitle + ', "' + escapedSearchString + '", ' + matchCase + '); true;');
           }
         }
       }

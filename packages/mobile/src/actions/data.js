@@ -128,7 +128,7 @@ const parseEvernoteImportedFile = async (dispatch, getState, importDPath, entrie
 
       let body = '';
       const bMatch = content.match(/<en-note[^>]*>([\s\S]+?)<\/en-note>/i);
-      if (bMatch) body = bMatch[1].trim();
+      if (bMatch) body = bMatch[1].trim().replace(/\r?\n/g, '');
 
       // img tags
       for (const match of body.matchAll(/<img[^>]+?src="([^"]+)"[^>]*>/gi)) {
@@ -577,7 +577,7 @@ const parseRawImportedFile = async (dispatch, getState, importDPath, entries) =>
         body = '<p>' + content.replace(/\r?\n/g, '<br />') + '</p>';
       } else if (HTML_FILE_EXTS.includes(fext.toLowerCase())) {
         const bMatch = content.match(/<body[^>]*>([\s\S]+?)<\/body>/i);
-        if (bMatch) body = bMatch[1].trim();
+        if (bMatch) body = bMatch[1].trim().replace(/\r?\n/g, '');
       }
 
       if (title || body) {

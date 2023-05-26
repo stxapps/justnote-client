@@ -833,7 +833,7 @@ export const splitOnFirst = (str, sep) => {
 };
 
 export const escapeDoubleQuotes = (s) => {
-  return s.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return s.trim().replace(/\r?\n/g, '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 };
 
 export const getFileExt = (fname) => {
