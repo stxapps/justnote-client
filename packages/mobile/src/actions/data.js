@@ -1033,7 +1033,7 @@ const _importAllData = async (dispatch, getState) => {
       dispatch(updateImportAllDataProgress(null));
 
       const error = result.copyError || '';
-      Alert.alert('Read file failed!', `Could not read content in the file. Please recheck your file.\n\n${error}`);
+      Alert.alert('Read file failed!', `Could not read the content in the file. Please recheck your file.\n\n${error}`);
       return;
     }
 
@@ -1049,7 +1049,7 @@ const _importAllData = async (dispatch, getState) => {
     dispatch(updateImportAllDataProgress(null));
     if (DocumentPicker.isCancel(error)) return;
 
-    Alert.alert('Read file failed!', `Could not read content in the file. Please recheck your file.\n\n${error}`);
+    Alert.alert('Read file failed!', `Could not read the content in the file. Please recheck your file.\n\n${error}`);
   }
 };
 

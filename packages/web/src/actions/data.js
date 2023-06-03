@@ -1028,7 +1028,7 @@ const parseImportedFile = async (dispatch, getState, fileContent) => {
 
 export const importAllData = () => async (dispatch, getState) => {
   const onError = () => {
-    window.alert('Read failed: could not read content in the file. Please recheck your file.');
+    window.alert('Read failed: could not read the content in the file. Please recheck your file.');
   };
 
   const onReaderLoad = (e) => {
