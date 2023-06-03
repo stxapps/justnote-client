@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Text, TextInput, Platform, StatusBar, Keyboard } from 'react-native';
 import { Provider, useSelector } from 'react-redux';
-import { createStore, compose } from 'redux';
+import { createStore, compose, applyMiddleware } from 'redux';
 import { install as installReduxLoop } from 'redux-loop';
 import {
   SafeAreaProvider, initialWindowMetrics, SafeAreaView,
@@ -26,14 +26,19 @@ TextInput.defaultProps.allowFontScaling = false;
 
 vars.syncMode.doSyncMode = true;
 
-/** @ts-ignore */
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-const store = createStore(
-  /** @type {any} */(reducers),
-  composeEnhancers(
+let enhancers;
+if (__DEV__) {
+  const createDebugger = require('redux-flipper').default;
+  enhancers = compose(
     installReduxLoop({ ENABLE_THUNK_MIGRATION: true }),
-  )
-);
+    applyMiddleware(createDebugger()),
+  );
+} else {
+  enhancers = compose(
+    installReduxLoop({ ENABLE_THUNK_MIGRATION: true }),
+  );
+}
+const store = createStore(/** @type {any} */(reducers), enhancers);
 
 if (Platform.OS === 'ios') {
   KeyboardManager.setEnable(false);
