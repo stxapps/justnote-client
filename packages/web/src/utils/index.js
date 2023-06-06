@@ -1406,6 +1406,7 @@ export const getRawPins = (pinFPaths, toRootIds) => {
 
     const _id = id.startsWith('deleted') ? id.slice(7) : id;
     const pinMainId = getMainId(_id, toRootIds);
+    if (!isString(pinMainId)) continue;
 
     // duplicate id, choose the latest updatedDT
     if (pinMainId in pins && pins[pinMainId].updatedDT > updatedDT) continue;
@@ -1421,6 +1422,7 @@ const _getPins = (pinFPaths, pendingPins, doExcludeUnpinning, toRootIds) => {
   for (const id in pendingPins) {
     const { status, rank, updatedDT, addedDT } = pendingPins[id];
     const pinMainId = getMainId(id, toRootIds);
+    if (!isString(pinMainId)) continue;
 
     if ([PIN_NOTE, PIN_NOTE_ROLLBACK].includes(status)) {
       pins[pinMainId] = { status, rank, updatedDT, addedDT, id };

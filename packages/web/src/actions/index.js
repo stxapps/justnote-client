@@ -2711,7 +2711,7 @@ export const unpinNotes = (ids) => async (dispatch, getState) => {
     // As for every move note to ARCHIVE and TRASH, will try to unpin the note too,
     //  if no pin to unpin, just return.
     console.log('In unpinNotes, no pin found for ids: ', ids);
-    dispatch(cleanUpPins());
+    // No need to dispatch(cleanUpPins()); here as no pins change, reduce call sync.
     return;
   }
 
@@ -2858,9 +2858,10 @@ export const cleanUpPins = () => async (dispatch, getState) => {
       console.log('cleanUpPins error: ', error);
       // error in this step should be fine
     }
-
-    await sync()(dispatch, getState);
   }
+
+  // If add a new pin, no unused pins but need to sync anyway.
+  await sync()(dispatch, getState);
 };
 
 export const updateLocalSettings = () => async (dispatch, getState) => {
