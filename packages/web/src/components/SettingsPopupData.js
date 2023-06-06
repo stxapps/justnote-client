@@ -405,7 +405,7 @@ const _SettingsPopupDataDeleteSync = (props) => {
   let actionPanel;
   if (!deleteSyncDataProgress) {
     actionPanel = (
-      <div className={tailwind('mt-6 mb-4')}>
+      <div className={tailwind('mt-7 mb-4')}>
         <button onClick={onDeleteSyncDataBtnClick} type="button" className={tailwind('block rounded-md border border-gray-300 bg-white px-2 py-2 text-sm text-gray-500 shadow-sm hover:border-gray-400 hover:text-gray-600 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 blk:border-gray-400 blk:bg-gray-900 blk:text-gray-300 blk:hover:border-gray-300 blk:hover:text-gray-200 blk:focus:border-gray-300 blk:focus:ring-gray-500 blk:focus:ring-offset-gray-900')}>
           Clean Up My Sync Logs
         </button>
