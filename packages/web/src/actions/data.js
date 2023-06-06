@@ -1,11 +1,13 @@
 import { saveAs } from 'file-saver';
 
 import dataApi from '../apis/data';
+import serverApi from '../apis/server';
+import ldbApi from '../apis/localDb';
 import fileApi from '../apis/localFile';
 import { updatePopupUrlHash, sync } from '../actions';
 import {
   UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
-  UPDATE_DELETE_ALL_DATA_PROGRESS, DELETE_ALL_DATA,
+  UPDATE_DELETE_ALL_DATA_PROGRESS, UPDATE_DELETE_SYNC_DATA_PROGRESS, DELETE_ALL_DATA,
 } from '../types/actionTypes';
 import {
   SETTINGS_POPUP, MY_NOTES, TRASH, ARCHIVE, ADDED_DT, UPDATED_DT, N_NOTES, CD_ROOT,
@@ -16,8 +18,9 @@ import {
   isEqual, isObject, isString, isNumber, sleep, randomString, clearNoteData,
   getStaticFPath, getMainId, isListNameObjsValid, indexOfClosingTag, createNoteFPath,
   createDataFName, extractNoteFPath, extractDataFName, extractDataId, listNoteIds,
-  createSettingsFPath, getSettingsFPaths, getLastSettingsFPaths, extractPinFPath,
-  getPins, batchGetFileWithRetry, extractFPath, copyListNameObjs, getFormattedTimeStamp,
+  listSettingsIds, createSettingsFPath, getSettingsFPaths, getLastSettingsFPaths,
+  extractPinFPath, getPins, batchGetFileWithRetry, extractFPath, copyListNameObjs,
+  getFormattedTimeStamp, getDataParentIds,
 } from '../utils';
 import { isUint8Array } from '../utils/index-web';
 import { initialSettingsState, initialInfoState } from '../types/initialStates';
@@ -1431,6 +1434,202 @@ export const deleteAllData = () => async (dispatch, getState) => {
 export const updateDeleteAllDataProgress = (progress) => {
   return {
     type: UPDATE_DELETE_ALL_DATA_PROGRESS,
+    payload: progress,
+  };
+};
+
+const deleteUpdatedNoteSyncData = async (id, noteIds) => {
+  const transitId = noteIds.toParents[id][0];
+  const rootId = noteIds.toRoots[id];
+  const { listName } = extractNoteFPath(noteIds.toFPaths[transitId][0]);
+
+  const fname = createDataFName(transitId, [rootId]);
+  const fpath = createNoteFPath(listName, fname, INDEX + DOT_JSON);
+  const content = { title: '', body: '' };
+
+  await serverApi.putFile(fpath, content);
+  if (vars.syncMode.doSyncMode) await ldbApi.putFile(fpath, content);
+
+  const parentIds = getDataParentIds(id, noteIds.toParents);
+
+  let fpaths;
+  for (let i = parentIds.length - 1; i >= 0; i--) {
+    const parentId = parentIds[i];
+    if (parentId === rootId) continue;
+
+    fpaths = noteIds.toFPaths[parentId];
+    fpaths = fpaths.filter(fp => fp !== fpath);
+
+    await serverApi.deleteFiles(fpaths);
+    if (vars.syncMode.doSyncMode) await ldbApi.deleteFiles(fpaths);
+  }
+};
+
+const deleteDeletedNoteSyncData = async (id, noteIds) => {
+  const parentIds = getDataParentIds(id, noteIds.toParents);
+
+  let fpaths;
+  for (let i = parentIds.length - 1; i >= 0; i--) {
+    const parentId = parentIds[i];
+
+    fpaths = noteIds.toFPaths[parentId];
+
+    await serverApi.deleteFiles(fpaths);
+    if (vars.syncMode.doSyncMode) await ldbApi.deleteFiles(fpaths);
+  }
+
+  fpaths = noteIds.toFPaths[id];
+  await serverApi.deleteFiles(fpaths);
+  if (vars.syncMode.doSyncMode) await ldbApi.deleteFiles(fpaths);
+};
+
+const deleteUpdatedSettingsSyncData = async (id, settingsIds) => {
+  const transitId = settingsIds.toParents[id][0];
+  const rootId = settingsIds.toRoots[id];
+
+  const fname = createDataFName(transitId, [rootId]);
+  const fpath = createSettingsFPath(fname);
+  const content = {};
+
+  await serverApi.putFile(fpath, content);
+  if (vars.syncMode.doSyncMode) await ldbApi.putFile(fpath, content);
+
+  const parentIds = getDataParentIds(id, settingsIds.toParents);
+
+  let fpaths;
+  for (let i = parentIds.length - 1; i >= 0; i--) {
+    const parentId = parentIds[i];
+    if (parentId === rootId) continue;
+
+    fpaths = settingsIds.toFPaths[parentId];
+    fpaths = fpaths.filter(fp => fp !== fpath);
+
+    await serverApi.deleteFiles(fpaths);
+    if (vars.syncMode.doSyncMode) await ldbApi.deleteFiles(fpaths);
+  }
+};
+
+const _deleteSyncData = async (dispatch, getState) => {
+  dispatch(updateDeleteSyncDataProgress({ total: 'calculating...', done: 0 }));
+
+  // Need to manually call it to wait for it properly!
+  await sync(true, 2)(dispatch, getState);
+
+  vars.deleteSyncData.isDeleting = true;
+
+  let noteIds, settingsIds;
+  try {
+    const fpaths = await dataApi.listFPaths(true);
+    noteIds = listNoteIds(fpaths.noteFPaths);
+    settingsIds = listSettingsIds(fpaths.settingsFPaths);
+  } catch (error) {
+    dispatch(updateDeleteAllDataProgress({
+      total: -1,
+      done: -1,
+      error: `${error}`,
+    }));
+    return;
+  }
+
+  const nUpdatedIds = [], nDeletedIds = [], sUpdatedIds = []
+  for (const id of noteIds.noteIds) {
+    let parentIds = noteIds.toParents[id];
+    if (!Array.isArray(parentIds) || parentIds.length === 0) continue;
+    if (parentIds.length >= 2) {
+      nUpdatedIds.push(id);
+      continue;
+    }
+
+    parentIds = noteIds.toParents[parentIds[0]];
+    if (!Array.isArray(parentIds) || parentIds.length === 0) continue;
+    if (parentIds.length >= 2) {
+      nUpdatedIds.push(id);
+      continue;
+    }
+
+    const rootId = noteIds.toRootIds[id];
+    if (parentIds[0] === rootId) continue;
+
+    nUpdatedIds.push(id);
+  }
+  for (const id of noteIds.allIds) {
+    if (!id.startsWith('deleted')) continue;
+    nDeletedIds.push(id);
+  }
+  for (const id of settingsIds.settingsIds) {
+    let parentIds = settingsIds.toParents[id];
+    if (!Array.isArray(parentIds) || parentIds.length === 0) continue;
+    if (parentIds.length >= 2) {
+      sUpdatedIds.push(id);
+      continue;
+    }
+
+    parentIds = settingsIds.toParents[parentIds[0]];
+    if (!Array.isArray(parentIds) || parentIds.length === 0) continue;
+    if (parentIds.length >= 2) {
+      sUpdatedIds.push(id);
+      continue;
+    }
+
+    const rootId = settingsIds.toRootIds[id];
+    if (parentIds[0] === rootId) continue;
+
+    sUpdatedIds.push(id);
+  }
+
+  const total = nUpdatedIds.length + nDeletedIds.length + sUpdatedIds.length;
+  const progress = { total, done: 0 };
+  dispatch(updateDeleteSyncDataProgress(progress));
+
+  if (progress.total === 0) return;
+
+  try {
+    const nItems = 3;
+    for (let i = 0, j = nUpdatedIds.length; i < j; i += nItems) {
+      const _nUpdatedIds = nUpdatedIds.slice(i, i + nItems);
+      await Promise.all(_nUpdatedIds.map(id => {
+        return deleteUpdatedNoteSyncData(id, noteIds);
+      }));
+
+      progress.done += _nUpdatedIds.length;
+      dispatch(updateDeleteSyncDataProgress(progress));
+    }
+    for (let i = 0, j = nDeletedIds.length; i < j; i += nItems) {
+      const _nDeletedIds = nDeletedIds.slice(i, i + nItems);
+      await Promise.all(_nDeletedIds.map(id => {
+        return deleteDeletedNoteSyncData(id, noteIds);
+      }));
+
+      progress.done += _nDeletedIds.length;
+      dispatch(updateDeleteSyncDataProgress(progress));
+    }
+    for (let i = 0, j = sUpdatedIds.length; i < j; i += nItems) {
+      const _sUpdatedIds = sUpdatedIds.slice(i, i + nItems);
+      await Promise.all(_sUpdatedIds.map(id => {
+        return deleteUpdatedSettingsSyncData(id, settingsIds);
+      }));
+
+      progress.done += _sUpdatedIds.length;
+      dispatch(updateDeleteSyncDataProgress(progress));
+    }
+  } catch (error) {
+    dispatch(updateDeleteSyncDataProgress({
+      total: -1,
+      done: -1,
+      error: `${error}`,
+    }));
+    return;
+  }
+};
+
+export const deleteSyncData = () => async (dispatch, getState) => {
+  await _deleteSyncData(dispatch, getState);
+  vars.deleteSyncData.isDeleting = false;
+};
+
+export const updateDeleteSyncDataProgress = (progress) => {
+  return {
+    type: UPDATE_DELETE_SYNC_DATA_PROGRESS,
     payload: progress,
   };
 };

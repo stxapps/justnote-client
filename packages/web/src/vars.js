@@ -106,11 +106,15 @@ const importAllData = {
   didPick: false,
 };
 
+const deleteSyncData = {
+  isDeleting: false,
+};
+
 const vars = {
   cachedFPaths, cachedServerFPaths, scrollPanel, keyboard, runAfterFetchTask,
   randomHouseworkTasks, updateNoteIdUrlHash, updateNoteId, changeListName,
   updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, deleteOldNotes, updateSettings,
   updateSettingsPopup, notesReducer, displayReducer, editorReducer, iap, syncMode,
-  importAllData,
+  importAllData, deleteSyncData,
 };
 export default vars;

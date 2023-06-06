@@ -3,7 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import {
   importAllData, updateImportAllDataProgress, exportAllData, updateExportAllDataProgress,
-  deleteAllData, updateDeleteAllDataProgress,
+  deleteAllData, updateDeleteAllDataProgress, deleteSyncData,
+  updateDeleteSyncDataProgress,
 } from '../actions/data';
 import { HASH_SUPPORT, SM_WIDTH } from '../types/const';
 
@@ -14,6 +15,7 @@ const _SettingsPopupData = (props) => {
   const {
     onSidebarOpenBtnClick, onToImportAllDataViewBtnClick,
     onToExportAllDataViewBtnClick, onToDeleteAllDataViewBtnClick,
+    onToDeleteSyncDataViewBtnClick,
   } = props;
   const tailwind = useTailwind();
 
@@ -33,7 +35,7 @@ const _SettingsPopupData = (props) => {
         <button onClick={onToImportAllDataViewBtnClick} className={tailwind('w-full rounded-sm text-left focus:outline-none focus:ring-2 focus:ring-gray-400 blk:focus:ring-gray-500')}>
           <h4 className={tailwind('text-base font-medium text-gray-800 underline hover:text-gray-900 blk:text-gray-100 blk:hover:text-white')}>Import Data</h4>
         </button>
-        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Import data from a zip file. The zip file can be exported from some note taking apps i.e. <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href="https://takeout.google.com/" target="_blank" rel="noreferrer">Google Keep</a>, <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href="https://help.evernote.com/hc/en-us/articles/209005557-Export-notes-and-notebooks-as-ENEX-or-HTML" target="_blank" rel="noreferrer">Evernote</a> (as multiple web pages (.html) and manually zip the folder), and our website.</p>
+        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Import data from a zip file. The zip file can be exported from note taking apps like <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href="https://takeout.google.com/" target="_blank" rel="noreferrer">Google Keep</a>, <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href="https://help.evernote.com/hc/en-us/articles/209005557-Export-notes-and-notebooks-as-ENEX-or-HTML" target="_blank" rel="noreferrer">Evernote</a> (as multiple web pages (.html) and manually zip the folder), and our website.</p>
       </div>
       <div className={tailwind('mt-8')}>
         <button onClick={onToExportAllDataViewBtnClick} className={tailwind('w-full rounded-sm text-left focus:outline-none focus:ring-2 focus:ring-gray-400 blk:focus:ring-gray-500')}>
@@ -41,11 +43,17 @@ const _SettingsPopupData = (props) => {
         </button>
         <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Export all your data from the server to your device in a zip file.</p>
       </div>
-      <div className={tailwind('mt-8 mb-4')}>
+      <div className={tailwind('mt-8')}>
         <button onClick={onToDeleteAllDataViewBtnClick} className={tailwind('w-full rounded-sm text-left focus:outline-none focus:ring-2 focus:ring-gray-400 blk:focus:ring-gray-500')}>
           <h4 className={tailwind('text-base font-medium text-gray-800 underline hover:text-gray-900 blk:text-gray-100 blk:hover:text-white')}>Delete All Data</h4>
         </button>
         <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Delete all your data including but not limited to all your saved notes in all lists, all your created lists, and all your settings.</p>
+      </div>
+      <div className={tailwind('mt-8 mb-4')}>
+        <button onClick={onToDeleteSyncDataViewBtnClick} className={tailwind('w-full rounded-sm text-left focus:outline-none focus:ring-2 focus:ring-gray-400 blk:focus:ring-gray-500')}>
+          <h4 className={tailwind('text-base font-medium text-gray-800 underline hover:text-gray-900 blk:text-gray-100 blk:hover:text-white')}>Clean Up Sync Logs</h4>
+        </button>
+        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Clean up your sync logs used for syncing your data across your devices.</p>
       </div>
     </div>
   );
@@ -250,7 +258,9 @@ const _SettingsPopupDataDelete = (props) => {
 
   const { onBackToDataViewBtnClick } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
-  const deleteAllDataProgress = useSelector(state => state.display.deleteAllDataProgress);
+  const deleteAllDataProgress = useSelector(
+    state => state.display.deleteAllDataProgress
+  );
   const [didCheckConfirm, setDidCheckConfirm] = useState(false);
   const [isRequiredConfirmShown, setIsRequiredConfirmShown] = useState(false);
   const didClick = useRef(false);
@@ -366,7 +376,111 @@ const _SettingsPopupDataDelete = (props) => {
   );
 };
 
+const _SettingsPopupDataDeleteSync = (props) => {
+
+  const { onBackToDataViewBtnClick } = props;
+  const { width: safeAreaWidth } = useSafeAreaFrame();
+  const deleteSyncDataProgress = useSelector(
+    state => state.display.deleteSyncDataProgress
+  );
+  const didClick = useRef(false);
+  const dispatch = useDispatch();
+  const tailwind = useTailwind();
+
+  const onDeleteSyncDataBtnClick = () => {
+    if (didClick.current) return;
+    dispatch(deleteSyncData());
+    didClick.current = true;
+  };
+
+  useEffect(() => {
+    return () => {
+      if (deleteSyncDataProgress) {
+        const { total, done } = deleteSyncDataProgress;
+        if (total === done) dispatch(updateDeleteSyncDataProgress(null));
+      }
+    };
+  }, [deleteSyncDataProgress, dispatch]);
+
+  let actionPanel;
+  if (!deleteSyncDataProgress) {
+    actionPanel = (
+      <div className={tailwind('mt-6 mb-4')}>
+        <button onClick={onDeleteSyncDataBtnClick} type="button" className={tailwind('block rounded-md border border-gray-300 bg-white px-2 py-2 text-sm text-gray-500 shadow-sm hover:border-gray-400 hover:text-gray-600 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 blk:border-gray-400 blk:bg-gray-900 blk:text-gray-300 blk:hover:border-gray-300 blk:hover:text-gray-200 blk:focus:border-gray-300 blk:focus:ring-gray-500 blk:focus:ring-offset-gray-900')}>
+          Clean Up My Sync Logs
+        </button>
+      </div>
+    );
+  } else if (deleteSyncDataProgress.total === -1) {
+    actionPanel = (
+      <div className={tailwind('mt-6 mb-4')}>
+        <div className={tailwind('flex items-center')}>
+          <svg className={tailwind('w-5 flex-shrink-0 flex-grow-0 text-red-500 blk:text-red-500')} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path fillRule="evenodd" clipRule="evenodd" d="M18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10ZM11 14C11 14.5523 10.5523 15 10 15C9.44772 15 9 14.5523 9 14C9 13.4477 9.44772 13 10 13C10.5523 13 11 13.4477 11 14ZM10 5C9.44772 5 9 5.44772 9 6V10C9 10.5523 9.44772 11 10 11C10.5523 11 11 10.5523 11 10V6C11 5.44772 10.5523 5 10 5Z" />
+          </svg>
+          <p className={tailwind('ml-1 flex-shrink flex-grow text-base text-red-600 blk:text-red-500')}>Oops..., something went wrong!</p>
+        </div>
+        <p className={tailwind('text-base leading-relaxed text-red-600 blk:text-red-500')}>{deleteSyncDataProgress.error}</p>
+        <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Please wait a moment and try again. If the problem persists, please <a className={tailwind('rounded-sm underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href={'/' + HASH_SUPPORT} target="_blank" rel="noreferrer">contact us</a>.</p>
+      </div>
+    );
+  } else if (deleteSyncDataProgress.total === 0) {
+    actionPanel = (
+      <div className={tailwind('mt-6 mb-4')}>
+        <div className={tailwind('flex items-center')}>
+          <svg className={tailwind('w-5 flex-shrink-0 flex-grow-0 text-gray-400 blk:text-gray-400')} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path fillRule="evenodd" clipRule="evenodd" d="M18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10ZM11 6C11 6.55228 10.5523 7 10 7C9.44772 7 9 6.55228 9 6C9 5.44772 9.44772 5 10 5C10.5523 5 11 5.44772 11 6ZM9 9C8.44772 9 8 9.44772 8 10C8 10.5523 8.44772 11 9 11V14C9 14.5523 9.44772 15 10 15H11C11.5523 15 12 14.5523 12 14C12 13.4477 11.5523 13 11 13V10C11 9.44772 10.5523 9 10 9H9Z" />
+          </svg>
+          <p className={tailwind('ml-1 flex-shrink flex-grow text-base text-gray-500 blk:text-gray-400')}>No logs to clean up.</p>
+        </div>
+        <p className={tailwind('text-base text-gray-500 blk:text-gray-400')}>{deleteSyncDataProgress.done} / {deleteSyncDataProgress.total}</p>
+      </div>
+    );
+  } else if (deleteSyncDataProgress.total === deleteSyncDataProgress.done) {
+    actionPanel = (
+      <div className={tailwind('mt-6 mb-4')}>
+        <div className={tailwind('flex items-center')}>
+          <svg className={tailwind('w-5 flex-shrink-0 flex-grow-0 text-green-500 blk:text-green-400')} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path fillRule="evenodd" clipRule="evenodd" d="M10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18ZM13.7071 8.70711C14.0976 8.31658 14.0976 7.68342 13.7071 7.29289C13.3166 6.90237 12.6834 6.90237 12.2929 7.29289L9 10.5858L7.70711 9.29289C7.31658 8.90237 6.68342 8.90237 6.29289 9.29289C5.90237 9.68342 5.90237 10.3166 6.29289 10.7071L8.29289 12.7071C8.68342 13.0976 9.31658 13.0976 9.70711 12.7071L13.7071 8.70711Z" />
+          </svg>
+          <p className={tailwind('ml-1 flex-shrink flex-grow text-base text-gray-500 blk:text-gray-400')}>Done</p>
+        </div>
+        <p className={tailwind('text-base text-gray-500 blk:text-gray-400')}>{deleteSyncDataProgress.done} / {deleteSyncDataProgress.total}</p>
+      </div>
+    );
+  } else {
+    actionPanel = (
+      <div className={tailwind('mt-6 mb-4')}>
+        <div className={tailwind('flex items-center')}>
+          <div className={tailwind('ball-clip-rotate blk:ball-clip-rotate-blk')}>
+            <div />
+          </div>
+          <p className={tailwind('ml-1 text-base text-gray-500 blk:text-gray-400')}>Cleaning...</p>
+        </div>
+        <p className={tailwind('text-base text-gray-500 blk:text-gray-400')}>{deleteSyncDataProgress.done} / {deleteSyncDataProgress.total}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={tailwind('p-4 md:p-6 md:pt-4')}>
+      <div className={tailwind('border-b border-gray-200 blk:border-gray-700 md:border-b-0')}>
+        <button onClick={onBackToDataViewBtnClick} className={tailwind('group pb-1 focus:outline-none md:pb-0')}>
+          <span className={tailwind('rounded-sm text-sm text-gray-500 group-focus:ring-2 group-focus:ring-gray-400 blk:text-gray-400 blk:group-focus:ring-gray-500')}>{'<'} <span className={tailwind('group-hover:underline')}>{safeAreaWidth < SM_WIDTH ? 'Settings / ' : ''}Data</span></span>
+        </button>
+        <h3 className={tailwind('pb-2 text-xl font-medium leading-none text-gray-800 blk:text-gray-100 md:pb-0')}>Clean Up Sync Logs</h3>
+      </div>
+      <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Clean up your sync logs used for syncing your data across your devices.</p>
+      <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}><span className={tailwind('font-medium')}>Caution</span>: you need to sign out on other devices first. If not, the sync logs will be synced back.</p>
+      <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Cleaning up sync logs helps reduce sync time as fewer sync logs to download and compare for new updates.</p>
+      <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>It may take several minutes to clean up all your sync logs.</p>
+      {actionPanel}
+    </div>
+  );
+};
+
 export const SettingsPopupData = React.memo(_SettingsPopupData);
 export const SettingsPopupDataImport = React.memo(_SettingsPopupDataImport);
 export const SettingsPopupDataExport = React.memo(_SettingsPopupDataExport);
 export const SettingsPopupDataDelete = React.memo(_SettingsPopupDataDelete);
+export const SettingsPopupDataDeleteSync = React.memo(_SettingsPopupDataDeleteSync);

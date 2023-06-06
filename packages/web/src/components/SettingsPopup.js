@@ -6,8 +6,8 @@ import { updateSettingsPopup, updateSettingsViewId } from '../actions';
 import {
   SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_IAP, SETTINGS_VIEW_IAP_RESTORE,
   SETTINGS_VIEW_DATA, SETTINGS_VIEW_DATA_IMPORT, SETTINGS_VIEW_DATA_EXPORT,
-  SETTINGS_VIEW_DATA_DELETE, SETTINGS_VIEW_LISTS, SETTINGS_VIEW_MISC,
-  SETTINGS_VIEW_ABOUT, HASH_SUPPORT, LG_WIDTH, MERGING, DIED_MERGING,
+  SETTINGS_VIEW_DATA_DELETE, SETTINGS_VIEW_DATA_DELETE_SYNC, SETTINGS_VIEW_LISTS,
+  SETTINGS_VIEW_MISC, SETTINGS_VIEW_ABOUT, HASH_SUPPORT, LG_WIDTH, MERGING, DIED_MERGING,
 } from '../types/const';
 import {
   canvasFMV, sideBarOverlayFMV, sideBarFMV, popupFMV,
@@ -17,7 +17,7 @@ import SettingsPopupAccount from './SettingsPopupAccount';
 import { SettingsPopupIap, SettingsPopupIapRestore } from './SettingsPopupIap';
 import {
   SettingsPopupData, SettingsPopupDataImport, SettingsPopupDataExport,
-  SettingsPopupDataDelete,
+  SettingsPopupDataDelete, SettingsPopupDataDeleteSync,
 } from './SettingsPopupData';
 import SettingsPopupLists from './SettingsPopupLists';
 import SettingsPopupMisc from './SettingsPopupMisc';
@@ -33,6 +33,7 @@ const VIEW_DATA = SETTINGS_VIEW_DATA;
 const VIEW_DATA_IMPORT = SETTINGS_VIEW_DATA_IMPORT;
 const VIEW_DATA_EXPORT = SETTINGS_VIEW_DATA_EXPORT;
 const VIEW_DATA_DELETE = SETTINGS_VIEW_DATA_DELETE;
+const VIEW_DATA_DELETE_SYNC = SETTINGS_VIEW_DATA_DELETE_SYNC;
 const VIEW_LISTS = SETTINGS_VIEW_LISTS;
 const VIEW_MISC = SETTINGS_VIEW_MISC;
 const VIEW_ABOUT = SETTINGS_VIEW_ABOUT;
@@ -49,7 +50,10 @@ const SettingsPopup = () => {
   const tailwind = useTailwind();
 
   const isViewSelected = (refViewId) => {
-    const dataViews = [VIEW_DATA, VIEW_DATA_IMPORT, VIEW_DATA_EXPORT, VIEW_DATA_DELETE];
+    const dataViews = [
+      VIEW_DATA, VIEW_DATA_IMPORT, VIEW_DATA_EXPORT, VIEW_DATA_DELETE,
+      VIEW_DATA_DELETE_SYNC,
+    ];
     if (refViewId === VIEW_DATA) {
       return dataViews.includes(viewId);
     }
@@ -114,6 +118,10 @@ const SettingsPopup = () => {
 
   const onToDeleteAllDataViewBtnClick = () => {
     dispatch(updateSettingsViewId(VIEW_DATA_DELETE, null));
+  };
+
+  const onToDeleteSyncDataViewBtnClick = () => {
+    dispatch(updateSettingsViewId(VIEW_DATA_DELETE_SYNC, null));
   };
 
   const onBackToDataViewBtnClick = () => {
@@ -334,7 +342,7 @@ const SettingsPopup = () => {
 
   const renderDataView = () => {
     const content = (
-      <SettingsPopupData onSidebarOpenBtnClick={onSidebarOpenBtnClick} onToImportAllDataViewBtnClick={onToImportAllDataViewBtnClick} onToExportAllDataViewBtnClick={onToExportAllDataViewBtnClick} onToDeleteAllDataViewBtnClick={onToDeleteAllDataViewBtnClick} />
+      <SettingsPopupData onSidebarOpenBtnClick={onSidebarOpenBtnClick} onToImportAllDataViewBtnClick={onToImportAllDataViewBtnClick} onToExportAllDataViewBtnClick={onToExportAllDataViewBtnClick} onToDeleteAllDataViewBtnClick={onToDeleteAllDataViewBtnClick} onToDeleteSyncDataViewBtnClick={onToDeleteSyncDataViewBtnClick} />
     );
     return _render(content);
   };
@@ -356,6 +364,13 @@ const SettingsPopup = () => {
   const renderDeleteAllDataView = () => {
     const content = (
       <SettingsPopupDataDelete onBackToDataViewBtnClick={onBackToDataViewBtnClick} />
+    );
+    return _render(content);
+  };
+
+  const renderDeleteSyncDataView = () => {
+    const content = (
+      <SettingsPopupDataDeleteSync onBackToDataViewBtnClick={onBackToDataViewBtnClick} />
     );
     return _render(content);
   };
@@ -450,6 +465,7 @@ const SettingsPopup = () => {
   else if (viewId === VIEW_DATA_IMPORT) return renderImportAllDataView();
   else if (viewId === VIEW_DATA_EXPORT) return renderExportAllDataView();
   else if (viewId === VIEW_DATA_DELETE) return renderDeleteAllDataView();
+  else if (viewId === VIEW_DATA_DELETE_SYNC) return renderDeleteSyncDataView();
   else if (viewId === VIEW_LISTS) return renderListsView();
   else if (viewId === VIEW_MISC) return renderMiscView();
   else if (viewId === VIEW_ABOUT) return renderAboutView();

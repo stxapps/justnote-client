@@ -201,6 +201,7 @@ export const SETTINGS_VIEW_DATA = 2;
 export const SETTINGS_VIEW_DATA_IMPORT = 7;
 export const SETTINGS_VIEW_DATA_EXPORT = 3;
 export const SETTINGS_VIEW_DATA_DELETE = 4;
+export const SETTINGS_VIEW_DATA_DELETE_SYNC = 11;
 export const SETTINGS_VIEW_LISTS = 5;
 export const SETTINGS_VIEW_MISC = 6;
 export const SETTINGS_VIEW_ABOUT = 8;
