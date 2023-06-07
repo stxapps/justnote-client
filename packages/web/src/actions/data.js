@@ -1441,7 +1441,13 @@ export const updateDeleteAllDataProgress = (progress) => {
 const deleteUpdatedNoteSyncData = async (id, noteIds) => {
   const transitId = noteIds.toParents[id][0];
   const rootId = noteIds.toRootIds[id];
-  const { listName } = extractNoteFPath(noteIds.toFPaths[transitId][0]);
+
+  let listName = MY_NOTES;
+
+  let fpaths = noteIds.toFPaths[transitId];
+  if (Array.isArray(fpaths) && fpaths.length > 0) {
+    listName = extractNoteFPath(fpaths[0]).listName;
+  }
 
   const fname = createDataFName(transitId, [rootId]);
   const fpath = createNoteFPath(listName, fname, INDEX + DOT_JSON);
@@ -1452,12 +1458,13 @@ const deleteUpdatedNoteSyncData = async (id, noteIds) => {
 
   const parentIds = getDataParentIds(id, noteIds.toParents);
 
-  let fpaths;
   for (let i = parentIds.length - 1; i >= 0; i--) {
     const parentId = parentIds[i];
     if (parentId === rootId) continue;
 
     fpaths = noteIds.toFPaths[parentId];
+    if (!Array.isArray(fpaths)) continue;
+
     fpaths = fpaths.filter(fp => fp !== fpath);
 
     if (vars.syncMode.doSyncMode) await serverApi.deleteFiles(fpaths);
@@ -1473,12 +1480,15 @@ const deleteDeletedNoteSyncData = async (id, noteIds) => {
     const parentId = parentIds[i];
 
     fpaths = noteIds.toFPaths[parentId];
+    if (!Array.isArray(fpaths)) continue;
 
     if (vars.syncMode.doSyncMode) await serverApi.deleteFiles(fpaths);
     await dataApi.deleteFiles(fpaths);
   }
 
   fpaths = noteIds.toFPaths[id];
+  if (!Array.isArray(fpaths)) return;
+
   if (vars.syncMode.doSyncMode) await serverApi.deleteFiles(fpaths);
   await dataApi.deleteFiles(fpaths);
 };
@@ -1502,6 +1512,8 @@ const deleteUpdatedSettingsSyncData = async (id, settingsIds) => {
     if (parentId === rootId) continue;
 
     fpaths = settingsIds.toFPaths[parentId];
+    if (!Array.isArray(fpaths)) continue;
+
     fpaths = fpaths.filter(fp => fp !== fpath);
 
     if (vars.syncMode.doSyncMode) await serverApi.deleteFiles(fpaths);
@@ -1662,12 +1674,14 @@ const _deleteSyncData = async (dispatch, getState) => {
       progress.done += _sUpdatedIds.length;
       dispatch(updateDeleteSyncDataProgress(progress));
     }
+    for (let i = 0, j = unusedPinFPaths.length; i < j; i += nItems) {
+      const _unusedPinFPaths = unusedPinFPaths.slice(i, i + nItems);
+      if (vars.syncMode.doSyncMode) await serverApi.deleteFiles(_unusedPinFPaths);
+      await dataApi.deleteFiles(_unusedPinFPaths);
 
-    if (vars.syncMode.doSyncMode) await serverApi.deleteFiles(unusedPinFPaths);
-    await dataApi.deleteFiles(unusedPinFPaths);
-    progress.done += unusedPinFPaths.length;
-    dispatch(updateDeleteSyncDataProgress(progress));
-
+      progress.done += _unusedPinFPaths.length;
+      dispatch(updateDeleteSyncDataProgress(progress));
+    }
     for (let i = 0, j = pDeletedIds.length; i < j; i += nItems) {
       const _pDeletedIds = pDeletedIds.slice(i, i + nItems);
       await Promise.all(_pDeletedIds.map(id => {
