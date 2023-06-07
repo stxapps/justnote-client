@@ -1815,6 +1815,7 @@ export const sync = (
 ) => async (dispatch, getState) => {
 
   if (!getState().user.isUserSignedIn) return;
+  if (vars.deleteSyncData.isDeleting) return;
 
   if (_isSyncing) {
     _newSyncObj = { doForceListFPaths, updateAction };

@@ -1286,21 +1286,28 @@ const _listDataIds = (dataFPaths, extractDataFPath, workingSubName) => {
     const { fname, subName } = extractDataFPath(fpath);
     const { id, parentIds } = extractDataFName(fname);
 
-    if (!toFPaths[id]) toFPaths[id] = [];
-    toFPaths[id].push(fpath);
+    if (!Array.isArray(toFPaths[id])) toFPaths[id] = [];
+    if (!toFPaths[id].includes(fpath)) toFPaths[id].push(fpath);
 
     if (subName !== workingSubName) continue;
-    if (ids.includes(id)) continue;
-    ids.push(id);
 
-    if (parentIds) {
-      toParents[id] = parentIds;
+    if (!ids.includes(id)) ids.push(id);
+
+    if (Array.isArray(parentIds)) {
+      if (Array.isArray(toParents[id])) {
+        for (const pid of parentIds) {
+          if (!toParents[id].includes(pid)) toParents[id].push(pid);
+        }
+      } else toParents[id] = parentIds;
+
       for (const pid of parentIds) {
-        if (!toChildren[pid]) toChildren[pid] = [];
-        toChildren[pid].push(id);
+        if (!Array.isArray(toChildren[pid])) toChildren[pid] = [];
+        if (!toChildren[pid].includes(pid)) toChildren[pid].push(id);
       }
     } else {
-      toParents[id] = null;
+      if (Array.isArray(toParents[id])) {
+        if (toParents[id].length === 0) toParents[id] = null;
+      } else toParents[id] = null;
     }
   }
 
@@ -1353,7 +1360,9 @@ const _listDataIds = (dataFPaths, extractDataFPath, workingSubName) => {
 
   const conflictWiths = Object.values(toLeafIds).filter(tIds => tIds.length > 1);
 
-  return { dataIds, conflictedIds, conflictWiths, toRootIds, toParents };
+  return {
+    dataIds, conflictedIds, conflictWiths, toRootIds, toParents, toFPaths, allIds: ids,
+  };
 };
 
 const _listNoteIds = (noteFPaths) => {
@@ -1361,9 +1370,12 @@ const _listNoteIds = (noteFPaths) => {
   //   i.e. update/move error and cancel died notes.
   // So use only index.json for listDataIds.
   const {
-    dataIds, conflictedIds, conflictWiths, toRootIds, toParents,
+    dataIds, conflictedIds, conflictWiths, toRootIds, toParents, toFPaths, allIds,
   } = _listDataIds(noteFPaths, extractNoteFPath, INDEX + DOT_JSON);
-  return { noteIds: dataIds, conflictedIds, conflictWiths, toRootIds, toParents };
+  return {
+    noteIds: dataIds, conflictedIds, conflictWiths, toRootIds, toParents, toFPaths,
+    allIds,
+  };
 };
 
 export const listNoteIds = createSelector(
@@ -1394,6 +1406,7 @@ export const getRawPins = (pinFPaths, toRootIds) => {
 
     const _id = id.startsWith('deleted') ? id.slice(7) : id;
     const pinMainId = getMainId(_id, toRootIds);
+    if (!isString(pinMainId)) continue;
 
     // duplicate id, choose the latest updatedDT
     if (pinMainId in pins && pins[pinMainId].updatedDT > updatedDT) continue;
@@ -1409,6 +1422,7 @@ const _getPins = (pinFPaths, pendingPins, doExcludeUnpinning, toRootIds) => {
   for (const id in pendingPins) {
     const { status, rank, updatedDT, addedDT } = pendingPins[id];
     const pinMainId = getMainId(id, toRootIds);
+    if (!isString(pinMainId)) continue;
 
     if ([PIN_NOTE, PIN_NOTE_ROLLBACK].includes(status)) {
       pins[pinMainId] = { status, rank, updatedDT, addedDT, id };
@@ -1524,12 +1538,20 @@ export const getSortedNotes = (notes, listName, sortOn, doDescendingOrder) => {
   return sortedNotes;
 };
 
-export const _listSettingsIds = (settingsFPaths) => {
+const _listSettingsIds = (settingsFPaths) => {
   const {
-    dataIds, conflictedIds, conflictWiths, toRootIds, toParents,
+    dataIds, conflictedIds, conflictWiths, toRootIds, toParents, toFPaths, allIds,
   } = _listDataIds(settingsFPaths, extractSettingsFPath, undefined);
-  return { settingsIds: dataIds, conflictedIds, conflictWiths, toRootIds, toParents };
+  return {
+    settingsIds: dataIds, conflictedIds, conflictWiths, toRootIds, toParents, toFPaths,
+    allIds,
+  };
 };
+
+export const listSettingsIds = createSelector(
+  settingsFPaths => settingsFPaths,
+  _listSettingsIds,
+);
 
 export const getLastSettingsFPaths = (settingsFPaths) => {
   const _v1FPaths = [], _v2FPaths = [];
@@ -1553,7 +1575,7 @@ export const getLastSettingsFPaths = (settingsFPaths) => {
   }
 
   const v2FPaths = [];
-  const { settingsIds, conflictedIds } = _listSettingsIds(_v2FPaths);
+  const { settingsIds, conflictedIds } = listSettingsIds(_v2FPaths);
   for (const settingsId of [...settingsIds, ...conflictedIds]) {
     for (const fpath of settingsId.fpaths) {
       v2FPaths.push({ fpath, id: settingsId.id, dt: settingsId.updatedDT });
