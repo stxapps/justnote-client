@@ -1586,24 +1586,18 @@ const _deleteSyncData = async (dispatch, getState) => {
       if (!pins[noteMainId].id.startsWith('deleted')) continue;
     }
 
-    let parentIds = noteIds.toParents[id];
-    if (!Array.isArray(parentIds) || parentIds.length === 0) continue;
-    if (parentIds.length >= 2) {
-      nUpdatedIds.push(id);
-      continue;
-    }
-
-    parentIds = noteIds.toParents[parentIds[0]];
-    if (!Array.isArray(parentIds) || parentIds.length === 0) continue;
-    if (parentIds.length >= 2) {
-      nUpdatedIds.push(id);
-      continue;
-    }
+    const fpIds = noteIds.toParents[id];
+    if (!Array.isArray(fpIds) || fpIds.length === 0) continue;
 
     const rootId = noteIds.toRootIds[id];
-    if (parentIds[0] === rootId) continue;
+    for (const fpId of fpIds) {
+      const spIds = noteIds.toParents[fpId];
+      if (!Array.isArray(spIds) || spIds.length === 0) continue;
+      if (spIds.length === 1 && spIds.includes(rootId)) continue;
 
-    nUpdatedIds.push(id);
+      nUpdatedIds.push(id);
+      break;
+    }
   }
   for (const id of noteIds.allIds) {
     if (!id.startsWith('deleted')) continue;
@@ -1612,24 +1606,18 @@ const _deleteSyncData = async (dispatch, getState) => {
   for (const settingsId of settingsIds.settingsIds) {
     const { id } = settingsId;
 
-    let parentIds = settingsIds.toParents[id];
-    if (!Array.isArray(parentIds) || parentIds.length === 0) continue;
-    if (parentIds.length >= 2) {
-      sUpdatedIds.push(id);
-      continue;
-    }
-
-    parentIds = settingsIds.toParents[parentIds[0]];
-    if (!Array.isArray(parentIds) || parentIds.length === 0) continue;
-    if (parentIds.length >= 2) {
-      sUpdatedIds.push(id);
-      continue;
-    }
+    const fpIds = settingsIds.toParents[id];
+    if (!Array.isArray(fpIds) || fpIds.length === 0) continue;
 
     const rootId = settingsIds.toRootIds[id];
-    if (parentIds[0] === rootId) continue;
+    for (const fpId of fpIds) {
+      const spIds = settingsIds.toParents[fpId];
+      if (!Array.isArray(spIds) || spIds.length === 0) continue;
+      if (spIds.length === 1 && spIds.includes(rootId)) continue;
 
-    sUpdatedIds.push(id);
+      sUpdatedIds.push(id);
+      break;
+    }
   }
   for (const pinMainId in pins) {
     if (!pins[pinMainId].id.startsWith('deleted')) continue;
