@@ -366,7 +366,7 @@ const _SettingsPopupDataDelete = (props) => {
       <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Delete all your data including but not limited to all your saved notes in all lists, all your created lists, and all your settings.</p>
       <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>This will only remove all your data, not your account. You will still be able to sign in.</p>
       <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>It may take several minutes to delete all your data.</p>
-      <p className={tailwind('mt-6 text-base leading-relaxed text-red-600 blk:text-red-500')}>This action CANNOT be undone.</p>
+      <p className={tailwind('mt-6 text-base leading-relaxed text-red-500 blk:text-red-500')}>This action CANNOT be undone.</p>
       <div className={tailwind('mt-6 flex items-center')}>
         <input onChange={onConfirmInputChange} checked={didCheckConfirm} className={tailwind('h-4 w-4 cursor-pointer rounded border-gray-400 bg-white text-gray-600 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 blk:border-gray-400 blk:bg-gray-900 blk:text-green-500 blk:focus:ring-gray-500 blk:focus:ring-offset-gray-900')} id="confirm-input" name="confirm-input" type="checkbox" />
         <label htmlFor="confirm-input" className={tailwind('ml-2 block cursor-pointer text-base text-gray-500 blk:text-gray-400')}>Yes, I’m absolutely sure I want to delete all my data.</label>
@@ -471,7 +471,7 @@ const _SettingsPopupDataDeleteSync = (props) => {
         <h3 className={tailwind('pb-2 text-xl font-medium leading-none text-gray-800 blk:text-gray-100 md:pb-0')}>Clean Up Sync Logs</h3>
       </div>
       <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Clean up your sync logs used for syncing your data across your devices.</p>
-      <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}><span className={tailwind('font-medium')}>Caution</span>: you need to sign out on other devices first. If not, the sync logs will be synced back.</p>
+      <p className={tailwind('mt-6 text-base leading-relaxed text-red-500 blk:text-red-500')}>You need to sign out on all other devices first. If not, the sync logs will be synced back and may cause some notes to have a conflicted version.</p>
       <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Cleaning up sync logs helps reduce sync time as fewer sync logs to download and compare for new updates.</p>
       <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>It may take several minutes to clean up all your sync logs.</p>
       {actionPanel}

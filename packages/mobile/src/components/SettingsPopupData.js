@@ -478,10 +478,10 @@ const _SettingsPopupDataDeleteSync = (props) => {
         <TouchableOpacity onPress={onBackToDataViewBtnClick} style={tailwind('pb-1 md:pb-0')}>
           <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-400')}>{'<'} {safeAreaWidth < SM_WIDTH ? 'Settings / ' : ''}Data</Text>
         </TouchableOpacity>
-        <Text style={tailwind('pb-2 text-xl font-medium leading-6 text-gray-800 blk:text-gray-100 md:pb-0')}>Export All Data</Text>
+        <Text style={tailwind('pb-2 text-xl font-medium leading-6 text-gray-800 blk:text-gray-100 md:pb-0')}>Clean Up Sync Logs</Text>
       </View>
       <Text style={tailwind('mt-6 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Clean up your sync logs used for syncing your data across your devices.</Text>
-      <Text style={tailwind('mt-6 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}><Text style={tailwind('text-base font-medium leading-6.5 text-gray-500 blk:text-gray-400')}>Caution</Text>: you need to sign out on other devices first. If not, the sync logs will be synced back.</Text>
+      <Text style={tailwind('mt-6 text-base font-normal leading-6.5 text-red-500 blk:text-red-500')}>You need to sign out on all other devices first. If not, the sync logs will be synced back and may cause some notes to have a conflicted version.</Text>
       <Text style={tailwind('mt-6 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Cleaning up sync logs helps reduce sync time as fewer sync logs to download and compare for new updates.</Text>
       <Text style={tailwind('mt-6 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>It may take several minutes to clean up all your sync logs.</Text>
       {actionPanel}
