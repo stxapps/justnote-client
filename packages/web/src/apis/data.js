@@ -100,6 +100,10 @@ const toConflictedNotes = (noteIds, conflictWiths, fpaths, contents) => {
 };
 
 const fetch = async (params) => {
+  if (syncMode.doSyncMode) {
+    const canUse = await ldbApi.canUseSync();
+    if (!canUse) throw new Error('Sync mode cannnot be used.');
+  }
 
   let { listName, sortOn, doDescendingOrder, doFetchStgsAndInfo, pendingPins } = params;
   const {
@@ -555,12 +559,18 @@ const deleteAllLocalFiles = async () => {
   await fileApi.deleteAllFiles();
 };
 
+const deleteAllSyncedFiles = async () => {
+  const fpaths = [];
+  await ldbApi.listFiles(fpath => fpaths.push(fpath));
+  await ldbApi.deleteFiles(fpaths);
+};
+
 const data = {
   getApi, listFPaths, listServerFPaths, toNotes, fetch, fetchMore,
   putNotes, getOldNotesInTrash, canDeleteListNames, putPins, deletePins, getFiles,
   putFiles, deleteFiles, getServerFilesToLocal, putLocalFilesToServer, deleteServerFiles,
   getLocalSettings, putLocalSettings, getUnsavedNotes, putUnsavedNote,
-  deleteUnsavedNotes, deleteAllUnsavedNotes, deleteAllLocalFiles,
+  deleteUnsavedNotes, deleteAllUnsavedNotes, deleteAllLocalFiles, deleteAllSyncedFiles,
 };
 
 export default data;

@@ -28,8 +28,9 @@ import {
   DELETE_OLD_NOTES_IN_TRASH_ROLLBACK, MERGE_NOTES, MERGE_NOTES_COMMIT,
   MERGE_NOTES_ROLLBACK, UPDATE_LIST_NAME_EDITORS, ADD_LIST_NAMES, UPDATE_LIST_NAMES,
   MOVE_LIST_NAME, MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_SELECTING_LIST_NAME,
-  UPDATE_DELETING_LIST_NAME, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, UPDATE_SORT_ON,
-  UPDATE_DO_DESCENDING_ORDER, UPDATE_NOTE_DATE_SHOWING_MODE, UPDATE_NOTE_DATE_FORMAT,
+  UPDATE_DELETING_LIST_NAME, UPDATE_DO_SYNC_MODE, UPDATE_DO_SYNC_MODE_INPUT,
+  UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, UPDATE_SORT_ON, UPDATE_DO_DESCENDING_ORDER,
+  UPDATE_NOTE_DATE_SHOWING_MODE, UPDATE_NOTE_DATE_FORMAT,
   UPDATE_DO_SECTION_NOTES_BY_MONTH, UPDATE_DO_MORE_EDITOR_FONT_SIZES, UPDATE_SETTINGS,
   UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS,
   MERGE_SETTINGS, MERGE_SETTINGS_COMMIT, MERGE_SETTINGS_ROLLBACK,
@@ -124,7 +125,7 @@ export const init = () => async (dispatch, getState) => {
       dispatch(updateIs24HFormat(is24HFormat));
 
       if (isUserSignedIn) {
-        const interval = (Date.now() - _lastSyncDT) / 1000 / 60 / 60;
+        const interval = (Date.now() - vars.sync.lastSyncDT) / 1000 / 60 / 60;
         dispatch(sync(interval > 1, 0));
       }
     }
@@ -142,6 +143,10 @@ export const init = () => async (dispatch, getState) => {
   const darkMatches = Appearance.getColorScheme() === 'dark';
   const is24HFormat = await is24HourFormat();
   const localSettings = await dataApi.getLocalSettings();
+  if (!localSettings.doSyncMode || !localSettings.doSyncModeInput) {
+    [localSettings.doSyncMode, localSettings.doSyncModeInput] = [true, true];
+    await dataApi.putLocalSettings(localSettings);
+  }
 
   // Need to fetch all here as some note ids might change.
   const unsavedNotes = await dataApi.getUnsavedNotes();
@@ -285,7 +290,7 @@ export const changeListName = (listName, doCheckEditing) => async (
   if (!listName) throw new Error(`Invalid listName: ${listName}`);
 
   if (doCheckEditing) {
-    if (vars.updateSettings.doFetch) return;
+    if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
 
     const isEditorUploading = getState().editor.isUploading;
     if (isEditorUploading) return;
@@ -336,7 +341,7 @@ export const updateNoteId = (id, doGetIdFromState = false, doCheckEditing = fals
       if (Date.now() - vars.updateNoteId.dt < 400) return;
       vars.updateNoteId.dt = Date.now();
 
-      if (vars.updateSettings.doFetch) return;
+      if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
       if (vars.deleteOldNotes.ids && vars.deleteOldNotes.ids.includes(id)) return;
 
       const isEditorUploading = getState().editor.isUploading;
@@ -1278,7 +1283,7 @@ export const showNoteListMenuPopup = (rect, doCheckEditing) => async (
   if (!rect) rect = vars.showNoteListMenuPopup.selectedRect;
 
   if (doCheckEditing) {
-    if (vars.updateSettings.doFetch) return;
+    if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
 
     const isEditorUploading = getState().editor.isUploading;
     if (isEditorUploading) return;
@@ -1313,7 +1318,7 @@ export const showNLIMPopup = (noteId, rect, doCheckEditing) => async (
   if (!rect) rect = vars.showNLIMPopup.selectedRect;
 
   if (doCheckEditing && noteId === _noteId) {
-    if (vars.updateSettings.doFetch) return;
+    if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
 
     const isEditorUploading = getState().editor.isUploading;
     if (isEditorUploading) return;
@@ -1544,6 +1549,14 @@ export const deleteListNames = (listNames) => async (dispatch, getState) => {
   dispatch({ type: DELETE_LIST_NAMES, payload: { listNames: allListNames } });
 };
 
+export const updateDoSyncMode = (doSyncMode) => {
+  return { type: UPDATE_DO_SYNC_MODE, payload: doSyncMode };
+};
+
+export const updateDoSyncModeInput = (doSyncMode) => {
+  return { type: UPDATE_DO_SYNC_MODE_INPUT, payload: doSyncMode };
+};
+
 export const updateDoDeleteOldNotesInTrash = (doDeleteOldNotesInTrash) => {
   return {
     type: UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, payload: doDeleteOldNotesInTrash,
@@ -1633,6 +1646,9 @@ const updateSettings = async (dispatch, getState) => {
   const settings = getState().settings;
   const snapshotSettings = getState().snapshot.settings;
 
+  const { doSyncMode, doSyncModeInput } = getState().localSettings;
+  if (doSyncMode !== doSyncModeInput) vars.syncMode.didChange = true;
+
   // It's ok if MERGE_SETTINGS, IMPORT, DELETE_ALL in progress. Let it be conflict.
   if (isEqual(settings, snapshotSettings)) {
     dispatch(cancelDiedSettings());
@@ -1647,10 +1663,11 @@ const updateSettings = async (dispatch, getState) => {
   const settingsFName = createDataFName(`${addedDT}${randomString(4)}`, _settingsIds);
   const settingsFPath = createSettingsFPath(settingsFName);
 
-  const doFetch = (
+  let doFetch = (
     settings.sortOn !== snapshotSettings.sortOn ||
     settings.doDescendingOrder !== snapshotSettings.doDescendingOrder
   );
+  if (vars.syncMode.didChange) doFetch = false;
   const payload = { settings, doFetch };
 
   vars.updateSettings.doFetch = doFetch;
@@ -1662,6 +1679,7 @@ const updateSettings = async (dispatch, getState) => {
     console.log('updateSettings error: ', error);
     dispatch({ type: UPDATE_SETTINGS_ROLLBACK, payload: { ...payload, error } });
     vars.updateSettings.doFetch = false;
+    vars.syncMode.didChange = false;
     return;
   }
 
@@ -1712,13 +1730,23 @@ const updateInfo = async (dispatch, getState) => {
   await sync()(dispatch, getState);
 };
 
+export const applySyncMode = async (dispatch, getState) => {
+  // Do nothing on mobile. This is for web.
+};
+
+export const disableSyncMode = async (dispatch, getState) => {
+  // Do nothing on mobile. This is for web.
+};
+
 export const updateStgsAndInfo = () => async (dispatch, getState) => {
   await updateSettings(dispatch, getState);
   await updateInfo(dispatch, getState);
+  await applySyncMode(dispatch, getState);
 };
 
 export const retryDiedSettings = () => async (dispatch, getState) => {
   await updateSettings(dispatch, getState);
+  await applySyncMode(dispatch, getState);
 };
 
 export const cancelDiedSettings = () => async (dispatch, getState) => {
@@ -1729,16 +1757,18 @@ export const cancelDiedSettings = () => async (dispatch, getState) => {
   const { noteIds, conflictedIds } = listNoteIds(noteFPaths);
 
   const listNames = getListNamesFromNoteIds(noteIds, conflictedIds);
-  const doFetch = (
+  let doFetch = (
     settings.sortOn !== snapshotSettings.sortOn ||
     settings.doDescendingOrder !== snapshotSettings.doDescendingOrder
   );
+  if (vars.syncMode.didChange) doFetch = false;
   const payload = { listNames, settings: snapshotSettings, doFetch };
 
   vars.updateSettings.doFetch = doFetch;
   dispatch({ type: CANCEL_DIED_SETTINGS, payload });
 
   vars.updateSettings.doFetch = false;
+  vars.syncMode.didChange = false;
 };
 
 export const tryUpdateInfo = () => async (dispatch, getState) => {
@@ -1809,19 +1839,19 @@ export const mergeSettings = (selectedId) => async (dispatch, getState) => {
  *               1 - force, update immediately no matter what
  *               2 - no update even there is a change
  */
-let _isSyncing = false, _newSyncObj = /** @type Object */(null), _lastSyncDT = 0;
 export const sync = (
   doForceListFPaths = false, updateAction = 0, haveUpdate = false
 ) => async (dispatch, getState) => {
 
   if (!getState().user.isUserSignedIn) return;
+  if (!getState().localSettings.doSyncMode) return;
   if (vars.deleteSyncData.isDeleting) return;
 
-  if (_isSyncing) {
-    _newSyncObj = { doForceListFPaths, updateAction };
+  if (vars.sync.isSyncing) {
+    vars.sync.newSyncObj = { doForceListFPaths, updateAction };
     return;
   }
-  [_isSyncing, _newSyncObj] = [true, null];
+  [vars.sync.isSyncing, vars.sync.newSyncObj] = [true, null];
 
   // Set haveUpdate to true if there is already pending update
   //   Need to check before dispatching SYNC
@@ -1881,11 +1911,21 @@ export const sync = (
           allLeafStaticFPaths.includes(staticFPath) &&
           !staticFPaths.includes(staticFPath)
         ) {
-          // if no file locally, will just ignore by Blockstack mobile libraries.
-          const fileFPath = 'file://' + staticFPath;
-          if (!fpaths.includes(fileFPath)) {
-            fpaths.push(fileFPath);
-            contents.push('');
+          if (vars.platform.isReactNative) {
+            // if no file locally, will just ignore by Blockstack mobile libraries.
+            const fileFPath = 'file://' + staticFPath;
+            if (!fpaths.includes(fileFPath)) {
+              fpaths.push(fileFPath);
+              contents.push('');
+            }
+          } else {
+            if (!fpaths.includes(staticFPath)) {
+              const content = await fileApi.getFile(staticFPath);
+              if (content !== undefined) {
+                fpaths.push(staticFPath);
+                contents.push(content);
+              }
+            }
           }
         }
       }
@@ -1941,11 +1981,18 @@ export const sync = (
           allLeafStaticFPaths.includes(staticFPath) &&
           !_staticFPaths.includes(staticFPath)
         ) {
-          // if no directories, will create by Blockstack mobile libraries.
-          const fileFPath = 'file://' + staticFPath;
-          if (!gStaticFPaths.includes(fileFPath)) {
-            gStaticFPaths.push(fileFPath);
-            haveUpdate = true;
+          if (vars.platform.isReactNative) {
+            // if no directories, will create by Blockstack mobile libraries.
+            const fileFPath = 'file://' + staticFPath;
+            if (!gStaticFPaths.includes(fileFPath)) {
+              gStaticFPaths.push(fileFPath);
+              haveUpdate = true;
+            }
+          } else {
+            if (!gStaticFPaths.includes(staticFPath)) {
+              gStaticFPaths.push(staticFPath);
+              haveUpdate = true;
+            }
           }
         }
       }
@@ -1967,7 +2014,15 @@ export const sync = (
     }
     // No order guarantee btw _gFPaths and gContents
     let { fpaths: gFPaths, contents: gContents } = await serverApi.getFiles(_gFPaths);
-    await serverApi.getFiles(gStaticFPaths, true);
+    if (vars.platform.isReactNative) {
+      await serverApi.getFiles(gStaticFPaths, true);
+    } else {
+      const gStaticFiles = await serverApi.getFiles(gStaticFPaths, true);
+      for (let i = 0; i < gStaticFiles.fpaths.length; i++) {
+        if (gStaticFiles.contents[i] === null) continue;
+        await fileApi.putFile(gStaticFiles.fpaths[i], gStaticFiles.contents[i]);
+      }
+    }
     await dataApi.putFiles([...fpaths, ...gFPaths], [...contents, ...gContents]);
 
     // 4. Local side: loop used to be leaves in local and set to empty
@@ -2154,26 +2209,26 @@ export const sync = (
       payload: {
         updateAction,
         haveUpdate,
-        haveNewSync: _newSyncObj !== null,
+        haveNewSync: vars.sync.newSyncObj !== null,
       },
     });
 
-    if (_newSyncObj) {
-      let _doForce = /** @type boolean */(_newSyncObj.doForceListFPaths);
+    if (vars.sync.newSyncObj) {
+      let _doForce = vars.sync.newSyncObj.doForceListFPaths;
       if (doForceListFPaths) _doForce = false;
 
-      /** @ts-ignore */
-      const _updateAction = Math.min(updateAction, _newSyncObj.updateAction);
+      const _updateAction = Math.min(updateAction, vars.sync.newSyncObj.updateAction);
 
-      [_isSyncing, _newSyncObj] = [false, null];
+      [vars.sync.isSyncing, vars.sync.newSyncObj] = [false, null];
       dispatch(sync(_doForce, _updateAction, haveUpdate));
       return;
     }
 
-    [_isSyncing, _newSyncObj, _lastSyncDT] = [false, null, Date.now()];
+    [vars.sync.isSyncing, vars.sync.newSyncObj] = [false, null];
+    vars.sync.lastSyncDT = Date.now();
   } catch (error) {
     console.log('Sync error: ', error);
-    [_isSyncing, _newSyncObj] = [false, null];
+    [vars.sync.isSyncing, vars.sync.newSyncObj] = [false, null];
     dispatch({ type: SYNC_ROLLBACK, payload: error });
   }
 };

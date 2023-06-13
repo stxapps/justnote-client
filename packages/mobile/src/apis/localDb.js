@@ -131,10 +131,14 @@ const getUnsavedNoteFPaths = async () => {
   return fpaths;
 };
 
+const canUseSync = async () => {
+  return true;
+};
+
 const localDb = {
   isUserDummy, updateUserDummy, getItem, setItem, removeItem,
   cachedFPaths, getFile, getFiles, putFile, putFiles, deleteFile, deleteFiles,
-  deleteAllFiles, listFiles, exists, getUnsavedNoteFPaths,
+  deleteAllFiles, listFiles, exists, getUnsavedNoteFPaths, canUseSync,
 };
 
 export default localDb;

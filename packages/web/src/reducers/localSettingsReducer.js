@@ -2,7 +2,8 @@ import { loop, Cmd } from 'redux-loop';
 
 import { updateLocalSettings } from '../actions';
 import {
-  INIT, FETCH_COMMIT, UPDATE_SETTINGS_COMMIT, UPDATE_INFO_COMMIT, MERGE_SETTINGS_COMMIT,
+  INIT, FETCH_COMMIT, UPDATE_SETTINGS_COMMIT, UPDATE_INFO_COMMIT, CANCEL_DIED_SETTINGS,
+  MERGE_SETTINGS_COMMIT, UPDATE_DO_SYNC_MODE, UPDATE_DO_SYNC_MODE_INPUT,
   UPDATE_DO_USE_LOCAL_THEME, UPDATE_LOCAL_THEME, UPDATE_EDITOR_IS_UPLOADING,
   CLEAN_UP_STATIC_FILES_COMMIT, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -12,11 +13,13 @@ import {
   blkModeThemeCustomOptions,
 } from '../types/initialStates';
 import { isObject } from '../utils';
+import vars from '../vars';
 
 const localSettingsReducer = (state = initialState, action) => {
 
   if (action.type === INIT) {
     const { localSettings } = action.payload;
+    vars.syncMode.doSyncMode = localSettings.doSyncMode;
     return { ...state, ...localSettings };
   }
 
@@ -75,6 +78,31 @@ const localSettingsReducer = (state = initialState, action) => {
       newState.purchases = null;
     }
 
+    return loop(
+      newState, Cmd.run(updateLocalSettings(), { args: [Cmd.dispatch, Cmd.getState] })
+    );
+  }
+
+  if (action.type === CANCEL_DIED_SETTINGS) {
+    const { doSyncMode, doSyncModeInput } = state;
+    if (doSyncMode === doSyncModeInput) return state;
+
+    const newState = { ...state, doSyncModeInput: doSyncMode };
+    return loop(
+      newState, Cmd.run(updateLocalSettings(), { args: [Cmd.dispatch, Cmd.getState] })
+    );
+  }
+
+  if (action.type === UPDATE_DO_SYNC_MODE) {
+    const newState = { ...state, doSyncMode: action.payload };
+    vars.syncMode.doSyncMode = newState.doSyncMode;
+    return loop(
+      newState, Cmd.run(updateLocalSettings(), { args: [Cmd.dispatch, Cmd.getState] })
+    );
+  }
+
+  if (action.type === UPDATE_DO_SYNC_MODE_INPUT) {
+    const newState = { ...state, doSyncModeInput: action.payload };
     return loop(
       newState, Cmd.run(updateLocalSettings(), { args: [Cmd.dispatch, Cmd.getState] })
     );

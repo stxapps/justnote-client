@@ -2,9 +2,10 @@ import React, { useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import {
-  updateDoDeleteOldNotesInTrash, updateSortOn, updateDoDescendingOrder,
-  updateNoteDateShowingMode, updateNoteDateFormat, updateDoSectionNotesByMonth,
-  updateDoMoreEditorFontSizes, updateDoUseLocalTheme, updateTheme, updatePopupUrlHash,
+  updateDoSyncModeInput, updateDoDeleteOldNotesInTrash, updateSortOn,
+  updateDoDescendingOrder, updateNoteDateShowingMode, updateNoteDateFormat,
+  updateDoSectionNotesByMonth, updateDoMoreEditorFontSizes, updateDoUseLocalTheme,
+  updateTheme, updatePopupUrlHash,
 } from '../actions';
 import {
   DATE_FORMAT_MENU_POPUP, ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE,
@@ -20,6 +21,7 @@ import { useTailwind } from '.';
 const SettingsPopupMisc = (props) => {
 
   const { onSidebarOpenBtnClick } = props;
+  const doSyncModeInput = useSelector(state => state.localSettings.doSyncModeInput);
   const doDeleteOldNotesInTrash = useSelector(
     state => state.settings.doDeleteOldNotesInTrash
   );
@@ -45,6 +47,10 @@ const SettingsPopupMisc = (props) => {
   const blkTimeInput = useRef(null);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
+
+  const onDoSyncModeBtnClick = () => {
+    dispatch(updateDoSyncModeInput(!doSyncModeInput));
+  };
 
   const onDoDeleteBtnClick = () => {
     dispatch(updateDoDeleteOldNotesInTrash(!doDeleteOldNotesInTrash));
@@ -137,6 +143,9 @@ const SettingsPopupMisc = (props) => {
       dispatch(updateTheme(_themeMode, _customOptions));
     }
   };
+
+  const doSyncModeBtnClassNames = doSyncModeInput ? 'bg-green-500 blk:bg-green-500' : 'bg-gray-200 blk:bg-gray-700';
+  const doSyncModeBtnInnerClassNames = doSyncModeInput ? 'translate-x-5' : 'translate-x-0';
 
   const doDeleteBtnClassNames = doDeleteOldNotesInTrash ? 'bg-green-500 blk:bg-green-500' : 'bg-gray-200 blk:bg-gray-700';
   const doDeleteBtnInnerClassNames = doDeleteOldNotesInTrash ? 'translate-x-5' : 'translate-x-0';
@@ -381,6 +390,15 @@ const SettingsPopupMisc = (props) => {
         </div>
         <span onClick={onDoMoreFontSizesBtnClick} role="checkbox" tabIndex={0} aria-checked="true" aria-labelledby="font-size-option-label" aria-describedby="font-size-option-description" className={tailwind(`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:focus:ring-offset-gray-900 ${doMoreFontSizesBtnClassNames}`)}>
           <span aria-hidden="true" className={tailwind(`inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out blk:bg-gray-300 ${doMoreFontSizesBtnInnerClassNames}`)} />
+        </span>
+      </div>
+      <div className={tailwind('mt-10 flex items-center justify-between space-x-4')}>
+        <div className={tailwind('flex flex-col')}>
+          <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>Sync mode</h4>
+          <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Enable sync mode on this device. All notes will be downloaded and stored locally. And new changes will be synced to the server.</p>
+        </div>
+        <span onClick={onDoSyncModeBtnClick} role="checkbox" tabIndex={0} aria-checked="true" aria-labelledby="sync-mode-option-label" aria-describedby="sync-mode-option-description" className={tailwind(`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 blk:focus:ring-offset-gray-900 ${doSyncModeBtnClassNames}`)}>
+          <span aria-hidden="true" className={tailwind(`inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out blk:bg-gray-300 ${doSyncModeBtnInnerClassNames}`)} />
         </span>
       </div>
       <div className={tailwind('mt-10 mb-4 flex items-center justify-between space-x-4')}>

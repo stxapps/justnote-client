@@ -21,8 +21,8 @@ import {
   SIDEBAR_POPUP, SEARCH_POPUP, SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP,
   TIME_PICK_POPUP, DATE_FORMAT_MENU_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP,
   CONFIRM_AS_DUMMY_POPUP, CONFIRM_EXIT_DUMMY_POPUP, ACCESS_ERROR_POPUP,
-  STALE_ERROR_POPUP, NEW_NOTE, MY_NOTES, TRASH, ARCHIVE, UPDATING, DIED_UPDATING,
-  MAX_SELECTED_NOTE_IDS, SETTINGS_VIEW_ACCOUNT, DELETE_ACTION_LIST_NAME,
+  STALE_ERROR_POPUP, USE_SYNC_ERROR_POPUP, NEW_NOTE, MY_NOTES, TRASH, ARCHIVE, UPDATING,
+  DIED_UPDATING, MAX_SELECTED_NOTE_IDS, SETTINGS_VIEW_ACCOUNT, DELETE_ACTION_LIST_NAME,
 } from '../types/const';
 import { doContainListName, isObject, isString, doContainStaleNotes } from '../utils';
 import vars from '../vars';
@@ -59,6 +59,7 @@ const initialState = {
   isConfirmExitDummyPopupShown: false,
   isAccessErrorPopupShown: false,
   isStaleErrorPopupShown: false,
+  isUseSyncErrorPopupShown: false,
   searchString: '',
   isBulkEditing: false,
   selectedNoteIds: [],
@@ -249,6 +250,11 @@ const displayReducer = (state = initialState, action) => {
       return newState;
     }
 
+    if (id === USE_SYNC_ERROR_POPUP) {
+      const newState = { ...state, isUseSyncErrorPopupShown: isShown };
+      return newState;
+    }
+
     throw new Error(`Invalid type: ${action.type} and payload: ${action.payload}`);
   }
 
@@ -362,6 +368,13 @@ const displayReducer = (state = initialState, action) => {
       )
     ) {
       newState.isAccessErrorPopupShown = true;
+    }
+    if (
+      isObject(error) &&
+      isString(error.message) &&
+      error.message.includes('Sync mode cannnot be used')
+    ) {
+      newState.isUseSyncErrorPopupShown = true;
     }
     return newState;
   }

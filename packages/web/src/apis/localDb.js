@@ -139,9 +139,19 @@ const getUnsavedNoteFPaths = async () => {
   return fpaths;
 };
 
+const canUseSync = async () => {
+  try {
+    await idb.get('get-to-find-can-use-idb');
+    return true;
+  } catch (error) {
+    console.log('In localDb.canUseIdb, IndexedDB error:', error);
+  }
+  return false;
+};
+
 const localDb = {
   cachedFPaths, getFile, getFiles, putFile, putFiles, deleteFile, deleteFiles,
-  deleteAllFiles, listFiles, exists, getUnsavedNoteFPaths,
+  deleteAllFiles, listFiles, exists, getUnsavedNoteFPaths, canUseSync,
 };
 
 export default localDb;

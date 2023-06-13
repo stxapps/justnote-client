@@ -94,8 +94,19 @@ const iap = {
   errorEventEmitter: null,
 };
 
+const platform = {
+  isReactNative: false,
+};
+
 export const syncMode = {
   doSyncMode: false,
+  didChange: false,
+};
+
+const sync = {
+  isSyncing: false,
+  newSyncObj: null,
+  lastSyncDT: 0,
 };
 
 export const getCachedFPaths = () => {
@@ -114,7 +125,7 @@ const vars = {
   cachedFPaths, cachedServerFPaths, scrollPanel, keyboard, runAfterFetchTask,
   randomHouseworkTasks, updateNoteIdUrlHash, updateNoteId, changeListName,
   updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, deleteOldNotes, updateSettings,
-  updateSettingsPopup, notesReducer, displayReducer, editorReducer, iap, syncMode,
-  importAllData, deleteSyncData,
+  updateSettingsPopup, notesReducer, displayReducer, editorReducer, iap, platform,
+  syncMode, sync, importAllData, deleteSyncData,
 };
 export default vars;

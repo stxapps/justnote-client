@@ -2,7 +2,8 @@ import React, { useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { updatePopupUrlHash, showNoteListMenuPopup } from '../actions';
-import { SEARCH_POPUP, LG_WIDTH, UPDATING } from '../types/const';
+import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
+import { SEARCH_POPUP, LG_WIDTH, UPDATING, SHOW_SYNCED } from '../types/const';
 import { getListNameMap } from '../selectors';
 import { getListNameDisplayName } from '../utils';
 
@@ -19,6 +20,7 @@ const NoteListTopBar = (props) => {
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const didFetch = useSelector(state => state.display.didFetch);
   const settingsStatus = useSelector(state => state.display.settingsStatus);
+  const syncProgress = useSelector(state => state.display.syncProgress);
   const menuBtn = useRef(null);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
@@ -45,7 +47,7 @@ const NoteListTopBar = (props) => {
   );
 
   let innerMenuBtn;
-  if (settingsStatus === UPDATING) {
+  if (settingsStatus === UPDATING || (syncProgress && syncProgress.status === SYNC)) {
     innerMenuBtn = (
       <React.Fragment>
         {menuBtnSvg}
@@ -54,6 +56,20 @@ const NoteListTopBar = (props) => {
             <circle cx="50" cy="50" strokeWidth="4" r="44" strokeDasharray="226.1946710584651 77.39822368615503" />
           </svg>
         </div>
+      </React.Fragment>
+    );
+  } else if (syncProgress && syncProgress.status === SYNC_ROLLBACK) {
+    innerMenuBtn = (
+      <React.Fragment>
+        {menuBtnSvg}
+        <div className={tailwind('absolute top-1 right-2.5 h-1.5 w-1.5 rounded-full bg-red-500 blk:bg-red-500')} />
+      </React.Fragment>
+    );
+  } else if (syncProgress && syncProgress.status === SHOW_SYNCED) {
+    innerMenuBtn = (
+      <React.Fragment>
+        {menuBtnSvg}
+        <div className={tailwind('absolute top-1 right-2.5 h-1.5 w-1.5 rounded-full bg-green-600 blk:bg-green-500')} />
       </React.Fragment>
     );
   } else {

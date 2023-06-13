@@ -33,6 +33,8 @@ export const initialSettingsState = {
 };
 
 export const initialLocalSettingsState = {
+  doSyncMode: false,
+  doSyncModeInput: false,
   doUseLocalTheme: false,
   themeMode: WHT_MODE,
   themeCustomOptions: [

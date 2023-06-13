@@ -5,6 +5,7 @@ import userSession from '../userSession';
 import axios from '../axiosWrapper';
 import iapApi from '../paddleWrapper';
 import dataApi from '../apis/data';
+import serverApi from '../apis/server';
 import fileApi from '../apis/localFile';
 import lsgApi from '../apis/localSg';
 import {
@@ -21,14 +22,16 @@ import {
   DELETE_OLD_NOTES_IN_TRASH_ROLLBACK, MERGE_NOTES, MERGE_NOTES_COMMIT,
   MERGE_NOTES_ROLLBACK, UPDATE_LIST_NAME_EDITORS, ADD_LIST_NAMES, UPDATE_LIST_NAMES,
   MOVE_LIST_NAME, MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_SELECTING_LIST_NAME,
-  UPDATE_DELETING_LIST_NAME, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, UPDATE_SORT_ON,
-  UPDATE_DO_DESCENDING_ORDER, UPDATE_NOTE_DATE_SHOWING_MODE, UPDATE_NOTE_DATE_FORMAT,
+  UPDATE_DELETING_LIST_NAME, UPDATE_DO_SYNC_MODE, UPDATE_DO_SYNC_MODE_INPUT,
+  UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, UPDATE_SORT_ON, UPDATE_DO_DESCENDING_ORDER,
+  UPDATE_NOTE_DATE_SHOWING_MODE, UPDATE_NOTE_DATE_FORMAT,
   UPDATE_DO_SECTION_NOTES_BY_MONTH, UPDATE_DO_MORE_EDITOR_FONT_SIZES, UPDATE_SETTINGS,
   UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS,
   MERGE_SETTINGS, MERGE_SETTINGS_COMMIT, MERGE_SETTINGS_ROLLBACK,
   UPDATE_SETTINGS_VIEW_ID, UPDATE_INFO, UPDATE_INFO_COMMIT, UPDATE_INFO_ROLLBACK,
   UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION, UPDATE_DISCARD_ACTION,
   UPDATE_LIST_NAMES_MODE, UPDATE_SYNCED, INCREASE_SAVE_NOTE_COUNT,
+  SYNC, SYNC_COMMIT, SYNC_ROLLBACK, UPDATE_SYNC_PROGRESS,
   INCREASE_DISCARD_NOTE_COUNT, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
   INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
   INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT,
@@ -58,7 +61,7 @@ import {
   DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
   DISCARD_ACTION_UPDATE_LIST_NAME, MY_NOTES, TRASH, ID, NEW_NOTE, NEW_NOTE_OBJ,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES, N_DAYS, CD_ROOT,
-  INFO, DOT_JSON, SHOW_SYNCED, LG_WIDTH, IAP_VERIFY_URL, IAP_STATUS_URL, PADDLE,
+  INFO, INDEX, DOT_JSON, SHOW_SYNCED, LG_WIDTH, IAP_VERIFY_URL, IAP_STATUS_URL, PADDLE,
   COM_JUSTNOTECC, COM_JUSTNOTECC_SUPPORTER, SIGNED_TEST_STRING, VALID, INVALID, ACTIVE,
   UNKNOWN, SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS, WHT_MODE,
   BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE, FEATURE_DATE_FORMAT,
@@ -104,6 +107,10 @@ export const init = () => async (dispatch, getState) => {
   const darkMatches = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const is24HFormat = null;
   const localSettings = await dataApi.getLocalSettings();
+  if (localSettings.doSyncMode !== localSettings.doSyncModeInput) {
+    localSettings.doSyncModeInput = localSettings.doSyncMode;
+    await dataApi.putLocalSettings(localSettings);
+  }
 
   // Need to fetch all here as some note ids might change.
   const unsavedNotes = await dataApi.getUnsavedNotes();
@@ -560,7 +567,7 @@ export const updateNoteIdUrlHash = (
       if (Date.now() - vars.updateNoteId.dt < 400) return;
       vars.updateNoteId.dt = Date.now();
 
-      if (vars.updateSettings.doFetch) return;
+      if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
       if (vars.deleteOldNotes.ids && vars.deleteOldNotes.ids.includes(id)) return;
 
       const isEditorUploading = getState().editor.isUploading;
@@ -640,7 +647,7 @@ export const updateBulkEditUrlHash = (
   return async (dispatch, getState) => {
     if (doGetIdFromState) selectedNoteId = vars.updateBulkEdit.selectedNoteId;
     if (doCheckEditing) {
-      if (vars.updateSettings.doFetch) return;
+      if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
 
       const listName = getState().display.listName;
       if (listName === TRASH && vars.deleteOldNotes.ids) return;
@@ -681,7 +688,7 @@ export const changeListName = (listName, doCheckEditing) => async (
   if (!listName) throw new Error(`Invalid listName: ${listName}`);
 
   if (doCheckEditing) {
-    if (vars.updateSettings.doFetch) return;
+    if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
 
     const isEditorUploading = getState().editor.isUploading;
     if (isEditorUploading) return;
@@ -732,7 +739,7 @@ export const updateNoteId = (id, doGetIdFromState = false, doCheckEditing = fals
       if (Date.now() - vars.updateNoteId.dt < 400) return;
       vars.updateNoteId.dt = Date.now();
 
-      if (vars.updateSettings.doFetch) return;
+      if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
       if (vars.deleteOldNotes.ids && vars.deleteOldNotes.ids.includes(id)) return;
 
       const isEditorUploading = getState().editor.isUploading;
@@ -1634,7 +1641,7 @@ export const showNoteListMenuPopup = (rect, doCheckEditing) => async (
   if (!rect) rect = vars.showNoteListMenuPopup.selectedRect;
 
   if (doCheckEditing) {
-    if (vars.updateSettings.doFetch) return;
+    if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
 
     const isEditorUploading = getState().editor.isUploading;
     if (isEditorUploading) return;
@@ -1669,7 +1676,7 @@ export const showNLIMPopup = (noteId, rect, doCheckEditing) => async (
   if (!rect) rect = vars.showNLIMPopup.selectedRect;
 
   if (doCheckEditing && noteId === _noteId) {
-    if (vars.updateSettings.doFetch) return;
+    if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
 
     const isEditorUploading = getState().editor.isUploading;
     if (isEditorUploading) return;
@@ -1910,6 +1917,14 @@ export const deleteListNames = (listNames) => async (dispatch, getState) => {
   dispatch({ type: DELETE_LIST_NAMES, payload: { listNames: allListNames } });
 };
 
+export const updateDoSyncMode = (doSyncMode) => {
+  return { type: UPDATE_DO_SYNC_MODE, payload: doSyncMode };
+};
+
+export const updateDoSyncModeInput = (doSyncMode) => {
+  return { type: UPDATE_DO_SYNC_MODE_INPUT, payload: doSyncMode };
+};
+
 export const updateDoDeleteOldNotesInTrash = (doDeleteOldNotesInTrash) => {
   return {
     type: UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, payload: doDeleteOldNotesInTrash,
@@ -1999,6 +2014,9 @@ const updateSettings = async (dispatch, getState) => {
   const settings = getState().settings;
   const snapshotSettings = getState().snapshot.settings;
 
+  const { doSyncMode, doSyncModeInput } = getState().localSettings;
+  if (doSyncMode !== doSyncModeInput) vars.syncMode.didChange = true;
+
   // It's ok if MERGE_SETTINGS, IMPORT, DELETE_ALL in progress. Let it be conflict.
   if (isEqual(settings, snapshotSettings)) {
     dispatch(cancelDiedSettings());
@@ -2013,10 +2031,11 @@ const updateSettings = async (dispatch, getState) => {
   const settingsFName = createDataFName(`${addedDT}${randomString(4)}`, _settingsIds);
   const settingsFPath = createSettingsFPath(settingsFName);
 
-  const doFetch = (
+  let doFetch = (
     settings.sortOn !== snapshotSettings.sortOn ||
     settings.doDescendingOrder !== snapshotSettings.doDescendingOrder
   );
+  if (vars.syncMode.didChange) doFetch = false;
   const payload = { settings, doFetch };
 
   vars.updateSettings.doFetch = doFetch;
@@ -2028,6 +2047,7 @@ const updateSettings = async (dispatch, getState) => {
     console.log('updateSettings error: ', error);
     dispatch({ type: UPDATE_SETTINGS_ROLLBACK, payload: { ...payload, error } });
     vars.updateSettings.doFetch = false;
+    vars.syncMode.didChange = false;
     return;
   }
 
@@ -2078,13 +2098,48 @@ const updateInfo = async (dispatch, getState) => {
   await sync()(dispatch, getState);
 };
 
+export const applySyncMode = async (dispatch, getState) => {
+  // If updateSettings rollback, no apply sync mode yet, wait for retry.
+  if (!vars.syncMode.didChange) return;
+  vars.syncMode.didChange = false;
+
+  const { doSyncMode, doSyncModeInput } = getState().localSettings;
+  if (doSyncMode === doSyncModeInput) return;
+
+  // No need to clear vars as reload the page!
+
+  // Need to clear the local storage in case of clean up already.
+  await dataApi.deleteAllSyncedFiles();
+
+  // Do it directly instead of dispatch(updateDoSyncMode(false));
+  //   to make sure storing before reload.
+  const localSettings = await dataApi.getLocalSettings();
+  localSettings.doSyncMode = localSettings.doSyncModeInput;
+  await dataApi.putLocalSettings(localSettings);
+
+  window.location.reload();
+};
+
+export const disableSyncMode = async (dispatch, getState) => {
+  await dataApi.deleteAllSyncedFiles();
+
+  const localSettings = await dataApi.getLocalSettings();
+  localSettings.doSyncMode = false;
+  localSettings.doSyncModeInput = false;
+  await dataApi.putLocalSettings(localSettings);
+
+  window.location.reload();
+};
+
 export const updateStgsAndInfo = () => async (dispatch, getState) => {
   await updateSettings(dispatch, getState);
   await updateInfo(dispatch, getState);
+  await applySyncMode(dispatch, getState);
 };
 
 export const retryDiedSettings = () => async (dispatch, getState) => {
   await updateSettings(dispatch, getState);
+  await applySyncMode(dispatch, getState);
 };
 
 export const cancelDiedSettings = () => async (dispatch, getState) => {
@@ -2095,16 +2150,18 @@ export const cancelDiedSettings = () => async (dispatch, getState) => {
   const { noteIds, conflictedIds } = listNoteIds(noteFPaths);
 
   const listNames = getListNamesFromNoteIds(noteIds, conflictedIds);
-  const doFetch = (
+  let doFetch = (
     settings.sortOn !== snapshotSettings.sortOn ||
     settings.doDescendingOrder !== snapshotSettings.doDescendingOrder
   );
+  if (vars.syncMode.didChange) doFetch = false;
   const payload = { listNames, settings: snapshotSettings, doFetch };
 
   vars.updateSettings.doFetch = doFetch;
   dispatch({ type: CANCEL_DIED_SETTINGS, payload });
 
   vars.updateSettings.doFetch = false;
+  vars.syncMode.didChange = false;
 };
 
 export const tryUpdateInfo = () => async (dispatch, getState) => {
@@ -2172,19 +2229,439 @@ export const mergeSettings = (selectedId) => async (dispatch, getState) => {
  * _newSyncObj: there is a new update and need to sync again
  *
  * updateAction: 0 - normal, update immediately or show notification
- * 1 - force, update immediately no matter what
- * 2 - no update even there is a change
+ *               1 - force, update immediately no matter what
+ *               2 - no update even there is a change
  */
 export const sync = (
-  doForceServerListFPaths = false, updateAction = 0, haveUpdate = false
+  doForceListFPaths = false, updateAction = 0, haveUpdate = false
 ) => async (dispatch, getState) => {
-  // Do nothing on web. This is for mobile.
+
+  if (!getState().user.isUserSignedIn) return;
+  if (!getState().localSettings.doSyncMode) return;
+  if (vars.deleteSyncData.isDeleting) return;
+
+  if (vars.sync.isSyncing) {
+    vars.sync.newSyncObj = { doForceListFPaths, updateAction };
+    return;
+  }
+  [vars.sync.isSyncing, vars.sync.newSyncObj] = [true, null];
+
+  // Set haveUpdate to true if there is already pending update
+  //   Need to check before dispatching SYNC
+  const syncProgress = getState().display.syncProgress;
+  if (syncProgress && syncProgress.status === SHOW_SYNCED) haveUpdate = true;
+
+  dispatch({ type: SYNC });
+  await sleep(16); // Make sure rerender first.
+
+  try {
+    const {
+      noteFPaths, staticFPaths, settingsFPaths, infoFPath, pinFPaths,
+    } = await dataApi.listServerFPaths(doForceListFPaths);
+    const { noteIds, conflictedIds } = listNoteIds(noteFPaths);
+
+    const leafFPaths = [];
+    for (const noteId of noteIds) leafFPaths.push(...noteId.fpaths);
+    for (const noteId of conflictedIds) leafFPaths.push(...noteId.fpaths);
+
+    const {
+      noteFPaths: _noteFPaths,
+      settingsFPaths: _settingsFPaths,
+      infoFPath: _infoFPath,
+      pinFPaths: _pinFPaths,
+    } = await dataApi.listFPaths(doForceListFPaths);
+    const _staticFPaths = await fileApi.getStaticFPaths();
+    const {
+      noteIds: _noteIds, conflictedIds: _conflictedIds,
+    } = listNoteIds(_noteFPaths);
+
+    const _leafFPaths = [];
+    for (const noteId of _noteIds) _leafFPaths.push(...noteId.fpaths);
+    for (const noteId of _conflictedIds) _leafFPaths.push(...noteId.fpaths);
+
+    const allNoteFPaths = [...new Set([...noteFPaths, ..._noteFPaths])];
+    const {
+      noteIds: allNoteIds, conflictedIds: allConflictedIds, toRootIds: allToRootIds,
+    } = listNoteIds(allNoteFPaths);
+
+    const allLeafFPaths = [];
+    for (const noteId of allNoteIds) allLeafFPaths.push(...noteId.fpaths);
+    for (const noteId of allConflictedIds) allLeafFPaths.push(...noteId.fpaths);
+
+    const allLeafStaticFPaths = [];
+    for (const fpath of allLeafFPaths) {
+      if (fpath.includes(CD_ROOT + '/')) {
+        allLeafStaticFPaths.push(getStaticFPath(fpath));
+      }
+    }
+
+    // 1. Server side: upload all fpaths
+    let fpaths = [], contents = [];
+    for (const fpath of _noteFPaths) {
+      if (fpath.includes(CD_ROOT + '/')) {
+        const staticFPath = getStaticFPath(fpath);
+        if (
+          allLeafStaticFPaths.includes(staticFPath) &&
+          !staticFPaths.includes(staticFPath)
+        ) {
+          if (vars.platform.isReactNative) {
+            // if no file locally, will just ignore by Blockstack mobile libraries.
+            const fileFPath = 'file://' + staticFPath;
+            if (!fpaths.includes(fileFPath)) {
+              fpaths.push(fileFPath);
+              contents.push('');
+            }
+          } else {
+            if (!fpaths.includes(staticFPath)) {
+              const content = await fileApi.getFile(staticFPath);
+              if (content !== undefined) {
+                fpaths.push(staticFPath);
+                contents.push(content);
+              }
+            }
+          }
+        }
+      }
+
+      if (noteFPaths.includes(fpath)) continue;
+
+      let content;
+      if (allLeafFPaths.includes(fpath)) {
+        // No order guarantee but this is just one file
+        content = (await dataApi.getFiles([fpath])).contents[0];
+      } else {
+        if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
+        else content = '';
+      }
+      fpaths.push(fpath);
+      contents.push(content);
+    }
+    await serverApi.putFiles(fpaths, contents);
+
+    // 2. Server side: loop used to be leaves in server and set to empty
+    fpaths = []; contents = [];
+    let deletedFPaths = [];
+    for (const fpath of leafFPaths) {
+      if (fpath.includes(CD_ROOT + '/')) {
+        const staticFPath = getStaticFPath(fpath);
+        if (
+          !allLeafStaticFPaths.includes(staticFPath) &&
+          staticFPaths.includes(staticFPath)
+        ) {
+          if (!deletedFPaths.includes(staticFPath)) deletedFPaths.push(staticFPath);
+        }
+      }
+
+      if (allLeafFPaths.includes(fpath)) continue;
+
+      let content;
+      if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
+      else content = '';
+
+      fpaths.push(fpath);
+      contents.push(content);
+    }
+    await serverApi.putFiles(fpaths, contents);
+    await serverApi.deleteFiles(deletedFPaths);
+
+    // 3. Local side: download all fpaths
+    fpaths = []; contents = [];
+    let _gFPaths = [], gStaticFPaths = [];
+    for (const fpath of noteFPaths) {
+      if (fpath.includes(CD_ROOT + '/')) {
+        const staticFPath = getStaticFPath(fpath);
+        if (
+          allLeafStaticFPaths.includes(staticFPath) &&
+          !_staticFPaths.includes(staticFPath)
+        ) {
+          if (vars.platform.isReactNative) {
+            // if no directories, will create by Blockstack mobile libraries.
+            const fileFPath = 'file://' + staticFPath;
+            if (!gStaticFPaths.includes(fileFPath)) {
+              gStaticFPaths.push(fileFPath);
+              haveUpdate = true;
+            }
+          } else {
+            if (!gStaticFPaths.includes(staticFPath)) {
+              gStaticFPaths.push(staticFPath);
+              haveUpdate = true;
+            }
+          }
+        }
+      }
+
+      if (_noteFPaths.includes(fpath)) continue;
+      haveUpdate = true;
+
+      if (allLeafFPaths.includes(fpath)) {
+        _gFPaths.push(fpath);
+        continue;
+      }
+
+      let content;
+      if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
+      else content = '';
+
+      fpaths.push(fpath);
+      contents.push(content);
+    }
+    // No order guarantee btw _gFPaths and gContents
+    let { fpaths: gFPaths, contents: gContents } = await serverApi.getFiles(_gFPaths);
+    if (vars.platform.isReactNative) {
+      await serverApi.getFiles(gStaticFPaths, true);
+    } else {
+      const gStaticFiles = await serverApi.getFiles(gStaticFPaths, true);
+      for (let i = 0; i < gStaticFiles.fpaths.length; i++) {
+        if (gStaticFiles.contents[i] === null) continue;
+        await fileApi.putFile(gStaticFiles.fpaths[i], gStaticFiles.contents[i]);
+      }
+    }
+    await dataApi.putFiles([...fpaths, ...gFPaths], [...contents, ...gContents]);
+
+    // 4. Local side: loop used to be leaves in local and set to empty
+    fpaths = []; contents = []; deletedFPaths = [];
+    for (const fpath of _leafFPaths) {
+      if (fpath.includes(CD_ROOT + '/')) {
+        const staticFPath = getStaticFPath(fpath);
+        if (
+          !allLeafStaticFPaths.includes(staticFPath) &&
+          _staticFPaths.includes(staticFPath)
+        ) {
+          if (!deletedFPaths.includes(staticFPath)) deletedFPaths.push(staticFPath);
+        }
+      }
+
+      if (allLeafFPaths.includes(fpath)) continue;
+
+      let content;
+      if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
+      else content = '';
+
+      fpaths.push(fpath);
+      contents.push(content);
+    }
+    await dataApi.putFiles(fpaths, contents);
+    await fileApi.deleteFiles(deletedFPaths);
+
+    // Settings
+    const { fpaths: settingsLeafFPaths } = getLastSettingsFPaths(settingsFPaths);
+    const { fpaths: _settingsLeafFPaths } = getLastSettingsFPaths(_settingsFPaths);
+
+    const settingsAllFPaths = [...new Set([...settingsFPaths, ..._settingsFPaths])];
+    const { fpaths: settingsAllLeafFPaths } = getLastSettingsFPaths(settingsAllFPaths);
+
+    // 1. Server side: upload all settingsFPaths
+    fpaths = []; contents = [];
+    for (const fpath of _settingsFPaths) {
+      if (settingsFPaths.includes(fpath)) continue;
+
+      let content;
+      if (settingsAllLeafFPaths.includes(fpath)) {
+        // No order guarantee but this is just one file
+        content = (await dataApi.getFiles([fpath])).contents[0];
+      } else {
+        content = {};
+      }
+      fpaths.push(fpath);
+      contents.push(content);
+    }
+    await serverApi.putFiles(fpaths, contents);
+
+    // 2. Server side: loop used to be leaves in server and set to empty
+    fpaths = []; contents = [];
+    for (const fpath of settingsLeafFPaths) {
+      if (settingsAllLeafFPaths.includes(fpath)) continue;
+      fpaths.push(fpath);
+      contents.push({});
+    }
+    await serverApi.putFiles(fpaths, contents);
+
+    // 3. Local side: download all settingsFPaths
+    fpaths = []; contents = [];
+    _gFPaths = [];
+    for (const fpath of settingsFPaths) {
+      if (_settingsFPaths.includes(fpath)) continue;
+      haveUpdate = true;
+
+      if (settingsAllLeafFPaths.includes(fpath)) {
+        _gFPaths.push(fpath);
+        continue;
+      }
+
+      fpaths.push(fpath);
+      contents.push({});
+    }
+    // No order guarantee btw _gFPaths and gContents
+    ({ fpaths: gFPaths, contents: gContents } = await serverApi.getFiles(_gFPaths));
+    await dataApi.putFiles([...fpaths, ...gFPaths], [...contents, ...gContents]);
+
+    // 4. Local side: loop used to be leaves in local and set to empty
+    fpaths = []; contents = [];
+    for (const fpath of _settingsLeafFPaths) {
+      if (settingsAllLeafFPaths.includes(fpath)) continue;
+      fpaths.push(fpath);
+      contents.push({});
+    }
+    await dataApi.putFiles(fpaths, contents);
+
+    // Info
+    //   action: 0 - no info or already the same,
+    //           1 - download from server to device,
+    //           2 - upload from device to server
+    let syncInfoAction;
+    if (infoFPath && _infoFPath) {
+      const dt = parseInt(
+        infoFPath.slice(INFO.length, -1 * DOT_JSON.length), 10
+      );
+      const _dt = parseInt(
+        _infoFPath.slice(INFO.length, -1 * DOT_JSON.length), 10
+      );
+
+      if (dt > _dt) syncInfoAction = 1;
+      else if (dt < _dt) syncInfoAction = 2;
+      else syncInfoAction = 0;
+    } else if (infoFPath) syncInfoAction = 1;
+    else if (_infoFPath) syncInfoAction = 2;
+    else syncInfoAction = 0;
+
+    if (syncInfoAction === 0) { /* Do nothing */ }
+    else if (syncInfoAction === 1) {
+      // Download from server to device
+
+      // No order guarantee but this is just one file
+      const content = (await serverApi.getFiles([infoFPath])).contents[0];
+      await dataApi.putFiles([infoFPath], [content]);
+
+      // Delete obsolete version in device
+      if (_infoFPath) await dataApi.deleteFiles([_infoFPath]);
+
+      haveUpdate = true;
+    } else if (syncInfoAction === 2) {
+      // Upload from device to server
+
+      // No order guarantee but this is just one file
+      const content = (await dataApi.getFiles([_infoFPath])).contents[0];
+      await serverApi.putFiles([_infoFPath], [content]);
+
+      // Delete obsolete version in server
+      if (infoFPath) await serverApi.deleteFiles([infoFPath]);
+    } else throw new Error(`Invalid syncInfoAction: ${syncInfoAction}`);
+
+    // Pins
+    const allPinFPaths = [...new Set([...pinFPaths, ..._pinFPaths])];
+    const leafPins = {};
+    for (const fpath of allPinFPaths) {
+      const { updatedDT, id } = extractPinFPath(fpath);
+
+      const _id = id.startsWith('deleted') ? id.slice(7) : id;
+      const pinMainId = getMainId(_id, allToRootIds);
+
+      if (pinMainId in leafPins && leafPins[pinMainId].updatedDT > updatedDT) continue;
+      leafPins[pinMainId] = { updatedDT, fpath };
+    }
+    const leafPinFPaths = Object.values(leafPins).map(el => el.fpath);
+
+    // 1. Server side: upload leaf pinFPaths
+    fpaths = []; contents = [];
+    for (const fpath of leafPinFPaths) {
+      if (pinFPaths.includes(fpath)) continue;
+      fpaths.push(fpath);
+      contents.push({});
+    }
+    await serverApi.putFiles(fpaths, contents);
+
+    // 2. Server side: delete obsolete pinFPaths
+    fpaths = []; contents = [];
+    for (const fpath of pinFPaths) {
+      if (leafPinFPaths.includes(fpath)) continue;
+      fpaths.push(fpath);
+    }
+    await serverApi.deleteFiles(fpaths);
+
+    // 3. Local side: download leaf pinFPaths
+    fpaths = []; contents = [];
+    for (const fpath of leafPinFPaths) {
+      if (_pinFPaths.includes(fpath)) continue;
+      haveUpdate = true;
+
+      fpaths.push(fpath);
+      contents.push({});
+    }
+    await dataApi.putFiles(fpaths, contents);
+
+    // 4. Local side: delete obsolete pinFPaths
+    fpaths = []; contents = [];
+    for (const fpath of _pinFPaths) {
+      if (leafPinFPaths.includes(fpath)) continue;
+      fpaths.push(fpath);
+    }
+    await dataApi.deleteFiles(fpaths);
+
+    dispatch({
+      type: SYNC_COMMIT,
+      payload: {
+        updateAction,
+        haveUpdate,
+        haveNewSync: vars.sync.newSyncObj !== null,
+      },
+    });
+
+    if (vars.sync.newSyncObj) {
+      let _doForce = vars.sync.newSyncObj.doForceListFPaths;
+      if (doForceListFPaths) _doForce = false;
+
+      const _updateAction = Math.min(updateAction, vars.sync.newSyncObj.updateAction);
+
+      [vars.sync.isSyncing, vars.sync.newSyncObj] = [false, null];
+      dispatch(sync(_doForce, _updateAction, haveUpdate));
+      return;
+    }
+
+    [vars.sync.isSyncing, vars.sync.newSyncObj] = [false, null];
+    vars.sync.lastSyncDT = Date.now();
+  } catch (error) {
+    console.log('Sync error: ', error);
+    [vars.sync.isSyncing, vars.sync.newSyncObj] = [false, null];
+    dispatch({ type: SYNC_ROLLBACK, payload: error });
+  }
 };
 
 export const tryUpdateSynced = (updateAction, haveUpdate) => async (
   dispatch, getState
 ) => {
-  // Do nothing on web. This is for mobile.
+  if (updateAction === 2) return;
+  if (updateAction === 1) {
+    dispatch(updateSynced());
+    return;
+  }
+
+  if (!haveUpdate) {
+    dispatch(randomHouseworkTasks());
+    return;
+  }
+
+  const isBulkEditing = getState().display.isBulkEditing;
+  if (!isBulkEditing) {
+    const pageYOffset = vars.scrollPanel.pageYOffset;
+    const noteId = getState().display.noteId;
+    const isPopupShown = (
+      getState().display.isNoteListItemMenuPopupShown ||
+      getState().display.isListNamesPopupShown ||
+      getState().display.isPinMenuPopupShown
+    );
+
+    const isEditorFocused = getState().display.isEditorFocused;
+    const isEditorBusy = getState().display.isEditorBusy;
+    if (
+      pageYOffset === 0 && noteId === null && !isPopupShown &&
+      !isEditorFocused && !isEditorBusy
+    ) {
+      dispatch(updateSynced());
+      return;
+    }
+  }
+
+  dispatch({ type: UPDATE_SYNC_PROGRESS, payload: { status: SHOW_SYNCED } });
 };
 
 export const updateSynced = () => {
