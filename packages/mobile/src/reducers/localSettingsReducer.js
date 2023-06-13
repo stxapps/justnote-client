@@ -2,8 +2,8 @@ import { loop, Cmd } from 'redux-loop';
 
 import { updateLocalSettings } from '../actions';
 import {
-  INIT, FETCH_COMMIT, UPDATE_SETTINGS_COMMIT, UPDATE_INFO_COMMIT, CANCEL_DIED_SETTINGS,
-  MERGE_SETTINGS_COMMIT, UPDATE_DO_SYNC_MODE, UPDATE_DO_SYNC_MODE_INPUT,
+  INIT, FETCH_COMMIT, UPDATE_SETTINGS_COMMIT, UPDATE_INFO_COMMIT, MERGE_SETTINGS_COMMIT,
+  UPDATE_DO_SYNC_MODE, UPDATE_DO_SYNC_MODE_INPUT, CANCEL_CHANGED_SYNC_MODE,
   UPDATE_DO_USE_LOCAL_THEME, UPDATE_LOCAL_THEME, UPDATE_EDITOR_IS_UPLOADING,
   CLEAN_UP_STATIC_FILES_COMMIT, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -83,7 +83,7 @@ const localSettingsReducer = (state = initialState, action) => {
     );
   }
 
-  if (action.type === CANCEL_DIED_SETTINGS) {
+  if (action.type === CANCEL_CHANGED_SYNC_MODE) {
     const { doSyncMode, doSyncModeInput } = state;
     if (doSyncMode === doSyncModeInput) return state;
 

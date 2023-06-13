@@ -37,7 +37,7 @@ import {
   UPDATE_SETTINGS_VIEW_ID, UPDATE_INFO, UPDATE_INFO_COMMIT, UPDATE_INFO_ROLLBACK,
   UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION, UPDATE_DISCARD_ACTION,
   UPDATE_LIST_NAMES_MODE, UPDATE_SYNCED, INCREASE_SAVE_NOTE_COUNT,
-  SYNC, SYNC_COMMIT, SYNC_ROLLBACK, UPDATE_SYNC_PROGRESS,
+  CANCEL_CHANGED_SYNC_MODE, SYNC, SYNC_COMMIT, SYNC_ROLLBACK, UPDATE_SYNC_PROGRESS,
   INCREASE_DISCARD_NOTE_COUNT, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
   INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
   INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT,
@@ -1730,11 +1730,7 @@ const updateInfo = async (dispatch, getState) => {
   await sync()(dispatch, getState);
 };
 
-export const applySyncMode = async (dispatch, getState) => {
-  // Do nothing on mobile. This is for web.
-};
-
-export const disableSyncMode = async (dispatch, getState) => {
+const applySyncMode = async (dispatch, getState) => {
   // Do nothing on mobile. This is for web.
 };
 
@@ -1768,7 +1764,14 @@ export const cancelDiedSettings = () => async (dispatch, getState) => {
   dispatch({ type: CANCEL_DIED_SETTINGS, payload });
 
   vars.updateSettings.doFetch = false;
-  vars.syncMode.didChange = false;
+};
+
+export const disableSyncMode = () => async (dispatch, getState) => {
+  // Do nothing on mobile. This is for web.
+};
+
+export const cancelChangedSyncMode = () => {
+  return { type: CANCEL_CHANGED_SYNC_MODE };
 };
 
 export const tryUpdateInfo = () => async (dispatch, getState) => {

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { retryDiedSettings, cancelDiedSettings, updateSettingsPopup } from '../actions';
+import {
+  retryDiedSettings, cancelDiedSettings, cancelChangedSyncMode, updateSettingsPopup,
+} from '../actions';
 import { HASH_SUPPORT, DIED_UPDATING } from '../types/const';
 
 import { useTailwind } from '.';
@@ -22,6 +24,7 @@ const _SettingsUpdateErrorPopup = () => {
   const onCancelBtnClick = () => {
     if (didClick.current) return;
     dispatch(cancelDiedSettings());
+    dispatch(cancelChangedSyncMode());
     didClick.current = true;
   };
 
