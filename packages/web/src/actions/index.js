@@ -2240,7 +2240,7 @@ export const sync = (
 ) => async (dispatch, getState) => {
 
   if (!getState().user.isUserSignedIn) return;
-  if (!getState().localSettings.doSyncMode) return;
+  if (!vars.syncMode.doSyncMode) return;
   if (vars.deleteSyncData.isDeleting) return;
 
   if (vars.sync.isSyncing) {

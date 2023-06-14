@@ -25,7 +25,6 @@ TextInput.defaultProps = TextInput.defaultProps || {};
 TextInput.defaultProps.allowFontScaling = false;
 
 vars.platform.isReactNative = true;
-vars.syncMode.doSyncMode = true;
 
 let enhancers;
 if (__DEV__) {
