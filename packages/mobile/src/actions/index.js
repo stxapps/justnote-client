@@ -1318,18 +1318,20 @@ export const showNLIMPopup = (noteId, rect, doCheckEditing) => async (
   if (!noteId) noteId = vars.showNLIMPopup.selectedNoteId;
   if (!rect) rect = vars.showNLIMPopup.selectedRect;
 
-  if (doCheckEditing && noteId === _noteId) {
+  if (doCheckEditing) {
     if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
 
-    const isEditorUploading = getState().editor.isUploading;
-    if (isEditorUploading) return;
+    if (noteId === _noteId) {
+      const isEditorUploading = getState().editor.isUploading;
+      if (isEditorUploading) return;
 
-    const isEditorFocused = getState().display.isEditorFocused;
-    if (isEditorFocused) {
-      vars.showNLIMPopup.selectedNoteId = noteId;
-      vars.showNLIMPopup.selectedRect = rect;
-      dispatch(increaseShowNLIMPopupCount());
-      return;
+      const isEditorFocused = getState().display.isEditorFocused;
+      if (isEditorFocused) {
+        vars.showNLIMPopup.selectedNoteId = noteId;
+        vars.showNLIMPopup.selectedRect = rect;
+        dispatch(increaseShowNLIMPopupCount());
+        return;
+      }
     }
   }
 
