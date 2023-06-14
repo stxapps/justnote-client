@@ -19,7 +19,6 @@ const localSettingsReducer = (state = initialState, action) => {
 
   if (action.type === INIT) {
     const { localSettings } = action.payload;
-    vars.syncMode.doSyncMode = localSettings.doSyncMode;
     return { ...state, ...localSettings };
   }
 

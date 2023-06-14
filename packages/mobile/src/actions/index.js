@@ -147,6 +147,7 @@ export const init = () => async (dispatch, getState) => {
     [localSettings.doSyncMode, localSettings.doSyncModeInput] = [true, true];
     await dataApi.putLocalSettings(localSettings);
   }
+  vars.syncMode.doSyncMode = localSettings.doSyncMode;
 
   // Need to fetch all here as some note ids might change.
   const unsavedNotes = await dataApi.getUnsavedNotes();
