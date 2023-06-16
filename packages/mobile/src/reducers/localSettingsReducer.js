@@ -141,7 +141,8 @@ const localSettingsReducer = (state = initialState, action) => {
   }
 
   if (action.type === DELETE_ALL_DATA) {
-    const newState = { ...initialState };
+    const { doSyncMode, doSyncModeInput } = state;
+    const newState = { ...initialState, doSyncMode, doSyncModeInput };
     return loop(
       newState, Cmd.run(updateLocalSettings(), { args: [Cmd.dispatch, Cmd.getState] })
     );

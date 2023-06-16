@@ -19,7 +19,7 @@ import {
   createDataFName, extractNoteFPath, extractDataFName, extractDataId, listNoteIds,
   listSettingsIds, createSettingsFPath, getSettingsFPaths, getLastSettingsFPaths,
   extractPinFPath, getPins, batchGetFileWithRetry, extractFPath, copyListNameObjs,
-  getFormattedTimeStamp, getDataParentIds,
+  getFormattedTimeStamp, getDataParentIds, createPinFPath,
 } from '../utils';
 import { isUint8Array } from '../utils/index-web';
 import { initialSettingsState, initialInfoState } from '../types/initialStates';
@@ -79,8 +79,12 @@ const parseEvernoteImportedFile = async (dispatch, getState, zip, entries) => {
       const content = await entry.getData(new zip.BlobWriter());
       if (!content) continue;
 
-      fpaths.push(fpath);
-      contents.push(content);
+      if (vars.syncMode.doSyncMode) {
+        await fileApi.putFile(fpath, content);
+      } else {
+        fpaths.push(fpath);
+        contents.push(content);
+      }
     }
 
     await importAllDataLoop(fpaths, contents);
@@ -125,7 +129,7 @@ const parseEvernoteImportedFile = async (dispatch, getState, zip, entries) => {
 
       let body = '';
       const bMatch = content.match(/<en-note[^>]*>([\s\S]+?)<\/en-note>/i);
-      if (bMatch) body = bMatch[1].trim();
+      if (bMatch) body = bMatch[1].trim().replace(/\r?\n/g, '');
 
       // img tags
       for (const match of body.matchAll(/<img[^>]+?src="([^"]+)"[^>]*>/gi)) {
@@ -312,6 +316,7 @@ const parseGKeepImportedFile = async (dispatch, getState, zip, entries) => {
       }
     }
 
+    // No check vars.sync.isSyncing, if conflicts, can solve later.
     await sync(true, 2)(dispatch, getState);
 
     const settingsFPaths = getSettingsFPaths(getState());
@@ -345,8 +350,12 @@ const parseGKeepImportedFile = async (dispatch, getState, zip, entries) => {
       const content = await entry.getData(new zip.BlobWriter());
       if (!content) continue;
 
-      fpaths.push(fpath);
-      contents.push(content);
+      if (vars.syncMode.doSyncMode) {
+        await fileApi.putFile(fpath, content);
+      } else {
+        fpaths.push(fpath);
+        contents.push(content);
+      }
     }
 
     await importAllDataLoop(fpaths, contents);
@@ -534,6 +543,7 @@ const parseRawImportedFile = async (dispatch, getState, zip, entries) => {
     _addListNameObj(settings.listNameMap, dirMap, idMap, nowObj);
     now = nowObj.now;
 
+    // No check vars.sync.isSyncing, if conflicts, can solve later.
     await sync(true, 2)(dispatch, getState);
 
     const settingsFPaths = getSettingsFPaths(getState());
@@ -577,7 +587,7 @@ const parseRawImportedFile = async (dispatch, getState, zip, entries) => {
         body = '<p>' + content.replace(/\r?\n/g, '<br />') + '</p>';
       } else if (HTML_FILE_EXTS.includes(fext.toLowerCase())) {
         const bMatch = content.match(/<body[^>]*>([\s\S]+?)<\/body>/i);
-        if (bMatch) body = bMatch[1].trim();
+        if (bMatch) body = bMatch[1].trim().replace(/\r?\n/g, '');
       }
 
       if (title || body) {
@@ -707,8 +717,12 @@ const parseJustnoteImages = async (
       const content = await entry.getData(new zip.BlobWriter());
       if (!content) continue;
 
-      fpaths.push(fpath);
-      contents.push(content);
+      if (vars.syncMode.doSyncMode) {
+        await fileApi.putFile(fpath, content);
+      } else {
+        fpaths.push(fpath);
+        contents.push(content);
+      }
     }
 
     await importAllDataLoop(fpaths, contents);
@@ -719,7 +733,7 @@ const parseJustnoteImages = async (
 };
 
 const parseJustnoteNotes = async (
-  dispatch, existFPaths, toRootIds, leafIds, zip, noteEntries, idMap, progress
+  dispatch, existFPaths, toParents, leafIds, zip, noteEntries, idMap, progress
 ) => {
   for (let i = 0, j = noteEntries.length; i < j; i += N_NOTES) {
     const selectedEntries = noteEntries.slice(i, i + N_NOTES);
@@ -768,17 +782,18 @@ const parseJustnoteNotes = async (
 
       // There are 6 states of a note:
       //   1. leaf | skip | check leafIds
-      //   2. updated (no leaf) | new id | Check id in toRootIds
-      //   3. deleted (no leaf) | new id | Check id in toRootIds (deleted inc.!)
+      //   2. updated (not leaf) | new id | Check id in toParents
+      //   3. deleted (not leaf) | new id | Check id in toParents (deleted inc.!)
       //   4. never store | same id | Not found
-      //   5. clean up on updated | new id | Check id in toRootIds
+      //   5. clean up on updated | new id | Check parentId or id in toParents
       //   6. clean up on deleted | same id | Not found
 
       // There are id level and file level!
       // If new id and fails, can't continue? Ask to clean up first.
 
       // Exist but not leaf, new id.
-      if (id in toRootIds && !leafIds.includes(id)) {
+      const parentIdOrId = parentId || id;
+      if (parentIdOrId in toParents && !leafIds.includes(id)) {
         if (!idMap[fpathParts[2]]) {
           let rootId = null;
           if (parentId) {
@@ -808,6 +823,15 @@ const parseJustnoteNotes = async (
         fpaths.push(fpathParts.join('/'));
         contents.push(content);
         continue;
+      }
+
+      // Leaf but diff parent, skip. Can happen if export and then import.
+      if (leafIds.includes(id)) {
+        if (parentId && !Array.isArray(toParents[id])) continue;
+        if (!parentId && Array.isArray(toParents[id])) continue;
+        if (parentId && Array.isArray(toParents[id])) {
+          if (!toParents[id].includes(parentId)) continue;
+        }
       }
 
       // If already exist, skip. So if errors, can continue where it left off.
@@ -906,10 +930,10 @@ const parseJustnotePins = async (
 
 const parseJustnoteImportedFile = async (dispatch, getState, zip, entries) => {
 
-  // Need to manually call it to wait for it properly!
-  await sync(true, 2)(dispatch, getState);
+  // No check vars.sync.isSyncing, if conflicts, can solve later.
+  await sync(true, 2)(dispatch, getState); // manually call to wait for it properly!
 
-  let existFPaths = [], toRootIds, leafIds = [];
+  let existFPaths = [], toRootIds, toParents, leafIds = [];
 
   const fpaths = await dataApi.listFPaths(true);
   if (vars.syncMode.doSyncMode) fpaths.staticFPaths = await fileApi.getStaticFPaths();
@@ -921,6 +945,7 @@ const parseJustnoteImportedFile = async (dispatch, getState, zip, entries) => {
 
   const noteIds = listNoteIds(fpaths.noteFPaths);
   toRootIds = noteIds.toRootIds;
+  toParents = noteIds.toParents;
   for (const noteId of [...noteIds.noteIds, ...noteIds.conflictedIds]) {
     leafIds.push(noteId.id);
   }
@@ -964,7 +989,7 @@ const parseJustnoteImportedFile = async (dispatch, getState, zip, entries) => {
 
   const idMap = {};
   await parseJustnoteNotes(
-    dispatch, existFPaths, toRootIds, leafIds, zip, noteEntries, idMap, progress
+    dispatch, existFPaths, toParents, leafIds, zip, noteEntries, idMap, progress
   );
   await parseJustnotePins(
     dispatch, toRootIds, pins, zip, pinEntries, idMap, progress
@@ -1019,11 +1044,7 @@ const parseImportedFile = async (dispatch, getState, fileContent) => {
     await reader.close();
     await sync(false, 1)(dispatch, getState);
   } catch (error) {
-    dispatch(updateImportAllDataProgress({
-      total: -1,
-      done: -1,
-      error: `${error}`,
-    }));
+    dispatch(updateImportAllDataProgress({ total: -1, done: -1, error: `${error}` }));
     return;
   }
 };
@@ -1065,10 +1086,15 @@ export const updateImportAllDataProgress = (progress) => {
 export const exportAllData = () => async (dispatch, getState) => {
   dispatch(updateExportAllDataProgress({ total: 'calculating...', done: 0 }));
 
-  // Need to manually call it to wait for it properly!
-  await sync(true, 2)(dispatch, getState);
+  if (vars.sync.isSyncing) {
+    dispatch(updateExportAllDataProgress({
+      total: -1, done: -1, error: 'Please wait for the sync to complete first.',
+    }));
+    return;
+  }
+  await sync(true, 2)(dispatch, getState); // manually call to wait for it properly!
 
-  let fpaths = [], toRootIds;
+  let fpaths = [], fileFPaths = [], pins, toRootIds;
   try {
     const { noteFPaths, settingsFPaths, pinFPaths } = await dataApi.listFPaths(true);
     const { noteIds, conflictedIds, toRootIds: _toRootIds } = listNoteIds(noteFPaths);
@@ -1076,7 +1102,14 @@ export const exportAllData = () => async (dispatch, getState) => {
     for (const noteId of [...noteIds, ...conflictedIds]) {
       for (const fpath of noteId.fpaths) {
         fpaths.push(fpath);
-        if (fpath.includes(CD_ROOT + '/')) fpaths.push(getStaticFPath(fpath));
+        if (fpath.includes(CD_ROOT + '/')) {
+          const staticFPath = getStaticFPath(fpath);
+          if (vars.syncMode.doSyncMode) {
+            if (!fileFPaths.includes(staticFPath)) fileFPaths.push(staticFPath);
+          } else {
+            if (!fpaths.includes(staticFPath)) fpaths.push(staticFPath);
+          }
+        }
       }
     }
 
@@ -1089,35 +1122,17 @@ export const exportAllData = () => async (dispatch, getState) => {
       }
     }
 
-    const pins = {};
-    for (const fpath of pinFPaths) {
-      const { id, updatedDT } = extractPinFPath(fpath);
-
-      const _id = id.startsWith('deleted') ? id.slice(7) : id;
-      const pinMainId = getMainId(_id, _toRootIds);
-      if (!isString(pinMainId)) continue;
-
-      // duplicate id, choose the latest updatedDT
-      if (pinMainId in pins && pins[pinMainId].updatedDT > updatedDT) continue;
-      pins[pinMainId] = { updatedDT, id, fpath };
-    }
-    for (const pinMainId in pins) {
-      if (pins[pinMainId].id.startsWith('deleted')) continue;
-      fpaths.push(pins[pinMainId].fpath);
-    }
-
-    fpaths = [...new Set(fpaths)];
     toRootIds = _toRootIds;
+
+    pins = getPins(pinFPaths, {}, false, toRootIds);
+    pins = Object.values(pins);
   } catch (error) {
-    dispatch(updateExportAllDataProgress({
-      total: -1,
-      done: -1,
-      error: `${error}`,
-    }));
+    dispatch(updateExportAllDataProgress({ total: -1, done: -1, error: `${error}` }));
     return;
   }
 
-  const progress = { total: fpaths.length, done: 0 };
+  const total = fpaths.length + fileFPaths.length + pins.length;
+  const progress = { total, done: 0 };
   dispatch(updateExportAllDataProgress(progress));
 
   if (progress.total === 0) return;
@@ -1127,7 +1142,7 @@ export const exportAllData = () => async (dispatch, getState) => {
     const zip = await import('@zip.js/zip.js');
     const zipWriter = new zip.ZipWriter(new zip.BlobWriter('application/zip'));
 
-    const errorResponses = [], pinFPaths = [], pinContents = [], idMap = {};
+    const errorResponses = [], idMap = {};
     for (let i = 0; i < fpaths.length; i += N_NOTES) {
       const successResponses = [];
       const selectedFPaths = fpaths.slice(i, i + N_NOTES);
@@ -1139,14 +1154,7 @@ export const exportAllData = () => async (dispatch, getState) => {
         else errorResponses.push(response);
       }
 
-      const filteredResponses = [];
       for (let { fpath, content } of successResponses) {
-        if (fpath.startsWith(PINS)) {
-          pinFPaths.push(fpath);
-          pinContents.push(content);
-          continue;
-        }
-
         if (fpath.startsWith(NOTES)) {
           const { listName, fname, subName } = extractNoteFPath(fpath);
           const { id, parentIds } = extractDataFName(fname);
@@ -1157,10 +1165,6 @@ export const exportAllData = () => async (dispatch, getState) => {
           idMap[toRootIds[id]] = id;
         }
 
-        filteredResponses.push({ fpath, content });
-      }
-
-      await Promise.all(filteredResponses.map(({ fpath, content }) => {
         if (fpath.endsWith(DOT_JSON)) content = JSON.stringify(content);
 
         let reader;
@@ -1175,35 +1179,50 @@ export const exportAllData = () => async (dispatch, getState) => {
           reader = new zip.BlobReader(content);
         }
 
-        return zipWriter.add(fpath, reader);
-      }));
+        await zipWriter.add(fpath, reader);
+      }
 
-      progress.done += filteredResponses.length;
+      progress.done += successResponses.length;
+      if (progress.done < progress.total) {
+        dispatch(updateExportAllDataProgress(progress));
+      }
+    }
+
+    for (let i = 0, j = fileFPaths.length; i < j; i += N_NOTES) {
+      const selectedFPaths = fileFPaths.slice(i, i + N_NOTES);
+
+      for (const fpath of selectedFPaths) {
+        let content = await fileApi.getFile(fpath);
+        if (content === undefined) continue;
+
+        if (isUint8Array(content)) content = new Blob([content]);
+
+        const reader = new zip.BlobReader(content);
+        await zipWriter.add(fpath, reader);
+      }
+
+      progress.done += selectedFPaths.length;
       if (progress.done < progress.total) {
         dispatch(updateExportAllDataProgress(progress));
       }
     }
 
     // Need idMap to be all populated before mapping pinId to a new id.
-    for (let i = 0; i < pinFPaths.length; i++) {
-      let fpath = pinFPaths[i];
-      let content = pinContents[i];
+    for (let i = 0, j = pins.length; i < j; i += N_NOTES) {
+      const selectedPins = pins.slice(i, i + N_NOTES);
 
-      const fpathParts = fpath.split('/');
-      const id = fpathParts[fpathParts.length - 1].split('.')[0];
+      for (const { rank, updatedDT, addedDT, id } of selectedPins) {
+        let mappedId = id;
+        if (idMap[toRootIds[id]]) mappedId = idMap[toRootIds[id]];
 
-      if (idMap[toRootIds[id]]) {
-        // If conflicts, only one will get pinned but it should be fine
-        //   as conflicted notes are exported separately as not conflicted.
-        fpathParts[fpathParts.length - 1] = idMap[toRootIds[id]] + '.json';
-        fpath = fpathParts.join('/');
+        const fpath = createPinFPath(rank, updatedDT, addedDT, mappedId);
+        const content = JSON.stringify({});
+
+        const reader = new zip.TextReader(content);
+        await zipWriter.add(fpath, reader);
       }
-      content = JSON.stringify(content);
 
-      const reader = new zip.TextReader(content);
-      await zipWriter.add(fpath, reader);
-
-      progress.done += 1;
+      progress.done += selectedPins.length;
       if (progress.done < progress.total) {
         dispatch(updateExportAllDataProgress(progress));
       }
@@ -1221,11 +1240,7 @@ export const exportAllData = () => async (dispatch, getState) => {
     }
     dispatch(updateExportAllDataProgress(progress));
   } catch (error) {
-    dispatch(updateExportAllDataProgress({
-      total: -1,
-      done: -1,
-      error: `${error}`,
-    }));
+    dispatch(updateExportAllDataProgress({ total: -1, done: -1, error: `${error}` }));
     return;
   }
 };
@@ -1320,8 +1335,13 @@ const deleteAllPins = async (dispatch, pins, progress) => {
 export const deleteAllData = () => async (dispatch, getState) => {
   dispatch(updateDeleteAllDataProgress({ total: 'calculating...', done: 0 }));
 
-  // Need to manually call it to wait for it properly!
-  await sync(true, 2)(dispatch, getState);
+  if (vars.sync.isSyncing) {
+    dispatch(updateDeleteAllDataProgress({
+      total: -1, done: -1, error: 'Please wait for the sync to complete first.',
+    }));
+    return;
+  }
+  await sync(true, 2)(dispatch, getState); // manually call to wait for it properly!
 
   let allNoteIds, staticFPaths, settingsFPaths, settingsIds, infoFPath, pins;
   try {
@@ -1337,11 +1357,7 @@ export const deleteAllData = () => async (dispatch, getState) => {
     pins = getPins(fpaths.pinFPaths, {}, false, noteIds.toRootIds);
     pins = Object.values(pins);
   } catch (error) {
-    dispatch(updateDeleteAllDataProgress({
-      total: -1,
-      done: -1,
-      error: `${error}`,
-    }));
+    dispatch(updateDeleteAllDataProgress({ total: -1, done: -1, error: `${error}` }));
     return;
   }
 
@@ -1422,11 +1438,7 @@ export const deleteAllData = () => async (dispatch, getState) => {
 
     await sync(false, 1)(dispatch, getState);
   } catch (error) {
-    dispatch(updateDeleteAllDataProgress({
-      total: -1,
-      done: -1,
-      error: `${error}`,
-    }));
+    dispatch(updateDeleteAllDataProgress({ total: -1, done: -1, error: `${error}` }));
     return;
   }
 };
@@ -1438,9 +1450,27 @@ export const updateDeleteAllDataProgress = (progress) => {
   };
 };
 
-const deleteUpdatedNoteSyncData = async (id, noteIds) => {
+const deleteUpdatedNoteSyncData = async (id, noteIds, pins) => {
   const transitId = noteIds.toParents[id][0];
   const rootId = noteIds.toRootIds[id];
+  const mainId = getMainId(id, noteIds.toRootIds);
+
+  const pin = pins[mainId];
+  if (
+    isObject(pin) &&
+    !pin.id.startsWith('deleted') &&
+    ![id, transitId, rootId].includes(pin.id)
+  ) {
+    const { rank, updatedDT, addedDT } = extractPinFPath(pin.fpath);
+    const fpath = createPinFPath(rank, updatedDT, addedDT, id);
+    const content = {};
+
+    if (vars.syncMode.doSyncMode) await serverApi.putFiles([fpath], [content]);
+    await dataApi.putFiles([fpath], [content]);
+
+    if (vars.syncMode.doSyncMode) await serverApi.deleteFiles(pin.fpaths);
+    await dataApi.deleteFiles(pin.fpaths);
+  }
 
   let listName = MY_NOTES;
 
@@ -1535,8 +1565,13 @@ const deleteDeletedPinSyncData = async (id, pins) => {
 const _deleteSyncData = async (dispatch, getState) => {
   dispatch(updateDeleteSyncDataProgress({ total: 'calculating...', done: 0 }));
 
-  // Need to manually call it to wait for it properly!
-  await sync(true, 2)(dispatch, getState);
+  if (vars.sync.isSyncing) {
+    dispatch(updateDeleteSyncDataProgress({
+      total: -1, done: -1, error: 'Please wait for the sync to complete first.',
+    }));
+    return;
+  }
+  await sync(true, 2)(dispatch, getState); // manually call to wait for it properly!
 
   vars.deleteSyncData.isDeleting = true;
 
@@ -1569,22 +1604,13 @@ const _deleteSyncData = async (dispatch, getState) => {
       pins[pinMainId].fpath = fpath;
     }
   } catch (error) {
-    dispatch(updateDeleteAllDataProgress({
-      total: -1,
-      done: -1,
-      error: `${error}`,
-    }));
+    dispatch(updateDeleteSyncDataProgress({ total: -1, done: -1, error: `${error}` }));
     return;
   }
 
   const nUpdatedIds = [], nDeletedIds = [], sUpdatedIds = [], pDeletedIds = [];
   for (const noteId of noteIds.noteIds) {
     const { id } = noteId;
-
-    const noteMainId = getMainId(id, noteIds.toRootIds);
-    if (isObject(pins[noteMainId])) {
-      if (!pins[noteMainId].id.startsWith('deleted')) continue;
-    }
 
     const fpIds = noteIds.toParents[id];
     if (!Array.isArray(fpIds) || fpIds.length === 0) continue;
@@ -1638,7 +1664,7 @@ const _deleteSyncData = async (dispatch, getState) => {
     for (let i = 0, j = nUpdatedIds.length; i < j; i += nItems) {
       const _nUpdatedIds = nUpdatedIds.slice(i, i + nItems);
       await Promise.all(_nUpdatedIds.map(id => {
-        return deleteUpdatedNoteSyncData(id, noteIds);
+        return deleteUpdatedNoteSyncData(id, noteIds, pins);
       }));
 
       progress.done += _nUpdatedIds.length;
@@ -1680,11 +1706,7 @@ const _deleteSyncData = async (dispatch, getState) => {
       dispatch(updateDeleteSyncDataProgress(progress));
     }
   } catch (error) {
-    dispatch(updateDeleteSyncDataProgress({
-      total: -1,
-      done: -1,
-      error: `${error}`,
-    }));
+    dispatch(updateDeleteSyncDataProgress({ total: -1, done: -1, error: `${error}` }));
     return;
   }
 };
