@@ -6,7 +6,8 @@ import fileApi from '../apis/localFile';
 import { updatePopupUrlHash, sync } from '../actions';
 import {
   UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
-  UPDATE_DELETE_ALL_DATA_PROGRESS, UPDATE_DELETE_SYNC_DATA_PROGRESS, DELETE_ALL_DATA,
+  UPDATE_DELETE_ALL_DATA_PROGRESS, UPDATE_DELETE_SYNC_DATA_PROGRESS, SYNC_ROLLBACK,
+  DELETE_ALL_DATA,
 } from '../types/actionTypes';
 import {
   SETTINGS_POPUP, MY_NOTES, TRASH, ARCHIVE, ADDED_DT, UPDATED_DT, N_NOTES, CD_ROOT,
@@ -1094,6 +1095,14 @@ export const exportAllData = () => async (dispatch, getState) => {
   }
   await sync(true, 2)(dispatch, getState); // manually call to wait for it properly!
 
+  const syncProgress = getState().display.syncProgress;
+  if (isObject(syncProgress) && syncProgress.status === SYNC_ROLLBACK) {
+    dispatch(updateExportAllDataProgress({
+      total: -1, done: -1, error: 'Sync failed. Please wait a moment and try again.',
+    }));
+    return;
+  }
+
   let fpaths = [], fileFPaths = [], pins, toRootIds;
   try {
     const { noteFPaths, settingsFPaths, pinFPaths } = await dataApi.listFPaths(true);
@@ -1343,6 +1352,14 @@ export const deleteAllData = () => async (dispatch, getState) => {
   }
   await sync(true, 2)(dispatch, getState); // manually call to wait for it properly!
 
+  const syncProgress = getState().display.syncProgress;
+  if (isObject(syncProgress) && syncProgress.status === SYNC_ROLLBACK) {
+    dispatch(updateDeleteAllDataProgress({
+      total: -1, done: -1, error: 'Sync failed. Please wait a moment and try again.',
+    }));
+    return;
+  }
+
   let allNoteIds, staticFPaths, settingsFPaths, settingsIds, infoFPath, pins;
   try {
     const fpaths = await dataApi.listFPaths(true);
@@ -1572,6 +1589,14 @@ const _deleteSyncData = async (dispatch, getState) => {
     return;
   }
   await sync(true, 2)(dispatch, getState); // manually call to wait for it properly!
+
+  const syncProgress = getState().display.syncProgress;
+  if (isObject(syncProgress) && syncProgress.status === SYNC_ROLLBACK) {
+    dispatch(updateDeleteSyncDataProgress({
+      total: -1, done: -1, error: 'Sync failed. Please wait a moment and try again.',
+    }));
+    return;
+  }
 
   vars.deleteSyncData.isDeleting = true;
 
