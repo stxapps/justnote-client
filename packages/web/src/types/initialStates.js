@@ -2,6 +2,7 @@ import {
   MY_NOTES, TRASH, ARCHIVE, ADDED_DT, MODE_VIEW, NOTE_DATE_SHOWING_MODE_HIDE,
   NOTE_DATE_FORMAT_SYSTEM, WHT_MODE, BLK_MODE,
 } from '../types/const';
+import vars from '../vars';
 
 export const myNotesListNameObj = { listName: MY_NOTES, displayName: MY_NOTES };
 export const trashListNameObj = { listName: TRASH, displayName: TRASH };
@@ -33,8 +34,8 @@ export const initialSettingsState = {
 };
 
 export const initialLocalSettingsState = {
-  doSyncMode: false,
-  doSyncModeInput: false,
+  doSyncMode: vars.platform.isReactNative ? true : false,
+  doSyncModeInput: vars.platform.isReactNative ? true : false,
   doUseLocalTheme: false,
   themeMode: WHT_MODE,
   themeCustomOptions: [

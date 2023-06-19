@@ -1,3 +1,5 @@
+import platformWrapper from './platformWrapper';
+
 export const didChange = {
   doDeleteOldNotesInTrash: false,
   sortOn: false,
@@ -95,11 +97,11 @@ const iap = {
 };
 
 const platform = {
-  isReactNative: false,
+  isReactNative: platformWrapper.isReactNative,
 };
 
 export const syncMode = {
-  doSyncMode: false,
+  doSyncMode: platform.isReactNative ? true : false,
   didChange: false,
 };
 
