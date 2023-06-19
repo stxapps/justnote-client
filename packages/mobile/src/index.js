@@ -14,7 +14,6 @@ import reducers from './reducers';
 import { BLK_MODE } from './types/const';
 import { getThemeMode } from './selectors';
 import cache from './utils/cache';
-import vars from './vars';
 
 import App from './components/App';
 
