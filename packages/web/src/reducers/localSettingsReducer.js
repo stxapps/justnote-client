@@ -149,8 +149,10 @@ const localSettingsReducer = (state = initialState, action) => {
   }
 
   if (action.type === RESET_STATE) {
+    const newState = { ...initialState };
+    vars.syncMode.doSyncMode = newState.doSyncMode;
     // Delete in localStorage by dataApi.deleteAllLocalFiles.
-    return { ...initialState };
+    return newState;
   }
 
   return state;
