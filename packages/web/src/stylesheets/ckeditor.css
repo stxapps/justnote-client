@@ -139,6 +139,14 @@
 
   --ck-color-editable-blur-selection: hsl(0, 0%, 85%);
 
+  --ck-powered-by-line-height: 10px;
+  --ck-powered-by-padding-vertical: 2px;
+  --ck-powered-by-padding-horizontal: 4px;
+  --ck-powered-by-text-color: var(--jn-editor-gray-500);
+  --ck-powered-by-border-radius: 100px;
+  --ck-powered-by-background: transparent;
+  --ck-powered-by-border-color: transparent;
+
   --ck-font-size-base: 15px;
   --ck-toolbar-dropdown-max-width: 96vw;
 }
@@ -255,6 +263,14 @@
   --ck-color-split-button-hover-border: var(--ck-color-base-border);
 
   --ck-color-editable-blur-selection: hsl(0, 0%, 35%);
+
+  --ck-powered-by-line-height: 10px;
+  --ck-powered-by-padding-vertical: 2px;
+  --ck-powered-by-padding-horizontal: 4px;
+  --ck-powered-by-text-color: var(--jn-editor-gray-400);
+  --ck-powered-by-border-radius: 100px;
+  --ck-powered-by-background: var(--jn-editor-gray-900);
+  --ck-powered-by-border-color: transparent;
 }
 
 .ck.ck-editor__editable {
@@ -515,4 +531,16 @@
 
 .ck-find-result .ck-find-result_selected {
   background: transparent;
+}
+
+.ck.ck-balloon-panel.ck-powered-by-balloon .ck.ck-powered-by .ck-icon {
+  filter: brightness(150%);
+}
+
+.blk-mode .ck.ck-balloon-panel.ck-powered-by-balloon {
+  background-color: var(--ck-powered-by-background);
+}
+
+.blk-mode .ck.ck-balloon-panel.ck-powered-by-balloon .ck.ck-powered-by .ck-icon {
+  filter: brightness(750%);
 }

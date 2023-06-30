@@ -88,6 +88,7 @@ const NoteEditorEditor = (props) => {
 
   const noteIdRef = useRef(note.id);
   const isFocusedRef = useRef(isFocused);
+  const safeAreaWidthRef = useRef(safeAreaWidth);
 
   const isMobile = useMemo(() => _isMobile(), []);
 
@@ -111,7 +112,13 @@ const NoteEditorEditor = (props) => {
 
   const blurTitleInput = () => {
     if (titleInput.current) titleInput.current.blur();
-    if (bodyEditor.current) bodyEditor.current.ui.view.editable.element.blur();
+    if (bodyEditor.current) {
+      try {
+        bodyEditor.current.ui.view.editable.element.blur();
+      } catch (error) {
+        console.log('blur bodyEditor error: ', error);
+      }
+    }
   };
 
   const clearNoteMedia = () => {
@@ -199,6 +206,28 @@ const NoteEditorEditor = (props) => {
     replaceWithContents, replaceWithFiles,
   ]);
 
+  const setToolbarGroupedItemsDropdownMaxWidth = useCallback(() => {
+    let toolbarView;
+    try {
+      const editor = bodyEditor.current;
+      toolbarView = editor.ui.view.toolbar._behavior.groupedItemsDropdown.toolbarView;
+    } catch (error) {
+      console.log('get toolbarView in groupedItemsDropdown error: ', error);
+    }
+    if (!toolbarView) return;
+
+    if (isMobile) {
+      if (safeAreaWidthRef.current < 350) toolbarView.maxWidth = '224px';
+      else if (safeAreaWidthRef.current < 428) toolbarView.maxWidth = '256px';
+      else if (safeAreaWidthRef.current < 468) toolbarView.maxWidth = '216px';
+      else toolbarView.maxWidth = '';
+    } else {
+      if (safeAreaWidthRef.current < 372) toolbarView.maxWidth = '224px';
+      else if (safeAreaWidthRef.current < 400) toolbarView.maxWidth = '188px';
+      else toolbarView.maxWidth = '';
+    }
+  }, [isMobile]);
+
   const onFocus = useCallback(() => {
     dispatch(updateEditorFocused(true));
   }, [dispatch]);
@@ -280,7 +309,12 @@ const NoteEditorEditor = (props) => {
       }
     }
 
-    const groupedItemsDropdown = editor.ui.view.toolbar._behavior.groupedItemsDropdown;
+    let groupedItemsDropdown;
+    try {
+      groupedItemsDropdown = editor.ui.view.toolbar._behavior.groupedItemsDropdown;
+    } catch (error) {
+      console.log('get groupedItemsDropdown error: ', error);
+    }
     const toolbarItems = editor.ui.view.toolbar.items;
 
     if (isMobile) {
@@ -297,15 +331,27 @@ const NoteEditorEditor = (props) => {
       onFocus();
     });
 
+    if (groupedItemsDropdown) {
+      groupedItemsDropdown.on('change:isOpen', (evt, name, isOpen) => {
+        if (isOpen) setToolbarGroupedItemsDropdownMaxWidth();
+      });
+    }
+
     if (isMobile) {
+      const contextualBalloon = editor.plugins.get('ContextualBalloon');
       const linkUi = editor.plugins.get('LinkUI');
-      if (linkUi) {
-        const urlInput = linkUi.formView.urlInputView;
-        const inputElement = urlInput.fieldView.element;
-        if (inputElement) {
-          inputElement.setAttribute('inputmode', 'url');
-          inputElement.setAttribute('autocapitalize', 'none');
-        }
+      if (contextualBalloon && linkUi) {
+        contextualBalloon.on('change:visibleView', (evt, name, visibleView) => {
+          if (!linkUi.formView || linkUi.formView !== visibleView) return;
+
+          try {
+            const inputElement = linkUi.formView.urlInputView.fieldView.element;
+            inputElement.setAttribute('inputmode', 'url');
+            inputElement.setAttribute('autocapitalize', 'none');
+          } catch (error) {
+            console.log('set attribute on link input error: ', error);
+          }
+        });
       }
     }
 
@@ -315,7 +361,10 @@ const NoteEditorEditor = (props) => {
 
     bodyEditor.current = editor;
     setEditorReady(true);
-  }, [isMobile, onUpdateIsUploading, onAddObjectUrlFiles, setEditorReady, onFocus]);
+  }, [
+    isMobile, onUpdateIsUploading, onAddObjectUrlFiles, setEditorReady, onFocus,
+    setToolbarGroupedItemsDropdownMaxWidth,
+  ]);
 
   const onDataChange = useMemo(() => debounce(() => {
     // At the time, might already unmounted
@@ -336,7 +385,8 @@ const NoteEditorEditor = (props) => {
   useEffect(() => {
     noteIdRef.current = note.id;
     isFocusedRef.current = isFocused;
-  }, [note.id, isFocused]);
+    safeAreaWidthRef.current = safeAreaWidth;
+  }, [note.id, isFocused, safeAreaWidth]);
 
   useEffect(() => {
     if (!isEditorReady) return;
@@ -445,8 +495,12 @@ const NoteEditorEditor = (props) => {
   useEffect(() => {
     if (!isEditorReady) return;
     if (updateEditorWidthCount !== prevUpdateEditorWidthCount.current) {
-      bodyEditor.current.ui.view.toolbar.maxWidth = '9999px';
-      bodyEditor.current.ui.view.toolbar.maxWidth = 'auto';
+      try {
+        bodyEditor.current.ui.view.toolbar.maxWidth = '9999px';
+        bodyEditor.current.ui.view.toolbar.maxWidth = 'auto';
+      } catch (error) {
+        console.log('set maxWidth in updateEditorWidthCount error: ', error);
+      }
       prevUpdateEditorWidthCount.current = updateEditorWidthCount;
     }
   }, [isEditorReady, updateEditorWidthCount]);
@@ -481,34 +535,6 @@ const NoteEditorEditor = (props) => {
   useEffect(() => {
     onUpdateIsUploading(false);
   }, [note.id, onUpdateIsUploading]);
-
-  useEffect(() => {
-    if (!isEditorReady) return;
-
-    const editor = bodyEditor.current;
-    const groupedItemsDropdown = editor.ui.view.toolbar._behavior.groupedItemsDropdown;
-    if (!groupedItemsDropdown) return;
-
-    if (isMobile) {
-      if (safeAreaWidth < 350) {
-        groupedItemsDropdown.toolbarView.maxWidth = '224px';
-      } else if (safeAreaWidth < 428) {
-        groupedItemsDropdown.toolbarView.maxWidth = '256px';
-      } else if (safeAreaWidth < 468) {
-        groupedItemsDropdown.toolbarView.maxWidth = '216px';
-      } else {
-        groupedItemsDropdown.toolbarView.maxWidth = '';
-      }
-    } else {
-      if (safeAreaWidth < 372) {
-        groupedItemsDropdown.toolbarView.maxWidth = '224px';
-      } else if (safeAreaWidth < 400) {
-        groupedItemsDropdown.toolbarView.maxWidth = '188px';
-      } else {
-        groupedItemsDropdown.toolbarView.maxWidth = '';
-      }
-    }
-  }, [isEditorReady, isMobile, safeAreaWidth]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -627,6 +653,7 @@ const NoteEditorEditor = (props) => {
         ],
         columns: 6,
         documentColors: 0,
+        colorPicker: false,
       },
       fontBackgroundColor: {
         colors: [
@@ -645,6 +672,7 @@ const NoteEditorEditor = (props) => {
         ],
         columns: 6,
         documentColors: 0,
+        colorPicker: false,
       },
       link: {
         addTargetToExternalLinks: true,

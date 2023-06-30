@@ -355,6 +355,7 @@ const _ConflictItem = (props) => {
         ],
         columns: 6,
         documentColors: 0,
+        colorPicker: false,
       },
       fontBackgroundColor: {
         colors: [
@@ -373,6 +374,7 @@ const _ConflictItem = (props) => {
         ],
         columns: 6,
         documentColors: 0,
+        colorPicker: false,
       },
       link: {
         addTargetToExternalLinks: true,

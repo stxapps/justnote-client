@@ -37,14 +37,14 @@ export const dialogFMV = {
 export const canvasFMV = /** @type {any} */ ({
   hidden: {
     transition: { when: 'afterChildren' },
-    transitionEnd: { visibility: 'hidden' },
+    visibility: 'hidden',
   },
   visible: {
     visibility: 'visible',
   },
   vanish: {
     transition: { when: 'afterChildren' },
-    transitionEnd: { visibility: 'hidden' },
+    visibility: 'hidden',
   },
 });
 
