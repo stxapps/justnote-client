@@ -16,9 +16,6 @@ import { popupBgFMV, popupFMV, slideFMV } from '../types/animConfigs';
 import { useSafeAreaFrame, useTailwind } from '.';
 import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
 
-// eslint-disable-next-line
-import { Tween } from 'framer-motion';
-
 const MODE_MOVE_NOTES = LIST_NAMES_MODE_MOVE_NOTES;
 const MODE_MOVE_LIST_NAME = LIST_NAMES_MODE_MOVE_LIST_NAME;
 
@@ -106,7 +103,7 @@ const ListNamesPopup = () => {
   };
 
   const onForwardBtnClick = (selectedListName) => {
-    const transition = /** @type Tween */({
+    const transition = /** @type import('framer-motion').Tween */({
       ...slideFMV,
       onComplete: () => {
         setCurrentListName(selectedListName);
@@ -124,7 +121,7 @@ const ListNamesPopup = () => {
   }, [derivedIsShown]);
 
   useEffect(() => {
-    const transition = /** @type Tween */({ ...slideFMV });
+    const transition = /** @type import('framer-motion').Tween */({ ...slideFMV });
     const controls = animate(slideAnim, '0%', transition);
     return () => controls.stop();
   }, [backCount, slideAnim]);
