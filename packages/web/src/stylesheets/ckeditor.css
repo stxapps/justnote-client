@@ -533,6 +533,14 @@
   background: transparent;
 }
 
+.ck.ck-balloon-panel.ck-powered-by-balloon {
+  visibility: hidden;
+}
+
+.visible-powered-by .ck.ck-balloon-panel.ck-powered-by-balloon {
+  visibility: visible;
+}
+
 .ck.ck-balloon-panel.ck-powered-by-balloon .ck.ck-powered-by .ck-icon {
   filter: brightness(150%);
 }

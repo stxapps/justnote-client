@@ -103,6 +103,13 @@ const NoteEditorEditor = (props) => {
     }
   };
 
+  const removeVisiblePoweredBy = () => {
+    const wrapper = document.querySelector('.ck-body-wrapper');
+    if (wrapper) {
+      wrapper.classList.remove('visible-powered-by');
+    }
+  };
+
   const focusTitleInput = () => {
     if (titleInput.current) titleInput.current.blur();
     setTimeout(() => {
@@ -200,6 +207,14 @@ const NoteEditorEditor = (props) => {
       // Also, in handleScreenRotation, calling updateNoteIdUrlHash(null)
       //   guess it's the same reason.
       console.log('NoteEditorEditor.setInitData: ckeditor.setData error ', error);
+    }
+
+    if (noteIdRef.current === NEW_NOTE && unsavedNote.status === null) {
+      try {
+        bodyEditor.current.model.document.once('change', removeVisiblePoweredBy);
+      } catch (error) {
+        console.log('add removeVisiblePoweredBy error: ', error);
+      }
     }
   }, [
     note.title, note.body, note.media, unsavedNote.status, unsavedNote.note,
@@ -397,6 +412,19 @@ const NoteEditorEditor = (props) => {
     if (!isEditorReady) return;
     setInitData();
   }, [isEditorReady, setInitData]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+
+    const wrapper = document.querySelector('.ck-body-wrapper');
+    if (wrapper) {
+      if (note.id === NEW_NOTE && unsavedNote.status === null) {
+        wrapper.classList.add('visible-powered-by');
+      } else {
+        wrapper.classList.remove('visible-powered-by');
+      }
+    }
+  }, [isEditorReady, note.id, unsavedNote.status]);
 
   useEffect(() => {
     // Need checkToFocusCount, can't just depend on changes in notes and unsaved
