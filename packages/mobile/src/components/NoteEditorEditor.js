@@ -159,6 +159,10 @@ const NoteEditorEditor = (props) => {
 
     const escapedBody = escapeDoubleQuotes(body);
     webView.current.injectJavaScript('window.justnote.setBody("' + escapedBody + '"); true;');
+
+    if (noteIdRef.current === NEW_NOTE && unsavedNote.status === null) {
+      webView.current.injectJavaScript('window.justnote.addRemoveVisiblePoweredByListener(); true;');
+    }
   }, [note.title, note.body, note.media, unsavedNote.status, unsavedNote.note]);
 
   const setEditable = (editable) => {
@@ -330,6 +334,14 @@ const NoteEditorEditor = (props) => {
     if (!isEditorReady) return;
     setEditable((note.id === NEW_NOTE || note.status === ADDED) && !isEditorBusy);
   }, [isEditorReady, note.id, note.status, isEditorBusy]);
+
+  useEffect(() => {
+    if (!isEditorReady || !webView.current) return;
+
+    let visible = 'false';
+    if (note.id === NEW_NOTE && unsavedNote.status === null) visible = 'true';
+    webView.current.injectJavaScript('window.justnote.setVisiblePoweredBy(' + visible + '); true;');
+  }, [isEditorReady, note.id, unsavedNote.status]);
 
   useEffect(() => {
     if (!isEditorReady || !webView.current) return;

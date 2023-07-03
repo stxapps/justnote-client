@@ -720,8 +720,14 @@ export const isTitleEqual = (t1, t2) => {
 
 export const isBodyEqual = (s1, s2) => {
   // Remove spaces in rgb(r, g, b)
-  const pattern = /rgb\((\d+),\s*(\d+),\s*(\d+)\)/gi;
-  const substitute = 'rgb($1,$2,$3)';
+  let pattern = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/gi;
+  let substitute = 'rgb($1,$2,$3)';
+  s1 = s1.replace(pattern, substitute);
+  s2 = s2.replace(pattern, substitute);
+
+  // Remove spaces in hsl(h, s, l)
+  pattern = /hsl\(\s*([\d%]+)\s*,\s*([\d%]+)\s*,\s*([\d%]+)\s*\)/gi;
+  substitute = 'hsl($1,$2,$3)';
   s1 = s1.replace(pattern, substitute);
   s2 = s2.replace(pattern, substitute);
 
@@ -1931,4 +1937,58 @@ export const extractFPath = (fpath) => {
   const fnameParts = fname.split('.');
   const fext = fnameParts[fnameParts.length - 1];
   return { fpath, fpathParts, fname, fnameParts, fext };
+};
+
+export const applySubscriptionOfferDetails = (product) => {
+  if (!isObject(product)) return;
+
+  const { subscriptionOfferDetails } = product;
+  if (!Array.isArray(subscriptionOfferDetails)) return;
+
+  const offers = [];
+  for (const offer of subscriptionOfferDetails) {
+    if (!isObject(offer)) continue;
+    if (!isObject(offer.pricingPhases)) continue;
+    if (!Array.isArray(offer.pricingPhases.pricingPhaseList)) continue;
+
+    let firstPrice, firstNonZeroFormattedPrice;
+    for (const pricing of offer.pricingPhases.pricingPhaseList) {
+      if (!isObject(pricing)) continue;
+
+      const price = parseInt(pricing.priceAmountMicros, 10);
+      if (isNumber(price)) {
+        if (!isNumber(firstPrice)) firstPrice = price;
+        if (price > 0 && !isString(firstNonZeroFormattedPrice)) {
+          firstNonZeroFormattedPrice = pricing.formattedPrice;
+        }
+      }
+    }
+
+    if (isNumber(firstPrice) && isString(firstNonZeroFormattedPrice)) {
+      offers.push({ ...offer, firstPrice, firstNonZeroFormattedPrice });
+    }
+  }
+
+  let offer = offers.find(_offer => {
+    return _offer.basePlanId === 'p1y' && _offer.offerId === 'freetrial';
+  });
+  if (!isObject(offer)) {
+    offer = offers.find(_offer => {
+      return _offer.basePlanId === 'p1y' && _offer.offerId === null;
+    });
+  }
+  if (!isObject(offer)) {
+    for (const _offer of offers) {
+      if (!isObject(offer)) {
+        offer = _offer;
+        continue;
+      }
+      // Not totally correct, good enough for now.
+      if (_offer.firstPrice < offer.firstPrice) offer = _offer;
+    }
+  }
+  if (!isObject(offer)) return;
+
+  product.offerToken = offer.offerToken;
+  product.localizedPrice = offer.firstNonZeroFormattedPrice;
 };
