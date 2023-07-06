@@ -108,7 +108,7 @@ const NoteListItem = (props) => {
 
   const renderExporting = () => {
     return (
-      <View style={tailwind('absolute top-0 right-0 bg-transparent pt-2 pr-2')}>
+      <View style={tailwind('absolute top-0 right-0 bg-transparent pt-1.5 pr-1.5')}>
         <Circle size={16} color={themeMode === BLK_MODE ? 'rgb(156, 163, 175)' : 'rgb(107, 114, 128)'} />
       </View>
     );
