@@ -2,9 +2,12 @@ import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { useSelector } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
+import { Circle } from 'react-native-animated-spinkit';
 
-import { PINNED, VALID, INVALID } from '../types/const';
-import { makeGetPinStatus, makeGetUnsavedNote } from '../selectors';
+import { PINNED, VALID, INVALID, BLK_MODE } from '../types/const';
+import {
+  makeGetPinStatus, makeGetUnsavedNote, makeGetIsExportingNoteAsPdf, getThemeMode,
+} from '../selectors';
 import { isDiedStatus, isBusyStatus, isPinningStatus } from '../utils';
 
 import { useTailwind } from '.';
@@ -16,9 +19,12 @@ const NoteListItem = (props) => {
   const { note } = props;
   const getPinStatus = useMemo(makeGetPinStatus, []);
   const getUnsavedNote = useMemo(makeGetUnsavedNote, []);
+  const getIsExportingNoteAsPdf = useMemo(makeGetIsExportingNoteAsPdf, []);
   const noteId = useSelector(state => state.display.noteId);
   const pinStatus = useSelector(state => getPinStatus(state, note));
   const unsavedNote = useSelector(state => getUnsavedNote(state, note));
+  const isExporting = useSelector(state => getIsExportingNoteAsPdf(state, note));
+  const themeMode = useSelector(state => getThemeMode(state));
   const tailwind = useTailwind();
 
   const isConflicted = note.id.startsWith('conflict');
@@ -100,6 +106,14 @@ const NoteListItem = (props) => {
     );
   };
 
+  const renderExporting = () => {
+    return (
+      <View style={tailwind('absolute top-0 right-0 bg-transparent pt-2 pr-2')}>
+        <Circle size={16} color={themeMode === BLK_MODE ? 'rgb(156, 163, 175)' : 'rgb(107, 114, 128)'} />
+      </View>
+    );
+  };
+
   let content;
   if (isConflicted || isDied || isUnsavedInvalid) {
     content = <NoteListItemError note={note} unsavedNote={unsavedNote} />;
@@ -112,6 +126,7 @@ const NoteListItem = (props) => {
       {content}
       {(isBusyStatus(note.status) && note.id !== noteId) && renderBusy()}
       {(isUnsavedValid && note.id !== noteId) && renderUnsaved()}
+      {isExporting && renderExporting()}
       {isPinning && renderPinning()}
       {[PINNED].includes(pinStatus) && renderPin()}
       {note.id === noteId && <View style={tailwind(`absolute inset-y-0 top-0 right-0 w-1 ${isConflicted || isDied ? 'bg-red-100' : 'bg-green-600'}`)} />}

@@ -57,7 +57,7 @@ import {
   MOVE_PINNED_NOTE_ROLLBACK, CANCEL_DIED_PINS, UPDATE_SYSTEM_THEME_MODE,
   UPDATE_DO_USE_LOCAL_THEME, UPDATE_DEFAULT_THEME, UPDATE_LOCAL_THEME,
   UPDATE_UPDATING_THEME_MODE, UPDATE_TIME_PICK, UPDATE_IS_24H_FORMAT,
-  UPDATE_PAYWALL_FEATURE, RESET_STATE,
+  UPDATE_PAYWALL_FEATURE, UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS, RESET_STATE,
 } from '../types/actionTypes';
 import {
   DOMAIN_NAME, APP_URL_SCHEME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH, PAYWALL_POPUP,
@@ -71,7 +71,7 @@ import {
   VALID, INVALID, UNKNOWN, ERROR, ACTIVE, SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT,
   SETTINGS_VIEW_LISTS, WHT_MODE, BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE,
   FEATURE_DATE_FORMAT, FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES,
-  NOTE_DATE_FORMATS,
+  NOTE_DATE_FORMATS, NO_PERMISSION_GRANTED,
 } from '../types/const';
 import {
   isEqual, isObject, isString, isNumber, sleep, separateUrlAndParam, getUserImageUrl,
@@ -3166,74 +3166,101 @@ const replaceImageUrls = async (body) => {
 };
 
 export const exportNoteAsPdf = () => async (dispatch, getState) => {
-  const { listName, selectingNoteId } = getState().display;
-  const note = getState().notes[listName][selectingNoteId];
-  const body = await replaceImageUrls(note.body);
+  dispatch(updateExportNoteAsPdfProgress({ total: 1, done: 0 }));
+  await sleep(16);
 
-  let html = `${jhfp}`;
-  html = html.replace(/__-title-__/g, note.title);
-  html = html.replace(/__-body-__/g, body);
-  if (Platform.OS === 'ios') html = html.replace(' mx-12 my-16"', '"');
+  let name, file;
+  try {
+    const { listName, selectingNoteId } = getState().display;
+    const note = getState().notes[listName][selectingNoteId];
+    const body = await replaceImageUrls(note.body);
 
-  let name = note.title ? `${note.title}` : 'Justnote\'s note';
-  name += ` ${getFormattedTimeStamp(new Date())}`;
+    let html = `${jhfp}`;
+    html = html.replace(/__-title-__/g, note.title);
+    html = html.replace(/__-body-__/g, body);
+    if (Platform.OS === 'ios') html = html.replace(' mx-12 my-16"', '"');
 
-  const options = { html, fileName: name };
-  if (Platform.OS === 'ios') {
-    options.paddingLeft = 48;
-    options.paddingRight = 48;
-    options.paddingTop = 64;
-    options.paddingBottom = 64;
-    options.bgColor = '#FFFFFF';
+    name = note.title ? `${note.title}` : 'Justnote\'s note';
+    if (name.length > 56) name = name.slice(0, 56);
+    name += ` ${getFormattedTimeStamp(new Date())}`;
+
+    const options = { html, fileName: name };
+    if (Platform.OS === 'ios') {
+      options.paddingLeft = 48;
+      options.paddingRight = 48;
+      options.paddingTop = 64;
+      options.paddingBottom = 64;
+      options.bgColor = '#FFFFFF';
+    }
+
+    file = await RNHTMLtoPDF.convert(options);
+  } catch (error) {
+    dispatch(updateExportNoteAsPdfProgress({ total: -1, done: -1, error: `${error}` }));
+    return;
   }
-
-  const file = await RNHTMLtoPDF.convert(options);
 
   if (Platform.OS === 'ios') {
     try {
       await Share.open({ url: 'file://' + file.filePath });
     } catch (error) {
+      let doCancel = false;
       if (isObject(error)) {
         if (
           isObject(error.error) &&
           isString(error.error.message) &&
           error.error.message.includes('The operation was cancelled')
-        ) return;
+        ) doCancel = true;
         if (
           isString(error.message) &&
           error.message.includes('User did not share')
-        ) return;
+        ) doCancel = true;
+      }
+      if (doCancel) {
+        dispatch(updateExportNoteAsPdfProgress(null));
+        return;
       }
 
-      Alert.alert('Exporting Note Error!', `Please wait a moment and try again. If the problem persists, please contact us.\n\n${error}`);
+      dispatch(updateExportNoteAsPdfProgress({
+        total: -1, done: -1, error: `${error}`,
+      }));
+      return;
     }
+
+    dispatch(updateExportNoteAsPdfProgress(null));
     return;
   }
 
   if (Platform.OS === 'android') {
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-    );
-    if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-      Alert.alert(
-        'Permission denied',
-        'We don\'t have permission to save the exported PDF file in Downloads.\n\nPlease grant this permission in Settings -> Apps -> Permissions.',
+    if (Platform.Version < 33) {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
       );
+      if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+        dispatch(updateExportNoteAsPdfProgress({
+          total: -1, done: -1, error: NO_PERMISSION_GRANTED,
+        }));
+        return;
+      }
+    }
+
+    const fname = name + '.pdf';
+    try {
+      await FileSystem.cpExternal(file.filePath, fname, 'downloads');
+    } catch (error) {
+      dispatch(updateExportNoteAsPdfProgress({
+        total: -1, done: -1, error: `${error}`,
+      }));
       return;
     }
 
-    try {
-      const fname = name + '.pdf';
-      await FileSystem.cpExternal(file.filePath, fname, 'downloads');
-      Alert.alert(
-        'Export completed',
-        `The exported PDF file - ${fname} - has been saved in Downloads.`,
-      );
-    } catch (error) {
-      Alert.alert('Exporting Note Error!', `Please wait a moment and try again. If the problem persists, please contact us.\n\n${error}`);
-    }
+    dispatch(updateExportNoteAsPdfProgress({ total: 1, done: 1, fname }));
     return;
   }
 
   console.log('Invalid platform: ', Platform.OS);
+  dispatch(updateExportNoteAsPdfProgress(null));
+};
+
+export const updateExportNoteAsPdfProgress = (progress) => {
+  return { type: UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS, payload: progress };
 };

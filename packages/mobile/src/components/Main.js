@@ -13,6 +13,9 @@ import SidebarProfilePopup from './SidebarProfilePopup';
 import NoteListMenuPopup from './NoteListMenuPopup';
 import NoteListItemMenuPopup from './NoteListItemMenuPopup';
 import PinMenuPopup from './PinMenuPopup';
+import {
+  ExportNoteAsPdfCompletePopup, ExportNoteAsPdfErrorPopup,
+} from './ExportNoteAsPdfPopup';
 import SettingsPopup from './SettingsPopup';
 import SettingsListsMenuPopup from './SettingsListsMenuPopup';
 import DateFormatMenuPopup from './DateFormatMenuPopup';
@@ -55,7 +58,8 @@ const Main = () => {
       <NoteListMenuPopup />
       <NoteListItemMenuPopup />
       <PinMenuPopup />
-      <PaywallPopup />
+      <ExportNoteAsPdfCompletePopup />
+      <ExportNoteAsPdfErrorPopup />
       <SettingsPopup />
       <SettingsListsMenuPopup />
       <DateFormatMenuPopup />
