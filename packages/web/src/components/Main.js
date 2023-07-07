@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { endIapConnection } from '../actions';
 import { LG_WIDTH } from '../types/const';
-import { debounce, isMobile as _isMobile, scrollWindowTopOrIntoView } from '../utils';
+import { debounce, isMobile as _isMobile, scrollWindowIntoView } from '../utils';
 
 import { useSafeAreaFrame } from '.';
 import ColsPanel from './ColsPanel';
@@ -56,7 +56,7 @@ const Main = () => {
     //   so need to monitor and try to scroll back.
     if (!window.visualViewport || isSettingsPopupShown || !isMobile) return;
 
-    const scrollListener = debounce(() => scrollWindowTopOrIntoView(), 100);
+    const scrollListener = debounce(() => scrollWindowIntoView(), 100);
     window.visualViewport.addEventListener('scroll', scrollListener);
 
     return () => {
