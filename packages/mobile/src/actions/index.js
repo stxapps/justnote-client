@@ -3200,24 +3200,20 @@ export const exportNoteAsPdf = () => async (dispatch, getState) => {
   }
 
   if (Platform.OS === 'ios') {
+    dispatch(updateExportNoteAsPdfProgress(null));
     try {
       await Share.open({ url: 'file://' + file.filePath });
     } catch (error) {
-      let doCancel = false;
       if (isObject(error)) {
         if (
           isObject(error.error) &&
           isString(error.error.message) &&
           error.error.message.includes('The operation was cancelled')
-        ) doCancel = true;
+        ) return;
         if (
           isString(error.message) &&
           error.message.includes('User did not share')
-        ) doCancel = true;
-      }
-      if (doCancel) {
-        dispatch(updateExportNoteAsPdfProgress(null));
-        return;
+        ) return;
       }
 
       dispatch(updateExportNoteAsPdfProgress({
@@ -3226,7 +3222,6 @@ export const exportNoteAsPdf = () => async (dispatch, getState) => {
       return;
     }
 
-    dispatch(updateExportNoteAsPdfProgress(null));
     return;
   }
 
