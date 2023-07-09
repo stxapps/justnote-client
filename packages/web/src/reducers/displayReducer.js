@@ -11,9 +11,9 @@ import {
   UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS, MERGE_SETTINGS_COMMIT,
   UPDATE_SETTINGS_VIEW_ID, UPDATE_LIST_NAMES_MODE, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
   UPDATE_SYNC_PROGRESS, UPDATE_SYNCED, UPDATE_PAYWALL_FEATURE,
-  UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
-  UPDATE_DELETE_ALL_DATA_PROGRESS, UPDATE_DELETE_SYNC_DATA_PROGRESS, DELETE_ALL_DATA,
-  RESET_STATE,
+  UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS, UPDATE_IMPORT_ALL_DATA_PROGRESS,
+  UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
+  UPDATE_DELETE_SYNC_DATA_PROGRESS, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   SIGN_UP_POPUP, SIGN_IN_POPUP, PROFILE_POPUP, NOTE_LIST_MENU_POPUP,
@@ -87,6 +87,7 @@ const initialState = {
   syncProgress: null,
   paywallFeature: null,
   doRightPanelAnimateHidden: false,
+  exportNoteAsPdfProgress: null,
   importAllDataProgress: null,
   exportAllDataProgress: null,
   deleteAllDataProgress: null,
@@ -564,6 +565,11 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_PAYWALL_FEATURE) {
     return { ...state, paywallFeature: action.payload };
+  }
+
+  if (action.type === UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS) {
+    const progress = isObject(action.payload) ? { ...action.payload } : action.payload;
+    return { ...state, exportNoteAsPdfProgress: progress };
   }
 
   if (action.type === UPDATE_IMPORT_ALL_DATA_PROGRESS) {

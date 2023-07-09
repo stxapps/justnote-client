@@ -537,3 +537,24 @@ export const makeGetUnsavedNote = () => {
     { memoizeOptions: { resultEqualityCheck: isEqual } },
   );
 };
+
+export const makeGetIsExportingNoteAsPdf = () => {
+  return createSelector(
+    state => state.display.selectingNoteId,
+    state => state.display.exportNoteAsPdfProgress,
+    (__, note) => {
+      if (isObject(note)) return note.id;
+      return null;
+    },
+    (selectingNoteId, exportNoteAsPdfProgress, noteId) => {
+      if (selectingNoteId !== noteId) return false;
+      if (
+        !isObject(exportNoteAsPdfProgress) ||
+        exportNoteAsPdfProgress.total !== 1 ||
+        exportNoteAsPdfProgress.done !== 0
+      ) return false;
+
+      return true;
+    }
+  );
+};
