@@ -17,7 +17,7 @@ const getFile = async (fpath, dir = Dirs.DocumentDir, encoding = BASE64) => {
 
   let content; // If NotFound, return undefined.
   try {
-    /* @ts-ignore */
+    /* @ts-expect-error */
     content = await FileSystem.readFile(fpath, encoding);
   } catch (error) {
     console.log('In localFile.getFile, error:', error);
@@ -43,7 +43,7 @@ const putFile = async (fpath, content, dir = Dirs.DocumentDir, encoding = BASE64
     if (i >= 0) content = content.slice(i + 1);
   }
 
-  /* @ts-ignore */
+  /* @ts-expect-error */
   await FileSystem.writeFile(fpath, content, encoding);
 };
 

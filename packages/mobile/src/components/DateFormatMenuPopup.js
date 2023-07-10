@@ -158,7 +158,7 @@ const DateFormatMenuPopup = () => {
       popupStyle.width = derivedAnchorPosition.width;
     }
 
-    /* @ts-ignore */
+    /* @ts-expect-error */
     bgStyle = { opacity: popupAnim };
 
     panel = (

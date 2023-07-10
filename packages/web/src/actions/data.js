@@ -1001,7 +1001,7 @@ const parseImportedFile = async (dispatch, getState, fileContent) => {
   dispatch(updateImportAllDataProgress({ total: 'calculating...', done: 0 }));
 
   try {
-    // @ts-ignore
+    // @ts-expect-error
     const zip = await import('@zip.js/zip.js');
     const reader = new zip.ZipReader(
       new zip.Uint8ArrayReader(new Uint8Array(fileContent))
@@ -1147,7 +1147,7 @@ export const exportAllData = () => async (dispatch, getState) => {
   if (progress.total === 0) return;
 
   try {
-    // @ts-ignore
+    // @ts-expect-error
     const zip = await import('@zip.js/zip.js');
     const zipWriter = new zip.ZipWriter(new zip.BlobWriter('application/zip'));
 

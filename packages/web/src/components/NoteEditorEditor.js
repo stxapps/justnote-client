@@ -617,7 +617,7 @@ const NoteEditorEditor = (props) => {
     const last = head.lastElementChild;
     if (
       last.tagName.toLowerCase() === 'link' &&
-      /* @ts-ignore */
+      /* @ts-expect-error */
       last.href && last.href.includes('/static/css/') && last.href.endsWith('.css')
     ) {
       return;

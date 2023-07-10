@@ -16,7 +16,7 @@ import Support from './Support';
 import ErrorBoundary from './ErrorBoundary';
 
 // medium.com/hackernoon/lazy-loading-and-preloading-components-in-react-16-6-804de091c82d
-// @ts-ignore
+// @ts-expect-error
 const _Main = import('./Main');
 const Main = React.lazy(() => _Main);
 

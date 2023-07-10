@@ -1,6 +1,6 @@
 import { AppRegistry } from 'react-native';
 
 import Root from './src';
-import { projectName } from './app.json';
+import appJson from './app.json';
 
-AppRegistry.registerComponent(projectName, () => Root);
+AppRegistry.registerComponent(appJson.projectName, () => Root);

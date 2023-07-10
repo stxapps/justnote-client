@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-expect-error
 import RNBlockstackSdk from 'react-native-blockstack';
 
 const hasSession = async () => {
