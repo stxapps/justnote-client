@@ -1,26 +1,73 @@
-import React, { useRef } from 'react';
-import { View, Text } from 'react-native';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { View, Text, Keyboard, Platform } from 'react-native';
 import { useSelector } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
 import { DUMMY_NOTE_OBJ, DUMMY_UNSAVED_NOTE_OBJ, INVALID } from '../types/const';
 import { isDiedStatus } from '../utils';
 
-import { useTailwind } from '.';
+import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 import NoteEditorTopBar from './NoteEditorTopBar';
 import NoteEditorEditor from './NoteEditorEditor';
 import NoteEditorBulkEdit from './NoteEditorBulkEdit';
-import { NoteEditorSavedConflict, NoteEditorUnsavedConflict } from './NoteEditorConflict';
+import {
+  NoteEditorSavedConflict, NoteEditorUnsavedConflict,
+} from './NoteEditorConflict';
 import NoteEditorRetry from './NoteEditorRetry';
 
 const NoteEditor = (props) => {
 
   const { note, unsavedNote, isFullScreen, onToggleFullScreen, width } = props;
+  const { height: safeAreaHeight } = useSafeAreaFrame();
+  const insets = useSafeAreaInsets();
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
+  const [kbHeight, setKbHeight] = useState(0);
+  const kbWillShowListener = useRef(null);
+  const kbWillHideListener = useRef(null);
   const isContentEditor = useRef(false);
   const tailwind = useTailwind();
 
   const isUnsavedInvalid = unsavedNote.status === INVALID;
+
+  const viewStyle = useMemo(() => {
+    const classNames = 'w-full bg-white blk:bg-gray-900';
+
+    if (Platform.OS === 'ios') {
+      let height = safeAreaHeight;
+      if (kbHeight > 0) height = height + insets.bottom - kbHeight;
+      return [tailwind(classNames), { height }];
+    }
+
+    return tailwind(`h-full ${classNames}`);
+  }, [safeAreaHeight, insets, kbHeight, tailwind]);
+
+  useEffect(() => {
+    if (Platform.OS === 'ios') {
+      if (!kbWillShowListener.current) {
+        kbWillShowListener.current = Keyboard.addListener('keyboardWillShow', (e) => {
+          setKbHeight(e.endCoordinates.height);
+        });
+      }
+      if (!kbWillHideListener.current) {
+        kbWillHideListener.current = Keyboard.addListener('keyboardWillHide', () => {
+          setKbHeight(0);
+        });
+      }
+    }
+
+    return () => {
+      if (Platform.OS === 'ios') {
+        if (kbWillShowListener.current) {
+          kbWillShowListener.current.remove();
+          kbWillShowListener.current = null;
+        }
+        if (kbWillHideListener.current) {
+          kbWillHideListener.current.remove();
+          kbWillHideListener.current = null;
+        }
+      }
+    };
+  }, []);
 
   const _render = () => {
     isContentEditor.current = false;
@@ -53,7 +100,7 @@ const NoteEditor = (props) => {
     isContentEditor.current = true;
     return (
       <View style={tailwind('h-full w-full bg-white blk:bg-gray-900')}>
-        <View style={tailwind('h-full w-full bg-white blk:bg-gray-900')}>
+        <View style={viewStyle}>
           <NoteEditorTopBar note={note} unsavedNote={unsavedNote} isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} width={width} />
           <NoteEditorEditor key="NoteEditorEditor" note={note} unsavedNote={unsavedNote} />
         </View>
