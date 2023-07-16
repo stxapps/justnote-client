@@ -4,15 +4,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import {
   updatePopupUrlHash, moveNotesWithAction, pinNotes, updateMoveAction,
-  updateDeleteAction, updateListNamesMode, viewNoteAsWebpage,
+  updateDeleteAction, updateListNamesMode, viewNoteAsWebpage, showAddLockEditorPopup,
+  lockNote,
 } from '../actions';
 import {
   MY_NOTES, TRASH, ARCHIVE, REMOVE, RESTORE, DELETE, MOVE_TO, PIN, MANAGE_PIN, PINNED,
-  VIEW_AS_WEBPAGE, NOTE_ITEM_POPUP_MENU,
-  NOTE_LIST_ITEM_MENU_POPUP, LIST_NAMES_POPUP, PIN_MENU_POPUP, CONFIRM_DELETE_POPUP,
-  MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_ITEM_MENU, LIST_NAMES_MODE_MOVE_NOTES,
+  VIEW_AS_WEBPAGE, NOTE_ITEM_POPUP_MENU, NOTE_LIST_ITEM_MENU_POPUP, LIST_NAMES_POPUP,
+  PIN_MENU_POPUP, CONFIRM_DELETE_POPUP, MOVE_ACTION_NOTE_ITEM_MENU,
+  DELETE_ACTION_NOTE_ITEM_MENU, LIST_NAMES_MODE_MOVE_NOTES, LOCK_ACTION_ADD_LOCK_NOTE,
+  LOCK, UNLOCKED,
 } from '../types/const';
-import { getListNameMap, makeGetPinStatus } from '../selectors';
+import { getListNameMap, makeGetPinStatus, makeGetLockNoteStatus } from '../selectors';
 import { getListNameDisplayName, getAllListNames } from '../utils';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
 
@@ -23,6 +25,7 @@ const NoteListItemMenuPopup = () => {
 
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
   const getPinStatus = useMemo(makeGetPinStatus, []);
+  const getLockNoteStatus = useMemo(makeGetLockNoteStatus, []);
   const isShown = useSelector(state => state.display.isNoteListItemMenuPopupShown);
   const anchorPosition = useSelector(
     state => state.display.noteListItemMenuPopupPosition
@@ -31,6 +34,7 @@ const NoteListItemMenuPopup = () => {
   const listNameMap = useSelector(state => getListNameMap(state));
   const selectingNoteId = useSelector(state => state.display.selectingNoteId);
   const pinStatus = useSelector(state => getPinStatus(state, selectingNoteId));
+  const lockStatus = useSelector(state => getLockNoteStatus(state, selectingNoteId));
   const [popupSize, setPopupSize] = useState(null);
   const popup = useRef(null);
   const cancelBtn = useRef(null);
@@ -72,6 +76,13 @@ const NoteListItemMenuPopup = () => {
     } else if (text === VIEW_AS_WEBPAGE) {
       onCancelBtnClick();
       dispatch(viewNoteAsWebpage());
+    } else if (text === LOCK) {
+      if (lockStatus === null) {
+        dispatch(showAddLockEditorPopup(LOCK_ACTION_ADD_LOCK_NOTE))
+      } else if (lockStatus === UNLOCKED) {
+        onCancelBtnClick();
+        dispatch(lockNote(selectingNoteId));
+      }
     } else {
       console.log(`In NoteListItemMenuPopup, invalid text: ${text}`);
     }
@@ -97,7 +108,7 @@ const NoteListItemMenuPopup = () => {
       if (pinStatus === PINNED) menu = [...menu, MANAGE_PIN];
       else if (pinStatus === null) menu = [...menu, PIN];
 
-      menu = [...menu, VIEW_AS_WEBPAGE];
+      menu = [...menu, VIEW_AS_WEBPAGE, LOCK];
     }
 
     return menu;

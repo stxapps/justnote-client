@@ -21,6 +21,8 @@ import iapReducer from './iapReducer';
 import cachedFPathsReducer from './cachedFPathsReducer';
 import pendingPinsReducer from './pendingPinsReducer';
 import timePickReducer from './timePickReducer';
+import lockSettingsReducer from './lockSettingsReducer';
+import lockEditorReducer from './lockEditorReducer';
 
 const reducers = combineReducers({
   window: windowReducer,
@@ -44,6 +46,8 @@ const reducers = combineReducers({
   cachedFPaths: cachedFPathsReducer,
   pendingPins: pendingPinsReducer,
   timePick: timePickReducer,
+  lockSettings: lockSettingsReducer,
+  lockEditor: lockEditorReducer,
 });
 
 export default reducers;

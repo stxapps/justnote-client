@@ -12,6 +12,7 @@ import SidebarProfilePopup from './SidebarProfilePopup';
 import NoteListMenuPopup from './NoteListMenuPopup';
 import NoteListItemMenuPopup from './NoteListItemMenuPopup';
 import PinMenuPopup from './PinMenuPopup';
+import LockMenuPopup from './LockMenuPopup';
 import SettingsPopup from './SettingsPopup';
 import SettingsListsMenuPopup from './SettingsListsMenuPopup';
 import DateFormatMenuPopup from './DateFormatMenuPopup';
@@ -20,6 +21,7 @@ import {
   SettingsUpdateErrorPopup, SettingsConflictErrorPopup,
 } from './SettingsErrorPopup';
 import ListNamesPopup from './ListNamesPopup';
+import LockEditorPopup from './lockEditorPopup';
 import ConfirmDeletePopup from './ConfirmDeletePopup';
 import ConfirmDiscardPopup from './ConfirmDiscardPopup';
 import PaywallPopup from './PaywallPopup';
@@ -84,6 +86,7 @@ const Main = () => {
       <NoteListMenuPopup />
       <NoteListItemMenuPopup />
       <PinMenuPopup />
+      <LockMenuPopup />
       <SettingsPopup />
       <SettingsListsMenuPopup />
       <DateFormatMenuPopup />
@@ -91,6 +94,7 @@ const Main = () => {
       <SettingsConflictErrorPopup />
       <SettingsUpdateErrorPopup />
       <ListNamesPopup />
+      <LockEditorPopup />
       <ConfirmDeletePopup />
       <ConfirmDiscardPopup />
       <PaywallPopup />

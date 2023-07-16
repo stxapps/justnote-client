@@ -11,7 +11,8 @@ import {
   NOTE_DATE_FORMAT_MSDSY, NOTE_DATE_FORMAT_DSMSY, NOTE_DATE_FORMAT_YHMHD,
   NOTE_DATE_FORMAT_MHDHY, NOTE_DATE_FORMAT_DHMHY, NOTE_DATE_FORMAT_YOMOD,
   NOTE_DATE_FORMAT_MODOY, NOTE_DATE_FORMAT_DOMOY, NOTE_DATE_FORMAT_YMMMD,
-  NOTE_DATE_FORMAT_MMMDY, NOTE_DATE_FORMAT_DMMMY, MODE_EDIT, MAX_TRY,
+  NOTE_DATE_FORMAT_MMMDY, NOTE_DATE_FORMAT_DMMMY, MODE_EDIT, MAX_TRY, VALID_PASSWORD,
+  NO_PASSWORD, CONTAIN_SPACES_PASSWORD, TOO_LONG_PASSWORD,
 } from '../types/const';
 import {
   PIN_NOTE, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_ROLLBACK,
@@ -1991,4 +1992,11 @@ export const applySubscriptionOfferDetails = (product) => {
 
   product.offerToken = offer.offerToken;
   product.localizedPrice = offer.firstNonZeroFormattedPrice;
+};
+
+export const validatePassword = (password) => {
+  if (!isString(password) || password.length === 0) return NO_PASSWORD;
+  if (/\s/g.test(password)) return CONTAIN_SPACES_PASSWORD;
+  if (password.length > 27) return TOO_LONG_PASSWORD;
+  return VALID_PASSWORD;
 };

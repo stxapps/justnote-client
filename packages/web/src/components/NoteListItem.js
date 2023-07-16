@@ -1,21 +1,26 @@
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-import { PINNED, VALID, INVALID } from '../types/const';
-import { makeGetPinStatus, makeGetUnsavedNote } from '../selectors';
+import { PINNED, LOCKED, VALID, INVALID } from '../types/const';
+import {
+  makeGetPinStatus, makeGetLockNoteStatus, makeGetUnsavedNote,
+} from '../selectors';
 import { isDiedStatus, isBusyStatus, isPinningStatus } from '../utils';
 
 import { useTailwind } from '.';
 import NoteListItemContent from './NoteListItemContent';
 import NoteListItemError from './NoteListItemError';
+import NoteListItemLock from './NoteListItemLock';
 
 const NoteListItem = (props) => {
 
   const { note } = props;
   const getPinStatus = useMemo(makeGetPinStatus, []);
+  const getLockStatus = useMemo(makeGetLockNoteStatus, []);
   const getUnsavedNote = useMemo(makeGetUnsavedNote, []);
   const noteId = useSelector(state => state.display.noteId);
   const pinStatus = useSelector(state => getPinStatus(state, note));
+  const lockStatus = useSelector(state => getLockStatus(state, note));
   const unsavedNote = useSelector(state => getUnsavedNote(state, note));
   const tailwind = useTailwind();
 
@@ -78,7 +83,9 @@ const NoteListItem = (props) => {
   };
 
   let content;
-  if (isConflicted || isDied || isUnsavedInvalid) {
+  if (lockStatus === LOCKED) {
+    content = <NoteListItemLock note={note} />
+  } else if (isConflicted || isDied || isUnsavedInvalid) {
     content = <NoteListItemError note={note} unsavedNote={unsavedNote} />;
   } else {
     content = <NoteListItemContent note={note} pinStatus={pinStatus} />;

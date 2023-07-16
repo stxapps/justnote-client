@@ -10,7 +10,7 @@ import {
   UPDATE_DELETE_ACTION, UPDATE_DISCARD_ACTION, UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT,
   UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS, MERGE_SETTINGS_COMMIT,
   UPDATE_SETTINGS_VIEW_ID, UPDATE_LIST_NAMES_MODE, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
-  UPDATE_SYNC_PROGRESS, UPDATE_SYNCED, UPDATE_PAYWALL_FEATURE,
+  UPDATE_SYNC_PROGRESS, UPDATE_SYNCED, UPDATE_PAYWALL_FEATURE, UPDATE_LOCK_ACTION,
   UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS, UPDATE_IMPORT_ALL_DATA_PROGRESS,
   UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
   UPDATE_DELETE_SYNC_DATA_PROGRESS, DELETE_ALL_DATA, RESET_STATE,
@@ -19,10 +19,11 @@ import {
   SIGN_UP_POPUP, SIGN_IN_POPUP, PROFILE_POPUP, NOTE_LIST_MENU_POPUP,
   NOTE_LIST_ITEM_MENU_POPUP, LIST_NAMES_POPUP, PIN_MENU_POPUP, PAYWALL_POPUP,
   SIDEBAR_POPUP, SEARCH_POPUP, SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP,
-  TIME_PICK_POPUP, DATE_FORMAT_MENU_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP,
-  CONFIRM_AS_DUMMY_POPUP, CONFIRM_EXIT_DUMMY_POPUP, ACCESS_ERROR_POPUP,
-  STALE_ERROR_POPUP, USE_SYNC_ERROR_POPUP, NEW_NOTE, MY_NOTES, TRASH, ARCHIVE, UPDATING,
-  DIED_UPDATING, MAX_SELECTED_NOTE_IDS, SETTINGS_VIEW_ACCOUNT, DELETE_ACTION_LIST_NAME,
+  TIME_PICK_POPUP, DATE_FORMAT_MENU_POPUP, LOCK_MENU_POPUP, LOCK_EDITOR_POPUP,
+  CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, CONFIRM_AS_DUMMY_POPUP,
+  CONFIRM_EXIT_DUMMY_POPUP, ACCESS_ERROR_POPUP, STALE_ERROR_POPUP, USE_SYNC_ERROR_POPUP,
+  NEW_NOTE, MY_NOTES, TRASH, ARCHIVE, UPDATING, DIED_UPDATING, MAX_SELECTED_NOTE_IDS,
+  SETTINGS_VIEW_ACCOUNT, DELETE_ACTION_LIST_NAME,
 } from '../types/const';
 import { doContainListName, isObject, isString, doContainStaleNotes } from '../utils';
 import vars from '../vars';
@@ -53,6 +54,9 @@ const initialState = {
   timePickPopupPosition: null,
   isDateFormatMenuPopupShown: false,
   dateFormatPopupPosition: null,
+  isLockMenuPopupShown: false,
+  lockMenuPopupPosition: null,
+  isLockEditorPopupShown: false,
   isConfirmDeletePopupShown: false,
   isConfirmDiscardPopupShown: false,
   isConfirmAsDummyPopupShown: false,
@@ -87,6 +91,7 @@ const initialState = {
   syncProgress: null,
   paywallFeature: null,
   doRightPanelAnimateHidden: false,
+  lockAction: null,
   exportNoteAsPdfProgress: null,
   importAllDataProgress: null,
   exportAllDataProgress: null,
@@ -221,6 +226,19 @@ const displayReducer = (state = initialState, action) => {
         isDateFormatMenuPopupShown: isShown,
         dateFormatMenuPopupPosition: anchorPosition,
       };
+    }
+
+    if (id === LOCK_MENU_POPUP) {
+      return {
+        ...state,
+        isLockMenuPopupShown: isShown,
+        lockMenuPopupPosition: anchorPosition,
+      };
+    }
+
+    if (id === LOCK_EDITOR_POPUP) {
+      const newState = { ...state, isLockEditorPopupShown: isShown };
+      return newState;
     }
 
     if (id === CONFIRM_DELETE_POPUP) {
@@ -565,6 +583,10 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_PAYWALL_FEATURE) {
     return { ...state, paywallFeature: action.payload };
+  }
+
+  if (action.type === UPDATE_LOCK_ACTION) {
+    return { ...state, lockAction: action.payload };
   }
 
   if (action.type === UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS) {

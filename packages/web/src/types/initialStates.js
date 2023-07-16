@@ -65,3 +65,8 @@ export const initialListNameEditorState = {
   focusCount: 0,
   blurCount: 0,
 };
+
+export const initialLockSettingsState = {
+  lockedNotes: {},
+  lockedLists: {},
+};

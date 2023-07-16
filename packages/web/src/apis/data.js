@@ -4,7 +4,7 @@ import ldbApi from './localDb';
 import fileApi from './localFile';
 import {
   UNSAVED_NOTES_UNSAVED, UNSAVED_NOTES_SAVED, INDEX, DOT_JSON, CD_ROOT, N_NOTES, TRASH,
-  N_DAYS, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE,
+  N_DAYS, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE, LOCK_SETTINGS_STATE,
 } from '../types/const';
 import {
   isObject, createNoteFPath, createDataFName, extractNoteFPath, createPinFPath,
@@ -13,7 +13,9 @@ import {
   batchDeleteFileWithRetry, getListNamesFromNoteIds,
 } from '../utils';
 import { syncMode } from '../vars';
-import { initialLocalSettingsState } from '../types/initialStates';
+import {
+  initialLocalSettingsState, initialLockSettingsState,
+} from '../types/initialStates';
 
 const getApi = () => {
   // Beware arguments are not exactly the same!
@@ -565,12 +567,46 @@ const deleteAllSyncedFiles = async () => {
   await ldbApi.deleteFiles(fpaths);
 };
 
+const getLockSettings = async () => {
+  const lockSettings = { ...initialLockSettingsState };
+  try {
+    const item = await lsgApi.getItem(LOCK_SETTINGS_STATE);
+    if (item) {
+      const _lockSettings = JSON.parse(item);
+      for (const k in lockSettings) {
+        if (k in _lockSettings) {
+          for (const kk in _lockSettings[k]) {
+            const _obj = _lockSettings[k][kk];
+
+            const obj = {};
+            for (const kkk in _obj) {
+              if (kkk === 'unlockedDT') continue;
+              obj[kkk] = _obj[kkk];
+            }
+
+            lockSettings[k][kk] = obj;
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.log('Get or parse lockSettings error: ', error);
+  }
+
+  return lockSettings;
+};
+
+const putLockSettings = async (lockSettings) => {
+  await lsgApi.setItem(LOCK_SETTINGS_STATE, JSON.stringify(lockSettings));
+};
+
 const data = {
   getApi, listFPaths, listServerFPaths, toNotes, fetch, fetchMore,
   putNotes, getOldNotesInTrash, canDeleteListNames, putPins, deletePins, getFiles,
   putFiles, deleteFiles, getServerFilesToLocal, putLocalFilesToServer, deleteServerFiles,
   getLocalSettings, putLocalSettings, getUnsavedNotes, putUnsavedNote,
   deleteUnsavedNotes, deleteAllUnsavedNotes, deleteAllLocalFiles, deleteAllSyncedFiles,
+  getLockSettings, putLockSettings,
 };
 
 export default data;
