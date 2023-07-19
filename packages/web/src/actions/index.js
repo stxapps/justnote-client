@@ -52,24 +52,24 @@ import {
   UPDATE_DO_USE_LOCAL_THEME, UPDATE_DEFAULT_THEME, UPDATE_LOCAL_THEME,
   UPDATE_UPDATING_THEME_MODE, UPDATE_TIME_PICK, UPDATE_IS_24H_FORMAT,
   UPDATE_PAYWALL_FEATURE, UPDATE_LOCK_ACTION, UPDATE_LOCK_EDITOR, ADD_LOCK_NOTE,
-  REMOVE_LOCK_NOTE, LOCK_NOTE, UNLOCK_NOTE,
-
-  RESET_STATE,
+  REMOVE_LOCK_NOTE, LOCK_NOTE, UNLOCK_NOTE, ADD_LOCK_LIST, REMOVE_LOCK_LIST, LOCK_LIST,
+  UNLOCK_LIST, RESET_STATE,
 } from '../types/actionTypes';
 import {
   HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY, HASH_SUPPORT,
-  SEARCH_POPUP, PAYWALL_POPUP, SETTINGS_POPUP, CONFIRM_DELETE_POPUP,
-  CONFIRM_DISCARD_POPUP, NOTE_LIST_MENU_POPUP, NOTE_LIST_ITEM_MENU_POPUP,
-  LOCK_EDITOR_POPUP, MOVE_ACTION_NOTE_COMMANDS, MOVE_ACTION_NOTE_ITEM_MENU,
-  DELETE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
-  DISCARD_ACTION_UPDATE_LIST_NAME, MY_NOTES, TRASH, ID, NEW_NOTE, NEW_NOTE_OBJ,
-  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES, N_DAYS, CD_ROOT,
-  INFO, INDEX, DOT_JSON, SHOW_SYNCED, LG_WIDTH, IAP_VERIFY_URL, IAP_STATUS_URL, PADDLE,
-  COM_JUSTNOTECC, COM_JUSTNOTECC_SUPPORTER, SIGNED_TEST_STRING, VALID, INVALID, ACTIVE,
-  UNKNOWN, SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS, WHT_MODE,
-  BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE, FEATURE_DATE_FORMAT,
-  FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES, FEATURE_LOCK,
-  NOTE_DATE_FORMATS, PADDLE_RANDOM_ID, VALID_PASSWORD, PASSWORD_MSGS,
+  SEARCH_POPUP, PAYWALL_POPUP, SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP,
+  CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, NOTE_LIST_MENU_POPUP,
+  NOTE_LIST_ITEM_MENU_POPUP, LOCK_EDITOR_POPUP, MOVE_ACTION_NOTE_COMMANDS,
+  MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_ITEM_MENU,
+  DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_LIST_NAME, MY_NOTES, TRASH, ID,
+  NEW_NOTE, NEW_NOTE_OBJ, DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
+  N_NOTES, N_DAYS, CD_ROOT, INFO, INDEX, DOT_JSON, SHOW_SYNCED, LG_WIDTH,
+  IAP_VERIFY_URL, IAP_STATUS_URL, PADDLE, COM_JUSTNOTECC, COM_JUSTNOTECC_SUPPORTER,
+  SIGNED_TEST_STRING, VALID, INVALID, ACTIVE, UNKNOWN, SWAP_LEFT, SWAP_RIGHT,
+  SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS, WHT_MODE, BLK_MODE, CUSTOM_MODE,
+  FEATURE_PIN, FEATURE_APPEARANCE, FEATURE_DATE_FORMAT, FEATURE_SECTION_NOTES_BY_MONTH,
+  FEATURE_MORE_EDITOR_FONT_SIZES, FEATURE_LOCK, NOTE_DATE_FORMATS, PADDLE_RANDOM_ID,
+  VALID_PASSWORD, PASSWORD_MSGS, LOCK_ACTION_ADD_LOCK_NOTE, LOCK_ACTION_ADD_LOCK_LIST,
 } from '../types/const';
 import {
   throttle, extractUrl, urlHashToObj, objToUrlHash, isBusyStatus, isEqual,
@@ -3493,7 +3493,11 @@ export const showAddLockEditorPopup = (actionType) => async (dispatch, getState)
   const purchases = getState().info.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
-    updatePopupUrlHash(NOTE_LIST_ITEM_MENU_POPUP, false, null);
+    if (actionType === LOCK_ACTION_ADD_LOCK_NOTE) {
+      updatePopupUrlHash(NOTE_LIST_ITEM_MENU_POPUP, false, null);
+    } else if (actionType === LOCK_ACTION_ADD_LOCK_LIST) {
+      updatePopupUrlHash(SETTINGS_LISTS_MENU_POPUP, false, null);
+    }
 
     dispatch(updatePaywallFeature(FEATURE_LOCK));
     dispatch(updatePopup(PAYWALL_POPUP, true));
@@ -3603,20 +3607,86 @@ export const unlockNote = (noteId, password) => async (dispatch, getState) => {
   updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
 };
 
-export const addLockList = (listName, password, doAllowChangeListName) => async (
+export const addLockList = (listName, password, canChangeListNames) => async (
   dispatch, getState
 ) => {
+  const vResult = validatePassword(password);
+  if (vResult !== VALID_PASSWORD) {
+    dispatch(updateLockEditor({ errMsg: PASSWORD_MSGS[vResult] }));
+    return;
+  }
 
+  dispatch(updateLockEditor({ isLoadingShown: true, errMsg: '' }));
+  await sleep(16);
+
+  password = await userSession.encrypt(password);
+
+  dispatch({
+    type: ADD_LOCK_LIST, payload: { listName, password, canChangeListNames },
+  });
+  updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
 };
 
 export const removeLockList = (listName, password) => async (dispatch, getState) => {
+  const vResult = validatePassword(password);
+  if (vResult !== VALID_PASSWORD) {
+    dispatch(updateLockEditor({ errMsg: PASSWORD_MSGS[vResult] }));
+    return;
+  }
 
+  dispatch(updateLockEditor({ isLoadingShown: true, errMsg: '' }));
+  await sleep(16);
+
+  const lockedList = getState().lockSettings.lockedLists[listName];
+
+  let isValid = false;
+  if (isObject(lockedList)) {
+    if (isString(lockedList.password)) {
+      const lockedPassword = await userSession.decrypt(lockedList.password);
+      if (lockedPassword === password) isValid = true;
+    }
+  }
+  if (!isValid) {
+    dispatch(updateLockEditor({
+      isLoadingShown: false, errMsg: 'Password is not correct. Please try again.',
+    }));
+    return;
+  }
+
+  dispatch({ type: REMOVE_LOCK_LIST, payload: { listName } });
+  updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
 };
 
 export const lockList = (listName) => async (dispatch, getState) => {
-
+  dispatch({ type: LOCK_LIST, payload: { listName } });
 };
 
 export const unlockList = (listName, password) => async (dispatch, getState) => {
+  const vResult = validatePassword(password);
+  if (vResult !== VALID_PASSWORD) {
+    dispatch(updateLockEditor({ errMsg: PASSWORD_MSGS[vResult] }));
+    return;
+  }
 
+  dispatch(updateLockEditor({ isLoadingShown: true, errMsg: '' }));
+  await sleep(16);
+
+  const lockedList = getState().lockSettings.lockedLists[listName];
+
+  let isValid = false;
+  if (isObject(lockedList)) {
+    if (isString(lockedList.password)) {
+      const lockedPassword = await userSession.decrypt(lockedList.password);
+      if (lockedPassword === password) isValid = true;
+    }
+  }
+  if (!isValid) {
+    dispatch(updateLockEditor({
+      isLoadingShown: false, errMsg: 'Password is not correct. Please try again.',
+    }));
+    return;
+  }
+
+  dispatch({ type: UNLOCK_LIST, payload: { listName, unlockedDT: Date.now() } });
+  updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
 };

@@ -5,14 +5,14 @@ import { updatePopupUrlHash, updateSelectingNoteId, updateLockAction } from '../
 import {
   LOCK_MENU_POPUP, LOCK_EDITOR_POPUP, LOCK_ACTION_UNLOCK_NOTE,
 } from '../types/const';
-import { makeGetLockNoteDoShowTitle } from '../selectors';
+import { makeGetDoShowTitle } from '../selectors';
 
 import { useTailwind } from '.';
 
 const NoteListItemLock = (props) => {
 
   const { note } = props;
-  const getDoShowTitle = useMemo(makeGetLockNoteDoShowTitle, []);
+  const getDoShowTitle = useMemo(makeGetDoShowTitle, []);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const doShowTitle = useSelector(state => getDoShowTitle(state, note));
   const dispatch = useDispatch();
@@ -44,23 +44,21 @@ const NoteListItemLock = (props) => {
   };
 
   const title = doShowTitle ? note.title : '';
-  const body = 'Please enter a password to unlock';
-
-  const titleClassNames = title ? 'pb-1.5' : '';
+  const body = 'This note is locked.';
 
   const titleTabIndex = title ? 0 : -1;
   const bodyTabIndex = title ? -1 : 0;
 
   return (
     <div className={tailwind('group flex items-center rounded-sm py-4 pl-3 sm:pl-5')}>
-      <button onClick={onContentBtnClick} className={tailwind('mr-3 flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 border border-gray-300 focus:outline-none')}>
-        <svg className={tailwind('h-6 w-6 text-gray-400')} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <button onClick={onContentBtnClick} className={tailwind('mr-3 flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white pb-0.5 focus:outline-none blk:border-gray-600 blk:bg-gray-900')}>
+        <svg className={tailwind('h-6 w-6 text-gray-400 blk:text-gray-500')} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
           <path fillRule="evenodd" clipRule="evenodd" d="M5 9V7C5 5.67392 5.52678 4.40215 6.46447 3.46447C7.40215 2.52678 8.67392 2 10 2C11.3261 2 12.5979 2.52678 13.5355 3.46447C14.4732 4.40215 15 5.67392 15 7V9C15.5304 9 16.0391 9.21071 16.4142 9.58579C16.7893 9.96086 17 10.4696 17 11V16C17 16.5304 16.7893 17.0391 16.4142 17.4142C16.0391 17.7893 15.5304 18 15 18H5C4.46957 18 3.96086 17.7893 3.58579 17.4142C3.21071 17.0391 3 16.5304 3 16V11C3 10.4696 3.21071 9.96086 3.58579 9.58579C3.96086 9.21071 4.46957 9 5 9ZM13 7V9H7V7C7 6.20435 7.31607 5.44129 7.87868 4.87868C8.44129 4.31607 9.20435 4 10 4C10.7956 4 11.5587 4.31607 12.1213 4.87868C12.6839 5.44129 13 6.20435 13 7Z" />
         </svg>
       </button>
       <div className={tailwind('min-w-0 flex-1')}>
         <div className={tailwind('pr-3')}>
-          <button tabIndex={titleTabIndex} onClick={onContentBtnClick} className={tailwind(`flex w-full items-center justify-between rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 blk:focus-visible:ring-gray-500 blk:focus-visible:ring-offset-gray-900 ${titleClassNames}`)}>
+          <button tabIndex={titleTabIndex} onClick={onContentBtnClick} className={tailwind('flex w-full items-center justify-between rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 blk:focus-visible:ring-gray-500 blk:focus-visible:ring-offset-gray-900')}>
             <h3 className={tailwind('min-w-0 flex-1 truncate text-left text-base font-semibold text-gray-800 group-hover:underline blk:text-gray-100 lg:text-sm')}>{title}</h3>
           </button>
         </div>

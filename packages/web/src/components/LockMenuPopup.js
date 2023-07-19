@@ -4,8 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import { updatePopupUrlHash, updateLockAction } from '../actions';
 import {
-  LOCK_MENU_POPUP, LOCK_EDITOR_POPUP, LOCK_ACTION_REMOVE_LOCK_NOTE,
-  LOCK_ACTION_UNLOCK_NOTE, UNLOCK, REMOVE_LOCK,
+  LOCK_MENU_POPUP, LOCK_EDITOR_POPUP, LOCK_ACTION_REMOVE_LOCK_NOTE, REMOVE_LOCK,
 } from '../types/const';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
 

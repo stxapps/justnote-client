@@ -4,25 +4,28 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import { updateNoteIdUrlHash, fetch } from '../actions';
 import {
-  TRASH, NEW_NOTE, NEW_NOTE_OBJ, MAX_SELECTED_NOTE_IDS, VALID,
+  TRASH, NEW_NOTE, NEW_NOTE_OBJ, MAX_SELECTED_NOTE_IDS, VALID, LOCKED,
 } from '../types/const';
-import { makeGetUnsavedNote } from '../selectors';
+import { makeGetUnsavedNote, makeGetLockListStatus } from '../selectors';
 import { popupFMV } from '../types/animConfigs';
 
 import { useTailwind } from '.';
 import NoteListTopBar from './NoteListTopBar';
 import NoteListItems from './NoteListItems';
 import LoadingNoteListItems from './LoadingNoteListItems';
+import NoteListLock from './NoteListLock';
 
 const NoteList = (props) => {
 
   const { onSidebarOpenBtnClick } = props;
   const getUnsavedNote = useMemo(makeGetUnsavedNote, []);
+  const getLockListStatus = useMemo(makeGetLockListStatus, []);
   const listName = useSelector(state => state.display.listName);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const isMaxErrorShown = useSelector(state => state.display.isSelectedNoteIdsMaxErrorShown);
   const fetchedListNames = useSelector(state => state.display.fetchedListNames);
   const unsavedNote = useSelector(state => getUnsavedNote(state, NEW_NOTE_OBJ));
+  const lockStatus = useSelector(state => getLockListStatus(state, listName));
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
@@ -59,7 +62,11 @@ const NoteList = (props) => {
     if (!fetchedListNames.includes(listName)) dispatch(fetch());
   }, [listName, fetchedListNames, dispatch]);
 
-  const noteListItems = fetchedListNames.includes(listName) ? <NoteListItems /> : <LoadingNoteListItems />;
+  let noteListItems = <LoadingNoteListItems />;
+  if (fetchedListNames.includes(listName)) {
+    if (lockStatus === LOCKED) noteListItems = <NoteListLock />;
+    else noteListItems = <NoteListItems />;
+  }
 
   return (
     <div className={tailwind('relative flex h-full w-full min-w-64 flex-col')}>

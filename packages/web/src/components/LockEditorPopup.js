@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import {
   updatePopupUrlHash, updateLockEditor, addLockNote, removeLockNote, unlockNote,
+  addLockList, removeLockList, unlockList,
 } from '../actions';
 import {
   DOMAIN_NAME, HASH_SUPPORT, LOCK_EDITOR_POPUP, SM_WIDTH, LOCK_ACTION_ADD_LOCK_NOTE,
@@ -21,17 +22,20 @@ const LockEditorPopup = () => {
   const lockAction = useSelector(state => state.display.lockAction);
   const selectingNoteId = useSelector(state => state.display.selectingNoteId);
   const selectingListName = useSelector(state => state.display.selectingListName);
-  const isLoadingShown = useSelector(state => state.lockEditor.isLoadingShown);
-  const errMsg = useSelector(state => state.lockEditor.errMsg);
+  // errMsg might be the same and didClick not reset! So need the whole state.
+  const lockEditorState = useSelector(state => state.lockEditor);
   // Naked password not in reducer to avoid storing to storage.
   const [passwordInputValue, setPasswordInputValue] = useState('');
   const [doShowPassword, setDoShowPassword] = useState(false);
   const [doShowTitle, setDoShowTitle] = useState(false);
+  const [canChangeListNames, setCanChangeListNames] = useState(false);
   const scrollView = useRef(null);
   const passwordInput = useRef(null);
   const didClick = useRef(false);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
+
+  const { isLoadingShown, errMsg } = lockEditorState;
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;
@@ -48,17 +52,29 @@ const LockEditorPopup = () => {
     setDoShowTitle(e.target.checked);
   };
 
+  const onCanChangeListNamesInputChange = (e) => {
+    setCanChangeListNames(e.target.checked);
+  };
+
   const onOkBtnClick = () => {
     if (didClick.current) return;
 
     if (lockAction === LOCK_ACTION_ADD_LOCK_NOTE) {
-      dispatch(addLockNote(selectingNoteId, passwordInputValue));
+      dispatch(addLockNote(selectingNoteId, passwordInputValue, doShowTitle));
     } else if (lockAction === LOCK_ACTION_REMOVE_LOCK_NOTE) {
       dispatch(removeLockNote(selectingNoteId, passwordInputValue));
     } else if (lockAction === LOCK_ACTION_UNLOCK_NOTE) {
       dispatch(unlockNote(selectingNoteId, passwordInputValue));
+    } else if (lockAction === LOCK_ACTION_ADD_LOCK_LIST) {
+      dispatch(
+        addLockList(selectingListName, passwordInputValue, canChangeListNames)
+      );
+    } else if (lockAction === LOCK_ACTION_REMOVE_LOCK_LIST) {
+      dispatch(removeLockList(selectingListName, passwordInputValue));
+    } else if (lockAction === LOCK_ACTION_UNLOCK_LIST) {
+      dispatch(unlockList(selectingListName, passwordInputValue));
     } else {
-
+      console.log(`In LockEditorPopup, invalid lockAction: ${lockAction}`);
     }
 
     didClick.current = true;
@@ -69,6 +85,7 @@ const LockEditorPopup = () => {
       setPasswordInputValue('');
       setDoShowPassword(false);
       setDoShowTitle(false);
+      setCanChangeListNames(false);
       setTimeout(() => {
         if (passwordInput.current) passwordInput.current.focus();
       }, 100);
@@ -77,7 +94,7 @@ const LockEditorPopup = () => {
 
   useEffect(() => {
     if (isShown) didClick.current = false;
-  }, [isShown, isLoadingShown, errMsg]);
+  }, [isShown, lockEditorState]);
 
   // *manage keyboard* - try absolute so move along with keyboard
   // can use absolute - always the same amount from top, unlike SignInPopup/SignUpPopup can be at the bottom
@@ -102,7 +119,7 @@ const LockEditorPopup = () => {
             <div className={tailwind('relative flex flex-col overflow-hidden rounded-lg bg-white')} style={{ height: panelHeight }}>
               <div ref={scrollView} className={tailwind('relative flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6')}>
                 <h2 className={tailwind('mt-8 text-left text-xl font-semibold text-gray-900')}>Lock Note</h2>
-                <p className={tailwind('mt-2 text-sm leading-6 text-gray-500')}>Local only. If you forget the password, you can sign out and sign back in again.</p>
+                <p className={tailwind('mt-2 text-sm leading-6 text-gray-500')}>Local only. If you forget the password, you can sign out and sign back in again. Like Lock access, the data still there.</p>
                 <p className={tailwind('mt-2 text-sm leading-6 text-gray-500')}>Enter a password used to unlock your note below.</p>
                 <div className={tailwind('pt-3.5')}>
                   <label htmlFor="password-input" className={tailwind('sr-only')}>Password</label>
@@ -124,7 +141,11 @@ const LockEditorPopup = () => {
                 </div>
                 <div className={tailwind('mt-6 flex items-center')}>
                   <input onChange={onShowTitleInputChange} checked={doShowTitle} className={tailwind('h-4 w-4 cursor-pointer rounded border-gray-400 bg-white text-gray-600 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 blk:border-gray-400 blk:bg-gray-900 blk:text-green-500 blk:focus:ring-gray-500 blk:focus:ring-offset-gray-900')} id="show-title-input" name="show-title-input" type="checkbox" />
-                  <label htmlFor="show-title-input" className={tailwind('ml-2 block cursor-pointer text-base text-gray-500 blk:text-gray-400')}>Do not hide note title in the note list</label>
+                  <label htmlFor="show-title-input" className={tailwind('ml-2 block cursor-pointer text-base text-gray-500 blk:text-gray-400')}>Show note title in the note list</label>
+                </div>
+                <div className={tailwind('mt-6 flex items-center')}>
+                  <input onChange={onCanChangeListNamesInputChange} checked={canChangeListNames} className={tailwind('h-4 w-4 cursor-pointer rounded border-gray-400 bg-white text-gray-600 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 blk:border-gray-400 blk:bg-gray-900 blk:text-green-500 blk:focus:ring-gray-500 blk:focus:ring-offset-gray-900')} id="change-list-names-input" name="change-list-names-input" type="checkbox" />
+                  <label htmlFor="change-list-names-input" className={tailwind('ml-2 block cursor-pointer text-base text-gray-500 blk:text-gray-400')}>Allow change to other lists</label>
                 </div>
                 <div className={tailwind(errMsg ? '' : 'pt-5')}>
                   {errMsg && <p className={tailwind('py-2 text-sm text-red-600')}>{errMsg}</p>}

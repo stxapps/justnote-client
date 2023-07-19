@@ -16,11 +16,11 @@ const NoteListItem = (props) => {
 
   const { note } = props;
   const getPinStatus = useMemo(makeGetPinStatus, []);
-  const getLockStatus = useMemo(makeGetLockNoteStatus, []);
+  const getLockNoteStatus = useMemo(makeGetLockNoteStatus, []);
   const getUnsavedNote = useMemo(makeGetUnsavedNote, []);
   const noteId = useSelector(state => state.display.noteId);
   const pinStatus = useSelector(state => getPinStatus(state, note));
-  const lockStatus = useSelector(state => getLockStatus(state, note));
+  const lockStatus = useSelector(state => getLockNoteStatus(state, note));
   const unsavedNote = useSelector(state => getUnsavedNote(state, note));
   const tailwind = useTailwind();
 

@@ -6,6 +6,7 @@ import { updatePopup, updateSettingsPopup, updateSettingsViewId } from '../actio
 import {
   PAYWALL_POPUP, SM_WIDTH, SETTINGS_VIEW_IAP, FEATURE_PIN, FEATURE_APPEARANCE,
   FEATURE_DATE_FORMAT, FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES,
+  FEATURE_LOCK,
 } from '../types/const';
 import { dialogBgFMV, dialogFMV } from '../types/animConfigs';
 
@@ -51,6 +52,7 @@ const PaywallPopup = () => {
   if (feature === FEATURE_DATE_FORMAT) featureText = 'Custom date format';
   if (feature === FEATURE_SECTION_NOTES_BY_MONTH) featureText = 'Section by month';
   if (feature === FEATURE_MORE_EDITOR_FONT_SIZES) featureText = 'More font sizes';
+  if (feature === FEATURE_LOCK) featureText = 'Lock lists and notes';
 
   const spanStyle = {};
   if (safeAreaWidth >= SM_WIDTH) spanStyle.height = safeAreaHeight;

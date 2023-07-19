@@ -557,6 +557,7 @@ const deleteAllUnsavedNotes = async () => {
 const deleteAllLocalFiles = async () => {
   await lsgApi.removeItem(COLS_PANEL_STATE);
   await lsgApi.removeItem(LOCAL_SETTINGS_STATE);
+  await lsgApi.removeItem(LOCK_SETTINGS_STATE);
   await ldbApi.deleteAllFiles();
   await fileApi.deleteAllFiles();
 };
@@ -568,25 +569,25 @@ const deleteAllSyncedFiles = async () => {
 };
 
 const getLockSettings = async () => {
+  // BUG Alert: new object, not ref to the object in initialLockSettingsState!
   const lockSettings = { ...initialLockSettingsState };
   try {
     const item = await lsgApi.getItem(LOCK_SETTINGS_STATE);
     if (item) {
       const _lockSettings = JSON.parse(item);
-      for (const k in lockSettings) {
-        if (k in _lockSettings) {
-          for (const kk in _lockSettings[k]) {
-            const _obj = _lockSettings[k][kk];
+      for (const k1 in _lockSettings) {
+        if (!(k1 in lockSettings)) continue;
 
-            const obj = {};
-            for (const kkk in _obj) {
-              if (kkk === 'unlockedDT') continue;
-              obj[kkk] = _obj[kkk];
-            }
-
-            lockSettings[k][kk] = obj;
+        const v1 = {}, _v1 = _lockSettings[k1];
+        for (const k2 in _v1) {
+          const v2 = {}, _v2 = _v1[k2];
+          for (const k3 in _v2) {
+            if (k3 === 'unlockedDT') continue;
+            v2[k3] = _v2[k3];
           }
+          v1[k2] = v2;
         }
+        lockSettings[k1] = v1;
       }
     }
   } catch (error) {

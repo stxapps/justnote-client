@@ -2,28 +2,41 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { changeListName, updatePopupUrlHash } from '../actions';
-import { SIDEBAR_POPUP, TRASH, ARCHIVE, LG_WIDTH } from '../types/const';
-import { getListNameMap } from '../selectors';
+import { SIDEBAR_POPUP, MY_NOTES, TRASH, ARCHIVE, LG_WIDTH } from '../types/const';
+import { getListNameMap, getCanChangeListNames } from '../selectors';
+import { getListNameObj } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
 const SidebarListNames = () => {
 
   const listNameMap = useSelector(getListNameMap);
+  const canChangeListNames = useSelector(state => getCanChangeListNames(state));
   const tailwind = useTailwind();
 
   const isChildless = listNameMap.every(listNameObj => {
     return !listNameObj.children || listNameObj.children.length === 0;
   });
 
+  let content;
+  if (canChangeListNames) {
+    content = listNameMap.map(listNameObj => {
+      return (
+        <SidebarListName key={listNameObj.listName} listNameObj={listNameObj} level={0} isChildless={isChildless} />
+      );
+    });
+  } else {
+    const { listNameObj: _listNameObj } = getListNameObj(MY_NOTES, listNameMap);
+    const listNameObj = { ..._listNameObj, children: null };
+    content = (
+      <SidebarListName key={listNameObj.listName} listNameObj={listNameObj} level={0} isChildless={true} />
+    );
+  }
+
   return (
     <nav className={tailwind('mt-6 overflow-y-auto pl-3 pr-1')}>
       <div className={tailwind('space-y-1.5')}>
-        {listNameMap.map(listNameObj => {
-          return (
-            <SidebarListName key={listNameObj.listName} listNameObj={listNameObj} level={0} isChildless={isChildless} />
-          );
-        })}
+        {content}
       </div>
     </nav>
   );

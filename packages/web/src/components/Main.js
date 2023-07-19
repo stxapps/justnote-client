@@ -21,7 +21,7 @@ import {
   SettingsUpdateErrorPopup, SettingsConflictErrorPopup,
 } from './SettingsErrorPopup';
 import ListNamesPopup from './ListNamesPopup';
-import LockEditorPopup from './lockEditorPopup';
+import LockEditorPopup from './LockEditorPopup';
 import ConfirmDeletePopup from './ConfirmDeletePopup';
 import ConfirmDiscardPopup from './ConfirmDiscardPopup';
 import PaywallPopup from './PaywallPopup';

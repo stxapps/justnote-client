@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-import { INVALID } from '../types/const';
-import { isDiedStatus } from '../utils';
+import { INVALID, LOCKED, NEW_NOTE } from '../types/const';
+import { makeGetLockNoteStatus, makeGetLockListStatus } from '../selectors';
+import { isObject, isDiedStatus } from '../utils';
 
 import { useTailwind } from '.';
 import NoteEditorTopBar from './NoteEditorTopBar';
@@ -10,14 +11,33 @@ import NoteEditorEditor from './NoteEditorEditor';
 import NoteEditorBulkEdit from './NoteEditorBulkEdit';
 import { NoteEditorSavedConflict, NoteEditorUnsavedConflict } from './NoteEditorConflict';
 import NoteEditorRetry from './NoteEditorRetry';
+import NoteEditorLock from './NoteEditorLock';
 
 const NoteEditor = (props) => {
 
   const { note, unsavedNote, isFullScreen, onToggleFullScreen } = props;
+  const getLockNoteStatus = useMemo(makeGetLockNoteStatus, []);
+  const getLockListStatus = useMemo(makeGetLockListStatus, []);
+  const listName = useSelector(state => state.display.listName);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
+  const lockNoteStatus = useSelector(state => getLockNoteStatus(state, note));
+  const lockListStatus = useSelector(state => getLockListStatus(state, listName));
   const tailwind = useTailwind();
 
   const isUnsavedInvalid = unsavedNote.status === INVALID;
+  const isListLocked = [lockNoteStatus, lockListStatus].includes(LOCKED);
+
+  const editorEditor = (
+    <div className={tailwind('flex h-full w-full flex-col bg-white blk:bg-gray-900')}>
+      <NoteEditorTopBar note={note} unsavedNote={unsavedNote} isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} />
+      <NoteEditorEditor note={note} unsavedNote={unsavedNote} />
+    </div>
+  );
+
+  if (isListLocked) {
+    if (isObject(note) && note.id === NEW_NOTE) return editorEditor;
+    return <NoteEditorLock note={note} lockNoteStatus={lockNoteStatus} lockListStatus={lockListStatus} />;
+  }
 
   if (isBulkEditing) return <NoteEditorBulkEdit />;
   if (!note) {
@@ -42,12 +62,7 @@ const NoteEditor = (props) => {
     return <NoteEditorUnsavedConflict note={note} unsavedNote={unsavedNote} />;
   }
 
-  return (
-    <div className={tailwind('flex h-full w-full flex-col bg-white blk:bg-gray-900')}>
-      <NoteEditorTopBar note={note} unsavedNote={unsavedNote} isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} />
-      <NoteEditorEditor note={note} unsavedNote={unsavedNote} />
-    </div>
-  );
+  return editorEditor;
 };
 
 export default React.memo(NoteEditor);

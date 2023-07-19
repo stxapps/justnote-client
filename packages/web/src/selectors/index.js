@@ -3,7 +3,7 @@ import { createSelectorCreator, defaultMemoize, createSelector } from 'reselect'
 import {
   PINNED, ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE, NOTE_DATE_FORMAT_SYSTEM,
   UPDATING, MOVING, DIED_UPDATING, DIED_MOVING, WHT_MODE, BLK_MODE, SYSTEM_MODE,
-  CUSTOM_MODE, NEW_NOTE, VALID, INVALID, LOCKED, UNLOCKED,
+  CUSTOM_MODE, NEW_NOTE, VALID, INVALID, LOCKED, UNLOCKED, MY_NOTES,
 } from '../types/const';
 import {
   isStringIn, isObject, isString, isArrayEqual, isEqual, isTitleEqual, isBodyEqual,
@@ -483,7 +483,7 @@ export const makeGetUnsavedNote = () => {
   return createSelector(
     state => getNoteFPaths(state),
     state => state.unsavedNotes,
-    (state, note) => note,
+    (__, note) => note,
     (noteFPaths, unsavedNotes, note) => {
       // Valid - found an unsaved note
       // Invalid - found a confliced unsaved note
@@ -559,7 +559,6 @@ export const makeGetIsExportingNoteAsPdf = () => {
   );
 };
 
-/** @return {function(any, any): any} */
 export const makeGetLockNoteStatus = () => {
   return createSelector(
     state => getNoteFPaths(state),
@@ -586,7 +585,7 @@ export const makeGetLockNoteStatus = () => {
   );
 };
 
-export const makeGetLockNoteDoShowTitle = () => {
+export const makeGetDoShowTitle = () => {
   return createSelector(
     state => getNoteFPaths(state),
     state => state.lockSettings.lockedNotes,
@@ -596,7 +595,7 @@ export const makeGetLockNoteDoShowTitle = () => {
       return null;
     },
     (noteFPaths, lockedNotes, noteId) => {
-      if (!isString(noteId)) return null;
+      if (!isString(noteId)) return false;
 
       const { toRootIds } = listNoteIds(noteFPaths);
       const noteMainId = getMainId(noteId, toRootIds);
@@ -611,5 +610,35 @@ export const makeGetLockNoteDoShowTitle = () => {
 };
 
 export const makeGetLockListStatus = () => {
+  return createSelector(
+    state => state.lockSettings.lockedLists,
+    (__, listName) => listName,
+    (lockedLists, listName) => {
+      if (!isString(listName)) return null;
 
+      if (isObject(lockedLists[listName])) {
+        if (isString(lockedLists[listName].password)) {
+          if (isNumber(lockedLists[listName].unlockedDT)) return UNLOCKED;
+          return LOCKED;
+        }
+      }
+      return null;
+    },
+  );
 };
+
+export const getCanChangeListNames = createSelector(
+  state => state.display.listName,
+  state => state.lockSettings.lockedLists,
+  (listName, lockedLists) => {
+    if (listName !== MY_NOTES) return true;
+
+    if (isObject(lockedLists[listName])) {
+      if (isNumber(lockedLists[listName].unlockedDT)) return true;
+      if ([true, false].includes(lockedLists[listName].canChangeListNames)) {
+        return lockedLists[listName].canChangeListNames;
+      }
+    }
+    return true;
+  },
+);
