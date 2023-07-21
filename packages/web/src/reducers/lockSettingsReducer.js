@@ -9,10 +9,10 @@ import { initialLockSettingsState as initialState } from '../types/initialStates
 
 /* {
   lockedNotes: {
-    noteMainId: { password, doShowTitle, unlockedDT },
+    noteMainId: { password, doShowTitle, canExport, unlockedDT },
   },
   lockedLists: {
-    listName: { password, canChangeListNames, unlockedDT },
+    listName: { password, canChangeListNames, canExport, unlockedDT },
   },
 } */
 
@@ -24,11 +24,11 @@ const lockSettingsReducer = (state = initialState, action) => {
   }
 
   if (action.type === ADD_LOCK_NOTE) {
-    const { noteMainId, password, doShowTitle } = action.payload;
+    const { noteMainId, password, doShowTitle, canExport } = action.payload;
 
     const newState = { ...state };
     newState.lockedNotes = {
-      ...newState.lockedNotes, [noteMainId]: { password, doShowTitle },
+      ...newState.lockedNotes, [noteMainId]: { password, doShowTitle, canExport },
     };
 
     return loop(
@@ -90,11 +90,11 @@ const lockSettingsReducer = (state = initialState, action) => {
   }
 
   if (action.type === ADD_LOCK_LIST) {
-    const { listName, password, canChangeListNames } = action.payload;
+    const { listName, password, canChangeListNames, canExport } = action.payload;
 
     const newState = { ...state };
     newState.lockedLists = {
-      ...newState.lockedLists, [listName]: { password, canChangeListNames },
+      ...newState.lockedLists, [listName]: { password, canChangeListNames, canExport },
     };
 
     return loop(

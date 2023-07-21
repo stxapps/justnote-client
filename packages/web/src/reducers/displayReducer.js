@@ -11,9 +11,10 @@ import {
   UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS, MERGE_SETTINGS_COMMIT,
   UPDATE_SETTINGS_VIEW_ID, UPDATE_LIST_NAMES_MODE, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
   UPDATE_SYNC_PROGRESS, UPDATE_SYNCED, UPDATE_PAYWALL_FEATURE, UPDATE_LOCK_ACTION,
-  UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS, UPDATE_IMPORT_ALL_DATA_PROGRESS,
-  UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
-  UPDATE_DELETE_SYNC_DATA_PROGRESS, DELETE_ALL_DATA, RESET_STATE,
+  ADD_LOCK_NOTE, LOCK_NOTE, ADD_LOCK_LIST, LOCK_LIST, UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS,
+  UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
+  UPDATE_DELETE_ALL_DATA_PROGRESS, UPDATE_DELETE_SYNC_DATA_PROGRESS, DELETE_ALL_DATA,
+  RESET_STATE,
 } from '../types/actionTypes';
 import {
   SIGN_UP_POPUP, SIGN_IN_POPUP, PROFILE_POPUP, NOTE_LIST_MENU_POPUP,
@@ -587,6 +588,18 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_LOCK_ACTION) {
     return { ...state, lockAction: action.payload };
+  }
+
+  if ([ADD_LOCK_NOTE, LOCK_NOTE].includes(action.type)) {
+    const { noteId } = action.payload;
+    if (state.noteId === noteId) {
+      return { ...state, noteId: null, isEditorFocused: false, isEditorBusy: false };
+    }
+    return state;
+  }
+
+  if ([ADD_LOCK_LIST, LOCK_LIST].includes(action.type)) {
+    return { ...state, noteId: null, isEditorFocused: false, isEditorBusy: false };
   }
 
   if (action.type === UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS) {

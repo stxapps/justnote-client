@@ -85,6 +85,10 @@ const createSelectorNotes = createSelectorCreator(
 
     if (prevVal['pendingPins'] !== val['pendingPins']) return false;
 
+    if (prevVal['lockSettings'].lockedNotes !== val['lockSettings'].lockedNotes) {
+      return false;
+    }
+
     if (
       prevVal['notes'] === val['notes'] &&
       prevVal['conflictedNotes'] === val['conflictedNotes']
@@ -124,6 +128,7 @@ export const _getNotes = (state) => {
   const noteFPaths = getNoteFPaths(state);
   const pinFPaths = getPinFPaths(state);
   const pendingPins = state.pendingPins;
+  const lockedNotes = state.lockSettings.lockedNotes;
 
   let sortedNotes = getSortedNotes(notes, listName, sortOn, doDescendingOrder);
   if (!sortedNotes) return { pinnedNotes: null, notes: null };
@@ -148,10 +153,10 @@ export const _getNotes = (state) => {
   if (searchString === '') return { pinnedNotes, notes: noPinnedNotes };
 
   const searchPinnedNotes = pinnedNotes.filter(note => {
-    return isStringIn(note, searchString);
+    return isStringIn(note, searchString, lockedNotes, toRootIds);
   });
   const searchNotes = noPinnedNotes.filter(note => {
-    return isStringIn(note, searchString);
+    return isStringIn(note, searchString, lockedNotes, toRootIds);
   });
 
   return { pinnedNotes: searchPinnedNotes, notes: searchNotes };

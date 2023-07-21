@@ -59,17 +59,18 @@ import {
   HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY, HASH_SUPPORT,
   SEARCH_POPUP, PAYWALL_POPUP, SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP,
   CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, NOTE_LIST_MENU_POPUP,
-  NOTE_LIST_ITEM_MENU_POPUP, LOCK_EDITOR_POPUP, MOVE_ACTION_NOTE_COMMANDS,
-  MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_ITEM_MENU,
-  DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_LIST_NAME, MY_NOTES, TRASH, ID,
-  NEW_NOTE, NEW_NOTE_OBJ, DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
-  N_NOTES, N_DAYS, CD_ROOT, INFO, INDEX, DOT_JSON, SHOW_SYNCED, LG_WIDTH,
-  IAP_VERIFY_URL, IAP_STATUS_URL, PADDLE, COM_JUSTNOTECC, COM_JUSTNOTECC_SUPPORTER,
-  SIGNED_TEST_STRING, VALID, INVALID, ACTIVE, UNKNOWN, SWAP_LEFT, SWAP_RIGHT,
-  SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS, WHT_MODE, BLK_MODE, CUSTOM_MODE,
-  FEATURE_PIN, FEATURE_APPEARANCE, FEATURE_DATE_FORMAT, FEATURE_SECTION_NOTES_BY_MONTH,
-  FEATURE_MORE_EDITOR_FONT_SIZES, FEATURE_LOCK, NOTE_DATE_FORMATS, PADDLE_RANDOM_ID,
-  VALID_PASSWORD, PASSWORD_MSGS, LOCK_ACTION_ADD_LOCK_NOTE, LOCK_ACTION_ADD_LOCK_LIST,
+  NOTE_LIST_ITEM_MENU_POPUP, LOCK_EDITOR_POPUP, LOCK_MENU_POPUP,
+  MOVE_ACTION_NOTE_COMMANDS, MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS,
+  DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
+  DISCARD_ACTION_UPDATE_LIST_NAME, MY_NOTES, TRASH, ID, NEW_NOTE, NEW_NOTE_OBJ,
+  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES, N_DAYS, CD_ROOT,
+  INFO, INDEX, DOT_JSON, SHOW_SYNCED, LG_WIDTH, IAP_VERIFY_URL, IAP_STATUS_URL, PADDLE,
+  COM_JUSTNOTECC, COM_JUSTNOTECC_SUPPORTER, SIGNED_TEST_STRING, VALID, INVALID, ACTIVE,
+  UNKNOWN, SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS, WHT_MODE,
+  BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE, FEATURE_DATE_FORMAT,
+  FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES, FEATURE_LOCK,
+  NOTE_DATE_FORMATS, PADDLE_RANDOM_ID, VALID_PASSWORD, PASSWORD_MSGS,
+  LOCK_ACTION_ADD_LOCK_NOTE, LOCK_ACTION_UNLOCK_NOTE, LOCK_ACTION_ADD_LOCK_LIST,
 } from '../types/const';
 import {
   throttle, extractUrl, urlHashToObj, objToUrlHash, isBusyStatus, isEqual,
@@ -3508,9 +3509,9 @@ export const showAddLockEditorPopup = (actionType) => async (dispatch, getState)
   updatePopupUrlHash(LOCK_EDITOR_POPUP, true, null, true);
 };
 
-export const addLockNote = (noteId, password, doShowTitle) => async (
-  dispatch, getState
-) => {
+export const addLockNote = (
+  noteId, password, doShowTitle, canExport
+) => async (dispatch, getState) => {
   const vResult = validatePassword(password);
   if (vResult !== VALID_PASSWORD) {
     dispatch(updateLockEditor({ errMsg: PASSWORD_MSGS[vResult] }));
@@ -3526,8 +3527,20 @@ export const addLockNote = (noteId, password, doShowTitle) => async (
   const noteMainId = getMainId(noteId, toRootIds);
   password = await userSession.encrypt(password);
 
-  dispatch({ type: ADD_LOCK_NOTE, payload: { noteMainId, password, doShowTitle } });
+  dispatch({
+    type: ADD_LOCK_NOTE,
+    payload: { noteId, noteMainId, password, doShowTitle, canExport },
+  });
   updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
+};
+
+export const showLockMenuPopup = (noteId, rect) => async (dispatch, getState) => {
+  if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
+
+  // Impossible noteId === getState().display.noteId as the note is locked.
+
+  dispatch(updateSelectingNoteId(noteId));
+  updatePopupUrlHash(LOCK_MENU_POPUP, true, rect);
 };
 
 export const removeLockNote = (noteId, password) => async (dispatch, getState) => {
@@ -3570,7 +3583,26 @@ export const lockNote = (noteId) => async (dispatch, getState) => {
 
   const noteMainId = getMainId(noteId, toRootIds);
 
-  dispatch({ type: LOCK_NOTE, payload: { noteMainId } });
+  dispatch({ type: LOCK_NOTE, payload: { noteId, noteMainId } });
+};
+
+export const showUnlockNoteEditorPopup = (noteId) => async (dispatch, getState) => {
+
+  if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
+  if (vars.deleteOldNotes.ids && vars.deleteOldNotes.ids.includes(noteId)) return;
+
+  const isEditorUploading = getState().editor.isUploading;
+  if (isEditorUploading) return;
+
+  const isEditorFocused = getState().display.isEditorFocused;
+  if (isEditorFocused) {
+    // As this note is locked, not editing this note for sure.
+    // Unsaved should be stored in time before completing unlock this note.
+  }
+
+  dispatch(updateSelectingNoteId(noteId));
+  dispatch(updateLockAction(LOCK_ACTION_UNLOCK_NOTE));
+  updatePopupUrlHash(LOCK_EDITOR_POPUP, true);
 };
 
 export const unlockNote = (noteId, password) => async (dispatch, getState) => {
@@ -3605,11 +3637,20 @@ export const unlockNote = (noteId, password) => async (dispatch, getState) => {
 
   dispatch({ type: UNLOCK_NOTE, payload: { noteMainId, unlockedDT: Date.now() } });
   updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
+
+  const safeAreaWidth = getState().window.width;
+  if (isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
+    // As this and hiding lock editor popup both change url hash,
+    //   need to be in different js clock cycle.
+    setTimeout(() => {
+      updateNoteIdUrlHash(noteId);
+    }, 100);
+  } else dispatch(updateNoteId(noteId));
 };
 
-export const addLockList = (listName, password, canChangeListNames) => async (
-  dispatch, getState
-) => {
+export const addLockList = (
+  listName, password, canChangeListNames, canExport
+) => async (dispatch, getState) => {
   const vResult = validatePassword(password);
   if (vResult !== VALID_PASSWORD) {
     dispatch(updateLockEditor({ errMsg: PASSWORD_MSGS[vResult] }));
@@ -3622,7 +3663,8 @@ export const addLockList = (listName, password, canChangeListNames) => async (
   password = await userSession.encrypt(password);
 
   dispatch({
-    type: ADD_LOCK_LIST, payload: { listName, password, canChangeListNames },
+    type: ADD_LOCK_LIST,
+    payload: { listName, password, canChangeListNames, canExport },
   });
   updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
 };

@@ -515,17 +515,32 @@ export const containUppercase = (letters) => {
   return false;
 };
 
-export const isStringIn = (note, searchString) => {
-  let title = note.title.slice(0, MAX_CHARS);
+const _isStringIn = (noteTitle, noteBody, searchString) => {
+  let title = noteTitle.slice(0, MAX_CHARS);
   if (!containUppercase(searchString)) title = title.toLowerCase();
 
-  let body = stripHtml(note.body).slice(0, MAX_CHARS);
+  let body = stripHtml(noteBody).slice(0, MAX_CHARS);
   if (!containUppercase(searchString)) body = body.toLowerCase();
 
   const content = title + ' ' + body;
   const searchWords = searchString.split(' ');
 
   return searchWords.every(word => content.includes(word));
+};
+
+export const isStringIn = (note, searchString, lockedNotes, toRootIds) => {
+  const noteMainId = getMainId(note.id, toRootIds);
+  if (isObject(lockedNotes[noteMainId])) {
+    if (!isNumber(lockedNotes[noteMainId].unlockedDT)) {
+      if (lockedNotes[noteMainId].doShowTitle) {
+        return _isStringIn(note.title, '', searchString);
+      } else {
+        return false;
+      }
+    }
+  }
+
+  return _isStringIn(note.title, note.body, searchString);
 };
 
 export const isStringTitleIn = (title, searchString) => {
