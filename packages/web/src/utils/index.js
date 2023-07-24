@@ -1407,6 +1407,9 @@ export const listNoteIds = createSelector(
 );
 
 export const getMainId = (id, toRootIds) => {
+  if (isString(id) && id.startsWith('conflict')) {
+    id = id.split('-')[1];
+  }
   return toRootIds[id];
 };
 

@@ -36,7 +36,19 @@ const NoteListItemLock = (props) => {
     dispatch(showLockMenuPopup(note.id, rect));
   };
 
-  const title = doShowTitle ? note.title : '';
+  let title = '';
+  if (doShowTitle) {
+    if (note.id.startsWith('conflict')) {
+      for (const _note of note.notes) {
+        if (_note.title) {
+          title = _note.title;
+          break;
+        }
+      }
+    } else {
+      title = note.title;
+    }
+  }
   const body = 'This note is locked.';
 
   const titleTabIndex = title ? 0 : -1;

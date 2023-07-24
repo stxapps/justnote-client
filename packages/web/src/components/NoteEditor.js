@@ -25,7 +25,7 @@ const NoteEditor = (props) => {
   const tailwind = useTailwind();
 
   const isUnsavedInvalid = unsavedNote.status === INVALID;
-  const isListLocked = [lockNoteStatus, lockListStatus].includes(LOCKED);
+  const isLocked = [lockNoteStatus, lockListStatus].includes(LOCKED);
 
   const editorEditor = (
     <div className={tailwind('flex h-full w-full flex-col bg-white blk:bg-gray-900')}>
@@ -34,7 +34,7 @@ const NoteEditor = (props) => {
     </div>
   );
 
-  if (isListLocked) {
+  if (isLocked) {
     if (isObject(note) && note.id === NEW_NOTE) return editorEditor;
     return <NoteEditorLock note={note} lockNoteStatus={lockNoteStatus} lockListStatus={lockListStatus} />;
   }

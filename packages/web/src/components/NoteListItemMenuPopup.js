@@ -108,8 +108,10 @@ const NoteListItemMenuPopup = () => {
       if (pinStatus === PINNED) menu = [...menu, MANAGE_PIN];
       else if (pinStatus === null) menu = [...menu, PIN];
 
-      menu = [...menu, VIEW_AS_WEBPAGE, LOCK];
+      menu = [...menu, VIEW_AS_WEBPAGE];
     }
+
+    menu = [...menu, LOCK];
 
     return menu;
   };
