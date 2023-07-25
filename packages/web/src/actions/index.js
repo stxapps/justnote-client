@@ -53,7 +53,7 @@ import {
   UPDATE_UPDATING_THEME_MODE, UPDATE_TIME_PICK, UPDATE_IS_24H_FORMAT,
   UPDATE_PAYWALL_FEATURE, UPDATE_LOCK_ACTION, UPDATE_LOCK_EDITOR, ADD_LOCK_NOTE,
   REMOVE_LOCK_NOTE, LOCK_NOTE, UNLOCK_NOTE, ADD_LOCK_LIST, REMOVE_LOCK_LIST, LOCK_LIST,
-  UNLOCK_LIST, RESET_STATE,
+  UNLOCK_LIST, CLEAN_UP_LOCKS, RESET_STATE,
 } from '../types/actionTypes';
 import {
   HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY, HASH_SUPPORT,
@@ -82,7 +82,7 @@ import {
   doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins, getSortedNotes,
   separatePinnedValues, getRawPins, getFormattedTime, get24HFormattedTime,
   getWindowSize, getNote, getEditingListNameEditors, getListNamesFromNoteIds,
-  validatePassword,
+  validatePassword, doContainListName,
 } from '../utils';
 import { isUint8Array, isBlob, convertBlobToDataUrl } from '../utils/index-web';
 import { _ } from '../utils/obj';
@@ -1278,6 +1278,7 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
     await dataApi.putNotes({ listName, notes: fromNotes });
     await dataApi.deleteServerFiles(unusedFPaths);
     await fileApi.deleteFiles(unusedFPaths);
+    await cleanUpLocks(dispatch, getState);
   } catch (error) {
     console.log('deleteNotes clean up error: ', error);
     // error in this step should be fine
@@ -1559,6 +1560,7 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
     await dataApi.putNotes({ listName, notes: fromNotes });
     await dataApi.deleteServerFiles(unusedFPaths);
     await fileApi.deleteFiles(unusedFPaths);
+    await cleanUpLocks(dispatch, getState);
   } catch (error) {
     console.log('deleteOldNotesInTrash clean up error: ', error);
     // error in this step should be fine
@@ -2067,6 +2069,7 @@ const updateSettings = async (dispatch, getState) => {
 
   try {
     await dataApi.putFiles(_settingsFPaths, _settingsFPaths.map(() => ({})));
+    await cleanUpLocks(dispatch, getState);
   } catch (error) {
     console.log('updateSettings clean up error: ', error);
     // error in this step should be fine
@@ -3731,4 +3734,24 @@ export const unlockList = (listName, password) => async (dispatch, getState) => 
 
   dispatch({ type: UNLOCK_LIST, payload: { listName, unlockedDT: Date.now() } });
   updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
+};
+
+const cleanUpLocks = async (dispatch, getState) => {
+  const noteFPaths = getNoteFPaths(getState());
+  const { listNameMap } = getState().settings;
+  const lockSettings = getState().lockSettings;
+
+  const { toLeafIds } = listNoteIds(noteFPaths);
+
+  const noteMainIds = [];
+  for (const noteMainId in lockSettings.lockedNotes) {
+    if (!Array.isArray(toLeafIds[noteMainId])) noteMainIds.push(noteMainId);
+  }
+
+  const listNames = [];
+  for (const listName in lockSettings.lockedLists) {
+    if (!doContainListName(listName, listNameMap)) listNames.push(listName);
+  }
+
+  dispatch({ type: CLEAN_UP_LOCKS, payload: { noteMainIds, listNames } });
 };

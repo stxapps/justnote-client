@@ -2,8 +2,8 @@ import { loop, Cmd } from 'redux-loop';
 
 import { updateLockSettings } from '../actions';
 import {
-  INIT, ADD_LOCK_NOTE, REMOVE_LOCK_NOTE, LOCK_NOTE, UNLOCK_NOTE, DELETE_ALL_DATA,
-  ADD_LOCK_LIST, REMOVE_LOCK_LIST, LOCK_LIST, UNLOCK_LIST, RESET_STATE,
+  INIT, ADD_LOCK_NOTE, REMOVE_LOCK_NOTE, LOCK_NOTE, UNLOCK_NOTE, ADD_LOCK_LIST,
+  REMOVE_LOCK_LIST, LOCK_LIST, UNLOCK_LIST, CLEAN_UP_LOCKS, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import { initialLockSettingsState as initialState } from '../types/initialStates';
 
@@ -147,6 +147,24 @@ const lockSettingsReducer = (state = initialState, action) => {
         newState.lockedLists[k] = { ...state.lockedLists[k], unlockedDT };
         continue;
       }
+      newState.lockedLists[k] = state.lockedLists[k];
+    }
+
+    return loop(
+      newState, Cmd.run(updateLockSettings(), { args: [Cmd.dispatch, Cmd.getState] })
+    );
+  }
+
+  if (action.type === CLEAN_UP_LOCKS) {
+    const { noteMainIds, listNames } = action.payload;
+
+    const newState = { ...state, lockedNotes: {}, lockedLists: {} };
+    for (const k in state.lockedNotes) {
+      if (noteMainIds.includes(k)) continue;
+      newState.lockedNotes[k] = state.lockedNotes[k];
+    }
+    for (const k in state.lockedLists) {
+      if (listNames.includes(k)) continue;
       newState.lockedLists[k] = state.lockedLists[k];
     }
 

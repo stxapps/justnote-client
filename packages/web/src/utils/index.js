@@ -1383,7 +1383,8 @@ const _listDataIds = (dataFPaths, extractDataFPath, workingSubName) => {
   const conflictWiths = Object.values(toLeafIds).filter(tIds => tIds.length > 1);
 
   return {
-    dataIds, conflictedIds, conflictWiths, toRootIds, toParents, toFPaths, allIds: ids,
+    dataIds, conflictedIds, conflictWiths, toRootIds, toParents, toFPaths, toLeafIds,
+    allIds: ids,
   };
 };
 
@@ -1392,11 +1393,12 @@ const _listNoteIds = (noteFPaths) => {
   //   i.e. update/move error and cancel died notes.
   // So use only index.json for listDataIds.
   const {
-    dataIds, conflictedIds, conflictWiths, toRootIds, toParents, toFPaths, allIds,
+    dataIds, conflictedIds, conflictWiths, toRootIds, toParents, toFPaths, toLeafIds,
+    allIds,
   } = _listDataIds(noteFPaths, extractNoteFPath, INDEX + DOT_JSON);
   return {
     noteIds: dataIds, conflictedIds, conflictWiths, toRootIds, toParents, toFPaths,
-    allIds,
+    toLeafIds, allIds,
   };
 };
 
