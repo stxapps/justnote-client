@@ -18,7 +18,7 @@ const NoteListLock = () => {
     dispatch(updateSelectingListName(listName));
     dispatch(updateLockAction(LOCK_ACTION_UNLOCK_LIST));
     updatePopupUrlHash(LOCK_EDITOR_POPUP, true);
-  }
+  };
 
   return (
     <div className={tailwind('flex-shrink flex-grow overflow-y-auto pb-[5.5rem] lg:pb-0')}>

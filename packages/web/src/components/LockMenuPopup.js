@@ -15,9 +15,7 @@ const LockMenuPopup = () => {
 
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
   const isShown = useSelector(state => state.display.isLockMenuPopupShown);
-  const anchorPosition = useSelector(
-    state => state.display.lockMenuPopupPosition
-  );
+  const anchorPosition = useSelector(state => state.display.lockMenuPopupPosition);
   const [popupSize, setPopupSize] = useState(null);
   const popup = useRef(null);
   const cancelBtn = useRef(null);

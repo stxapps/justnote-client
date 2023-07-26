@@ -12,8 +12,8 @@ import { popupFMV } from '../types/animConfigs';
 import { useTailwind } from '.';
 import NoteListTopBar from './NoteListTopBar';
 import NoteListItems from './NoteListItems';
-import LoadingNoteListItems from './LoadingNoteListItems';
 import NoteListLock from './NoteListLock';
+import LoadingNoteListItems from './LoadingNoteListItems';
 
 const NoteList = (props) => {
 

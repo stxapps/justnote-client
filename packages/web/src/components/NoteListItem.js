@@ -84,7 +84,7 @@ const NoteListItem = (props) => {
 
   let content;
   if (lockStatus === LOCKED) {
-    content = <NoteListItemLock note={note} />
+    content = <NoteListItemLock note={note} />;
   } else if (isConflicted || isDied || isUnsavedInvalid) {
     content = <NoteListItemError note={note} unsavedNote={unsavedNote} />;
   } else {

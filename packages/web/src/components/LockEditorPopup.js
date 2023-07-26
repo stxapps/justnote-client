@@ -30,7 +30,6 @@ const LockEditorPopup = () => {
   const [doShowTitle, setDoShowTitle] = useState(false);
   const [canChangeListNames, setCanChangeListNames] = useState(false);
   const [canExport, setCanExport] = useState(false);
-  const scrollView = useRef(null);
   const passwordInput = useRef(null);
   const didClick = useRef(false);
   const dispatch = useDispatch();
@@ -176,7 +175,7 @@ const LockEditorPopup = () => {
           </div>
           <motion.div className={tailwind('w-full max-w-[23rem] overflow-hidden rounded-lg bg-white shadow-xl blk:bg-gray-800 blk:ring-1 blk:ring-white blk:ring-opacity-25 sm:mb-20')} variants={dialogFMV} initial="hidden" animate="visible" exit="hidden" role="dialog" aria-modal="true" aria-labelledby="modal-headline">
             <div className={tailwind('relative flex flex-col overflow-hidden rounded-lg bg-white blk:bg-gray-800')} style={{ maxHeight: panelHeight }}>
-              <div ref={scrollView} className={tailwind('relative flex-1 overflow-y-auto overflow-x-hidden px-4 pt-8 pb-4 sm:px-6 sm:pb-6')}>
+              <div className={tailwind('relative flex-1 overflow-y-auto overflow-x-hidden px-4 pt-8 pb-4 sm:px-6 sm:pb-6')}>
                 <h2 className={tailwind('text-left text-xl font-semibold text-gray-900 blk:text-white')}>{title}</h2>
                 {desc}
                 <div className={tailwind([LOCK_ACTION_ADD_LOCK_NOTE, LOCK_ACTION_ADD_LOCK_LIST].includes(lockAction) ? 'pt-1' : 'pt-3.5')}>

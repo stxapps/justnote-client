@@ -78,7 +78,7 @@ const NoteListItemMenuPopup = () => {
       dispatch(viewNoteAsWebpage());
     } else if (text === LOCK) {
       if (lockStatus === null) {
-        dispatch(showAddLockEditorPopup(LOCK_ACTION_ADD_LOCK_NOTE))
+        dispatch(showAddLockEditorPopup(LOCK_ACTION_ADD_LOCK_NOTE));
       } else if (lockStatus === UNLOCKED) {
         onCancelBtnClick();
         dispatch(lockNote(selectingNoteId));

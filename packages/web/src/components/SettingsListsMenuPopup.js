@@ -9,7 +9,7 @@ import {
 import {
   SETTINGS_LISTS_MENU_POPUP, LIST_NAMES_POPUP, LOCK_EDITOR_POPUP, MY_NOTES, TRASH,
   ARCHIVE, MODE_EDIT, SWAP_LEFT, SWAP_RIGHT, LIST_NAMES_MODE_MOVE_LIST_NAME, LOCK,
-  REMOVE_LOCK, LOCK_ACTION_ADD_LOCK_LIST, LOCK_ACTION_REMOVE_LOCK_LIST
+  REMOVE_LOCK, LOCK_ACTION_ADD_LOCK_LIST, LOCK_ACTION_REMOVE_LOCK_LIST,
 } from '../types/const';
 import { makeGetListNameEditor, makeGetLockListStatus } from '../selectors';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
@@ -93,7 +93,7 @@ const SettingsListsMenuPopup = () => {
 
   const onAddLockBtnClick = () => {
     if (didClick.current) return;
-    dispatch(showAddLockEditorPopup(LOCK_ACTION_ADD_LOCK_LIST))
+    dispatch(showAddLockEditorPopup(LOCK_ACTION_ADD_LOCK_LIST));
     didClick.current = true;
   };
 
@@ -102,7 +102,7 @@ const SettingsListsMenuPopup = () => {
     dispatch(updateLockAction(LOCK_ACTION_REMOVE_LOCK_LIST));
     updatePopupUrlHash(LOCK_EDITOR_POPUP, true, null, true);
     didClick.current = true;
-  }
+  };
 
   useEffect(() => {
     if (isShown) {
