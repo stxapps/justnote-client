@@ -87,7 +87,7 @@ const NoteListItemContent = (props) => {
         </Svg>
       </TouchableOpacity>}
       <View style={tailwind('flex-1')}>
-        <View style={tailwind('pr-3')}>
+        {(note.title || noteDate) && <View style={tailwind('pr-3')}>
           <TouchableOpacity activeOpacity={1.0} onPress={onContentBtnClick} onLongPress={onContentBtnLongClick} style={tailwind(`w-full flex-row items-center justify-between rounded-sm ${titleClassNames}`)}>
             <View style={tailwind('flex-1')}>
               <Text style={tailwind('text-left text-base font-semibold text-gray-800 blk:text-gray-100 lg:text-sm')} numberOfLines={1} ellipsizeMode="tail">{note.title}</Text>
@@ -96,7 +96,7 @@ const NoteListItemContent = (props) => {
               <Text style={tailwind('text-left text-xs font-normal text-gray-400 blk:text-gray-500')}>{noteDate}</Text>
             </View>
           </TouchableOpacity>
-        </View>
+        </View>}
         <View style={tailwind(`flex-row items-center justify-between ${isBulkEditing ? 'pr-3' : ''}`)}>
           <TouchableOpacity activeOpacity={1.0} onPress={onContentBtnClick} onLongPress={onContentBtnLongClick} style={[tailwind('w-full flex-1 items-start justify-center rounded-sm'), { minHeight: 42 }]}>
             <View ref={pBodyRef} collapsable={false}>

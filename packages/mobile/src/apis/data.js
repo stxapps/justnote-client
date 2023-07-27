@@ -4,7 +4,7 @@ import ldbApi from './localDb';
 import fileApi from './localFile';
 import {
   UNSAVED_NOTES_UNSAVED, UNSAVED_NOTES_SAVED, INDEX, DOT_JSON, CD_ROOT, N_NOTES, TRASH,
-  N_DAYS, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE,
+  N_DAYS, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE, LOCK_SETTINGS_STATE,
 } from '../types/const';
 import {
   isObject, createNoteFPath, createDataFName, extractNoteFPath, createPinFPath,
@@ -13,7 +13,9 @@ import {
   batchDeleteFileWithRetry, getListNamesFromNoteIds,
 } from '../utils';
 import { syncMode } from '../vars';
-import { initialLocalSettingsState } from '../types/initialStates';
+import {
+  initialLocalSettingsState, initialLockSettingsState,
+} from '../types/initialStates';
 
 const getApi = () => {
   // Beware arguments are not exactly the same!
@@ -555,6 +557,7 @@ const deleteAllUnsavedNotes = async () => {
 const deleteAllLocalFiles = async () => {
   await lsgApi.removeItem(COLS_PANEL_STATE);
   await lsgApi.removeItem(LOCAL_SETTINGS_STATE);
+  await lsgApi.removeItem(LOCK_SETTINGS_STATE);
   await ldbApi.deleteAllFiles();
   await fileApi.deleteAllFiles();
 };
@@ -565,12 +568,46 @@ const deleteAllSyncedFiles = async () => {
   await ldbApi.deleteFiles(fpaths);
 };
 
+const getLockSettings = async () => {
+  // BUG Alert: new object, not ref to the object in initialLockSettingsState!
+  const lockSettings = { ...initialLockSettingsState };
+  try {
+    const item = await lsgApi.getItem(LOCK_SETTINGS_STATE);
+    if (item) {
+      const _lockSettings = JSON.parse(item);
+      for (const k1 in _lockSettings) {
+        if (!(k1 in lockSettings)) continue;
+
+        const v1 = {}, _v1 = _lockSettings[k1];
+        for (const k2 in _v1) {
+          const v2 = {}, _v2 = _v1[k2];
+          for (const k3 in _v2) {
+            if (k3 === 'unlockedDT') continue;
+            v2[k3] = _v2[k3];
+          }
+          v1[k2] = v2;
+        }
+        lockSettings[k1] = v1;
+      }
+    }
+  } catch (error) {
+    console.log('Get or parse lockSettings error: ', error);
+  }
+
+  return lockSettings;
+};
+
+const putLockSettings = async (lockSettings) => {
+  await lsgApi.setItem(LOCK_SETTINGS_STATE, JSON.stringify(lockSettings));
+};
+
 const data = {
   getApi, listFPaths, listServerFPaths, toNotes, fetch, fetchMore,
   putNotes, getOldNotesInTrash, canDeleteListNames, putPins, deletePins, getFiles,
   putFiles, deleteFiles, getServerFilesToLocal, putLocalFilesToServer, deleteServerFiles,
   getLocalSettings, putLocalSettings, getUnsavedNotes, putUnsavedNote,
   deleteUnsavedNotes, deleteAllUnsavedNotes, deleteAllLocalFiles, deleteAllSyncedFiles,
+  getLockSettings, putLockSettings,
 };
 
 export default data;

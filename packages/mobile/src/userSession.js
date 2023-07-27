@@ -43,9 +43,17 @@ const signECDSA = async (content) => {
   return sigObj;
 };
 
+const encrypt = async (content) => {
+  return content;
+};
+
+const decrypt = async (encryptedContent) => {
+  return encryptedContent;
+};
+
 const userSession = {
   hasSession, createSession, isUserSignedIn, handlePendingSignIn, signUserOut,
-  updateUserData, loadUserData, signECDSA,
+  updateUserData, loadUserData, signECDSA, encrypt, decrypt,
 };
 
 export default userSession;

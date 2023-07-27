@@ -13,6 +13,7 @@ import SidebarProfilePopup from './SidebarProfilePopup';
 import NoteListMenuPopup from './NoteListMenuPopup';
 import NoteListItemMenuPopup from './NoteListItemMenuPopup';
 import PinMenuPopup from './PinMenuPopup';
+import LockMenuPopup from './LockMenuPopup';
 import {
   ExportNoteAsPdfCompletePopup, ExportNoteAsPdfErrorPopup,
 } from './ExportNoteAsPdfPopup';
@@ -25,6 +26,7 @@ import {
   SettingsUpdateErrorPopup, SettingsConflictErrorPopup,
 } from './SettingsErrorPopup';
 import ListNamesPopup from './ListNamesPopup';
+import LockEditorPopup from './LockEditorPopup';
 import ConfirmDeletePopup from './ConfirmDeletePopup';
 import ConfirmDiscardPopup from './ConfirmDiscardPopup';
 import ConfirmExitDummyPopup from './ConfirmExitDummyPopup';
@@ -58,6 +60,7 @@ const Main = () => {
       <NoteListMenuPopup />
       <NoteListItemMenuPopup />
       <PinMenuPopup />
+      <LockMenuPopup />
       <ExportNoteAsPdfCompletePopup />
       <ExportNoteAsPdfErrorPopup />
       <SettingsPopup />
@@ -68,6 +71,7 @@ const Main = () => {
       <SettingsConflictErrorPopup />
       <SettingsUpdateErrorPopup />
       <ListNamesPopup />
+      <LockEditorPopup />
       <ConfirmDeletePopup />
       <ConfirmDiscardPopup />
       <ConfirmExitDummyPopup />

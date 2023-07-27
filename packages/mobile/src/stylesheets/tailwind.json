@@ -4507,6 +4507,9 @@
 	"min-w-32": {
 		"minWidth": 128
 	},
+	"min-w-36": {
+		"minWidth": 144
+	},
 	"min-w-56": {
 		"minWidth": 224
 	},

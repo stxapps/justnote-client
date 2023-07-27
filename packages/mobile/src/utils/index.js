@@ -11,7 +11,8 @@ import {
   NOTE_DATE_FORMAT_MSDSY, NOTE_DATE_FORMAT_DSMSY, NOTE_DATE_FORMAT_YHMHD,
   NOTE_DATE_FORMAT_MHDHY, NOTE_DATE_FORMAT_DHMHY, NOTE_DATE_FORMAT_YOMOD,
   NOTE_DATE_FORMAT_MODOY, NOTE_DATE_FORMAT_DOMOY, NOTE_DATE_FORMAT_YMMMD,
-  NOTE_DATE_FORMAT_MMMDY, NOTE_DATE_FORMAT_DMMMY, MODE_EDIT, MAX_TRY,
+  NOTE_DATE_FORMAT_MMMDY, NOTE_DATE_FORMAT_DMMMY, MODE_EDIT, MAX_TRY, VALID_PASSWORD,
+  NO_PASSWORD, CONTAIN_SPACES_PASSWORD, TOO_LONG_PASSWORD,
 } from '../types/const';
 import {
   PIN_NOTE, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_ROLLBACK,
@@ -514,17 +515,32 @@ export const containUppercase = (letters) => {
   return false;
 };
 
-export const isStringIn = (note, searchString) => {
-  let title = note.title.slice(0, MAX_CHARS);
+const _isStringIn = (noteTitle, noteBody, searchString) => {
+  let title = noteTitle.slice(0, MAX_CHARS);
   if (!containUppercase(searchString)) title = title.toLowerCase();
 
-  let body = stripHtml(note.body).slice(0, MAX_CHARS);
+  let body = stripHtml(noteBody).slice(0, MAX_CHARS);
   if (!containUppercase(searchString)) body = body.toLowerCase();
 
   const content = title + ' ' + body;
   const searchWords = searchString.split(' ');
 
   return searchWords.every(word => content.includes(word));
+};
+
+export const isStringIn = (note, searchString, lockedNotes, toRootIds) => {
+  const noteMainId = getMainId(note.id, toRootIds);
+  if (isObject(lockedNotes[noteMainId])) {
+    if (!isNumber(lockedNotes[noteMainId].unlockedDT)) {
+      if (lockedNotes[noteMainId].doShowTitle) {
+        return _isStringIn(note.title, '', searchString);
+      } else {
+        return false;
+      }
+    }
+  }
+
+  return _isStringIn(note.title, note.body, searchString);
 };
 
 export const isStringTitleIn = (title, searchString) => {
@@ -1367,7 +1383,8 @@ const _listDataIds = (dataFPaths, extractDataFPath, workingSubName) => {
   const conflictWiths = Object.values(toLeafIds).filter(tIds => tIds.length > 1);
 
   return {
-    dataIds, conflictedIds, conflictWiths, toRootIds, toParents, toFPaths, allIds: ids,
+    dataIds, conflictedIds, conflictWiths, toRootIds, toParents, toFPaths, toLeafIds,
+    allIds: ids,
   };
 };
 
@@ -1376,11 +1393,12 @@ const _listNoteIds = (noteFPaths) => {
   //   i.e. update/move error and cancel died notes.
   // So use only index.json for listDataIds.
   const {
-    dataIds, conflictedIds, conflictWiths, toRootIds, toParents, toFPaths, allIds,
+    dataIds, conflictedIds, conflictWiths, toRootIds, toParents, toFPaths, toLeafIds,
+    allIds,
   } = _listDataIds(noteFPaths, extractNoteFPath, INDEX + DOT_JSON);
   return {
     noteIds: dataIds, conflictedIds, conflictWiths, toRootIds, toParents, toFPaths,
-    allIds,
+    toLeafIds, allIds,
   };
 };
 
@@ -1391,6 +1409,9 @@ export const listNoteIds = createSelector(
 );
 
 export const getMainId = (id, toRootIds) => {
+  if (isString(id) && id.startsWith('conflict')) {
+    id = id.split('-')[1];
+  }
   return toRootIds[id];
 };
 
@@ -1991,4 +2012,11 @@ export const applySubscriptionOfferDetails = (product) => {
 
   product.offerToken = offer.offerToken;
   product.localizedPrice = offer.firstNonZeroFormattedPrice;
+};
+
+export const validatePassword = (password) => {
+  if (!isString(password) || password.length === 0) return NO_PASSWORD;
+  if (/\s/g.test(password)) return CONTAIN_SPACES_PASSWORD;
+  if (password.length > 27) return TOO_LONG_PASSWORD;
+  return VALID_PASSWORD;
 };

@@ -4,24 +4,28 @@ import { useSelector } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 import { Circle } from 'react-native-animated-spinkit';
 
-import { PINNED, VALID, INVALID, BLK_MODE } from '../types/const';
+import { PINNED, LOCKED, VALID, INVALID, BLK_MODE } from '../types/const';
 import {
-  makeGetPinStatus, makeGetUnsavedNote, makeGetIsExportingNoteAsPdf, getThemeMode,
+  makeGetPinStatus, makeGetLockNoteStatus, makeGetUnsavedNote,
+  makeGetIsExportingNoteAsPdf, getThemeMode,
 } from '../selectors';
 import { isDiedStatus, isBusyStatus, isPinningStatus } from '../utils';
 
 import { useTailwind } from '.';
 import NoteListItemContent from './NoteListItemContent';
 import NoteListItemError from './NoteListItemError';
+import NoteListItemLock from './NoteListItemLock';
 
 const NoteListItem = (props) => {
 
   const { note } = props;
   const getPinStatus = useMemo(makeGetPinStatus, []);
+  const getLockNoteStatus = useMemo(makeGetLockNoteStatus, []);
   const getUnsavedNote = useMemo(makeGetUnsavedNote, []);
   const getIsExportingNoteAsPdf = useMemo(makeGetIsExportingNoteAsPdf, []);
   const noteId = useSelector(state => state.display.noteId);
   const pinStatus = useSelector(state => getPinStatus(state, note));
+  const lockStatus = useSelector(state => getLockNoteStatus(state, note));
   const unsavedNote = useSelector(state => getUnsavedNote(state, note));
   const isExporting = useSelector(state => getIsExportingNoteAsPdf(state, note));
   const themeMode = useSelector(state => getThemeMode(state));
@@ -115,7 +119,9 @@ const NoteListItem = (props) => {
   };
 
   let content;
-  if (isConflicted || isDied || isUnsavedInvalid) {
+  if (lockStatus === LOCKED) {
+    content = <NoteListItemLock note={note} />;
+  } else if (isConflicted || isDied || isUnsavedInvalid) {
     content = <NoteListItemError note={note} unsavedNote={unsavedNote} />;
   } else {
     content = <NoteListItemContent note={note} pinStatus={pinStatus} />;

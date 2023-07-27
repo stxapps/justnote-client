@@ -7,14 +7,16 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   updatePopup, moveNotesWithAction, pinNotes, updateMoveAction,
   updateDeleteAction, updateListNamesMode, shareNote, exportNoteAsPdf,
+  showAddLockEditorPopup, lockNote,
 } from '../actions';
 import {
   MY_NOTES, TRASH, ARCHIVE, REMOVE, RESTORE, DELETE, MOVE_TO, PIN, MANAGE_PIN, PINNED,
-  SHARE, EXPORT_AS_PDF, NOTE_ITEM_POPUP_MENU,
-  NOTE_LIST_ITEM_MENU_POPUP, LIST_NAMES_POPUP, PIN_MENU_POPUP, CONFIRM_DELETE_POPUP,
-  MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_ITEM_MENU, LIST_NAMES_MODE_MOVE_NOTES,
+  SHARE, EXPORT_AS_PDF, NOTE_ITEM_POPUP_MENU, NOTE_LIST_ITEM_MENU_POPUP,
+  LIST_NAMES_POPUP, PIN_MENU_POPUP, CONFIRM_DELETE_POPUP, MOVE_ACTION_NOTE_ITEM_MENU,
+  DELETE_ACTION_NOTE_ITEM_MENU, LIST_NAMES_MODE_MOVE_NOTES, LOCK_ACTION_ADD_LOCK_NOTE,
+  LOCK, UNLOCKED,
 } from '../types/const';
-import { getListNameMap, makeGetPinStatus } from '../selectors';
+import { getListNameMap, makeGetPinStatus, makeGetLockNoteStatus } from '../selectors';
 import { getListNameDisplayName, getAllListNames } from '../utils';
 import { popupFMV } from '../types/animConfigs';
 
@@ -26,6 +28,7 @@ const NoteListItemMenuPopup = () => {
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
   const insets = useSafeAreaInsets();
   const getPinStatus = useMemo(makeGetPinStatus, []);
+  const getLockNoteStatus = useMemo(makeGetLockNoteStatus, []);
   const isShown = useSelector(state => state.display.isNoteListItemMenuPopupShown);
   const anchorPosition = useSelector(
     state => state.display.noteListItemMenuPopupPosition
@@ -34,6 +37,7 @@ const NoteListItemMenuPopup = () => {
   const listNameMap = useSelector(state => getListNameMap(state));
   const selectingNoteId = useSelector(state => state.display.selectingNoteId);
   const pinStatus = useSelector(state => getPinStatus(state, selectingNoteId));
+  const lockStatus = useSelector(state => getLockNoteStatus(state, selectingNoteId));
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
   const [popupSize, setPopupSize] = useState(null);
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
@@ -85,6 +89,13 @@ const NoteListItemMenuPopup = () => {
     } else if (text === EXPORT_AS_PDF) {
       onCancelBtnClick();
       dispatch(exportNoteAsPdf());
+    } else if (text === LOCK) {
+      onCancelBtnClick();
+      if (lockStatus === null) {
+        dispatch(showAddLockEditorPopup(LOCK_ACTION_ADD_LOCK_NOTE));
+      } else if (lockStatus === UNLOCKED) {
+        dispatch(lockNote(selectingNoteId));
+      }
     } else {
       console.log(`In NoteListItemMenuPopup, invalid text: ${text}`);
     }
@@ -137,6 +148,8 @@ const NoteListItemMenuPopup = () => {
 
       menu = [...menu, EXPORT_AS_PDF, SHARE];
     }
+
+    if (isUserSignedIn) menu = [...menu, LOCK];
 
     return menu;
   };
@@ -230,13 +243,13 @@ const NoteListItemMenuPopup = () => {
     bgStyle = { opacity: popupAnim };
 
     panel = (
-      <Animated.View onLayout={onPopupLayout} style={[tailwind(popupClassNames), { minWidth: 128 }, popupStyle]}>
+      <Animated.View onLayout={onPopupLayout} style={[tailwind(popupClassNames), { minWidth: 136 }, popupStyle]}>
         {buttons}
       </Animated.View>
     );
   } else {
     panel = (
-      <Animated.View onLayout={onPopupLayout} style={[tailwind(popupClassNames), { minWidth: 128 }, { top: safeAreaHeight + 256, left: safeAreaWidth + 256 }]}>
+      <Animated.View onLayout={onPopupLayout} style={[tailwind(popupClassNames), { minWidth: 136 }, { top: safeAreaHeight + 256, left: safeAreaWidth + 256 }]}>
         {buttons}
       </Animated.View>
     );

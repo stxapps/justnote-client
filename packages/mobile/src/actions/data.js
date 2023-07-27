@@ -1079,6 +1079,35 @@ export const updateImportAllDataProgress = (progress) => {
   };
 };
 
+const _canExport = (noteId, lockSettings, toRootIds) => {
+  const lockedList = lockSettings.lockedLists[noteId.listName];
+  if (isObject(lockedList)) {
+    if (!isNumber(lockedList.unlockedDT)) {
+      if (!lockedList.canExport) return false;
+    }
+  }
+
+  const noteMainId = getMainId(noteId.id, toRootIds);
+  const lockedNote = lockSettings.lockedNotes[noteMainId];
+  if (isObject(lockedNote)) {
+    if (!isNumber(lockedNote.unlockedDT)) {
+      if (!lockedNote.canExport) return false;
+    }
+  }
+
+  return true;
+};
+
+const _filterPins = (pins, noteMainIds) => {
+  const filteredPins = [];
+  for (const pinMainId in pins) {
+    if (!noteMainIds.includes(pinMainId)) continue;
+    filteredPins.push(pins[pinMainId]);
+  }
+
+  return filteredPins;
+};
+
 export const saveAs = async (filePath, fileName) => {
   if (Platform.OS === 'ios') {
     try {
@@ -1151,12 +1180,19 @@ export const exportAllData = () => async (dispatch, getState) => {
     return;
   }
 
+  const lockSettings = getState().lockSettings;
+
   let fpaths = [], fileFPaths = [], pins, toRootIds;
   try {
     const { noteFPaths, settingsFPaths, pinFPaths } = await dataApi.listFPaths(true);
     const { noteIds, conflictedIds, toRootIds: _toRootIds } = listNoteIds(noteFPaths);
+    toRootIds = _toRootIds;
 
+    const noteMainIds = [];
     for (const noteId of [...noteIds, ...conflictedIds]) {
+      if (!_canExport(noteId, lockSettings, toRootIds)) continue;
+      noteMainIds.push(getMainId(noteId.id, toRootIds));
+
       for (const fpath of noteId.fpaths) {
         fpaths.push(fpath);
         if (fpath.includes(CD_ROOT + '/')) {
@@ -1179,10 +1215,8 @@ export const exportAllData = () => async (dispatch, getState) => {
       }
     }
 
-    toRootIds = _toRootIds;
-
     pins = getPins(pinFPaths, {}, false, toRootIds);
-    pins = Object.values(pins);
+    pins = _filterPins(pins, noteMainIds);
   } catch (error) {
     dispatch(updateExportAllDataProgress({ total: -1, done: -1, error: `${error}` }));
     return;

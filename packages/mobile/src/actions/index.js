@@ -57,13 +57,16 @@ import {
   MOVE_PINNED_NOTE_ROLLBACK, CANCEL_DIED_PINS, UPDATE_SYSTEM_THEME_MODE,
   UPDATE_DO_USE_LOCAL_THEME, UPDATE_DEFAULT_THEME, UPDATE_LOCAL_THEME,
   UPDATE_UPDATING_THEME_MODE, UPDATE_TIME_PICK, UPDATE_IS_24H_FORMAT,
-  UPDATE_PAYWALL_FEATURE, UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS, RESET_STATE,
+  UPDATE_PAYWALL_FEATURE, UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS, UPDATE_LOCK_ACTION,
+  UPDATE_LOCK_EDITOR, ADD_LOCK_NOTE, REMOVE_LOCK_NOTE, LOCK_NOTE, UNLOCK_NOTE,
+  ADD_LOCK_LIST, REMOVE_LOCK_LIST, LOCK_LIST, UNLOCK_LIST, CLEAN_UP_LOCKS, RESET_STATE,
 } from '../types/actionTypes';
 import {
   DOMAIN_NAME, APP_URL_SCHEME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH, PAYWALL_POPUP,
-  SETTINGS_POPUP, CONFIRM_DISCARD_POPUP, NOTE_LIST_MENU_POPUP,
-  NOTE_LIST_ITEM_MENU_POPUP, MOVE_ACTION_NOTE_COMMANDS, MOVE_ACTION_NOTE_ITEM_MENU,
-  DELETE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
+  SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP, CONFIRM_DISCARD_POPUP,
+  NOTE_LIST_MENU_POPUP, NOTE_LIST_ITEM_MENU_POPUP, LOCK_EDITOR_POPUP, LOCK_MENU_POPUP,
+  MOVE_ACTION_NOTE_COMMANDS, MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS,
+  DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
   DISCARD_ACTION_UPDATE_LIST_NAME, MY_NOTES, TRASH, ID, NEW_NOTE, NEW_NOTE_OBJ,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES, N_DAYS, CD_ROOT,
   INFO, INDEX, DOT_JSON, SHOW_SYNCED, LG_WIDTH, IAP_VERIFY_URL, IAP_STATUS_URL,
@@ -71,7 +74,8 @@ import {
   VALID, INVALID, UNKNOWN, ERROR, ACTIVE, SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT,
   SETTINGS_VIEW_LISTS, WHT_MODE, BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE,
   FEATURE_DATE_FORMAT, FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES,
-  NOTE_DATE_FORMATS, NO_PERMISSION_GRANTED,
+  FEATURE_LOCK, NOTE_DATE_FORMATS, NO_PERMISSION_GRANTED, VALID_PASSWORD, PASSWORD_MSGS,
+  LOCK_ACTION_ADD_LOCK_NOTE, LOCK_ACTION_UNLOCK_NOTE, LOCK_ACTION_ADD_LOCK_LIST,
 } from '../types/const';
 import {
   isEqual, isObject, isString, isNumber, sleep, separateUrlAndParam, getUserImageUrl,
@@ -82,7 +86,8 @@ import {
   doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins, getSortedNotes,
   separatePinnedValues, getRawPins, getFormattedTime, get24HFormattedTime,
   getFormattedTimeStamp, getMineSubType, getNote, getEditingListNameEditors,
-  getListNamesFromNoteIds, applySubscriptionOfferDetails,
+  getListNamesFromNoteIds, applySubscriptionOfferDetails, validatePassword,
+  doContainListName,
 } from '../utils';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
@@ -152,6 +157,8 @@ export const init = () => async (dispatch, getState) => {
   // Need to fetch all here as some note ids might change.
   const unsavedNotes = await dataApi.getUnsavedNotes();
 
+  const lockSettings = await dataApi.getLockSettings();
+
   dispatch({
     type: INIT,
     payload: {
@@ -168,6 +175,7 @@ export const init = () => async (dispatch, getState) => {
       is24HFormat,
       localSettings,
       unsavedNotes,
+      lockSettings,
     },
   });
 
@@ -273,7 +281,7 @@ export const updateNoteIdUrlHash = (id) => {
   _getDispatch()(updateNoteId(id));
 };
 
-export const updatePopupUrlHash = (id, isShown, rect) => {
+export const updatePopupUrlHash = (id, isShown, rect, doReplace = false) => {
   _getDispatch()(updatePopup(id, isShown, rect));
 };
 
@@ -912,6 +920,7 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
     await dataApi.putNotes({ listName, notes: fromNotes });
     await dataApi.deleteServerFiles(unusedFPaths);
     await fileApi.deleteFiles(unusedFPaths);
+    await cleanUpLocks(dispatch, getState);
   } catch (error) {
     console.log('deleteNotes clean up error: ', error);
     // error in this step should be fine
@@ -1193,6 +1202,7 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
     await dataApi.putNotes({ listName, notes: fromNotes });
     await dataApi.deleteServerFiles(unusedFPaths);
     await fileApi.deleteFiles(unusedFPaths);
+    await cleanUpLocks(dispatch, getState);
   } catch (error) {
     console.log('deleteOldNotesInTrash clean up error: ', error);
     // error in this step should be fine
@@ -1691,6 +1701,7 @@ const updateSettings = async (dispatch, getState) => {
 
   try {
     await dataApi.putFiles(_settingsFPaths, _settingsFPaths.map(() => ({})));
+    await cleanUpLocks(dispatch, getState);
   } catch (error) {
     console.log('updateSettings clean up error: ', error);
     // error in this step should be fine
@@ -3258,4 +3269,280 @@ export const exportNoteAsPdf = () => async (dispatch, getState) => {
 
 export const updateExportNoteAsPdfProgress = (progress) => {
   return { type: UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS, payload: progress };
+};
+
+export const updateLockAction = (lockAction) => {
+  return { type: UPDATE_LOCK_ACTION, payload: lockAction };
+};
+
+export const updateLockEditor = (payload) => {
+  return { type: UPDATE_LOCK_EDITOR, payload };
+};
+
+export const updateLockSettings = () => async (dispatch, getState) => {
+  const lockSettings = getState().lockSettings;
+  await dataApi.putLockSettings(lockSettings);
+};
+
+export const showAddLockEditorPopup = (actionType) => async (dispatch, getState) => {
+  const purchases = getState().info.purchases;
+
+  if (!doEnableExtraFeatures(purchases)) {
+    if (actionType === LOCK_ACTION_ADD_LOCK_NOTE) {
+      updatePopupUrlHash(NOTE_LIST_ITEM_MENU_POPUP, false, null);
+    } else if (actionType === LOCK_ACTION_ADD_LOCK_LIST) {
+      updatePopupUrlHash(SETTINGS_LISTS_MENU_POPUP, false, null);
+    }
+
+    dispatch(updatePaywallFeature(FEATURE_LOCK));
+    dispatch(updatePopup(PAYWALL_POPUP, true));
+    return;
+  }
+
+  dispatch(updateLockAction(actionType));
+  updatePopupUrlHash(LOCK_EDITOR_POPUP, true, null, true);
+};
+
+export const addLockNote = (
+  noteId, password, doShowTitle, canExport
+) => async (dispatch, getState) => {
+  const vResult = validatePassword(password);
+  if (vResult !== VALID_PASSWORD) {
+    dispatch(updateLockEditor({ errMsg: PASSWORD_MSGS[vResult] }));
+    return;
+  }
+
+  dispatch(updateLockEditor({ isLoadingShown: true, errMsg: '' }));
+  await sleep(16);
+
+  const noteFPaths = getNoteFPaths(getState());
+  const { toRootIds } = listNoteIds(noteFPaths);
+
+  const noteMainId = getMainId(noteId, toRootIds);
+  password = await userSession.encrypt(password);
+
+  dispatch({
+    type: ADD_LOCK_NOTE,
+    payload: { noteId, noteMainId, password, doShowTitle, canExport },
+  });
+  updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
+};
+
+export const showLockMenuPopup = (noteId, rect) => async (dispatch, getState) => {
+  if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
+
+  // Impossible noteId === getState().display.noteId as the note is locked.
+
+  dispatch(updateSelectingNoteId(noteId));
+  updatePopupUrlHash(LOCK_MENU_POPUP, true, rect);
+};
+
+export const removeLockNote = (noteId, password) => async (dispatch, getState) => {
+  const vResult = validatePassword(password);
+  if (vResult !== VALID_PASSWORD) {
+    dispatch(updateLockEditor({ errMsg: PASSWORD_MSGS[vResult] }));
+    return;
+  }
+
+  dispatch(updateLockEditor({ isLoadingShown: true, errMsg: '' }));
+  await sleep(16);
+
+  const noteFPaths = getNoteFPaths(getState());
+  const { toRootIds } = listNoteIds(noteFPaths);
+
+  const noteMainId = getMainId(noteId, toRootIds);
+  const lockedNote = getState().lockSettings.lockedNotes[noteMainId];
+
+  let isValid = false;
+  if (isObject(lockedNote)) {
+    if (isString(lockedNote.password)) {
+      const lockedPassword = await userSession.decrypt(lockedNote.password);
+      if (lockedPassword === password) isValid = true;
+    }
+  }
+  if (!isValid) {
+    dispatch(updateLockEditor({
+      isLoadingShown: false, errMsg: 'Password is not correct. Please try again.',
+    }));
+    return;
+  }
+
+  dispatch({ type: REMOVE_LOCK_NOTE, payload: { noteMainId } });
+  updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
+};
+
+export const lockNote = (noteId) => async (dispatch, getState) => {
+  const noteFPaths = getNoteFPaths(getState());
+  const { toRootIds } = listNoteIds(noteFPaths);
+
+  const noteMainId = getMainId(noteId, toRootIds);
+
+  dispatch({ type: LOCK_NOTE, payload: { noteId, noteMainId } });
+};
+
+export const showUnlockNoteEditorPopup = (noteId) => async (dispatch, getState) => {
+
+  if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
+  if (vars.deleteOldNotes.ids && vars.deleteOldNotes.ids.includes(noteId)) return;
+
+  const isEditorUploading = getState().editor.isUploading;
+  if (isEditorUploading) return;
+
+  const isEditorFocused = getState().display.isEditorFocused;
+  if (isEditorFocused) {
+    // As this note is locked, not editing this note for sure.
+    // Unsaved should be stored in time before completing unlock this note.
+  }
+
+  dispatch(updateSelectingNoteId(noteId));
+  dispatch(updateLockAction(LOCK_ACTION_UNLOCK_NOTE));
+  updatePopupUrlHash(LOCK_EDITOR_POPUP, true);
+};
+
+export const unlockNote = (noteId, password) => async (dispatch, getState) => {
+  const vResult = validatePassword(password);
+  if (vResult !== VALID_PASSWORD) {
+    dispatch(updateLockEditor({ errMsg: PASSWORD_MSGS[vResult] }));
+    return;
+  }
+
+  dispatch(updateLockEditor({ isLoadingShown: true, errMsg: '' }));
+  await sleep(16);
+
+  const noteFPaths = getNoteFPaths(getState());
+  const { toRootIds } = listNoteIds(noteFPaths);
+
+  const noteMainId = getMainId(noteId, toRootIds);
+  const lockedNote = getState().lockSettings.lockedNotes[noteMainId];
+
+  let isValid = false;
+  if (isObject(lockedNote)) {
+    if (isString(lockedNote.password)) {
+      const lockedPassword = await userSession.decrypt(lockedNote.password);
+      if (lockedPassword === password) isValid = true;
+    }
+  }
+  if (!isValid) {
+    dispatch(updateLockEditor({
+      isLoadingShown: false, errMsg: 'Password is not correct. Please try again.',
+    }));
+    return;
+  }
+
+  dispatch({ type: UNLOCK_NOTE, payload: { noteMainId, unlockedDT: Date.now() } });
+  updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
+
+  const safeAreaWidth = getState().window.width;
+  if (isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
+    // As this and hiding lock editor popup both change url hash,
+    //   need to be in different js clock cycle.
+    setTimeout(() => {
+      updateNoteIdUrlHash(noteId);
+    }, 100);
+  } else dispatch(updateNoteId(noteId));
+};
+
+export const addLockList = (
+  listName, password, canChangeListNames, canExport
+) => async (dispatch, getState) => {
+  const vResult = validatePassword(password);
+  if (vResult !== VALID_PASSWORD) {
+    dispatch(updateLockEditor({ errMsg: PASSWORD_MSGS[vResult] }));
+    return;
+  }
+
+  dispatch(updateLockEditor({ isLoadingShown: true, errMsg: '' }));
+  await sleep(16);
+
+  password = await userSession.encrypt(password);
+
+  dispatch({
+    type: ADD_LOCK_LIST,
+    payload: { listName, password, canChangeListNames, canExport },
+  });
+  updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
+};
+
+export const removeLockList = (listName, password) => async (dispatch, getState) => {
+  const vResult = validatePassword(password);
+  if (vResult !== VALID_PASSWORD) {
+    dispatch(updateLockEditor({ errMsg: PASSWORD_MSGS[vResult] }));
+    return;
+  }
+
+  dispatch(updateLockEditor({ isLoadingShown: true, errMsg: '' }));
+  await sleep(16);
+
+  const lockedList = getState().lockSettings.lockedLists[listName];
+
+  let isValid = false;
+  if (isObject(lockedList)) {
+    if (isString(lockedList.password)) {
+      const lockedPassword = await userSession.decrypt(lockedList.password);
+      if (lockedPassword === password) isValid = true;
+    }
+  }
+  if (!isValid) {
+    dispatch(updateLockEditor({
+      isLoadingShown: false, errMsg: 'Password is not correct. Please try again.',
+    }));
+    return;
+  }
+
+  dispatch({ type: REMOVE_LOCK_LIST, payload: { listName } });
+  updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
+};
+
+export const lockList = (listName) => async (dispatch, getState) => {
+  dispatch({ type: LOCK_LIST, payload: { listName } });
+};
+
+export const unlockList = (listName, password) => async (dispatch, getState) => {
+  const vResult = validatePassword(password);
+  if (vResult !== VALID_PASSWORD) {
+    dispatch(updateLockEditor({ errMsg: PASSWORD_MSGS[vResult] }));
+    return;
+  }
+
+  dispatch(updateLockEditor({ isLoadingShown: true, errMsg: '' }));
+  await sleep(16);
+
+  const lockedList = getState().lockSettings.lockedLists[listName];
+
+  let isValid = false;
+  if (isObject(lockedList)) {
+    if (isString(lockedList.password)) {
+      const lockedPassword = await userSession.decrypt(lockedList.password);
+      if (lockedPassword === password) isValid = true;
+    }
+  }
+  if (!isValid) {
+    dispatch(updateLockEditor({
+      isLoadingShown: false, errMsg: 'Password is not correct. Please try again.',
+    }));
+    return;
+  }
+
+  dispatch({ type: UNLOCK_LIST, payload: { listName, unlockedDT: Date.now() } });
+  updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
+};
+
+const cleanUpLocks = async (dispatch, getState) => {
+  const noteFPaths = getNoteFPaths(getState());
+  const { listNameMap } = getState().settings;
+  const lockSettings = getState().lockSettings;
+
+  const { toLeafIds } = listNoteIds(noteFPaths);
+
+  const noteMainIds = [];
+  for (const noteMainId in lockSettings.lockedNotes) {
+    if (!Array.isArray(toLeafIds[noteMainId])) noteMainIds.push(noteMainId);
+  }
+
+  const listNames = [];
+  for (const listName in lockSettings.lockedLists) {
+    if (!doContainListName(listName, listNameMap)) listNames.push(listName);
+  }
+
+  dispatch({ type: CLEAN_UP_LOCKS, payload: { noteMainIds, listNames } });
 };
