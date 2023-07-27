@@ -30,6 +30,7 @@ const LockEditorPopup = () => {
   const [doShowTitle, setDoShowTitle] = useState(false);
   const [canChangeListNames, setCanChangeListNames] = useState(false);
   const [canExport, setCanExport] = useState(false);
+  const [derivedIsShown, setDerivedIsShown] = useState(isShown);
   const passwordInput = useRef(null);
   const didClick = useRef(false);
   const dispatch = useDispatch();
@@ -88,11 +89,6 @@ const LockEditorPopup = () => {
 
   useEffect(() => {
     if (isShown) {
-      setPasswordInputValue('');
-      setDoShowPassword(false);
-      setDoShowTitle(false);
-      setCanChangeListNames(false);
-      setCanExport(false);
       setTimeout(() => {
         if (passwordInput.current) passwordInput.current.focus();
       }, 100);
@@ -102,6 +98,17 @@ const LockEditorPopup = () => {
   useEffect(() => {
     if (isShown) didClick.current = false;
   }, [isShown, lockEditorState]);
+
+  if (derivedIsShown !== isShown) {
+    if (!derivedIsShown && isShown) {
+      setPasswordInputValue('');
+      setDoShowPassword(false);
+      setDoShowTitle(false);
+      setCanChangeListNames(false);
+      setCanExport(false);
+    }
+    setDerivedIsShown(isShown);
+  }
 
   if (!isShown) return <AnimatePresence key="AP_LockP" />;
 
@@ -210,7 +217,7 @@ const LockEditorPopup = () => {
                 </div>}
                 <div className={tailwind(errMsg ? '' : isAddLock ? 'pt-5' : 'pt-3.5')}>
                   {errMsg && <p className={tailwind('py-2 text-sm text-red-600')}>{errMsg}</p>}
-                  <button onClick={onOkBtnClick} className={tailwind('w-full rounded-md border border-gray-800 bg-gray-800 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-white blk:border-gray-500 blk:bg-gray-500 blk:hover:border-gray-400 blk:hover:bg-gray-400 blk:focus:ring-gray-500 blk:focus:ring-offset-gray-800')} type="button">{btnText}</button>
+                  <button onClick={onOkBtnClick} className={tailwind('w-full rounded-md border border-gray-800 bg-gray-800 py-2 text-base font-medium text-white shadow-sm hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-white blk:border-gray-500 blk:bg-gray-500 blk:hover:border-gray-400 blk:hover:bg-gray-400 blk:focus:ring-gray-500 blk:focus:ring-offset-gray-800 sm:text-sm')} type="button">{btnText}</button>
                 </div>
                 <div className={tailwind('absolute top-0 right-0 p-1')}>
                   <button onClick={onCancelBtnClick} className={tailwind('group flex h-7 w-7 items-center justify-center focus:outline-none')} aria-label="Close sign in popup">
