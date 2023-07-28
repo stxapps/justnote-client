@@ -566,6 +566,7 @@ export const makeGetIsExportingNoteAsPdf = () => {
 
 export const makeGetLockNoteStatus = () => {
   return createSelector(
+    state => state.display.doForceLock,
     state => getNoteFPaths(state),
     state => state.lockSettings.lockedNotes,
     (__, noteIdOrObj) => {
@@ -573,7 +574,7 @@ export const makeGetLockNoteStatus = () => {
       if (isObject(noteIdOrObj)) return noteIdOrObj.id;
       return null;
     },
-    (noteFPaths, lockedNotes, noteId) => {
+    (doForceLock, noteFPaths, lockedNotes, noteId) => {
       if (!isString(noteId)) return null;
 
       const { toRootIds } = listNoteIds(noteFPaths);
@@ -581,6 +582,7 @@ export const makeGetLockNoteStatus = () => {
 
       if (isObject(lockedNotes[noteMainId])) {
         if (isString(lockedNotes[noteMainId].password)) {
+          if (doForceLock) return LOCKED;
           if (isNumber(lockedNotes[noteMainId].unlockedDT)) return UNLOCKED;
           return LOCKED;
         }
@@ -616,13 +618,15 @@ export const makeGetDoShowTitle = () => {
 
 export const makeGetLockListStatus = () => {
   return createSelector(
+    state => state.display.doForceLock,
     state => state.lockSettings.lockedLists,
     (__, listName) => listName,
-    (lockedLists, listName) => {
+    (doForceLock, lockedLists, listName) => {
       if (!isString(listName)) return null;
 
       if (isObject(lockedLists[listName])) {
         if (isString(lockedLists[listName].password)) {
+          if (doForceLock) return LOCKED;
           if (isNumber(lockedLists[listName].unlockedDT)) return UNLOCKED;
           return LOCKED;
         }
@@ -633,13 +637,14 @@ export const makeGetLockListStatus = () => {
 };
 
 export const getCanChangeListNames = createSelector(
+  state => state.display.doForceLock,
   state => state.display.listName,
   state => state.lockSettings.lockedLists,
-  (listName, lockedLists) => {
+  (doForceLock, listName, lockedLists) => {
     if (listName !== MY_NOTES) return true;
 
     if (isObject(lockedLists[listName])) {
-      if (isNumber(lockedLists[listName].unlockedDT)) return true;
+      if (!doForceLock && isNumber(lockedLists[listName].unlockedDT)) return true;
       if ([true, false].includes(lockedLists[listName].canChangeListNames)) {
         return lockedLists[listName].canChangeListNames;
       }

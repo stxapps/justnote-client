@@ -285,3 +285,7 @@ export const PASSWORD_MSGS = {
   [CONTAIN_SPACES_PASSWORD]: 'Please no spaces in the password.',
   [TOO_LONG_PASSWORD]: 'Please no more than 27 characters.',
 };
+
+export const APP_STATE_ACTIVE = 'active';
+export const APP_STATE_INACTIVE = 'inactive';
+export const APP_STATE_BACKGROUND = 'background';

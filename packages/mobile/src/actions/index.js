@@ -7,6 +7,7 @@ import { is24HourFormat } from 'react-native-device-time-format';
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
 import { FileSystem } from 'react-native-file-access';
 import Share from 'react-native-share';
+import FlagSecure from 'react-native-flag-secure';
 
 import userSession from '../userSession';
 import axios from '../axiosWrapper';
@@ -59,7 +60,8 @@ import {
   UPDATE_UPDATING_THEME_MODE, UPDATE_TIME_PICK, UPDATE_IS_24H_FORMAT,
   UPDATE_PAYWALL_FEATURE, UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS, UPDATE_LOCK_ACTION,
   UPDATE_LOCK_EDITOR, ADD_LOCK_NOTE, REMOVE_LOCK_NOTE, LOCK_NOTE, UNLOCK_NOTE,
-  ADD_LOCK_LIST, REMOVE_LOCK_LIST, LOCK_LIST, UNLOCK_LIST, CLEAN_UP_LOCKS, RESET_STATE,
+  ADD_LOCK_LIST, REMOVE_LOCK_LIST, LOCK_LIST, UNLOCK_LIST, CLEAN_UP_LOCKS,
+  UPDATE_LOCKS_FOR_ACTIVE_APP, UPDATE_LOCKS_FOR_INACTIVE_APP, RESET_STATE,
 } from '../types/actionTypes';
 import {
   DOMAIN_NAME, APP_URL_SCHEME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH, PAYWALL_POPUP,
@@ -76,6 +78,7 @@ import {
   FEATURE_DATE_FORMAT, FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES,
   FEATURE_LOCK, NOTE_DATE_FORMATS, NO_PERMISSION_GRANTED, VALID_PASSWORD, PASSWORD_MSGS,
   LOCK_ACTION_ADD_LOCK_NOTE, LOCK_ACTION_UNLOCK_NOTE, LOCK_ACTION_ADD_LOCK_LIST,
+  APP_STATE_ACTIVE, APP_STATE_INACTIVE, APP_STATE_BACKGROUND,
 } from '../types/const';
 import {
   isEqual, isObject, isString, isNumber, sleep, separateUrlAndParam, getUserImageUrl,
@@ -87,7 +90,7 @@ import {
   separatePinnedValues, getRawPins, getFormattedTime, get24HFormattedTime,
   getFormattedTimeStamp, getMineSubType, getNote, getEditingListNameEditors,
   getListNamesFromNoteIds, applySubscriptionOfferDetails, validatePassword,
-  doContainListName,
+  doContainListName, doListContainUnlocks,
 } from '../utils';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
@@ -119,21 +122,8 @@ export const init = () => async (dispatch, getState) => {
   });
 
   AppState.addEventListener('change', async (nextAppState) => {
-    if (nextAppState === 'active') {
-      const isUserSignedIn = await userSession.isUserSignedIn();
-      if (isUserSignedIn) {
-        const { purchaseStatus } = getState().iap;
-        if (purchaseStatus === REQUEST_PURCHASE) return;
-      }
-
-      const is24HFormat = await is24HourFormat();
-      dispatch(updateIs24HFormat(is24HFormat));
-
-      if (isUserSignedIn) {
-        const interval = (Date.now() - vars.sync.lastSyncDT) / 1000 / 60 / 60;
-        dispatch(sync(interval > 1, 0));
-      }
-    }
+    await handleAppStateChange(nextAppState)(dispatch, getState);
+    vars.appState.lastChangeDT = Date.now();
   });
 
   const isUserSignedIn = await userSession.isUserSignedIn();
@@ -217,6 +207,47 @@ const handlePendingSignIn = (url) => async (dispatch, getState) => {
     type: UPDATE_HANDLING_SIGN_IN,
     payload: false,
   });
+};
+
+const handleAppStateChange = (nextAppState) => async (dispatch, getState) => {
+  const isUserSignedIn = await userSession.isUserSignedIn();
+  const now = Date.now();
+
+  if (nextAppState === APP_STATE_ACTIVE) {
+    if (getState().display.doForceLock) {
+      if (Platform.OS === 'android') FlagSecure.deactivate();
+      let isLong = (now - vars.appState.lastChangeDT) > 21 * 60 * 1000;
+      dispatch({ type: UPDATE_LOCKS_FOR_ACTIVE_APP, payload: { isLong } });
+    }
+
+    if (isUserSignedIn) {
+      const { purchaseStatus } = getState().iap;
+      if (purchaseStatus === REQUEST_PURCHASE) return;
+    }
+
+    const is24HFormat = await is24HourFormat();
+    dispatch(updateIs24HFormat(is24HFormat));
+
+    if (!isUserSignedIn) return;
+
+    const interval = (now - vars.sync.lastSyncDT) / 1000 / 60 / 60;
+    dispatch(sync(interval > 1, 0));
+  }
+
+  let isInactive = nextAppState === APP_STATE_INACTIVE;
+  if (Platform.OS === 'android') isInactive = nextAppState === APP_STATE_BACKGROUND;
+  if (isInactive) {
+    if (!isUserSignedIn) return;
+
+    const { purchaseStatus } = getState().iap;
+    if (purchaseStatus === REQUEST_PURCHASE) return;
+
+    const doLCU = doListContainUnlocks(getState());
+    if (doLCU) {
+      if (Platform.OS === 'android') FlagSecure.activate();
+      dispatch({ type: UPDATE_LOCKS_FOR_INACTIVE_APP });
+    }
+  }
 };
 
 export const signOut = () => async (dispatch, getState) => {

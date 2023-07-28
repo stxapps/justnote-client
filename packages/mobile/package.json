@@ -29,6 +29,7 @@
     "react-native-document-picker": "^9.0.1",
     "react-native-fast-image": "^8.6.3",
     "react-native-file-access": "^3.0.4",
+    "react-native-flag-secure": "^1.0.4",
     "react-native-html-to-pdf": "https://github.com/stxapps/react-native-html-to-pdf#77aed8df9caa3b48f7cf19933bc6d6576fe817ce",
     "react-native-iap": "^12.10.5",
     "react-native-keyboard-manager": "^6.5.11-2",

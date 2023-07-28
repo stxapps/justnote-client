@@ -11,7 +11,8 @@ import {
   UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS, MERGE_SETTINGS_COMMIT,
   UPDATE_SETTINGS_VIEW_ID, UPDATE_LIST_NAMES_MODE, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
   UPDATE_SYNC_PROGRESS, UPDATE_SYNCED, UPDATE_PAYWALL_FEATURE, UPDATE_LOCK_ACTION,
-  ADD_LOCK_NOTE, LOCK_NOTE, ADD_LOCK_LIST, LOCK_LIST, UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS,
+  ADD_LOCK_NOTE, LOCK_NOTE, ADD_LOCK_LIST, LOCK_LIST, UPDATE_LOCKS_FOR_ACTIVE_APP,
+  UPDATE_LOCKS_FOR_INACTIVE_APP, UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS,
   UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
   UPDATE_DELETE_ALL_DATA_PROGRESS, UPDATE_DELETE_SYNC_DATA_PROGRESS, DELETE_ALL_DATA,
   RESET_STATE,
@@ -93,6 +94,7 @@ const initialState = {
   paywallFeature: null,
   doRightPanelAnimateHidden: false,
   lockAction: null,
+  doForceLock: false,
   exportNoteAsPdfProgress: null,
   importAllDataProgress: null,
   exportAllDataProgress: null,
@@ -600,6 +602,38 @@ const displayReducer = (state = initialState, action) => {
 
   if ([ADD_LOCK_LIST, LOCK_LIST].includes(action.type)) {
     return { ...state, noteId: null, isEditorFocused: false, isEditorBusy: false };
+  }
+
+  if (action.type === UPDATE_LOCKS_FOR_ACTIVE_APP) {
+    const { isLong } = action.payload;
+
+    const newState = { ...state, doForceLock: false };
+    if (isLong) {
+      newState.noteId = null;
+      newState.isEditorFocused = false;
+      newState.isEditorBusy = false;
+      newState.selectedNoteIds = [];
+      newState.isSelectedNoteIdsMaxErrorShown = false;
+    }
+    return newState;
+  }
+
+  if (action.type === UPDATE_LOCKS_FOR_INACTIVE_APP) {
+    return {
+      ...state,
+      doForceLock: true,
+      isNoteListItemMenuPopupShown: false,
+      noteListItemMenuPopupPosition: null,
+      isListNamesPopupShown: false,
+      listNamesPopupPosition: null,
+      isPinMenuPopupShown: false,
+      pinMenuPopupPosition: null,
+      isLockMenuPopupShown: false,
+      lockMenuPopupPosition: null,
+      isLockEditorPopupShown: false,
+      isConfirmDeletePopupShown: false,
+      isConfirmDiscardPopupShown: false,
+    };
   }
 
   if (action.type === UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS) {

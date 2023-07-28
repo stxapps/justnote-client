@@ -286,6 +286,7 @@
 - yarn add https://github.com/stxapps/react-native-html-to-pdf#77aed8df9caa3b48f7cf19933bc6d6576fe817ce
 - yarn add react-native-document-picker react-native-share react-native-zip-archive
 - yarn add htmlparser2
+- yarn add react-native-flag-secure
 - yarn add --dev redux-flipper react-native-flipper@0.164.0
 - Font
   + Create react-native.config.js
