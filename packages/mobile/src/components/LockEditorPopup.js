@@ -15,7 +15,7 @@ import {
 import {
   MY_NOTES, LOCK_EDITOR_POPUP, LOCK_ACTION_ADD_LOCK_NOTE, LOCK_ACTION_REMOVE_LOCK_NOTE,
   LOCK_ACTION_UNLOCK_NOTE, LOCK_ACTION_ADD_LOCK_LIST, LOCK_ACTION_REMOVE_LOCK_LIST,
-  LOCK_ACTION_UNLOCK_LIST, BLK_MODE,
+  LOCK_ACTION_UNLOCK_LIST, BLK_MODE, LG_WIDTH,
 } from '../types/const';
 import { getThemeMode } from '../selectors';
 import { dialogFMV } from '../types/animConfigs';
@@ -29,7 +29,7 @@ const KBM_ACTIONS = [
 
 const LockEditorPopup = () => {
 
-  const { height: safeAreaHeight } = useSafeAreaFrame();
+  const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
   const insets = useSafeAreaInsets();
   const isShown = useSelector(state => state.display.isLockEditorPopupShown);
   const lockAction = useSelector(state => state.display.lockAction);
@@ -50,6 +50,7 @@ const LockEditorPopup = () => {
   const popupAnim = useRef(new Animated.Value(0)).current;
   const popupBackHandler = useRef(null);
   const didClick = useRef(false);
+  const lockActionRef = useRef(lockAction);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
@@ -124,6 +125,10 @@ const LockEditorPopup = () => {
   }, [onCancelBtnClick]);
 
   useEffect(() => {
+    lockActionRef.current = lockAction;
+  }, [lockAction]);
+
+  useEffect(() => {
     let didMount = true;
     if (isShown) {
       Animated.timing(popupAnim, { toValue: 1, ...dialogFMV.visible }).start();
@@ -142,23 +147,16 @@ const LockEditorPopup = () => {
 
   useEffect(() => {
     if (isShown) {
-      if (Platform.OS === 'ios' && KBM_ACTIONS.includes(lockAction)) {
+      if (Platform.OS === 'ios' && KBM_ACTIONS.includes(lockActionRef.current)) {
         KeyboardManager.setEnable(true);
       }
     } else {
-      if (Platform.OS === 'ios' && KBM_ACTIONS.includes(lockAction)) {
+      if (Platform.OS === 'ios' && KBM_ACTIONS.includes(lockActionRef.current)) {
         KeyboardManager.setEnable(false);
       }
       if (Platform.OS === 'android') Keyboard.dismiss();
     }
-
-    return () => {
-      if (Platform.OS === 'ios' && KBM_ACTIONS.includes(lockAction)) {
-        KeyboardManager.setEnable(false);
-      }
-      if (Platform.OS === 'android') Keyboard.dismiss();
-    };
-  }, [isShown, lockAction]);
+  }, [isShown]);
 
   useEffect(() => {
     if (isShown) {
@@ -201,6 +199,7 @@ const LockEditorPopup = () => {
     ],
     maxWidth: 368,
   };
+  if (safeAreaWidth >= LG_WIDTH) popupStyle.marginTop = Math.round(appHeight / 6);
   const bgStyle = { opacity: popupAnim };
 
   const switchThumbColorOn = 'rgb(34, 197, 94)';
@@ -264,18 +263,18 @@ const LockEditorPopup = () => {
   const isAddLock = isAddLockNote || isAddLockList;
 
   return (
-    <View style={[tailwind('absolute inset-0 items-center justify-center'), canvasStyle]}>
+    <View style={[tailwind('absolute inset-0 items-center justify-center lg:justify-start'), canvasStyle]}>
       <TouchableWithoutFeedback onPress={onCancelBtnClick}>
         <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
       </TouchableWithoutFeedback>
-      <Animated.View style={[tailwind('w-full overflow-hidden rounded-lg bg-white shadow-xl blk:border blk:border-gray-700 blk:bg-gray-800 sm:mb-20'), popupStyle]}>
+      <Animated.View style={[tailwind('w-full overflow-hidden rounded-lg bg-white shadow-xl blk:border blk:border-gray-700 blk:bg-gray-800'), popupStyle]}>
         <ScrollView style={{ maxHeight: panelHeight }} keyboardShouldPersistTaps="handled">
           <View style={tailwind('px-4 pt-8 pb-4 sm:px-6 sm:pb-6')}>
             <Text style={tailwind('text-left text-xl font-semibold text-gray-900 blk:text-white')}>{title}</Text>
             {desc}
             <View style={tailwind([LOCK_ACTION_ADD_LOCK_NOTE, LOCK_ACTION_ADD_LOCK_LIST].includes(lockAction) ? 'pt-1' : 'pt-3.5')}>
               <View style={tailwind('mt-1 rounded-md bg-white shadow-sm blk:bg-gray-800')}>
-                <TextInput ref={passwordInput} onChange={onPasswordInputChange} style={tailwind('w-full rounded-md border border-gray-300 bg-white py-2 pl-4 pr-6 text-sm font-normal leading-5 text-gray-700 blk:border-gray-600 blk:bg-gray-800 blk:text-gray-200')} placeholder="Password" placeholderTextColor={themeMode === BLK_MODE ? 'rgb(156, 163, 175)' : 'rgb(107, 114, 128)'} value={passwordInputValue} autoCapitalize="none" secureTextEntry={!doShowPassword} />
+                <TextInput ref={passwordInput} onChange={onPasswordInputChange} style={tailwind('w-full rounded-md border border-gray-300 bg-white py-2 pl-4 pr-6 text-sm font-normal leading-4 text-gray-700 blk:border-gray-600 blk:bg-gray-800 blk:text-gray-200')} placeholder="Password" placeholderTextColor={themeMode === BLK_MODE ? 'rgb(156, 163, 175)' : 'rgb(107, 114, 128)'} value={passwordInputValue} autoCapitalize="none" secureTextEntry={!doShowPassword} />
                 <TouchableOpacity onPress={() => setDoShowPassword(!doShowPassword)} style={tailwind('absolute inset-y-0 right-0 items-center justify-center pr-2')}>
                   <Svg width={16} height={16} style={tailwind('font-normal text-gray-400 blk:text-gray-500')} viewBox="0 0 20 20" fill="currentColor">
                     {doShowPassword && <React.Fragment>

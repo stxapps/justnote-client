@@ -180,7 +180,7 @@ const LockEditorPopup = () => {
           <div className={tailwind('fixed inset-0')}>
             <motion.button onClick={onCancelBtnClick} className={tailwind('absolute inset-0 h-full w-full cursor-default bg-black bg-opacity-25 focus:outline-none')} variants={dialogBgFMV} initial="hidden" animate="visible" exit="hidden" />
           </div>
-          <motion.div className={tailwind('w-full max-w-[23rem] overflow-hidden rounded-lg bg-white shadow-xl blk:bg-gray-800 blk:ring-1 blk:ring-white blk:ring-opacity-25 sm:mb-20')} variants={dialogFMV} initial="hidden" animate="visible" exit="hidden" role="dialog" aria-modal="true" aria-labelledby="modal-headline">
+          <motion.div className={tailwind('w-full max-w-[23rem] overflow-hidden rounded-lg bg-white shadow-xl blk:bg-gray-800 blk:ring-1 blk:ring-white blk:ring-opacity-25 lg:mb-20')} variants={dialogFMV} initial="hidden" animate="visible" exit="hidden" role="dialog" aria-modal="true" aria-labelledby="modal-headline">
             <div className={tailwind('relative flex flex-col overflow-hidden rounded-lg bg-white blk:bg-gray-800')} style={{ maxHeight: panelHeight }}>
               <div className={tailwind('relative flex-1 overflow-y-auto overflow-x-hidden px-4 pt-8 pb-4 sm:px-6 sm:pb-6')}>
                 <h2 className={tailwind('text-left text-xl font-semibold text-gray-900 blk:text-white')}>{title}</h2>
