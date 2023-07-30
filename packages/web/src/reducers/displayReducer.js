@@ -95,6 +95,7 @@ const initialState = {
   doRightPanelAnimateHidden: false,
   lockAction: null,
   doForceLock: false,
+  exitColsPanelFullScreenCount: 0,
   exportNoteAsPdfProgress: null,
   importAllDataProgress: null,
   exportAllDataProgress: null,
@@ -614,6 +615,7 @@ const displayReducer = (state = initialState, action) => {
       newState.isEditorBusy = false;
       newState.selectedNoteIds = [];
       newState.isSelectedNoteIdsMaxErrorShown = false;
+      newState.exitColsPanelFullScreenCount = newState.exitColsPanelFullScreenCount + 1;
     }
     return newState;
   }
