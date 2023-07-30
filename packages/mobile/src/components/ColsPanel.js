@@ -33,6 +33,7 @@ const ColsPanel = () => {
     return state.notes[listName][noteId];
   });
   const unsavedNote = useSelector(state => getUnsavedNote(state, note));
+  const exitCount = useSelector(state => state.display.exitColsPanelFullScreenCount);
 
   const [state, setState] = useState({
     isPane1Shown: true,
@@ -46,6 +47,7 @@ const ColsPanel = () => {
   const startInfo = useRef(null);
   const whichResizer = useRef(null);
   const prevDidGetState = useRef(didGetState);
+  const prevExitCount = useRef(exitCount);
 
   const tailwind = useTailwind();
 
@@ -176,6 +178,17 @@ const ColsPanel = () => {
     }
     prevDidGetState.current = didGetState;
   }, [didGetState, state]);
+
+  useEffect(() => {
+    if (exitCount !== prevExitCount.current) {
+      if (exitCount > prevExitCount.current && state.isPane3FullScreen) {
+        setState(prevState => {
+          return { ...prevState, isPane3FullScreen: false };
+        });
+      }
+      prevExitCount.current = exitCount;
+    }
+  }, [exitCount, state.isPane3FullScreen]);
 
   if (!didGetState) return <Loading />;
 
