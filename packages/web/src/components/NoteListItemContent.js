@@ -7,7 +7,7 @@ import {
 } from '../actions';
 import { LG_WIDTH } from '../types/const';
 import { makeIsNoteIdSelected, makeGetNoteDate } from '../selectors';
-import { isBusyStatus, isPinningStatus, stripHtml } from '../utils';
+import { isNumber, isBusyStatus, isPinningStatus, stripHtml } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
@@ -15,12 +15,13 @@ const NoteListItemContent = (props) => {
 
   const { note, pinStatus } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
-  const [doTitlePb, setDoTitlePb] = useState(false);
   const getIsNoteIdSelected = useMemo(makeIsNoteIdSelected, []);
   const getNoteDate = useMemo(makeGetNoteDate, []);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const isSelected = useSelector(state => getIsNoteIdSelected(state, note.id));
   const noteDate = useSelector(state => getNoteDate(state, note));
+  const [viewPbMode, setViewPbMode] = useState(0);
+  const [doTitlePb, setDoTitlePb] = useState(false);
   const body = useMemo(() => stripHtml(note.body), [note.body]);
   const isBusy = useMemo(() => {
     return isBusyStatus(note.status) || isPinningStatus(pinStatus);
@@ -132,17 +133,30 @@ const NoteListItemContent = (props) => {
   }, []);
 
   useEffect(() => {
-    if (!pBodyRef.current || !pBodyRef.current.clientHeight) return;
+    if (!pBodyRef.current || !isNumber(pBodyRef.current.clientHeight)) return;
     const height = pBodyRef.current.clientHeight;
 
-    let _doTitlePb = false;
-    if (note && note.title && body && height > 20) _doTitlePb = true;
+    let _viewPbMode = 0;
+    if ((note && note.title) || noteDate) {
+      if (height <= 44) _viewPbMode = 1;
+      if (height <= 24) _viewPbMode = 2;
+    }
 
+    let _doTitlePb = false;
+    if (((note && note.title) || noteDate) && body) {
+      if (height >= 22) _doTitlePb = true;
+    }
+
+    if (viewPbMode !== _viewPbMode) setViewPbMode(_viewPbMode);
     if (doTitlePb !== _doTitlePb) setDoTitlePb(_doTitlePb);
-  }, [doTitlePb, note, body, setDoTitlePb]);
+  }, [viewPbMode, doTitlePb, note, body, noteDate, setViewPbMode, setDoTitlePb]);
 
   const circleClassNames = isSelected ? 'bg-green-600 border-green-700' : 'bg-gray-200 border-gray-300';
   const checkClassNames = isSelected ? 'text-white' : 'text-gray-400';
+
+  let viewClassNames = 'py-4';
+  if (viewPbMode === 1) viewClassNames = 'pt-4 pb-3.5';
+  else if (viewPbMode === 2) viewClassNames = 'pt-4 pb-2';
 
   const titleClassNames = doTitlePb ? 'pb-1.5' : '';
 
@@ -150,20 +164,20 @@ const NoteListItemContent = (props) => {
   const bodyTabIndex = note.title ? -1 : 0;
 
   return (
-    <div className={tailwind('group flex items-center rounded-sm py-4 pl-3 sm:pl-5')}>
+    <div className={tailwind(`group flex items-center rounded-sm pl-3 sm:pl-5 ${viewClassNames}`)}>
       {(isBulkEditing && !isBusy) && <button onTouchStart={onTouchPress} onTouchMove={onTouchCancel} onTouchEnd={onTouchPressRelease} onTouchCancel={onTouchCancel} onMouseDown={onClickPress} onMouseUp={onClickPressRelease} onMouseLeave={onClickCancel} className={tailwind(`mr-3 flex h-10 w-10 items-center justify-center rounded-full border focus:outline-none ${circleClassNames}`)}>
         <svg className={tailwind(`h-6 w-6 ${checkClassNames}`)} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
           <path fillRule="evenodd" clipRule="evenodd" d="M16.7071 5.29289C17.0976 5.68342 17.0976 6.31658 16.7071 6.70711L8.70711 14.7071C8.31658 15.0976 7.68342 15.0976 7.29289 14.7071L3.29289 10.7071C2.90237 10.3166 2.90237 9.68342 3.29289 9.29289C3.68342 8.90237 4.31658 8.90237 4.70711 9.29289L8 12.5858L15.2929 5.29289C15.6834 4.90237 16.3166 4.90237 16.7071 5.29289Z" />
         </svg>
       </button>}
       <div className={tailwind('min-w-0 flex-1')}>
-        <div className={tailwind('pr-3')}>
+        {(note.title || noteDate) && <div className={tailwind('pr-3')}>
           {/* Add pb (titleClassNames) in button, not in div above, to make no clickable gap but ring is misaligned. */}
           <button tabIndex={titleTabIndex} onTouchStart={onTouchPress} onTouchMove={onTouchCancel} onTouchEnd={onTouchPressRelease} onTouchCancel={onTouchCancel} onMouseDown={onClickPress} onMouseUp={onClickPressRelease} onMouseLeave={onClickCancel} className={tailwind(`flex w-full items-center justify-between rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 blk:focus-visible:ring-gray-500 blk:focus-visible:ring-offset-gray-900 ${titleClassNames}`)}>
             <h3 className={tailwind('min-w-0 flex-1 truncate text-left text-base font-semibold text-gray-800 group-hover:underline blk:text-gray-100 lg:text-sm')}>{note.title}</h3>
             <p className={tailwind('ml-3 flex-shrink-0 flex-grow-0 whitespace-nowrap text-left text-xs text-gray-400 blk:text-gray-500')}>{noteDate}</p>
           </button>
-        </div>
+        </div>}
         <div className={tailwind(`flex items-center justify-between ${isBulkEditing ? 'pr-3' : ''}`)}>
           <button tabIndex={bodyTabIndex} onTouchStart={onTouchPress} onTouchMove={onTouchCancel} onTouchEnd={onTouchPressRelease} onTouchCancel={onTouchCancel} onMouseDown={onClickPress} onMouseUp={onClickPressRelease} onMouseLeave={onClickCancel} className={tailwind('min-h-[2.625rem] w-full min-w-0 flex-1 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 blk:focus-visible:ring-gray-500 blk:focus-visible:ring-offset-gray-900')}>
             <p ref={pBodyRef} className={tailwind('text-left text-sm text-gray-500 line-clamp-3 blk:text-gray-400')}>{body}</p>

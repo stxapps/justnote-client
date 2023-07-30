@@ -15,12 +15,13 @@ import { useTailwind } from '.';
 const NoteListItemContent = (props) => {
 
   const { note, pinStatus } = props;
-  const [doTitlePb, setDoTitlePb] = useState(false);
   const getIsNoteIdSelected = useMemo(makeIsNoteIdSelected, []);
   const getNoteDate = useMemo(makeGetNoteDate, []);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const isSelected = useSelector(state => getIsNoteIdSelected(state, note.id));
   const noteDate = useSelector(state => getNoteDate(state, note));
+  const [viewPbMode, setViewPbMode] = useState(0);
+  const [doTitlePb, setDoTitlePb] = useState(false);
   const body = useMemo(() => stripHtml(note.body), [note.body]);
   const isBusy = useMemo(() => {
     return isBusyStatus(note.status) || isPinningStatus(pinStatus);
@@ -66,21 +67,34 @@ const NoteListItemContent = (props) => {
     setTimeout(() => {
       if (!pBodyRef.current) return;
       pBodyRef.current.measure((_fx, _fy, width, height, x, y) => {
-        let _doTitlePb = false;
-        if (note && note.title && body && height > 20) _doTitlePb = true;
+        let _viewPbMode = 0;
+        if ((note && note.title) || noteDate) {
+          if (height <= 44) _viewPbMode = 1;
+          if (height <= 24) _viewPbMode = 2;
+        }
 
+        let _doTitlePb = false;
+        if (((note && note.title) || noteDate) && body) {
+          if (height >= 22) _doTitlePb = true;
+        }
+
+        if (viewPbMode !== _viewPbMode) setViewPbMode(_viewPbMode);
         if (doTitlePb !== _doTitlePb) setDoTitlePb(_doTitlePb);
       });
     }, 1);
-  }, [doTitlePb, note, body, setDoTitlePb]);
+  }, [viewPbMode, doTitlePb, note, body, noteDate, setViewPbMode, setDoTitlePb]);
 
   const circleClassNames = isSelected ? 'bg-green-600 border-green-700' : 'bg-gray-200 border-gray-300';
   const checkClassNames = isSelected ? 'text-white' : 'text-gray-400';
 
+  let viewClassNames = 'py-4';
+  if (viewPbMode === 1) viewClassNames = 'pt-4 pb-3.5';
+  else if (viewPbMode === 2) viewClassNames = 'pt-4 pb-2';
+
   const titleClassNames = doTitlePb ? 'pb-1.5' : '';
 
   return (
-    <View style={tailwind('w-full flex-row items-center rounded-sm py-4 pl-3 sm:pl-5')}>
+    <View style={tailwind(`w-full flex-row items-center rounded-sm pl-3 sm:pl-5 ${viewClassNames}`)}>
       {(isBulkEditing && !isBusy) && <TouchableOpacity activeOpacity={1.0} onPress={onContentBtnClick} onLongPress={onContentBtnLongClick} style={tailwind(`mr-3 h-10 w-10 items-center justify-center rounded-full border ${circleClassNames}`)}>
         <Svg style={tailwind(`h-6 w-6 font-normal ${checkClassNames}`)} viewBox="0 0 20 20" fill="currentColor">
           <Path fillRule="evenodd" clipRule="evenodd" d="M16.7071 5.29289C17.0976 5.68342 17.0976 6.31658 16.7071 6.70711L8.70711 14.7071C8.31658 15.0976 7.68342 15.0976 7.29289 14.7071L3.29289 10.7071C2.90237 10.3166 2.90237 9.68342 3.29289 9.29289C3.68342 8.90237 4.31658 8.90237 4.70711 9.29289L8 12.5858L15.2929 5.29289C15.6834 4.90237 16.3166 4.90237 16.7071 5.29289Z" />
