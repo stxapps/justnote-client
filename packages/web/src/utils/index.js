@@ -2020,3 +2020,30 @@ export const validatePassword = (password) => {
   if (password.length > 27) return TOO_LONG_PASSWORD;
   return VALID_PASSWORD;
 };
+
+export const doListContainUnlocks = (state) => {
+  const listName = state.display.listName;
+  const { lockedNotes, lockedLists } = state.lockSettings;
+
+  if (isObject(lockedLists[listName])) {
+    if (isString(lockedLists[listName].password)) {
+      if (isNumber(lockedLists[listName].unlockedDT)) return true;
+    }
+  }
+
+  const noteFPaths = getNoteFPaths(state);
+  const { toRootIds } = listNoteIds(noteFPaths);
+
+  if (isObject(state.notes[listName])) {
+    for (const noteId in state.notes[listName]) {
+      const noteMainId = getMainId(noteId, toRootIds);
+      if (isObject(lockedNotes[noteMainId])) {
+        if (isString(lockedNotes[noteMainId].password)) {
+          if (isNumber(lockedNotes[noteMainId].unlockedDT)) return true;
+        }
+      }
+    }
+  }
+
+  return false;
+};

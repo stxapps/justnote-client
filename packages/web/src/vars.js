@@ -123,11 +123,15 @@ const deleteSyncData = {
   isDeleting: false,
 };
 
+const appState = {
+  lastChangeDT: Date.now(),
+};
+
 const vars = {
   cachedFPaths, cachedServerFPaths, scrollPanel, keyboard, runAfterFetchTask,
   randomHouseworkTasks, updateNoteIdUrlHash, updateNoteId, changeListName,
   updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, deleteOldNotes, updateSettings,
   updateSettingsPopup, notesReducer, displayReducer, editorReducer, iap, platform,
-  syncMode, sync, importAllData, deleteSyncData,
+  syncMode, sync, importAllData, deleteSyncData, appState,
 };
 export default vars;
