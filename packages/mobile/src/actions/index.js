@@ -217,6 +217,8 @@ const handleAppStateChange = (nextAppState) => async (dispatch, getState) => {
     if (getState().display.doForceLock) {
       if (Platform.OS === 'android') FlagSecure.deactivate();
       let isLong = (now - vars.appState.lastChangeDT) > 21 * 60 * 1000;
+      // If isLong is true, on web, need to update url hash if noteId !== null
+      //   like in refreshFetched.
       dispatch({ type: UPDATE_LOCKS_FOR_ACTIVE_APP, payload: { isLong } });
     }
 

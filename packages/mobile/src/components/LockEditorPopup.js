@@ -188,7 +188,7 @@ const LockEditorPopup = () => {
 
   // safeAreaHeight doesn't include status bar height, but minus it anyway.
   const statusBarHeight = 24;
-  let appHeight = safeAreaHeight - statusBarHeight;
+  const appHeight = safeAreaHeight - statusBarHeight;
   const panelHeight = Math.min(480 - 40, appHeight * 0.9);
 
   const canvasStyle = { paddingLeft: 16 + insets.left, paddingRight: 16 + insets.right };
@@ -199,7 +199,9 @@ const LockEditorPopup = () => {
     ],
     maxWidth: 368,
   };
-  if (safeAreaWidth >= LG_WIDTH) popupStyle.marginTop = Math.round(appHeight / 6);
+  if (Platform.OS === 'ios' && safeAreaWidth >= LG_WIDTH) {
+    popupStyle.marginTop = Math.round(appHeight / 6);
+  }
   const bgStyle = { opacity: popupAnim };
 
   const switchThumbColorOn = 'rgb(34, 197, 94)';
@@ -263,7 +265,7 @@ const LockEditorPopup = () => {
   const isAddLock = isAddLockNote || isAddLockList;
 
   return (
-    <View style={[tailwind('absolute inset-0 items-center justify-center lg:justify-start'), canvasStyle]}>
+    <View style={[tailwind(`absolute inset-0 items-center justify-center ${Platform.OS === 'ios' ? 'lg:justify-start' : ''}`), canvasStyle]}>
       <TouchableWithoutFeedback onPress={onCancelBtnClick}>
         <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
       </TouchableWithoutFeedback>
