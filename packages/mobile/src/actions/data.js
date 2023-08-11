@@ -1080,7 +1080,17 @@ export const updateImportAllDataProgress = (progress) => {
 };
 
 const _canExport = (noteId, lockSettings, toRootIds) => {
-  const lockedList = lockSettings.lockedLists[noteId.listName];
+  // Possible e.g., force lock while settingsPopup is shown.
+  let lockedList = lockSettings.lockedLists[MY_NOTES];
+  if (isObject(lockedList)) {
+    if (!isNumber(lockedList.unlockedDT)) {
+      if (!lockedList.canChangeListNames) {
+        if (!lockedList.canExport) return false;
+      }
+    }
+  }
+
+  lockedList = lockSettings.lockedLists[noteId.listName];
   if (isObject(lockedList)) {
     if (!isNumber(lockedList.unlockedDT)) {
       if (!lockedList.canExport) return false;
