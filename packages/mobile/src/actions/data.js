@@ -1317,13 +1317,12 @@ export const exportAllData = () => async (dispatch, getState) => {
       }
     }
 
-    const filePath = `${Dirs.CacheDir}/justnote-data.zip`;
+    const fileName = `Justnote data ${getFormattedTimeStamp(new Date())}.zip`;
+    const filePath = `${Dirs.CacheDir}/${fileName}`;
     const doFileExist = await FileSystem.exists(filePath);
     if (doFileExist) await FileSystem.unlink(filePath);
 
     await zip(exportDPath, filePath);
-
-    const fileName = `Justnote data ${getFormattedTimeStamp(new Date())}.zip`;
     await saveAs(filePath, fileName);
 
     if (errorResponses.length > 0) {

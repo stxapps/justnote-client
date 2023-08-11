@@ -128,7 +128,7 @@ const PaywallPopup = () => {
           <View style={tailwind('mt-3 sm:mt-5')}>
             <Text style={tailwind('text-center text-lg font-medium leading-6 text-gray-900')}>Purchase a subscription</Text>
             <View style={tailwind('mt-2')}>
-              <Text style={tailwind('text-center text-sm font-normal text-gray-500')}>{featureText} Please purchase a subscription to support us and unlock extra features.</Text>
+              <Text style={tailwind('text-center text-sm font-normal text-gray-500')}>{featureText} Please purchase a subscription to support us and unlock all extra features.</Text>
             </View>
           </View>
         </View>

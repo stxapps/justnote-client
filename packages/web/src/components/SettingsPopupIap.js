@@ -423,7 +423,7 @@ const IapPurchased = (props) => {
       <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>Your subscription</h4>
       {infoText}
       {refreshPanel}
-      <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>{isUnknown ? 'If the problem persists' : 'If you have any question'}, please <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href={'/' + HASH_SUPPORT} target="_blank" rel="noreferrer">contact us</a> with your app public key below and order ID in your order confirmation email.</p>
+      <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>{isUnknown ? 'If the problem persists' : 'If you have any questions'}, please <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href={'/' + HASH_SUPPORT} target="_blank" rel="noreferrer">contact us</a> with your app public key below and order ID in your order confirmation email.</p>
       <div className={tailwind('mt-6 flex flex-col sm:flex-row')}>
         <p className={tailwind('flex-shrink-0 flex-grow-0 text-base text-gray-500 blk:text-gray-400')}>App public key:</p>
         {publicKeyText}

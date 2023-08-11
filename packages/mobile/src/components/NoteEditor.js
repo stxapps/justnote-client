@@ -6,7 +6,7 @@ import Svg, { Path } from 'react-native-svg';
 import {
   DUMMY_NOTE_OBJ, DUMMY_UNSAVED_NOTE_OBJ, INVALID, LOCKED, NEW_NOTE,
 } from '../types/const';
-import { makeGetLockNoteStatus, makeGetLockListStatus } from '../selectors';
+import { makeGetLockNoteStatus, getCurrentLockListStatus } from '../selectors';
 import { isObject, isDiedStatus } from '../utils';
 
 import { useTailwind } from '.';
@@ -23,11 +23,9 @@ const NoteEditor = (props) => {
 
   const { note, unsavedNote, isFullScreen, onToggleFullScreen, width } = props;
   const getLockNoteStatus = useMemo(makeGetLockNoteStatus, []);
-  const getLockListStatus = useMemo(makeGetLockListStatus, []);
-  const listName = useSelector(state => state.display.listName);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const lockNoteStatus = useSelector(state => getLockNoteStatus(state, note));
-  const lockListStatus = useSelector(state => getLockListStatus(state, listName));
+  const lockListStatus = useSelector(state => getCurrentLockListStatus(state));
   const isContentEditor = useRef(false);
   const tailwind = useTailwind();
 

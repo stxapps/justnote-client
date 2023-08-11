@@ -3702,7 +3702,8 @@ export const removeLockList = (listName, password) => async (dispatch, getState)
   updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
 };
 
-export const lockList = (listName) => async (dispatch, getState) => {
+export const lockCurrentList = () => async (dispatch, getState) => {
+  const listName = getState().display.listName;
   dispatch({ type: LOCK_LIST, payload: { listName } });
 };
 

@@ -440,7 +440,7 @@ const IapPurchased = (props) => {
       <Text style={tailwind('text-base font-medium leading-4 text-gray-800 blk:text-gray-100')}>Your subscription</Text>
       {infoText}
       {refreshPanel}
-      <Text style={tailwind('mt-6 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>{isUnknown ? 'If the problem persists' : 'If you have any question'}, please <Text onPress={() => Linking.openURL(DOMAIN_NAME + '/' + HASH_SUPPORT)} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>contact us</Text> with your app public key below and order ID in your order confirmation email.</Text>
+      <Text style={tailwind('mt-6 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>{isUnknown ? 'If the problem persists' : 'If you have any questions'}, please <Text onPress={() => Linking.openURL(DOMAIN_NAME + '/' + HASH_SUPPORT)} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>contact us</Text> with your app public key below and order ID in your order confirmation email.</Text>
       <View style={tailwind('mt-6 sm:flex-row')}>
         <Text style={tailwind('flex-shrink-0 flex-grow-0 text-base font-normal text-gray-500 blk:text-gray-400')}>App public key:</Text>
         {publicKeyText}

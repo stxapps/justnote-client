@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, TouchableWithoutFeedback, Animated, Linking, BackHandler,
 } from 'react-native';
@@ -7,14 +7,14 @@ import Svg, { Path } from 'react-native-svg';
 
 import {
   sync, updateSynced, signOut, updatePopup, updateSettingsPopup, updateSettingsViewId,
-  updateBulkEdit, lockList,
+  updateBulkEdit, lockCurrentList,
 } from '../actions';
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import {
   DOMAIN_NAME, HASH_SUPPORT, SIGN_UP_POPUP, NOTE_LIST_MENU_POPUP,
   CONFIRM_EXIT_DUMMY_POPUP, SETTINGS_VIEW_ACCOUNT, LG_WIDTH, SHOW_SYNCED, LOCK, UNLOCKED,
 } from '../types/const';
-import { makeGetLockListStatus, getCanChangeListNames } from '../selectors';
+import { getCurrentLockListStatus, getCanChangeListNames } from '../selectors';
 import { popupFMV, rotateAnimConfig } from '../types/animConfigs';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
@@ -23,13 +23,11 @@ const NoteListMenuPopup = () => {
 
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const insets = useSafeAreaInsets();
-  const getLockListStatus = useMemo(makeGetLockListStatus, []);
   const isShown = useSelector(state => state.display.isNoteListMenuPopupShown);
   const anchorPosition = useSelector(state => state.display.noteListMenuPopupPosition);
-  const listName = useSelector(state => state.display.listName);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const syncProgress = useSelector(state => state.display.syncProgress);
-  const lockStatus = useSelector(state => getLockListStatus(state, listName));
+  const lockStatus = useSelector(state => getCurrentLockListStatus(state));
   const canChangeListNames = useSelector(state => getCanChangeListNames(state));
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
@@ -85,7 +83,7 @@ const NoteListMenuPopup = () => {
   const onLockBtnClick = () => {
     onNoteListMenuCancelBtnClick();
     // Wait for the close animation to finish first
-    setTimeout(() => dispatch(lockList(listName)), 100);
+    setTimeout(() => dispatch(lockCurrentList()), 100);
   };
 
   const onSignUpBtnClick = () => {

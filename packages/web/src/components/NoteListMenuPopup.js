@@ -1,18 +1,18 @@
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import Url from 'url-parse';
 
 import {
   sync, updateSynced, signOut, updatePopupUrlHash, updateSettingsPopup,
-  updateSettingsViewId, updateBulkEditUrlHash, lockList,
+  updateSettingsViewId, updateBulkEditUrlHash, lockCurrentList,
 } from '../actions';
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import {
   HASH_SUPPORT, NOTE_LIST_MENU_POPUP, SETTINGS_VIEW_ACCOUNT, LG_WIDTH, SHOW_SYNCED,
   LOCK, UNLOCKED,
 } from '../types/const';
-import { makeGetLockListStatus, getCanChangeListNames } from '../selectors';
+import { getCurrentLockListStatus, getCanChangeListNames } from '../selectors';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
 
 import { useSafeAreaFrame, useTailwind } from '.';
@@ -20,14 +20,12 @@ import { useSafeAreaFrame, useTailwind } from '.';
 const NoteListMenuPopup = () => {
 
   const { width: safeAreaWidth } = useSafeAreaFrame();
-  const getLockListStatus = useMemo(makeGetLockListStatus, []);
   const isShown = useSelector(state => state.display.isNoteListMenuPopupShown);
   const anchorPosition = useSelector(state => state.display.noteListMenuPopupPosition);
-  const listName = useSelector(state => state.display.listName);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const syncProgress = useSelector(state => state.display.syncProgress);
   const doSyncMode = useSelector(state => state.localSettings.doSyncMode);
-  const lockStatus = useSelector(state => getLockListStatus(state, listName));
+  const lockStatus = useSelector(state => getCurrentLockListStatus(state));
   const canChangeListNames = useSelector(state => getCanChangeListNames(state));
   const cancelBtn = useRef(null);
   const dispatch = useDispatch();
@@ -90,7 +88,7 @@ const NoteListMenuPopup = () => {
   const onLockBtnClick = () => {
     onNoteListMenuCancelBtnClick();
     // Wait for the close animation to finish first
-    setTimeout(() => dispatch(lockList(listName)), 100);
+    setTimeout(() => dispatch(lockCurrentList()), 100);
   };
 
   const renderSyncBtn = () => {

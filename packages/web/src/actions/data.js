@@ -1271,9 +1271,8 @@ export const exportAllData = () => async (dispatch, getState) => {
       }
     }
 
-    const blob = await zipWriter.close();
-
     const fileName = `Justnote data ${getFormattedTimeStamp(new Date())}.zip`;
+    const blob = await zipWriter.close();
     saveAs(blob, fileName);
 
     if (errorResponses.length > 0) {

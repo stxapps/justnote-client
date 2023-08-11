@@ -636,6 +636,11 @@ export const makeGetLockListStatus = () => {
   );
 };
 
+const _getCurrentLockListStatus = makeGetLockListStatus();
+export const getCurrentLockListStatus = (state) => {
+  return _getCurrentLockListStatus(state, state.display.listName);
+};
+
 export const getCanChangeListNames = createSelector(
   state => state.display.doForceLock,
   state => state.display.listName,

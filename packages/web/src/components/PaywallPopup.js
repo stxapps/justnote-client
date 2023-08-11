@@ -84,7 +84,7 @@ const PaywallPopup = () => {
               <div className={tailwind('mt-3 text-center sm:mt-5')}>
                 <h3 className={tailwind('text-lg font-medium leading-6 text-gray-900')} id="modal-title">Purchase a subscription</h3>
                 <div className={tailwind('mt-2')}>
-                  <p className={tailwind('text-sm text-gray-500')}>{featureText} Please purchase a subscription to support us and unlock extra features.</p>
+                  <p className={tailwind('text-sm text-gray-500')}>{featureText} Please purchase a subscription to support us and unlock all extra features.</p>
                 </div>
               </div>
             </div>
