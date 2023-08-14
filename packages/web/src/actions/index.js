@@ -82,7 +82,7 @@ import {
   doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins, getSortedNotes,
   separatePinnedValues, getRawPins, getFormattedTime, get24HFormattedTime,
   getWindowSize, getNote, getEditingListNameEditors, getListNamesFromNoteIds,
-  validatePassword, doContainListName,
+  validatePassword, doContainListName, sample,
 } from '../utils';
 import { isUint8Array, isBlob, convertBlobToDataUrl } from '../utils/index-web';
 import { _ } from '../utils/obj';
@@ -2871,7 +2871,7 @@ export const updatePaywallFeature = (feature) => {
   return { type: UPDATE_PAYWALL_FEATURE, payload: feature };
 };
 
-const verifyPurchase = async (rawPurchase) => {
+const _verifyPurchase = async (rawPurchase) => {
   if (!rawPurchase) return { status: INVALID };
 
   const source = PADDLE;
@@ -2901,6 +2901,19 @@ const verifyPurchase = async (rawPurchase) => {
   }
 
   return verifyResult;
+};
+
+const verifyPurchase = async (rawPurchase) => {
+  // Sometimes the servers doesn't return the latest result, so wait and try again.
+  const nTries = 3;
+
+  let result;
+  for (let currentTry = 1; currentTry <= nTries; currentTry++) {
+    result = await _verifyPurchase(rawPurchase);
+    if (result.status === VALID) return result;
+    if (currentTry < nTries) await sleep(sample([3000, 4500, 6000]));
+  }
+  return result;
 };
 
 const getIapStatus = async (doForce) => {
@@ -2969,6 +2982,11 @@ const iapUpdatedListener = (dispatch, getState) => async (rawPurchase) => {
 const iapErrorListener = (dispatch, getState) => async (error) => {
   console.log('Error in iapErrorListener: ', error);
   if (error.code === 'E_USER_CANCELLED') {
+    // It's possible that a user completes the purchase,
+    //   but iapUpdatedListener doesn't get called and the user just close the popup.
+    // PS1. No need redundant in requestPurchase's catch block.
+    // PS2. No await, do it in the background, in case really no purchase.
+    checkRequestPurchase(dispatch, getState);
     dispatch(updateIapPurchaseStatus(null, null));
   } else {
     dispatch({ type: REQUEST_PURCHASE_ROLLBACK });
@@ -3047,6 +3065,30 @@ export const requestPurchase = (product) => async (dispatch, getState) => {
     } else {
       dispatch({ type: REQUEST_PURCHASE_ROLLBACK });
     }
+  }
+};
+
+const checkRequestPurchase = async (dispatch, getState) => {
+  const { purchases } = getState().info;
+  const purchase = getValidPurchase(purchases);
+  if (purchase) return;
+
+  try {
+    const res = await getIapStatus(false);
+    const statusResult = res.data;
+
+    if (statusResult.status === VALID) {
+      const purchase = getValidPurchase(statusResult.purchases);
+      if (purchase) {
+        dispatch({
+          type: REQUEST_PURCHASE_COMMIT,
+          payload: { status: statusResult.status, purchase, rawPurchase: null },
+        });
+        return;
+      }
+    }
+  } catch (error) {
+    console.log('checkRequestPurchase error:', error);
   }
 };
 
