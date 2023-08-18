@@ -58,7 +58,7 @@ const NoteEditorEditor = (props) => {
   const themeMode = useSelector(state => getThemeMode(state));
   const [isHtmlReady, setHtmlReady] = useState(Platform.OS === 'ios' ? false : true);
   const [isEditorReady, setEditorReady] = useState(false);
-  const [terminateCount, setTerminateCount] = useState(0)
+  const [terminateCount, setTerminateCount] = useState(0);
   const webView = useRef(null);
   const hackInput = useRef(null);
   const prevSearchString = useRef(searchString);
