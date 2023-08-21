@@ -207,6 +207,7 @@ const _ConflictItem = (props) => {
   const [didOpen, setDidOpen] = useState(false);
   const [isHtmlReady, setHtmlReady] = useState(Platform.OS === 'ios' ? false : true);
   const [isEditorReady, setEditorReady] = useState(false);
+  const [terminateCount, setTerminateCount] = useState(0);
   const webView = useRef(null);
   const imagesDir = useRef(null);
   const didClick = useRef(false);
@@ -278,7 +279,7 @@ const _ConflictItem = (props) => {
 
   const onContentProcessDidTerminate = useCallback(() => {
     setEditorReady(false);
-    if (webView.current) webView.current.reload();
+    setTerminateCount(c => c + 1);
   }, []);
 
   useEffect(() => {
@@ -369,9 +370,9 @@ const _ConflictItem = (props) => {
       </View>
       {didOpen && <View style={tailwind(`h-80 ${isOpen ? '' : 'absolute top-full left-full'}`)}>
         {Platform.OS === 'ios' ?
-          <WebView ref={webView} style={tailwind('flex-1 bg-white blk:bg-gray-900')} source={cache('NEE_webView_source_ios', { uri: Dirs.DocumentDir + '/' + HTML_FNAME })} originWhitelist={cache('NEE_webView_originWhitelist_ios', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} hideKeyboardAccessoryView={true} textZoom={100} allowFileAccessFromFileURLs={true} allowUniversalAccessFromFileURLs={true} allowingReadAccessToURL={Dirs.DocumentDir} cacheEnabled={false} onShouldStartLoadWithRequest={onShouldStartLoadWithRequest} onContentProcessDidTerminate={onContentProcessDidTerminate} onRenderProcessGone={onContentProcessDidTerminate} />
+          <WebView key={`NEC_webView_key_ios_${terminateCount}`} ref={webView} style={tailwind('flex-1 bg-white blk:bg-gray-900')} source={cache('NEE_webView_source_ios', { uri: Dirs.DocumentDir + '/' + HTML_FNAME })} originWhitelist={cache('NEE_webView_originWhitelist_ios', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} hideKeyboardAccessoryView={true} textZoom={100} allowFileAccessFromFileURLs={true} allowUniversalAccessFromFileURLs={true} allowingReadAccessToURL={Dirs.DocumentDir} cacheEnabled={false} onShouldStartLoadWithRequest={onShouldStartLoadWithRequest} onContentProcessDidTerminate={onContentProcessDidTerminate} onRenderProcessGone={onContentProcessDidTerminate} />
           :
-          <WebView ref={webView} style={tailwind('flex-1 bg-white blk:bg-gray-900')} source={cache('NEE_webView_source', { baseUrl: '', html: ckeditor })} originWhitelist={cache('NEE_webView_originWhitelist', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} hideKeyboardAccessoryView={true} textZoom={100} androidLayerType="hardware" allowFileAccess={true} cacheEnabled={false} onShouldStartLoadWithRequest={onShouldStartLoadWithRequest} onContentProcessDidTerminate={onContentProcessDidTerminate} onRenderProcessGone={onContentProcessDidTerminate} nestedScrollEnabled={true} />
+          <WebView key={`NEC_webView_key_${terminateCount}`} ref={webView} style={tailwind('flex-1 bg-white blk:bg-gray-900')} source={cache('NEE_webView_source', { baseUrl: '', html: ckeditor })} originWhitelist={cache('NEE_webView_originWhitelist', ['*'])} onMessage={onMessage} keyboardDisplayRequiresUserAction={false} hideKeyboardAccessoryView={true} textZoom={100} androidLayerType="hardware" allowFileAccess={true} cacheEnabled={false} onShouldStartLoadWithRequest={onShouldStartLoadWithRequest} onContentProcessDidTerminate={onContentProcessDidTerminate} onRenderProcessGone={onContentProcessDidTerminate} nestedScrollEnabled={true} />
         }
       </View>}
     </View>
