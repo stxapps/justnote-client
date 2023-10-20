@@ -25,6 +25,7 @@ export const initialSettingsState = {
   listNameMap: [
     { ...myNotesListNameObj }, { ...trashListNameObj }, { ...archiveListNameObj },
   ],
+  tagNameMap: [],
   purchases: null, // No need anymore but keep it for comparing
   checkPurchasesDT: null, // No need anymore but keep it for comparing
   themeMode: WHT_MODE,
@@ -69,4 +70,14 @@ export const initialListNameEditorState = {
 export const initialLockSettingsState = {
   lockedNotes: {},
   lockedLists: {},
+};
+
+export const initialTagNameEditorState = {
+  mode: MODE_VIEW,
+  value: '',
+  color: '',
+  msg: '',
+  isCheckingCanDelete: false,
+  focusCount: 0,
+  blurCount: 0,
 };

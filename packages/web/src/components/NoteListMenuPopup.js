@@ -40,7 +40,7 @@ const NoteListMenuPopup = () => {
     if (syncProgress && syncProgress.status === SHOW_SYNCED) {
       dispatch(updateSynced());
     } else {
-      dispatch(sync(true, 0));
+      dispatch(sync(true));
     }
   };
 

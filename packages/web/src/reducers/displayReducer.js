@@ -1,38 +1,44 @@
 import {
-  UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP,
-  UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, ADD_SELECTED_NOTE_IDS,
+  UPDATE_LIST_NAME, UPDATE_QUERY_STRING, UPDATE_SEARCH_STRING, UPDATE_NOTE_ID,
+  UPDATE_POPUP, FETCH_COMMIT, FETCH_ROLLBACK, UPDATE_FETCHED, FETCH_MORE_ROLLBACK,
+  UPDATE_FETCHED_MORE, REFRESH_FETCHED, ADD_FETCHING_INFO, DELETE_FETCHING_INFO,
+  SET_SHOWING_NOTE_INFOS, ADD_NOTE, UPDATE_NOTE, MOVE_NOTES_COMMIT, DELETE_NOTES_COMMIT,
+  DISCARD_NOTE, MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
+  UPDATE_HANDLING_SIGN_IN, UPDATE_BULK_EDITING, ADD_SELECTED_NOTE_IDS,
   DELETE_SELECTED_NOTE_IDS, UPDATE_SELECTING_NOTE_ID, UPDATE_SELECTING_LIST_NAME,
-  UPDATE_DELETING_LIST_NAME, FETCH_COMMIT, FETCH_ROLLBACK, UPDATE_FETCHED_MORE,
-  REFRESH_FETCHED, ADD_NOTE, UPDATE_NOTE, DISCARD_NOTE, MERGE_NOTES_COMMIT,
-  CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH_COMMIT, DELETE_LIST_NAMES,
-  UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY, INCREASE_SAVE_NOTE_COUNT,
+  DELETE_LIST_NAMES, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY, INCREASE_SAVE_NOTE_COUNT,
   INCREASE_SET_INIT_DATA_COUNT, INCREASE_RESET_DID_CLICK_COUNT, UPDATE_MOVE_ACTION,
   UPDATE_DELETE_ACTION, UPDATE_DISCARD_ACTION, UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT,
   UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS, MERGE_SETTINGS_COMMIT,
   UPDATE_SETTINGS_VIEW_ID, UPDATE_LIST_NAMES_MODE, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
   UPDATE_SYNC_PROGRESS, UPDATE_SYNCED, UPDATE_PAYWALL_FEATURE, UPDATE_LOCK_ACTION,
   ADD_LOCK_NOTE, LOCK_NOTE, ADD_LOCK_LIST, LOCK_LIST, UPDATE_LOCKS_FOR_ACTIVE_APP,
-  UPDATE_LOCKS_FOR_INACTIVE_APP, UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS,
-  UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
-  UPDATE_DELETE_ALL_DATA_PROGRESS, UPDATE_DELETE_SYNC_DATA_PROGRESS, DELETE_ALL_DATA,
-  RESET_STATE,
+  UPDATE_LOCKS_FOR_INACTIVE_APP, UPDATE_TAG_DATA_S_STEP_COMMIT,
+  UPDATE_TAG_DATA_T_STEP_COMMIT, UPDATE_SELECTING_TAG_NAME, DELETE_TAG_NAMES,
+  UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS, UPDATE_IMPORT_ALL_DATA_PROGRESS,
+  UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
+  UPDATE_DELETE_SYNC_DATA_PROGRESS, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   SIGN_UP_POPUP, SIGN_IN_POPUP, PROFILE_POPUP, NOTE_LIST_MENU_POPUP,
-  NOTE_LIST_ITEM_MENU_POPUP, LIST_NAMES_POPUP, PIN_MENU_POPUP, PAYWALL_POPUP,
-  SIDEBAR_POPUP, SEARCH_POPUP, SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP,
-  TIME_PICK_POPUP, DATE_FORMAT_MENU_POPUP, LOCK_MENU_POPUP, LOCK_EDITOR_POPUP,
-  CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, CONFIRM_AS_DUMMY_POPUP,
+  NOTE_LIST_ITEM_MENU_POPUP, LIST_NAMES_POPUP, PIN_MENU_POPUP, TAG_EDITOR_POPUP,
+  PAYWALL_POPUP, SIDEBAR_POPUP, SEARCH_POPUP, SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP,
+  SETTINGS_TAGS_MENU_POPUP, TIME_PICK_POPUP, DATE_FORMAT_MENU_POPUP, LOCK_MENU_POPUP,
+  LOCK_EDITOR_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, CONFIRM_AS_DUMMY_POPUP,
   CONFIRM_EXIT_DUMMY_POPUP, ACCESS_ERROR_POPUP, STALE_ERROR_POPUP, USE_SYNC_ERROR_POPUP,
-  NEW_NOTE, MY_NOTES, TRASH, ARCHIVE, UPDATING, DIED_UPDATING, MAX_SELECTED_NOTE_IDS,
-  SETTINGS_VIEW_ACCOUNT, DELETE_ACTION_LIST_NAME,
+  MY_NOTES, TRASH, ARCHIVE, UPDATING, DIED_ADDING, DIED_UPDATING, DIED_MOVING,
+  MAX_SELECTED_NOTE_IDS, SETTINGS_VIEW_ACCOUNT,
 } from '../types/const';
-import { doContainListName, isObject, isString, doContainStaleNotes } from '../utils';
+import {
+  doContainListName, doContainTagName, isObject, isString, isNumber,
+  doContainStaleNotes,
+} from '../utils';
 import vars from '../vars';
 
 const initialState = {
-  isHandlingSignIn: false,
   listName: MY_NOTES,
+  queryString: '',
+  searchString: '',
   noteId: null,
   isSignUpPopupShown: false,
   isSignInPopupShown: false,
@@ -46,12 +52,15 @@ const initialState = {
   listNamesPopupPosition: null,
   isPinMenuPopupShown: false,
   pinMenuPopupPosition: null,
+  isTagEditorPopupShown: false,
   isPaywallPopupShown: false,
   isSidebarPopupShown: false,
   isSearchPopupShown: false,
   isSettingsPopupShown: false,
   isSettingsListsMenuPopupShown: false,
   settingsListsMenuPopupPosition: null,
+  isSettingsTagsMenuPopupShown: false,
+  settingsTagsMenuPopupPosition: null,
   isTimePickPopupShown: false,
   timePickPopupPosition: null,
   isDateFormatMenuPopupShown: false,
@@ -66,16 +75,18 @@ const initialState = {
   isAccessErrorPopupShown: false,
   isStaleErrorPopupShown: false,
   isUseSyncErrorPopupShown: false,
-  searchString: '',
+  isHandlingSignIn: false,
   isBulkEditing: false,
   selectedNoteIds: [],
   isSelectedNoteIdsMaxErrorShown: false,
   selectingNoteId: null,
   selectingListName: null,
-  deletingListName: null,
+  selectingTagName: null,
   didFetch: false,
   didFetchSettings: false,
-  fetchedListNames: [],
+  fetchingInfos: [],
+  showingNoteInfos: null,
+  hasMoreNotes: null,
   listChangedCount: 0,
   isEditorFocused: false,
   isEditorBusy: false,
@@ -105,21 +116,36 @@ const initialState = {
 
 const displayReducer = (state = initialState, action) => {
 
-  if (action.type === UPDATE_HANDLING_SIGN_IN) {
-    return { ...state, isHandlingSignIn: action.payload };
-  }
-
   if (action.type === UPDATE_LIST_NAME) {
     return {
       ...state,
       listName: action.payload,
-      listChangedCount: state.listChangedCount + 1,
       noteId: null,
       isEditorFocused: false,
       isEditorBusy: false,
       selectedNoteIds: [],
       isSelectedNoteIdsMaxErrorShown: false,
+      listChangedCount: state.listChangedCount + 1,
     };
+  }
+
+  if (action.type === UPDATE_QUERY_STRING) {
+    const newState = {
+      ...state,
+      queryString: action.payload,
+      noteId: null,
+      isEditorFocused: false,
+      isEditorBusy: false,
+    };
+    [newState.selectedNoteIds, newState.isSelectedNoteIdsMaxErrorShown] = [[], false];
+    [newState.showingNoteInfos, newState.hasMoreNotes] = [null, null];
+    newState.listChangedCount += 1;
+    vars.fetch.doShowLoading = true;
+    return newState;
+  }
+
+  if (action.type === UPDATE_SEARCH_STRING) {
+    return { ...state, searchString: action.payload };
   }
 
   if (action.type === UPDATE_NOTE_ID) {
@@ -183,6 +209,10 @@ const displayReducer = (state = initialState, action) => {
       return newState;
     }
 
+    if (id === TAG_EDITOR_POPUP) {
+      return { ...state, isTagEditorPopupShown: isShown };
+    }
+
     if (id === PAYWALL_POPUP) {
       return { ...state, isPaywallPopupShown: isShown };
     }
@@ -213,6 +243,14 @@ const displayReducer = (state = initialState, action) => {
         ...state,
         isSettingsListsMenuPopupShown: isShown,
         settingsListsMenuPopupPosition: anchorPosition,
+      };
+    }
+
+    if (id === SETTINGS_TAGS_MENU_POPUP) {
+      return {
+        ...state,
+        isSettingsTagsMenuPopupShown: isShown,
+        settingsTagsMenuPopupPosition: anchorPosition,
       };
     }
 
@@ -281,8 +319,249 @@ const displayReducer = (state = initialState, action) => {
     throw new Error(`Invalid type: ${action.type} and payload: ${action.payload}`);
   }
 
-  if (action.type === UPDATE_SEARCH_STRING) {
-    return { ...state, searchString: action.payload };
+  if (action.type === FETCH_COMMIT) {
+    const newState = {
+      ...state,
+      isAccessErrorPopupShown: false,
+      didFetch: true,
+    };
+
+    // Make sure listName is in listNameMap, if not, set to My Notes.
+    const { listNames, tagNames, doFetchStgsAndInfo, settings } = action.payload;
+    if (!doFetchStgsAndInfo) return newState;
+
+    newState.didFetchSettings = true;
+
+    let doCtLn = false;
+    if (listNames.includes(newState.listName)) doCtLn = true;
+    if (settings) {
+      if (doContainListName(newState.listName, settings.listNameMap)) doCtLn = true;
+    } else {
+      if ([MY_NOTES, TRASH, ARCHIVE].includes(newState.listName)) doCtLn = true;
+    }
+    if (!doCtLn) newState.listName = MY_NOTES;
+
+    let doCtQt = false;
+    const tagName = newState.queryString.trim(); // Only tag name for now
+    if (tagNames.includes(tagName)) doCtQt = true;
+    if (settings) {
+      if (doContainTagName(tagName, settings.tagNameMap)) doCtQt = true;
+    }
+    if (!doCtQt) newState.queryString = '';
+
+    return newState;
+  }
+
+  if (action.type === FETCH_ROLLBACK) {
+    const { fthId, error } = action.payload;
+
+    const newState = { ...state };
+    newState.fetchingInfos = state.fetchingInfos.filter(info => info.fthId !== fthId);
+    if (
+      (
+        isObject(error) &&
+        isString(error.message) &&
+        (
+          error.message.includes('401') ||
+          error.message.includes('GaiaError error 7')
+        )
+      ) ||
+      (
+        isObject(error) &&
+        isObject(error.hubError) &&
+        error.hubError.statusCode === 401
+      )
+    ) {
+      newState.isAccessErrorPopupShown = true;
+    }
+    if (
+      isObject(error) &&
+      isString(error.message) &&
+      error.message.includes('Sync mode cannnot be used')
+    ) {
+      newState.isUseSyncErrorPopupShown = true;
+    }
+    return newState;
+  }
+
+  if (
+    action.type === UPDATE_FETCHED ||
+    action.type === UPDATE_FETCHED_MORE ||
+    action.type === SET_SHOWING_NOTE_INFOS
+  ) {
+    const newState = { ...state };
+
+    const { notes } = action.payload;
+    if (doContainStaleNotes(notes)) newState.isStaleErrorPopupShown = true;
+
+    if ('infos' in action.payload) {
+      const { infos } = action.payload;
+      if (Array.isArray(infos)) {
+        newState.showingNoteInfos = infos.map(info => ({ ...info }));
+      } else {
+        newState.showingNoteInfos = infos;
+      }
+    }
+    if ('hasMore' in action.payload) {
+      newState.hasMoreNotes = action.payload.hasMore;
+    }
+    if ('doChangeListCount' in action.payload) {
+      if (action.payload.doChangeListCount) newState.listChangedCount += 1;
+    }
+    if ('doClearSelectedLinkIds' in action.payload) {
+      if (action.payload.doClearSelectedLinkIds) {
+        newState.selectedNoteIds = [];
+        newState.isSelectedNoteIdsMaxErrorShown = false;
+      }
+    }
+    return newState;
+  }
+
+  if (action.type === FETCH_MORE_ROLLBACK) {
+    const { fthId } = action.payload;
+
+    const newState = { ...state };
+    newState.fetchingInfos = state.fetchingInfos.filter(info => info.fthId !== fthId);
+    return newState;
+  }
+
+  if (action.type === REFRESH_FETCHED) {
+    const { doShowLoading, doScrollTop } = action.payload;
+
+    const newState = { ...state };
+    if (doShowLoading && Array.isArray(newState.showingNoteInfos)) {
+      [newState.selectedNoteIds, newState.isSelectedNoteIdsMaxErrorShown] = [[], false];
+      [newState.showingNoteInfos, newState.hasMoreNotes] = [null, null];
+      vars.fetch.doShowLoading = true;
+    }
+    if (doScrollTop) newState.listChangedCount += 1;
+    if (newState.didFetchSettings) {
+      newState.isStaleErrorPopupShown = false;
+      newState.didFetchSettings = false;
+      newState.fetchingInfos = newState.fetchingInfos.map(info => {
+        return { ...info, isInterrupted: true };
+      });
+
+      [vars.fetch.fetchedLnOrQts, vars.fetch.fetchedNoteIds] = [[], []];
+      vars.fetch.doForce = true;
+    }
+
+    return newState;
+  }
+
+  if (action.type === ADD_FETCHING_INFO) {
+    return { ...state, fetchingInfos: [...state.fetchingInfos, { ...action.payload }] };
+  }
+
+  if (action.type === DELETE_FETCHING_INFO) {
+    return {
+      ...state,
+      fetchingInfos: state.fetchingInfos.filter(info => info.fthId !== action.payload),
+    };
+  }
+
+  if (action.type === ADD_NOTE) {
+    const { note, insertIndex } = action.payload;
+    if (!isObject(note) || !isNumber(insertIndex)) return state;
+    if (!Array.isArray(state.showingNoteInfos)) return state;
+
+    const noteId = note.id;
+    if (state.showingNoteInfos.some(info => info.id === noteId)) return state;
+
+    const newState = { ...state, noteId, isEditorBusy: false };
+    newState.showingNoteInfos = [
+      ...newState.showingNoteInfos.slice(0, insertIndex),
+      { id: note.id },
+      ...newState.showingNoteInfos.slice(insertIndex),
+    ];
+    return newState;
+  }
+
+  if (action.type === UPDATE_NOTE) {
+    const { fromNote, toNote } = action.payload;
+    if (!isObject(fromNote) || !isObject(toNote)) return state;
+    if (!Array.isArray(state.showingNoteInfos)) return state;
+
+    const newState = { ...state, noteId: toNote.id, isEditorBusy: false };
+
+    newState.showingNoteInfos = [];
+    for (const info of state.showingNoteInfos) {
+      if (info.id === fromNote.id) {
+        newState.showingNoteInfos.push({ ...info, id: toNote.id });
+        continue;
+      }
+      newState.showingNoteInfos.push(info);
+    }
+
+    return newState;
+  }
+
+  if (action.type === MOVE_NOTES_COMMIT || action.type === DELETE_NOTES_COMMIT) {
+    const { successFromNotes } = action.payload;
+
+    const fromNoteIds = successFromNotes.map(note => note.id);
+    return {
+      ...state,
+      showingNoteInfos: _filterIfNotNull(state.showingNoteInfos, fromNoteIds),
+    };
+  }
+
+  if (action.type === MERGE_NOTES_COMMIT) {
+    const { toListName, toNote } = action.payload;
+
+    // Need to set NoteId here for consistency with notesReducer
+    const newState = {
+      ...state, noteId: state.listName === toListName ? toNote.id : null,
+    };
+
+    // Need to update showingNoteInfos: delete conflict ids, insert toNote id!
+
+    return newState;
+  }
+
+  if (action.type === DISCARD_NOTE) {
+    return { ...state, isEditorFocused: false };
+  }
+
+  if (action.type === CANCEL_DIED_NOTES) {
+    const { ids, statuses, fromIds } = action.payload;
+    if (!Array.isArray(state.showingNoteInfos)) return state;
+
+    // Need to reset NoteId here for consistency with notesReducer
+    const newState = { ...state, noteId: null };
+
+    newState.showingNoteInfos = [];
+    for (const info of state.showingNoteInfos) {
+      const i = ids.find(id => id === info.id);
+      if (i < 0) {
+        newState.showingNoteInfos.push(info);
+        continue;
+      }
+
+      const [status, fromId] = [statuses[i], fromIds[i]];
+      if ([DIED_ADDING, DIED_MOVING].includes(status)) continue;
+      if ([DIED_UPDATING].includes(status)) {
+        newState.showingNoteInfos.push({ ...info, id: fromId });
+        continue;
+      }
+
+      newState.showingNoteInfos.push(info);
+    }
+
+    return newState;
+  }
+
+  if (action.type === DELETE_OLD_NOTES_IN_TRASH_COMMIT) {
+    const { successIds } = action.payload;
+
+    const newState = { ...state };
+    if (successIds.includes(state.noteId)) newState.noteId = null;
+    newState.showingNoteInfos = _filterIfNotNull(state.showingNoteInfos, successIds);
+    return newState;
+  }
+
+  if (action.type === UPDATE_HANDLING_SIGN_IN) {
+    return { ...state, isHandlingSignIn: action.payload };
   }
 
   if (action.type === UPDATE_BULK_EDITING) {
@@ -328,132 +607,6 @@ const displayReducer = (state = initialState, action) => {
     return { ...state, selectingListName: action.payload };
   }
 
-  if (action.type === UPDATE_DELETING_LIST_NAME) {
-    return {
-      ...state, deletingListName: action.payload, deleteAction: DELETE_ACTION_LIST_NAME,
-    };
-  }
-
-  if (action.type === FETCH_COMMIT) {
-    const { listName, notes } = action.payload;
-    const newState = {
-      ...state,
-      noteId: state.noteId === NEW_NOTE ? NEW_NOTE : null,
-      isAccessErrorPopupShown: false,
-      isEditorFocused: state.noteId === NEW_NOTE ? true : false,
-      isEditorBusy: false,
-      selectedNoteIds: [],
-      isSelectedNoteIdsMaxErrorShown: false,
-      didFetch: true,
-      didFetchSettings: true,
-      fetchedListNames: [...state.fetchedListNames, listName],
-    };
-
-    if (doContainStaleNotes(notes)) newState.isStaleErrorPopupShown = true;
-
-    // Make sure listName is in listNameMap, if not, set to My Notes.
-    const { listNames, doFetchStgsAndInfo, settings } = action.payload;
-    if (!doFetchStgsAndInfo) return newState;
-
-    newState.settingsStatus = null;
-
-    if (listNames.includes(newState.listName)) return newState;
-    if (settings) {
-      if (!doContainListName(newState.listName, settings.listNameMap)) {
-        newState.listName = MY_NOTES;
-      }
-    } else {
-      if (![MY_NOTES, TRASH, ARCHIVE].includes(newState.listName)) {
-        newState.listName = MY_NOTES;
-      }
-    }
-
-    return newState;
-  }
-
-  if (action.type === FETCH_ROLLBACK) {
-    const { error } = action.payload;
-
-    const newState = { ...state };
-    if (
-      (
-        isObject(error) &&
-        isString(error.message) &&
-        (
-          error.message.includes('401') ||
-          error.message.includes('GaiaError error 7')
-        )
-      ) ||
-      (
-        isObject(error) &&
-        isObject(error.hubError) &&
-        error.hubError.statusCode === 401
-      )
-    ) {
-      newState.isAccessErrorPopupShown = true;
-    }
-    if (
-      isObject(error) &&
-      isString(error.message) &&
-      error.message.includes('Sync mode cannnot be used')
-    ) {
-      newState.isUseSyncErrorPopupShown = true;
-    }
-    return newState;
-  }
-
-  if (action.type === UPDATE_FETCHED_MORE) {
-    const { notes } = action.payload;
-
-    if (doContainStaleNotes(notes)) return { ...state, isStaleErrorPopupShown: true };
-    return state;
-  }
-
-  if (action.type === REFRESH_FETCHED) {
-    return {
-      ...state,
-      noteId: state.noteId === NEW_NOTE ? NEW_NOTE : null,
-      isStaleErrorPopupShown: false,
-      isEditorFocused: state.noteId === NEW_NOTE ? true : false,
-      isEditorBusy: false,
-      selectedNoteIds: [],
-      isSelectedNoteIdsMaxErrorShown: false,
-      didFetchSettings: false,
-      fetchedListNames: [],
-    };
-  }
-
-  if (action.type === ADD_NOTE) {
-    const { note } = action.payload;
-    return { ...state, noteId: note.id, isEditorBusy: false };
-  }
-
-  if (action.type === UPDATE_NOTE) {
-    const { toNote } = action.payload;
-    return { ...state, noteId: toNote.id, isEditorBusy: false };
-  }
-
-  if (action.type === DISCARD_NOTE) {
-    return { ...state, isEditorFocused: false };
-  }
-
-  if (action.type === MERGE_NOTES_COMMIT) {
-    const { toListName, toNote } = action.payload;
-    // Need to set NoteId here for consistency with notesReducer
-    return { ...state, noteId: state.listName === toListName ? toNote.id : null };
-  }
-
-  if (action.type === CANCEL_DIED_NOTES) {
-    // Need to reset NoteId here for consistency with notesReducer
-    return { ...state, noteId: null };
-  }
-
-  if (action.type === DELETE_OLD_NOTES_IN_TRASH_COMMIT) {
-    const { ids } = action.payload;
-    if (ids.includes(state.noteId)) return { ...state, noteId: null };
-    return state;
-  }
-
   if (action.type === DELETE_LIST_NAMES) {
     const { listNames } = action.payload;
     if (!listNames.includes(state.listName)) return state;
@@ -493,14 +646,9 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_SETTINGS) {
-    const { settings, doFetch } = action.payload;
-    const doContain = doContainListName(state.listName, settings.listNameMap);
+    const { doFetch } = action.payload;
 
-    const newState = {
-      ...state,
-      listName: doContain ? state.listName : MY_NOTES,
-      settingsStatus: UPDATING,
-    };
+    const newState = { ...state, settingsStatus: UPDATING };
     if (doFetch) newState.noteId = null;
     return newState;
   }
@@ -509,8 +657,12 @@ const displayReducer = (state = initialState, action) => {
     const { doFetch } = action.payload;
 
     const newState = { ...state, settingsStatus: null };
-    if (doFetch) {
-      newState.fetchedListNames = [];
+    if (doFetch && Array.isArray(newState.showingNoteInfos)) {
+      [newState.selectedNoteIds, newState.isSelectedNoteIdsMaxErrorShown] = [[], false];
+      [newState.showingNoteInfos, newState.hasMoreNotes] = [null, null];
+      newState.listChangedCount += 1;
+      [vars.fetch.fetchedLnOrQts, vars.fetch.doShowLoading] = [[], true];
+
       newState.noteId = null;
     }
     return newState;
@@ -522,15 +674,26 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === CANCEL_DIED_SETTINGS || action.type === MERGE_SETTINGS_COMMIT) {
     const { settings, doFetch } = action.payload;
-    const doContain = doContainListName(state.listName, settings.listNameMap);
+
+    let doCtLn = false;
+    if (doContainListName(state.listName, settings.listNameMap)) doCtLn = true;
+
+    let doCtQt = false;
+    const tagName = state.queryString.trim(); // Only tag name for now
+    if (doContainTagName(tagName, settings.tagNameMap)) doCtQt = true;
 
     const newState = {
       ...state,
-      listName: doContain ? state.listName : MY_NOTES,
+      listName: doCtLn ? state.listName : MY_NOTES,
+      queryString: doCtQt ? state.queryString : '',
       settingsStatus: null,
     };
-    if (doFetch) {
-      newState.fetchedListNames = [];
+    if (doFetch && Array.isArray(newState.showingNoteInfos)) {
+      [newState.selectedNoteIds, newState.isSelectedNoteIdsMaxErrorShown] = [[], false];
+      [newState.showingNoteInfos, newState.hasMoreNotes] = [null, null];
+      newState.listChangedCount += 1;
+      [vars.fetch.fetchedLnOrQts, vars.fetch.doShowLoading] = [[], true];
+
       newState.noteId = null;
     }
     return newState;
@@ -549,7 +712,6 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === SYNC_COMMIT) {
-    if (action.payload.haveNewSync) return state;
     return { ...state, isAccessErrorPopupShown: false, syncProgress: null };
   }
 
@@ -606,16 +768,29 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_LOCKS_FOR_ACTIVE_APP) {
-    const { isLong } = action.payload;
+    const { isLong, doNoChangeMyNotes } = action.payload;
+    const { queryString, doForceLock } = state;
 
     const newState = { ...state, doForceLock: false };
     if (isLong) {
       newState.noteId = null;
-      newState.isEditorFocused = false;
-      newState.isEditorBusy = false;
-      newState.selectedNoteIds = [];
-      newState.isSelectedNoteIdsMaxErrorShown = false;
+      [newState.isEditorFocused, newState.isEditorBusy] = [false, false];
+      [newState.selectedNoteIds, newState.isSelectedNoteIdsMaxErrorShown] = [[], false];
       newState.exitColsPanelFullScreenCount = newState.exitColsPanelFullScreenCount + 1;
+    }
+    if (
+      (!queryString && isLong && doNoChangeMyNotes && !doForceLock) ||
+      (!queryString && isLong && doNoChangeMyNotes && doForceLock) ||
+      (queryString && isLong && !doNoChangeMyNotes && doForceLock) ||
+      (queryString && isLong && doNoChangeMyNotes && !doForceLock) ||
+      (queryString && isLong && doNoChangeMyNotes && doForceLock)
+    ) {
+      newState.listName = MY_NOTES;
+      newState.queryString = '';
+      newState.searchString = '';
+      newState.isBulkEditing = false;
+      newState.listChangedCount = newState.listChangedCount + 1;
+      //newState.isTagEditorPopupShown = false;
     }
     return newState;
   }
@@ -630,12 +805,54 @@ const displayReducer = (state = initialState, action) => {
       listNamesPopupPosition: null,
       isPinMenuPopupShown: false,
       pinMenuPopupPosition: null,
+      isTagEditorPopupShown: false,
       isLockMenuPopupShown: false,
       lockMenuPopupPosition: null,
       isLockEditorPopupShown: false,
       isConfirmDeletePopupShown: false,
       isConfirmDiscardPopupShown: false,
     };
+  }
+
+  if (action.type === UPDATE_TAG_DATA_S_STEP_COMMIT) {
+    const { doFetch } = action.payload;
+    if (!doFetch || !Array.isArray(state.showingLinkIds)) return state;
+
+    const newState = { ...state };
+    [newState.selectedNoteIds, newState.isSelectedNoteIdsMaxErrorShown] = [[], false];
+    [newState.showingNoteInfos, newState.hasMoreNotes] = [null, null];
+    newState.listChangedCount += 1;
+    [vars.fetch.fetchedLnOrQts, vars.fetch.doShowLoading] = [[], true];
+    return newState;
+  }
+
+  if (action.type === UPDATE_TAG_DATA_T_STEP_COMMIT) {
+    const { id, values } = action.payload;
+
+    if (state.queryString) {
+      // Only tag name for now
+      const tagName = state.queryString.trim();
+      const found = values.some(value => value.tagName === tagName);
+      if (!found) {
+        return {
+          ...state,
+          showingLinkIds: _filterIfNotNull(state.showingLinkIds, [id]),
+        };
+      }
+    }
+
+    return state;
+  }
+
+  if (action.type === UPDATE_SELECTING_TAG_NAME) {
+    return { ...state, selectingTagName: action.payload };
+  }
+
+  if (action.type === DELETE_TAG_NAMES) {
+    const { tagNames } = action.payload;
+    // Only tag name for now
+    if (!tagNames.includes(state.queryString)) return state;
+    return { ...state, queryString: '' };
   }
 
   if (action.type === UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS) {
@@ -648,8 +865,14 @@ const displayReducer = (state = initialState, action) => {
     const newState = { ...state, importAllDataProgress: progress };
     if (isObject(progress) && progress.total && progress.done) {
       if (progress.total === progress.done) {
+        newState.selectedNoteIds = [];
+        newState.isSelectedNoteIdsMaxErrorShown = false;
         newState.didFetchSettings = false;
-        newState.fetchedListNames = [];
+        [newState.showingNoteInfos, newState.hasMoreNotes] = [null, null];
+        newState.listChangedCount += 1;
+        [vars.fetch.fetchedLnOrQts, vars.fetch.fetchedNoteIds] = [[], []];
+        vars.fetch.doShowLoading = true;
+
         newState.noteId = null;
       }
     }
@@ -672,17 +895,25 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === DELETE_ALL_DATA) {
-    return {
+    const newState = {
       ...initialState,
-      didFetch: true, didFetchSettings: true, fetchedListNames: [MY_NOTES],
+      didFetch: true, didFetchSettings: true, showingNoteInfos: [], hasMoreNotes: false,
     };
+    [vars.fetch.fetchedLnOrQts, vars.fetch.fetchedNoteIds] = [[MY_NOTES], []];
+    return newState;
   }
 
   if (action.type === RESET_STATE) {
+    [vars.fetch.fetchedLnOrQts, vars.fetch.fetchedNoteIds] = [[], []];
     return { ...initialState };
   }
 
   return state;
+};
+
+const _filterIfNotNull = (arr, excludingIds) => {
+  if (!Array.isArray(arr)) return arr;
+  return arr.filter(el => !excludingIds.includes(el.id));
 };
 
 export default displayReducer;

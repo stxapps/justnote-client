@@ -82,7 +82,7 @@ const NoteListItems = () => {
 
     vars.scrollPanel.contentHeight = scrollHeight;
     vars.scrollPanel.layoutHeight = windowHeight;
-    vars.scrollPanel.pageYOffset = scrollTop;
+    vars.scrollPanel.scrollY = scrollTop;
 
     if (
       !hasMoreRef.current || hasFetchedMoreRef.current || isFetchingMoreRef.current
@@ -103,7 +103,7 @@ const NoteListItems = () => {
   const renderEmpty = () => {
 
     const displayName = getListNameDisplayName(listName, listNameMap);
-    vars.scrollPanel.pageYOffset = 0;
+    vars.scrollPanel.scrollY = 0;
 
     if (searchString !== '') {
       return (
@@ -216,7 +216,7 @@ const NoteListItems = () => {
       setTimeout(() => {
         if (flatList.current) {
           flatList.current.scrollTo(0, 0);
-          vars.scrollPanel.pageYOffset = 0;
+          vars.scrollPanel.scrollY = 0;
         }
       }, 1);
     }

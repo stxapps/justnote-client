@@ -20,7 +20,7 @@ const pendingPinsReducer = (state = initialState, action) => {
     const { pins } = action.payload;
 
     const newState = { ...state };
-    for (const pin of pins) newState[pin.id] = { status: action.type, ...pin };
+    for (const pin of pins) newState[pin.id] = { ...pin, status: action.type };
 
     return newState;
   }
@@ -38,14 +38,14 @@ const pendingPinsReducer = (state = initialState, action) => {
     const { pins } = action.payload;
 
     const newState = { ...state };
-    for (const pin of pins) newState[pin.id] = { status: action.type, ...pin };
+    for (const pin of pins) newState[pin.id] = { ...pin, status: action.type };
 
     return newState;
   }
 
   if (action.type === MOVE_PINNED_NOTE) {
     const pin = action.payload;
-    return { ...state, [pin.id]: { status: action.type, ...pin } };
+    return { ...state, [pin.id]: { ...pin, status: action.type } };
   }
 
   if (action.type === MOVE_PINNED_NOTE_COMMIT) {
@@ -59,7 +59,7 @@ const pendingPinsReducer = (state = initialState, action) => {
 
   if (action.type === MOVE_PINNED_NOTE_ROLLBACK) {
     const pin = action.payload;
-    return { ...state, [pin.id]: { status: action.type, ...pin } };
+    return { ...state, [pin.id]: { ...pin, status: action.type } };
   }
 
   if (action.type === CANCEL_DIED_PINS) {

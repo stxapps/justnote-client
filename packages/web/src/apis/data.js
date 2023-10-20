@@ -8,9 +8,9 @@ import {
 } from '../types/const';
 import {
   isObject, createNoteFPath, createDataFName, extractNoteFPath, createPinFPath,
-  addFPath, getMainId, listNoteIds, sortWithPins, getStaticFPath, getLastSettingsFPaths,
-  excludeNotObjContents, batchGetFileWithRetry, batchPutFileWithRetry,
-  batchDeleteFileWithRetry, getListNamesFromNoteIds,
+  addFPath, getMainId, listNoteMetas, sortWithPins, getStaticFPath,
+  getLastSettingsFPaths, excludeNotObjContents, batchGetFileWithRetry,
+  batchPutFileWithRetry, batchDeleteFileWithRetry, getListNamesFromNoteMetas,
 } from '../utils';
 import { syncMode } from '../vars';
 import {
@@ -50,11 +50,11 @@ const listServerFPaths = async (doForce = false) => {
   return serverApi.cachedFPaths.fpaths;
 };
 
-const toNotes = (noteIds, fpaths, contents) => {
+const toNotes = (noteMetas, fpaths, contents) => {
   const notes = [];
-  for (const noteId of noteIds) {
+  for (const meta of noteMetas) {
     let title = '', body = '', media = [];
-    for (const fpath of noteId.fpaths) {
+    for (const fpath of meta.fpaths) {
       const content = contents[fpaths.indexOf(fpath)];
 
       const { subName } = extractNoteFPath(fpath);
@@ -66,27 +66,27 @@ const toNotes = (noteIds, fpaths, contents) => {
       }
     }
     notes.push({
-      parentIds: noteId.parentIds,
-      id: noteId.id,
+      parentIds: meta.parentIds,
+      id: meta.id,
       title, body, media,
-      addedDT: noteId.addedDT,
-      updatedDT: noteId.updatedDT,
+      addedDT: meta.addedDT,
+      updatedDT: meta.updatedDT,
     });
   }
 
   return notes;
 };
 
-const toConflictedNotes = (noteIds, conflictWiths, fpaths, contents) => {
+const toConflictedNotes = (noteMetas, conflictWiths, fpaths, contents) => {
 
-  const notes = toNotes(noteIds, fpaths, contents);
+  const notes = toNotes(noteMetas, fpaths, contents);
 
   const conflictedNotes = [];
   for (const conflictWith of conflictWiths) {
     const selectedNotes = notes.filter(note => conflictWith.includes(note.id));
     const sortedNotes = selectedNotes.sort((a, b) => a.updatedDT - b.updatedDT);
     const sortedListNames = sortedNotes.map(note => {
-      return noteIds.find(noteId => noteId.id === note.id).listName;
+      return noteMetas.find(meta => meta.id === note.id).listName;
     });
 
     conflictedNotes.push({
@@ -152,35 +152,37 @@ const fetch = async (params) => {
     }
   }
 
-  const { noteIds, conflictedIds, conflictWiths, toRootIds } = listNoteIds(noteFPaths);
+  const {
+    noteMetas, conflictedMetas, conflictWiths, toRootIds,
+  } = listNoteMetas(noteFPaths);
 
-  const namedNoteIds = noteIds.filter(id => id.listName === listName);
-  let sortedNoteIds = namedNoteIds.sort((a, b) => a[sortOn] - b[sortOn]);
-  if (doDescendingOrder) sortedNoteIds.reverse();
+  const namedNoteMetas = noteMetas.filter(meta => meta.listName === listName);
+  let sortedNoteMetas = namedNoteMetas.sort((a, b) => a[sortOn] - b[sortOn]);
+  if (doDescendingOrder) sortedNoteMetas.reverse();
 
-  sortedNoteIds = sortWithPins(
-    sortedNoteIds, pinFPaths, pendingPins, toRootIds,
-    (noteId) => {
-      return getMainId(noteId.id, toRootIds);
+  sortedNoteMetas = sortWithPins(
+    sortedNoteMetas, pinFPaths, pendingPins, toRootIds,
+    (meta) => {
+      return getMainId(meta.id, toRootIds);
     }
   );
-  const selectedNoteIds = sortedNoteIds.slice(0, N_NOTES);
+  const selectedNoteMetas = sortedNoteMetas.slice(0, N_NOTES);
 
   const namedConflictWiths = conflictWiths.filter(conflictWith => {
     for (const id of conflictWith) {
-      const conflictedId = conflictedIds.find(noteId => noteId.id === id);
+      const conflictedId = conflictedMetas.find(meta => meta.id === id);
       if (conflictedId.listName === listName) return true;
     }
     return false;
   });
   const selectedConflictWiths = namedConflictWiths.slice(0, N_NOTES);
-  const selectedConflictedIds = conflictedIds.filter(noteId => {
-    return selectedConflictWiths.some(conflictWith => conflictWith.includes(noteId.id));
+  const selectedConflictedNoteMetas = conflictedMetas.filter(meta => {
+    return selectedConflictWiths.some(conflictWith => conflictWith.includes(meta.id));
   });
 
   const _fpaths = [];
-  for (const id of selectedNoteIds) _fpaths.push(...id.fpaths);
-  for (const id of selectedConflictedIds) _fpaths.push(...id.fpaths);
+  for (const meta of selectedNoteMetas) _fpaths.push(...meta.fpaths);
+  for (const meta of selectedConflictedNoteMetas) _fpaths.push(...meta.fpaths);
 
   const responses = await batchGetFileWithRetry(getApi().getFile, _fpaths, 0, true);
   const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
@@ -189,15 +191,15 @@ const fetch = async (params) => {
     contents.push(content);
   }
 
-  const notes = toNotes(selectedNoteIds, fpaths, contents);
-  const hasMore = namedNoteIds.length > N_NOTES;
+  const notes = toNotes(selectedNoteMetas, fpaths, contents);
+  const hasMore = namedNoteMetas.length > N_NOTES;
   const conflictedNotes = toConflictedNotes(
-    selectedConflictedIds, selectedConflictWiths, fpaths, contents
+    selectedConflictedNoteMetas, selectedConflictWiths, fpaths, contents
   );
 
   // List names should be retrieve from settings
   //   but also retrive from file paths in case the settings is gone.
-  const listNames = getListNamesFromNoteIds(noteIds, conflictedIds);
+  const listNames = getListNamesFromNoteMetas(noteMetas, conflictedMetas);
 
   await fetchStaticFiles(notes, conflictedNotes);
 
@@ -211,32 +213,32 @@ const fetchMore = async (params) => {
   const { listName, ids, sortOn, doDescendingOrder, pendingPins } = params;
 
   const { noteFPaths, pinFPaths } = await listFPaths();
-  const { noteIds, toRootIds } = listNoteIds(noteFPaths);
+  const { noteMetas, toRootIds } = listNoteMetas(noteFPaths);
 
-  const namedNoteIds = noteIds.filter(id => id.listName === listName);
-  let sortedNoteIds = namedNoteIds.sort((a, b) => a[sortOn] - b[sortOn]);
-  if (doDescendingOrder) sortedNoteIds.reverse();
+  const namedNoteMetas = noteMetas.filter(meta => meta.listName === listName);
+  let sortedNoteMetas = namedNoteMetas.sort((a, b) => a[sortOn] - b[sortOn]);
+  if (doDescendingOrder) sortedNoteMetas.reverse();
 
-  sortedNoteIds = sortWithPins(
-    sortedNoteIds, pinFPaths, pendingPins, toRootIds,
-    (noteId) => {
-      return getMainId(noteId.id, toRootIds);
+  sortedNoteMetas = sortWithPins(
+    sortedNoteMetas, pinFPaths, pendingPins, toRootIds,
+    (meta) => {
+      return getMainId(meta.id, toRootIds);
     }
   );
 
   // With pins, can't fetch further from the current point
-  let filteredNoteIds = [], hasDisorder = false;
-  for (let i = 0; i < sortedNoteIds.length; i++) {
-    const noteId = sortedNoteIds[i];
-    if (!ids.includes(noteId.id)) {
+  let filteredNoteMetas = [], hasDisorder = false;
+  for (let i = 0; i < sortedNoteMetas.length; i++) {
+    const meta = sortedNoteMetas[i];
+    if (!ids.includes(meta.id)) {
       if (i < ids.length) hasDisorder = true;
-      filteredNoteIds.push(noteId);
+      filteredNoteMetas.push(meta);
     }
   }
-  const selectedNoteIds = filteredNoteIds.slice(0, N_NOTES);
+  const selectedNoteMetas = filteredNoteMetas.slice(0, N_NOTES);
 
   const _fpaths = [];
-  for (const id of selectedNoteIds) _fpaths.push(...id.fpaths);
+  for (const meta of selectedNoteMetas) _fpaths.push(...meta.fpaths);
 
   const responses = await batchGetFileWithRetry(getApi().getFile, _fpaths, 0, true);
   const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
@@ -245,8 +247,8 @@ const fetchMore = async (params) => {
     contents.push(content);
   }
 
-  const notes = toNotes(selectedNoteIds, fpaths, contents);
-  const hasMore = filteredNoteIds.length > N_NOTES;
+  const notes = toNotes(selectedNoteMetas, fpaths, contents);
+  const hasMore = filteredNoteMetas.length > N_NOTES;
 
   await fetchStaticFiles(notes, null);
 
@@ -288,9 +290,9 @@ const fetchStaticFiles = async (notes, conflictedNotes) => {
 };
 
 const putNotes = async (params) => {
-  const { listName, notes, staticFPaths, manuallyManageError } = params;
+  const { listNames, notes, staticFPaths, manuallyManageError } = params;
 
-  const fpaths = [], contents = [], mediaFPaths = [], mediaContents = [];
+  const mediaFPaths = [], mediaContents = [];
   if (!syncMode.doSyncMode && Array.isArray(staticFPaths)) {
     const files = await fileApi.getFiles(staticFPaths);
     for (let i = 0; i < files.fpaths.length; i++) {
@@ -299,11 +301,12 @@ const putNotes = async (params) => {
     }
   }
 
-  const noteMap = {}, successNotes = [], errorNotes = [];
-  for (const note of notes) {
+  const fpaths = [], contents = [], noteMap = {};
+  for (let i = 0; i < listNames.length; i++) {
+    const [listName, note] = [listNames[i], notes[i]];
+
     const fname = createDataFName(note.id, note.parentIds);
     const fpath = createNoteFPath(listName, fname, INDEX + DOT_JSON);
-    noteMap[fpath] = note;
 
     fpaths.push(fpath);
     contents.push({ title: note.title, body: note.body });
@@ -313,7 +316,11 @@ const putNotes = async (params) => {
         mediaContents.push(content);
       }
     }
+    noteMap[fpath] = { listName, note };
   }
+
+  const successListNames = [], successNotes = [];
+  const errorListNames = [], errorNotes = [], errors = [];
 
   // Put static files and cdroot fpaths first, and index.json file last.
   // So if errors, can leave the added fpaths as is. They won't interfere.
@@ -325,48 +332,28 @@ const putNotes = async (params) => {
     getApi().putFile, fpaths, contents, 0, !!manuallyManageError
   );
   for (const response of responses) {
-    if (response.success) successNotes.push(noteMap[response.fpath]);
-    else errorNotes.push({ ...noteMap[response.fpath], error: response.error });
+    const { listName, note } = noteMap[response.fpath];
+    if (response.success) {
+      successListNames.push(listName);
+      successNotes.push(note);
+    } else {
+      errorListNames.push(listName);
+      errorNotes.push(note);
+      errors.push(response.error);
+    }
   }
 
-  return { successNotes, errorNotes };
-};
-
-const getOldNotesInTrash = async () => {
-
-  const { noteFPaths } = await listFPaths();
-  const { noteIds } = listNoteIds(noteFPaths);
-
-  const trashNoteIds = noteIds.filter(id => id.listName === TRASH);
-  const oldNoteIds = trashNoteIds.filter(noteId => {
-    const interval = Date.now() - noteId.updatedDT;
-    const days = interval / 1000 / 60 / 60 / 24;
-
-    return days > N_DAYS;
-  });
-  const selectedNoteIds = oldNoteIds.slice(0, N_NOTES);
-
-  const fpaths = [];
-  for (const id of selectedNoteIds) fpaths.push(...id.fpaths);
-
-  // Dummy contents are enough and good for performance
-  const contents = [];
-  for (let i = 0; i < fpaths.length; i++) {
-    if (fpaths[i].endsWith(INDEX + DOT_JSON)) contents.push({ title: '', body: '' });
-    else contents.push('');
-  }
-
-  return toNotes(selectedNoteIds, fpaths, contents);
+  return { successListNames, successNotes, errorListNames, errorNotes, errors };
 };
 
 const canDeleteListNames = async (listNames) => {
 
   const { noteFPaths } = await listFPaths();
-  const { noteIds, conflictedIds } = listNoteIds(noteFPaths);
+  const { noteMetas, conflictedMetas } = listNoteMetas(noteFPaths);
 
   const inUseListNames = new Set();
-  for (const noteId of [...noteIds, ...conflictedIds]) {
-    for (const fpath of noteId.fpaths) {
+  for (const meta of [...noteMetas, ...conflictedMetas]) {
+    for (const fpath of meta.fpaths) {
       inUseListNames.add(extractNoteFPath(fpath).listName);
     }
   }
@@ -603,7 +590,7 @@ const putLockSettings = async (lockSettings) => {
 
 const data = {
   getApi, listFPaths, listServerFPaths, toNotes, fetch, fetchMore,
-  putNotes, getOldNotesInTrash, canDeleteListNames, putPins, deletePins, getFiles,
+  putNotes, canDeleteListNames, putPins, deletePins, getFiles,
   putFiles, deleteFiles, getServerFilesToLocal, putLocalFilesToServer, deleteServerFiles,
   getLocalSettings, putLocalSettings, getUnsavedNotes, putUnsavedNote,
   deleteUnsavedNotes, deleteAllUnsavedNotes, deleteAllLocalFiles, deleteAllSyncedFiles,

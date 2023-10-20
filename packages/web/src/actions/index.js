@@ -1,5 +1,6 @@
 import Url from 'url-parse';
 import { LexoRank } from '@wewatch/lexorank';
+import TaskQueue from 'queue';
 
 import userSession from '../userSession';
 import axios from '../axiosWrapper';
@@ -14,7 +15,7 @@ import {
   UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, UPDATE_SELECTING_NOTE_ID,
   FETCH, FETCH_COMMIT, FETCH_ROLLBACK, FETCH_MORE, FETCH_MORE_COMMIT,
-  FETCH_MORE_ROLLBACK, CACHE_FETCHED_MORE, UPDATE_FETCHED_MORE, CANCEL_FETCHED_MORE,
+  FETCH_MORE_ROLLBACK, CACHE_FETCHED_MORE, UPDATE_FETCHED_MORE,
   REFRESH_FETCHED, ADD_NOTE, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK, UPDATE_NOTE,
   UPDATE_NOTE_COMMIT, UPDATE_NOTE_ROLLBACK, DISCARD_NOTE, MOVE_NOTES, MOVE_NOTES_COMMIT,
   MOVE_NOTES_ROLLBACK, DELETE_NOTES, DELETE_NOTES_COMMIT, DELETE_NOTES_ROLLBACK,
@@ -22,13 +23,18 @@ import {
   DELETE_OLD_NOTES_IN_TRASH_ROLLBACK, MERGE_NOTES, MERGE_NOTES_COMMIT,
   MERGE_NOTES_ROLLBACK, UPDATE_LIST_NAME_EDITORS, ADD_LIST_NAMES, UPDATE_LIST_NAMES,
   MOVE_LIST_NAME, MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_SELECTING_LIST_NAME,
-  UPDATE_DELETING_LIST_NAME, UPDATE_DO_SYNC_MODE, UPDATE_DO_SYNC_MODE_INPUT,
+  UPDATE_DO_SYNC_MODE, UPDATE_DO_SYNC_MODE_INPUT,
   UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, UPDATE_SORT_ON, UPDATE_DO_DESCENDING_ORDER,
   UPDATE_NOTE_DATE_SHOWING_MODE, UPDATE_NOTE_DATE_FORMAT,
-  UPDATE_DO_SECTION_NOTES_BY_MONTH, UPDATE_DO_MORE_EDITOR_FONT_SIZES, UPDATE_SETTINGS,
-  UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK, CANCEL_DIED_SETTINGS,
+  UPDATE_DO_SECTION_NOTES_BY_MONTH, UPDATE_DO_MORE_EDITOR_FONT_SIZES,
+  TRY_UPDATE_SETTINGS, TRY_UPDATE_SETTINGS_COMMIT, TRY_UPDATE_SETTINGS_ROLLBACK,
+  UPDATE_SETTINGS,
+  UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK, UPDATE_UNCHANGED_SETTINGS,
+  CANCEL_DIED_SETTINGS,
   MERGE_SETTINGS, MERGE_SETTINGS_COMMIT, MERGE_SETTINGS_ROLLBACK,
-  UPDATE_SETTINGS_VIEW_ID, UPDATE_INFO, UPDATE_INFO_COMMIT, UPDATE_INFO_ROLLBACK,
+  UPDATE_SETTINGS_VIEW_ID,
+  TRY_UPDATE_INFO, TRY_UPDATE_INFO_COMMIT, TRY_UPDATE_INFO_ROLLBACK,
+  UPDATE_INFO, UPDATE_INFO_COMMIT, UPDATE_INFO_ROLLBACK, UPDATE_UNCHANGED_INFO,
   UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION, UPDATE_DISCARD_ACTION,
   UPDATE_LIST_NAMES_MODE, UPDATE_SYNCED, INCREASE_SAVE_NOTE_COUNT,
   CANCEL_CHANGED_SYNC_MODE, SYNC, SYNC_COMMIT, SYNC_ROLLBACK, UPDATE_SYNC_PROGRESS,
@@ -53,7 +59,7 @@ import {
   UPDATE_UPDATING_THEME_MODE, UPDATE_TIME_PICK, UPDATE_IS_24H_FORMAT,
   UPDATE_PAYWALL_FEATURE, UPDATE_LOCK_ACTION, UPDATE_LOCK_EDITOR, ADD_LOCK_NOTE,
   REMOVE_LOCK_NOTE, LOCK_NOTE, UNLOCK_NOTE, ADD_LOCK_LIST, REMOVE_LOCK_LIST, LOCK_LIST,
-  UNLOCK_LIST, CLEAN_UP_LOCKS, RESET_STATE,
+  UNLOCK_LIST, CLEAN_UP_LOCKS, RESET_STATE, UPDATE_TAG_DATA_S_STEP,
 } from '../types/actionTypes';
 import {
   HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY, HASH_SUPPORT,
@@ -71,18 +77,20 @@ import {
   FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES, FEATURE_LOCK,
   NOTE_DATE_FORMATS, PADDLE_RANDOM_ID, VALID_PASSWORD, PASSWORD_MSGS,
   LOCK_ACTION_ADD_LOCK_NOTE, LOCK_ACTION_UNLOCK_NOTE, LOCK_ACTION_ADD_LOCK_LIST,
+  LOCAL_NOTE_ATTRS, TASK_TYPE, TASK_DO_FORCE_LIST_FPATHS, TASK_UPDATE_ACTION,
 } from '../types/const';
 import {
   throttle, extractUrl, urlHashToObj, objToUrlHash, isBusyStatus, isEqual,
   separateUrlAndParam, getUserImageUrl, randomString, sleep, isObject, isString,
   isNumber, isTitleEqual, isBodyEqual, clearNoteData, getStaticFPath, deriveFPaths,
-  getListNameObj, getAllListNames, getMainId, createDataFName, listNoteIds,
+  getListNameObj, getAllListNames, getMainId, createDataFName, listNoteMetas,
   getNoteFPaths, getStaticFPaths, createSettingsFPath, getSettingsFPaths,
   getLastSettingsFPaths, getInfoFPath, getLatestPurchase, getValidPurchase,
-  doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins, getSortedNotes,
+  doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins,
   separatePinnedValues, getRawPins, getFormattedTime, get24HFormattedTime,
-  getWindowSize, getNote, getEditingListNameEditors, getListNamesFromNoteIds,
-  validatePassword, doContainListName, sample,
+  getWindowSize, getNote, getEditingListNameEditors, getListNamesFromNoteMetas,
+  validatePassword, doContainListName, sample, getListNameAndNote, newObject,
+  doContainSyncCallTasks,
 } from '../utils';
 import { isUint8Array, isBlob, convertBlobToDataUrl } from '../utils/index-web';
 import { _ } from '../utils/obj';
@@ -90,6 +98,9 @@ import { initialSettingsState } from '../types/initialStates';
 import vars from '../vars';
 
 const jhfp = require('../jhfp');
+
+const syncQueue = new TaskQueue({ concurrency: 1, autostart: true });
+const taskQueue = new TaskQueue({ concurrency: 1, autostart: true });
 
 let popStateListener, hashChangeListener;
 export const init = () => async (dispatch, getState) => {
@@ -851,6 +862,14 @@ export const fetch = () => async (dispatch, getState) => {
   }
 };
 
+export const tryUpdateFetched = (payload) => async (dispatch, getState) => {
+
+};
+
+export const updateFetched = (payload) => async (dispatch, getState) => {
+
+};
+
 export const fetchMore = () => async (dispatch, getState) => {
 
   const addedDT = Date.now();
@@ -893,7 +912,7 @@ export const tryUpdateFetchedMore = (payload) => async (dispatch, getState) => {
   }
 
   if (isInterrupted) {
-    dispatch({ type: CANCEL_FETCHED_MORE, payload });
+    //dispatch({ type: CANCEL_FETCHED_MORE, payload });
     return;
   }
 
@@ -906,7 +925,7 @@ export const tryUpdateFetchedMore = (payload) => async (dispatch, getState) => {
   if (!isBulkEditing) {
     const scrollHeight = vars.scrollPanel.contentHeight;
     const windowHeight = vars.scrollPanel.layoutHeight;
-    const windowBottom = windowHeight + vars.scrollPanel.pageYOffset;
+    const windowBottom = windowHeight + vars.scrollPanel.scrollY;
 
     const isPopupShown = (
       getState().display.isNoteListItemMenuPopupShown ||
@@ -923,9 +942,7 @@ export const tryUpdateFetchedMore = (payload) => async (dispatch, getState) => {
   dispatch({ type: CACHE_FETCHED_MORE, payload });
 };
 
-export const updateFetchedMore = (payload, listName = null) => async (
-  dispatch, getState
-) => {
+export const updateFetchedMore = (payload) => async (dispatch, getState) => {
 
   if (!payload) {
     if (!listName) listName = getState().display.listName;
@@ -953,14 +970,16 @@ export const refreshFetched = () => async (dispatch, getState) => {
   dispatch({ type: REFRESH_FETCHED });
 };
 
-export const addNote = (title, body, media, listName = null) => async (
+export const addNote = (title, body, media, listName) => async (
   dispatch, getState
 ) => {
-
-  const addedDT = Date.now();
-  if (listName === null) listName = getState().display.listName;
+  if (!isString(listName)) listName = getState().display.listName;
   if (listName === TRASH) listName = MY_NOTES;
 
+  const queryString = getState().display.queryString;
+  if (queryString) listName = MY_NOTES;
+
+  const addedDT = Date.now();
   const note = {
     parentIds: null,
     id: `${addedDT}${randomString(4)}`,
@@ -970,11 +989,18 @@ export const addNote = (title, body, media, listName = null) => async (
 
   const { usedFPaths, localUnusedFPaths } = deriveFPaths(media, null);
 
-  const payload = { listName, note };
+  let insertIndex;
+  if (!queryString && listName === getState().display.listName) {
+    insertIndex = _getAddLinkInsertIndex(getState);
+  }
+
+  const payload = { listName, note, insertIndex };
   dispatch({ type: ADD_NOTE, payload });
 
   try {
-    await dataApi.putNotes({ listName, notes: [note], staticFPaths: usedFPaths });
+    await dataApi.putNotes({
+      listNames: [listName], notes: [note], staticFPaths: usedFPaths,
+    });
   } catch (error) {
     console.log('addNote error: ', error);
     dispatch({ type: ADD_NOTE_ROLLBACK, payload: { ...payload, error } });
@@ -982,6 +1008,7 @@ export const addNote = (title, body, media, listName = null) => async (
   }
 
   dispatch({ type: ADD_NOTE_COMMIT, payload });
+  addFetchedToVars(null, [note], vars);
 
   try {
     await fileApi.deleteFiles(localUnusedFPaths);
@@ -990,33 +1017,40 @@ export const addNote = (title, body, media, listName = null) => async (
     // error in this step should be fine
   }
 
-  await sync()(dispatch, getState);
+  dispatch(sync());
 };
 
 export const updateNote = (title, body, media, id) => async (dispatch, getState) => {
-
+  const notes = getState().notes;
   const addedDT = Date.now();
-  const listName = getState().display.listName;
 
-  const note = getState().notes[listName][id];
+  const { listName, note } = getListNameAndNote(id, notes);
+  if (!isString(listName) || !isObject(note)) {
+    console.log('In updateNote, no found list name or note for id:', id);
+    return;
+  }
+
+  const fromNote = newObject(note, LOCAL_NOTE_ATTRS);
+  const emptyFromNote = clearNoteData(fromNote);
   const toNote = {
-    ...note,
-    parentIds: [note.id],
-    id: `${addedDT}${randomString(4)}`,
+    ...fromNote,
+    parentIds: [fromNote.id], id: `${addedDT}${randomString(4)}`,
     title, body, media,
     updatedDT: addedDT,
+    fromNote,
   };
-  const fromNote = clearNoteData(note);
 
   const {
     usedFPaths, serverUnusedFPaths, localUnusedFPaths,
-  } = deriveFPaths(media, note.media);
+  } = deriveFPaths(media, fromNote.media);
 
-  const payload = { listName, fromNote: note, toNote };
+  const payload = { listName, fromNote, toNote };
   dispatch({ type: UPDATE_NOTE, payload });
 
   try {
-    await dataApi.putNotes({ listName, notes: [toNote], staticFPaths: usedFPaths });
+    await dataApi.putNotes({
+      listNames: [listName], notes: [toNote], staticFPaths: usedFPaths,
+    });
   } catch (error) {
     console.log('updateNote error: ', error);
     dispatch({ type: UPDATE_NOTE_ROLLBACK, payload: { ...payload, error } });
@@ -1026,7 +1060,7 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
   dispatch({ type: UPDATE_NOTE_COMMIT, payload });
 
   try {
-    await dataApi.putNotes({ listName, notes: [fromNote] });
+    await dataApi.putNotes({ listNames: [listName], notes: [emptyFromNote] });
     await dataApi.deleteServerFiles(serverUnusedFPaths);
     await fileApi.deleteFiles(localUnusedFPaths);
   } catch (error) {
@@ -1034,11 +1068,10 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
     // error in this step should be fine
   }
 
-  await sync()(dispatch, getState);
+  dispatch(sync());
 };
 
 export const saveNote = (title, body, media) => async (dispatch, getState) => {
-
   if (title === '' && body === '') {
     dispatch(increaseFocusTitleCount());
     return;
@@ -1100,48 +1133,50 @@ const _getFromNotes = (notes, toNotes) => {
   return fromNotes;
 };
 
-const _moveNotes = (toListName, ids, fromListName = null) => async (
-  dispatch, getState
-) => {
+const _moveNotes = (toListName, ids) => async (dispatch, getState) => {
+  if (ids.length === 0) return;
 
+  const notes = getState().notes;
   let addedDT = Date.now();
-  if (!fromListName) fromListName = getState().display.listName;
 
-  const notes = Object.values(_.select(getState().notes[fromListName], ID, ids));
-  const toNotes = notes.map(note => {
+  const fromListNames = [], fromNotes = [], emptyFromNotes = [];
+  const toListNames = [], toNotes = [];
+  for (const id of ids) {
+    const { listName, note } = getListNameAndNote(id, notes);
+    if (!isString(listName) || !isObject(note)) {
+      console.log('In moveNotes, no found list name or note for id:', id);
+      continue;
+    }
+
+    const [fromListName, fromNote] = [listName, newObject(note, LOCAL_NOTE_ATTRS)];
+    if (fromListName === toListName) {
+      console.log('In moveNotes, same fromListName and toListName:', fromListName);
+      continue;
+    }
+
+    const toId = `${addedDT}${randomString(4)}`;
     const toNote = {
-      ...note,
-      parentIds: [note.id],
-      id: `${addedDT}${randomString(4)}`,
-      updatedDT: addedDT,
+      ...fromNote,
+      parentIds: [fromNote.id], id: toId, updatedDT: addedDT,
+      fromListName, fromNote,
     };
     addedDT += 1;
-    return toNote;
-  });
-  let fromNotes = notes.map(note => clearNoteData(note));
 
-  let payload = { fromListName, fromNotes: notes, toListName, toNotes };
+    fromListNames.push(fromListName);
+    fromNotes.push(fromNote);;
+    emptyFromNotes.push(clearNoteData(fromNote));
+    toListNames.push(toListName);
+    toNotes.push(toNote);
+  }
+
+  let payload = { fromListNames, fromNotes, toListNames, toNotes };
   dispatch({ type: MOVE_NOTES, payload });
 
   try {
     const result = await dataApi.putNotes({
-      listName: toListName, notes: toNotes, manuallyManageError: true,
+      listNames: toListNames, notes: toNotes, manuallyManageError: true,
     });
-    if (result.errorNotes.length > 0) {
-      fromNotes = _getFromNotes(notes, result.successNotes);
-      payload = { ...payload, fromNotes, toNotes: result.successNotes };
-
-      const errorFromNotes = _getFromNotes(notes, result.errorNotes);
-
-      const error = result.errorNotes[0].error;
-      console.log('moveNotes error: ', error);
-      dispatch({
-        type: MOVE_NOTES_ROLLBACK,
-        payload: {
-          ...payload, fromNotes: errorFromNotes, toNotes: result.errorNotes, error,
-        },
-      });
-    }
+    payload = { ...payload, ...result };
   } catch (error) {
     console.log('moveNotes error: ', error);
     dispatch({ type: MOVE_NOTES_ROLLBACK, payload: { ...payload, error } });
@@ -1149,15 +1184,16 @@ const _moveNotes = (toListName, ids, fromListName = null) => async (
   }
 
   dispatch({ type: MOVE_NOTES_COMMIT, payload });
+  addFetchedToVars(null, toNotes, vars);
 
   try {
-    await dataApi.putNotes({ listName: fromListName, notes: fromNotes });
+    await dataApi.putNotes({ listNames: fromListNames, notes: emptyFromNotes });
   } catch (error) {
     console.log('moveNotes clean up error: ', error);
     // error in this step should be fine
   }
 
-  await sync()(dispatch, getState);
+  dispatch(sync());
 };
 
 export const moveNotesWithAction = (toListName, moveAction) => async (
@@ -1222,7 +1258,10 @@ const _getUnusedFPaths = (notes, toNotes) => {
 
 const _deleteNotes = (ids) => async (dispatch, getState) => {
   let addedDT = Date.now();
+
+  // Support different listnames!!!
   const listName = getState().display.listName;
+
 
   const notes = Object.values(_.select(getState().notes[listName], ID, ids));
   const toNotes = notes.map(note => {
@@ -1272,6 +1311,8 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
     return;
   }
 
+  // success ids and error ids!!!
+
   dispatch({ type: DELETE_NOTES_COMMIT, payload });
 
   try {
@@ -1284,7 +1325,7 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
     // error in this step should be fine
   }
 
-  await sync()(dispatch, getState);
+  dispatch(sync());
 };
 
 export const deleteNotes = () => async (dispatch, getState) => {
@@ -1349,7 +1390,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       }
 
       dispatch({ type: ADD_NOTE_COMMIT, payload });
-      await sync()(dispatch, getState);
+      dispatch(sync());
     } else if (status === DIED_UPDATING) {
       const toNote = note;
       const fromNote = clearNoteData(note.fromNote);
@@ -1380,7 +1421,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
         // error in this step should be fine
       }
 
-      await sync()(dispatch, getState);
+      dispatch(sync());
     } else if (status === DIED_MOVING) {
       const [toListName, toNote, fromListName] = [listName, note, note.fromListName];
       const fromNote = clearNoteData(note.fromNote);
@@ -1408,7 +1449,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
         // error in this step should be fine
       }
 
-      await sync()(dispatch, getState);
+      dispatch(sync());
     } else if (status === DIED_DELETING) {
       const toNote = {
         ...note,
@@ -1453,7 +1494,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
         // error in this step should be fine
       }
 
-      await sync()(dispatch, getState);
+      dispatch(sync());
     } else {
       throw new Error(`Invalid status: ${status} of id: ${id}`);
     }
@@ -1511,7 +1552,29 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
   const doDeleteOldNotesInTrash = getState().settings.doDeleteOldNotesInTrash;
   if (!doDeleteOldNotesInTrash) return;
 
-  const oldNotes = await dataApi.getOldNotesInTrash();
+  const noteFPaths = getNoteFPaths(getState());
+  const { noteMetas } = listNoteMetas(noteFPaths);
+
+  const trashNoteMetas = noteMetas.filter(meta => meta.listName === TRASH);
+  const oldNoteMetas = trashNoteMetas.filter(meta => {
+    const interval = Date.now() - meta.updatedDT;
+    const days = interval / 1000 / 60 / 60 / 24;
+
+    return days > N_DAYS;
+  });
+  const selectedNoteMetas = oldNoteMetas.slice(0, N_NOTES);
+
+  const fpaths = [];
+  for (const meta of selectedNoteMetas) fpaths.push(...meta.fpaths);
+
+  // Dummy contents are enough and good for performance
+  const contents = [];
+  for (let i = 0; i < fpaths.length; i++) {
+    if (fpaths[i].endsWith(INDEX + DOT_JSON)) contents.push({ title: '', body: '' });
+    else contents.push('');
+  }
+
+  const oldNotes = dataApi.toNotes(selectedNoteMetas, fpaths, contents);
   if (oldNotes.length === 0) return;
 
   const oldNoteIds = oldNotes.map(note => note.id);
@@ -1538,6 +1601,8 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
     }
   }
 
+  // listNames not just listName!!!
+
   const listName = TRASH;
   const payload = { listName, ids: oldNoteIds };
 
@@ -1553,6 +1618,8 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
     return;
   }
 
+  // successIds and errorIds???
+
   dispatch({ type: DELETE_OLD_NOTES_IN_TRASH_COMMIT, payload });
   vars.deleteOldNotes.ids = null;
 
@@ -1566,7 +1633,7 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
     // error in this step should be fine
   }
 
-  await sync()(dispatch, getState);
+  dispatch(sync());
 };
 
 export const mergeNotes = (selectedId) => async (dispatch, getState) => {
@@ -1642,7 +1709,7 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
     // error in this step should be fine
   }
 
-  await sync()(dispatch, getState);
+  dispatch(sync());
 };
 
 export const showNoteListMenuPopup = (rect, doCheckEditing) => async (
@@ -1721,9 +1788,9 @@ const _cleanUpStaticFiles = async (dispatch, getState) => {
   const unsavedNotes = getState().unsavedNotes;
 
   const usedFPaths = [];
-  const { noteIds, conflictedIds } = listNoteIds(noteFPaths);
-  for (const noteId of [...noteIds, ...conflictedIds]) {
-    for (const fpath of noteId.fpaths) {
+  const { noteMetas, conflictedMetas } = listNoteMetas(noteFPaths);
+  for (const meta of [...noteMetas, ...conflictedMetas]) {
+    for (const fpath of meta.fpaths) {
       if (fpath.includes(CD_ROOT + '/')) usedFPaths.push(getStaticFPath(fpath));
     }
   }
@@ -1836,6 +1903,9 @@ export const updateSettingsPopup = (isShown, doCheckEditing = false) => async (
         updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
         return;
       }
+
+      const tagNameEditors = getState().tagNameEditors;
+
     }
     dispatch(updateStgsAndInfo());
   }
@@ -2016,25 +2086,18 @@ export const updateSelectingListName = (listName) => {
   };
 };
 
-export const updateDeletingListName = (listName) => {
-  return {
-    type: UPDATE_DELETING_LIST_NAME,
-    payload: listName,
-  };
-};
-
-const updateSettings = async (dispatch, getState) => {
+const updateSettingsInQueue = (dispatch, getState) => async () => {
   const settings = getState().settings;
   const snapshotSettings = getState().snapshot.settings;
 
-  const { doSyncMode, doSyncModeInput } = getState().localSettings;
-  if (doSyncMode !== doSyncModeInput) vars.syncMode.didChange = true;
-
   // It's ok if MERGE_SETTINGS, IMPORT, DELETE_ALL in progress. Let it be conflict.
   if (isEqual(settings, snapshotSettings)) {
-    dispatch(cancelDiedSettings());
+    dispatch({ type: UPDATE_UNCHANGED_SETTINGS });
     return;
   }
+
+  const { doSyncMode, doSyncModeInput } = getState().localSettings;
+  if (doSyncMode !== doSyncModeInput) vars.syncMode.didChange = true;
 
   const addedDT = Date.now();
   const {
@@ -2059,12 +2122,14 @@ const updateSettings = async (dispatch, getState) => {
   } catch (error) {
     console.log('updateSettings error: ', error);
     dispatch({ type: UPDATE_SETTINGS_ROLLBACK, payload: { ...payload, error } });
+    dispatch({ type: TRY_UPDATE_SETTINGS_ROLLBACK });
     vars.updateSettings.doFetch = false;
     vars.syncMode.didChange = false;
     return;
   }
 
   dispatch({ type: UPDATE_SETTINGS_COMMIT, payload });
+  dispatch({ type: TRY_UPDATE_SETTINGS_COMMIT });
   vars.updateSettings.doFetch = false;
 
   try {
@@ -2075,15 +2140,28 @@ const updateSettings = async (dispatch, getState) => {
     // error in this step should be fine
   }
 
-  await sync()(dispatch, getState);
+  const doContain = doContainSyncCallTasks(taskQueue);
+  if (!doContain) await syncAndWait()(dispatch, getState);
 };
 
-const updateInfo = async (dispatch, getState) => {
+const updateSettings = async (dispatch, getState) => {
+  const settings = getState().settings;
+  dispatch({ type: TRY_UPDATE_SETTINGS, payload: { settings } });
+
+  const task = updateSettingsInQueue(dispatch, getState);
+  task[TASK_TYPE] = UPDATE_SETTINGS;
+  taskQueue.push(task);
+};
+
+const updateInfoInQueue = (dispatch, getState) => async () => {
   const info = getState().info;
   const snapshotInfo = getState().snapshot.info;
 
   // It's ok if IAP in progess as when complete, it'll update again.
-  if (isEqual(info, snapshotInfo)) return;
+  if (isEqual(info, snapshotInfo)) {
+    dispatch({ type: UPDATE_UNCHANGED_INFO });
+    return;
+  }
 
   const addedDT = Date.now();
   const infoFPath = `${INFO}${addedDT}${DOT_JSON}`;
@@ -2097,10 +2175,12 @@ const updateInfo = async (dispatch, getState) => {
   } catch (error) {
     console.log('updateInfo error: ', error);
     dispatch({ type: UPDATE_INFO_ROLLBACK, payload: { ...payload, error } });
+    dispatch({ type: TRY_UPDATE_INFO_ROLLBACK });
     return;
   }
 
   dispatch({ type: UPDATE_INFO_COMMIT, payload });
+  dispatch({ type: TRY_UPDATE_INFO_COMMIT });
 
   try {
     if (_infoFPath) await dataApi.deleteFiles([_infoFPath]);
@@ -2109,10 +2189,19 @@ const updateInfo = async (dispatch, getState) => {
     // error in this step should be fine
   }
 
-  await sync()(dispatch, getState);
+  const doContain = doContainSyncCallTasks(taskQueue);
+  if (!doContain) await syncAndWait()(dispatch, getState);
 };
 
-const applySyncMode = async (dispatch, getState) => {
+const updateInfo = async (dispatch, getState) => {
+  dispatch({ type: TRY_UPDATE_INFO });
+
+  const task = updateInfoInQueue(dispatch, getState);
+  task[TASK_TYPE] = UPDATE_INFO;
+  taskQueue.push(task);
+};
+
+const applySyncModeInQueue = (dispatch, getState) => async () => {
   // If updateSettings rollback, no apply sync mode yet, wait for retry.
   if (!vars.syncMode.didChange) return;
   vars.syncMode.didChange = false;
@@ -2134,6 +2223,12 @@ const applySyncMode = async (dispatch, getState) => {
   window.location.reload();
 };
 
+const applySyncMode = async (dispatch, getState) => {
+  const task = applySyncModeInQueue(dispatch, getState);
+  task[TASK_TYPE] = 'APPLY_SYNC_MODE';
+  taskQueue.push(task);
+};
+
 export const updateStgsAndInfo = () => async (dispatch, getState) => {
   await updateSettings(dispatch, getState);
   await updateInfo(dispatch, getState);
@@ -2150,9 +2245,9 @@ export const cancelDiedSettings = () => async (dispatch, getState) => {
   const snapshotSettings = getState().snapshot.settings;
 
   const noteFPaths = getNoteFPaths(getState());
-  const { noteIds, conflictedIds } = listNoteIds(noteFPaths);
+  const { noteMetas, conflictedNoteMetas } = listNoteMetas(noteFPaths);
 
-  const listNames = getListNamesFromNoteIds(noteIds, conflictedIds);
+  const listNames = getListNamesFromNoteMetas(noteMetas, conflictedNoteMetas);
   let doFetch = (
     settings.sortOn !== snapshotSettings.sortOn ||
     settings.doDescendingOrder !== snapshotSettings.doDescendingOrder
@@ -2188,36 +2283,9 @@ export const tryUpdateInfo = () => async (dispatch, getState) => {
   await updateInfo(dispatch, getState);
 };
 
-export const mergeSettings = (selectedId) => async (dispatch, getState) => {
-  const currentSettings = getState().settings;
-  const contents = getState().conflictedSettings.contents;
-
-  const addedDT = Date.now();
-  const _settingsFPaths = contents.map(content => content.fpath);
-  const _settingsIds = contents.map(content => content.id);
-  const _settings = contents.find(content => content.id === selectedId);
-
-  const settingsFName = createDataFName(`${addedDT}${randomString(4)}`, _settingsIds);
-  const settingsFPath = createSettingsFPath(settingsFName);
-
-  const settings = { ...initialSettingsState };
-  for (const k in settings) {
-    // Conflicted settings content has extra attrs i.e. id and fpath.
-    if (k in _settings) settings[k] = _settings[k];
-  }
-
-  const noteFPaths = getNoteFPaths(getState());
-  const { noteIds, conflictedIds } = listNoteIds(noteFPaths);
-
-  const listNames = getListNamesFromNoteIds(noteIds, conflictedIds);
-  const doFetch = (
-    settings.sortOn !== currentSettings.sortOn ||
-    settings.doDescendingOrder !== currentSettings.doDescendingOrder
-  );
-  const payload = { listNames, settings, doFetch };
-
-  vars.updateSettings.doFetch = doFetch;
-  dispatch({ type: MERGE_SETTINGS, payload });
+const mergeSettingsInQueue = (
+  settingsFPath, settings, _settingsFPaths, payload, dispatch, getState
+) => async () => {
 
   try {
     await dataApi.putFiles([settingsFPath], [settings]);
@@ -2238,33 +2306,68 @@ export const mergeSettings = (selectedId) => async (dispatch, getState) => {
     // error in this step should be fine
   }
 
-  await sync()(dispatch, getState);
+  const doContain = doContainSyncCallTasks(taskQueue);
+  if (!doContain) await syncAndWait()(dispatch, getState);
+};
+
+export const mergeSettings = (selectedId) => async (dispatch, getState) => {
+  const currentSettings = getState().settings;
+  const contents = getState().conflictedSettings.contents;
+
+  const addedDT = Date.now();
+  const _settingsFPaths = contents.map(content => content.fpath);
+  const _settingsIds = contents.map(content => content.id);
+  const _settings = contents.find(content => content.id === selectedId);
+
+  const settingsFName = createDataFName(`${addedDT}${randomString(4)}`, _settingsIds);
+  const settingsFPath = createSettingsFPath(settingsFName);
+
+  const settings = { ...initialSettingsState };
+  for (const k in settings) {
+    // Conflicted settings content has extra attrs i.e. id and fpath.
+    if (k in _settings) settings[k] = _settings[k];
+  }
+
+  const noteFPaths = getNoteFPaths(getState());
+  const { noteMetas, conflictedNoteMetas } = listNoteMetas(noteFPaths);
+
+  const listNames = getListNamesFromNoteMetas(noteMetas, conflictedNoteMetas);
+  const doFetch = (
+    settings.sortOn !== currentSettings.sortOn ||
+    settings.doDescendingOrder !== currentSettings.doDescendingOrder
+  );
+  const payload = { listNames, settings, doFetch };
+
+  vars.updateSettings.doFetch = doFetch;
+  dispatch({ type: MERGE_SETTINGS, payload });
+
+  const task = mergeSettingsInQueue(
+    settingsFPath, settings, _settingsFPaths, payload, dispatch, getState
+  );
+  task[TASK_TYPE] = MERGE_SETTINGS;
+  taskQueue.push(task);
 };
 
 /*
- * _isSyncing: one sync at a time
- * _newSyncObj: there is a new update and need to sync again
- *
  * updateAction: 0 - normal, update immediately or show notification
  *               1 - force, update immediately no matter what
  *               2 - no update even there is a change
  */
-export const sync = (
-  doForceListFPaths = false, updateAction = 0, haveUpdate = false
-) => async (dispatch, getState) => {
-
-  if (!getState().user.isUserSignedIn) return;
-  if (!vars.syncMode.doSyncMode) return;
-  if (vars.deleteSyncData.isDeleting) return;
-
-  if (vars.sync.isSyncing) {
-    vars.sync.newSyncObj = { doForceListFPaths, updateAction };
+const syncInQueue = (
+  waitResolve, doForceListFPaths, updateAction, dispatch, getState
+) => async () => {
+  if (
+    !getState().user.isUserSignedIn ||
+    !vars.syncMode.doSyncMode ||
+    vars.deleteSyncData.isDeleting
+  ) {
+    if (waitResolve) waitResolve(false);
     return;
   }
-  [vars.sync.isSyncing, vars.sync.newSyncObj] = [true, null];
 
   // Set haveUpdate to true if there is already pending update
   //   Need to check before dispatching SYNC
+  let haveUpdate = false;
   const syncProgress = getState().display.syncProgress;
   if (syncProgress && syncProgress.status === SHOW_SYNCED) haveUpdate = true;
 
@@ -2275,11 +2378,11 @@ export const sync = (
     const {
       noteFPaths, staticFPaths, settingsFPaths, infoFPath, pinFPaths,
     } = await dataApi.listServerFPaths(doForceListFPaths);
-    const { noteIds, conflictedIds } = listNoteIds(noteFPaths);
+    const { noteMetas, conflictedMetas } = listNoteMetas(noteFPaths);
 
     const leafFPaths = [];
-    for (const noteId of noteIds) leafFPaths.push(...noteId.fpaths);
-    for (const noteId of conflictedIds) leafFPaths.push(...noteId.fpaths);
+    for (const meta of noteMetas) leafFPaths.push(...meta.fpaths);
+    for (const meta of conflictedMetas) leafFPaths.push(...meta.fpaths);
 
     const {
       noteFPaths: _noteFPaths,
@@ -2289,21 +2392,22 @@ export const sync = (
     } = await dataApi.listFPaths(doForceListFPaths);
     const _staticFPaths = await fileApi.getStaticFPaths();
     const {
-      noteIds: _noteIds, conflictedIds: _conflictedIds,
-    } = listNoteIds(_noteFPaths);
+      noteMetas: _noteMetas, conflictedMetas: _conflictedMetas,
+    } = listNoteMetas(_noteFPaths);
 
     const _leafFPaths = [];
-    for (const noteId of _noteIds) _leafFPaths.push(...noteId.fpaths);
-    for (const noteId of _conflictedIds) _leafFPaths.push(...noteId.fpaths);
+    for (const meta of _noteMetas) _leafFPaths.push(...meta.fpaths);
+    for (const meta of _conflictedMetas) _leafFPaths.push(...meta.fpaths);
 
     const allNoteFPaths = [...new Set([...noteFPaths, ..._noteFPaths])];
     const {
-      noteIds: allNoteIds, conflictedIds: allConflictedIds, toRootIds: allToRootIds,
-    } = listNoteIds(allNoteFPaths);
+      noteMetas: allNoteMetas, conflictedMetas: allConflictedMetas,
+      toRootIds: allToRootIds,
+    } = listNoteMetas(allNoteFPaths);
 
     const allLeafFPaths = [];
-    for (const noteId of allNoteIds) allLeafFPaths.push(...noteId.fpaths);
-    for (const noteId of allConflictedIds) allLeafFPaths.push(...noteId.fpaths);
+    for (const meta of allNoteMetas) allLeafFPaths.push(...meta.fpaths);
+    for (const meta of allConflictedMetas) allLeafFPaths.push(...meta.fpaths);
 
     const allLeafStaticFPaths = [];
     for (const fpath of allLeafFPaths) {
@@ -2614,33 +2718,79 @@ export const sync = (
     }
     await dataApi.deleteFiles(fpaths);
 
-    dispatch({
-      type: SYNC_COMMIT,
-      payload: {
-        updateAction,
-        haveUpdate,
-        haveNewSync: vars.sync.newSyncObj !== null,
-      },
-    });
+    if (syncQueue.length <= 1) {
+      if (vars.sync.updateAction < updateAction) updateAction = vars.sync.updateAction;
+      if (!haveUpdate) haveUpdate = vars.sync.haveUpdate;
 
-    if (vars.sync.newSyncObj) {
-      let _doForce = vars.sync.newSyncObj.doForceListFPaths;
-      if (doForceListFPaths) _doForce = false;
-
-      const _updateAction = Math.min(updateAction, vars.sync.newSyncObj.updateAction);
-
-      [vars.sync.isSyncing, vars.sync.newSyncObj] = [false, null];
-      dispatch(sync(_doForce, _updateAction, haveUpdate));
-      return;
+      dispatch({
+        type: SYNC_COMMIT, payload: { updateAction, haveUpdate },
+      });
+    } else {
+      if (updateAction < vars.sync.updateAction) vars.sync.updateAction = updateAction;
+      if (haveUpdate) vars.sync.haveUpdate = haveUpdate;
     }
 
-    [vars.sync.isSyncing, vars.sync.newSyncObj] = [false, null];
+    if (waitResolve) waitResolve(true);
     vars.sync.lastSyncDT = Date.now();
   } catch (error) {
     console.log('Sync error: ', error);
-    [vars.sync.isSyncing, vars.sync.newSyncObj] = [false, null];
     dispatch({ type: SYNC_ROLLBACK, payload: error });
+    if (waitResolve) waitResolve(false);
   }
+};
+
+export const sync = (doForceListFPaths = false, updateAction = 0) => async (
+  dispatch, getState
+) => {
+  if (syncQueue.length >= 7) {
+    console.log('Sync queue length is too high:', syncQueue.length);
+    return;
+  }
+  if (syncQueue.length >= 2) {
+    let foundDoForce = false, foundUpdateAction = false;
+    if (!doForceListFPaths) foundDoForce = true;
+    if (updateAction === 0) foundUpdateAction = true;
+
+    for (const task of (/** @type any */(syncQueue)).jobs) {
+      if (task[TASK_DO_FORCE_LIST_FPATHS]) foundDoForce = true;
+      if (task[TASK_UPDATE_ACTION] <= updateAction) foundUpdateAction = true;
+    }
+
+    if (foundDoForce && foundUpdateAction) return;
+  }
+  if (syncQueue.length === 0) {
+    [vars.sync.updateAction, vars.sync.haveUpdate] = [Infinity, false];
+  }
+
+  const task = syncInQueue(null, doForceListFPaths, updateAction, dispatch, getState);
+  task[TASK_DO_FORCE_LIST_FPATHS] = doForceListFPaths;
+  task[TASK_UPDATE_ACTION] = updateAction;
+  syncQueue.push(task);
+};
+
+export const syncAndWait = (doForceListFPaths = false, updateAction = 0) => async (
+  dispatch, getState
+) => {
+  if (syncQueue.length >= 7) {
+    console.log('Sync queue length is too high:', syncQueue.length);
+    return false;
+  }
+  if (syncQueue.length === 0) {
+    [vars.sync.updateAction, vars.sync.haveUpdate] = [Infinity, false];
+  }
+
+  let waitResolve;
+  const waitPromise = new Promise(resolve => waitResolve = resolve);
+
+  const task = syncInQueue(
+    waitResolve, doForceListFPaths, updateAction, dispatch, getState
+  );
+  task[TASK_DO_FORCE_LIST_FPATHS] = doForceListFPaths;
+  task[TASK_UPDATE_ACTION] = updateAction;
+  syncQueue.push(task);
+
+  const waitResult = await waitPromise;
+  return waitResult;
 };
 
 export const tryUpdateSynced = (updateAction, haveUpdate) => async (
@@ -2659,7 +2809,7 @@ export const tryUpdateSynced = (updateAction, haveUpdate) => async (
 
   const isBulkEditing = getState().display.isBulkEditing;
   if (!isBulkEditing) {
-    const pageYOffset = vars.scrollPanel.pageYOffset;
+    const scrollY = vars.scrollPanel.scrollY;
     const noteId = getState().display.noteId;
     const isPopupShown = (
       getState().display.isNoteListItemMenuPopupShown ||
@@ -2670,7 +2820,7 @@ export const tryUpdateSynced = (updateAction, haveUpdate) => async (
     const isEditorFocused = getState().display.isEditorFocused;
     const isEditorBusy = getState().display.isEditorBusy;
     if (
-      pageYOffset === 0 && noteId === null && !isPopupShown &&
+      scrollY === 0 && noteId === null && !isPopupShown &&
       !isEditorFocused && !isEditorBusy
     ) {
       dispatch(updateSynced());
@@ -3187,7 +3337,7 @@ export const pinNotes = (ids) => async (dispatch, getState) => {
   const pinFPaths = getPinFPaths(getState());
   const pendingPins = getState().pendingPins;
 
-  const { toRootIds } = listNoteIds(noteFPaths);
+  const { toRootIds } = listNoteMetas(noteFPaths);
   const currentPins = getPins(pinFPaths, pendingPins, true, toRootIds);
   const currentRanks = Object.values(currentPins).map(pin => pin.rank).sort();
 
@@ -3228,7 +3378,7 @@ export const unpinNotes = (ids) => async (dispatch, getState) => {
   const pinFPaths = getPinFPaths(getState());
   const pendingPins = getState().pendingPins;
 
-  const { toRootIds } = listNoteIds(noteFPaths);
+  const { toRootIds } = listNoteMetas(noteFPaths);
   let currentPins = getPins(pinFPaths, pendingPins, true, toRootIds);
 
   let now = Date.now();
@@ -3274,13 +3424,14 @@ export const movePinnedNote = (id, direction) => async (dispatch, getState) => {
   const pinFPaths = getPinFPaths(getState());
   const pendingPins = getState().pendingPins;
 
-  const sortedNotes = getSortedNotes(notes, listName, doDescendingOrder);
+  //const sortedNotes = getSortedNotes(notes, listName, doDescendingOrder);
+  const sortedNotes = [];
   if (!sortedNotes) {
     console.log('No notes found for note id: ', id);
     return;
   }
 
-  const { toRootIds } = listNoteIds(noteFPaths);
+  const { toRootIds } = listNoteMetas(noteFPaths);
   let [pinnedValues] = separatePinnedValues(
     sortedNotes,
     pinFPaths,
@@ -3362,7 +3513,7 @@ export const cleanUpPins = () => async (dispatch, getState) => {
   const noteFPaths = getNoteFPaths(getState());
   const pinFPaths = getPinFPaths(getState());
 
-  const { toRootIds } = listNoteIds(noteFPaths);
+  const { toRootIds } = listNoteMetas(noteFPaths);
   const pins = getRawPins(pinFPaths, toRootIds);
 
   let unusedPins = [];
@@ -3397,7 +3548,7 @@ export const cleanUpPins = () => async (dispatch, getState) => {
   }
 
   // If add a new pin, no unused pins but need to sync anyway.
-  await sync()(dispatch, getState);
+  dispatch(sync());
 };
 
 export const updateLocalSettings = () => async (dispatch, getState) => {
@@ -3567,7 +3718,7 @@ export const addLockNote = (
   await sleep(16);
 
   const noteFPaths = getNoteFPaths(getState());
-  const { toRootIds } = listNoteIds(noteFPaths);
+  const { toRootIds } = listNoteMetas(noteFPaths);
 
   const noteMainId = getMainId(noteId, toRootIds);
   password = await userSession.encrypt(password);
@@ -3599,7 +3750,7 @@ export const removeLockNote = (noteId, password) => async (dispatch, getState) =
   await sleep(16);
 
   const noteFPaths = getNoteFPaths(getState());
-  const { toRootIds } = listNoteIds(noteFPaths);
+  const { toRootIds } = listNoteMetas(noteFPaths);
 
   const noteMainId = getMainId(noteId, toRootIds);
   const lockedNote = getState().lockSettings.lockedNotes[noteMainId];
@@ -3624,7 +3775,7 @@ export const removeLockNote = (noteId, password) => async (dispatch, getState) =
 
 export const lockNote = (noteId) => async (dispatch, getState) => {
   const noteFPaths = getNoteFPaths(getState());
-  const { toRootIds } = listNoteIds(noteFPaths);
+  const { toRootIds } = listNoteMetas(noteFPaths);
 
   const noteMainId = getMainId(noteId, toRootIds);
 
@@ -3661,7 +3812,7 @@ export const unlockNote = (noteId, password) => async (dispatch, getState) => {
   await sleep(16);
 
   const noteFPaths = getNoteFPaths(getState());
-  const { toRootIds } = listNoteIds(noteFPaths);
+  const { toRootIds } = listNoteMetas(noteFPaths);
 
   const noteMainId = getMainId(noteId, toRootIds);
   const lockedNote = getState().lockSettings.lockedNotes[noteMainId];
@@ -3784,7 +3935,7 @@ const cleanUpLocks = async (dispatch, getState) => {
   const { listNameMap } = getState().settings;
   const lockSettings = getState().lockSettings;
 
-  const { toLeafIds } = listNoteIds(noteFPaths);
+  const { toLeafIds } = listNoteMetas(noteFPaths);
 
   const noteMainIds = [];
   for (const noteMainId in lockSettings.lockedNotes) {

@@ -1,17 +1,19 @@
 import {
   INIT, FETCH_COMMIT, ADD_LIST_NAMES, UPDATE_LIST_NAMES, MOVE_LIST_NAME,
-  MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH,
-  UPDATE_SORT_ON, UPDATE_DO_DESCENDING_ORDER, UPDATE_NOTE_DATE_SHOWING_MODE,
-  UPDATE_NOTE_DATE_FORMAT, UPDATE_DO_SECTION_NOTES_BY_MONTH,
-  UPDATE_DO_MORE_EDITOR_FONT_SIZES, UPDATE_DEFAULT_THEME, UPDATE_SETTINGS_COMMIT,
-  CANCEL_DIED_SETTINGS, MERGE_SETTINGS_COMMIT, DELETE_ALL_DATA, RESET_STATE,
+  MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_TAG_DATA_S_STEP,
+  UPDATE_TAG_DATA_S_STEP_COMMIT, CANCEL_DIED_TAGS, ADD_TAG_NAMES, UPDATE_TAG_NAMES,
+  MOVE_TAG_NAME, DELETE_TAG_NAMES, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, UPDATE_SORT_ON,
+  UPDATE_DO_DESCENDING_ORDER, UPDATE_NOTE_DATE_SHOWING_MODE, UPDATE_NOTE_DATE_FORMAT,
+  UPDATE_DO_SECTION_NOTES_BY_MONTH, UPDATE_DO_MORE_EDITOR_FONT_SIZES,
+  UPDATE_DEFAULT_THEME, UPDATE_SETTINGS_COMMIT, CANCEL_DIED_SETTINGS,
+  MERGE_SETTINGS_COMMIT, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   MY_NOTES, TRASH, ARCHIVE, SWAP_LEFT, SWAP_RIGHT, NOTE_DATE_SHOWING_MODE_SHOW,
 } from '../types/const';
 import {
   getListNameObj, doContainListName, copyListNameObjs, swapArrayElements,
-  deriveSettingsState,
+  deriveSettingsState, copyTagNameObjs, getTagNameObj,
 } from '../utils';
 import {
   initialSettingsState as initialState,
@@ -31,10 +33,15 @@ const settingsReducer = (state = initialState, action) => {
   }
 
   if (action.type === FETCH_COMMIT) {
-    const { listNames, doFetchStgsAndInfo, settings } = action.payload;
+    const {
+      doFetchStgsAndInfo, settings, conflictedSettings, listNames, tagNames,
+    } = action.payload;
     if (!doFetchStgsAndInfo) return state;
 
-    const newState = deriveSettingsState(listNames, settings, initialState);
+    let newState = deriveSettingsState(listNames, tagNames, settings, initialState);
+    if (Array.isArray(conflictedSettings) && conflictedSettings.length > 0) {
+      newState = { ...state };
+    }
 
     if (didChange.doDeleteOldNotesInTrash) {
       newState.doDeleteOldNotesInTrash = state.doDeleteOldNotesInTrash;
@@ -61,6 +68,14 @@ const settingsReducer = (state = initialState, action) => {
     }
     if (didChange.listNameMap) {
       newState.listNameMap = state.listNameMap;
+    }
+    if (didChange.tagNameMap) {
+      newState.tagNameMap = state.tagNameMap;
+    }
+    if (didChange.newTagNameObjs.length > 0) {
+      newState.tagNameMap = addTagNameObjs(
+        newState.tagNameMap, didChange.newTagNameObjs
+      );
     }
 
     return newState;
@@ -202,6 +217,113 @@ const settingsReducer = (state = initialState, action) => {
     return newState;
   }
 
+  if (action.type === UPDATE_TAG_DATA_S_STEP) {
+    const { newTagNameObjs } = action.payload;
+    if (newTagNameObjs.length === 0) return state;
+
+    const newState = { ...state };
+    newState.tagNameMap = addTagNameObjs(state.tagNameMap, newTagNameObjs);
+
+    didChange.newTagNameObjs = addTagNameObjs(didChange.newTagNameObjs, newTagNameObjs);
+
+    return newState;
+  }
+
+  if (action.type === UPDATE_TAG_DATA_S_STEP_COMMIT) {
+    const { newTagNameObjs } = action.payload;
+
+    const usedTagNames = newTagNameObjs.map(obj => obj.tagName);
+    didChange.newTagNameObjs = didChange.newTagNameObjs.filter(obj => {
+      return !usedTagNames.includes(obj.tagName);
+    });
+
+    return state;
+  }
+
+  if (action.type === CANCEL_DIED_TAGS) {
+    const { unusedTagNames } = action.payload;
+
+    const newState = { ...state };
+    newState.tagNameMap = newState.tagNameMap.filter(tagNameObj => {
+      return !unusedTagNames.includes(tagNameObj.tagName);
+    });
+
+    didChange.newTagNameObjs = didChange.newTagNameObjs.filter(obj => {
+      return !unusedTagNames.includes(obj.tagName);
+    });
+
+    return newState;
+  }
+
+  if (action.type === ADD_TAG_NAMES) {
+    const newState = { ...state };
+    newState.tagNameMap = [...state.tagNameMap, ...action.payload];
+
+    didChange.tagNameMap = true;
+
+    return newState;
+  }
+
+  if (action.type === UPDATE_TAG_NAMES) {
+    const { tagNames, newNames } = action.payload;
+
+    const newState = { ...state };
+    newState.tagNameMap = copyTagNameObjs(newState.tagNameMap);
+
+    for (let i = 0; i < tagNames.length; i++) {
+      const { tagNameObj } = getTagNameObj(tagNames[i], newState.tagNameMap);
+      if (!tagNameObj) {
+        console.log(`settingsReducer - UPDATE_TAG_NAMES, not found tagName: ${tagNames[i]}, in tagNameMap: `, newState.tagNameMap);
+        continue;
+      }
+      tagNameObj.displayName = newNames[i];
+    }
+
+    didChange.tagNameMap = true;
+
+    return newState;
+  }
+
+  if (action.type === MOVE_TAG_NAME) {
+    const { tagName, direction } = action.payload;
+
+    const newState = { ...state };
+    newState.tagNameMap = copyTagNameObjs(newState.tagNameMap);
+
+    const _tagNameMap = newState.tagNameMap;
+    const i = _tagNameMap.findIndex(obj => obj.tagName === tagName);
+    if (i < 0) {
+      console.log(`settingsReducer - MOVE_TAG_NAME, not found tagName: ${tagName} in tagNameMap: `, _tagNameMap);
+      return state;
+    }
+
+    let newTagNameMap;
+    if (direction === SWAP_LEFT) {
+      newTagNameMap = swapArrayElements(_tagNameMap, i - 1, i);
+    } else if (direction === SWAP_RIGHT) {
+      newTagNameMap = swapArrayElements(_tagNameMap, i, i + 1);
+    } else {
+      throw new Error(`Invalid direction: ${direction}`);
+    }
+
+    newState.tagNameMap = newTagNameMap;
+
+    didChange.tagNameMap = true;
+
+    return newState;
+  }
+
+  if (action.type === DELETE_TAG_NAMES) {
+    const { tagNames } = action.payload;
+
+    const newState = { ...state };
+    newState.tagNameMap = copyTagNameObjs(newState.tagNameMap, tagNames);
+
+    didChange.tagNameMap = true;
+
+    return newState;
+  }
+
   if (action.type === UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH) {
     didChange.doDeleteOldNotesInTrash = true;
     return { ...state, doDeleteOldNotesInTrash: action.payload };
@@ -254,11 +376,12 @@ const settingsReducer = (state = initialState, action) => {
     didChange.doSectionNotesByMonth = false;
     didChange.doMoreEditorFontSizes = false;
     didChange.listNameMap = false;
+    didChange.tagNameMap = false;
     return state;
   }
 
   if (action.type === CANCEL_DIED_SETTINGS) {
-    const { listNames, settings } = action.payload;
+    const { listNames, tagNames, settings } = action.payload;
     didChange.doDeleteOldNotesInTrash = false;
     didChange.sortOn = false;
     didChange.doDescendingOrder = false;
@@ -267,11 +390,12 @@ const settingsReducer = (state = initialState, action) => {
     didChange.doSectionNotesByMonth = false;
     didChange.doMoreEditorFontSizes = false;
     didChange.listNameMap = false;
-    return deriveSettingsState(listNames, settings, initialState);
+    didChange.tagNameMap = false;
+    return deriveSettingsState(listNames, tagNames, settings, initialState);
   }
 
   if (action.type === MERGE_SETTINGS_COMMIT) {
-    const { listNames, settings } = action.payload;
+    const { listNames, tagNames, settings } = action.payload;
     didChange.doDeleteOldNotesInTrash = false;
     didChange.sortOn = false;
     didChange.doDescendingOrder = false;
@@ -280,7 +404,8 @@ const settingsReducer = (state = initialState, action) => {
     didChange.doSectionNotesByMonth = false;
     didChange.doMoreEditorFontSizes = false;
     didChange.listNameMap = false;
-    return deriveSettingsState(listNames, settings, initialState);
+    didChange.tagNameMap = false;
+    return deriveSettingsState(listNames, tagNames, settings, initialState);
   }
 
   if (action.type === DELETE_ALL_DATA || action.type === RESET_STATE) {
@@ -292,10 +417,25 @@ const settingsReducer = (state = initialState, action) => {
     didChange.doSectionNotesByMonth = false;
     didChange.doMoreEditorFontSizes = false;
     didChange.listNameMap = false;
+    didChange.tagNameMap = false;
+    didChange.newTagNameObjs = [];
     return { ...initialState };
   }
 
   return state;
+};
+
+const addTagNameObjs = (tagNameMap, tagNameObjs) => {
+  const tagNames = [];
+
+  const newTagNameMap = [];
+  for (const obj of [...tagNameMap, ...tagNameObjs]) {
+    if (tagNames.includes(obj.tagName)) continue;
+    newTagNameMap.push({ ...obj });
+    tagNames.push(obj.tagName);
+  }
+
+  return newTagNameMap;
 };
 
 export default settingsReducer;
