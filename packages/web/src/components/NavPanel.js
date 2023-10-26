@@ -28,7 +28,7 @@ const NavPanel = () => {
 
     if (!noteId) return null;
     if (noteId === NEW_NOTE) return NEW_NOTE_OBJ;
-    if (noteId.startsWith('conflict')) return state.conflictedNotes[listName][noteId];
+    if (noteId.startsWith('conflict')) return state.conflictedNotes[noteId];
     return state.notes[listName][noteId];
   });
   const unsavedNote = useSelector(state => getUnsavedNote(state, note));

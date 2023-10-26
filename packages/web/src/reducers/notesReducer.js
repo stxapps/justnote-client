@@ -83,7 +83,12 @@ const notesReducer = (state = initialState, action) => {
         }
 
         const processingNotes = _.exclude(state[listName], STATUS, ADDED);
-        newState[listName] = { ...newState[listName], ...processingNotes };
+        const interveningNotes = _.select(
+          state[listName], ID, vars.notesReducer.interveningNoteIds[listName]
+        );
+        newState[listName] = {
+          ...newState[listName], ...interveningNotes, ...processingNotes,
+        };
       }
     }
 
@@ -126,8 +131,8 @@ const notesReducer = (state = initialState, action) => {
           newState[listName][id] = { ...state[listName][id] };
         }
 
-        const processingLinks = _.exclude(state[listName], STATUS, ADDED);
-        newState[listName] = { ...newState[listName], ...processingLinks };
+        const processingNotes = _.exclude(state[listName], STATUS, ADDED);
+        newState[listName] = { ...newState[listName], ...processingNotes };
       }
     }
 

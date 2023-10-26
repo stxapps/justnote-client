@@ -3,14 +3,14 @@ import lsgApi from './localSg';
 import ldbApi from './localDb';
 import fileApi from './localFile';
 import {
-  UNSAVED_NOTES_UNSAVED, UNSAVED_NOTES_SAVED, INDEX, DOT_JSON, CD_ROOT, N_NOTES, TRASH,
-  N_DAYS, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE, LOCK_SETTINGS_STATE,
+  UNSAVED_NOTES_UNSAVED, UNSAVED_NOTES_SAVED, INDEX, DOT_JSON, CD_ROOT, N_NOTES,
+  COLS_PANEL_STATE, LOCAL_SETTINGS_STATE, LOCK_SETTINGS_STATE,
 } from '../types/const';
 import {
   isObject, createNoteFPath, createDataFName, extractNoteFPath, createPinFPath,
-  addFPath, getMainId, listNoteMetas, sortWithPins, getStaticFPath,
-  getLastSettingsFPaths, excludeNotObjContents, batchGetFileWithRetry,
-  batchPutFileWithRetry, batchDeleteFileWithRetry, getListNamesFromNoteMetas,
+  addFPath, listNoteMetas, getStaticFPath, getLastSettingsFPaths, excludeNotObjContents,
+  batchGetFileWithRetry, batchPutFileWithRetry, batchDeleteFileWithRetry,
+  getInUseTagNames,
 } from '../utils';
 import { syncMode } from '../vars';
 import {
@@ -24,7 +24,8 @@ const getApi = () => {
 
 const _listFPaths = async (listFiles) => {
   const fpaths = {
-    noteFPaths: [], staticFPaths: [], settingsFPaths: [], infoFPath: null, pinFPaths: [],
+    noteFPaths: [], staticFPaths: [], settingsFPaths: [], infoFPath: null,
+    pinFPaths: [], tagFPaths: [],
   };
   await listFiles((fpath) => {
     addFPath(fpaths, fpath);
@@ -50,12 +51,35 @@ const listServerFPaths = async (doForce = false) => {
   return serverApi.cachedFPaths.fpaths;
 };
 
-const toNotes = (noteMetas, fpaths, contents) => {
-  const notes = [];
-  for (const meta of noteMetas) {
+const toConflictedNotes = (conflictedMetas, fpaths, contents) => {
+  const conflictedNotes = [];
+  for (const conflictedMeta of conflictedMetas) {
+    const { notes } = toNotes(conflictedMeta.metas, fpaths, contents);
+
+    conflictedNotes.push({
+      id: conflictedMeta.id,
+      listNames: conflictedMeta.listNames,
+      notes,
+      addedDT: conflictedMeta.addedDT,
+      updatedDT: conflictedMeta.updatedDT,
+      isConflicted: conflictedMeta.isConflicted,
+    });
+  }
+  return conflictedNotes;
+};
+
+const toNotes = (metas, fpaths, contents) => {
+  const ftcMap = {};
+  for (let i = 0; i < fpaths.length; i++) {
+    const [fpath, content] = [fpaths[i], contents[i]];
+    ftcMap[fpath] = content;
+  }
+
+  const listNames = [], notes = [];
+  for (const meta of metas) {
     let title = '', body = '', media = [];
     for (const fpath of meta.fpaths) {
-      const content = contents[fpaths.indexOf(fpath)];
+      const content = ftcMap[fpath];
 
       const { subName } = extractNoteFPath(fpath);
       if (subName === INDEX + DOT_JSON) {
@@ -65,6 +89,8 @@ const toNotes = (noteMetas, fpaths, contents) => {
         media.push({ name: subName, content: content });
       }
     }
+
+    listNames.push(meta.listName);
     notes.push({
       parentIds: meta.parentIds,
       id: meta.id,
@@ -74,205 +100,116 @@ const toNotes = (noteMetas, fpaths, contents) => {
     });
   }
 
-  return notes;
+  return { listNames, notes };
 };
 
-const toConflictedNotes = (noteMetas, conflictWiths, fpaths, contents) => {
-
-  const notes = toNotes(noteMetas, fpaths, contents);
-
-  const conflictedNotes = [];
-  for (const conflictWith of conflictWiths) {
-    const selectedNotes = notes.filter(note => conflictWith.includes(note.id));
-    const sortedNotes = selectedNotes.sort((a, b) => a.updatedDT - b.updatedDT);
-    const sortedListNames = sortedNotes.map(note => {
-      return noteMetas.find(meta => meta.id === note.id).listName;
-    });
-
-    conflictedNotes.push({
-      id: 'conflict-' + sortedNotes.map(note => note.id).join('-'),
-      listNames: sortedListNames,
-      notes: sortedNotes,
-      addedDT: Math.min(...sortedNotes.map(note => note.addedDT)),
-      updatedDT: Math.max(...sortedNotes.map(note => note.updatedDT)),
-    });
-  }
-
-  return conflictedNotes;
-};
-
-const fetch = async (params) => {
-  if (syncMode.doSyncMode) {
-    const canUse = await ldbApi.canUseSync();
-    if (!canUse) throw new Error('Sync mode cannnot be used.');
-  }
-
-  let { listName, sortOn, doDescendingOrder, doFetchStgsAndInfo, pendingPins } = params;
-  const {
-    noteFPaths, settingsFPaths: _settingsFPaths, infoFPath, pinFPaths,
-  } = await listFPaths(doFetchStgsAndInfo);
-
+const fetchStgsAndInfo = async (_settingsFPaths, infoFPath) => {
   let settings, conflictedSettings = [], info;
-  if (doFetchStgsAndInfo) {
-    const {
-      fpaths: settingsFPaths, ids: settingsIds,
-    } = getLastSettingsFPaths(_settingsFPaths);
+  const {
+    fpaths: settingsFPaths, ids: settingsIds,
+  } = getLastSettingsFPaths(_settingsFPaths);
 
-    if (settingsFPaths.length > 0) {
-      const files = await getFiles(settingsFPaths, true);
+  if (settingsFPaths.length > 0) {
+    const files = await getFiles(settingsFPaths, true);
 
-      // content can be null if dangerouslyIgnoreError is true.
-      const { fpaths, contents } = excludeNotObjContents(files.fpaths, files.contents);
-      for (let i = 0; i < fpaths.length; i++) {
-        const [fpath, content] = [fpaths[i], contents[i]];
-        if (fpaths.length === 1) {
-          settings = content;
-          [sortOn, doDescendingOrder] = [settings.sortOn, settings.doDescendingOrder];
-          continue;
-        }
-        conflictedSettings.push({
-          ...content, id: settingsIds[settingsFPaths.indexOf(fpath)], fpath,
-        });
+    // content can be null if dangerouslyIgnoreError is true.
+    const { fpaths, contents } = excludeNotObjContents(files.fpaths, files.contents);
+    for (let i = 0; i < fpaths.length; i++) {
+      const [fpath, content] = [fpaths[i], contents[i]];
+      if (fpaths.length === 1) {
+        settings = content;
+        continue;
       }
-    }
-
-    if (infoFPath) {
-      const { contents } = await getFiles([infoFPath], true);
-      if (isObject(contents[0])) info = contents[0];
-    }
-
-    // Transition from purchases in settings to info.
-    if (isObject(settings) && !isObject(info)) {
-      if ('purchases' in settings) {
-        info = { purchases: settings.purchases, checkPurchasesDT: null };
-        if ('checkPurchasesDT' in settings) {
-          info.checkPurchasesDT = settings.checkPurchasesDT;
-        }
-      }
+      conflictedSettings.push({
+        ...content, id: settingsIds[settingsFPaths.indexOf(fpath)], fpath,
+      });
     }
   }
 
-  const {
-    noteMetas, conflictedMetas, conflictWiths, toRootIds,
-  } = listNoteMetas(noteFPaths);
+  if (infoFPath) {
+    const { contents } = await getFiles([infoFPath], true);
+    if (isObject(contents[0])) info = contents[0];
+  }
 
-  const namedNoteMetas = noteMetas.filter(meta => meta.listName === listName);
-  let sortedNoteMetas = namedNoteMetas.sort((a, b) => a[sortOn] - b[sortOn]);
-  if (doDescendingOrder) sortedNoteMetas.reverse();
-
-  sortedNoteMetas = sortWithPins(
-    sortedNoteMetas, pinFPaths, pendingPins, toRootIds,
-    (meta) => {
-      return getMainId(meta.id, toRootIds);
+  // Transition from purchases in settings to info.
+  if (isObject(settings) && !isObject(info)) {
+    if ('purchases' in settings) {
+      info = { purchases: settings.purchases, checkPurchasesDT: null };
+      if ('checkPurchasesDT' in settings) {
+        info.checkPurchasesDT = settings.checkPurchasesDT;
+      }
     }
-  );
-  const selectedNoteMetas = sortedNoteMetas.slice(0, N_NOTES);
+  }
+  if (isObject(settings)) {
+    if ('purchases' in settings) settings.purchases = null;
+    if ('checkPurchasesDT' in settings) settings.checkPurchasesDT = null;
+  }
+  for (const cSettings of conflictedSettings) {
+    if ('purchases' in cSettings) cSettings.purchases = null;
+    if ('checkPurchasesDT' in cSettings) cSettings.checkPurchasesDT = null;
+  }
 
-  const namedConflictWiths = conflictWiths.filter(conflictWith => {
-    for (const id of conflictWith) {
-      const conflictedId = conflictedMetas.find(meta => meta.id === id);
-      if (conflictedId.listName === listName) return true;
+  return { settings, conflictedSettings, info };
+};
+
+const fetchNotes = async (noteMetas) => {
+  const _fpaths = [], metas = [], conflictedMetas = [];
+  for (const meta of noteMetas) {
+    if (meta.isConflicted) {
+      for (const cMeta of meta.metas) _fpaths.push(...cMeta.fpaths);
+      conflictedMetas.push(meta);
+    } else {
+      _fpaths.push(...meta.fpaths);
+      metas.push(meta);
     }
-    return false;
-  });
-  const selectedConflictWiths = namedConflictWiths.slice(0, N_NOTES);
-  const selectedConflictedNoteMetas = conflictedMetas.filter(meta => {
-    return selectedConflictWiths.some(conflictWith => conflictWith.includes(meta.id));
-  });
-
-  const _fpaths = [];
-  for (const meta of selectedNoteMetas) _fpaths.push(...meta.fpaths);
-  for (const meta of selectedConflictedNoteMetas) _fpaths.push(...meta.fpaths);
+  }
 
   const responses = await batchGetFileWithRetry(getApi().getFile, _fpaths, 0, true);
+
   const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
   for (const { fpath, content } of responses) {
     fpaths.push(fpath);
     contents.push(content);
   }
 
-  const notes = toNotes(selectedNoteMetas, fpaths, contents);
-  const hasMore = namedNoteMetas.length > N_NOTES;
-  const conflictedNotes = toConflictedNotes(
-    selectedConflictedNoteMetas, selectedConflictWiths, fpaths, contents
-  );
+  const conflictedNotes = toConflictedNotes(conflictedMetas, fpaths, contents);
+  const { listNames, notes } = toNotes(metas, fpaths, contents);
 
-  // List names should be retrieve from settings
-  //   but also retrive from file paths in case the settings is gone.
-  const listNames = getListNamesFromNoteMetas(noteMetas, conflictedMetas);
+  await fetchStaticFiles(conflictedNotes, notes);
 
-  await fetchStaticFiles(notes, conflictedNotes);
+  const notesPerLn = {};
+  for (let i = 0; i < listNames.length; i++) {
+    const [listName, note] = [listNames[i], notes[i]];
 
-  return {
-    notes, hasMore, conflictedNotes, listNames, settings, conflictedSettings, info,
-  };
-};
-
-const fetchMore = async (params) => {
-
-  const { listName, ids, sortOn, doDescendingOrder, pendingPins } = params;
-
-  const { noteFPaths, pinFPaths } = await listFPaths();
-  const { noteMetas, toRootIds } = listNoteMetas(noteFPaths);
-
-  const namedNoteMetas = noteMetas.filter(meta => meta.listName === listName);
-  let sortedNoteMetas = namedNoteMetas.sort((a, b) => a[sortOn] - b[sortOn]);
-  if (doDescendingOrder) sortedNoteMetas.reverse();
-
-  sortedNoteMetas = sortWithPins(
-    sortedNoteMetas, pinFPaths, pendingPins, toRootIds,
-    (meta) => {
-      return getMainId(meta.id, toRootIds);
-    }
-  );
-
-  // With pins, can't fetch further from the current point
-  let filteredNoteMetas = [], hasDisorder = false;
-  for (let i = 0; i < sortedNoteMetas.length; i++) {
-    const meta = sortedNoteMetas[i];
-    if (!ids.includes(meta.id)) {
-      if (i < ids.length) hasDisorder = true;
-      filteredNoteMetas.push(meta);
-    }
-  }
-  const selectedNoteMetas = filteredNoteMetas.slice(0, N_NOTES);
-
-  const _fpaths = [];
-  for (const meta of selectedNoteMetas) _fpaths.push(...meta.fpaths);
-
-  const responses = await batchGetFileWithRetry(getApi().getFile, _fpaths, 0, true);
-  const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
-  for (let { fpath, content } of responses) {
-    fpaths.push(fpath);
-    contents.push(content);
+    if (!isObject(notesPerLn[listName])) notesPerLn[listName] = {};
+    notesPerLn[listName][note.id] = note;
   }
 
-  const notes = toNotes(selectedNoteMetas, fpaths, contents);
-  const hasMore = filteredNoteMetas.length > N_NOTES;
-
-  await fetchStaticFiles(notes, null);
-
-  return { notes, hasMore, hasDisorder };
+  return { conflictedNotes, notes: notesPerLn };
 };
 
-const fetchStaticFiles = async (notes, conflictedNotes) => {
+const fetchStaticFiles = async (conflictedNotes, notes) => {
   if (syncMode.doSyncMode) return;
 
   const fpaths = [];
-  for (const note of notes) {
-    if (note.media) {
-      for (const { name } of note.media) {
-        if (name.startsWith(CD_ROOT + '/')) fpaths.push(getStaticFPath(name));
+  for (const conflictedNote of conflictedNotes) {
+    for (const note of conflictedNote.notes) {
+      if (note.media) {
+        for (const { name } of note.media) {
+          if (name.startsWith(CD_ROOT + '/')) {
+            const staticFPath = getStaticFPath(name);
+            if (!fpaths.includes(staticFPath)) fpaths.push(staticFPath);
+          }
+        }
       }
     }
   }
-  if (conflictedNotes) {
-    for (const conflictedNote of conflictedNotes) {
-      for (const note of conflictedNote.notes) {
-        if (note.media) {
-          for (const { name } of note.media) {
-            if (name.startsWith(CD_ROOT + '/')) fpaths.push(getStaticFPath(name));
-          }
+  for (const note of notes) {
+    if (note.media) {
+      for (const { name } of note.media) {
+        if (name.startsWith(CD_ROOT + '/')) {
+          const staticFPath = getStaticFPath(name);
+          if (!fpaths.includes(staticFPath)) fpaths.push(staticFPath);
         }
       }
     }
@@ -316,11 +253,11 @@ const putNotes = async (params) => {
         mediaContents.push(content);
       }
     }
-    noteMap[fpath] = { listName, note };
+    noteMap[fpath] = { listName, id: note.id };
   }
 
-  const successListNames = [], successNotes = [];
-  const errorListNames = [], errorNotes = [], errors = [];
+  const successListNames = [], successNoteIds = [], successNotes = [];
+  const errorListNames = [], errorNoteIds = [], errorNotes = [], errors = [];
 
   // Put static files and cdroot fpaths first, and index.json file last.
   // So if errors, can leave the added fpaths as is. They won't interfere.
@@ -332,22 +269,31 @@ const putNotes = async (params) => {
     getApi().putFile, fpaths, contents, 0, !!manuallyManageError
   );
   for (const response of responses) {
-    const { listName, note } = noteMap[response.fpath];
+    const { listName, id } = noteMap[response.fpath];
     if (response.success) {
-      successListNames.push(listName);
-      successNotes.push(note);
+      if (!successNoteIds.includes(id)) {
+        successListNames.push(listName);
+        successNoteIds.push(id);
+      }
     } else {
-      errorListNames.push(listName);
-      errorNotes.push(note);
-      errors.push(response.error);
+      if (!errorNoteIds.includes(id)) {
+        errorListNames.push(listName);
+        errorNoteIds.push(id);
+        errors.push(response.error);
+      }
     }
   }
+
+  const itnMap = {};
+  for (const note of notes) itnMap[note.id] = note;
+
+  for (const id of successNoteIds) successNotes.push(itnMap[id]);
+  for (const id of errorNoteIds) errorNotes.push(itnMap[id]);
 
   return { successListNames, successNotes, errorListNames, errorNotes, errors };
 };
 
 const canDeleteListNames = async (listNames) => {
-
   const { noteFPaths } = await listFPaths();
   const { noteMetas, conflictedMetas } = listNoteMetas(noteFPaths);
 
@@ -360,6 +306,19 @@ const canDeleteListNames = async (listNames) => {
 
   const canDeletes = [];
   for (const listName of listNames) canDeletes.push(!inUseListNames.has(listName));
+
+  return canDeletes;
+};
+
+const canDeleteTagNames = async (tagNames) => {
+  const { noteFPaths, tagFPaths } = await listFPaths();
+
+  const inUseTagNames = getInUseTagNames(noteFPaths, tagFPaths);
+
+  const canDeletes = [];
+  for (const tagName of tagNames) {
+    canDeletes.push(!inUseTagNames.includes(tagName));
+  }
 
   return canDeletes;
 };
@@ -589,8 +548,8 @@ const putLockSettings = async (lockSettings) => {
 };
 
 const data = {
-  getApi, listFPaths, listServerFPaths, toNotes, fetch, fetchMore,
-  putNotes, canDeleteListNames, putPins, deletePins, getFiles,
+  getApi, listFPaths, listServerFPaths, toNotes, fetchStgsAndInfo, fetchNotes,
+  putNotes, canDeleteListNames, canDeleteTagNames, putPins, deletePins, getFiles,
   putFiles, deleteFiles, getServerFilesToLocal, putLocalFilesToServer, deleteServerFiles,
   getLocalSettings, putLocalSettings, getUnsavedNotes, putUnsavedNote,
   deleteUnsavedNotes, deleteAllUnsavedNotes, deleteAllLocalFiles, deleteAllSyncedFiles,

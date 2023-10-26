@@ -1,6 +1,6 @@
 import {
-  FETCH_COMMIT, MERGE_NOTES, MERGE_NOTES_COMMIT, MERGE_NOTES_ROLLBACK,
-  DELETE_ALL_DATA, RESET_STATE,
+  FETCH_COMMIT, UPDATE_FETCHED, UPDATE_FETCHED_MORE, MERGE_NOTES, MERGE_NOTES_COMMIT,
+  MERGE_NOTES_ROLLBACK, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import { ID, MERGING, DIED_MERGING } from '../types/const';
 import { _ } from '../utils/obj';
@@ -10,50 +10,29 @@ const initialState = {};
 const conflictedNotesReducer = (state = initialState, action) => {
 
   if (action.type === FETCH_COMMIT) {
-    const { listName, conflictedNotes } = action.payload;
+    const { doFetchStgsAndInfo } = action.payload;
+    if (doFetchStgsAndInfo) return { ...initialState };
 
-    // FETCH_COMMIT needs to add conflicted notes and remove not anymore conflicted notes
-    const newState = {};
-    if (Array.isArray(conflictedNotes) && conflictedNotes.length > 0) {
-      newState[listName] = _.mapKeys(conflictedNotes, ID);
-    }
+    // Need to also clear when refresh
+    return state;
+  }
 
-    for (const k in state) {
-      if (k === listName) continue;
+  if (action.type === UPDATE_FETCHED || action.type === UPDATE_FETCHED_MORE) {
+    const { conflictedNotes } = action.payload;
+    if (!Array.isArray(conflictedNotes) || conflictedNotes.length === 0) return state;
 
-      // In other list name,
-      //   if it contains a conflicted note and it's not conflicted anymore,
-      //   remove from this list name too.
-      for (const id in state[k]) {
-        if (
-          state[k][id].listNames.includes(listName) &&
-          !conflictedNotes.some(note => note.id === id)
-        ) {
-          // Not found, not conflicted anymore
-          // Do nothing, as to remove from this list name as well
-          continue;
-        }
-
-        if (!newState[k]) newState[k] = {};
-        newState[k][id] = state[k][id];
-      }
-    }
-
-    return newState;
+    return { ...state, ..._.mapKeys(conflictedNotes, ID) };
   }
 
   if (action.type === MERGE_NOTES) {
     const { conflictedNote } = action.payload;
 
     const newState = {};
-    for (const k in state) {
-      for (const id in state[k]) {
-        if (!newState[k]) newState[k] = {};
-        if (id === conflictedNote.id) {
-          newState[k][id] = { ...state[k][id], status: MERGING };
-        } else {
-          newState[k][id] = state[k][id];
-        }
+    for (const id in state) {
+      if (id === conflictedNote.id) {
+        newState[id] = { ...state[id], status: MERGING };
+      } else {
+        newState[id] = state[id];
       }
     }
 
@@ -64,13 +43,9 @@ const conflictedNotesReducer = (state = initialState, action) => {
     const { conflictedNote } = action.payload;
 
     const newState = {};
-    for (const k in state) {
-      for (const id in state[k]) {
-        if (id === conflictedNote.id) continue;
-
-        if (!newState[k]) newState[k] = {};
-        newState[k][id] = state[k][id];
-      }
+    for (const id in state) {
+      if (id === conflictedNote.id) continue;
+      newState[id] = state[id];
     }
 
     return newState;
@@ -80,14 +55,11 @@ const conflictedNotesReducer = (state = initialState, action) => {
     const { conflictedNote } = action.payload;
 
     const newState = {};
-    for (const k in state) {
-      for (const id in state[k]) {
-        if (!newState[k]) newState[k] = {};
-        if (id === conflictedNote.id) {
-          newState[k][id] = { ...state[k][id], status: DIED_MERGING };
-        } else {
-          newState[k][id] = state[k][id];
-        }
+    for (const id in state) {
+      if (id === conflictedNote.id) {
+        newState[id] = { ...state[id], status: DIED_MERGING };
+      } else {
+        newState[id] = state[id];
       }
     }
 

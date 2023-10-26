@@ -408,8 +408,8 @@ const displayReducer = (state = initialState, action) => {
     if ('doChangeListCount' in action.payload) {
       if (action.payload.doChangeListCount) newState.listChangedCount += 1;
     }
-    if ('doClearSelectedLinkIds' in action.payload) {
-      if (action.payload.doClearSelectedLinkIds) {
+    if ('doClearSelectedNoteIds' in action.payload) {
+      if (action.payload.doClearSelectedNoteIds) {
         newState.selectedNoteIds = [];
         newState.isSelectedNoteIdsMaxErrorShown = false;
       }
@@ -426,17 +426,14 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === REFRESH_FETCHED) {
-    const { doShowLoading, doScrollTop } = action.payload;
-
-    const newState = { ...state };
-    if (doShowLoading && Array.isArray(newState.showingNoteInfos)) {
+    const newState = { ...state, isStaleErrorPopupShown: false };
+    if (Array.isArray(newState.showingNoteInfos)) {
       [newState.selectedNoteIds, newState.isSelectedNoteIdsMaxErrorShown] = [[], false];
       [newState.showingNoteInfos, newState.hasMoreNotes] = [null, null];
       vars.fetch.doShowLoading = true;
     }
-    if (doScrollTop) newState.listChangedCount += 1;
+    newState.listChangedCount += 1;
     if (newState.didFetchSettings) {
-      newState.isStaleErrorPopupShown = false;
       newState.didFetchSettings = false;
       newState.fetchingInfos = newState.fetchingInfos.map(info => {
         return { ...info, isInterrupted: true };
@@ -816,7 +813,7 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_TAG_DATA_S_STEP_COMMIT) {
     const { doFetch } = action.payload;
-    if (!doFetch || !Array.isArray(state.showingLinkIds)) return state;
+    if (!doFetch || !Array.isArray(state.showingNoteInfos)) return state;
 
     const newState = { ...state };
     [newState.selectedNoteIds, newState.isSelectedNoteIdsMaxErrorShown] = [[], false];
@@ -836,7 +833,7 @@ const displayReducer = (state = initialState, action) => {
       if (!found) {
         return {
           ...state,
-          showingLinkIds: _filterIfNotNull(state.showingLinkIds, [id]),
+          showingNoteInfos: _filterIfNotNull(state.showingNoteInfos, [id]),
         };
       }
     }

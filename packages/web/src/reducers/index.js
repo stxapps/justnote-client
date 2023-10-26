@@ -1,9 +1,9 @@
 import { combineReducers } from 'redux-loop';
 
 import windowReducer from './windowReducer';
+import conflictedNotesReducer from './conflictedNotesReducer';
 import notesReducer from './notesReducer';
 import fetchedMoreReducer from './fetchedMoreReducer';
-import conflictedNotesReducer from './conflictedNotesReducer';
 import unsavedNotesReducer from './unsavedNotesReducer';
 import displayReducer from './displayReducer';
 import userReducer from './userReducer';
@@ -27,9 +27,9 @@ import lockEditorReducer from './lockEditorReducer';
 
 const reducers = combineReducers({
   window: windowReducer,
+  conflictedNotes: conflictedNotesReducer,
   notes: notesReducer,
   fetchedMore: fetchedMoreReducer,
-  conflictedNotes: conflictedNotesReducer,
   unsavedNotes: unsavedNotesReducer,
   display: displayReducer,
   user: userReducer,

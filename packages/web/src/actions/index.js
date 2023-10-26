@@ -11,36 +11,35 @@ import fileApi from '../apis/localFile';
 import lsgApi from '../apis/localSg';
 import {
   INIT, UPDATE_HREF, UPDATE_WINDOW_SIZE, UPDATE_VISUAL_SIZE, UPDATE_USER,
-  UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_NOTE_ID, UPDATE_POPUP,
-  UPDATE_SEARCH_STRING, UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY,
-  ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, UPDATE_SELECTING_NOTE_ID,
-  FETCH, FETCH_COMMIT, FETCH_ROLLBACK, FETCH_MORE, FETCH_MORE_COMMIT,
-  FETCH_MORE_ROLLBACK, CACHE_FETCHED_MORE, UPDATE_FETCHED_MORE,
-  REFRESH_FETCHED, ADD_NOTE, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK, UPDATE_NOTE,
+  UPDATE_HANDLING_SIGN_IN, UPDATE_LIST_NAME, UPDATE_QUERY_STRING, UPDATE_SEARCH_STRING,
+  UPDATE_NOTE_ID, UPDATE_POPUP, UPDATE_BULK_EDITING, UPDATE_EDITOR_FOCUSED,
+  UPDATE_EDITOR_BUSY, ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS,
+  UPDATE_SELECTING_NOTE_ID, FETCH, FETCH_COMMIT, FETCH_ROLLBACK, UPDATE_FETCHED,
+  FETCH_MORE, FETCH_MORE_COMMIT, FETCH_MORE_ROLLBACK, CACHE_FETCHED_MORE,
+  UPDATE_FETCHED_MORE, REFRESH_FETCHED, ADD_FETCHING_INFO, DELETE_FETCHING_INFO,
+  SET_SHOWING_NOTE_INFOS, ADD_NOTE, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK, UPDATE_NOTE,
   UPDATE_NOTE_COMMIT, UPDATE_NOTE_ROLLBACK, DISCARD_NOTE, MOVE_NOTES, MOVE_NOTES_COMMIT,
   MOVE_NOTES_ROLLBACK, DELETE_NOTES, DELETE_NOTES_COMMIT, DELETE_NOTES_ROLLBACK,
   CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
   DELETE_OLD_NOTES_IN_TRASH_ROLLBACK, MERGE_NOTES, MERGE_NOTES_COMMIT,
   MERGE_NOTES_ROLLBACK, UPDATE_LIST_NAME_EDITORS, ADD_LIST_NAMES, UPDATE_LIST_NAMES,
   MOVE_LIST_NAME, MOVE_TO_LIST_NAME, DELETE_LIST_NAMES, UPDATE_SELECTING_LIST_NAME,
-  UPDATE_DO_SYNC_MODE, UPDATE_DO_SYNC_MODE_INPUT,
-  UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH, UPDATE_SORT_ON, UPDATE_DO_DESCENDING_ORDER,
-  UPDATE_NOTE_DATE_SHOWING_MODE, UPDATE_NOTE_DATE_FORMAT,
-  UPDATE_DO_SECTION_NOTES_BY_MONTH, UPDATE_DO_MORE_EDITOR_FONT_SIZES,
-  TRY_UPDATE_SETTINGS, TRY_UPDATE_SETTINGS_COMMIT, TRY_UPDATE_SETTINGS_ROLLBACK,
-  UPDATE_SETTINGS,
-  UPDATE_SETTINGS_COMMIT, UPDATE_SETTINGS_ROLLBACK, UPDATE_UNCHANGED_SETTINGS,
-  CANCEL_DIED_SETTINGS,
+  UPDATE_DO_SYNC_MODE, UPDATE_DO_SYNC_MODE_INPUT, UPDATE_DO_DELETE_OLD_NOTES_IN_TRASH,
+  UPDATE_SORT_ON, UPDATE_DO_DESCENDING_ORDER, UPDATE_NOTE_DATE_SHOWING_MODE,
+  UPDATE_NOTE_DATE_FORMAT, UPDATE_DO_SECTION_NOTES_BY_MONTH,
+  UPDATE_DO_MORE_EDITOR_FONT_SIZES, TRY_UPDATE_SETTINGS, TRY_UPDATE_SETTINGS_COMMIT,
+  TRY_UPDATE_SETTINGS_ROLLBACK, UPDATE_SETTINGS, UPDATE_SETTINGS_COMMIT,
+  UPDATE_SETTINGS_ROLLBACK, UPDATE_UNCHANGED_SETTINGS, CANCEL_DIED_SETTINGS,
   MERGE_SETTINGS, MERGE_SETTINGS_COMMIT, MERGE_SETTINGS_ROLLBACK,
-  UPDATE_SETTINGS_VIEW_ID,
-  TRY_UPDATE_INFO, TRY_UPDATE_INFO_COMMIT, TRY_UPDATE_INFO_ROLLBACK,
-  UPDATE_INFO, UPDATE_INFO_COMMIT, UPDATE_INFO_ROLLBACK, UPDATE_UNCHANGED_INFO,
-  UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION, UPDATE_DISCARD_ACTION,
-  UPDATE_LIST_NAMES_MODE, UPDATE_SYNCED, INCREASE_SAVE_NOTE_COUNT,
-  CANCEL_CHANGED_SYNC_MODE, SYNC, SYNC_COMMIT, SYNC_ROLLBACK, UPDATE_SYNC_PROGRESS,
-  INCREASE_DISCARD_NOTE_COUNT, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
-  INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
-  INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT,
+  UPDATE_SETTINGS_VIEW_ID, TRY_UPDATE_INFO, TRY_UPDATE_INFO_COMMIT,
+  TRY_UPDATE_INFO_ROLLBACK, UPDATE_INFO, UPDATE_INFO_COMMIT, UPDATE_INFO_ROLLBACK,
+  UPDATE_UNCHANGED_INFO, UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION,
+  UPDATE_DISCARD_ACTION, UPDATE_LIST_NAMES_MODE, UPDATE_SYNCED,
+  INCREASE_SAVE_NOTE_COUNT, CANCEL_CHANGED_SYNC_MODE, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
+  UPDATE_SYNC_PROGRESS, INCREASE_DISCARD_NOTE_COUNT,
+  INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT, INCREASE_UPDATE_NOTE_ID_COUNT,
+  INCREASE_CHANGE_LIST_NAME_COUNT, INCREASE_FOCUS_TITLE_COUNT,
+  INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT,
   INCREASE_UPDATE_EDITOR_WIDTH_COUNT, INCREASE_RESET_DID_CLICK_COUNT,
   INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT, INCREASE_UPDATE_BULK_EDIT_COUNT,
   INCREASE_SHOW_NOTE_LIST_MENU_POPUP_COUNT, INCREASE_SHOW_NLIM_POPUP_COUNT,
@@ -59,7 +58,7 @@ import {
   UPDATE_UPDATING_THEME_MODE, UPDATE_TIME_PICK, UPDATE_IS_24H_FORMAT,
   UPDATE_PAYWALL_FEATURE, UPDATE_LOCK_ACTION, UPDATE_LOCK_EDITOR, ADD_LOCK_NOTE,
   REMOVE_LOCK_NOTE, LOCK_NOTE, UNLOCK_NOTE, ADD_LOCK_LIST, REMOVE_LOCK_LIST, LOCK_LIST,
-  UNLOCK_LIST, CLEAN_UP_LOCKS, RESET_STATE, UPDATE_TAG_DATA_S_STEP,
+  UNLOCK_LIST, CLEAN_UP_LOCKS, RESET_STATE,
 } from '../types/actionTypes';
 import {
   HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY, HASH_SUPPORT,
@@ -77,7 +76,7 @@ import {
   FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES, FEATURE_LOCK,
   NOTE_DATE_FORMATS, PADDLE_RANDOM_ID, VALID_PASSWORD, PASSWORD_MSGS,
   LOCK_ACTION_ADD_LOCK_NOTE, LOCK_ACTION_UNLOCK_NOTE, LOCK_ACTION_ADD_LOCK_LIST,
-  LOCAL_NOTE_ATTRS, TASK_TYPE, TASK_DO_FORCE_LIST_FPATHS, TASK_UPDATE_ACTION,
+  LOCAL_NOTE_ATTRS, TASK_TYPE, TASK_DO_FORCE_LIST_FPATHS, TASK_UPDATE_ACTION, ADDED,
 } from '../types/const';
 import {
   throttle, extractUrl, urlHashToObj, objToUrlHash, isBusyStatus, isEqual,
@@ -86,11 +85,13 @@ import {
   getListNameObj, getAllListNames, getMainId, createDataFName, listNoteMetas,
   getNoteFPaths, getStaticFPaths, createSettingsFPath, getSettingsFPaths,
   getLastSettingsFPaths, getInfoFPath, getLatestPurchase, getValidPurchase,
-  doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins,
-  separatePinnedValues, getRawPins, getFormattedTime, get24HFormattedTime,
-  getWindowSize, getNote, getEditingListNameEditors, getListNamesFromNoteMetas,
-  validatePassword, doContainListName, sample, getListNameAndNote, newObject,
-  doContainSyncCallTasks,
+  doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins, separatePinnedValues,
+  getRawPins, getFormattedTime, get24HFormattedTime, getWindowSize, getNote,
+  getEditingListNameEditors, getListNamesFromNoteMetas, validatePassword,
+  doContainListName, sample, getListNameAndNote, newObject, doContainSyncCallTasks,
+  getNNoteMetas, addFetchedToVars, isFetchedNoteMeta, doesIncludeFetching, sortNotes,
+  sortWithPins, doesIncludeFetchingMore, isFetchingInterrupted, getTagFPaths,
+  getInUseTagNames, getEditingTagNameEditors, getNNoteMetasByQt,
 } from '../utils';
 import { isUint8Array, isBlob, convertBlobToDataUrl } from '../utils/index-web';
 import { _ } from '../utils/obj';
@@ -200,41 +201,53 @@ export const init = () => async (dispatch, getState) => {
 
   window.addEventListener('beforeunload', (e) => {
     const isUserSignedIn = userSession.isUserSignedIn();
-    if (isUserSignedIn) {
-      const notes = getState().notes;
-      for (const listName in notes) {
-        for (const noteId in notes[listName]) {
-          if (isBusyStatus(notes[listName][noteId].status)) {
-            e.preventDefault();
-            return e.returnValue = 'It looks like your note hasn\'t been saved. Do you want to leave this site and discard your changes?';
-          }
+    if (!isUserSignedIn) return;
+
+    const notes = getState().notes;
+    for (const listName in notes) {
+      for (const noteId in notes[listName]) {
+        if (isBusyStatus(notes[listName][noteId].status)) {
+          e.preventDefault();
+          return e.returnValue = 'It looks like your note hasn\'t been saved. Do you want to leave this site and discard your changes?';
         }
       }
+    }
 
-      const conflictedNotes = getState().conflictedNotes;
-      for (const listName in conflictedNotes) {
-        for (const noteId in conflictedNotes[listName]) {
-          if (isBusyStatus(conflictedNotes[listName][noteId].status)) {
-            e.preventDefault();
-            return e.returnValue = 'It looks like your selection on conflicted notes hasn\'t been saved. Do you want to leave this site and discard your changes?';
-          }
-        }
-      }
-
-      const settings = getState().settings;
-      const snapshotSettings = getState().snapshot.settings;
-      if (!isEqual(settings, snapshotSettings)) {
+    const conflictedNotes = getState().conflictedNotes;
+    for (const noteId in conflictedNotes) {
+      if (isBusyStatus(conflictedNotes[noteId].status)) {
         e.preventDefault();
-        return e.returnValue = 'It looks like your changes to the settings haven\'t been saved. Do you want to leave this site and discard your changes?';
+        return e.returnValue = 'It looks like your selection on conflicted notes hasn\'t been saved. Do you want to leave this site and discard your changes?';
       }
+    }
 
-      const listNameEditors = getState().listNameEditors;
-      const listNameMap = getState().settings.listNameMap;
-      const editingLNEs = getEditingListNameEditors(listNameEditors, listNameMap);
-      if (isObject(editingLNEs)) {
-        e.preventDefault();
-        return e.returnValue = 'It looks like your changes to the list names haven\'t been saved. Do you want to leave this site and discard your changes?';
-      }
+    // Check TRY_UPDATE_SETTINGS, MERGE_SETTINGS, PIN_NOTE,
+    //   UNPIN_NOTE, MOVE_PINNED_NOTE_ADD_STEP, UPDATE_TAG_DATA_S_STEP,
+    //   UPDATE_TAG_DATA_T_STEP?
+
+    if (!getState().display.isSettingsPopupShown) return;
+
+    const settings = getState().settings;
+    const snapshotSettings = getState().snapshot.settings;
+    if (!isEqual(settings, snapshotSettings)) {
+      e.preventDefault();
+      return e.returnValue = 'It looks like your changes to the settings haven\'t been saved. Do you want to leave this site and discard your changes?';
+    }
+
+    const listNameEditors = getState().listNameEditors;
+    const listNameMap = getState().settings.listNameMap;
+    const editingLNEs = getEditingListNameEditors(listNameEditors, listNameMap);
+    if (isObject(editingLNEs)) {
+      e.preventDefault();
+      return e.returnValue = 'It looks like your changes to the list names haven\'t been saved. Do you want to leave this site and discard your changes?';
+    }
+
+    const tagNameEditors = getState().tagNameEditors;
+    const tagNameMap = getState().settings.tagNameMap;
+    const editingTNEs = getEditingTagNameEditors(tagNameEditors, tagNameMap);
+    if (isObject(editingTNEs)) {
+      e.preventDefault();
+      return e.returnValue = 'It looks like your changes to the tag names haven\'t been saved. Do you want to leave this site and discard your changes?';
     }
   }, { capture: true });
 
@@ -701,9 +714,6 @@ export const onUpdateBulkEditUrlHash = (title, body, media) => async (
 export const changeListName = (listName, doCheckEditing) => async (
   dispatch, getState
 ) => {
-
-  const _listName = getState().display.listName;
-
   if (!listName) listName = vars.changeListName.changingListName;
   if (!listName) throw new Error(`Invalid listName: ${listName}`);
 
@@ -726,11 +736,10 @@ export const changeListName = (listName, doCheckEditing) => async (
     dispatch({ type: UPDATE_SYNCED });
   }
 
-  dispatch({ type: UPDATE_LIST_NAME, payload: listName });
+  dispatch(updateFetched(null, false, true));
+  dispatch(updateFetchedMore(null, true));
 
-  if (!(syncProgress && syncProgress.status === SHOW_SYNCED)) {
-    await updateFetchedMore(null, _listName)(dispatch, getState);
-  }
+  dispatch({ type: UPDATE_LIST_NAME, payload: listName });
 };
 
 export const onChangeListName = (title, body, media) => async (
@@ -740,6 +749,20 @@ export const onChangeListName = (title, body, media) => async (
   if (vars.keyboard.height > 0) dispatch(increaseBlurCount());
   dispatch(changeListName(null, false));
   dispatch(handleUnsavedNote(noteId, title, body, media));
+};
+
+export const updateQueryString = (queryString) => async (dispatch, getState) => {
+  dispatch(updateFetched(null, false, true));
+  dispatch(updateFetchedMore(null, true));
+
+  dispatch({ type: UPDATE_QUERY_STRING, payload: queryString });
+};
+
+export const updateSearchString = (searchString) => {
+  return {
+    type: UPDATE_SEARCH_STRING,
+    payload: searchString,
+  };
 };
 
 const _updateNoteId = (id) => {
@@ -803,13 +826,6 @@ export const updatePopup = (id, isShown, anchorPosition) => {
   };
 };
 
-export const updateSearchString = (searchString) => {
-  return {
-    type: UPDATE_SEARCH_STRING,
-    payload: searchString,
-  };
-};
-
 export const updateBulkEdit = (isBulkEditing) => {
   return {
     type: UPDATE_BULK_EDITING,
@@ -838,86 +854,444 @@ export const updateSelectingNoteId = (id) => {
   };
 };
 
+const _getInfosFromMetas = (metas) => {
+  const infos = [];
+  for (const { id, isConflicted, isPinned } of metas) {
+    infos.push({ id, isConflicted: !!isConflicted, isPinned: !!isPinned });
+  }
+  return infos;
+};
+
 export const fetch = () => async (dispatch, getState) => {
+  /*if (vars.syncMode.doSyncMode) {
+    const canUse = await ldbApi.canUseSync();
+    if (!canUse) throw new Error('Sync mode cannnot be used.');
+  }*/
 
+  const doForce = vars.fetch.doForce;
+  vars.fetch.doForce = false;
+
+  const conflictedNotes = getState().conflictedNotes;
+  const notes = getState().notes;
   const listName = getState().display.listName;
+  const queryString = getState().display.queryString;
+  const didFetch = getState().display.didFetch;
   const didFetchSettings = getState().display.didFetchSettings;
-  const sortOn = getState().settings.sortOn;
-  const doDescendingOrder = getState().settings.doDescendingOrder;
+  const fetchingInfos = getState().display.fetchingInfos;
+  const doForceLock = getState().display.doForceLock;
   const pendingPins = getState().pendingPins;
+  const pendingTags = getState().pendingTags;
+  const lockedNotes = getState().lockSettings.lockedNotes;
+  const lockedLists = getState().lockSettings.lockedLists;
 
-  const doFetchStgsAndInfo = !didFetchSettings;
+  let sortOn = getState().settings.sortOn;
+  let doDescendingOrder = getState().settings.doDescendingOrder;
 
-  const payload = {
-    listName, sortOn, doDescendingOrder, doFetchStgsAndInfo, pendingPins,
-  };
-  dispatch({ type: FETCH, payload });
+  const noteFPaths = getNoteFPaths(getState());
+  const pinFPaths = getPinFPaths(getState());
+  const tagFPaths = getTagFPaths(getState());
 
-  try {
-    const fetched = await dataApi.fetch(payload);
-    dispatch({ type: FETCH_COMMIT, payload: { ...payload, ...fetched } });
-  } catch (error) {
-    console.log('fetch error: ', error);
-    dispatch({ type: FETCH_ROLLBACK, payload: { ...payload, error } });
-  }
-};
-
-export const tryUpdateFetched = (payload) => async (dispatch, getState) => {
-
-};
-
-export const updateFetched = (payload) => async (dispatch, getState) => {
-
-};
-
-export const fetchMore = () => async (dispatch, getState) => {
-
-  const addedDT = Date.now();
-
-  const fetchMoreId = `${addedDT}-${randomString(4)}`;
-  const listName = getState().display.listName;
-  const ids = Object.keys(getState().notes[listName]);
-  const sortOn = getState().settings.sortOn;
-  const doDescendingOrder = getState().settings.doDescendingOrder;
-  const pendingPins = getState().pendingPins;
-
-  // If there is already cached fetchedMore with the same list name, just return.
-  const fetchedMore = getState().fetchedMore[listName];
-  if (fetchedMore) return;
-
-  const payload = {
-    fetchMoreId, listName, ids, sortOn, doDescendingOrder, pendingPins,
-  };
-  dispatch({ type: FETCH_MORE, payload });
-
-  try {
-    const fetched = await dataApi.fetchMore(payload);
-    dispatch({ type: FETCH_MORE_COMMIT, payload: { ...payload, ...fetched } });
-  } catch (error) {
-    console.log('fetchMore error: ', error);
-    dispatch({ type: FETCH_MORE_ROLLBACK, payload: { ...payload, error } });
-  }
-};
-
-export const tryUpdateFetchedMore = (payload) => async (dispatch, getState) => {
-
-  const { fetchMoreId, listName, hasDisorder } = payload;
-
-  let isInterrupted = false;
-  for (const id in getState().isFetchMoreInterrupted[listName]) {
-    if (id === fetchMoreId) {
-      isInterrupted = getState().isFetchMoreInterrupted[listName][id];
-      break;
-    }
-  }
-
-  if (isInterrupted) {
-    //dispatch({ type: CANCEL_FETCHED_MORE, payload });
+  const lnOrQt = queryString ? queryString : listName;
+  if (doesIncludeFetching(lnOrQt, doForce, fetchingInfos)) {
+    vars.fetch.doShowLoading = false;
     return;
   }
 
-  if (listName !== getState().display.listName || !hasDisorder) {
+  const fthId = `${Date.now()}${randomString(4)}`;
+  dispatch(addFetchingInfo({ type: FETCH, doForce, lnOrQt, fthId }));
+
+  const bin = { fetchedNoteMetas: [], unfetchedNoteMetas: [], hasMore: false };
+  if (didFetch && didFetchSettings) {
+    let metas, metasWithPcEc;
+    if (queryString) {
+      const _result = getNNoteMetasByQt({
+        noteFPaths, notes, sortOn, doDescendingOrder, pinFPaths, pendingPins,
+        tagFPaths, pendingTags, doForceLock, lockedNotes, lockedLists, queryString,
+      });
+      [metas, metasWithPcEc] = [_result.metas, _result.metasWithPcEc];
+      bin.hasMore = _result.hasMore;
+    } else {
+      const _result = getNNoteMetas({
+        noteFPaths, notes, listName, sortOn, doDescendingOrder, pinFPaths, pendingPins,
+      });
+      [metas, metasWithPcEc] = [_result.metas, _result.metasWithPcEc];
+      bin.hasMore = _result.hasMore;
+    }
+    for (const meta of metas) {
+      if (isFetchedNoteMeta(vars.fetch.fetchedNoteIds, conflictedNotes, notes, meta)) {
+        bin.fetchedNoteMetas.push(meta);
+      } else {
+        bin.unfetchedNoteMetas.push(meta);
+      }
+    }
+    if (bin.unfetchedNoteMetas.length === 0) {
+      const infos = _getInfosFromMetas(metasWithPcEc);
+      dispatch({
+        type: SET_SHOWING_NOTE_INFOS,
+        payload: { infos, hasMore: bin.hasMore, doClearSelectedNoteIds: true },
+      });
+      // E.g., in settings commit, reset fetchedLnOrQts but not fetchedNoteIds,
+      //   need to add lnOrQt for correctness.
+      addFetchedToVars(lnOrQt, null, null, vars);
+      dispatch(deleteFetchingInfo(fthId));
+      vars.fetch.doShowLoading = false;
+      return;
+    }
+  }
+  vars.fetch.doShowLoading = false;
+
+  const payload = { listName, queryString, lnOrQt, fthId };
+  dispatch({ type: FETCH, payload });
+
+  const result = {};
+  try {
+    if (!didFetch || !didFetchSettings) {
+      const {
+        noteFPaths, settingsFPaths, infoFPath, pinFPaths, tagFPaths,
+      } = await dataApi.listFPaths(true);
+
+      const { noteMetas, conflictedMetas } = listNoteMetas(noteFPaths);
+
+      const sResult = await dataApi.fetchStgsAndInfo(settingsFPaths, infoFPath);
+      result.doFetchStgsAndInfo = true;
+      result.settings = sResult.settings;
+      result.conflictedSettings = sResult.conflictedSettings;
+      result.info = sResult.info;
+      // List names should be retrieve from settings
+      //   but also retrive from file paths in case the settings is gone.
+      result.listNames = getListNamesFromNoteMetas(noteMetas, conflictedMetas);
+      result.tagNames = getInUseTagNames(noteFPaths, tagFPaths);
+
+      if (result.settings) {
+        sortOn = result.settings.sortOn;
+        doDescendingOrder = result.settings.doDescendingOrder
+      }
+
+      let metas;
+      if (queryString) {
+        const _result = getNNoteMetasByQt({
+          noteFPaths, notes, sortOn, doDescendingOrder, pinFPaths, pendingPins,
+          tagFPaths, pendingTags, doForceLock, lockedNotes, lockedLists, queryString,
+        });
+        [metas, bin.hasMore] = [_result.metas, _result.hasMore];
+      } else {
+        const _result = getNNoteMetas({
+          noteFPaths, notes, listName, sortOn, doDescendingOrder, pinFPaths,
+          pendingPins,
+        });
+        [metas, bin.hasMore] = [_result.metas, _result.hasMore];
+      }
+      for (const meta of metas) bin.unfetchedNoteMetas.push(meta);
+    }
+
+    const lResult = await dataApi.fetchNotes(bin.unfetchedNoteMetas);
+    result.fetchedNoteMetas = bin.fetchedNoteMetas;
+    result.unfetchedNoteMetas = bin.unfetchedNoteMetas;
+    result.hasMore = bin.hasMore;
+    result.conflictedNotes = lResult.conflictedNotes;
+    result.notes = lResult.notes;
+  } catch (error) {
+    console.log('fetch error: ', error);
+    dispatch({ type: FETCH_ROLLBACK, payload: { ...payload, error } });
+    dispatch(deleteFetchingInfo(fthId));
+    return;
+  }
+
+  dispatch({ type: FETCH_COMMIT, payload: { ...payload, ...result } });
+};
+
+const _poolConflictedNotes = (
+  conflictedMetas, payloadConflictedNotes, stateConflictedNotes
+) => {
+  return conflictedMetas.map(meta => {
+    const { id } = meta;
+
+    let notes = payloadConflictedNotes;
+    if (isObject(notes[id])) return notes[id];
+
+    notes = stateConflictedNotes;
+    if (isObject(notes[id])) return notes[id];
+
+    return null;
+  });
+};
+
+const _poolListNameAndNotes = (noteMetas, payloadNotes, stateNotes) => {
+  return noteMetas.map(meta => {
+    const { listName, id } = meta;
+
+    let notes = payloadNotes;
+    if (isObject(notes[listName] && isObject(notes[listName][id]))) {
+      return { listName, note: notes[listName][id] };
+    }
+
+    notes = stateNotes;
+    if (isObject(notes[listName] && isObject(notes[listName][id]))) {
+      return { listName, note: notes[listName][id] };
+    }
+
+    return { listName: null, note: null };
+  });
+};
+
+const _getInfosFromNotes = (conflictedNotes, pinnedNotes, notes) => {
+  const infos = [];
+  for (const note of conflictedNotes) {
+    infos.push({ id: note.id, isConflicted: true, isPinned: false });
+  }
+  for (const note of pinnedNotes) {
+    infos.push({ id: note.id, isConflicted: false, isPinned: true });
+  }
+  for (const note of notes) {
+    infos.push({ id: note.id, isConflicted: false, isPinned: false });
+  }
+  return infos;
+};
+
+export const tryUpdateFetched = (payload) => async (dispatch, getState) => {
+  dispatch(updateFetched(payload));
+  dispatch(deleteFetchingInfo(payload.fthId));
+};
+
+export const updateFetched = (
+  payload, doChangeListCount = false, noDisplay = false
+) => async (dispatch, getState) => {
+
+  if (!payload) return;
+
+  const conflictedNotes = getState().conflictedNotes;
+  const notes = getState().notes;
+  const pendingPins = getState().pendingPins;
+  const sortOn = getState().settings.sortOn;
+  const doDescendingOrder = getState().settings.doDescendingOrder;
+  const noteFPaths = getNoteFPaths(getState());
+  const pinFPaths = getPinFPaths(getState());
+
+  const { toRootIds } = listNoteMetas(noteFPaths);
+
+  const conflictedMetas = [], updatingNoteMetas = [];
+  const { fetchedNoteMetas, unfetchedNoteMetas } = payload;
+  for (const meta of [...fetchedNoteMetas, ...unfetchedNoteMetas]) {
+    if (meta.isConflicted) conflictedMetas.push(meta);
+    else updatingNoteMetas.push(meta);
+  }
+
+  let cfNts = _poolConflictedNotes(
+    conflictedMetas, payload.conflictedNotes, conflictedNotes
+  );
+  cfNts = cfNts.filter(cfNt => isObject(cfNt));
+
+  const ntsPerLn = {}, updatingNotes = [];
+  const updatingLnAndNts = _poolListNameAndNotes(
+    updatingNoteMetas, payload.notes, notes
+  );
+  for (const { listName, note } of updatingLnAndNts) {
+    if (!isString(listName) || !isObject(note)) continue;
+
+    if (!isObject(ntsPerLn[listName])) ntsPerLn[listName] = {};
+    ntsPerLn[listName][note.id] = note;
+
+    updatingNotes.push(note);
+  }
+
+  if (noDisplay) {
+    dispatch({
+      type: UPDATE_FETCHED,
+      payload: { lnOrQt: payload.lnOrQt, conflictedNotes: cfNts, notes: ntsPerLn },
+    });
+    addFetchedToVars(payload.lnOrQt, payload.conflictedNotes, payload.notes, vars);
+    return;
+  }
+
+  const processingNotes = [], interveningNotes = [];
+  if (isObject(notes[payload.lnOrQt])) {
+    for (const note of Object.values(notes[payload.lnOrQt])) {
+      if (note.status === ADDED) continue;
+      processingNotes.push(note);
+    }
+  }
+  if (Array.isArray(vars.notesReducer.interveningNoteIds[payload.lnOrQt])) {
+    for (const note of Object.values(notes[payload.lnOrQt])) {
+      if (!vars.notesReducer.interveningNoteIds[payload.lnOrQt].includes(note.id)) {
+        continue;
+      }
+      interveningNotes.push(note);
+    }
+  }
+
+  const sortedCfNts = sortNotes(cfNts, sortOn, doDescendingOrder);
+
+  let sortedNotes = [...updatingNotes, ...interveningNotes, ...processingNotes];
+  sortedNotes = Object.values(_.mapKeys(sortedNotes, ID));
+  sortedNotes = sortNotes(sortedNotes, sortOn, doDescendingOrder);
+
+  const {
+    pinnedValues: pinnedNotes, values: noPinnedNotes,
+  } = sortWithPins(sortedNotes, pinFPaths, pendingPins, toRootIds, (note) => {
+    return getMainId(note, toRootIds);
+  });
+
+  const infos = _getInfosFromNotes(sortedCfNts, pinnedNotes, noPinnedNotes);
+
+  // Need to update in one render, if not jumpy!
+  //   - update notes
+  //   - update showingNoteInfos, hasMore, and scrollTop or not
+  //   - clear payload in fetched
+  dispatch({
+    type: UPDATE_FETCHED,
+    payload: {
+      lnOrQt: payload.lnOrQt, conflictedNotes: cfNts, notes: ntsPerLn,
+      infos, hasMore: payload.hasMore, doChangeListCount,
+      doClearSelectedNoteIds: true,
+    },
+  });
+  addFetchedToVars(payload.lnOrQt, payload.conflictedNotes, payload.notes, vars);
+};
+
+export const fetchMore = () => async (dispatch, getState) => {
+  const conflictedNotes = getState().conflictedNotes;
+  const notes = getState().notes;
+  const listName = getState().display.listName;
+  const queryString = getState().display.queryString;
+  const fetchingInfos = getState().display.fetchingInfos;
+  const showingNoteInfos = getState().display.showingNoteInfos;
+  const doForceLock = getState().display.doForceLock;
+  const cachedFetchedMore = getState().fetchedMore;
+  const pendingPins = getState().pendingPins;
+  const pendingTags = getState().pendingTags;
+  const lockedNotes = getState().lockSettings.lockedNotes;
+  const lockedLists = getState().lockSettings.lockedLists;
+
+  const sortOn = getState().settings.sortOn;
+  const doDescendingOrder = getState().settings.doDescendingOrder;
+
+  const noteFPaths = getNoteFPaths(getState());
+  const pinFPaths = getPinFPaths(getState());
+  const tagFPaths = getTagFPaths(getState());
+
+  if (!Array.isArray(showingNoteInfos)) {
+    console.log('In fetchMore, showingNoteInfos is not an array!');
+    return;
+  }
+
+  const lnOrQt = queryString ? queryString : listName;
+  if (
+    doesIncludeFetchingMore(lnOrQt, fetchingInfos) || lnOrQt in cachedFetchedMore
+  ) {
+    return;
+  }
+
+  const fthId = `${Date.now()}${randomString(4)}`;
+  dispatch(addFetchingInfo({ type: FETCH_MORE, lnOrQt, fthId }));
+
+  const safNoteIds = []; // Showing and fetched note ids.
+  const showingNotes = showingNoteInfos.map(info => {
+    if (info.isConflicted) return conflictedNotes[info.id];
+    return getNote(info.id, notes);
+  });
+  for (const note of showingNotes) {
+    if (!isObject(note)) continue;
+    if (note.isConflicted) {
+      const isAllFetched = note.notes.every(cNote => {
+        return vars.fetch.fetchedNoteIds.includes(cNote.id);
+      })
+      if (isAllFetched) safNoteIds.push(note.id);
+      continue;
+    }
+    // In fetchedNoteIds but might not in notes
+    //   e.g. delete by UPDATE_FETCHED or UPDATE_FETCHED_MORE.
+    // Though, here should be fine as note is from notes.
+    if (vars.fetch.fetchedNoteIds.includes(note.id)) safNoteIds.push(note.id);
+  }
+
+  const bin = {
+    fetchedNoteMetas: [], unfetchedNoteMetas: [], hasMore: false, hasDisorder: false,
+  };
+
+  let metas, metasWithPcEc;
+  if (queryString) {
+    const _result = getNNoteMetasByQt({
+      noteFPaths, notes, sortOn, doDescendingOrder, pinFPaths, pendingPins, tagFPaths,
+      pendingTags, doForceLock, lockedNotes, lockedLists, queryString,
+      excludingIds: safNoteIds,
+    });
+    [metas, metasWithPcEc] = [_result.metas, _result.metasWithPcEc];
+    [bin.hasMore, bin.hasDisorder] = [_result.hasMore, _result.hasDisorder];
+  } else {
+    const _result = getNNoteMetas({
+      noteFPaths, notes, listName, sortOn, doDescendingOrder, pinFPaths, pendingPins,
+      excludingIds: safNoteIds,
+    });
+    [metas, metasWithPcEc] = [_result.metas, _result.metasWithPcEc];
+    [bin.hasMore, bin.hasDisorder] = [_result.hasMore, _result.hasDisorder];
+  }
+  for (const meta of metas) {
+    if (isFetchedNoteMeta(vars.fetch.fetchedNoteIds, conflictedNotes, notes, meta)) {
+      bin.fetchedNoteMetas.push(meta);
+    } else {
+      bin.unfetchedNoteMetas.push(meta);
+    }
+  }
+  if (bin.unfetchedNoteMetas.length === 0) {
+    if (bin.hasDisorder) {
+      console.log('No cache for now. Maybe fast enough to not jumpy.');
+    }
+    const infos = _getInfosFromMetas(metasWithPcEc);
+    dispatch({
+      type: SET_SHOWING_NOTE_INFOS, payload: { infos, hasMore: bin.hasMore },
+    });
+    dispatch(deleteFetchingInfo(fthId));
+    return;
+  }
+
+  const payload = { listName, queryString, lnOrQt, fthId, safNoteIds };
+  dispatch({ type: FETCH_MORE, payload });
+
+  let result = {};
+  try {
+    const lResult = await dataApi.fetchNotes(bin.unfetchedNoteMetas);
+    result.fetchedNoteMetas = bin.fetchedNoteMetas;
+    result.unfetchedNoteMetas = bin.unfetchedNoteMetas;
+    result.hasMore = bin.hasMore;
+    result.hasDisorder = bin.hasDisorder;
+    result.conflictedNotes = lResult.conflictedNotes;
+    result.notes = lResult.notes;
+  } catch (error) {
+    console.log('fetchMore error: ', error);
+    dispatch({ type: FETCH_MORE_ROLLBACK, payload: { ...payload, error } });
+    dispatch(deleteFetchingInfo(fthId));
+    return;
+  }
+
+  dispatch({ type: FETCH_MORE_COMMIT, payload: { ...payload, ...result } });
+};
+
+export const tryUpdateFetchedMore = (payload) => async (dispatch, getState) => {
+  const listName = getState().display.listName;
+  const queryString = getState().display.queryString;
+  const fetchingInfos = getState().display.fetchingInfos;
+  const showingNoteInfos = getState().display.showingNoteInfos;
+
+  // If interrupted e.g. by refreshFetched,
+  //   don't updateFetchedMore so don't override any variables.
+  if (
+    isFetchingInterrupted(payload.fthId, fetchingInfos) ||
+    !Array.isArray(showingNoteInfos)
+  ) {
+    dispatch(deleteFetchingInfo(payload.fthId));
+    return;
+  }
+
+  const lnOrQt = queryString ? queryString : listName;
+  if (payload.lnOrQt !== lnOrQt) {
+    dispatch(updateFetchedMore(payload, true));
+    dispatch(deleteFetchingInfo(payload.fthId));
+    return;
+  }
+
+  if (!payload.hasDisorder) {
     dispatch(updateFetchedMore(payload));
+    dispatch(deleteFetchingInfo(payload.fthId));
     return;
   }
 
@@ -930,29 +1304,135 @@ export const tryUpdateFetchedMore = (payload) => async (dispatch, getState) => {
     const isPopupShown = (
       getState().display.isNoteListItemMenuPopupShown ||
       getState().display.isListNamesPopupShown ||
-      getState().display.isPinMenuPopupShown
+      getState().display.isPinMenuPopupShown ||
+      getState().display.isLockMenuPopupShown
     );
 
     if (windowBottom > (scrollHeight * 0.96) && !isPopupShown) {
       dispatch(updateFetchedMore(payload));
+      dispatch(deleteFetchingInfo(payload.fthId));
       return;
     }
   }
 
   dispatch({ type: CACHE_FETCHED_MORE, payload });
+  dispatch(deleteFetchingInfo(payload.fthId));
 };
 
-export const updateFetchedMore = (payload) => async (dispatch, getState) => {
+export const updateFetchedMore = (
+  payload, noDisplay = false
+) => async (dispatch, getState) => {
 
   if (!payload) {
-    if (!listName) listName = getState().display.listName;
+    const listName = getState().display.listName;
+    const queryString = getState().display.queryString;
+    const lnOrQt = queryString ? queryString : listName;
 
-    const fetchedMore = getState().fetchedMore[listName];
+    const fetchedMore = getState().fetchedMore[lnOrQt];
     if (fetchedMore) ({ payload } = fetchedMore);
   }
   if (!payload) return;
 
-  dispatch({ type: UPDATE_FETCHED_MORE, payload });
+  const conflictedNotes = getState().conflictedNotes;
+  const notes = getState().notes;
+  const showingNoteInfos = getState().display.showingNoteInfos;
+  const pendingPins = getState().pendingPins;
+  const sortOn = getState().settings.sortOn;
+  const doDescendingOrder = getState().settings.doDescendingOrder;
+  const noteFPaths = getNoteFPaths(getState());
+  const pinFPaths = getPinFPaths(getState());
+
+  if (!Array.isArray(showingNoteInfos)) {
+    // Need to dispatch UPDATE_FETCHED_MORE to make sure clear fetchedMoreReducer.
+    dispatch({
+      type: UPDATE_FETCHED_MORE, payload: { lnOrQt: payload.lnOrQt },
+    });
+    return;
+  }
+
+  if (noDisplay) {
+    dispatch({
+      type: UPDATE_FETCHED_MORE,
+      payload: {
+        lnOrQt: payload.lnOrQt, conflictedNotes: payload.conflictedNotes,
+        notes: payload.notes,
+      },
+    });
+    addFetchedToVars(payload.lnOrQt, payload.conflictedNotes, payload.notes, vars);
+    return;
+  }
+
+  const { toRootIds } = listNoteMetas(noteFPaths);
+
+  const processingNotes = [];
+  if (isObject(notes[payload.lnOrQt])) {
+    for (const note of Object.values(notes[payload.lnOrQt])) {
+      if (note.status === ADDED) continue;
+      processingNotes.push(note);
+    }
+  }
+
+  const fsCfNts = [], fsNts = [];
+  for (const info of showingNoteInfos) {
+    if (info.isConflicted) {
+      const note = conflictedNotes[info.id];
+      if (isObject(note)) fsCfNts.push(note);
+      continue;
+    }
+
+    const note = getNote(info.id, notes);
+    if (isObject(note)) fsNts.push(note);
+  }
+
+  const conflictedMetas = [], updatingNoteMetas = [];
+  const { fetchedNoteMetas, unfetchedNoteMetas } = payload;
+  for (const meta of [...fetchedNoteMetas, ...unfetchedNoteMetas]) {
+    if (meta.isConflicted) conflictedMetas.push(meta);
+    else updatingNoteMetas.push(meta);
+  }
+
+  let cfNts = _poolConflictedNotes(
+    conflictedMetas, payload.conflictedNotes, conflictedNotes
+  );
+  cfNts = cfNts.filter(cfNt => isObject(cfNt));
+
+  const updatingNotes = [];
+  const updatingLnAndNts = _poolListNameAndNotes(
+    updatingNoteMetas, payload.notes, notes
+  );
+  for (const { listName, note } of updatingLnAndNts) {
+    if (!isString(listName) || !isObject(note)) continue;
+    updatingNotes.push(note);
+  }
+
+  let sortedCfNts = [...fsCfNts, ...cfNts];
+  sortedCfNts = Object.values(_.mapKeys(sortedCfNts, ID));
+  sortedCfNts = sortNotes(sortedCfNts, sortOn, doDescendingOrder);
+
+  let sortedNotes = [...fsNts, ...updatingNotes, ...processingNotes];
+  sortedNotes = Object.values(_.mapKeys(sortedNotes, ID));
+  sortedNotes = sortNotes(sortedNotes, sortOn, doDescendingOrder);
+
+  const {
+    pinnedValues: pinnedNotes, values: noPinnedNotes,
+  } = sortWithPins(sortedNotes, pinFPaths, pendingPins, toRootIds, (note) => {
+    return getMainId(note, toRootIds);
+  });
+
+  const infos = _getInfosFromNotes(sortedCfNts, pinnedNotes, noPinnedNotes);
+
+  // Need to update in one render, if not jumpy!
+  //   - update notes
+  //   - update showingNoteInfos, hasMore
+  //   - clear payload in fetchedMore
+  dispatch({
+    type: UPDATE_FETCHED_MORE,
+    payload: {
+      lnOrQt: payload.lnOrQt, conflictedNotes: payload.conflictedNotes,
+      notes: payload.notes, infos, hasMore: payload.hasMore,
+    },
+  });
+  addFetchedToVars(payload.lnOrQt, payload.conflictedNotes, payload.notes, vars);
 };
 
 export const refreshFetched = () => async (dispatch, getState) => {
@@ -968,6 +1448,18 @@ export const refreshFetched = () => async (dispatch, getState) => {
   }
 
   dispatch({ type: REFRESH_FETCHED });
+};
+
+const addFetchingInfo = (payload) => {
+  return { type: ADD_FETCHING_INFO, payload };
+};
+
+const deleteFetchingInfo = (fthId) => {
+  return { type: DELETE_FETCHING_INFO, payload: fthId };
+};
+
+const _getAddNoteInsertIndex = (getState) => {
+
 };
 
 export const addNote = (title, body, media, listName) => async (
@@ -991,7 +1483,7 @@ export const addNote = (title, body, media, listName) => async (
 
   let insertIndex;
   if (!queryString && listName === getState().display.listName) {
-    insertIndex = _getAddLinkInsertIndex(getState);
+    insertIndex = _getAddNoteInsertIndex(getState);
   }
 
   const payload = { listName, note, insertIndex };
@@ -1008,7 +1500,7 @@ export const addNote = (title, body, media, listName) => async (
   }
 
   dispatch({ type: ADD_NOTE_COMMIT, payload });
-  addFetchedToVars(null, [note], vars);
+  addFetchedToVars(null, null, [note], vars);
 
   try {
     await fileApi.deleteFiles(localUnusedFPaths);
@@ -1184,7 +1676,7 @@ const _moveNotes = (toListName, ids) => async (dispatch, getState) => {
   }
 
   dispatch({ type: MOVE_NOTES_COMMIT, payload });
-  addFetchedToVars(null, toNotes, vars);
+  addFetchedToVars(null, null, toNotes, vars);
 
   try {
     await dataApi.putNotes({ listNames: fromListNames, notes: emptyFromNotes });
@@ -1574,7 +2066,7 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
     else contents.push('');
   }
 
-  const oldNotes = dataApi.toNotes(selectedNoteMetas, fpaths, contents);
+  const { notes: oldNotes } = dataApi.toNotes(selectedNoteMetas, fpaths, contents);
   if (oldNotes.length === 0) return;
 
   const oldNoteIds = oldNotes.map(note => note.id);
@@ -2779,17 +3271,16 @@ export const syncAndWait = (doForceListFPaths = false, updateAction = 0) => asyn
     [vars.sync.updateAction, vars.sync.haveUpdate] = [Infinity, false];
   }
 
-  let waitResolve;
-  const waitPromise = new Promise(resolve => waitResolve = resolve);
-
-  const task = syncInQueue(
-    waitResolve, doForceListFPaths, updateAction, dispatch, getState
-  );
-  task[TASK_DO_FORCE_LIST_FPATHS] = doForceListFPaths;
-  task[TASK_UPDATE_ACTION] = updateAction;
-  syncQueue.push(task);
-
+  const waitPromise = new Promise(resolve => {
+    const task = syncInQueue(
+      resolve, doForceListFPaths, updateAction, dispatch, getState
+    );
+    task[TASK_DO_FORCE_LIST_FPATHS] = doForceListFPaths;
+    task[TASK_UPDATE_ACTION] = updateAction;
+    syncQueue.push(task);
+  });
   const waitResult = await waitPromise;
+
   return waitResult;
 };
 

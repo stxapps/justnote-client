@@ -463,10 +463,17 @@ export const getAllListNames = (listNameObjs) => {
 };
 
 export const getListNamesFromNoteMetas = (noteMetas, conflictedNoteMetas) => {
-  let listNames = [];
-  listNames.push(...noteMetas.map(id => id.listName));
-  listNames.push(...conflictedNoteMetas.map(id => id.listName));
-  listNames = [...new Set(listNames)];
+  const listNames = [];
+  for (const meta of noteMetas) {
+    const { listName } = meta;
+    if (!listNames.includes(listName)) listNames.push(listName);
+  }
+  for (const cMeta of conflictedNoteMetas) {
+    for (const meta of cMeta.metas) {
+      const { listName } = meta;
+      if (!listNames.includes(listName)) listNames.push(listName);
+    }
+  }
   return listNames;
 };
 
@@ -536,7 +543,7 @@ const _isStringIn = (noteTitle, noteBody, searchString) => {
 };
 
 export const isStringIn = (note, searchString, lockedNotes, toRootIds) => {
-  const noteMainId = getNoteMainId(note, toRootIds);
+  const noteMainId = getMainId(note, toRootIds);
   if (isObject(lockedNotes[noteMainId])) {
     if (!isNumber(lockedNotes[noteMainId].unlockedDT)) {
       if (lockedNotes[noteMainId].doShowTitle) {
@@ -1475,42 +1482,106 @@ const _listMetas = (dataFPaths, extractDataFPath, workingSubName) => {
   };
 };
 
-const _listNoteMetas = (noteFPaths) => {
-  // Possible to have cdroot paths but not index.json and vice versa.
-  //   i.e. update/move error and cancel died notes.
-  // So use only index.json for listMetas.
-  const {
-    metas, conflictedMetas, conflictWiths, toRootIds, toParents, toFPaths, toLeafIds,
-    allIds,
-  } = _listMetas(noteFPaths, extractNoteFPath, INDEX + DOT_JSON);
-  return {
-    noteMetas: metas, conflictedMetas, conflictWiths, toRootIds, toParents, toFPaths,
-    toLeafIds, allIds,
-  };
-};
-
 export const listNoteMetas = createSelector(
   noteFPaths => noteFPaths,
-  _listNoteMetas,
+  noteFPaths => {
+    // Possible to have cdroot paths but not index.json and vice versa.
+    //   i.e. update/move error and cancel died notes.
+    // So use only index.json for listMetas.
+    const {
+      metas, conflictedMetas, conflictWiths, toRootIds, toParents, toFPaths, toLeafIds,
+      allIds,
+    } = _listMetas(noteFPaths, extractNoteFPath, INDEX + DOT_JSON);
+    return {
+      noteMetas: metas, conflictedMetas, conflictWiths, toRootIds, toParents, toFPaths,
+      toLeafIds, allIds,
+    };
+  },
 );
 
-export const getMainId = (id, toRootIds) => {
-  if (isString(id) && id.startsWith('conflict')) {
-    id = id.split('-')[1];
-  }
-  return toRootIds[id];
-};
+const applyPcNotesToMetas = (notes, noteMetas, toRootIds) => {
+  const processingMetas = [];
+  for (const listName in notes) {
+    for (const note of Object.values(notes[listName])) {
+      const { parentIds, id, addedDT, updatedDT, media, status } = note;
+      if (status === ADDED) continue;
 
-export const getNoteMainId = (note, toRootIds) => {
-  let noteId = note.id;
-  if (NEW_NOTE_FPATH_STATUSES.includes(note.status)) {
-    if (Array.isArray(note.parentIds) && note.parentIds.length > 0) {
-      noteId = note.parentIds[0];
+      const fname = createDataFName(id, parentIds);
+      const fpath = createNoteFPath(listName, fname, INDEX + DOT_JSON);
+      const fpaths = [fpath];
+      if (media) {
+        for (const { name } of media) {
+          const mdFPath = createNoteFPath(listName, fname, name);
+          if (!fpaths.includes(mdFPath)) fpaths.push(mdFPath);
+        }
+      }
+
+      const [isConflicted, conflictWith] = [false, null];
+      const meta = {
+        parentIds, id, addedDT, updatedDT, isConflicted, conflictWith, fpaths, listName,
+      };
+      processingMetas.push(meta);
     }
   }
 
-  const noteMainId = getMainId(noteId, toRootIds);
-  return noteMainId;
+  const pidToMetasMap = {};
+  for (const meta of processingMetas) {
+    if (!Array.isArray(meta.parentIds)) continue;
+    for (const pid of meta.parentIds) {
+      if (!Array.isArray(pidToMetasMap[pid])) pidToMetasMap[pid] = [];
+      pidToMetasMap[pid].push(meta);
+    }
+  }
+
+  const metas = [], cIds = [];
+  for (const meta of noteMetas) {
+    const cMetas = pidToMetasMap[meta.id];
+    if (Array.isArray(cMetas)) {
+      for (const cMeta of cMetas) {
+        if (cIds.includes(cMeta.id)) continue;
+        cIds.push(cMeta.id);
+        metas.push(cMeta);
+      }
+      continue;
+    }
+    metas.push(meta);
+  }
+  for (const meta of processingMetas) {
+    if (cIds.includes(meta.id)) continue;
+    metas.push(meta);
+  }
+
+  const tRIds = { ...toRootIds };
+  for (const meta of processingMetas) {
+    if (Array.isArray(meta.parentIds) && meta.parentIds.length > 0) {
+      tRIds[meta.id] = tRIds[meta.parentIds[0]];
+      continue;
+    }
+
+    tRIds[meta.id] = meta.id;
+  }
+
+  return { noteMetas: metas, toRootIds: tRIds };
+};
+
+export const getMainId = (idOrNote, toRootIds) => {
+  let id;
+  if (isString(idOrNote)) {
+    id = idOrNote;
+  } else if (isObject(idOrNote)) {
+    // processing notes might not have a fpath yet and no link to its parent ids,
+    //   so need to use note.parentIds to get mainId with rootIds.
+    id = idOrNote.id;
+    if (NEW_NOTE_FPATH_STATUSES.includes(idOrNote.status)) {
+      if (Array.isArray(idOrNote.parentIds) && idOrNote.parentIds.length > 0) {
+        id = idOrNote.parentIds[0];
+      }
+    }
+  }
+  if (!isString(id)) return null;
+  if (id.startsWith('conflict')) id = id.split('-')[1];
+
+  return toRootIds[id];
 };
 
 export const getPinFPaths = (state) => {
@@ -1618,7 +1689,7 @@ export const sortWithPins = (
   pinnedValues = pinnedValues.map(pinnedValue => pinnedValue.value);
 
   const pinnedAndSortedValues = [...pinnedValues, ...values];
-  return pinnedAndSortedValues;
+  return { pinnedValues, values, pinnedAndSortedValues };
 };
 
 export const isPinningStatus = (pinStatus) => {
@@ -2115,8 +2186,8 @@ export const getLockListStatus = (doForceLock, lockedLists, listName) => {
   return null;
 };
 
-const _isNoteUnlocked = (noteId, toRootIds, lockedNotes) => {
-  const noteMainId = getMainId(noteId, toRootIds);
+const _isNoteUnlocked = (note, toRootIds, lockedNotes) => {
+  const noteMainId = getMainId(note, toRootIds);
   if (isObject(lockedNotes[noteMainId])) {
     if (isString(lockedNotes[noteMainId].password)) {
       if (isNumber(lockedNotes[noteMainId].unlockedDT)) return true;
@@ -2155,7 +2226,8 @@ export const doListContainUnlocks = (state) => {
       const doContain = _doListContainUnlocks(listName, lockedLists);
       if (doContain) return true;
 
-      const isUnlocked = _isNoteUnlocked(info.id, toRootIds, lockedNotes)
+      const note = getNote(info.id, notes);
+      const isUnlocked = _isNoteUnlocked(note, toRootIds, lockedNotes)
       if (isUnlocked) return true;
     }
     return false;
@@ -2168,7 +2240,8 @@ export const doListContainUnlocks = (state) => {
 
   if (isObject(notes[listName])) {
     for (const id in notes[listName]) {
-      const isUnlocked = _isNoteUnlocked(id, toRootIds, lockedNotes);
+      const note = notes[listName][id];
+      const isUnlocked = _isNoteUnlocked(note, toRootIds, lockedNotes);
       if (isUnlocked) return true;
     }
   }
@@ -2176,8 +2249,29 @@ export const doListContainUnlocks = (state) => {
   return false;
 };
 
+const toConflictedMetas = (noteMetas, conflictWiths) => {
+  const conflictedMetas = [];
+  for (const conflictWith of conflictWiths) {
+    const selectedMetas = noteMetas.filter(meta => conflictWith.includes(meta.id));
+    const sortedMetas = selectedMetas.sort((a, b) => a.updatedDT - b.updatedDT);
+
+    conflictedMetas.push({
+      id: 'conflict-' + sortedMetas.map(meta => meta.id).join('-'),
+      listNames: sortedMetas.map(meta => meta.listName),
+      metas: sortedMetas,
+      addedDT: Math.min(...sortedMetas.map(meta => meta.addedDT)),
+      updatedDT: Math.max(...sortedMetas.map(meta => meta.updatedDT)),
+      isConflicted: true,
+    });
+  }
+
+  return conflictedMetas;
+};
+
 export const getNNoteMetas = (params) => {
-  const { noteFPaths, listName, doDescendingOrder, pinFPaths, pendingPins } = params;
+  const {
+    noteFPaths, notes, listName, sortOn, doDescendingOrder, pinFPaths, pendingPins,
+  } = params;
 
   let excludingIds = [], excludingMainIds = [];
   if (Array.isArray(params.excludingIds)) excludingIds = params.excludingIds;
@@ -2185,20 +2279,85 @@ export const getNNoteMetas = (params) => {
     excludingMainIds = params.excludingMainIds;
   }
 
-  const { noteMetas, toRootIds } = listNoteMetas(noteFPaths);
-
-  const processingNotes = [];
-  if (isObject(params.notes) && isObject(params.notes[listName])) {
-    for (const note of Object.values(params.notes[listName])) {
+  const processingNoteIds = [];
+  if (isObject(notes[listName])) {
+    for (const note of Object.values(notes[listName])) {
       if (note.status === ADDED) continue;
-      processingNotes.push(note);
+      processingNoteIds.push(note.id);
+    }
+  }
+  // No need to handle intervening notes here as
+  //   if all fetched, fast enough/in one event loop
+  //   if not, handle in updateFetched.
+
+  const {
+    noteMetas: _noteMetas, conflictedMetas, conflictWiths, toRootIds: _toRootIds,
+  } = listNoteMetas(noteFPaths);
+  const { noteMetas, toRootIds } = applyPcNotesToMetas(notes, _noteMetas, _toRootIds);
+
+  const slCfWths = conflictWiths.filter(conflictWith => {
+    for (const id of conflictWith) {
+      const conflictedId = conflictedMetas.find(meta => meta.id === id);
+      if (conflictedId.listName === listName) return true;
+    }
+    return false;
+  });
+  const cfMetas = toConflictedMetas(conflictedMetas, slCfWths);
+  cfMetas.sort((a, b) => a[sortOn] - b[sortOn]);
+  if (doDescendingOrder) cfMetas.reverse();
+
+  const fsMetas = noteMetas.filter(meta => meta.listName === listName);
+  fsMetas.sort((a, b) => a[sortOn] - b[sortOn]);
+  if (doDescendingOrder) fsMetas.reverse();
+
+  const {
+    pinnedValues: pMetas, values: npMetas,
+  } = sortWithPins(fsMetas, pinFPaths, pendingPins, toRootIds, (meta) => {
+    return getMainId(meta.id, toRootIds);
+  });
+  const pdMetas = pMetas.map(meta => ({ ...meta, isPinned: true }));
+
+  const cbMetas = [...cfMetas, ...pdMetas, ...npMetas];
+
+  // With pins, can't fetch further from the current point
+  let metas = [], metasWithPcEc = [];
+  for (const meta of cbMetas) {
+    const { id } = meta;
+    const mainId = getMainId(id, toRootIds);
+
+    if (excludingIds.includes(id) || excludingMainIds.includes(mainId)) {
+      metasWithPcEc.push(meta);
+      continue;
+    }
+    if (processingNoteIds.includes(id)) {
+      metasWithPcEc.push(meta);
+      continue;
+    }
+    if (metas.length < N_NOTES) {
+      metas.push(meta);
+      metasWithPcEc.push(meta);
     }
   }
 
-  // processing notes might not have a fpath yet and no link to its parent ids,
-  //   so need to use note.parents to get mainId with rootIds.
+  const idsWithPcEc = metasWithPcEc.map(meta => meta.id);
+  const hasMore = cbMetas.some(meta => !idsWithPcEc.includes(meta.id));
 
+  let foundNotExcl = false, hasDisorder = false;
+  for (const meta of metasWithPcEc) {
+    const { id } = meta;
+    const mainId = getMainId(id, toRootIds);
 
+    if (excludingIds.includes(id) || excludingMainIds.includes(mainId)) {
+      if (foundNotExcl) {
+        hasDisorder = true;
+        break;
+      }
+      continue;
+    }
+    foundNotExcl = true;
+  }
+
+  return { metas, hasMore, hasDisorder, metasWithPcEc };
 };
 
 export const newObject = (object, ignoreAttrs) => {
@@ -2210,11 +2369,19 @@ export const newObject = (object, ignoreAttrs) => {
   return nObject;
 };
 
-export const addFetchedToVars = (lnOrQt, notes, vars) => {
+export const addFetchedToVars = (lnOrQt, conflictedNotes, notes, vars) => {
   const { fetchedLnOrQts, fetchedNoteIds } = vars.fetch;
 
   if (isString(lnOrQt) && !fetchedLnOrQts.includes(lnOrQt)) {
     fetchedLnOrQts.push(lnOrQt);
+  }
+
+  if (Array.isArray(conflictedNotes)) {
+    for (const cfNt of conflictedNotes) {
+      for (const note of cfNt.notes) {
+        if (!fetchedNoteIds.includes(note.id)) fetchedNoteIds.push(note.id);
+      }
+    }
   }
 
   if (isObject(notes) && !Array.isArray(notes)) {
@@ -2230,14 +2397,23 @@ export const addFetchedToVars = (lnOrQt, notes, vars) => {
   }
 };
 
-export const isFetchedNoteId = (fetchedNoteIds, notes, listName, id) => {
-  if (!fetchedNoteIds.includes(id)) return false;
+export const isFetchedNoteMeta = (fetchedNoteIds, conflictedNotes, notes, meta) => {
+  const { id, listName, isConflicted } = meta;
 
-  // Beware, in fetchedNoteIds but might not in notes!
-  //   e.g. delete by UPDATE_FETCHED or UPDATE_FETCHED_MORE
-  //   so need to check still in the notes.
-  // The flow should be like showingNoteIds/fpaths -> notes -> filtered by fetched.
-  if (!isObject(notes[listName]) || !isObject(notes[listName][id])) return false;
+  if (isConflicted) {
+    for (const { id: cId } of meta.metas) {
+      if (!fetchedNoteIds.includes(cId)) return false;
+    }
+    if (!isObject(conflictedNotes[id])) return false;
+  } else {
+    if (!fetchedNoteIds.includes(id)) return false;
+    // Beware, in fetchedNoteIds but might not in notes!
+    //   e.g. delete by UPDATE_FETCHED or UPDATE_FETCHED_MORE
+    //   so need to check still in the notes.
+    // The flow should be like showingNoteIds/fpaths -> notes -> filtered by fetched.
+    if (!isObject(notes[listName]) || !isObject(notes[listName][id])) return false;
+  }
+
   return true;
 };
 
@@ -2252,10 +2428,10 @@ export const doesIncludeFetching = (lnOrQt, doForce, fetchingInfos) => {
   return false;
 };
 
-export const doesIncludeFetchingMore = (lnOrQt, doForCompare, fetchingInfos) => {
+export const doesIncludeFetchingMore = (lnOrQt, fetchingInfos) => {
   for (const info of fetchingInfos) {
     if (info.type !== FETCH_MORE) continue;
-    if (info.lnOrQt === lnOrQt && info.doForCompare === doForCompare) return true;
+    if (info.lnOrQt === lnOrQt) return true;
   }
   return false;
 };
@@ -2466,12 +2642,120 @@ export const isTaggingStatus = (tagStatus) => {
   ].includes(tagStatus);
 };
 
-const getNoteMetasByTagName = () => {
+const getNoteMetasByTagName = (
+  noteMetas, toRootIds, tagFPaths, pendingTags, selectedTagName, doForceLock,
+  lockedNotes, lockedLists
+) => {
+  const tags = getTags(tagFPaths, pendingTags, toRootIds);
 
+  const mainIds = [];
+  for (const mainId in tags) {
+    const found = tags[mainId].values.some(value => {
+      return value.tagName === selectedTagName;
+    });
+    if (found) mainIds.push(mainId);
+  }
+
+  const metas = [];
+  for (const meta of noteMetas) {
+    const { id, listName } = meta;
+    if (listName === TRASH) continue;
+
+    const mainId = getMainId(id, toRootIds);
+
+    if (isObject(lockedNotes[mainId])) {
+      if (!isNumber(lockedNotes[mainId].unlockedDT)) continue;
+    }
+
+    const lockStatus = getLockListStatus(doForceLock, lockedLists, listName);
+    if (lockStatus === LOCKED) continue;
+
+    if (!mainIds.includes(mainId)) continue;
+    metas.push(meta);
+  }
+
+  return metas;
 };
 
 export const getNNoteMetasByQt = (params) => {
+  const {
+    noteFPaths, notes, sortOn, doDescendingOrder, pinFPaths, pendingPins, tagFPaths,
+    pendingTags, doForceLock, lockedNotes, lockedLists, queryString,
+  } = params;
 
+  let excludingIds = [], excludingMainIds = [];
+  if (Array.isArray(params.excludingIds)) excludingIds = params.excludingIds;
+  if (Array.isArray(params.excludingMainIds)) {
+    excludingMainIds = params.excludingMainIds;
+  }
+
+  const processingNoteIds = [];
+  for (const listName in notes) {
+    for (const note of Object.values(notes[listName])) {
+      if (note.status === ADDED) continue;
+      processingNoteIds.push(note.id);
+    }
+  }
+
+  const { noteMetas: _noteMetas, toRootIds: _toRootIds } = listNoteMetas(noteFPaths);
+  const { noteMetas, toRootIds } = applyPcNotesToMetas(notes, _noteMetas, _toRootIds);
+
+  // Only tag name for now
+  const tagName = queryString.trim();
+  const fsMetas = getNoteMetasByTagName(
+    noteMetas, toRootIds, tagFPaths, pendingTags, tagName, doForceLock, lockedNotes,
+    lockedLists,
+  );
+  fsMetas.sort((a, b) => a[sortOn] - b[sortOn]);
+  if (doDescendingOrder) fsMetas.reverse();
+
+  const {
+    pinnedValues: pMetas, values: npMetas,
+  } = sortWithPins(fsMetas, pinFPaths, pendingPins, toRootIds, (meta) => {
+    return getMainId(meta.id, toRootIds);
+  });
+  const pdMetas = pMetas.map(meta => ({ ...meta, isPinned: true }));
+
+  const cbMetas = [...pdMetas, ...npMetas];
+
+  let metas = [], metasWithPcEc = [];
+  for (const meta of cbMetas) {
+    const { id } = meta;
+    const mainId = getMainId(id, toRootIds);
+
+    if (excludingIds.includes(id) || excludingMainIds.includes(mainId)) {
+      metasWithPcEc.push(meta);
+      continue;
+    }
+    if (processingNoteIds.includes(id)) {
+      metasWithPcEc.push(meta);
+      continue;
+    }
+    if (metas.length < N_NOTES) {
+      metas.push(meta);
+      metasWithPcEc.push(meta);
+    }
+  }
+
+  const idsWithPcEc = metasWithPcEc.map(meta => meta.id);
+  const hasMore = cbMetas.some(meta => !idsWithPcEc.includes(meta.id));
+
+  let foundNotExcl = false, hasDisorder = false;
+  for (const meta of metasWithPcEc) {
+    const { id } = meta;
+    const mainId = getMainId(id, toRootIds);
+
+    if (excludingIds.includes(id) || excludingMainIds.includes(mainId)) {
+      if (foundNotExcl) {
+        hasDisorder = true;
+        break;
+      }
+      continue;
+    }
+    foundNotExcl = true;
+  }
+
+  return { metas, hasMore, hasDisorder, metasWithPcEc };
 };
 
 export const getArraysPerKey = (keys, values) => {
