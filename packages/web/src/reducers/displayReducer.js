@@ -494,12 +494,12 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === MOVE_NOTES_COMMIT || action.type === DELETE_NOTES_COMMIT) {
-    const { successFromNotes } = action.payload;
+    const { successNotes } = action.payload;
 
-    const fromNoteIds = successFromNotes.map(note => note.id);
+    const fromIds = successNotes.map(note => note.fromNote.id);
     return {
       ...state,
-      showingNoteInfos: _filterIfNotNull(state.showingNoteInfos, fromNoteIds),
+      showingNoteInfos: _filterIfNotNull(state.showingNoteInfos, fromIds),
     };
   }
 
@@ -549,11 +549,13 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === DELETE_OLD_NOTES_IN_TRASH_COMMIT) {
-    const { successIds } = action.payload;
+    const { successNotes } = action.payload;
+
+    const fromIds = successNotes.map(note => note.fromNote.id);
 
     const newState = { ...state };
-    if (successIds.includes(state.noteId)) newState.noteId = null;
-    newState.showingNoteInfos = _filterIfNotNull(state.showingNoteInfos, successIds);
+    if (fromIds.includes(state.noteId)) newState.noteId = null;
+    newState.showingNoteInfos = _filterIfNotNull(state.showingNoteInfos, fromIds);
     return newState;
   }
 

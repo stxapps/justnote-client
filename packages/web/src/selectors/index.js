@@ -648,7 +648,7 @@ export const makeGetTnAndDns = () => {
       if (!isObject(note)) return [];
 
       const { toRootIds } = listNoteMetas(noteFPaths);
-      const tags = getTags(tagFPaths, pendingTags);
+      const tags = getTags(tagFPaths, pendingTags, toRootIds);
       const noteMainId = getMainId(note, toRootIds);
 
       if (!isObject(tags[noteMainId])) return [];
@@ -689,7 +689,7 @@ export const getTagEditor = createSelector(
     const editor = { ...tagEditor };
     if (!editor.didValuesEdit && isObject(note)) {
       const { toRootIds } = listNoteMetas(noteFPaths);
-      const tags = getTags(tagFPaths, pendingTags);
+      const tags = getTags(tagFPaths, pendingTags, toRootIds);
       const noteMainId = getMainId(note, toRootIds);
 
       if (noteMainId in tags) {

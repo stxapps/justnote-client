@@ -278,14 +278,14 @@ const notesReducer = (state = initialState, action) => {
   }
 
   if (action.type === DELETE_NOTES) {
-    const { listNames, ids } = action.payload;
+    const { fromListNames, fromNotes } = action.payload;
 
-    const idsPerLn = getArraysPerKey(listNames, ids);
+    const fromNotesPerLn = getArraysPerKey(fromListNames, fromNotes);
 
     const newState = { ...state };
-    for (const [listName, lnIds] of Object.entries(idsPerLn)) {
+    for (const [listName, lnNotes] of Object.entries(fromNotesPerLn)) {
       newState[listName] = _.update(
-        newState[listName], ID, lnIds, STATUS, DELETING
+        newState[listName], ID, _.extract(lnNotes, ID), STATUS, DELETING
       );
     }
 
@@ -293,18 +293,22 @@ const notesReducer = (state = initialState, action) => {
   }
 
   if (action.type === DELETE_NOTES_COMMIT) {
-    const { successListNames, successIds, errorListNames, errorIds } = action.payload;
+    const {
+      successListNames, successNotes, errorListNames, errorNotes,
+    } = action.payload;
 
-    const successIdsPerLn = getArraysPerKey(successListNames, successIds);
-    const errorIdsPerLn = getArraysPerKey(errorListNames, errorIds);
+    const successNotesPerLn = getArraysPerKey(successListNames, successNotes);
+    const errorNotesPerLn = getArraysPerKey(errorListNames, errorNotes);
 
     const newState = { ...state };
-    for (const [listName, lnIds] of Object.entries(successIdsPerLn)) {
-      newState[listName] = _.exclude(newState[listName], ID, lnIds);
+    for (const [listName, lnNotes] of Object.entries(successNotesPerLn)) {
+      const fromIds = lnNotes.map(note => note.fromNote.id);
+      newState[listName] = _.exclude(newState[listName], ID, fromIds);
     }
-    for (const [listName, lnIds] of Object.entries(errorIdsPerLn)) {
+    for (const [listName, lnNotes] of Object.entries(errorNotesPerLn)) {
+      const fromIds = lnNotes.map(note => note.fromNote.id);
       newState[listName] = _.update(
-        newState[listName], ID, lnIds, STATUS, DIED_DELETING
+        newState[listName], ID, fromIds, STATUS, DIED_DELETING
       );
     }
 
@@ -312,14 +316,14 @@ const notesReducer = (state = initialState, action) => {
   }
 
   if (action.type === DELETE_NOTES_ROLLBACK) {
-    const { listNames, ids } = action.payload;
+    const { fromListNames, fromNotes } = action.payload;
 
-    const idsPerLn = getArraysPerKey(listNames, ids);
+    const fromNotesPerLn = getArraysPerKey(fromListNames, fromNotes);
 
     const newState = { ...state };
-    for (const [listName, lnIds] of Object.entries(idsPerLn)) {
+    for (const [listName, lnNotes] of Object.entries(fromNotesPerLn)) {
       newState[listName] = _.update(
-        newState[listName], ID, lnIds, STATUS, DIED_DELETING
+        newState[listName], ID, _.extract(lnNotes, ID), STATUS, DIED_DELETING
       );
     }
 
@@ -365,13 +369,14 @@ const notesReducer = (state = initialState, action) => {
   }
 
   if (action.type === DELETE_OLD_NOTES_IN_TRASH_COMMIT) {
-    const { successListNames, successIds } = action.payload;
+    const { successListNames, successNotes } = action.payload;
 
-    const idsPerLn = getArraysPerKey(successListNames, successIds);
+    const successNotesPerLn = getArraysPerKey(successListNames, successNotes);
 
     const newState = { ...state };
-    for (const [listName, lnIds] of Object.entries(idsPerLn)) {
-      newState[listName] = _.exclude(newState[listName], ID, lnIds);
+    for (const [listName, lnNotes] of Object.entries(successNotesPerLn)) {
+      const fromIds = lnNotes.map(note => note.fromNote.id);
+      newState[listName] = _.exclude(newState[listName], ID, fromIds);
     }
 
     return newState;

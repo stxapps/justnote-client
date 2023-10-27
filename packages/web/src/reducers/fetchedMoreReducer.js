@@ -1,9 +1,7 @@
 import {
   UPDATE_FETCHED, CACHE_FETCHED_MORE, UPDATE_FETCHED_MORE, REFRESH_FETCHED,
-  UPDATE_NOTE_COMMIT, MOVE_NOTES_COMMIT, DELETE_NOTES_COMMIT,
-  DELETE_OLD_NOTES_IN_TRASH_COMMIT, DELETE_ALL_DATA, RESET_STATE,
+  DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
-import { getArraysPerKey } from '../utils';
 
 const initialState = {};
 
@@ -38,31 +36,6 @@ const fetchedMoreReducer = (state = initialState, action) => {
 
   if (action.type === REFRESH_FETCHED) {
     return { ...initialState };
-  }
-
-  if (action.type === UPDATE_NOTE_COMMIT) {
-
-  }
-
-  // Died notes are always shown, so need to apply to cached notes here too.
-  if (
-    action.type === MOVE_NOTES_COMMIT ||
-    action.type === DELETE_NOTES_COMMIT ||
-    action.type === DELETE_OLD_NOTES_IN_TRASH_COMMIT
-  ) {
-    const { successFromListNames, successFromNotes } = action.payload;
-
-    const successIds = successFromNotes.map(note => note.id);
-    const idsPerLn = getArraysPerKey(successFromListNames, successIds);
-
-    const newState = { ...state };
-    for (const [listName, lnIds] of Object.entries(idsPerLn)) {
-      if (!newState[listName]) continue;
-
-      const { payload } = newState[listName];
-
-
-    }
   }
 
   if (action.type === DELETE_ALL_DATA || action.type === RESET_STATE) {

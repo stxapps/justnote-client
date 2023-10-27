@@ -462,13 +462,13 @@ export const getAllListNames = (listNameObjs) => {
   return listNames;
 };
 
-export const getListNamesFromNoteMetas = (noteMetas, conflictedNoteMetas) => {
+export const getListNamesFromNoteMetas = (noteMetas, conflictedMetas) => {
   const listNames = [];
   for (const meta of noteMetas) {
     const { listName } = meta;
     if (!listNames.includes(listName)) listNames.push(listName);
   }
-  for (const cMeta of conflictedNoteMetas) {
+  for (const cMeta of conflictedMetas) {
     for (const meta of cMeta.metas) {
       const { listName } = meta;
       if (!listNames.includes(listName)) listNames.push(listName);
@@ -1499,66 +1499,39 @@ export const listNoteMetas = createSelector(
   },
 );
 
-const applyPcNotesToMetas = (notes, noteMetas, toRootIds) => {
-  const processingMetas = [];
-  for (const listName in notes) {
-    for (const note of Object.values(notes[listName])) {
-      const { parentIds, id, addedDT, updatedDT, media, status } = note;
-      if (status === ADDED) continue;
+const applyPcNotesToMetas = (pcListNames, pcNotes, noteMetas, toRootIds) => {
+  const metas = [], tRIds = { ...toRootIds }, parentIds = [];
+  for (let i = 0; i < pcListNames.length; i++) {
+    const [listName, note] = [pcListNames[i], pcNotes[i]];
+    const { parentIds, id, addedDT, updatedDT, media } = note;
 
-      const fname = createDataFName(id, parentIds);
-      const fpath = createNoteFPath(listName, fname, INDEX + DOT_JSON);
-      const fpaths = [fpath];
-      if (media) {
-        for (const { name } of media) {
-          const mdFPath = createNoteFPath(listName, fname, name);
-          if (!fpaths.includes(mdFPath)) fpaths.push(mdFPath);
-        }
+    const fname = createDataFName(id, parentIds);
+    const fpath = createNoteFPath(listName, fname, INDEX + DOT_JSON);
+    const fpaths = [fpath];
+    if (media) {
+      for (const { name } of media) {
+        const mdFPath = createNoteFPath(listName, fname, name);
+        if (!fpaths.includes(mdFPath)) fpaths.push(mdFPath);
       }
-
-      const [isConflicted, conflictWith] = [false, null];
-      const meta = {
-        parentIds, id, addedDT, updatedDT, isConflicted, conflictWith, fpaths, listName,
-      };
-      processingMetas.push(meta);
     }
-  }
 
-  const pidToMetasMap = {};
-  for (const meta of processingMetas) {
-    if (!Array.isArray(meta.parentIds)) continue;
-    for (const pid of meta.parentIds) {
-      if (!Array.isArray(pidToMetasMap[pid])) pidToMetasMap[pid] = [];
-      pidToMetasMap[pid].push(meta);
-    }
-  }
+    const [isConflicted, conflictWith] = [false, null];
+    const meta = {
+      parentIds, id, addedDT, updatedDT, isConflicted, conflictWith, fpaths, listName,
+    };
 
-  const metas = [], cIds = [];
-  for (const meta of noteMetas) {
-    const cMetas = pidToMetasMap[meta.id];
-    if (Array.isArray(cMetas)) {
-      for (const cMeta of cMetas) {
-        if (cIds.includes(cMeta.id)) continue;
-        cIds.push(cMeta.id);
-        metas.push(cMeta);
-      }
-      continue;
-    }
     metas.push(meta);
-  }
-  for (const meta of processingMetas) {
-    if (cIds.includes(meta.id)) continue;
-    metas.push(meta);
-  }
-
-  const tRIds = { ...toRootIds };
-  for (const meta of processingMetas) {
     if (Array.isArray(meta.parentIds) && meta.parentIds.length > 0) {
       tRIds[meta.id] = tRIds[meta.parentIds[0]];
-      continue;
+      parentIds.push(...meta.parentIds);
+    } else {
+      tRIds[meta.id] = meta.id;
     }
+  }
 
-    tRIds[meta.id] = meta.id;
+  for (const meta of noteMetas) {
+    if (parentIds.includes(meta.id)) continue;
+    metas.push(meta);
   }
 
   return { noteMetas: metas, toRootIds: tRIds };
@@ -2279,10 +2252,12 @@ export const getNNoteMetas = (params) => {
     excludingMainIds = params.excludingMainIds;
   }
 
-  const processingNoteIds = [];
-  if (isObject(notes[listName])) {
-    for (const note of Object.values(notes[listName])) {
+  const pcListNames = [], pcNotes = [], processingNoteIds = [];
+  for (const ln in notes) {
+    for (const note of Object.values(notes[ln])) {
       if (note.status === ADDED) continue;
+      pcListNames.push(ln);
+      pcNotes.push(note);
       processingNoteIds.push(note.id);
     }
   }
@@ -2293,7 +2268,9 @@ export const getNNoteMetas = (params) => {
   const {
     noteMetas: _noteMetas, conflictedMetas, conflictWiths, toRootIds: _toRootIds,
   } = listNoteMetas(noteFPaths);
-  const { noteMetas, toRootIds } = applyPcNotesToMetas(notes, _noteMetas, _toRootIds);
+  const {
+    noteMetas, toRootIds,
+  } = applyPcNotesToMetas(pcListNames, pcNotes, _noteMetas, _toRootIds);
 
   const slCfWths = conflictWiths.filter(conflictWith => {
     for (const id of conflictWith) {
@@ -2459,28 +2436,22 @@ export const getRawTags = (tagFPaths, toRootIds) => {
   for (const fpath of tagFPaths) {
     const { tagName, rank, updatedDT, addedDT, id } = extractTagFPath(fpath);
 
-    const mainId = getMainId(id, toRootIds);
+    const _id = id.startsWith('deleted') ? id.slice(7) : id;
+    const mainId = getMainId(_id, toRootIds);
     if (!isString(mainId)) continue;
 
     if (!isObject(tags[mainId])) tags[mainId] = { values: [] };
 
-    // updatedDT needs to be the same
-    //   so can choose only the latest updatedDT for all tags per id.
-    let currentUpdatedDT = 0;
-    if (tags[mainId].values.length > 0) {
-      currentUpdatedDT = tags[mainId].values[0].updatedDT;
-    }
-
-    if (updatedDT < currentUpdatedDT) continue;
-    if (updatedDT > currentUpdatedDT) tags[mainId] = { values: [] };
-
-    let values = tags[mainId].values;
+    const { values } = tags[mainId];
 
     const i = values.findIndex(tag => tag.tagName === tagName);
     if (i < 0) {
       values.push({ tagName, rank, updatedDT, addedDT, id });
       continue;
     }
+
+    // duplicate tag name, choose the latest updatedDT
+    if (values[i].updatedDT > updatedDT) continue;
 
     tags[mainId].values = [
       ...values.slice(0, i),
@@ -2512,9 +2483,11 @@ const _getTags = (tagFPaths, pendingTags, toRootIds) => {
 
   const filteredTags = {};
   for (const mainId in tags) {
-    const found = tags[mainId].values(value => value.tagName === 'deleted');
-    if (found) continue;
-    filteredTags[mainId] = tags[mainId];
+    const values = tags[mainId].values.filter(value => {
+      return !value.id.startsWith('deleted');
+    });
+    if (values.length === 0) continue;
+    filteredTags[mainId] = { values };
   }
 
   return filteredTags;
@@ -2523,6 +2496,7 @@ const _getTags = (tagFPaths, pendingTags, toRootIds) => {
 export const getTags = createSelector(
   (...args) => args[0],
   (...args) => args[1],
+  (...args) => args[2],
   _getTags,
 );
 
@@ -2689,16 +2663,20 @@ export const getNNoteMetasByQt = (params) => {
     excludingMainIds = params.excludingMainIds;
   }
 
-  const processingNoteIds = [];
-  for (const listName in notes) {
-    for (const note of Object.values(notes[listName])) {
+  const pcListNames = [], pcNotes = [], processingNoteIds = [];
+  for (const ln in notes) {
+    for (const note of Object.values(notes[ln])) {
       if (note.status === ADDED) continue;
+      pcListNames.push(ln);
+      pcNotes.push(note);
       processingNoteIds.push(note.id);
     }
   }
 
   const { noteMetas: _noteMetas, toRootIds: _toRootIds } = listNoteMetas(noteFPaths);
-  const { noteMetas, toRootIds } = applyPcNotesToMetas(notes, _noteMetas, _toRootIds);
+  const {
+    noteMetas, toRootIds,
+  } = applyPcNotesToMetas(pcListNames, pcNotes, _noteMetas, _toRootIds);
 
   // Only tag name for now
   const tagName = queryString.trim();

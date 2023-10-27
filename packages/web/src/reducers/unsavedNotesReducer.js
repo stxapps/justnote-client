@@ -63,14 +63,16 @@ const unsavedNotesReducer = (state = initialState, action) => {
       else ids = [NEW_NOTE];
     } else if (type === UPDATE_NOTE_COMMIT) ids = [payload.toNote.id];
     else if (type === DISCARD_NOTE) ids = [payload];
-    else if (type === DELETE_NOTES_COMMIT) ids = payload.ids;
-    else if (type === CANCEL_DIED_NOTES) {
+    else if (type === DELETE_NOTES_COMMIT) {
+      ids = payload.successNotes.map(note => note.fromNote.id);
+    } else if (type === CANCEL_DIED_NOTES) {
       // For update note, can delete unsaved note here instead of UPDATE_NOTE_ROLLBACK
       //   so if reload, died note is gone but unsaved still there.
       ids = payload.deleteUnsavedNoteIds;
     } else if (type === MERGE_NOTES_COMMIT) ids = [payload.toNote.id];
-    else if (type === DELETE_OLD_NOTES_IN_TRASH_COMMIT) ids = payload.ids;
-    else {
+    else if (type === DELETE_OLD_NOTES_IN_TRASH_COMMIT) {
+      ids = payload.successNotes.map(note => note.fromNote.id);
+    } else {
       console.log('In unsavedNotesReducer, invalid delete action:', action);
       return state;
     }
