@@ -91,7 +91,7 @@ export const getNotes = createSelectorNotes(
 
     const cNotes = [], pNotes = [], sNotes = [];
     for (const info of showingNoteInfos) {
-      if (info.isConflicted) {
+      if (info.id.startsWith('conflict')) {
         const note = conflictedNotes[info.id];
         if (!isObject(note)) continue;
 
@@ -145,7 +145,7 @@ export const getIsFetchingMore = createSelector(
   state => state.display.fetchingInfos,
   (listName, queryString, fetchingInfos) => {
     const lnOrQt = queryString ? queryString : listName;
-    if (doesIncludeFetchingMore(lnOrQt, false, fetchingInfos)) return true;
+    if (doesIncludeFetchingMore(lnOrQt, fetchingInfos)) return true;
     return false;
   }
 );

@@ -5,7 +5,8 @@ import {
   FETCH, FETCH_MORE, PIN_NOTE, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_ROLLBACK,
   MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_ROLLBACK, UPDATE_TAG_DATA_S_STEP,
   UPDATE_TAG_DATA_S_STEP_COMMIT, UPDATE_TAG_DATA_S_STEP_ROLLBACK,
-  UPDATE_TAG_DATA_T_STEP, UPDATE_TAG_DATA_T_STEP_ROLLBACK, UPDATE_SETTINGS, UPDATE_INFO, MERGE_SETTINGS,
+  UPDATE_TAG_DATA_T_STEP, UPDATE_TAG_DATA_T_STEP_ROLLBACK, UPDATE_SETTINGS,
+  MERGE_SETTINGS, UPDATE_INFO,
 } from '../types/actionTypes';
 import {
   HASH_FRAGMENT_IDENTIFIER, HTTP, MAX_CHARS, CD_ROOT, STATUS, NOTES, IMAGES, SETTINGS,
@@ -2450,7 +2451,6 @@ export const getRawTags = (tagFPaths, toRootIds) => {
       continue;
     }
 
-    // duplicate tag name, choose the latest updatedDT
     if (values[i].updatedDT > updatedDT) continue;
 
     tags[mainId].values = [
@@ -2748,7 +2748,9 @@ export const getArraysPerKey = (keys, values) => {
 
 export const doContainSyncCallTasks = (taskQueue) => {
   for (const task of taskQueue.jobs) {
-    if ([UPDATE_SETTINGS, UPDATE_INFO, MERGE_SETTINGS].includes(task[TASK_TYPE])) {
+    if ([
+      UPDATE_SETTINGS, UPDATE_INFO, MERGE_SETTINGS, UPDATE_TAG_DATA_S_STEP,
+    ].includes(task[TASK_TYPE])) {
       return true;
     }
   }

@@ -64,9 +64,7 @@ import {
   UPDATE_TAG_DATA_T_STEP, UPDATE_TAG_DATA_T_STEP_COMMIT,
   UPDATE_TAG_DATA_T_STEP_ROLLBACK, CANCEL_DIED_TAGS, UPDATE_TAG_NAME_EDITORS,
   ADD_TAG_NAMES, UPDATE_TAG_NAMES, MOVE_TAG_NAME, DELETE_TAG_NAMES,
-  UPDATE_SELECTING_TAG_NAME,
-
-  RESET_STATE,
+  UPDATE_SELECTING_TAG_NAME, RESET_STATE,
 } from '../types/actionTypes';
 import {
   HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY, HASH_SUPPORT,
@@ -76,22 +74,20 @@ import {
   MOVE_ACTION_NOTE_COMMANDS, MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS,
   DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
   DISCARD_ACTION_UPDATE_LIST_NAME, DISCARD_ACTION_UPDATE_TAG_NAME, MY_NOTES, TRASH, ID,
-  NEW_NOTE, NEW_NOTE_OBJ,
-  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES, N_DAYS, CD_ROOT,
-  INFO, INDEX, DOT_JSON, SHOW_SYNCED, LG_WIDTH, IAP_VERIFY_URL, IAP_STATUS_URL, PADDLE,
-  COM_JUSTNOTECC, COM_JUSTNOTECC_SUPPORTER, SIGNED_TEST_STRING, VALID, INVALID, ACTIVE,
-  UNKNOWN, SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS, WHT_MODE,
-  BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE, FEATURE_DATE_FORMAT,
-  FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES, FEATURE_LOCK,
-  FEATURE_TAG,
-  NOTE_DATE_FORMATS, PADDLE_RANDOM_ID, VALID_PASSWORD, PASSWORD_MSGS,
-  LOCK_ACTION_ADD_LOCK_NOTE, LOCK_ACTION_UNLOCK_NOTE, LOCK_ACTION_ADD_LOCK_LIST,
-  LOCAL_NOTE_ATTRS, TASK_TYPE, TASK_DO_FORCE_LIST_FPATHS, TASK_UPDATE_ACTION, ADDED,
-  SHOWING_STATUSES, VALID_TAG_NAME, DUPLICATE_TAG_NAME, TAG_NAME_MSGS,
+  NEW_NOTE, NEW_NOTE_OBJ, DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
+  N_NOTES, N_DAYS, CD_ROOT, INFO, INDEX, DOT_JSON, SHOW_SYNCED, LG_WIDTH,
+  IAP_VERIFY_URL, IAP_STATUS_URL, PADDLE, COM_JUSTNOTECC, COM_JUSTNOTECC_SUPPORTER,
+  SIGNED_TEST_STRING, VALID, INVALID, ACTIVE, UNKNOWN, SWAP_LEFT, SWAP_RIGHT,
+  SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS, WHT_MODE, BLK_MODE, CUSTOM_MODE,
+  FEATURE_PIN, FEATURE_APPEARANCE, FEATURE_DATE_FORMAT, FEATURE_SECTION_NOTES_BY_MONTH,
+  FEATURE_MORE_EDITOR_FONT_SIZES, FEATURE_LOCK, FEATURE_TAG, NOTE_DATE_FORMATS,
+  PADDLE_RANDOM_ID, VALID_PASSWORD, PASSWORD_MSGS, LOCK_ACTION_ADD_LOCK_NOTE,
+  LOCK_ACTION_UNLOCK_NOTE, LOCK_ACTION_ADD_LOCK_LIST, LOCAL_NOTE_ATTRS, TASK_TYPE,
+  TASK_DO_FORCE_LIST_FPATHS, TASK_UPDATE_ACTION, ADDED, SHOWING_STATUSES,
+  VALID_TAG_NAME, DUPLICATE_TAG_NAME, TAG_NAME_MSGS, UPDATED_DT,
 } from '../types/const';
 import {
-  throttle, extractUrl, urlHashToObj, objToUrlHash, isBusyStatus, isEqual,
-  isArrayEqual,
+  throttle, extractUrl, urlHashToObj, objToUrlHash, isBusyStatus, isEqual, isArrayEqual,
   separateUrlAndParam, getUserImageUrl, randomString, sleep, isObject, isString,
   isNumber, isTitleEqual, isBodyEqual, clearNoteData, getStaticFPath, deriveFPaths,
   getListNameObj, getAllListNames, getMainId, createDataFName, listNoteMetas,
@@ -1202,7 +1198,7 @@ export const fetchMore = () => async (dispatch, getState) => {
 
   const safNoteIds = []; // Showing and fetched note ids.
   const showingNotes = showingNoteInfos.map(info => {
-    if (info.isConflicted) return conflictedNotes[info.id];
+    if (info.id.startsWith('conflict')) return conflictedNotes[info.id];
     return getNote(info.id, notes);
   });
   for (const note of showingNotes) {
@@ -1390,7 +1386,7 @@ export const updateFetchedMore = (
 
   const fsCfNts = [], fsNts = [];
   for (const info of showingNoteInfos) {
-    if (info.isConflicted) {
+    if (info.id.startsWith('conflict')) {
       const note = conflictedNotes[info.id];
       if (isObject(note)) fsCfNts.push(note);
       continue;
@@ -1482,7 +1478,9 @@ const sortShowingNoteInfos = async (dispatch, getState) => {
 
   const fsCfNts = [], fsNts = [];
   for (const info of showingNoteInfos) {
-    if (info.isConflicted) {
+    // Updating a new id in displayReducer might not update other attrs.
+    // To be safe, get isConflicted with info.id.
+    if (info.id.startsWith('conflict')) {
       const note = conflictedNotes[info.id];
       if (isObject(note)) fsCfNts.push(note);
       continue;
@@ -1585,6 +1583,7 @@ export const addNote = (title, body, media, listName) => async (
 
 export const updateNote = (title, body, media, id) => async (dispatch, getState) => {
   const notes = getState().notes;
+  const sortOn = getState().settings.sortOn;
   const addedDT = Date.now();
 
   const { listName, note } = getListNameAndNote(id, notes);
@@ -1609,6 +1608,7 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
 
   const payload = { listName, fromNote, toNote };
   dispatch({ type: UPDATE_NOTE, payload });
+  if (sortOn === UPDATED_DT) await sortShowingNoteInfos(dispatch, getState);
   addFetchedToVars(null, null, [toNote], vars);
 
   try {
@@ -1895,6 +1895,7 @@ export const deleteNotes = () => async (dispatch, getState) => {
 
 export const retryDiedNotes = (ids) => async (dispatch, getState) => {
   const notes = getState().notes;
+  const sortOn = getState().settings.sortOn;
   let addedDT = Date.now();
 
   for (const id of ids) {
@@ -1937,6 +1938,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       const payload = { listName, fromNote: note.fromNote, toNote };
       dispatch({ type: UPDATE_NOTE, payload });
+      if (sortOn === UPDATED_DT) await sortShowingNoteInfos(dispatch, getState);
 
       try {
         await dataApi.putNotes({
@@ -2058,6 +2060,7 @@ export const cancelDiedNotes = (canceledIds) => async (dispatch, getState) => {
   }
 
   const notes = getState().notes;
+  const sortOn = getState().settings.sortOn;
 
   const listNames = [], ids = [], statuses = [], fromIds = [];
   const deleteUnsavedNoteIds = [];
@@ -2080,6 +2083,9 @@ export const cancelDiedNotes = (canceledIds) => async (dispatch, getState) => {
 
   const payload = { listNames, ids, statuses, fromIds, deleteUnsavedNoteIds };
   dispatch({ type: CANCEL_DIED_NOTES, payload });
+  if (sortOn === UPDATED_DT && statuses.includes(DIED_UPDATING)) {
+    await sortShowingNoteInfos(dispatch, getState);
+  }
 };
 
 export const mergeNotes = (selectedId) => async (dispatch, getState) => {
@@ -2138,6 +2144,7 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
   }
 
   dispatch({ type: MERGE_NOTES_COMMIT, payload });
+  await sortShowingNoteInfos(dispatch, getState);
 
   try {
     await dataApi.putNotes({ listNames: fromListNames, notes: emptyFromNotes });
@@ -3297,9 +3304,55 @@ const syncInQueue = (
 
     // Tags
     const allTagFPaths = [...new Set([...tagFPaths, ..._tagFPaths])];
+    const leafTags = {};
+    for (const fpath of allTagFPaths) {
+      const { tagName, updatedDT, id } = extractTagFPath(fpath);
 
+      const _id = id.startsWith('deleted') ? id.slice(7) : id;
+      const mainId = getMainId(_id, allToRootIds);
 
+      const leafKey = `${mainId}-${tagName}`;
 
+      if (leafKey in leafTags && leafTags[leafKey].updatedDT > updatedDT) continue;
+      leafTags[leafKey] = { updatedDT, fpath };
+    }
+    const leafTagFPaths = Object.values(leafTags).map(el => el.fpath);
+
+    // 1. Server side: upload leaf tagFPaths
+    fpaths = []; contents = [];
+    for (const fpath of leafTagFPaths) {
+      if (tagFPaths.includes(fpath)) continue;
+      fpaths.push(fpath);
+      contents.push({});
+    }
+    await serverApi.putFiles(fpaths, contents);
+
+    // 2. Server side: delete obsolete tagFPaths
+    fpaths = []; contents = [];
+    for (const fpath of tagFPaths) {
+      if (leafTagFPaths.includes(fpath)) continue;
+      fpaths.push(fpath);
+    }
+    await serverApi.deleteFiles(fpaths);
+
+    // 3. Local side: download leaf tagFPaths
+    fpaths = []; contents = [];
+    for (const fpath of leafTagFPaths) {
+      if (_tagFPaths.includes(fpath)) continue;
+      haveUpdate = true;
+
+      fpaths.push(fpath);
+      contents.push({});
+    }
+    await dataApi.putFiles(fpaths, contents);
+
+    // 4. Local side: delete obsolete tagFPaths
+    fpaths = []; contents = [];
+    for (const fpath of _tagFPaths) {
+      if (leafTagFPaths.includes(fpath)) continue;
+      fpaths.push(fpath);
+    }
+    await dataApi.deleteFiles(fpaths);
 
     if (syncQueue.length <= 1) {
       if (vars.sync.updateAction < updateAction) updateAction = vars.sync.updateAction;
@@ -4017,7 +4070,7 @@ export const movePinnedNote = (id, direction) => async (dispatch, getState) => {
 
   const fsNts = [];
   for (const info of showingNoteInfos) {
-    if (info.isConflicted) continue;
+    if (info.id.startsWith('conflict')) continue;
     const note = getNote(info.id, notes);
     if (isObject(note) && SHOWING_STATUSES.includes(note.status)) fsNts.push(note);
   }
@@ -4556,9 +4609,11 @@ export const updateTagEditorPopup = (isShown, id, isAddTags) => async (
     }
 
     dispatch(updateSelectingNoteId(id));
+    updatePopupUrlHash(TAG_EDITOR_POPUP, true, null, true);
+    return;
   }
 
-  updatePopupUrlHash(TAG_EDITOR_POPUP, isShown)
+  updatePopupUrlHash(TAG_EDITOR_POPUP, false);
 };
 
 export const updateTagEditor = (values, hints, displayName, color, msg) => {
@@ -4634,15 +4689,17 @@ const updateTagDataSStepInQueue = (payload, dispatch, getState) => async () => {
       settings.sortOn !== snapshotSettings.sortOn ||
       settings.doDescendingOrder !== snapshotSettings.doDescendingOrder
     );
-
     payload = { ...payload, doUpdateSettings: true, settings, doFetch };
+
     vars.updateSettings.doFetch = doFetch;
 
     try {
       await dataApi.putFiles([settingsFPath], [settings]);
     } catch (error) {
       console.log('updateTagDataSStep error: ', error);
-      dispatch({ type: UPDATE_TAG_DATA_S_STEP_ROLLBACK, payload: { ...payload, error } });
+      dispatch({
+        type: UPDATE_TAG_DATA_S_STEP_ROLLBACK, payload: { ...payload, error },
+      });
       vars.updateSettings.doFetch = false;
       return;
     }
@@ -4795,34 +4852,16 @@ export const updateTagDataTStep = (id, values) => async (dispatch, getState) => 
   const fpaths = [], contents = [];
   for (const tagName in combinedValues) {
     const value = combinedValues[tagName];
-
     if (value.diffType === DIFF_EQUAL) continue;
-    if (value.diffType === DIFF_DELETE) {
 
-      const addedDT = isNumber(value.addedDT) ? value.addedDT : now;
-      fpaths.push(createTagFPath(tagName, value.rank, now, addedDT, `deleted${id}`));
-      contents.push({});
-      now += 1;
-      continue;
-    }
+    let _id = id;
+    if (value.diffType === DIFF_DELETE) _id = `deleted${id}`;
 
     const addedDT = isNumber(value.addedDT) ? value.addedDT : now;
-    fpaths.push(createTagFPath(tagName, value.rank, now, addedDT, id));
+    fpaths.push(createTagFPath(tagName, value.rank, now, addedDT, _id));
     contents.push({});
     now += 1;
   }
-
-  // MainId is the same, but id can be different.
-  // Old paths might not be deleted, need to delete them all.
-  /*const deleteFPaths = [];
-  for (const fpath of tagFPaths) {
-    const eResult = extractTagFPath(fpath);
-    if (getMainId(eResult.id) === mainId && deletedTagNames.includes(eResult.tagName)) {
-      deleteFPaths.push(createTagFPath(
-        eResult.tagName, eResult.rank, eResult.updatedDT, eResult.addedDT, eResult.id
-      ));
-    }
-  }*/
 
   const payload = { id, values };
   dispatch({ type: UPDATE_TAG_DATA_T_STEP, payload });
@@ -4836,15 +4875,6 @@ export const updateTagDataTStep = (id, values) => async (dispatch, getState) => 
   }
 
   dispatch({ type: UPDATE_TAG_DATA_T_STEP_COMMIT, payload });
-
-  /*try {
-    await serverApi.deleteFiles(deleteFPaths);
-  } catch (error) {
-    console.log('updateTagDataTStep clean up error: ', error);
-    // error in this step should be fine
-  }*/
-
-  dispatch(sync());
 };
 
 export const retryDiedTags = () => async (dispatch, getState) => {
@@ -4918,12 +4948,10 @@ export const cleanUpTags = () => async (dispatch, getState) => {
   for (const fpath of tagFPaths) {
     const { tagName, rank, updatedDT, addedDT, id } = extractTagFPath(fpath);
 
-    const tagMainId = getMainId(id, toRootIds);
+    const _id = id.startsWith('deleted') ? id.slice(7) : id;
+    const tagMainId = getMainId(_id, toRootIds);
 
-    if (
-      !isString(tagMainId) ||
-      !isObject(tags[tagMainId])
-    ) {
+    if (!isString(tagMainId) || !isObject(tags[tagMainId])) {
       unusedTagFPaths.push(fpath);
       continue;
     }
@@ -4942,7 +4970,6 @@ export const cleanUpTags = () => async (dispatch, getState) => {
   unusedTagFPaths = unusedTagFPaths.slice(0, N_NOTES);
 
   if (unusedTagFPaths.length > 0) {
-    // Don't need offline, if no network or get killed, can do it later.
     try {
       await dataApi.deleteFiles(unusedTagFPaths);
     } catch (error) {
@@ -4950,6 +4977,8 @@ export const cleanUpTags = () => async (dispatch, getState) => {
       // error in this step should be fine
     }
   }
+
+  dispatch(sync());
 };
 
 export const updateTagNameEditors = (tagNameEditors) => {

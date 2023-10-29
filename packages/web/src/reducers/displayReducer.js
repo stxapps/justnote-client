@@ -504,14 +504,21 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === MERGE_NOTES_COMMIT) {
-    const { toListName, toNote } = action.payload;
+    const { conflictedNote, toListName, toNote } = action.payload;
 
     // Need to set NoteId here for consistency with notesReducer
     const newState = {
       ...state, noteId: state.listName === toListName ? toNote.id : null,
     };
 
-    // Need to update showingNoteInfos: delete conflict ids, insert toNote id!
+    newState.showingNoteInfos = [];
+    for (const info of state.showingNoteInfos) {
+      if (info.id === conflictedNote.id) {
+        newState.showingNoteInfos.push({ ...info, id: toNote.id, isConflicted: false });
+        continue;
+      }
+      newState.showingNoteInfos.push(info);
+    }
 
     return newState;
   }
