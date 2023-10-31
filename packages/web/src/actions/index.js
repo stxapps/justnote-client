@@ -701,7 +701,8 @@ export const updateBulkEditUrlHash = (
       if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
 
       const listName = getState().display.listName;
-      if (listName === TRASH && vars.deleteOldNotes.ids) return;
+      const queryString = getState().display.queryString;
+      if (listName === TRASH && queryString === '' && vars.deleteOldNotes.ids) return;
 
       const isEditorUploading = getState().editor.isUploading;
       if (isEditorUploading) return;
@@ -1124,16 +1125,13 @@ export const updateFetched = (
   const processingNotes = [], interveningNotes = [];
   if (isObject(notes[payload.lnOrQt])) {
     for (const note of Object.values(notes[payload.lnOrQt])) {
-      if (note.status === ADDED) continue;
-      processingNotes.push(note);
-    }
-  }
-  if (Array.isArray(vars.notesReducer.interveningNoteIds[payload.lnOrQt])) {
-    for (const note of Object.values(notes[payload.lnOrQt])) {
-      if (!vars.notesReducer.interveningNoteIds[payload.lnOrQt].includes(note.id)) {
-        continue;
+      if (note.status !== ADDED) processingNotes.push(note);
+
+      if (Array.isArray(vars.notesReducer.interveningNoteIds[payload.lnOrQt])) {
+        if (vars.notesReducer.interveningNoteIds[payload.lnOrQt].includes(note.id)) {
+          interveningNotes.push(note);
+        }
       }
-      interveningNotes.push(note);
     }
   }
 
@@ -1647,8 +1645,8 @@ export const saveNote = (title, body, media) => async (dispatch, getState) => {
     return;
   }
 
-  const { listName, noteId } = getState().display;
-  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
+  const { noteId } = getState().display;
+  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getNote(noteId, getState().notes);
 
   dispatch(increaseBlurCount());
 
@@ -1666,8 +1664,8 @@ export const discardNote = (doCheckEditing, title = null, body = null) => async 
   dispatch, getState
 ) => {
 
-  const { listName, noteId } = getState().display;
-  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getState().notes[listName][noteId];
+  const { noteId } = getState().display;
+  const note = noteId === NEW_NOTE ? NEW_NOTE_OBJ : getNote(noteId, getState().notes);
 
   dispatch(increaseBlurCount());
 
@@ -2141,6 +2139,7 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
   const safeAreaWidth = getState().window.width;
   if (
     getState().display.listName !== toListName &&
+    getState().display.queryString === '' &&
     isNumber(safeAreaWidth) &&
     safeAreaWidth < LG_WIDTH
   ) {
@@ -4309,8 +4308,15 @@ export const viewNoteAsWebpage = () => async (dispatch, getState) => {
   // https://stackoverflow.com/a/39387533
   const w = window.open();
 
-  const { listName, selectingNoteId } = getState().display;
-  const note = getState().notes[listName][selectingNoteId];
+  const notes = getState().notes;
+  const selectingNoteId = getState().display.selectingNoteId;
+
+  const note = getNote(selectingNoteId, notes);
+  if (!isObject(note)) {
+    console.log('In viewNoteAsWebpage, invalid selectingNoteId:', selectingNoteId);
+    return;
+  }
+
   const body = await replaceImageUrls(note.body);
 
   let html = `${jhfp}`;

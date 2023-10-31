@@ -71,7 +71,7 @@ const NoteList = (props) => {
   ]);
 
   let noteListItems = <LoadingNoteListItems />;
-  if (!getIsShowingNoteInfosNull) {
+  if (!isShowingNoteInfosNull) {
     if (lockStatus === LOCKED) noteListItems = <NoteListLock />;
     else noteListItems = <NoteListItems />;
   }
