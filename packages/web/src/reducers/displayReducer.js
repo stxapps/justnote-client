@@ -117,16 +117,18 @@ const initialState = {
 const displayReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_LIST_NAME) {
-    return {
+    const newState = {
       ...state,
       listName: action.payload,
       noteId: null,
       isEditorFocused: false,
       isEditorBusy: false,
-      selectedNoteIds: [],
-      isSelectedNoteIdsMaxErrorShown: false,
-      listChangedCount: state.listChangedCount + 1,
     };
+    [newState.selectedNoteIds, newState.isSelectedNoteIdsMaxErrorShown] = [[], false];
+    [newState.showingNoteInfos, newState.hasMoreNotes] = [null, null];
+    newState.listChangedCount += 1;
+    vars.fetch.doShowLoading = true;
+    return newState;
   }
 
   if (action.type === UPDATE_QUERY_STRING) {
@@ -320,11 +322,7 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === FETCH_COMMIT) {
-    const newState = {
-      ...state,
-      isAccessErrorPopupShown: false,
-      didFetch: true,
-    };
+    const newState = { ...state, isAccessErrorPopupShown: false, didFetch: true };
 
     // Make sure listName is in listNameMap, if not, set to My Notes.
     const { listNames, tagNames, doFetchStgsAndInfo, settings } = action.payload;
@@ -428,6 +426,7 @@ const displayReducer = (state = initialState, action) => {
   if (action.type === REFRESH_FETCHED) {
     const newState = { ...state, isStaleErrorPopupShown: false };
     if (Array.isArray(newState.showingNoteInfos)) {
+      newState.noteId = null;
       [newState.selectedNoteIds, newState.isSelectedNoteIdsMaxErrorShown] = [[], false];
       [newState.showingNoteInfos, newState.hasMoreNotes] = [null, null];
       vars.fetch.doShowLoading = true;
@@ -664,12 +663,11 @@ const displayReducer = (state = initialState, action) => {
 
     const newState = { ...state, settingsStatus: null };
     if (doFetch && Array.isArray(newState.showingNoteInfos)) {
+      newState.noteId = null;
       [newState.selectedNoteIds, newState.isSelectedNoteIdsMaxErrorShown] = [[], false];
       [newState.showingNoteInfos, newState.hasMoreNotes] = [null, null];
       newState.listChangedCount += 1;
       [vars.fetch.fetchedLnOrQts, vars.fetch.doShowLoading] = [[], true];
-
-      newState.noteId = null;
     }
     return newState;
   }
@@ -695,12 +693,11 @@ const displayReducer = (state = initialState, action) => {
       settingsStatus: null,
     };
     if (doFetch && Array.isArray(newState.showingNoteInfos)) {
+      newState.noteId = null;
       [newState.selectedNoteIds, newState.isSelectedNoteIdsMaxErrorShown] = [[], false];
       [newState.showingNoteInfos, newState.hasMoreNotes] = [null, null];
       newState.listChangedCount += 1;
       [vars.fetch.fetchedLnOrQts, vars.fetch.doShowLoading] = [[], true];
-
-      newState.noteId = null;
     }
     return newState;
   }
@@ -748,9 +745,17 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_SYNCED) {
-    return {
-      ...state, syncProgress: null, didFetchSettings: false, fetchedListNames: [],
-    };
+    const newState = { ...state, syncProgress: null };
+
+    newState.noteId = null;
+    [newState.selectedNoteIds, newState.isSelectedNoteIdsMaxErrorShown] = [[], false];
+    newState.didFetchSettings = false;
+    [newState.showingNoteInfos, newState.hasMoreNotes] = [null, null];
+    newState.listChangedCount += 1;
+    [vars.fetch.fetchedLnOrQts, vars.fetch.fetchedNoteIds] = [[], []];
+    [vars.fetch.doShowLoading, vars.fetch.doForce] = [true, true];
+
+    return newState;
   }
 
   if (action.type === UPDATE_PAYWALL_FEATURE) {
@@ -825,6 +830,7 @@ const displayReducer = (state = initialState, action) => {
     if (!doFetch || !Array.isArray(state.showingNoteInfos)) return state;
 
     const newState = { ...state };
+    newState.noteId = null;
     [newState.selectedNoteIds, newState.isSelectedNoteIdsMaxErrorShown] = [[], false];
     [newState.showingNoteInfos, newState.hasMoreNotes] = [null, null];
     newState.listChangedCount += 1;
@@ -871,15 +877,14 @@ const displayReducer = (state = initialState, action) => {
     const newState = { ...state, importAllDataProgress: progress };
     if (isObject(progress) && progress.total && progress.done) {
       if (progress.total === progress.done) {
+        newState.noteId = null;
         newState.selectedNoteIds = [];
         newState.isSelectedNoteIdsMaxErrorShown = false;
         newState.didFetchSettings = false;
         [newState.showingNoteInfos, newState.hasMoreNotes] = [null, null];
         newState.listChangedCount += 1;
         [vars.fetch.fetchedLnOrQts, vars.fetch.fetchedNoteIds] = [[], []];
-        vars.fetch.doShowLoading = true;
-
-        newState.noteId = null;
+        [vars.fetch.doShowLoading, vars.fetch.doForce] = [true, true];
       }
     }
     return newState;

@@ -11,7 +11,7 @@ import {
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
   DISCARD_ACTION_CHANGE_LIST_NAME, DISCARD_ACTION_UPDATE_BULK_EDIT_URL_HASH,
   DISCARD_ACTION_SHOW_NOTE_LIST_MENU_POPUP, DISCARD_ACTION_SHOW_NLIM_POPUP,
-  DISCARD_ACTION_UPDATE_LIST_NAME, SM_WIDTH,
+  DISCARD_ACTION_UPDATE_LIST_NAME, DISCARD_ACTION_UPDATE_TAG_NAME, SM_WIDTH,
 } from '../types/const';
 import { dialogBgFMV, dialogFMV } from '../types/animConfigs';
 
@@ -60,7 +60,10 @@ const ConfirmDiscardPopup = () => {
       // As this and closing confirmDiscard popup both change url hash,
       //   need to be in different js clock cycle.
       setTimeout(() => dispatch(showNLIMPopup(null, null, false)), 100);
-    } else if (discardAction === DISCARD_ACTION_UPDATE_LIST_NAME) {
+    } else if (
+      discardAction === DISCARD_ACTION_UPDATE_LIST_NAME ||
+      discardAction === DISCARD_ACTION_UPDATE_TAG_NAME
+    ) {
       // As this and closing confirmDiscard popup both change url hash,
       //   need to be in different js clock cycle.
       setTimeout(() => dispatch(updateSettingsPopup(false, false)), 100);
@@ -87,6 +90,8 @@ const ConfirmDiscardPopup = () => {
   let msg = 'Are you sure you want to discard your unsaved changes to your note? All of your changes will be permanently deleted. This action cannot be undone.';
   if (discardAction === DISCARD_ACTION_UPDATE_LIST_NAME) {
     msg = 'There are some lists still in editing mode. Are you sure you want to discard them?';
+  } else if (discardAction === DISCARD_ACTION_UPDATE_TAG_NAME) {
+    msg = 'There are some tags still in editing mode. Are you sure you want to discard them?';
   }
 
   return (

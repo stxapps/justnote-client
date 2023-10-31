@@ -3,9 +3,9 @@ import { useSelector } from 'react-redux';
 
 import { PINNED, LOCKED, VALID, INVALID } from '../types/const';
 import {
-  makeGetPinStatus, makeGetLockNoteStatus, makeGetUnsavedNote,
+  makeGetPinStatus, makeGetTagStatus, makeGetLockNoteStatus, makeGetUnsavedNote,
 } from '../selectors';
-import { isDiedStatus, isBusyStatus, isPinningStatus } from '../utils';
+import { isDiedStatus, isBusyStatus, isPinningStatus, isTaggingStatus } from '../utils';
 
 import { useTailwind } from '.';
 import NoteListItemContent from './NoteListItemContent';
@@ -16,10 +16,12 @@ const NoteListItem = (props) => {
 
   const { note } = props;
   const getPinStatus = useMemo(makeGetPinStatus, []);
+  const getTagStatus = useMemo(makeGetTagStatus, []);
   const getLockNoteStatus = useMemo(makeGetLockNoteStatus, []);
   const getUnsavedNote = useMemo(makeGetUnsavedNote, []);
   const noteId = useSelector(state => state.display.noteId);
   const pinStatus = useSelector(state => getPinStatus(state, note));
+  const tagStatus = useSelector(state => getTagStatus(state, note));
   const lockStatus = useSelector(state => getLockNoteStatus(state, note));
   const unsavedNote = useSelector(state => getUnsavedNote(state, note));
   const tailwind = useTailwind();
@@ -29,6 +31,7 @@ const NoteListItem = (props) => {
   const isUnsavedValid = unsavedNote.status === VALID;
   const isUnsavedInvalid = unsavedNote.status === INVALID;
   const isPinning = isPinningStatus(pinStatus);
+  const isTagging = isTaggingStatus(tagStatus);
 
   const renderBusy = () => {
     const svgStyle = { top: '50px', left: '24px' };
@@ -88,7 +91,7 @@ const NoteListItem = (props) => {
   } else if (isConflicted || isDied || isUnsavedInvalid) {
     content = <NoteListItemError note={note} unsavedNote={unsavedNote} />;
   } else {
-    content = <NoteListItemContent note={note} pinStatus={pinStatus} />;
+    content = <NoteListItemContent note={note} pinStatus={pinStatus} tagStatus={tagStatus} />;
   }
 
   return (
@@ -97,6 +100,7 @@ const NoteListItem = (props) => {
       {(isBusyStatus(note.status) && note.id !== noteId) && renderBusy()}
       {(isUnsavedValid && note.id !== noteId) && renderUnsaved()}
       {isPinning && renderPinning()}
+      {isTagging && renderBusy()}
       {[PINNED].includes(pinStatus) && renderPin()}
       {note.id === noteId && <div className={tailwind(`absolute inset-y-0 top-0 right-0 w-1 ${isConflicted || isDied ? 'bg-red-100' : 'bg-green-600'}`)} />}
     </li>

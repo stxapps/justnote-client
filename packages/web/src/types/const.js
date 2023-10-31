@@ -93,12 +93,6 @@ export const VIEW_AS_WEBPAGE = 'View as Webpage';
 export const SHARE = 'Share';
 export const EXPORT_AS_PDF = 'Export as PDF';
 
-export const NOTE_ITEM_POPUP_MENU = {
-  [MY_NOTES]: [ARCHIVE, REMOVE, MOVE_TO],
-  [TRASH]: [RESTORE, DELETE],
-  [ARCHIVE]: [REMOVE, MOVE_TO],
-};
-
 export const ZERO = 'ZERO'; // top or left of the window
 export const CENTER = 'CENTER'; // center of the window
 export const EDGE = 'EDGE'; // bottom or right of the window

@@ -6,7 +6,7 @@ import { updatePopup, updateSettingsPopup, updateSettingsViewId } from '../actio
 import {
   PAYWALL_POPUP, SM_WIDTH, SETTINGS_VIEW_IAP, FEATURE_PIN, FEATURE_APPEARANCE,
   FEATURE_DATE_FORMAT, FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES,
-  FEATURE_LOCK,
+  FEATURE_LOCK, FEATURE_TAG,
 } from '../types/const';
 import { dialogBgFMV, dialogFMV } from '../types/animConfigs';
 
@@ -59,6 +59,8 @@ const PaywallPopup = () => {
     featureText = 'More font sizes are an extra feature.';
   } else if (feature === FEATURE_LOCK) {
     featureText = 'Lock lists & notes are an extra feature.';
+  } else if (feature === FEATURE_TAG) {
+    featureText = 'Tags are an extra feature.';
   }
 
   const spanStyle = {};

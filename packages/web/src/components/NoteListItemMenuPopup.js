@@ -5,35 +5,47 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   updatePopupUrlHash, moveNotesWithAction, pinNotes, updateMoveAction,
   updateDeleteAction, updateListNamesMode, viewNoteAsWebpage, showAddLockEditorPopup,
-  lockNote,
+  lockNote, updateTagEditorPopup,
 } from '../actions';
 import {
   MY_NOTES, TRASH, ARCHIVE, REMOVE, RESTORE, DELETE, MOVE_TO, PIN, MANAGE_PIN, PINNED,
-  VIEW_AS_WEBPAGE, NOTE_ITEM_POPUP_MENU, NOTE_LIST_ITEM_MENU_POPUP, LIST_NAMES_POPUP,
-  PIN_MENU_POPUP, CONFIRM_DELETE_POPUP, MOVE_ACTION_NOTE_ITEM_MENU,
-  DELETE_ACTION_NOTE_ITEM_MENU, LIST_NAMES_MODE_MOVE_NOTES, LOCK_ACTION_ADD_LOCK_NOTE,
-  LOCK, UNLOCKED,
+  VIEW_AS_WEBPAGE, NOTE_LIST_ITEM_MENU_POPUP, LIST_NAMES_POPUP, PIN_MENU_POPUP,
+  CONFIRM_DELETE_POPUP, MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_ITEM_MENU,
+  LIST_NAMES_MODE_MOVE_NOTES, LOCK_ACTION_ADD_LOCK_NOTE, LOCK, UNLOCKED, ADD_TAGS,
+  MANAGE_TAGS, TAGGED,
 } from '../types/const';
-import { getListNameMap, makeGetPinStatus, makeGetLockNoteStatus } from '../selectors';
+import {
+  getListNameMap, makeGetPinStatus, makeGetTagStatus, makeGetLockNoteStatus,
+} from '../selectors';
 import { getListNameDisplayName, getAllListNames } from '../utils';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
 
+export const NOTE_ITEM_POPUP_MENU = {
+  [MY_NOTES]: [ARCHIVE, REMOVE, MOVE_TO],
+  [TRASH]: [RESTORE, DELETE],
+  [ARCHIVE]: [REMOVE, MOVE_TO],
+};
+const QUERY_STRING_MENU = [REMOVE];
+
 const NoteListItemMenuPopup = () => {
 
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
   const getPinStatus = useMemo(makeGetPinStatus, []);
+  const getTagStatus = useMemo(makeGetTagStatus, []);
   const getLockNoteStatus = useMemo(makeGetLockNoteStatus, []);
   const isShown = useSelector(state => state.display.isNoteListItemMenuPopupShown);
   const anchorPosition = useSelector(
     state => state.display.noteListItemMenuPopupPosition
   );
   const listName = useSelector(state => state.display.listName);
+  const queryString = useSelector(state => state.display.queryString);
   const listNameMap = useSelector(state => getListNameMap(state));
   const selectingNoteId = useSelector(state => state.display.selectingNoteId);
   const pinStatus = useSelector(state => getPinStatus(state, selectingNoteId));
+  const tagStatus = useSelector(state => getTagStatus(state, selectingNoteId))
   const lockStatus = useSelector(state => getLockNoteStatus(state, selectingNoteId));
   const [popupSize, setPopupSize] = useState(null);
   const popup = useRef(null);
@@ -73,6 +85,8 @@ const NoteListItemMenuPopup = () => {
       dispatch(pinNotes([selectingNoteId]));
     } else if (text === MANAGE_PIN) {
       updatePopupUrlHash(PIN_MENU_POPUP, true, anchorPosition, true);
+    } else if (text === ADD_TAGS || text === MANAGE_TAGS) {
+      dispatch(updateTagEditorPopup(true, selectingNoteId, text === ADD_TAGS));
     } else if (text === VIEW_AS_WEBPAGE) {
       onCancelBtnClick();
       dispatch(viewNoteAsWebpage());
@@ -97,14 +111,17 @@ const NoteListItemMenuPopup = () => {
     } else {
       menu = NOTE_ITEM_POPUP_MENU[MY_NOTES];
     }
-
     if (listName === MY_NOTES && getAllListNames(listNameMap).length === 3) {
       menu = menu.slice(0, -1);
     }
+    if (queryString) menu = QUERY_STRING_MENU;
 
-    if (listName !== TRASH) {
+    if (listName !== TRASH || queryString) {
       // Only when no other pending actions and list name is not TRASH.
       // If busy, the menuBtn will be disabled.
+      if (tagStatus === TAGGED) menu = [...menu, MANAGE_TAGS];
+      else if (tagStatus === null) menu = [...menu, ADD_TAGS];
+
       if (pinStatus === PINNED) menu = [...menu, MANAGE_PIN];
       else if (pinStatus === null) menu = [...menu, PIN];
 

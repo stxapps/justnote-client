@@ -233,9 +233,15 @@ export const init = () => async (dispatch, getState) => {
       }
     }
 
-    // Check TRY_UPDATE_SETTINGS, MERGE_SETTINGS, PIN_NOTE,
-    //   UNPIN_NOTE, MOVE_PINNED_NOTE_ADD_STEP, UPDATE_TAG_DATA_S_STEP,
-    //   UPDATE_TAG_DATA_T_STEP?
+    if (
+      Object.keys(getState().pendingPins).length > 0 ||
+      Object.keys(getState().pendingTags).length > 0 ||
+      syncQueue.length > 0 ||
+      taskQueue.length > 0
+    ) {
+      e.preventDefault();
+      return e.returnValue = 'It looks like your changes are being saved to the server. Do you want to leave this site and discard your changes?';
+    }
 
     if (!getState().display.isSettingsPopupShown) return;
 

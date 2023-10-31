@@ -4,21 +4,18 @@ import { useSelector, useDispatch } from 'react-redux';
 import { updatePopupUrlHash, showNoteListMenuPopup } from '../actions';
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import { SEARCH_POPUP, LG_WIDTH, UPDATING, SHOW_SYNCED } from '../types/const';
-import { getListNameMap } from '../selectors';
-import { getListNameDisplayName } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 import NoteListSearchPopup from './NoteListSearchPopup';
 import NoteListTopBarBulkEdit from './NoteListTopBarBulkEdit';
+import NoteListTopBarTitle from './NoteListTopBarTitle';
 
 const NoteListTopBar = (props) => {
 
   const { onSidebarOpenBtnClick } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
-  const listName = useSelector(state => state.display.listName);
-  const listNameMap = useSelector(getListNameMap);
+
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
-  const didFetch = useSelector(state => state.display.didFetch);
   const settingsStatus = useSelector(state => state.display.settingsStatus);
   const syncProgress = useSelector(state => state.display.syncProgress);
   const menuBtn = useRef(null);
@@ -35,10 +32,6 @@ const NoteListTopBar = (props) => {
   };
 
   if (safeAreaWidth < LG_WIDTH && isBulkEditing) return <NoteListTopBarBulkEdit />;
-
-  let title;
-  if (didFetch) title = <h1 className={tailwind('truncate text-lg font-medium leading-6 text-gray-900 blk:text-gray-100')}>{getListNameDisplayName(listName, listNameMap)}</h1>;
-  else title = <div className={tailwind('h-6 w-20 animate-pulse rounded-md bg-gray-300 blk:bg-gray-700')} />;
 
   const menuBtnSvg = (
     <svg className={tailwind('w-10 rounded-full p-2 group-focus:bg-gray-200 blk:group-focus:bg-gray-700')} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -86,7 +79,9 @@ const NoteListTopBar = (props) => {
           </svg>
         </button>
         <div className={tailwind('flex min-w-0 flex-1 items-center justify-between pl-4 sm:pl-6')}>
-          <div className={tailwind('min-w-0 flex-1')}>{title}</div>
+          <div className={tailwind('min-w-0 flex-1')}>
+            <NoteListTopBarTitle />
+          </div>
           <div className={tailwind('ml-4 flex')}>
             <button onClick={onSearchBtnClick} type="button" className={tailwind('group inline-flex items-center border border-white bg-white px-1 text-sm text-gray-500 hover:text-gray-700 focus:text-gray-700 focus:outline-none blk:border-gray-900 blk:bg-gray-900 blk:text-gray-400 blk:hover:text-gray-200 blk:focus:text-gray-200 lg:hidden')}>
               <div className={tailwind('rounded p-2.5 group-focus:bg-gray-200 blk:group-focus:bg-gray-700')}>

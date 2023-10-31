@@ -2,8 +2,12 @@ import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { updatePopupUrlHash, deleteNotes, deleteListNames } from '../actions';
-import { CONFIRM_DELETE_POPUP, DELETE_ACTION_LIST_NAME, SM_WIDTH } from '../types/const';
+import {
+  updatePopupUrlHash, deleteNotes, deleteListNames, deleteTagNames,
+} from '../actions';
+import {
+  CONFIRM_DELETE_POPUP, DELETE_ACTION_LIST_NAME, DELETE_ACTION_TAG_NAME, SM_WIDTH,
+} from '../types/const';
 import { dialogBgFMV, dialogFMV } from '../types/animConfigs';
 
 import { useSafeAreaFrame, useTailwind } from '.';
@@ -13,7 +17,8 @@ const ConfirmDeletePopup = () => {
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
   const isShown = useSelector(state => state.display.isConfirmDeletePopupShown);
   const deleteAction = useSelector(state => state.display.deleteAction);
-  const deletingListName = useSelector(state => state.display.deletingListName);
+  const selectingListName = useSelector(state => state.display.selectingListName);
+  const selectingTagName = useSelector(state => state.display.selectingTagName);
   const cancelBtn = useRef(null);
   const didClick = useRef(false);
   const dispatch = useDispatch();
@@ -29,7 +34,9 @@ const ConfirmDeletePopup = () => {
     if (didClick.current) return;
 
     if (deleteAction === DELETE_ACTION_LIST_NAME) {
-      dispatch(deleteListNames([deletingListName]));
+      dispatch(deleteListNames([selectingListName]));
+    } else if (deleteAction === DELETE_ACTION_TAG_NAME) {
+      dispatch(deleteTagNames([selectingTagName]));
     } else {
       // As this and closing confirmDelete popup both call window.history.back(),
       //   need to be in different js clock cycle.

@@ -13,10 +13,13 @@ import NoteListMenuPopup from './NoteListMenuPopup';
 import NoteListItemMenuPopup from './NoteListItemMenuPopup';
 import PinMenuPopup from './PinMenuPopup';
 import LockMenuPopup from './LockMenuPopup';
+import TagEditorPopup from './TagEditorPopup';
 import SettingsPopup from './SettingsPopup';
 import SettingsListsMenuPopup from './SettingsListsMenuPopup';
+import SettingsTagsMenuPopup from './SettingsTagsMenuPopup';
 import DateFormatMenuPopup from './DateFormatMenuPopup';
 import PinErrorPopup from './PinErrorPopup';
+import TagErrorPopup from './TagErrorPopup';
 import {
   SettingsUpdateErrorPopup, SettingsConflictErrorPopup,
 } from './SettingsErrorPopup';
@@ -87,10 +90,13 @@ const Main = () => {
       <NoteListItemMenuPopup />
       <PinMenuPopup />
       <LockMenuPopup />
+      <TagEditorPopup />
       <SettingsPopup />
       <SettingsListsMenuPopup />
+      <SettingsTagsMenuPopup />
       <DateFormatMenuPopup />
       <PinErrorPopup />
+      <TagErrorPopup />
       <SettingsConflictErrorPopup />
       <SettingsUpdateErrorPopup />
       <ListNamesPopup />

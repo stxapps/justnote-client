@@ -6,7 +6,9 @@ import { updateNoteIdUrlHash, fetch } from '../actions';
 import {
   TRASH, NEW_NOTE, NEW_NOTE_OBJ, MAX_SELECTED_NOTE_IDS, VALID, LOCKED,
 } from '../types/const';
-import { makeGetUnsavedNote, getCurrentLockListStatus } from '../selectors';
+import {
+  getIsShowingNoteInfosNull, makeGetUnsavedNote, getCurrentLockListStatus,
+} from '../selectors';
 import { popupFMV } from '../types/animConfigs';
 
 import { useTailwind } from '.';
@@ -20,9 +22,14 @@ const NoteList = (props) => {
   const { onSidebarOpenBtnClick } = props;
   const getUnsavedNote = useMemo(makeGetUnsavedNote, []);
   const listName = useSelector(state => state.display.listName);
+  const queryString = useSelector(state => state.display.queryString);
+  const didFetch = useSelector(state => state.display.didFetch);
+  const didFetchSettings = useSelector(state => state.display.didFetchSettings);
+  const isShowingNoteInfosNull = useSelector(state => getIsShowingNoteInfosNull(state));
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
-  const isMaxErrorShown = useSelector(state => state.display.isSelectedNoteIdsMaxErrorShown);
-  const fetchedListNames = useSelector(state => state.display.fetchedListNames);
+  const isMaxErrorShown = useSelector(
+    state => state.display.isSelectedNoteIdsMaxErrorShown
+  );
   const unsavedNote = useSelector(state => getUnsavedNote(state, NEW_NOTE_OBJ));
   const lockStatus = useSelector(state => getCurrentLockListStatus(state));
   const dispatch = useDispatch();
@@ -58,11 +65,13 @@ const NoteList = (props) => {
   };
 
   useEffect(() => {
-    if (!fetchedListNames.includes(listName)) dispatch(fetch());
-  }, [listName, fetchedListNames, dispatch]);
+    dispatch(fetch());
+  }, [
+    listName, queryString, didFetch, didFetchSettings, isShowingNoteInfosNull, dispatch,
+  ]);
 
   let noteListItems = <LoadingNoteListItems />;
-  if (fetchedListNames.includes(listName)) {
+  if (!getIsShowingNoteInfosNull) {
     if (lockStatus === LOCKED) noteListItems = <NoteListLock />;
     else noteListItems = <NoteListItems />;
   }
