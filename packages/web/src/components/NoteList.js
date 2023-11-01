@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -32,6 +32,11 @@ const NoteList = (props) => {
   );
   const unsavedNote = useSelector(state => getUnsavedNote(state, NEW_NOTE_OBJ));
   const lockStatus = useSelector(state => getCurrentLockListStatus(state));
+  const prevListName = useRef(null);
+  const prevQueryString = useRef(null);
+  const prevDidFetch = useRef(null);
+  const prevDidFetchSettings = useRef(null);
+  const prevIsShowingNoteInfosNull = useRef(null);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
@@ -65,7 +70,19 @@ const NoteList = (props) => {
   };
 
   useEffect(() => {
-    dispatch(fetch());
+    if (
+      (prevListName.current !== listName) ||
+      (prevQueryString.current !== queryString) ||
+      (prevDidFetch.current && !didFetch) ||
+      (prevDidFetchSettings.current && !didFetchSettings) ||
+      (!prevIsShowingNoteInfosNull.current && isShowingNoteInfosNull)
+    ) dispatch(fetch());
+
+    prevListName.current = listName;
+    prevQueryString.current = queryString;
+    prevDidFetch.current = didFetch;
+    prevDidFetchSettings.current = didFetchSettings;
+    prevIsShowingNoteInfosNull.current = isShowingNoteInfosNull;
   }, [
     listName, queryString, didFetch, didFetchSettings, isShowingNoteInfosNull, dispatch,
   ]);

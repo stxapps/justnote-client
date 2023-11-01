@@ -65,9 +65,15 @@ const SettingsTagsMenuPopup = () => {
   const onDeleteBtnClick = () => {
     if (didClick.current) return;
     onCancelBtnClick();
-    dispatch(updateTagNameEditors({
-      [selectingTagName]: { isCheckingCanDelete: true },
-    }));
+
+    // As this and showing ConfirmDeletePopup both change url hash,
+    //   need to be in different js clock cycle.
+    setTimeout(() => {
+      dispatch(updateTagNameEditors({
+        [selectingTagName]: { isCheckingCanDelete: true },
+      }));
+    }, 100);
+
     didClick.current = true;
   };
 

@@ -1,6 +1,8 @@
 import * as idb from 'idb-keyval';
 
-import { NOTES, SETTINGS, INFO, PINS, UNSAVED_NOTES, DOT_JSON } from '../types/const';
+import {
+  NOTES, SETTINGS, INFO, PINS, TAGS, UNSAVED_NOTES, DOT_JSON,
+} from '../types/const';
 import { isObject, copyFPaths, addFPath, deleteFPath } from '../utils';
 import { cachedFPaths } from '../vars';
 
@@ -109,7 +111,7 @@ const listFiles = async (callback) => {
   let count = 0;
   for (let key of keys) {
     key = `${key}`; // Force key to be only string, no number.
-    if (![NOTES, SETTINGS, INFO, PINS].some(el => key.startsWith(el))) continue;
+    if (![NOTES, SETTINGS, INFO, PINS, TAGS].some(el => key.startsWith(el))) continue;
 
     callback(key);
     count += 1;

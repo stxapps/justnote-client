@@ -458,13 +458,21 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === ADD_NOTE) {
     const { note, insertIndex } = action.payload;
-    if (!isObject(note) || !isNumber(insertIndex)) return state;
-    if (!Array.isArray(state.showingNoteInfos)) return state;
 
-    const noteId = note.id;
-    if (state.showingNoteInfos.some(info => info.id === noteId)) return state;
+    const newState = { ...state, noteId: null, isEditorBusy: false };
+    if (!isObject(note)) return newState;
+    if (!Array.isArray(newState.showingNoteInfos)) return newState;
 
-    const newState = { ...state, noteId, isEditorBusy: false };
+    if (newState.listName !== TRASH && newState.queryString === '') {
+      newState.noteId = note.id;
+    }
+    if (
+      !isNumber(insertIndex) ||
+      newState.showingNoteInfos.some(info => info.id === note.id)
+    ) {
+      return newState;
+    }
+
     newState.showingNoteInfos = [
       ...newState.showingNoteInfos.slice(0, insertIndex),
       { id: note.id },
@@ -475,10 +483,12 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_NOTE) {
     const { fromNote, toNote } = action.payload;
-    if (!isObject(fromNote) || !isObject(toNote)) return state;
-    if (!Array.isArray(state.showingNoteInfos)) return state;
 
-    const newState = { ...state, noteId: toNote.id, isEditorBusy: false };
+    const newState = { ...state, noteId: null, isEditorBusy: false };
+    if (!isObject(fromNote) || !isObject(toNote)) return newState;
+    if (!Array.isArray(newState.showingNoteInfos)) return newState;
+
+    newState.noteId = toNote.id;
 
     newState.showingNoteInfos = [];
     for (const info of state.showingNoteInfos) {
@@ -528,10 +538,10 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === CANCEL_DIED_NOTES) {
     const { ids, statuses, fromIds } = action.payload;
-    if (!Array.isArray(state.showingNoteInfos)) return state;
 
     // Need to reset NoteId here for consistency with notesReducer
     const newState = { ...state, noteId: null };
+    if (!Array.isArray(newState.showingNoteInfos)) return newState;
 
     newState.showingNoteInfos = [];
     for (const info of state.showingNoteInfos) {

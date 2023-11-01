@@ -14,6 +14,7 @@ import {
 import { getListNameMap, getThemeMode } from '../selectors';
 import {
   isString, getListNameDisplayName, getFormattedDT, isMobile as _isMobile,
+  getListNameAndNote,
 } from '../utils';
 import { isUint8Array, isBlob, convertDataUrlToBlob } from '../utils/index-web';
 import { popupFMV } from '../types/animConfigs';
@@ -106,7 +107,10 @@ const _NoteEditorUnsavedConflict = (props) => {
 
   const { note, unsavedNote } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
-  const listName = useSelector(state => state.display.listName);
+  const listName = useSelector(state => {
+    const { listName } = getListNameAndNote(note.id, state.notes);
+    return listName;
+  });
   const didClick = useRef(false);
   const dispatch = useDispatch();
   const tailwind = useTailwind();

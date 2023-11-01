@@ -2474,14 +2474,9 @@ export const getRawTags = (tagFPaths, toRootIds) => {
 };
 
 const _getTags = (tagFPaths, pendingTags, toRootIds) => {
+  // Values from getRawTags and from pendingTags are different.
+  // E.g., no id from pendingTags.
   const tags = getRawTags(tagFPaths, toRootIds);
-
-  for (const id in pendingTags) {
-    const mainId = getMainId(id, toRootIds);
-    if (!isString(mainId)) continue;
-
-    tags[mainId] = { ...tags[mainId], ...pendingTags[id] };
-  }
 
   const filteredTags = {};
   for (const mainId in tags) {
@@ -2489,7 +2484,14 @@ const _getTags = (tagFPaths, pendingTags, toRootIds) => {
       return !value.id.startsWith('deleted');
     });
     if (values.length === 0) continue;
-    filteredTags[mainId] = { values };
+    filteredTags[mainId] = { ...tags[mainId], values };
+  }
+
+  for (const id in pendingTags) {
+    const mainId = getMainId(id, toRootIds);
+    if (!isString(mainId)) continue;
+
+    filteredTags[mainId] = { ...filteredTags[mainId], ...pendingTags[id] };
   }
 
   return filteredTags;

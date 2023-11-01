@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import lsgApi from '../apis/localSg';
 import { COLS_PANEL_STATE, NEW_NOTE, NEW_NOTE_OBJ } from '../types/const';
 import { makeGetUnsavedNote } from '../selectors';
-import { throttle, isMobile as _isMobile } from '../utils';
+import { throttle, isMobile as _isMobile, getNote } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 import Sidebar from './Sidebar';
@@ -35,12 +35,12 @@ const ColsPanel = () => {
   } = useSafeAreaFrame();
   const getUnsavedNote = useMemo(makeGetUnsavedNote, []);
   const note = useSelector(state => {
-    const { listName, noteId } = state.display;
+    const { noteId } = state.display;
 
     if (!noteId) return null;
     if (noteId === NEW_NOTE) return NEW_NOTE_OBJ;
     if (noteId.startsWith('conflict')) return state.conflictedNotes[noteId];
-    return state.notes[listName][noteId];
+    return getNote(noteId, state.notes);
   });
   const unsavedNote = useSelector(state => getUnsavedNote(state, note));
 

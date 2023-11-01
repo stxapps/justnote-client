@@ -8,7 +8,7 @@ import {
   canvasFMV, sideBarOverlayFMV, sideBarFMV, rightPanelFMV,
 } from '../types/animConfigs';
 import { makeGetUnsavedNote } from '../selectors';
-import { isMobile as _isMobile } from '../utils';
+import { isMobile as _isMobile, getNote } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 import Sidebar from './Sidebar';
@@ -24,12 +24,12 @@ const NavPanel = () => {
     state => state.display.doRightPanelAnimateHidden
   );
   const note = useSelector(state => {
-    const { listName, noteId } = state.display;
+    const { noteId } = state.display;
 
     if (!noteId) return null;
     if (noteId === NEW_NOTE) return NEW_NOTE_OBJ;
     if (noteId.startsWith('conflict')) return state.conflictedNotes[noteId];
-    return state.notes[listName][noteId];
+    return getNote(noteId, state.notes);
   });
   const unsavedNote = useSelector(state => getUnsavedNote(state, note));
   const [derivedNote, setDerivedNote] = useState(note);

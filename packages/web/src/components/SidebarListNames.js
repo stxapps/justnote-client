@@ -47,6 +47,7 @@ const _SidebarListName = (props) => {
   const { listNameObj, level, isChildless } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const listName = useSelector(state => state.display.listName);
+  const queryString = useSelector(state => state.display.queryString);
   const [doExpand, setDoExpand] = useState(false);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
@@ -61,7 +62,7 @@ const _SidebarListName = (props) => {
   };
 
   let btnClassNames, svgClassNames;
-  if (listNameObj.listName === listName) {
+  if (listNameObj.listName === listName && queryString === '') {
     btnClassNames = 'bg-gray-200 text-gray-900 blk:bg-gray-700 blk:text-gray-100';
     svgClassNames = 'text-gray-500 blk:text-gray-400';
   } else {

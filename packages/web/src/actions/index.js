@@ -1040,12 +1040,12 @@ const _poolListNameAndNotes = (noteMetas, payloadNotes, stateNotes) => {
     const { listName, id } = meta;
 
     let notes = payloadNotes;
-    if (isObject(notes[listName] && isObject(notes[listName][id]))) {
+    if (isObject(notes[listName]) && isObject(notes[listName][id])) {
       return { listName, note: notes[listName][id] };
     }
 
     notes = stateNotes;
-    if (isObject(notes[listName] && isObject(notes[listName][id]))) {
+    if (isObject(notes[listName]) && isObject(notes[listName][id])) {
       return { listName, note: notes[listName][id] };
     }
 
@@ -2672,14 +2672,14 @@ const updateSettingsInQueue = (dispatch, getState) => async () => {
   const settings = getState().settings;
   const snapshotSettings = getState().snapshot.settings;
 
+  const { doSyncMode, doSyncModeInput } = getState().localSettings;
+  if (doSyncMode !== doSyncModeInput) vars.syncMode.didChange = true;
+
   // It's ok if MERGE_SETTINGS, IMPORT, DELETE_ALL in progress. Let it be conflict.
   if (isEqual(settings, snapshotSettings)) {
     dispatch({ type: UPDATE_UNCHANGED_SETTINGS });
     return;
   }
-
-  const { doSyncMode, doSyncModeInput } = getState().localSettings;
-  if (doSyncMode !== doSyncModeInput) vars.syncMode.didChange = true;
 
   const addedDT = Date.now();
   const {
@@ -2949,7 +2949,7 @@ const syncInQueue = (
     !vars.syncMode.doSyncMode ||
     vars.deleteSyncData.isDeleting
   ) {
-    if (waitResolve) waitResolve(false);
+    if (waitResolve) waitResolve(true);
     return;
   }
 
@@ -4614,6 +4614,7 @@ export const updateTagEditorPopup = (isShown, id, isAddTags) => async (
     if (isAddTags) {
       const purchases = getState().info.purchases;
       if (!doEnableExtraFeatures(purchases)) {
+        updatePopupUrlHash(NOTE_LIST_ITEM_MENU_POPUP, false, null);
         dispatch(updatePaywallFeature(FEATURE_TAG));
         dispatch(updatePopup(PAYWALL_POPUP, true));
         return;
@@ -4747,13 +4748,12 @@ export const updateTagDataSStep = (id, values) => async (dispatch, getState) => 
   }
 
   if (newTagNameObjs.length === 0) {
-    const noteFPaths = getNote(getState());
+    const noteFPaths = getNoteFPaths(getState());
     const tagFPaths = getTagFPaths(getState());
 
     const { toRootIds } = listNoteMetas(noteFPaths);
-
     const solvedTags = getTags(tagFPaths, {}, toRootIds);
-    const mainId = getMainId(id);
+    const mainId = getMainId(id, toRootIds);
 
     const aTns = [], bTns = [];
     if (isObject(solvedTags[mainId])) {
@@ -4773,9 +4773,12 @@ export const updateTagDataSStep = (id, values) => async (dispatch, getState) => 
 };
 
 export const updateTagDataTStep = (id, values) => async (dispatch, getState) => {
+  const noteFPaths = getNoteFPaths(getState());
   const tagFPaths = getTagFPaths(getState());
-  const solvedTags = getTags(tagFPaths, {});
-  const mainId = getMainId(id);
+
+  const { toRootIds } = listNoteMetas(noteFPaths);
+  const solvedTags = getTags(tagFPaths, {}, toRootIds);
+  const mainId = getMainId(id, toRootIds);
 
   const combinedValues = {}, aTns = [], bTns = [];
   if (isObject(solvedTags[mainId])) {
@@ -4879,7 +4882,7 @@ export const updateTagDataTStep = (id, values) => async (dispatch, getState) => 
   dispatch({ type: UPDATE_TAG_DATA_T_STEP, payload });
 
   try {
-    await serverApi.putFiles(fpaths, contents);
+    await dataApi.putFiles(fpaths, contents);
   } catch (error) {
     console.log('updateTagDataTStep error: ', error);
     dispatch({ type: UPDATE_TAG_DATA_T_STEP_ROLLBACK, payload: { ...payload, error } });

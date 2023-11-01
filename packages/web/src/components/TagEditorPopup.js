@@ -16,8 +16,8 @@ const TagEditorPopup = () => {
   const { height: safeAreaHeight } = useSafeAreaFrame();
   const getTagStatus = useMemo(makeGetTagStatus, []);
   const isShown = useSelector(state => state.display.isTagEditorPopupShown);
-  const selectingLinkId = useSelector(state => state.display.selectingLinkId);
-  const tagStatus = useSelector(state => getTagStatus(state, selectingLinkId));
+  const selectingNoteId = useSelector(state => state.display.selectingNoteId);
+  const tagStatus = useSelector(state => getTagStatus(state, selectingNoteId));
   const tagEditor = useSelector(state => getTagEditor(state));
   const didClick = useRef(false);
   const dispatch = useDispatch();
@@ -33,7 +33,7 @@ const TagEditorPopup = () => {
     if (didClick.current) return;
     didClick.current = true;
 
-    dispatch(updateTagDataSStep(selectingLinkId, tagEditor.values));
+    dispatch(updateTagDataSStep(selectingNoteId, tagEditor.values));
     updatePopupUrlHash(TAG_EDITOR_POPUP, false);
   };
 
@@ -114,11 +114,11 @@ const TagEditorPopup = () => {
     title = MANAGE_TAGS;
     if (tagEditor.hints.length === 0) {
       desc = (
-        <React.Fragment>No tag for this link. Enter a new one and press <br className={tailwind('hidden sm:inline')} />the Add button.</React.Fragment>
+        <React.Fragment>No tag for this note. Enter a new one and press <br className={tailwind('hidden sm:inline')} />the Add button.</React.Fragment>
       );
     } else {
       desc = (
-        <React.Fragment>No tag for this link. Enter a new one, <br className={tailwind('sm:hidden')} />or select from the hint below.</React.Fragment>
+        <React.Fragment>No tag for this note. Enter a new one, <br className={tailwind('sm:hidden')} />or select from the hint below.</React.Fragment>
       );
     }
   }
@@ -141,7 +141,7 @@ const TagEditorPopup = () => {
                 {tagEditor.values.length > 0 && <div className={tailwind('flex min-h-[4rem] flex-wrap items-center justify-start pt-5')}>
                   {tagEditor.values.map((value, i) => {
                     return (
-                      <div key={`TagEditorValue-${value.tagName}`} className={tailwind(`mb-2 flex items-center rounded-md bg-gray-100 pl-3 blk:bg-gray-700 ${i === 0 ? '' : 'ml-2'}`)}>
+                      <div key={`TagEditorValue-${value.tagName}`} className={tailwind(`mb-2 flex items-center rounded-full bg-gray-100 pl-3 blk:bg-gray-700 ${i === 0 ? '' : 'ml-2'}`)}>
                         <div className={tailwind('text-sm text-gray-600 blk:text-gray-300')}>{value.displayName}</div>
                         <button onClick={() => onValueDeselect(value)} className={tailwind('group ml-1 items-center justify-center rounded-full py-1.5 pr-1.5 focus:outline-none')} type="button">
                           <svg className={tailwind('h-5 w-5 cursor-pointer rounded-full text-gray-400 group-hover:text-gray-500 group-focus:ring-2 group-focus:ring-gray-400 group-focus:ring-offset-2 blk:text-gray-400 blk:group-hover:text-gray-300 blk:group-focus:ring-gray-500 blk:group-focus:ring-offset-gray-800')} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -155,7 +155,7 @@ const TagEditorPopup = () => {
                 {tagEditor.msg && <p className={tailwind('py-2 text-sm text-red-500')}>{tagEditor.msg}</p>}
                 <div className={tailwind(`flex items-center justify-start ${tagEditor.msg ? '' : 'pt-5'}`)}>
                   <label htmlFor="new-tag-input" className={tailwind('sr-only')}>Add a new tag</label>
-                  <input onChange={onDnInputChange} onKeyDown={onDnInputKeyPress} className={tailwind('block w-full flex-1 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 placeholder:text-gray-500 focus:border-gray-500 focus:outline-none focus:ring-gray-500 blk:border-gray-600 blk:bg-gray-800 blk:text-gray-200 blk:placeholder:text-gray-400 blk:focus:border-gray-400 blk:focus:ring-gray-400')} placeholder="Add a new tag" value={tagEditor.displayName} id="new-tag-input" name="new-tag-input" type="text" />
+                  <input onChange={onDnInputChange} onKeyDown={onDnInputKeyPress} className={tailwind('block w-full flex-1 rounded-md border border-gray-300 bg-white px-3.5 py-[0.3125rem] text-sm text-gray-700 placeholder:text-gray-500 focus:border-gray-500 focus:outline-none focus:ring-gray-500 blk:border-gray-600 blk:bg-gray-800 blk:text-gray-200 blk:placeholder:text-gray-400 blk:focus:border-gray-400 blk:focus:ring-gray-400')} placeholder="Add a new tag" value={tagEditor.displayName} id="new-tag-input" name="new-tag-input" type="text" />
                   <button onClick={onAddBtnClick} className={tailwind('group ml-2 flex flex-shrink-0 flex-grow-0 items-center rounded-md border border-gray-400 bg-white py-[0.3125rem] pl-1.5 pr-2.5 hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 blk:border-gray-500 blk:bg-gray-800 blk:hover:border-gray-400 blk:focus:ring-gray-500 blk:focus:ring-offset-gray-800')} type="button">
                     <svg className={tailwind('h-4 w-4 text-gray-500 group-hover:text-gray-600 blk:text-gray-300 blk:group-hover:text-gray-100')} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                       <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
@@ -167,7 +167,7 @@ const TagEditorPopup = () => {
                   <div className={tailwind('mb-2 text-sm text-gray-500 blk:text-gray-400')}>Hint:</div>
                   {tagEditor.hints.map(hint => {
                     return (
-                      <button key={`TagEditorHint-${hint.tagName}`} onClick={() => onHintSelect(hint)} className={tailwind('group ml-2 mb-2 block rounded-md bg-gray-100 px-3 py-1.5 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 blk:bg-gray-700 blk:hover:bg-gray-600 blk:focus:ring-gray-500 blk:focus:ring-offset-gray-800')} type="button" disabled={hint.isBlur}>
+                      <button key={`TagEditorHint-${hint.tagName}`} onClick={() => onHintSelect(hint)} className={tailwind(`group ml-2 mb-2 block rounded-full bg-gray-100 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 blk:bg-gray-700 blk:focus:ring-gray-500 blk:focus:ring-offset-gray-800 ${hint.isBlur ? '' : 'hover:bg-gray-200 blk:hover:bg-gray-600'}`)} type="button" disabled={hint.isBlur}>
                         <div className={tailwind(`text-sm ${hint.isBlur ? 'text-gray-400 blk:text-gray-500' : 'text-gray-600 group-hover:text-gray-700 blk:text-gray-300 blk:group-hover:text-gray-100'}`)}>{hint.displayName}</div>
                       </button>
                     );
