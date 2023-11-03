@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { showLockMenuPopup, showUnlockNoteEditorPopup } from '../actions';
+import { showLockMenuPopup, showUNEPopup } from '../actions';
 import { makeGetDoShowTitle } from '../selectors';
 
 import { useTailwind } from '.';
@@ -17,7 +17,7 @@ const NoteListItemLock = (props) => {
 
   const onContentBtnClick = () => {
     if (isBulkEditing) return;
-    dispatch(showUnlockNoteEditorPopup(note.id));
+    dispatch(showUNEPopup(note.id, true));
   };
 
   const onMenuBtnClick = (e) => {

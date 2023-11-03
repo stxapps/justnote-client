@@ -60,6 +60,10 @@ const changeListName = {
   changingListName: null,
 };
 
+const updateQueryString = {
+  updatingQueryString: null,
+};
+
 const updateBulkEdit = {
   selectedNoteId: null,
 };
@@ -71,6 +75,10 @@ const showNoteListMenuPopup = {
 const showNLIMPopup = {
   selectedNoteId: null,
   selectedRect: null,
+};
+
+const showUNEPopup = {
+  selectedNoteId: null,
 };
 
 const deleteOldNotes = {
@@ -112,6 +120,7 @@ const platform = {
 export const syncMode = {
   doSyncMode: platform.isReactNative ? true : false,
   didChange: false,
+  didReload: false,
 };
 
 const sync = {
@@ -139,8 +148,8 @@ const appState = {
 const vars = {
   cachedFPaths, cachedServerFPaths, scrollPanel, keyboard, fetch, runAfterFetchTask,
   randomHouseworkTasks, updateNoteIdUrlHash, updateNoteId, changeListName,
-  updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, deleteOldNotes, updateSettings,
-  updateSettingsPopup, notesReducer, displayReducer, editorReducer, iap, platform,
-  syncMode, sync, importAllData, deleteSyncData, appState,
+  updateQueryString, updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, showUNEPopup,
+  deleteOldNotes, updateSettings, updateSettingsPopup, notesReducer, displayReducer,
+  editorReducer, iap, platform, syncMode, sync, importAllData, deleteSyncData, appState,
 };
 export default vars;

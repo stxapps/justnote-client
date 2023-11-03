@@ -36,18 +36,19 @@ import {
   TRY_UPDATE_INFO_ROLLBACK, UPDATE_INFO, UPDATE_INFO_COMMIT, UPDATE_INFO_ROLLBACK,
   UPDATE_UNCHANGED_INFO, UPDATE_MOVE_ACTION, UPDATE_DELETE_ACTION,
   UPDATE_DISCARD_ACTION, UPDATE_LIST_NAMES_MODE, UPDATE_SYNCED,
-  INCREASE_SAVE_NOTE_COUNT, CANCEL_CHANGED_SYNC_MODE, SYNC, SYNC_COMMIT, SYNC_ROLLBACK,
-  UPDATE_SYNC_PROGRESS, INCREASE_DISCARD_NOTE_COUNT,
+  CANCEL_CHANGED_SYNC_MODE, SYNC, SYNC_COMMIT, SYNC_ROLLBACK, UPDATE_SYNC_PROGRESS,
+  INCREASE_DISCARD_NOTE_COUNT, INCREASE_SAVE_NOTE_COUNT,
   INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT, INCREASE_UPDATE_NOTE_ID_COUNT,
-  INCREASE_CHANGE_LIST_NAME_COUNT, INCREASE_FOCUS_TITLE_COUNT,
-  INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT,
+  INCREASE_CHANGE_LIST_NAME_COUNT, INCREASE_UPDATE_QUERY_STRING_COUNT,
+  INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT,
   INCREASE_UPDATE_EDITOR_WIDTH_COUNT, INCREASE_RESET_DID_CLICK_COUNT,
   INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT, INCREASE_UPDATE_BULK_EDIT_COUNT,
   INCREASE_SHOW_NOTE_LIST_MENU_POPUP_COUNT, INCREASE_SHOW_NLIM_POPUP_COUNT,
-  UPDATE_EDITOR_IS_UPLOADING, UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_EDITING_NOTE,
-  UPDATE_UNSAVED_NOTE, DELETE_UNSAVED_NOTES, CLEAN_UP_STATIC_FILES,
-  CLEAN_UP_STATIC_FILES_COMMIT, CLEAN_UP_STATIC_FILES_ROLLBACK, UPDATE_STACKS_ACCESS,
-  GET_PRODUCTS, GET_PRODUCTS_COMMIT, GET_PRODUCTS_ROLLBACK, REQUEST_PURCHASE,
+  INCREASE_SHOW_UNE_POPUP_COUNT, UPDATE_EDITOR_IS_UPLOADING,
+  UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_EDITING_NOTE, UPDATE_UNSAVED_NOTE,
+  DELETE_UNSAVED_NOTES, CLEAN_UP_STATIC_FILES, CLEAN_UP_STATIC_FILES_COMMIT,
+  CLEAN_UP_STATIC_FILES_ROLLBACK, UPDATE_STACKS_ACCESS, GET_PRODUCTS,
+  GET_PRODUCTS_COMMIT, GET_PRODUCTS_ROLLBACK, REQUEST_PURCHASE,
   REQUEST_PURCHASE_COMMIT, REQUEST_PURCHASE_ROLLBACK, RESTORE_PURCHASES,
   RESTORE_PURCHASES_COMMIT, RESTORE_PURCHASES_ROLLBACK, REFRESH_PURCHASES,
   REFRESH_PURCHASES_COMMIT, REFRESH_PURCHASES_ROLLBACK, UPDATE_IAP_PUBLIC_KEY,
@@ -96,10 +97,10 @@ import {
   doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins, separatePinnedValues,
   getRawPins, getFormattedTime, get24HFormattedTime, getWindowSize, getNote,
   getEditingListNameEditors, getListNamesFromNoteMetas, validatePassword,
-  doContainListName, sample, getListNameAndNote, newObject, doContainSyncCallTasks,
-  getNNoteMetas, addFetchedToVars, isFetchedNoteMeta, doesIncludeFetching, sortNotes,
-  sortWithPins, doesIncludeFetchingMore, isFetchingInterrupted, getTagFPaths,
-  getInUseTagNames, getEditingTagNameEditors, getNNoteMetasByQt, extractNoteFPath,
+  doContainListName, sample, getListNameAndNote, newObject, getNNoteMetas,
+  addFetchedToVars, isFetchedNoteMeta, doesIncludeFetching, sortNotes, sortWithPins,
+  doesIncludeFetchingMore, isFetchingInterrupted, getTagFPaths, getInUseTagNames,
+  getEditingTagNameEditors, getNNoteMetasByQt, extractNoteFPath,
   validateTagNameDisplayName, getTagNameObjFromDisplayName, getTagNameObj, getTags,
   getRawTags, extractTagFPath, createTagFPath,
 } from '../utils';
@@ -219,6 +220,7 @@ export const init = () => async (dispatch, getState) => {
     for (const listName in notes) {
       for (const noteId in notes[listName]) {
         if (isBusyStatus(notes[listName][noteId].status)) {
+          vars.syncMode.didReload = false;
           e.preventDefault();
           return e.returnValue = 'It looks like your note hasn\'t been saved. Do you want to leave this site and discard your changes?';
         }
@@ -228,6 +230,7 @@ export const init = () => async (dispatch, getState) => {
     const conflictedNotes = getState().conflictedNotes;
     for (const noteId in conflictedNotes) {
       if (isBusyStatus(conflictedNotes[noteId].status)) {
+        vars.syncMode.didReload = false;
         e.preventDefault();
         return e.returnValue = 'It looks like your selection on conflicted notes hasn\'t been saved. Do you want to leave this site and discard your changes?';
       }
@@ -237,8 +240,10 @@ export const init = () => async (dispatch, getState) => {
       Object.keys(getState().pendingPins).length > 0 ||
       Object.keys(getState().pendingTags).length > 0 ||
       syncQueue.length > 0 ||
-      taskQueue.length > 0
+      taskQueue.length > 1 ||
+      (taskQueue.length === 1 && !vars.syncMode.didReload)
     ) {
+      vars.syncMode.didReload = false;
       e.preventDefault();
       return e.returnValue = 'It looks like your changes are being saved to the server. Do you want to leave this site and discard your changes?';
     }
@@ -248,6 +253,7 @@ export const init = () => async (dispatch, getState) => {
     const settings = getState().settings;
     const snapshotSettings = getState().snapshot.settings;
     if (!isEqual(settings, snapshotSettings)) {
+      vars.syncMode.didReload = false;
       e.preventDefault();
       return e.returnValue = 'It looks like your changes to the settings haven\'t been saved. Do you want to leave this site and discard your changes?';
     }
@@ -256,6 +262,7 @@ export const init = () => async (dispatch, getState) => {
     const listNameMap = getState().settings.listNameMap;
     const editingLNEs = getEditingListNameEditors(listNameEditors, listNameMap);
     if (isObject(editingLNEs)) {
+      vars.syncMode.didReload = false;
       e.preventDefault();
       return e.returnValue = 'It looks like your changes to the list names haven\'t been saved. Do you want to leave this site and discard your changes?';
     }
@@ -264,6 +271,7 @@ export const init = () => async (dispatch, getState) => {
     const tagNameMap = getState().settings.tagNameMap;
     const editingTNEs = getEditingTagNameEditors(tagNameEditors, tagNameMap);
     if (isObject(editingTNEs)) {
+      vars.syncMode.didReload = false;
       e.preventDefault();
       return e.returnValue = 'It looks like your changes to the tag names haven\'t been saved. Do you want to leave this site and discard your changes?';
     }
@@ -734,7 +742,10 @@ export const changeListName = (listName, doCheckEditing) => async (
   dispatch, getState
 ) => {
   if (!listName) listName = vars.changeListName.changingListName;
-  if (!listName) throw new Error(`Invalid listName: ${listName}`);
+  if (!listName) {
+    console.log('In changeListName, invalid listName:', listName);
+    return;
+  }
 
   if (doCheckEditing) {
     if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
@@ -770,11 +781,49 @@ export const onChangeListName = (title, body, media) => async (
   dispatch(handleUnsavedNote(noteId, title, body, media));
 };
 
-export const updateQueryString = (queryString) => async (dispatch, getState) => {
+export const updateQueryString = (queryString, doCheckEditing) => async (
+  dispatch, getState
+) => {
+  if (!isString(queryString)) {
+    queryString = vars.updateQueryString.updatingQueryString;
+  }
+  if (!isString(queryString)) {
+    console.log('In changeQueryString, invalid queryString:', queryString);
+    return;
+  }
+
+  if (doCheckEditing) {
+    if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
+
+    const isEditorUploading = getState().editor.isUploading;
+    if (isEditorUploading) return;
+
+    const isEditorFocused = getState().display.isEditorFocused;
+    if (isEditorFocused) {
+      vars.updateQueryString.updatingQueryString = queryString;
+      dispatch(increaseUpdateQueryStringCount());
+      return;
+    }
+  }
+
+  const syncProgress = getState().display.syncProgress;
+  if (syncProgress && syncProgress.status === SHOW_SYNCED) {
+    dispatch({ type: UPDATE_SYNCED });
+  }
+
   dispatch(updateFetched(null, false, true));
   dispatch(updateFetchedMore(null, true));
 
   dispatch({ type: UPDATE_QUERY_STRING, payload: queryString });
+};
+
+export const onUpdateQueryString = (title, body, media) => async (
+  dispatch, getState
+) => {
+  const { noteId } = getState().display;
+  if (vars.keyboard.height > 0) dispatch(increaseBlurCount());
+  dispatch(updateQueryString(null, false));
+  dispatch(handleUnsavedNote(noteId, title, body, media));
 };
 
 export const updateSearchString = (searchString) => {
@@ -2722,8 +2771,8 @@ const updateSettingsInQueue = (dispatch, getState) => async () => {
     // error in this step should be fine
   }
 
-  const doContain = doContainSyncCallTasks(taskQueue);
-  if (!doContain) await syncAndWait()(dispatch, getState);
+  // Subsequent updateSettings or updateInfo might be the same and just return.
+  await syncAndWait()(dispatch, getState);
 };
 
 const updateSettings = async (dispatch, getState) => {
@@ -2771,8 +2820,7 @@ const updateInfoInQueue = (dispatch, getState) => async () => {
     // error in this step should be fine
   }
 
-  const doContain = doContainSyncCallTasks(taskQueue);
-  if (!doContain) await syncAndWait()(dispatch, getState);
+  await syncAndWait()(dispatch, getState);
 };
 
 const updateInfo = async (dispatch, getState) => {
@@ -2802,6 +2850,9 @@ const applySyncModeInQueue = (dispatch, getState) => async () => {
   localSettings.doSyncMode = localSettings.doSyncModeInput;
   await dataApi.putLocalSettings(localSettings);
 
+  // A pending job is not in taskQueue.jobs and it's a local variable,
+  //   cannot access it, so need another variable.
+  vars.syncMode.didReload = true;
   window.location.reload();
 };
 
@@ -2891,8 +2942,7 @@ const mergeSettingsInQueue = (
     // error in this step should be fine
   }
 
-  const doContain = doContainSyncCallTasks(taskQueue);
-  if (!doContain) await syncAndWait()(dispatch, getState);
+  await syncAndWait()(dispatch, getState);
 };
 
 export const mergeSettings = (selectedId) => async (dispatch, getState) => {
@@ -3523,25 +3573,20 @@ export const increaseDiscardNoteCount = () => {
   return { type: INCREASE_DISCARD_NOTE_COUNT };
 };
 
-export const increaseUpdateNoteIdUrlHashCount = (id) => {
-  return {
-    type: INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
-    payload: id,
-  };
+export const increaseUpdateNoteIdUrlHashCount = () => {
+  return { type: INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT };
 };
 
-export const increaseUpdateNoteIdCount = (id) => {
-  return {
-    type: INCREASE_UPDATE_NOTE_ID_COUNT,
-    payload: id,
-  };
+export const increaseUpdateNoteIdCount = () => {
+  return { type: INCREASE_UPDATE_NOTE_ID_COUNT };
 };
 
-export const increaseChangeListNameCount = (listName) => {
-  return {
-    type: INCREASE_CHANGE_LIST_NAME_COUNT,
-    payload: listName,
-  };
+export const increaseChangeListNameCount = () => {
+  return { type: INCREASE_CHANGE_LIST_NAME_COUNT };
+};
+
+export const increaseUpdateQueryStringCount = () => {
+  return { type: INCREASE_UPDATE_QUERY_STRING_COUNT };
 };
 
 export const increaseFocusTitleCount = () => {
@@ -3578,6 +3623,10 @@ export const increaseShowNoteListMenuPopupCount = () => {
 
 export const increaseShowNLIMPopupCount = () => {
   return { type: INCREASE_SHOW_NLIM_POPUP_COUNT };
+};
+
+export const increaseShowUNEPopupCount = () => {
+  return { type: INCREASE_SHOW_UNE_POPUP_COUNT };
 };
 
 export const updateEditorIsUploading = (isUploading) => {
@@ -4386,9 +4435,9 @@ export const addLockNote = (
 };
 
 export const showLockMenuPopup = (noteId, rect) => async (dispatch, getState) => {
+  // While editing another note, show lock menu popup is fine,
+  //   as not updating the displayReducer noteId to this note.
   if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
-
-  // Impossible noteId === getState().display.noteId as the note is locked.
 
   dispatch(updateSelectingNoteId(noteId));
   updatePopupUrlHash(LOCK_MENU_POPUP, true, rect);
@@ -4437,23 +4486,37 @@ export const lockNote = (noteId) => async (dispatch, getState) => {
   dispatch({ type: LOCK_NOTE, payload: { noteId, noteMainId } });
 };
 
-export const showUnlockNoteEditorPopup = (noteId) => async (dispatch, getState) => {
+export const showUNEPopup = (noteId, doCheckEditing) => async (dispatch, getState) => {
+  // While editing another note, before showing unlockNoteEditorPopup,
+  //   need to handle the unsaved note first,
+  //   as the displayReducer noteId will be updated to this note.
+  if (!noteId) noteId = vars.showUNEPopup.selectedNoteId;
 
-  if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
-  if (vars.deleteOldNotes.ids && vars.deleteOldNotes.ids.includes(noteId)) return;
+  if (doCheckEditing) {
+    if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
+    if (vars.deleteOldNotes.ids && vars.deleteOldNotes.ids.includes(noteId)) return;
 
-  const isEditorUploading = getState().editor.isUploading;
-  if (isEditorUploading) return;
+    const isEditorUploading = getState().editor.isUploading;
+    if (isEditorUploading) return;
 
-  const isEditorFocused = getState().display.isEditorFocused;
-  if (isEditorFocused) {
-    // As this note is locked, not editing this note for sure.
-    // Unsaved should be stored in time before completing unlock this note.
+    const isEditorFocused = getState().display.isEditorFocused;
+    if (isEditorFocused) {
+      vars.showUNEPopup.selectedNoteId = noteId;
+      dispatch(increaseShowUNEPopupCount());
+      return;
+    }
   }
 
   dispatch(updateSelectingNoteId(noteId));
   dispatch(updateLockAction(LOCK_ACTION_UNLOCK_NOTE));
   updatePopupUrlHash(LOCK_EDITOR_POPUP, true);
+};
+
+export const onShowUNEPopup = (title, body, media) => async (dispatch, getState) => {
+  const { noteId } = getState().display;
+  if (vars.keyboard.height > 0) dispatch(increaseBlurCount());
+  dispatch(showUNEPopup(null, false));
+  dispatch(handleUnsavedNote(noteId, title, body, media));
 };
 
 export const unlockNote = (noteId, password) => async (dispatch, getState) => {

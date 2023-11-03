@@ -117,9 +117,12 @@ const initialState = {
 const displayReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_LIST_NAME) {
+    if (state.listName === action.payload && state.queryString === '') return state;
+
     const newState = {
       ...state,
       listName: action.payload,
+      queryString: '',
       noteId: null,
       isEditorFocused: false,
       isEditorBusy: false,
@@ -132,6 +135,8 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_QUERY_STRING) {
+    if (state.queryString === action.payload) return state;
+
     const newState = {
       ...state,
       queryString: action.payload,

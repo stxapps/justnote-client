@@ -6,8 +6,9 @@ import ckeditor from '@ckeditor/ckeditor5-build-decoupled-document';
 import fileApi from '../apis/localFile';
 import {
   updateEditorFocused, updateEditorBusy, saveNote, discardNote, onUpdateNoteIdUrlHash,
-  onUpdateNoteId, onChangeListName, onUpdateBulkEditUrlHash, onShowNoteListMenuPopup,
-  onShowNLIMPopup, updateEditorIsUploading, updateEditingNote, handleUnsavedNote,
+  onUpdateNoteId, onChangeListName, onUpdateQueryString, onUpdateBulkEditUrlHash,
+  onShowNoteListMenuPopup, onShowNLIMPopup, onShowUNEPopup, updateEditorIsUploading,
+  updateEditingNote, handleUnsavedNote,
 } from '../actions';
 import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, BLK_MODE, VALID } from '../types/const';
 import { getThemeMode, getDoMoreEditorFontSizes } from '../selectors';
@@ -26,9 +27,11 @@ const GET_DATA_DISCARD_NOTE = 'GET_DATA_DISCARD_NOTE';
 const GET_DATA_UPDATE_NOTE_ID_URL_HASH = 'GET_DATA_UPDATE_NOTE_ID_URL_HASH';
 const GET_DATA_UPDATE_NOTE_ID = 'GET_DATA_UPDATE_NOTE_ID';
 const GET_DATA_CHANGE_LIST_NAME = 'GET_DATA_CHANGE_LIST_NAME';
+const GET_DATA_UPDATE_QUERY_STRING = 'GET_DATA_UPDATE_QUERY_STRING';
 const GET_DATA_UPDATE_BULK_EDIT_URL_HASH = 'GET_DATA_UPDATE_BULK_EDIT_URL_HASH';
 const GET_DATA_SHOW_NOTE_LIST_MENU_POPUP = 'GET_DATA_SHOW_NOTE_LIST_MENU_POPUP';
 const GET_DATA_SHOW_NLIM_POPUP = 'GET_DATA_SHOW_NLIM_POPUP';
+const GET_DATA_SHOW_UNE_POPUP = 'GET_DATA_SHOW_UNE_POPUP';
 
 const NoteEditorEditor = (props) => {
 
@@ -46,6 +49,9 @@ const NoteEditorEditor = (props) => {
   );
   const updateNoteIdCount = useSelector(state => state.editor.updateNoteIdCount);
   const changeListNameCount = useSelector(state => state.editor.changeListNameCount);
+  const updateQueryStringCount = useSelector(
+    state => state.editor.updateQueryStringCount
+  );
   const focusTitleCount = useSelector(state => state.editor.focusTitleCount);
   const setInitDataCount = useSelector(state => state.editor.setInitDataCount);
   const updateEditorWidthCount = useSelector(
@@ -58,6 +64,7 @@ const NoteEditorEditor = (props) => {
     state => state.editor.showNoteListMenuPopupCount
   );
   const showNLIMPopupCount = useSelector(state => state.editor.showNLIMPopupCount);
+  const showUNEPopupCount = useSelector(state => state.editor.showUNEPopupCount);
   const themeMode = useSelector(state => getThemeMode(state));
   const [isEditorReady, setEditorReady] = useState(false);
   const scrollView = useRef(null);
@@ -72,12 +79,14 @@ const NoteEditorEditor = (props) => {
   const prevUpdateNoteIdUrlHashCount = useRef(updateNoteIdUrlHashCount);
   const prevUpdateNoteIdCount = useRef(updateNoteIdCount);
   const prevChangeListNameCount = useRef(changeListNameCount);
+  const prevUpdateQueryStringCount = useRef(updateQueryStringCount);
   const prevFocusTitleCount = useRef(focusTitleCount);
   const prevSetInitDataCount = useRef(setInitDataCount);
   const prevUpdateEditorWidthCount = useRef(updateEditorWidthCount);
   const prevUpdateBulkEditUrlHashCount = useRef(updateBulkEditUrlHashCount);
   const prevShowNoteListMenuPopupCount = useRef(showNoteListMenuPopupCount);
   const prevShowNLIMPopupCount = useRef(showNLIMPopupCount);
+  const prevShowUNEPopupCount = useRef(showUNEPopupCount);
   const objectUrlContents = useRef({});
   const objectUrlFiles = useRef({});
   const objectUrlNames = useRef({});
@@ -295,12 +304,16 @@ const NoteEditorEditor = (props) => {
       dispatch(onUpdateNoteId(title, body, media));
     } else if (action === GET_DATA_CHANGE_LIST_NAME) {
       dispatch(onChangeListName(title, body, media));
+    } else if (action === GET_DATA_UPDATE_QUERY_STRING) {
+      dispatch(onUpdateQueryString(title, body, media));
     } else if (action === GET_DATA_UPDATE_BULK_EDIT_URL_HASH) {
       dispatch(onUpdateBulkEditUrlHash(title, body, media));
     } else if (action === GET_DATA_SHOW_NOTE_LIST_MENU_POPUP) {
       dispatch(onShowNoteListMenuPopup(title, body, media));
     } else if (action === GET_DATA_SHOW_NLIM_POPUP) {
       dispatch(onShowNLIMPopup(title, body, media));
+    } else if (action === GET_DATA_SHOW_UNE_POPUP) {
+      dispatch(onShowUNEPopup(title, body, media));
     } else throw new Error(`Invalid getDataAction: ${getDataAction.current}`);
   }, [dispatch]);
 
@@ -489,6 +502,15 @@ const NoteEditorEditor = (props) => {
   }, [isEditorReady, changeListNameCount, onGetData]);
 
   useEffect(() => {
+    if (!isEditorReady) return;
+    if (updateQueryStringCount !== prevUpdateQueryStringCount.current) {
+      getDataAction.current = GET_DATA_UPDATE_QUERY_STRING;
+      onGetData();
+      prevUpdateQueryStringCount.current = updateQueryStringCount;
+    }
+  }, [isEditorReady, updateQueryStringCount, onGetData]);
+
+  useEffect(() => {
     /*
       Why needs focusTitleCount and just can't use isFocused!
 
@@ -559,6 +581,15 @@ const NoteEditorEditor = (props) => {
       prevShowNLIMPopupCount.current = showNLIMPopupCount;
     }
   }, [isEditorReady, showNLIMPopupCount, onGetData]);
+
+  useEffect(() => {
+    if (!isEditorReady) return;
+    if (showUNEPopupCount !== prevShowUNEPopupCount.current) {
+      getDataAction.current = GET_DATA_SHOW_UNE_POPUP;
+      onGetData();
+      prevShowUNEPopupCount.current = showUNEPopupCount;
+    }
+  }, [isEditorReady, showUNEPopupCount, onGetData]);
 
   useEffect(() => {
     onUpdateIsUploading(false);

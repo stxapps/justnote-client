@@ -41,7 +41,7 @@ const TopBarTitleQueryString = () => {
   const tailwind = useTailwind();
 
   const onCloseBtnClick = () => {
-    dispatch(updateQueryString(''));
+    dispatch(updateQueryString('', false));
   };
 
   if (!didFetch) {
