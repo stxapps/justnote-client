@@ -104,6 +104,11 @@ const toNotes = (metas, fpaths, contents) => {
 };
 
 const fetchStgsAndInfo = async (_settingsFPaths, infoFPath) => {
+  if (syncMode.doSyncMode) {
+    const canUse = await ldbApi.canUseSync();
+    if (!canUse) throw new Error('Sync mode cannnot be used.');
+  }
+
   let settings, conflictedSettings = [], info;
   const {
     fpaths: settingsFPaths, ids: settingsIds,

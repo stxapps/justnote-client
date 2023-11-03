@@ -931,11 +931,6 @@ const _getInfosFromMetas = (metas) => {
 };
 
 export const fetch = () => async (dispatch, getState) => {
-  /*if (vars.syncMode.doSyncMode) {
-    const canUse = await ldbApi.canUseSync();
-    if (!canUse) throw new Error('Sync mode cannnot be used.');
-  }*/
-
   const doForce = vars.fetch.doForce;
   vars.fetch.doForce = false;
 
