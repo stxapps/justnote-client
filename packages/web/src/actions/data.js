@@ -1816,7 +1816,7 @@ const _deleteSyncData = async (dispatch, getState) => {
       const { updatedDT, id } = extractPinFPath(fpath);
 
       const _id = id.startsWith('deleted') ? id.slice(7) : id;
-      const pinMainId = getMainId(_id, smRst.toRootIds);
+      const pinMainId = getMainId(_id, nmRst.toRootIds);
       if (!isString(pinMainId)) {
         unusedPinFPaths.push(fpath);
         continue;
@@ -1838,7 +1838,7 @@ const _deleteSyncData = async (dispatch, getState) => {
       const { tagName, updatedDT, id } = extractTagFPath(fpath);
 
       const _id = id.startsWith('deleted') ? id.slice(7) : id;
-      const mainId = getMainId(_id, smRst.toRootIds);
+      const mainId = getMainId(_id, nmRst.toRootIds);
       if (!isString(mainId)) {
         unusedTagFPaths.push(fpath);
         continue;

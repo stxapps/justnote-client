@@ -1608,6 +1608,12 @@ export const addNote = (title, body, media, listName) => async (
     insertIndex = _getAddNoteInsertIndex(getState);
   }
 
+  const safeAreaWidth = getState().window.width;
+  if (!isNumber(insertIndex) && isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
+    updateNoteIdUrlHash(null);
+    await sleep(100);
+  }
+
   const payload = { listName, note, insertIndex };
   dispatch({ type: ADD_NOTE, payload });
   addFetchedToVars(null, null, [note], vars);
