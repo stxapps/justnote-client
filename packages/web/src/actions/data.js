@@ -1028,7 +1028,7 @@ const parseJustnoteImportedFile = async (dispatch, getState, zip, entries) => {
   const pins = getPins(fpaths.pinFPaths, {}, false, toRootIds);
   const tags = getTags(fpaths.tagFPaths, {}, toRootIds);
 
-  const noteEntries = [], pinEntries = [], tagEntries = []
+  const noteEntries = [], pinEntries = [], tagEntries = [];
   const imgEntries = [], settingsEntries = [];
   for (const entry of entries) {
     if (entry.directory) continue;

@@ -788,7 +788,7 @@ export const updateQueryString = (queryString, doCheckEditing) => async (
     queryString = vars.updateQueryString.updatingQueryString;
   }
   if (!isString(queryString)) {
-    console.log('In changeQueryString, invalid queryString:', queryString);
+    console.log('In updateQueryString, invalid queryString:', queryString);
     return;
   }
 
@@ -827,17 +827,11 @@ export const onUpdateQueryString = (title, body, media) => async (
 };
 
 export const updateSearchString = (searchString) => {
-  return {
-    type: UPDATE_SEARCH_STRING,
-    payload: searchString,
-  };
+  return { type: UPDATE_SEARCH_STRING, payload: searchString };
 };
 
 const _updateNoteId = (id) => {
-  return {
-    type: UPDATE_NOTE_ID,
-    payload: id,
-  };
+  return { type: UPDATE_NOTE_ID, payload: id };
 };
 
 export const updateNoteId = (id, doGetIdFromState = false, doCheckEditing = false) => {
@@ -895,31 +889,19 @@ export const updatePopup = (id, isShown, anchorPosition) => {
 };
 
 export const updateBulkEdit = (isBulkEditing) => {
-  return {
-    type: UPDATE_BULK_EDITING,
-    payload: isBulkEditing,
-  };
+  return { type: UPDATE_BULK_EDITING, payload: isBulkEditing };
 };
 
 export const addSelectedNoteIds = (ids) => {
-  return {
-    type: ADD_SELECTED_NOTE_IDS,
-    payload: ids,
-  };
+  return { type: ADD_SELECTED_NOTE_IDS, payload: ids };
 };
 
 export const deleteSelectedNoteIds = (ids) => {
-  return {
-    type: DELETE_SELECTED_NOTE_IDS,
-    payload: ids,
-  };
+  return { type: DELETE_SELECTED_NOTE_IDS, payload: ids };
 };
 
 export const updateSelectingNoteId = (id) => {
-  return {
-    type: UPDATE_SELECTING_NOTE_ID,
-    payload: id,
-  };
+  return { type: UPDATE_SELECTING_NOTE_ID, payload: id };
 };
 
 const _getInfosFromMetas = (metas) => {
@@ -1603,9 +1585,11 @@ export const addNote = (title, body, media, listName) => async (
     insertIndex = _getAddNoteInsertIndex(getState);
   }
 
-  const safeAreaWidth = getState().window.width;
-  if (!isNumber(insertIndex) && isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
-    updateNoteIdUrlHash(null);
+  if (!isNumber(insertIndex)) {
+    const safeAreaWidth = getState().window.width;
+    if (isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(null);
+    else dispatch(updateNoteId(null));
+    // Let transition done before causing rerender.
     await sleep(100);
   }
 
@@ -1972,7 +1956,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       try {
         await dataApi.putNotes({
-          listNames: [listName], notes: [note], staticFPaths: usedFPaths
+          listNames: [listName], notes: [note], staticFPaths: usedFPaths,
         });
       } catch (error) {
         console.log('retryDiedNotes add error: ', error);
@@ -1996,7 +1980,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       try {
         await dataApi.putNotes({
-          listNames: [listName], notes: [toNote], staticFPaths: usedFPaths
+          listNames: [listName], notes: [toNote], staticFPaths: usedFPaths,
         });
       } catch (error) {
         console.log('retryDiedNotes update error: ', error);
@@ -3528,38 +3512,23 @@ export const updateSynced = () => {
 };
 
 export const updateEditorFocused = (isFocused) => {
-  return {
-    type: UPDATE_EDITOR_FOCUSED,
-    payload: isFocused,
-  };
+  return { type: UPDATE_EDITOR_FOCUSED, payload: isFocused };
 };
 
 export const updateEditorBusy = (isBusy) => {
-  return {
-    type: UPDATE_EDITOR_BUSY,
-    payload: isBusy,
-  };
+  return { type: UPDATE_EDITOR_BUSY, payload: isBusy };
 };
 
 export const updateMoveAction = (moveAction) => {
-  return {
-    type: UPDATE_MOVE_ACTION,
-    payload: moveAction,
-  };
+  return { type: UPDATE_MOVE_ACTION, payload: moveAction };
 };
 
 export const updateDeleteAction = (deleteAction) => {
-  return {
-    type: UPDATE_DELETE_ACTION,
-    payload: deleteAction,
-  };
+  return { type: UPDATE_DELETE_ACTION, payload: deleteAction };
 };
 
 export const updateDiscardAction = (discardAction) => {
-  return {
-    type: UPDATE_DISCARD_ACTION,
-    payload: discardAction,
-  };
+  return { type: UPDATE_DISCARD_ACTION, payload: discardAction };
 };
 
 export const updateListNamesMode = (mode) => {

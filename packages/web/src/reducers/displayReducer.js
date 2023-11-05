@@ -432,6 +432,7 @@ const displayReducer = (state = initialState, action) => {
     const newState = { ...state, isStaleErrorPopupShown: false };
     if (Array.isArray(newState.showingNoteInfos)) {
       newState.noteId = null;
+      [newState.isEditorFocused, newState.isEditorBusy] = [false, false];
       [newState.selectedNoteIds, newState.isSelectedNoteIdsMaxErrorShown] = [[], false];
       [newState.showingNoteInfos, newState.hasMoreNotes] = [null, null];
       vars.fetch.doShowLoading = true;
@@ -575,7 +576,10 @@ const displayReducer = (state = initialState, action) => {
     const fromIds = successNotes.map(note => note.fromNote.id);
 
     const newState = { ...state };
-    if (fromIds.includes(state.noteId)) newState.noteId = null;
+    if (fromIds.includes(state.noteId)) {
+      newState.noteId = null;
+      [newState.isEditorFocused, newState.isEditorBusy] = [false, false];
+    }
     newState.showingNoteInfos = _filterIfNotNull(state.showingNoteInfos, fromIds);
     return newState;
   }
@@ -669,7 +673,10 @@ const displayReducer = (state = initialState, action) => {
     const { doFetch } = action.payload;
 
     const newState = { ...state, settingsStatus: UPDATING };
-    if (doFetch) newState.noteId = null;
+    if (doFetch) {
+      newState.noteId = null;
+      [newState.isEditorFocused, newState.isEditorBusy] = [false, false];
+    }
     return newState;
   }
 
@@ -679,6 +686,7 @@ const displayReducer = (state = initialState, action) => {
     const newState = { ...state, settingsStatus: null };
     if (doFetch && Array.isArray(newState.showingNoteInfos)) {
       newState.noteId = null;
+      [newState.isEditorFocused, newState.isEditorBusy] = [false, false];
       [newState.selectedNoteIds, newState.isSelectedNoteIdsMaxErrorShown] = [[], false];
       [newState.showingNoteInfos, newState.hasMoreNotes] = [null, null];
       newState.listChangedCount += 1;
@@ -709,6 +717,7 @@ const displayReducer = (state = initialState, action) => {
     };
     if (doFetch && Array.isArray(newState.showingNoteInfos)) {
       newState.noteId = null;
+      [newState.isEditorFocused, newState.isEditorBusy] = [false, false];
       [newState.selectedNoteIds, newState.isSelectedNoteIdsMaxErrorShown] = [[], false];
       [newState.showingNoteInfos, newState.hasMoreNotes] = [null, null];
       newState.listChangedCount += 1;
@@ -763,6 +772,7 @@ const displayReducer = (state = initialState, action) => {
     const newState = { ...state, syncProgress: null };
 
     newState.noteId = null;
+    [newState.isEditorFocused, newState.isEditorBusy] = [false, false];
     [newState.selectedNoteIds, newState.isSelectedNoteIdsMaxErrorShown] = [[], false];
     newState.didFetchSettings = false;
     [newState.showingNoteInfos, newState.hasMoreNotes] = [null, null];
@@ -846,6 +856,7 @@ const displayReducer = (state = initialState, action) => {
 
     const newState = { ...state };
     newState.noteId = null;
+    [newState.isEditorFocused, newState.isEditorBusy] = [false, false];
     [newState.selectedNoteIds, newState.isSelectedNoteIdsMaxErrorShown] = [[], false];
     [newState.showingNoteInfos, newState.hasMoreNotes] = [null, null];
     newState.listChangedCount += 1;
@@ -893,6 +904,7 @@ const displayReducer = (state = initialState, action) => {
     if (isObject(progress) && progress.total && progress.done) {
       if (progress.total === progress.done) {
         newState.noteId = null;
+        [newState.isEditorFocused, newState.isEditorBusy] = [false, false];
         newState.selectedNoteIds = [];
         newState.isSelectedNoteIdsMaxErrorShown = false;
         newState.didFetchSettings = false;

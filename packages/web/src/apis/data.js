@@ -261,6 +261,7 @@ const putNotes = async (params) => {
     noteMap[fpath] = { listName, id: note.id };
   }
 
+  const _successListNames = [], _successNoteIds = [];
   const successListNames = [], successNoteIds = [], successNotes = [];
   const errorListNames = [], errorNoteIds = [], errorNotes = [], errors = [];
 
@@ -276,9 +277,9 @@ const putNotes = async (params) => {
   for (const response of responses) {
     const { listName, id } = noteMap[response.fpath];
     if (response.success) {
-      if (!successNoteIds.includes(id)) {
-        successListNames.push(listName);
-        successNoteIds.push(id);
+      if (!_successNoteIds.includes(id)) {
+        _successListNames.push(listName);
+        _successNoteIds.push(id);
       }
     } else {
       if (!errorNoteIds.includes(id)) {
@@ -287,6 +288,12 @@ const putNotes = async (params) => {
         errors.push(response.error);
       }
     }
+  }
+  for (let i = 0; i < _successListNames.length; i++) {
+    const [listName, id] = [_successListNames[i], _successNoteIds[i]];
+    if (errorNoteIds.includes(id)) continue;
+    successListNames.push(listName);
+    successNoteIds.push(id);
   }
 
   const itnMap = {};
