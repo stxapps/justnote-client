@@ -6,7 +6,7 @@ import {
   addSelectedNoteIds, deleteSelectedNoteIds, updateQueryString,
 } from '../actions';
 import { LG_WIDTH } from '../types/const';
-import { makeIsNoteIdSelected, makeGetNoteDate, makeGetTnAndDns, } from '../selectors';
+import { makeIsNoteIdSelected, makeGetNoteDate, makeGetTnAndDns } from '../selectors';
 import {
   isNumber, isBusyStatus, isPinningStatus, isTaggingStatus, stripHtml,
 } from '../utils';

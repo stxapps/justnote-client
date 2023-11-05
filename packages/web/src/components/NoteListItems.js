@@ -103,7 +103,7 @@ const NoteListItems = (props) => {
 
   const renderEmpty = () => {
     vars.scrollPanel.scrollY = 0;
-    return <EmptyContent />
+    return <EmptyContent />;
   };
 
   const renderFetchMoreBtn = () => {
