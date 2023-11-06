@@ -1500,7 +1500,7 @@ export const listNoteMetas = createSelector(
 );
 
 const applyPcNotesToMetas = (pcListNames, pcNotes, noteMetas, toRootIds) => {
-  const metas = [], tRIds = { ...toRootIds }, parentIds = [];
+  const metas = [], tRIds = { ...toRootIds }, pIds = [];
   for (let i = 0; i < pcListNames.length; i++) {
     const [listName, note] = [pcListNames[i], pcNotes[i]];
     const { parentIds, id, addedDT, updatedDT, media } = note;
@@ -1516,21 +1516,20 @@ const applyPcNotesToMetas = (pcListNames, pcNotes, noteMetas, toRootIds) => {
     }
 
     const [isConflicted, conflictWith] = [false, null];
-    const meta = {
+    metas.push({
       parentIds, id, addedDT, updatedDT, isConflicted, conflictWith, fpaths, listName,
-    };
+    });
 
-    metas.push(meta);
-    if (Array.isArray(meta.parentIds) && meta.parentIds.length > 0) {
-      tRIds[meta.id] = tRIds[meta.parentIds[0]];
-      parentIds.push(...meta.parentIds);
+    if (Array.isArray(parentIds) && parentIds.length > 0) {
+      tRIds[id] = tRIds[parentIds[0]];
+      pIds.push(...parentIds);
     } else {
-      tRIds[meta.id] = meta.id;
+      tRIds[id] = id;
     }
   }
 
   for (const meta of noteMetas) {
-    if (parentIds.includes(meta.id)) continue;
+    if (pIds.includes(meta.id)) continue;
     metas.push(meta);
   }
 
@@ -2202,7 +2201,7 @@ export const doListContainUnlocks = (state) => {
       if (doContain) return true;
 
       const note = getNote(info.id, notes);
-      const isUnlocked = _isNoteUnlocked(note, toRootIds, lockedNotes)
+      const isUnlocked = _isNoteUnlocked(note, toRootIds, lockedNotes);
       if (isUnlocked) return true;
     }
     return false;

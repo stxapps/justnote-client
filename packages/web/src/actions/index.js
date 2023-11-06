@@ -932,9 +932,9 @@ export const fetch = () => async (dispatch, getState) => {
   let sortOn = getState().settings.sortOn;
   let doDescendingOrder = getState().settings.doDescendingOrder;
 
-  const noteFPaths = getNoteFPaths(getState());
-  const pinFPaths = getPinFPaths(getState());
-  const tagFPaths = getTagFPaths(getState());
+  let noteFPaths = getNoteFPaths(getState());
+  let pinFPaths = getPinFPaths(getState());
+  let tagFPaths = getTagFPaths(getState());
 
   const lnOrQt = queryString ? queryString : listName;
   if (doesIncludeFetching(lnOrQt, doForce, fetchingInfos)) {
@@ -991,9 +991,10 @@ export const fetch = () => async (dispatch, getState) => {
   const result = {};
   try {
     if (!didFetch || !didFetchSettings) {
-      const {
-        noteFPaths, settingsFPaths, infoFPath, pinFPaths, tagFPaths,
-      } = await dataApi.listFPaths(true);
+      const fResult = await dataApi.listFPaths(true);
+      noteFPaths = fResult.noteFPaths;
+      [pinFPaths, tagFPaths] = [fResult.pinFPaths, fResult.tagFPaths];
+      const [settingsFPaths, infoFPath] = [fResult.settingsFPaths, fResult.infoFPath];
 
       const { noteMetas, conflictedMetas } = listNoteMetas(noteFPaths);
 
@@ -1009,7 +1010,7 @@ export const fetch = () => async (dispatch, getState) => {
 
       if (result.settings) {
         sortOn = result.settings.sortOn;
-        doDescendingOrder = result.settings.doDescendingOrder
+        doDescendingOrder = result.settings.doDescendingOrder;
       }
 
       let metas;
@@ -1236,7 +1237,7 @@ export const fetchMore = () => async (dispatch, getState) => {
     if (note.isConflicted) {
       const isAllFetched = note.notes.every(cNote => {
         return vars.fetch.fetchedNoteIds.includes(cNote.id);
-      })
+      });
       if (isAllFetched) safNoteIds.push(note.id);
       continue;
     }
@@ -1554,7 +1555,7 @@ const _getAddNoteInsertIndex = (getState) => {
   if (!doDescendingOrder) return showingNoteInfos.length;
 
   for (let i = 0; i < showingNoteInfos.length; i++) {
-    if (showingNoteInfos[i].isPinned) continue
+    if (showingNoteInfos[i].isPinned) continue;
     return i;
   }
 
@@ -1752,7 +1753,7 @@ const _moveNotes = (toListName, ids) => async (dispatch, getState) => {
     addedDT += 1;
 
     fromListNames.push(fromListName);
-    fromNotes.push(fromNote);;
+    fromNotes.push(fromNote);
     emptyFromNotes.push(clearNoteData(fromNote));
     toListNames.push(toListName);
     toNotes.push(toNote);
@@ -1861,7 +1862,7 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
     }
 
     fromListNames.push(fromListName);
-    fromNotes.push(fromNote);;
+    fromNotes.push(fromNote);
     emptyFromNotes.push(clearNoteData(fromNote));
     toListNames.push(fromListName);
     toNotes.push(toNote);
@@ -2033,7 +2034,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       dispatch(sync());
     } else if (status === DIED_DELETING) {
-      const fromListNames = [listName]
+      const fromListNames = [listName];
       const fromNotes = [note];
       const emptyFromNotes = [clearNoteData(note)];
       const toListNames = [listName];
@@ -2256,7 +2257,7 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
       title: '', body: '', media,
       addedDT: meta.addedDT,
       updatedDT: meta.updatedDT,
-    }
+    };
     const toNote = {
       ...fromNote,
       parentIds: [fromNote.id], id: `deleted${addedDT}${randomString(4)}`,
@@ -2868,7 +2869,7 @@ export const cancelDiedSettings = () => async (dispatch, getState) => {
   const { noteMetas, conflictedMetas } = listNoteMetas(noteFPaths);
 
   const listNames = getListNamesFromNoteMetas(noteMetas, conflictedMetas);
-  const tagNames = getInUseTagNames(noteFPaths, tagFPaths)
+  const tagNames = getInUseTagNames(noteFPaths, tagFPaths);
   let doFetch = (
     settings.sortOn !== snapshotSettings.sortOn ||
     settings.doDescendingOrder !== snapshotSettings.doDescendingOrder

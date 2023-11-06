@@ -45,7 +45,7 @@ const NoteListItemMenuPopup = () => {
   const listNameMap = useSelector(state => getListNameMap(state));
   const selectingNoteId = useSelector(state => state.display.selectingNoteId);
   const pinStatus = useSelector(state => getPinStatus(state, selectingNoteId));
-  const tagStatus = useSelector(state => getTagStatus(state, selectingNoteId))
+  const tagStatus = useSelector(state => getTagStatus(state, selectingNoteId));
   const lockStatus = useSelector(state => getLockNoteStatus(state, selectingNoteId));
   const [popupSize, setPopupSize] = useState(null);
   const popup = useRef(null);

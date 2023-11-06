@@ -6,6 +6,7 @@ import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import { SEARCH_POPUP, LG_WIDTH, UPDATING, SHOW_SYNCED } from '../types/const';
 
 import { useSafeAreaFrame, useTailwind } from '.';
+
 import NoteListSearchPopup from './NoteListSearchPopup';
 import NoteListTopBarBulkEdit from './NoteListTopBarBulkEdit';
 import NoteListTopBarTitle from './NoteListTopBarTitle';
@@ -14,7 +15,6 @@ const NoteListTopBar = (props) => {
 
   const { onSidebarOpenBtnClick } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
-
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const settingsStatus = useSelector(state => state.display.settingsStatus);
   const syncProgress = useSelector(state => state.display.syncProgress);

@@ -108,8 +108,8 @@ const _NoteEditorUnsavedConflict = (props) => {
   const { note, unsavedNote } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const listName = useSelector(state => {
-    const { listName } = getListNameAndNote(note.id, state.notes);
-    return listName;
+    const { listName: ln } = getListNameAndNote(note.id, state.notes);
+    return ln;
   });
   const didClick = useRef(false);
   const dispatch = useDispatch();
