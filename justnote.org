@@ -289,7 +289,7 @@
 - yarn add htmlparser2
 - yarn add react-native-flag-secure
 - yarn add --dev redux-flipper react-native-flipper@0.164.0
-- yarn add jest-diff queue
+- yarn add jest-diff queue event-target-fallback
 - Font
   + Create react-native.config.js
   + Run npx react-native-asset

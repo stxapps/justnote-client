@@ -20,6 +20,7 @@
   "dependencies": {
     "@wewatch/lexorank": "^1.0.3",
     "axios": "0.27.2",
+    "event-target-fallback": "^1.0.0",
     "htmlparser2": "^9.0.0",
     "jest-diff": "^29.7.0",
     "queue": "^7.0.0",

@@ -8,6 +8,7 @@ import RNHTMLtoPDF from 'react-native-html-to-pdf';
 import { FileSystem } from 'react-native-file-access';
 import Share from 'react-native-share';
 import FlagSecure from 'react-native-flag-secure';
+import 'event-target-fallback'; // Shim Event and EventTarget for queue
 import TaskQueue from 'queue';
 import { diffLinesRaw, DIFF_EQUAL, DIFF_DELETE, DIFF_INSERT } from 'jest-diff';
 
