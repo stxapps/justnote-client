@@ -10,25 +10,26 @@ import { parseDocument, DomUtils } from 'htmlparser2';
 import dataApi from '../apis/data';
 import serverApi from '../apis/server';
 import fileApi from '../apis/localFile';
-import { updatePopupUrlHash, sync } from '../actions';
+import { updatePopupUrlHash, sync, syncAndWait } from '../actions';
 import {
   UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
-  UPDATE_DELETE_ALL_DATA_PROGRESS, UPDATE_DELETE_SYNC_DATA_PROGRESS, SYNC_ROLLBACK,
-  DELETE_ALL_DATA,
+  UPDATE_DELETE_ALL_DATA_PROGRESS, UPDATE_DELETE_SYNC_DATA_PROGRESS, DELETE_ALL_DATA,
 } from '../types/actionTypes';
 import {
   SETTINGS_POPUP, MY_NOTES, TRASH, ARCHIVE, ADDED_DT, UPDATED_DT, N_NOTES, CD_ROOT,
-  NOTES, IMAGES, SETTINGS, INFO, PINS, INDEX, DOT_JSON, NOTE_DATE_SHOWING_MODE_HIDE,
-  NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS, IMAGE_FILE_EXTS, HTML_FILE_EXTS,
-  UTF8,
+  NOTES, IMAGES, SETTINGS, INFO, PINS, TAGS, INDEX, DOT_JSON,
+  NOTE_DATE_SHOWING_MODE_HIDE, NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS,
+  IMAGE_FILE_EXTS, HTML_FILE_EXTS, UTF8,
 } from '../types/const';
 import {
   isEqual, isObject, isString, isNumber, sleep, randomString, clearNoteData,
-  getStaticFPath, getMainId, isListNameObjsValid, indexOfClosingTag, createNoteFPath,
-  createDataFName, extractNoteFPath, extractDataFName, extractDataId, listNoteIds,
-  listSettingsIds, createSettingsFPath, getSettingsFPaths, getLastSettingsFPaths,
-  extractPinFPath, getPins, batchGetFileWithRetry, extractFPath, copyListNameObjs,
-  getFormattedTimeStamp, getDataParentIds, createPinFPath,
+  getStaticFPath, getMainId, isListNameObjsValid, isTagNameObjsValid,
+  indexOfClosingTag, createNoteFPath, createDataFName, extractNoteFPath,
+  extractDataFName, extractDataId, listNoteMetas, listSettingsMetas,
+  createSettingsFPath, getSettingsFPaths, getLastSettingsFPaths, extractPinFPath,
+  getPins, batchGetFileWithRetry, extractFPath, copyListNameObjs,
+  getFormattedTimeStamp, getDataParentIds, createPinFPath, extractTagFPath, getTags,
+  createTagFPath,
 } from '../utils';
 import { initialSettingsState, initialInfoState } from '../types/initialStates';
 import vars from '../vars';
@@ -317,8 +318,7 @@ const parseGKeepImportedFile = async (dispatch, getState, importDPath, entries) 
       }
     }
 
-    // No check vars.sync.isSyncing, if conflicts, can solve later.
-    await sync(true, 2)(dispatch, getState);
+    await syncAndWait(true, 2)(dispatch, getState);
 
     const settingsFPaths = getSettingsFPaths(getState());
     const { ids: settingsParentIds } = getLastSettingsFPaths(settingsFPaths);
@@ -538,8 +538,7 @@ const parseRawImportedFile = async (dispatch, getState, importDPath, entries) =>
     _addListNameObj(settings.listNameMap, dirMap, idMap, nowObj);
     now = nowObj.now;
 
-    // No check vars.sync.isSyncing, if conflicts, can solve later.
-    await sync(true, 2)(dispatch, getState);
+    await syncAndWait(true, 2)(dispatch, getState);
 
     const settingsFPaths = getSettingsFPaths(getState());
     const { ids: settingsParentIds } = getLastSettingsFPaths(settingsFPaths);
@@ -647,9 +646,13 @@ const _parseJustnoteSettings = async (getState, importDPath, settingsEntries) =>
       if ([true, false].includes(content.doMoreEditorFontSizes)) {
         settings.doMoreEditorFontSizes = content.doMoreEditorFontSizes;
       }
-      if ('listNameMap' in content && isListNameObjsValid(content.listNameMap)) {
+      if (isListNameObjsValid(content.listNameMap)) {
         settings.listNameMap = content.listNameMap;
       }
+      if (isTagNameObjsValid(content.tagNameMap)) {
+        settings.tagNameMap = content.tagNameMap;
+      }
+
       content = settings;
     } catch (error) {
       console.log('JSON.parse settings content error: ', error);
@@ -671,9 +674,9 @@ const _parseJustnoteSettings = async (getState, importDPath, settingsEntries) =>
   if (!isObject(latestSettingsPart)) return;
 
   const settingsFPaths = getSettingsFPaths(getState());
-  const lastSettingsFPaths = getLastSettingsFPaths(settingsFPaths);
-  if (lastSettingsFPaths.fpaths.length > 0) {
-    const lastSettingsFPath = lastSettingsFPaths.fpaths[0];
+  const lsfpsResult = getLastSettingsFPaths(settingsFPaths);
+  if (lsfpsResult.fpaths.length > 0) {
+    const lastSettingsFPath = lsfpsResult.fpaths[0];
     const { contents } = await dataApi.getFiles([lastSettingsFPath], true);
     if (isEqual(latestSettingsPart.content, contents[0])) {
       return;
@@ -681,7 +684,7 @@ const _parseJustnoteSettings = async (getState, importDPath, settingsEntries) =>
   }
 
   let now = Date.now();
-  const fname = createDataFName(`${now}${randomString(4)}`, lastSettingsFPaths.ids);
+  const fname = createDataFName(`${now}${randomString(4)}`, lsfpsResult.ids);
   const fpath = createSettingsFPath(fname);
   now += 1;
 
@@ -865,10 +868,13 @@ const parseJustnotePins = async (
       if (fpathParts.length !== 5 || fpathParts[0] !== PINS) continue;
       if (fnameParts.length !== 2) continue;
 
+      const rank = fpathParts[1];
+      if (rank.length === 0) continue;
+
       const updatedDT = fpathParts[2], addedDT = fpathParts[3], fname = fpathParts[4];
       if (!(/^\d+$/.test(updatedDT))) continue;
       if (!(/^\d+$/.test(addedDT))) continue;
-      if (!fname.endsWith('.json')) continue;
+      if (!fname.endsWith(DOT_JSON)) continue;
 
       let content = await FileSystem.readFile(`${importDPath}/${entry.filename}`, UTF8);
       if (!content) continue;
@@ -885,7 +891,7 @@ const parseJustnotePins = async (
 
       // Need idMap to be all populated before mapping pinId to a new id.
       if (idMap[id]) {
-        fpathParts[fpathParts.length - 1] = idMap[id] + '.json';
+        fpathParts[fpathParts.length - 1] = idMap[id] + DOT_JSON;
 
         fpaths.push(fpathParts.join('/'));
         contents.push(content);
@@ -917,10 +923,76 @@ const parseJustnotePins = async (
   }
 };
 
+const parseJustnoteTags = async (
+  dispatch, toRootIds, tags, importDPath, tagEntries, idMap, progress
+) => {
+  let now = Date.now();
+  for (let i = 0, j = tagEntries.length; i < j; i += N_NOTES) {
+    const selectedEntries = tagEntries.slice(i, i + N_NOTES);
+
+    const fpaths = [], contents = [];
+    for (const entry of selectedEntries) {
+      const { fpathParts, fnameParts } = extractFPath(entry.filename);
+      if (fpathParts.length !== 6 || fpathParts[0] !== TAGS) continue;
+      if (fnameParts.length !== 2) continue;
+
+      const tagName = fpathParts[1];
+      if (tagName.length === 0) continue;
+
+      const rank = fpathParts[2];
+      if (rank.length === 0) continue;
+
+      const updatedDT = fpathParts[3], addedDT = fpathParts[4], fname = fpathParts[5];
+      if (!(/^\d+$/.test(updatedDT))) continue;
+      if (!(/^\d+$/.test(addedDT))) continue;
+      if (!fname.endsWith(DOT_JSON)) continue;
+
+      let content = await FileSystem.readFile(`${importDPath}/${entry.filename}`, UTF8);
+      if (!content) continue;
+
+      try {
+        content = JSON.parse(content);
+        if (!isEqual(content, {})) continue;
+      } catch (error) {
+        console.log('JSON.parse tag content error: ', error);
+        continue;
+      }
+
+      const id = fnameParts[0];
+
+      // Need idMap to be all populated before mapping tagId to a new id.
+      if (idMap[id]) {
+        fpathParts[fpathParts.length - 1] = idMap[id] + DOT_JSON;
+
+        fpaths.push(fpathParts.join('/'));
+        contents.push(content);
+        continue;
+      }
+
+      // Already exists, no need to add again.
+      const mainId = getMainId(id, toRootIds);
+      if (isObject(tags[mainId])) {
+        const found = tags[mainId].values.some(value => value.tagName === tagName);
+        if (found) continue;
+      }
+
+      fpathParts[3] = `${now}`;
+      now += 1;
+
+      fpaths.push(fpathParts.join('/'));
+      contents.push(content);
+    }
+
+    await importAllDataLoop(fpaths, contents);
+
+    progress.done += selectedEntries.length;
+    dispatch(updateImportAllDataProgress(progress));
+  }
+};
+
 const parseJustnoteImportedFile = async (dispatch, getState, importDPath, entries) => {
 
-  // No check vars.sync.isSyncing, if conflicts, can solve later.
-  await sync(true, 2)(dispatch, getState); // manually call to wait for it properly!
+  await syncAndWait(true, 2)(dispatch, getState);
 
   let existFPaths = [], toRootIds, toParents, leafIds = [];
 
@@ -929,19 +1001,22 @@ const parseJustnoteImportedFile = async (dispatch, getState, importDPath, entrie
 
   existFPaths.push(...fpaths.noteFPaths);
   existFPaths.push(...fpaths.pinFPaths);
+  existFPaths.push(...fpaths.tagFPaths);
   existFPaths.push(...fpaths.staticFPaths);
   existFPaths.push(...fpaths.settingsFPaths);
 
-  const noteIds = listNoteIds(fpaths.noteFPaths);
-  toRootIds = noteIds.toRootIds;
-  toParents = noteIds.toParents;
-  for (const noteId of [...noteIds.noteIds, ...noteIds.conflictedIds]) {
-    leafIds.push(noteId.id);
+  const nmRst = listNoteMetas(fpaths.noteFPaths);
+  toRootIds = nmRst.toRootIds;
+  toParents = nmRst.toParents;
+  for (const meta of [...nmRst.noteMetas, ...nmRst.conflictedMetas]) {
+    leafIds.push(meta.id);
   }
 
   const pins = getPins(fpaths.pinFPaths, {}, false, toRootIds);
+  const tags = getTags(fpaths.tagFPaths, {}, toRootIds);
 
-  const noteEntries = [], pinEntries = [], imgEntries = [], settingsEntries = [];
+  const noteEntries = [], pinEntries = [], tagEntries = [];
+  const imgEntries = [], settingsEntries = [];
   for (const entry of entries) {
     if (entry.directory) continue;
 
@@ -955,6 +1030,10 @@ const parseJustnoteImportedFile = async (dispatch, getState, importDPath, entrie
       pinEntries.push(entry);
       continue;
     }
+    if (fpath.startsWith(TAGS)) {
+      tagEntries.push(entry);
+      continue;
+    }
     if (fpath.startsWith(IMAGES)) {
       imgEntries.push(entry);
       continue;
@@ -966,7 +1045,8 @@ const parseJustnoteImportedFile = async (dispatch, getState, importDPath, entrie
   }
 
   const total = (
-    noteEntries.length + pinEntries.length + imgEntries.length + settingsEntries.length
+    noteEntries.length + pinEntries.length + tagEntries.length +
+    imgEntries.length + settingsEntries.length
   );
   const progress = { total, done: 0 };
   dispatch(updateImportAllDataProgress(progress));
@@ -984,6 +1064,9 @@ const parseJustnoteImportedFile = async (dispatch, getState, importDPath, entrie
   );
   await parseJustnotePins(
     dispatch, toRootIds, pins, importDPath, pinEntries, idMap, progress
+  );
+  await parseJustnoteTags(
+    dispatch, toRootIds, tags, importDPath, tagEntries, idMap, progress
   );
 };
 
@@ -1025,7 +1108,7 @@ const parseImportedFile = async (dispatch, getState, importDPath) => {
       await parseJustnoteImportedFile(dispatch, getState, importDPath, entries);
     }
 
-    await sync(false, 1)(dispatch, getState);
+    dispatch(sync());
   } catch (error) {
     dispatch(updateImportAllDataProgress({ total: -1, done: -1, error: `${error}` }));
     return;
@@ -1079,7 +1162,7 @@ export const updateImportAllDataProgress = (progress) => {
   };
 };
 
-const _canExport = (noteId, lockSettings, toRootIds) => {
+const _canExport = (noteMeta, lockSettings, toRootIds) => {
   // Possible e.g., force lock while settingsPopup is shown.
   let lockedList = lockSettings.lockedLists[MY_NOTES];
   if (isObject(lockedList)) {
@@ -1090,14 +1173,14 @@ const _canExport = (noteId, lockSettings, toRootIds) => {
     }
   }
 
-  lockedList = lockSettings.lockedLists[noteId.listName];
+  lockedList = lockSettings.lockedLists[noteMeta.listName];
   if (isObject(lockedList)) {
     if (!isNumber(lockedList.unlockedDT)) {
       if (!lockedList.canExport) return false;
     }
   }
 
-  const noteMainId = getMainId(noteId.id, toRootIds);
+  const noteMainId = getMainId(noteMeta.id, toRootIds);
   const lockedNote = lockSettings.lockedNotes[noteMainId];
   if (isObject(lockedNote)) {
     if (!isNumber(lockedNote.unlockedDT)) {
@@ -1116,6 +1199,16 @@ const _filterPins = (pins, noteMainIds) => {
   }
 
   return filteredPins;
+};
+
+const _filterTags = (tags, noteMainIds) => {
+  const filteredTags = [];
+  for (const tagMainId in tags) {
+    if (!noteMainIds.includes(tagMainId)) continue;
+    filteredTags.push(tags[tagMainId]);
+  }
+
+  return filteredTags;
 };
 
 export const saveAs = async (filePath, fileName) => {
@@ -1174,16 +1267,8 @@ export const saveAs = async (filePath, fileName) => {
 export const exportAllData = () => async (dispatch, getState) => {
   dispatch(updateExportAllDataProgress({ total: 'calculating...', done: 0 }));
 
-  if (vars.sync.isSyncing) {
-    dispatch(updateExportAllDataProgress({
-      total: -1, done: -1, error: 'Please wait for the sync to complete first.',
-    }));
-    return;
-  }
-  await sync(true, 2)(dispatch, getState); // manually call to wait for it properly!
-
-  const syncProgress = getState().display.syncProgress;
-  if (isObject(syncProgress) && syncProgress.status === SYNC_ROLLBACK) {
+  const waitResult = await syncAndWait(true, 2)(dispatch, getState);
+  if (!waitResult) {
     dispatch(updateExportAllDataProgress({
       total: -1, done: -1, error: 'Sync failed. Please wait a moment and try again.',
     }));
@@ -1192,18 +1277,20 @@ export const exportAllData = () => async (dispatch, getState) => {
 
   const lockSettings = getState().lockSettings;
 
-  let fpaths = [], fileFPaths = [], pins, toRootIds;
+  let fpaths = [], fileFPaths = [], pins, tags, toRootIds;
   try {
-    const { noteFPaths, settingsFPaths, pinFPaths } = await dataApi.listFPaths(true);
-    const { noteIds, conflictedIds, toRootIds: _toRootIds } = listNoteIds(noteFPaths);
-    toRootIds = _toRootIds;
+    const {
+      noteFPaths, settingsFPaths, pinFPaths, tagFPaths,
+    } = await dataApi.listFPaths(true);
+    const nmRst = listNoteMetas(noteFPaths);
+    toRootIds = nmRst.toRootIds;
 
     const noteMainIds = [];
-    for (const noteId of [...noteIds, ...conflictedIds]) {
-      if (!_canExport(noteId, lockSettings, toRootIds)) continue;
-      noteMainIds.push(getMainId(noteId.id, toRootIds));
+    for (const meta of [...nmRst.noteMetas, ...nmRst.conflictedMetas]) {
+      if (!_canExport(meta, lockSettings, toRootIds)) continue;
+      noteMainIds.push(getMainId(meta.id, toRootIds));
 
-      for (const fpath of noteId.fpaths) {
+      for (const fpath of meta.fpaths) {
         fpaths.push(fpath);
         if (fpath.includes(CD_ROOT + '/')) {
           const staticFPath = getStaticFPath(fpath);
@@ -1216,9 +1303,9 @@ export const exportAllData = () => async (dispatch, getState) => {
       }
     }
 
-    const lastSettingsFPaths = getLastSettingsFPaths(settingsFPaths);
-    if (lastSettingsFPaths.fpaths.length > 0) {
-      const lastSettingsFPath = lastSettingsFPaths.fpaths[0];
+    const lsfpsResult = getLastSettingsFPaths(settingsFPaths);
+    if (lsfpsResult.fpaths.length > 0) {
+      const lastSettingsFPath = lsfpsResult.fpaths[0];
       const { contents } = await dataApi.getFiles([lastSettingsFPath], true);
       if (!isEqual(initialSettingsState, contents[0])) {
         fpaths.push(lastSettingsFPath);
@@ -1227,12 +1314,15 @@ export const exportAllData = () => async (dispatch, getState) => {
 
     pins = getPins(pinFPaths, {}, false, toRootIds);
     pins = _filterPins(pins, noteMainIds);
+
+    tags = getTags(tagFPaths, {}, toRootIds);
+    tags = _filterTags(tags, noteMainIds);
   } catch (error) {
     dispatch(updateExportAllDataProgress({ total: -1, done: -1, error: `${error}` }));
     return;
   }
 
-  const total = fpaths.length + fileFPaths.length + pins.length;
+  const total = fpaths.length + fileFPaths.length + pins.length + tags.length;
   const progress = { total, done: 0 };
   dispatch(updateExportAllDataProgress(progress));
 
@@ -1326,6 +1416,30 @@ export const exportAllData = () => async (dispatch, getState) => {
         dispatch(updateExportAllDataProgress(progress));
       }
     }
+    for (let i = 0, j = tags.length; i < j; i += N_NOTES) {
+      const selectedTags = tags.slice(i, i + N_NOTES);
+
+      for (const { values } of selectedTags) {
+        for (const { tagName, rank, updatedDT, addedDT, id } of values) {
+          let mappedId = id;
+          if (idMap[toRootIds[id]]) mappedId = idMap[toRootIds[id]];
+
+          const fpath = createTagFPath(tagName, rank, updatedDT, addedDT, mappedId);
+          const content = JSON.stringify({});
+
+          const dpath = Util.dirname(`${exportDPath}/${fpath}`);
+          const doExist = await FileSystem.exists(dpath);
+          if (!doExist) await FileSystem.mkdir(dpath);
+
+          await FileSystem.writeFile(`${exportDPath}/${fpath}`, content, UTF8);
+        }
+      }
+
+      progress.done += selectedTags.length;
+      if (progress.done < progress.total) {
+        dispatch(updateExportAllDataProgress(progress));
+      }
+    }
 
     const fileName = `Justnote data ${getFormattedTimeStamp(new Date())}.zip`;
     const filePath = `${Dirs.CacheDir}/${fileName}`;
@@ -1354,12 +1468,12 @@ export const updateExportAllDataProgress = (progress) => {
   };
 };
 
-const deleteAllNotes = async (dispatch, noteIds, progress) => {
-  for (let i = 0, j = noteIds.length; i < j; i += N_NOTES) {
-    const selectedNoteIds = noteIds.slice(i, i + N_NOTES);
+const deleteAllNotes = async (dispatch, noteMetas, progress) => {
+  for (let i = 0, j = noteMetas.length; i < j; i += N_NOTES) {
+    const selectedNoteMetas = noteMetas.slice(i, i + N_NOTES);
 
     const fpaths = [];
-    for (const id of selectedNoteIds) fpaths.push(...id.fpaths);
+    for (const meta of selectedNoteMetas) fpaths.push(...meta.fpaths);
 
     const contents = [];
     for (let k = 0; k < fpaths.length; k++) {
@@ -1367,16 +1481,17 @@ const deleteAllNotes = async (dispatch, noteIds, progress) => {
       else contents.push('');
     }
 
-    const selectedNotes = dataApi.toNotes(selectedNoteIds, fpaths, contents);
+    const tnResult = dataApi.toNotes(selectedNoteMetas, fpaths, contents);
+    const selectedNotes = tnResult.notes;
 
     let now = Date.now();
     const toNotes = {}, fromNotes = {};
-    for (let k = 0; k < selectedNoteIds.length; k++) {
-      const noteId = selectedNoteIds[k];
+    for (let k = 0; k < selectedNoteMetas.length; k++) {
+      const meta = selectedNoteMetas[k];
       const note = selectedNotes[k];
 
-      if (!toNotes[noteId.listName]) toNotes[noteId.listName] = [];
-      toNotes[noteId.listName].push({
+      if (!toNotes[meta.listName]) toNotes[meta.listName] = [];
+      toNotes[meta.listName].push({
         ...note,
         parentIds: [note.id],
         id: `deleted${now}${randomString(4)}`,
@@ -1385,8 +1500,8 @@ const deleteAllNotes = async (dispatch, noteIds, progress) => {
       });
       now += 1;
 
-      if (!fromNotes[noteId.listName]) fromNotes[noteId.listName] = [];
-      fromNotes[noteId.listName].push(clearNoteData(note));
+      if (!fromNotes[meta.listName]) fromNotes[meta.listName] = [];
+      fromNotes[meta.listName].push(clearNoteData(note));
     }
 
     for (const [_listName, _notes] of Object.entries(toNotes)) {
@@ -1402,7 +1517,7 @@ const deleteAllNotes = async (dispatch, noteIds, progress) => {
       // error in this step should be fine
     }
 
-    progress.done += selectedNoteIds.length;
+    progress.done += selectedNoteMetas.length;
     dispatch(updateDeleteAllDataProgress(progress));
   }
 };
@@ -1429,7 +1544,36 @@ const deleteAllPins = async (dispatch, pins, progress) => {
       // error in this step should be fine
     }
 
-    progress.done += toPins.length;
+    progress.done += _pins.length;
+    dispatch(updateDeleteAllDataProgress(progress));
+  }
+};
+
+const deleteAllTags = async (dispatch, tags, progress) => {
+  let now = Date.now();
+  for (let i = 0; i < tags.length; i += N_NOTES) {
+    const _tags = tags.slice(i, i + N_NOTES);
+
+    const toFPaths = [], fromFPaths = [];
+    for (const { values } of _tags) {
+      for (const { tagName, rank, updatedDT, addedDT, id } of values) {
+        toFPaths.push(createTagFPath(tagName, rank, now, addedDT, `deleted${id}`));
+        fromFPaths.push(createTagFPath(tagName, rank, updatedDT, addedDT, id));
+
+        now += 1;
+      }
+    }
+
+    await dataApi.putFiles(toFPaths, toFPaths.map(() => ({})));
+
+    try {
+      dataApi.deleteFiles(fromFPaths);
+    } catch (error) {
+      console.log('deleteAllTags error: ', error);
+      // error in this step should be fine
+    }
+
+    progress.done += _tags.length;
     dispatch(updateDeleteAllDataProgress(progress));
   }
 };
@@ -1437,42 +1581,36 @@ const deleteAllPins = async (dispatch, pins, progress) => {
 export const deleteAllData = () => async (dispatch, getState) => {
   dispatch(updateDeleteAllDataProgress({ total: 'calculating...', done: 0 }));
 
-  if (vars.sync.isSyncing) {
-    dispatch(updateDeleteAllDataProgress({
-      total: -1, done: -1, error: 'Please wait for the sync to complete first.',
-    }));
-    return;
-  }
-  await sync(true, 2)(dispatch, getState); // manually call to wait for it properly!
-
-  const syncProgress = getState().display.syncProgress;
-  if (isObject(syncProgress) && syncProgress.status === SYNC_ROLLBACK) {
+  const waitResult = await syncAndWait(true, 2)(dispatch, getState);
+  if (!waitResult) {
     dispatch(updateDeleteAllDataProgress({
       total: -1, done: -1, error: 'Sync failed. Please wait a moment and try again.',
     }));
     return;
   }
 
-  let allNoteIds, staticFPaths, settingsFPaths, settingsIds, infoFPath, pins;
+  let allNoteMetas, staticFPaths, settingsFPaths, settingsIds, infoFPath, pins, tags;
   try {
     const fpaths = await dataApi.listFPaths(true);
     if (vars.syncMode.doSyncMode) fpaths.staticFPaths = await fileApi.getStaticFPaths();
 
-    const noteIds = listNoteIds(fpaths.noteFPaths);
+    const nmRst = listNoteMetas(fpaths.noteFPaths);
 
-    allNoteIds = [...noteIds.noteIds, ...noteIds.conflictedIds];
+    allNoteMetas = [...nmRst.noteMetas, ...nmRst.conflictedMetas];
     staticFPaths = fpaths.staticFPaths;
     settingsFPaths = fpaths.settingsFPaths;
     infoFPath = fpaths.infoFPath;
-    pins = getPins(fpaths.pinFPaths, {}, false, noteIds.toRootIds);
+    pins = getPins(fpaths.pinFPaths, {}, false, nmRst.toRootIds);
     pins = Object.values(pins);
+    tags = getTags(fpaths.tagFPaths, {}, nmRst.toRootIds);
+    tags = Object.values(tags);
   } catch (error) {
     dispatch(updateDeleteAllDataProgress({ total: -1, done: -1, error: `${error}` }));
     return;
   }
 
-  const lastSettingsFPaths = getLastSettingsFPaths(settingsFPaths);
-  [settingsFPaths, settingsIds] = [lastSettingsFPaths.fpaths, lastSettingsFPaths.ids];
+  const lsfpsResult = getLastSettingsFPaths(settingsFPaths);
+  [settingsFPaths, settingsIds] = [lsfpsResult.fpaths, lsfpsResult.ids];
   if (settingsFPaths.length === 1) {
     const { contents } = await dataApi.getFiles(settingsFPaths, true);
     if (isEqual(initialSettingsState, contents[0])) {
@@ -1486,8 +1624,8 @@ export const deleteAllData = () => async (dispatch, getState) => {
   }
 
   const total = (
-    allNoteIds.length + staticFPaths.length + settingsFPaths.length +
-    (infoFPath ? 1 : 0) + pins.length
+    allNoteMetas.length + staticFPaths.length + settingsFPaths.length +
+    (infoFPath ? 1 : 0) + pins.length + tags.length
   );
   const progress = { total, done: 0 };
   dispatch(updateDeleteAllDataProgress(progress));
@@ -1495,7 +1633,7 @@ export const deleteAllData = () => async (dispatch, getState) => {
   if (progress.total === 0) return;
 
   try {
-    await deleteAllNotes(dispatch, allNoteIds, progress);
+    await deleteAllNotes(dispatch, allNoteMetas, progress);
 
     if (staticFPaths.length > 0) {
       await dataApi.deleteServerFiles(staticFPaths);
@@ -1536,7 +1674,10 @@ export const deleteAllData = () => async (dispatch, getState) => {
     }
 
     await deleteAllPins(dispatch, pins, progress);
+    await deleteAllTags(dispatch, tags, progress);
     await fileApi.deleteFiles(staticFPaths);
+
+    await syncAndWait(false, 1)(dispatch, getState);
 
     // Need to close the settings popup to update the url hash,
     //   as DELETE_ALL_DATA will set isSettingsPopupShown to false.
@@ -1545,8 +1686,6 @@ export const deleteAllData = () => async (dispatch, getState) => {
       updatePopupUrlHash(SETTINGS_POPUP, false);
     }
     dispatch({ type: DELETE_ALL_DATA });
-
-    await sync(false, 1)(dispatch, getState);
   } catch (error) {
     dispatch(updateDeleteAllDataProgress({ total: -1, done: -1, error: `${error}` }));
     return;
@@ -1588,10 +1727,10 @@ const getFileEntries = async (dpath) => {
   return entries;
 };
 
-const deleteUpdatedNoteSyncData = async (id, noteIds, pins) => {
-  const transitId = noteIds.toParents[id][0];
-  const rootId = noteIds.toRootIds[id];
-  const mainId = getMainId(id, noteIds.toRootIds);
+const deleteUpdatedNoteSyncData = async (id, nmRst, pins, tags) => {
+  const transitId = nmRst.toParents[id][0];
+  const rootId = nmRst.toRootIds[id];
+  const mainId = getMainId(id, nmRst.toRootIds);
 
   const pin = pins[mainId];
   if (
@@ -1610,9 +1749,32 @@ const deleteUpdatedNoteSyncData = async (id, noteIds, pins) => {
     await dataApi.deleteFiles(pin.fpaths);
   }
 
+  if (isObject(tags[mainId])) {
+    for (const tagName in tags[mainId]) {
+      const tag = tags[mainId][tagName];
+      if (
+        isObject(tag) &&
+        !tag.id.startsWith('deleted') &&
+        ![id, transitId, rootId].includes(tag.id)
+      ) {
+        const eRst = extractTagFPath(tag.fpath);
+        const fpath = createTagFPath(
+          eRst.tagName, eRst.rank, eRst.updatedDT, eRst.addedDT, id
+        );
+        const content = {};
+
+        if (vars.syncMode.doSyncMode) await serverApi.putFiles([fpath], [content]);
+        await dataApi.putFiles([fpath], [content]);
+
+        if (vars.syncMode.doSyncMode) await serverApi.deleteFiles(tag.fpaths);
+        await dataApi.deleteFiles(tag.fpaths);
+      }
+    }
+  }
+
   let listName = MY_NOTES;
 
-  let fpaths = noteIds.toFPaths[transitId];
+  let fpaths = nmRst.toFPaths[transitId];
   if (Array.isArray(fpaths) && fpaths.length > 0) {
     listName = extractNoteFPath(fpaths[0]).listName;
   }
@@ -1624,13 +1786,13 @@ const deleteUpdatedNoteSyncData = async (id, noteIds, pins) => {
   if (vars.syncMode.doSyncMode) await serverApi.putFiles([fpath], [content]);
   await dataApi.putFiles([fpath], [content]);
 
-  const parentIds = getDataParentIds(id, noteIds.toParents);
+  const parentIds = getDataParentIds(id, nmRst.toParents);
 
   for (let i = parentIds.length - 1; i >= 0; i--) {
     const parentId = parentIds[i];
     if (parentId === rootId) continue;
 
-    fpaths = noteIds.toFPaths[parentId];
+    fpaths = nmRst.toFPaths[parentId];
     if (!Array.isArray(fpaths)) continue;
 
     fpaths = fpaths.filter(fp => fp !== fpath);
@@ -1640,30 +1802,30 @@ const deleteUpdatedNoteSyncData = async (id, noteIds, pins) => {
   }
 };
 
-const deleteDeletedNoteSyncData = async (id, noteIds) => {
-  const parentIds = getDataParentIds(id, noteIds.toParents);
+const deleteDeletedNoteSyncData = async (id, nmRst) => {
+  const parentIds = getDataParentIds(id, nmRst.toParents);
 
   let fpaths;
   for (let i = parentIds.length - 1; i >= 0; i--) {
     const parentId = parentIds[i];
 
-    fpaths = noteIds.toFPaths[parentId];
+    fpaths = nmRst.toFPaths[parentId];
     if (!Array.isArray(fpaths)) continue;
 
     if (vars.syncMode.doSyncMode) await serverApi.deleteFiles(fpaths);
     await dataApi.deleteFiles(fpaths);
   }
 
-  fpaths = noteIds.toFPaths[id];
+  fpaths = nmRst.toFPaths[id];
   if (!Array.isArray(fpaths)) return;
 
   if (vars.syncMode.doSyncMode) await serverApi.deleteFiles(fpaths);
   await dataApi.deleteFiles(fpaths);
 };
 
-const deleteUpdatedSettingsSyncData = async (id, settingsIds) => {
-  const transitId = settingsIds.toParents[id][0];
-  const rootId = settingsIds.toRootIds[id];
+const deleteUpdatedSettingsSyncData = async (id, smRst) => {
+  const transitId = smRst.toParents[id][0];
+  const rootId = smRst.toRootIds[id];
 
   const fname = createDataFName(transitId, [rootId]);
   const fpath = createSettingsFPath(fname);
@@ -1672,14 +1834,14 @@ const deleteUpdatedSettingsSyncData = async (id, settingsIds) => {
   if (vars.syncMode.doSyncMode) await serverApi.putFiles([fpath], [content]);
   await dataApi.putFiles([fpath], [content]);
 
-  const parentIds = getDataParentIds(id, settingsIds.toParents);
+  const parentIds = getDataParentIds(id, smRst.toParents);
 
   let fpaths;
   for (let i = parentIds.length - 1; i >= 0; i--) {
     const parentId = parentIds[i];
     if (parentId === rootId) continue;
 
-    fpaths = settingsIds.toFPaths[parentId];
+    fpaths = smRst.toFPaths[parentId];
     if (!Array.isArray(fpaths)) continue;
 
     fpaths = fpaths.filter(fp => fp !== fpath);
@@ -1700,19 +1862,22 @@ const deleteDeletedPinSyncData = async (id, pins) => {
   await dataApi.deleteFiles([fpath]);
 };
 
+const deleteDeletedTagSyncData = async (tagName, id, tags) => {
+  const fpath = tags[id][tagName].fpath;
+  const fpaths = tags[id][tagName].fpaths.filter(fp => fp !== fpath);
+
+  if (vars.syncMode.doSyncMode) await serverApi.deleteFiles(fpaths);
+  await dataApi.deleteFiles(fpaths);
+
+  if (vars.syncMode.doSyncMode) await serverApi.deleteFiles([fpath]);
+  await dataApi.deleteFiles([fpath]);
+};
+
 const _deleteSyncData = async (dispatch, getState) => {
   dispatch(updateDeleteSyncDataProgress({ total: 'calculating...', done: 0 }));
 
-  if (vars.sync.isSyncing) {
-    dispatch(updateDeleteSyncDataProgress({
-      total: -1, done: -1, error: 'Please wait for the sync to complete first.',
-    }));
-    return;
-  }
-  await sync(true, 2)(dispatch, getState); // manually call to wait for it properly!
-
-  const syncProgress = getState().display.syncProgress;
-  if (isObject(syncProgress) && syncProgress.status === SYNC_ROLLBACK) {
+  const waitResult = await syncAndWait(true, 2)(dispatch, getState);
+  if (!waitResult) {
     dispatch(updateDeleteSyncDataProgress({
       total: -1, done: -1, error: 'Sync failed. Please wait a moment and try again.',
     }));
@@ -1721,17 +1886,17 @@ const _deleteSyncData = async (dispatch, getState) => {
 
   vars.deleteSyncData.isDeleting = true;
 
-  let noteIds, settingsIds, unusedPinFPaths = [], pins = {};
+  let nmRst, smRst, unusedPinFPaths = [], pins = {}, unusedTagFPaths = [], tags = {};
   try {
     const fpaths = await dataApi.listFPaths(true);
-    noteIds = listNoteIds(fpaths.noteFPaths);
-    settingsIds = listSettingsIds(fpaths.settingsFPaths);
+    nmRst = listNoteMetas(fpaths.noteFPaths);
+    smRst = listSettingsMetas(fpaths.settingsFPaths);
 
     for (const fpath of fpaths.pinFPaths) {
-      const { id, updatedDT } = extractPinFPath(fpath);
+      const { updatedDT, id } = extractPinFPath(fpath);
 
       const _id = id.startsWith('deleted') ? id.slice(7) : id;
-      const pinMainId = getMainId(_id, noteIds.toRootIds);
+      const pinMainId = getMainId(_id, nmRst.toRootIds);
       if (!isString(pinMainId)) {
         unusedPinFPaths.push(fpath);
         continue;
@@ -1749,21 +1914,45 @@ const _deleteSyncData = async (dispatch, getState) => {
       pins[pinMainId].id = id;
       pins[pinMainId].fpath = fpath;
     }
+    for (const fpath of fpaths.tagFPaths) {
+      const { tagName, updatedDT, id } = extractTagFPath(fpath);
+
+      const _id = id.startsWith('deleted') ? id.slice(7) : id;
+      const mainId = getMainId(_id, nmRst.toRootIds);
+      if (!isString(mainId)) {
+        unusedTagFPaths.push(fpath);
+        continue;
+      }
+
+      if (!isObject(tags[mainId])) tags[mainId] = {};
+      if (!isObject(tags[mainId][tagName])) {
+        tags[mainId][tagName] = { id: null, updatedDT: 0, fpath: null, fpaths: [] };
+      }
+      if (!tags[mainId][tagName].fpaths.includes(fpath)) {
+        tags[mainId][tagName].fpaths.push(fpath);
+      }
+
+      if (tags[mainId][tagName].updatedDT > updatedDT) continue;
+      tags[mainId][tagName].updatedDT = updatedDT;
+      tags[mainId][tagName].id = id;
+      tags[mainId][tagName].fpath = fpath;
+    }
   } catch (error) {
     dispatch(updateDeleteSyncDataProgress({ total: -1, done: -1, error: `${error}` }));
     return;
   }
 
-  const nUpdatedIds = [], nDeletedIds = [], sUpdatedIds = [], pDeletedIds = [];
-  for (const noteId of noteIds.noteIds) {
-    const { id } = noteId;
+  const nUpdatedIds = [], nDeletedIds = [], sUpdatedIds = [];
+  const pDeletedIds = [], tDeletedInfos = [];
+  for (const meta of nmRst.noteMetas) {
+    const { id } = meta;
 
-    const fpIds = noteIds.toParents[id];
+    const fpIds = nmRst.toParents[id];
     if (!Array.isArray(fpIds) || fpIds.length === 0) continue;
 
-    const rootId = noteIds.toRootIds[id];
+    const rootId = nmRst.toRootIds[id];
     for (const fpId of fpIds) {
-      const spIds = noteIds.toParents[fpId];
+      const spIds = nmRst.toParents[fpId];
       if (!Array.isArray(spIds) || spIds.length === 0) continue;
       if (spIds.length === 1 && spIds.includes(rootId)) continue;
 
@@ -1771,19 +1960,19 @@ const _deleteSyncData = async (dispatch, getState) => {
       break;
     }
   }
-  for (const id of noteIds.allIds) {
+  for (const id of nmRst.allIds) {
     if (!id.startsWith('deleted')) continue;
     nDeletedIds.push(id);
   }
-  for (const settingsId of settingsIds.settingsIds) {
-    const { id } = settingsId;
+  for (const meta of smRst.settingsMetas) {
+    const { id } = meta;
 
-    const fpIds = settingsIds.toParents[id];
+    const fpIds = smRst.toParents[id];
     if (!Array.isArray(fpIds) || fpIds.length === 0) continue;
 
-    const rootId = settingsIds.toRootIds[id];
+    const rootId = smRst.toRootIds[id];
     for (const fpId of fpIds) {
-      const spIds = settingsIds.toParents[fpId];
+      const spIds = smRst.toParents[fpId];
       if (!Array.isArray(spIds) || spIds.length === 0) continue;
       if (spIds.length === 1 && spIds.includes(rootId)) continue;
 
@@ -1795,10 +1984,17 @@ const _deleteSyncData = async (dispatch, getState) => {
     if (!pins[pinMainId].id.startsWith('deleted')) continue;
     pDeletedIds.push(pinMainId);
   }
+  for (const mainId in tags) {
+    for (const tagName in tags[mainId]) {
+      if (!tags[mainId][tagName].id.startsWith('deleted')) continue;
+      tDeletedInfos.push({ tagName, mainId });
+    }
+  }
 
   const total = (
     nUpdatedIds.length + nDeletedIds.length + sUpdatedIds.length +
-    unusedPinFPaths.length + pDeletedIds.length
+    unusedPinFPaths.length + pDeletedIds.length +
+    unusedTagFPaths.length + tDeletedInfos.length
   );
   const progress = { total, done: 0 };
   dispatch(updateDeleteSyncDataProgress(progress));
@@ -1810,7 +2006,7 @@ const _deleteSyncData = async (dispatch, getState) => {
     for (let i = 0, j = nUpdatedIds.length; i < j; i += nItems) {
       const _nUpdatedIds = nUpdatedIds.slice(i, i + nItems);
       await Promise.all(_nUpdatedIds.map(id => {
-        return deleteUpdatedNoteSyncData(id, noteIds, pins);
+        return deleteUpdatedNoteSyncData(id, nmRst, pins, tags);
       }));
 
       progress.done += _nUpdatedIds.length;
@@ -1819,7 +2015,7 @@ const _deleteSyncData = async (dispatch, getState) => {
     for (let i = 0, j = nDeletedIds.length; i < j; i += nItems) {
       const _nDeletedIds = nDeletedIds.slice(i, i + nItems);
       await Promise.all(_nDeletedIds.map(id => {
-        return deleteDeletedNoteSyncData(id, noteIds);
+        return deleteDeletedNoteSyncData(id, nmRst);
       }));
 
       progress.done += _nDeletedIds.length;
@@ -1828,7 +2024,7 @@ const _deleteSyncData = async (dispatch, getState) => {
     for (let i = 0, j = sUpdatedIds.length; i < j; i += nItems) {
       const _sUpdatedIds = sUpdatedIds.slice(i, i + nItems);
       await Promise.all(_sUpdatedIds.map(id => {
-        return deleteUpdatedSettingsSyncData(id, settingsIds);
+        return deleteUpdatedSettingsSyncData(id, smRst);
       }));
 
       progress.done += _sUpdatedIds.length;
@@ -1849,6 +2045,23 @@ const _deleteSyncData = async (dispatch, getState) => {
       }));
 
       progress.done += _pDeletedIds.length;
+      dispatch(updateDeleteSyncDataProgress(progress));
+    }
+    for (let i = 0, j = unusedTagFPaths.length; i < j; i += nItems) {
+      const _unusedTagFPaths = unusedTagFPaths.slice(i, i + nItems);
+      if (vars.syncMode.doSyncMode) await serverApi.deleteFiles(_unusedTagFPaths);
+      await dataApi.deleteFiles(_unusedTagFPaths);
+
+      progress.done += _unusedTagFPaths.length;
+      dispatch(updateDeleteSyncDataProgress(progress));
+    }
+    for (let i = 0, j = tDeletedInfos.length; i < j; i += nItems) {
+      const _tDeletedInfos = tDeletedInfos.slice(i, i + nItems);
+      await Promise.all(_tDeletedInfos.map(info => {
+        return deleteDeletedTagSyncData(info.tagName, info.mainId, tags);
+      }));
+
+      progress.done += _tDeletedInfos.length;
       dispatch(updateDeleteSyncDataProgress(progress));
     }
   } catch (error) {

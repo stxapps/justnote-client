@@ -6,6 +6,7 @@ import Svg, { Path } from 'react-native-svg';
 import lsgApi from '../apis/localSg';
 import { COLS_PANEL_STATE, NEW_NOTE, NEW_NOTE_OBJ } from '../types/const';
 import { makeGetUnsavedNote } from '../selectors';
+import { getNote } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 import Loading from './Loading';
@@ -25,12 +26,12 @@ const ColsPanel = () => {
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const getUnsavedNote = useMemo(makeGetUnsavedNote, []);
   const note = useSelector(state => {
-    const { listName, noteId } = state.display;
+    const { noteId } = state.display;
 
     if (!noteId) return null;
     if (noteId === NEW_NOTE) return NEW_NOTE_OBJ;
-    if (noteId.startsWith('conflict')) return state.conflictedNotes[listName][noteId];
-    return state.notes[listName][noteId];
+    if (noteId.startsWith('conflict')) return state.conflictedNotes[noteId];
+    return getNote(noteId, state.notes);
   });
   const unsavedNote = useSelector(state => getUnsavedNote(state, note));
   const exitCount = useSelector(state => state.display.exitColsPanelFullScreenCount);

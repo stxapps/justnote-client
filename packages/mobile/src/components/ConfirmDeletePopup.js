@@ -5,8 +5,10 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
-import { updatePopup, deleteNotes, deleteListNames } from '../actions';
-import { CONFIRM_DELETE_POPUP, DELETE_ACTION_LIST_NAME } from '../types/const';
+import { updatePopup, deleteNotes, deleteListNames, deleteTagNames } from '../actions';
+import {
+  CONFIRM_DELETE_POPUP, DELETE_ACTION_LIST_NAME, DELETE_ACTION_TAG_NAME,
+} from '../types/const';
 import { dialogFMV } from '../types/animConfigs';
 
 import { useSafeAreaInsets, useTailwind } from '.';
@@ -16,7 +18,8 @@ const ConfirmDeletePopup = () => {
   const insets = useSafeAreaInsets();
   const isShown = useSelector(state => state.display.isConfirmDeletePopupShown);
   const deleteAction = useSelector(state => state.display.deleteAction);
-  const deletingListName = useSelector(state => state.display.deletingListName);
+  const selectingListName = useSelector(state => state.display.selectingListName);
+  const selectingTagName = useSelector(state => state.display.selectingTagName);
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
   const [derivedIsShown, setDerivedIsShown] = useState(isShown);
   const popupAnim = useRef(new Animated.Value(0)).current;
@@ -35,7 +38,9 @@ const ConfirmDeletePopup = () => {
     if (didClick.current) return;
 
     if (deleteAction === DELETE_ACTION_LIST_NAME) {
-      dispatch(deleteListNames([deletingListName]));
+      dispatch(deleteListNames([selectingListName]));
+    } else if (deleteAction === DELETE_ACTION_TAG_NAME) {
+      dispatch(deleteTagNames([selectingTagName]));
     } else {
       dispatch(deleteNotes());
     }

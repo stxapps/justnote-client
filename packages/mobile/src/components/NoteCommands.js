@@ -21,6 +21,7 @@ const NoteCommands = (props) => {
   const { isFullScreen, onToggleFullScreen, isOnDarkBackground, isLeftAlign } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const listName = useSelector(state => state.display.listName);
+  const queryString = useSelector(state => state.display.queryString);
   const listNameMap = useSelector(getListNameMap);
   const resetDidClickCount = useSelector(state => state.display.resetDidClickCount);
   const moveToBtn = useRef(null);
@@ -91,11 +92,18 @@ const NoteCommands = (props) => {
 
   const rListName = [MY_NOTES, ARCHIVE, TRASH].includes(listName) ? listName : MY_NOTES;
 
-  const isArchiveBtnShown = [MY_NOTES].includes(rListName);
-  const isRemoveBtnShown = [MY_NOTES, ARCHIVE].includes(rListName);
-  const isRestoreBtnShown = [TRASH].includes(rListName);
-  const isDeleteBtnShown = [TRASH].includes(rListName);
-  const isMoveToBtnShown = [ARCHIVE].includes(rListName) || (rListName === MY_NOTES && getAllListNames(listNameMap).length > 3);
+  let isArchiveBtnShown = [MY_NOTES].includes(rListName);
+  let isRemoveBtnShown = [MY_NOTES, ARCHIVE].includes(rListName);
+  let isRestoreBtnShown = [TRASH].includes(rListName);
+  let isDeleteBtnShown = [TRASH].includes(rListName);
+  let isMoveToBtnShown = (
+    [ARCHIVE].includes(rListName) ||
+    (rListName === MY_NOTES && getAllListNames(listNameMap).length > 3)
+  );
+  if (queryString) {
+    [isArchiveBtnShown, isRemoveBtnShown, isRestoreBtnShown] = [false, true, false];
+    [isDeleteBtnShown, isMoveToBtnShown] = [false, false];
+  }
 
   let btnClassNames;
   if (isOnDarkBackground) btnClassNames = 'border-white bg-white lg:border-gray-300';

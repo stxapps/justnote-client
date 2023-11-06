@@ -12,7 +12,7 @@ import {
   initialLocalSettingsState as initialState, whtModeThemeCustomOptions,
   blkModeThemeCustomOptions,
 } from '../types/initialStates';
-import { isObject } from '../utils';
+import { isObject, getNormalizedPurchases } from '../utils';
 import vars from '../vars';
 
 const localSettingsReducer = (state = initialState, action) => {
@@ -38,7 +38,7 @@ const localSettingsReducer = (state = initialState, action) => {
     }
 
     if (isObject(info)) {
-      newState.purchases = info.purchases;
+      newState.purchases = getNormalizedPurchases(info.purchases);
     } else {
       newState.purchases = null;
     }

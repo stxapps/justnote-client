@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
-import { showLockMenuPopup, showUnlockNoteEditorPopup } from '../actions';
+import { showLockMenuPopup, showUNEPopup } from '../actions';
 import { makeGetDoShowTitle } from '../selectors';
 
 import { useTailwind } from '.';
@@ -20,7 +20,7 @@ const NoteListItemLock = (props) => {
 
   const onContentBtnClick = () => {
     if (isBulkEditing) return;
-    dispatch(showUnlockNoteEditorPopup(note.id));
+    dispatch(showUNEPopup(note.id, true));
   };
 
   const onMenuBtnClick = (e) => {

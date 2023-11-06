@@ -8,6 +8,7 @@ import Svg, { Path } from 'react-native-svg';
 import { updateNoteId, updatePopup, updateEditorScrollEnabled } from '../actions';
 import { NEW_NOTE, NEW_NOTE_OBJ, SIDEBAR_POPUP } from '../types/const';
 import { makeGetUnsavedNote } from '../selectors';
+import { getNote } from '../utils';
 import { sidebarFMV } from '../types/animConfigs';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
@@ -21,12 +22,12 @@ const NavPanel = () => {
   const insets = useSafeAreaInsets();
   const getUnsavedNote = useMemo(makeGetUnsavedNote, []);
   const note = useSelector(state => {
-    const { listName, noteId } = state.display;
+    const { noteId } = state.display;
 
     if (!noteId) return null;
     if (noteId === NEW_NOTE) return NEW_NOTE_OBJ;
-    if (noteId.startsWith('conflict')) return state.conflictedNotes[listName][noteId];
-    return state.notes[listName][noteId];
+    if (noteId.startsWith('conflict')) return state.conflictedNotes[noteId];
+    return getNote(noteId, state.notes);
   });
   const unsavedNote = useSelector(state => getUnsavedNote(state, note));
   const [derivedNote, setDerivedNote] = useState(note);

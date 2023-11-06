@@ -1,27 +1,25 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, Animated } from 'react-native';
+import { View, TouchableOpacity, Animated } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path, Circle } from 'react-native-svg';
 
 import { updatePopup, showNoteListMenuPopup } from '../actions';
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
-import { SEARCH_POPUP, LG_WIDTH, SHOW_SYNCED } from '../types/const';
-import { getListNameMap } from '../selectors';
-import { getListNameDisplayName } from '../utils';
+import { SEARCH_POPUP, LG_WIDTH, UPDATING, SHOW_SYNCED } from '../types/const';
 import { rotateAnimConfig } from '../types/animConfigs';
 
 import { useSafeAreaFrame, useTailwind } from '.';
+
 import NoteListSearchPopup from './NoteListSearchPopup';
 import NoteListTopBarBulkEdit from './NoteListTopBarBulkEdit';
+import NoteListTopBarTitle from './NoteListTopBarTitle';
 
 const NoteListTopBar = (props) => {
 
   const { onSidebarOpenBtnClick } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
-  const listName = useSelector(state => state.display.listName);
-  const listNameMap = useSelector(getListNameMap);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
-  const didFetch = useSelector(state => state.display.didFetch);
+  const settingsStatus = useSelector(state => state.display.settingsStatus);
   const syncProgress = useSelector(state => state.display.syncProgress);
   const menuBtn = useRef(null);
   const menuBtnAnim = useRef(new Animated.Value(0)).current;
@@ -59,10 +57,6 @@ const NoteListTopBar = (props) => {
 
   if (safeAreaWidth < LG_WIDTH && isBulkEditing) return <NoteListTopBarBulkEdit />;
 
-  let title;
-  if (didFetch) title = <Text style={tailwind('text-lg font-medium leading-6 text-gray-900 blk:text-gray-100')} numberOfLines={1} ellipsizeMode="tail">{getListNameDisplayName(listName, listNameMap)}</Text>;
-  else title = <View style={tailwind('h-6 w-20 rounded-md bg-gray-300 blk:bg-gray-700')} />;
-
   const menuBtnSvg = (
     <View style={tailwind('w-10 items-center justify-center rounded-full')}>
       <Svg width={24} height={24} style={tailwind('font-normal text-gray-500 blk:text-gray-400')} viewBox="0 0 20 20" fill="currentColor">
@@ -72,7 +66,7 @@ const NoteListTopBar = (props) => {
   );
 
   let innerMenuBtn;
-  if (syncProgress && syncProgress.status === SYNC) {
+  if (settingsStatus === UPDATING || syncProgress && syncProgress.status === SYNC) {
     const innerMenuBtnStyle = {
       transform: [{
         rotate: menuBtnAnim.interpolate(
@@ -118,7 +112,9 @@ const NoteListTopBar = (props) => {
           </Svg>
         </TouchableOpacity>
         <View style={tailwind('flex-1 flex-row items-center justify-between pl-4 sm:pl-6')}>
-          <View style={tailwind('flex-1')}>{title}</View>
+          <View style={tailwind('flex-1')}>
+            <NoteListTopBarTitle />
+          </View>
           <View style={tailwind('ml-4 flex-row')}>
             <TouchableOpacity onPress={onSearchBtnClick} style={tailwind('items-center justify-center border border-white bg-white px-1 blk:border-gray-900 blk:bg-gray-900 lg:hidden')}>
               <View style={tailwind('rounded p-2.5')}>

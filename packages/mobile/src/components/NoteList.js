@@ -7,7 +7,9 @@ import { updateBulkEdit, updateNoteId, fetch, sync } from '../actions';
 import {
   TRASH, NEW_NOTE, NEW_NOTE_OBJ, MAX_SELECTED_NOTE_IDS, VALID, LOCKED,
 } from '../types/const';
-import { makeGetUnsavedNote, getCurrentLockListStatus } from '../selectors';
+import {
+  getIsShowingNoteInfosNull, makeGetUnsavedNote, getCurrentLockListStatus,
+} from '../selectors';
 import { popupFMV } from '../types/animConfigs';
 
 import { useTailwind } from '.';
@@ -21,13 +23,23 @@ const NoteList = (props) => {
   const { onSidebarOpenBtnClick } = props;
   const getUnsavedNote = useMemo(makeGetUnsavedNote, []);
   const listName = useSelector(state => state.display.listName);
+  const queryString = useSelector(state => state.display.queryString);
+  const didFetch = useSelector(state => state.display.didFetch);
+  const didFetchSettings = useSelector(state => state.display.didFetchSettings);
+  const isShowingNoteInfosNull = useSelector(state => getIsShowingNoteInfosNull(state));
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
-  const isMaxErrorShown = useSelector(state => state.display.isSelectedNoteIdsMaxErrorShown);
-  const fetchedListNames = useSelector(state => state.display.fetchedListNames);
+  const isMaxErrorShown = useSelector(
+    state => state.display.isSelectedNoteIdsMaxErrorShown
+  );
   const unsavedNote = useSelector(state => getUnsavedNote(state, NEW_NOTE_OBJ));
   const lockStatus = useSelector(state => getCurrentLockListStatus(state));
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
   const isUserDummy = useSelector(state => state.user.isUserDummy);
+  const prevListName = useRef(null);
+  const prevQueryString = useRef(null);
+  const prevDidFetch = useRef(null);
+  const prevDidFetchSettings = useRef(null);
+  const prevIsShowingNoteInfosNull = useRef(null);
   const maxErrorAnim = useRef(new Animated.Value(0)).current;
   const bulkEditBackHandler = useRef(null);
   const dispatch = useDispatch();
@@ -86,8 +98,22 @@ const NoteList = (props) => {
   };
 
   useEffect(() => {
-    if (!fetchedListNames.includes(listName)) dispatch(fetch());
-  }, [listName, fetchedListNames, dispatch]);
+    if (
+      (prevListName.current !== listName) ||
+      (prevQueryString.current !== queryString) ||
+      (prevDidFetch.current && !didFetch) ||
+      (prevDidFetchSettings.current && !didFetchSettings) ||
+      (!prevIsShowingNoteInfosNull.current && isShowingNoteInfosNull)
+    ) dispatch(fetch());
+
+    prevListName.current = listName;
+    prevQueryString.current = queryString;
+    prevDidFetch.current = didFetch;
+    prevDidFetchSettings.current = didFetchSettings;
+    prevIsShowingNoteInfosNull.current = isShowingNoteInfosNull;
+  }, [
+    listName, queryString, didFetch, didFetchSettings, isShowingNoteInfosNull, dispatch,
+  ]);
 
   useEffect(() => {
     // As dummy then signed in, need to sync
@@ -110,7 +136,7 @@ const NoteList = (props) => {
   }, [isMaxErrorShown, maxErrorAnim]);
 
   let noteListItems = <LoadingNoteListItems />;
-  if (fetchedListNames.includes(listName)) {
+  if (!isShowingNoteInfosNull) {
     if (lockStatus === LOCKED) noteListItems = <NoteListLock />;
     else noteListItems = <NoteListItems />;
   }

@@ -4,11 +4,12 @@ import { putDbUnsavedNote } from '../actions';
 import {
   INCREASE_SAVE_NOTE_COUNT, INCREASE_DISCARD_NOTE_COUNT,
   INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT, INCREASE_UPDATE_NOTE_ID_COUNT,
-  INCREASE_CHANGE_LIST_NAME_COUNT, INCREASE_FOCUS_TITLE_COUNT,
-  INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
-  INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT, INCREASE_UPDATE_BULK_EDIT_COUNT,
-  INCREASE_SHOW_NOTE_LIST_MENU_POPUP_COUNT, INCREASE_SHOW_NLIM_POPUP_COUNT,
-  DISCARD_NOTE, MOVE_NOTES_COMMIT, UPDATE_EDITOR_IS_UPLOADING, UPDATE_BULK_EDITING,
+  INCREASE_CHANGE_LIST_NAME_COUNT, INCREASE_UPDATE_QUERY_STRING_COUNT,
+  INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT,
+  INCREASE_UPDATE_EDITOR_WIDTH_COUNT, INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT,
+  INCREASE_UPDATE_BULK_EDIT_COUNT, INCREASE_SHOW_NOTE_LIST_MENU_POPUP_COUNT,
+  INCREASE_SHOW_NLIM_POPUP_COUNT, INCREASE_SHOW_UNE_POPUP_COUNT, DISCARD_NOTE,
+  MOVE_NOTES_COMMIT, UPDATE_EDITOR_IS_UPLOADING, UPDATE_BULK_EDITING,
   UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_NOTE_ID, UPDATE_EDITING_NOTE,
   UPDATE_UNSAVED_NOTE, DELETE_UNSAVED_NOTES, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
@@ -27,6 +28,7 @@ const initialState = {
   updateNoteIdUrlHashCount: 0,
   updateNoteIdCount: 0,
   changeListNameCount: 0,
+  updateQueryStringCount: 0,
   focusTitleCount: 0,
   setInitDataCount: 0,
   blurCount: 0,
@@ -35,6 +37,7 @@ const initialState = {
   updateBulkEditCount: 0,
   showNoteListMenuPopupCount: 0,
   showNLIMPopupCount: 0,
+  showUNEPopupCount: 0,
   isUploading: false,
   isScrollEnabled: true,
   ...initialEditingNoteState,
@@ -60,6 +63,10 @@ const editorReducer = (state = initialState, action) => {
 
   if (action.type === INCREASE_CHANGE_LIST_NAME_COUNT) {
     return { ...state, changeListNameCount: state.changeListNameCount + 1 };
+  }
+
+  if (action.type === INCREASE_UPDATE_QUERY_STRING_COUNT) {
+    return { ...state, updateQueryStringCount: state.updateQueryStringCount + 1 };
   }
 
   if (action.type === INCREASE_FOCUS_TITLE_COUNT) {
@@ -99,6 +106,12 @@ const editorReducer = (state = initialState, action) => {
   if (action.type === INCREASE_SHOW_NLIM_POPUP_COUNT) {
     return {
       ...state, showNLIMPopupCount: state.showNLIMPopupCount + 1,
+    };
+  }
+
+  if (action.type === INCREASE_SHOW_UNE_POPUP_COUNT) {
+    return {
+      ...state, showUNEPopupCount: state.showUNEPopupCount + 1,
     };
   }
 
@@ -191,6 +204,7 @@ const editorReducer = (state = initialState, action) => {
       updateNoteIdUrlHashCount: state.updateNoteIdUrlHashCount,
       updateNoteIdCount: state.updateNoteIdCount,
       changeListNameCount: state.changeListNameCount,
+      updateQueryStringCount: state.updateQueryStringCount,
       focusTitleCount: state.focusTitleCount,
       setInitDataCount: state.setInitDataCount,
       blurCount: state.blurCount,
@@ -199,6 +213,7 @@ const editorReducer = (state = initialState, action) => {
       updateBulkEditCount: state.updateBulkEditCount,
       showNoteListMenuPopupCount: state.showNoteListMenuPopupCount,
       showNLIMPopupCount: state.showNLIMPopupCount,
+      showUNEPopupCount: state.showUNEPopupCount,
     };
   }
 

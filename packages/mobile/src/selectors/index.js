@@ -1,44 +1,29 @@
 import { createSelectorCreator, defaultMemoize, createSelector } from 'reselect';
 
 import {
-  PINNED, ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE, NOTE_DATE_FORMAT_SYSTEM,
-  UPDATING, MOVING, DIED_UPDATING, DIED_MOVING, WHT_MODE, BLK_MODE, SYSTEM_MODE,
-  CUSTOM_MODE, NEW_NOTE, VALID, INVALID, LOCKED, UNLOCKED, MY_NOTES,
+  SHOWING_STATUSES, PINNED, ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE,
+  NOTE_DATE_FORMAT_SYSTEM, WHT_MODE, BLK_MODE, SYSTEM_MODE, CUSTOM_MODE, NEW_NOTE,
+  VALID, INVALID, LOCKED, UNLOCKED, MY_NOTES, TAGGED,
 } from '../types/const';
 import {
-  isStringIn, isObject, isString, isArrayEqual, isEqual, isTitleEqual, isBodyEqual,
-  getListNameObj, getMainId, getValidProduct as _getValidProduct,
-  getValidPurchase as _getValidPurchase, listNoteIds, getSortedNotes,
-  separatePinnedValues, getNoteFPaths, getPinFPaths, getPins, doEnableExtraFeatures,
-  getFormattedNoteDate, isNumber, isMobile as _isMobile, getDataParentIds,
+  isStringIn, isObject, isString, isEqual, isTitleEqual, isBodyEqual, getListNameObj,
+  getMainId, getValidProduct as _getValidProduct, getValidPurchase as _getValidPurchase,
+  listNoteMetas, getNoteFPaths, getPinFPaths, getPins, doEnableExtraFeatures,
+  getFormattedNoteDate, isNumber, isMobile as _isMobile, getDataParentIds, getNote,
+  doesIncludeFetchingMore, getLockListStatus, getTagFPaths, getTags, getTagNameObj,
 } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
-import { initialListNameEditorState } from '../types/initialStates';
+import {
+  initialListNameEditorState, initialTagNameEditorState,
+} from '../types/initialStates';
 
-const createSelectorListNameMap = createSelectorCreator(
-  defaultMemoize,
-  (prevVal, val) => {
-    if (!isObject(prevVal['notes']) || !isObject(val['notes'])) {
-      if (prevVal['notes'] !== val['notes']) return false;
-    }
-
-    if (!isArrayEqual(
-      Object.keys(prevVal['notes']).sort(),
-      Object.keys(val['notes']).sort()
-    )) return false;
-
-    return isEqual(prevVal['settings']['listNameMap'], val['settings']['listNameMap']);
+export const getListNameMap = createSelector(
+  state => state.settings.listNameMap,
+  (listNameMap) => {
+    return listNameMap;
   }
 );
 
-export const getListNameMap = createSelectorListNameMap(
-  state => state,
-  (state) => {
-    return [...state.settings.listNameMap];
-  }
-);
-
-/** @return {function(any, any): any} */
 export const makeIsNoteIdSelected = () => {
   return createSelector(
     state => state.display.selectedNoteIds,
@@ -56,149 +41,133 @@ export const getSelectedNoteIdsLength = createSelector(
   }
 );
 
+export const getIsShowingNoteInfosNull = createSelector(
+  state => state.display.showingNoteInfos,
+  (showingNoteInfos) => {
+    return showingNoteInfos === null;
+  }
+);
+
 const createSelectorNotes = createSelectorCreator(
   defaultMemoize,
   (prevVal, val) => {
+    if (getNoteFPaths(prevVal) !== getNoteFPaths(val)) return false;
+    if (prevVal.conflictedNotes !== val.conflictedNotes) return false;
+    if (prevVal.notes !== val.notes) return false;
+    if (prevVal.display.queryString !== val.display.queryString) return false;
+    if (prevVal.pendingTags !== val.pendingTags) return false;
+    if (prevVal.lockSettings.lockedNotes !== val.lockSettings.lockedNotes) return false;
+    if (prevVal.display.searchString !== val.display.searchString) return false;
 
-    if (prevVal['settings'].sortOn !== val['settings'].sortOn) {
-      return false;
-    }
-    if (prevVal['settings'].doDescendingOrder !== val['settings'].doDescendingOrder) {
-      return false;
-    }
-    if (
-      prevVal['settings'].doSectionNotesByMonth !== val['settings'].doSectionNotesByMonth
-    ) {
-      return false;
-    }
-
-    if (prevVal['display'].listName !== val['display'].listName) return false;
-    if (prevVal['display'].searchString !== val['display'].searchString) return false;
-
-    if (prevVal['cachedFPaths'].fpaths !== val['cachedFPaths'].fpaths) {
-      if (!prevVal['cachedFPaths'].fpaths || !val['cachedFPaths'].fpaths) return false;
-      if (!isArrayEqual(
-        prevVal['cachedFPaths'].fpaths.pinFPaths,
-        val['cachedFPaths'].fpaths.pinFPaths
-      )) return false;
-    }
-
-    if (prevVal['pendingPins'] !== val['pendingPins']) return false;
-
-    if (prevVal['lockSettings'].lockedNotes !== val['lockSettings'].lockedNotes) {
-      return false;
-    }
-
-    if (
-      prevVal['notes'] === val['notes'] &&
-      prevVal['conflictedNotes'] === val['conflictedNotes']
-    ) {
-      return true;
-    }
-    if (!isArrayEqual(
-      Object.keys(prevVal['notes']).sort(), Object.keys(val['notes']).sort())
-    ) {
-      return false;
-    }
-    if (!isArrayEqual(
-      Object.keys(prevVal['conflictedNotes']).sort(),
-      Object.keys(val['conflictedNotes']).sort())
-    ) {
-      return false;
-    }
-
-    for (const key in val['notes']) {
-      if (prevVal['notes'][key] !== val['notes'][key]) return false;
-    }
-    for (const key in val['conflictedNotes']) {
-      if (prevVal['conflictedNotes'][key] !== val['conflictedNotes'][key]) return false;
+    const prevInfos = prevVal.display.showingNoteInfos;
+    const infos = val.display.showingNoteInfos;
+    if (Array.isArray(prevInfos) && Array.isArray(infos)) {
+      if (prevInfos.length !== infos.length) return false;
+      for (let i = 0; i < prevInfos.length; i++) {
+        const [prevInfo, info] = [prevInfos[i], infos[i]];
+        if (!isEqual(prevInfo, info)) return false;
+      }
+    } else {
+      if (prevInfos !== infos) return false;
     }
 
     return true;
   }
 );
 
-export const _getNotes = (state) => {
-
-  const notes = state.notes;
-  const listName = state.display.listName;
-  const searchString = state.display.searchString;
-  const sortOn = state.settings.sortOn;
-  const doDescendingOrder = state.settings.doDescendingOrder;
-  const noteFPaths = getNoteFPaths(state);
-  const pinFPaths = getPinFPaths(state);
-  const pendingPins = state.pendingPins;
-  const lockedNotes = state.lockSettings.lockedNotes;
-
-  let sortedNotes = getSortedNotes(notes, listName, sortOn, doDescendingOrder);
-  if (!sortedNotes) return { pinnedNotes: null, notes: null };
-
-  const { toRootIds } = listNoteIds(noteFPaths);
-  const getValueMainId = (note) => {
-    let noteId = note.id;
-    if ([UPDATING, MOVING, DIED_UPDATING, DIED_MOVING].includes(note.status)) {
-      if (Array.isArray(note.parentIds) && note.parentIds.length > 0) {
-        noteId = note.parentIds[0];
-      }
-    }
-    return getMainId(noteId, toRootIds);
-  };
-  const separatedValues = separatePinnedValues(
-    sortedNotes, pinFPaths, pendingPins, toRootIds, getValueMainId,
-  );
-
-  const pinnedNotes = separatedValues[0].map(pinnedValue => pinnedValue.value);
-  const noPinnedNotes = separatedValues[1];
-
-  if (searchString === '') return { pinnedNotes, notes: noPinnedNotes };
-
-  const searchPinnedNotes = pinnedNotes.filter(note => {
-    return isStringIn(note, searchString, lockedNotes, toRootIds);
-  });
-  const searchNotes = noPinnedNotes.filter(note => {
-    return isStringIn(note, searchString, lockedNotes, toRootIds);
-  });
-
-  return { pinnedNotes: searchPinnedNotes, notes: searchNotes };
-};
-
-export const _getConflictedNotes = (state) => {
-
-  const conflictedNotes = state.conflictedNotes;
-  const listName = state.display.listName;
-  const sortOn = state.settings.sortOn;
-  const doDescendingOrder = state.settings.doDescendingOrder;
-
-  if (!conflictedNotes || !conflictedNotes[listName]) return null;
-
-  const sortedNotes = Object.values(conflictedNotes[listName]).sort((a, b) => {
-    return a[sortOn] - b[sortOn];
-  });
-  if (doDescendingOrder) sortedNotes.reverse();
-
-  return sortedNotes;
-};
-
 export const getNotes = createSelectorNotes(
   state => state,
   (state) => {
-    const { pinnedNotes, notes } = _getNotes(state);
-    const conflictedNotes = _getConflictedNotes(state);
-    return { conflictedNotes, pinnedNotes, notes };
+    const noteFPaths = getNoteFPaths(state);
+    const conflictedNotes = state.conflictedNotes;
+    const notes = state.notes;
+    const queryString = state.display.queryString;
+    const pendingTags = state.pendingTags;
+    const lockedNotes = state.lockSettings.lockedNotes;
+    const searchString = state.display.searchString;
+    const showingNoteInfos = state.display.showingNoteInfos;
+
+    if (!Array.isArray(showingNoteInfos)) return null;
+
+    const cNotes = [], pNotes = [], sNotes = [];
+    for (const info of showingNoteInfos) {
+      if (info.id.startsWith('conflict')) {
+        const note = conflictedNotes[info.id];
+        if (!isObject(note)) continue;
+
+        cNotes.push(note);
+        continue;
+      }
+
+      if (queryString && isObject(pendingTags[info.id])) {
+        // Only tag name for now
+        const tagName = queryString.trim();
+        const values = pendingTags[info.id].values;
+        const found = values.some(value => value.tagName === tagName);
+        if (!found) continue;
+      }
+
+      const note = getNote(info.id, notes);
+      if (!isObject(note)) continue;
+      if (!SHOWING_STATUSES.includes(note.status)) continue;
+
+      if (info.isPinned) pNotes.push(note);
+      else sNotes.push(note);
+    }
+
+    if (searchString === '') {
+      return { conflictedNotes: cNotes, pinnedNotes: pNotes, notes: sNotes };
+    }
+
+    const { toRootIds } = listNoteMetas(noteFPaths);
+
+    const spNotes = pNotes.filter(note => {
+      return isStringIn(note, searchString, lockedNotes, toRootIds);
+    });
+    const ssNotes = sNotes.filter(note => {
+      return isStringIn(note, searchString, lockedNotes, toRootIds);
+    });
+
+    return { conflictedNotes: cNotes, pinnedNotes: spNotes, notes: ssNotes };
   }
+);
+
+export const getHasMoreNotes = createSelector(
+  state => state.display.hasMoreNotes,
+  (hasMoreNotes) => {
+    return hasMoreNotes;
+  },
 );
 
 export const getIsFetchingMore = createSelector(
   state => state.display.listName,
-  state => state.isFetchMoreInterrupted,
-  (listName, isFetchMoreInterrupted) => {
-    const obj = isFetchMoreInterrupted[listName];
-    if (isObject(obj) && !isEqual(obj, {})) return true;
+  state => state.display.queryString,
+  state => state.display.fetchingInfos,
+  (listName, queryString, fetchingInfos) => {
+    const lnOrQt = queryString ? queryString : listName;
+    if (doesIncludeFetchingMore(lnOrQt, fetchingInfos)) return true;
     return false;
   }
 );
 
-/** @return {function(any, any): initialListNameEditorState} */
+export const getHasFetchedMore = createSelector(
+  state => state.display.listName,
+  state => state.display.queryString,
+  state => state.fetchedMore,
+  (listName, queryString, fetchedMore) => {
+    let obj;
+    if (queryString) {
+      obj = fetchedMore[queryString];
+      if (isObject(obj) && !isEqual(obj, {})) return true;
+    }
+
+    obj = fetchedMore[listName];
+    if (isObject(obj) && !isEqual(obj, {})) return true;
+
+    return false;
+  }
+);
+
 export const makeGetListNameEditor = () => {
   return createSelector(
     state => state.settings.listNameMap,
@@ -251,36 +220,21 @@ export const getDoEnableExtraFeatures = createSelector(
   purchases => doEnableExtraFeatures(purchases),
 );
 
-/** @return {function(any, any): any} */
 export const makeGetPinStatus = () => {
   return createSelector(
     state => getNoteFPaths(state),
     state => getPinFPaths(state),
     state => state.pendingPins,
     (state, noteIdOrObj) => {
-      if (isObject(noteIdOrObj)) return noteIdOrObj;
-      if (isString(noteIdOrObj)) {
-        for (const listName in state.notes) {
-          if (isObject(state.notes[listName]) && noteIdOrObj in state.notes[listName]) {
-            return state.notes[listName][noteIdOrObj];
-          }
-        }
-      }
-      return null;
+      if (isString(noteIdOrObj)) return getNote(noteIdOrObj, state.notes);
+      return noteIdOrObj;
     },
     (noteFPaths, pinFPaths, pendingPins, note) => {
       if (!isObject(note)) return null;
 
-      const { toRootIds } = listNoteIds(noteFPaths);
+      const { toRootIds } = listNoteMetas(noteFPaths);
       const pins = getPins(pinFPaths, pendingPins, false, toRootIds);
-
-      let noteId = note.id;
-      if ([UPDATING, MOVING, DIED_UPDATING, DIED_MOVING].includes(note.status)) {
-        if (Array.isArray(note.parentIds) && note.parentIds.length > 0) {
-          noteId = note.parentIds[0];
-        }
-      }
-      const noteMainId = getMainId(noteId, toRootIds);
+      const noteMainId = getMainId(note, toRootIds);
 
       if (noteMainId in pins) {
         if ('status' in pins[noteMainId]) return pins[noteMainId].status;
@@ -292,7 +246,6 @@ export const makeGetPinStatus = () => {
   );
 };
 
-/** @return {function(any, any): any} */
 export const makeGetNoteDate = () => {
   return createSelector(
     state => getDoEnableExtraFeatures(state),
@@ -450,7 +403,6 @@ export const getThemeMode = createSelector(
   },
 );
 
-/** @type {function(any, any): any} */
 export const getTailwind = createSelector(
   safeAreaWidth => safeAreaWidth,
   (__, themeMode) => themeMode,
@@ -461,7 +413,6 @@ export const getTailwind = createSelector(
   },
 );
 
-/** @return {function(any, any): any} */
 export const makeIsTimePickHourItemSelected = () => {
   return createSelector(
     state => state.timePick.hour,
@@ -472,7 +423,6 @@ export const makeIsTimePickHourItemSelected = () => {
   );
 };
 
-/** @return {function(any, any): any} */
 export const makeIsTimePickMinuteItemSelected = () => {
   return createSelector(
     state => state.timePick.minute,
@@ -483,7 +433,6 @@ export const makeIsTimePickMinuteItemSelected = () => {
   );
 };
 
-/** @return {function(any, any): any} */
 export const makeGetUnsavedNote = () => {
   return createSelector(
     state => getNoteFPaths(state),
@@ -507,7 +456,7 @@ export const makeGetUnsavedNote = () => {
 
       if (note.id === NEW_NOTE) return result;
 
-      const { toParents } = listNoteIds(noteFPaths);
+      const { toParents } = listNoteMetas(noteFPaths);
       const parentIds = getDataParentIds(note.id, toParents);
 
       for (const parentId of parentIds) {
@@ -569,16 +518,15 @@ export const makeGetLockNoteStatus = () => {
     state => state.display.doForceLock,
     state => getNoteFPaths(state),
     state => state.lockSettings.lockedNotes,
-    (__, noteIdOrObj) => {
-      if (isString(noteIdOrObj)) return noteIdOrObj;
-      if (isObject(noteIdOrObj)) return noteIdOrObj.id;
-      return null;
+    (state, noteIdOrObj) => {
+      if (isString(noteIdOrObj)) return getNote(noteIdOrObj, state.notes);
+      return noteIdOrObj;
     },
-    (doForceLock, noteFPaths, lockedNotes, noteId) => {
-      if (!isString(noteId)) return null;
+    (doForceLock, noteFPaths, lockedNotes, note) => {
+      if (!isObject(note)) return null;
 
-      const { toRootIds } = listNoteIds(noteFPaths);
-      const noteMainId = getMainId(noteId, toRootIds);
+      const { toRootIds } = listNoteMetas(noteFPaths);
+      const noteMainId = getMainId(note, toRootIds);
 
       if (isObject(lockedNotes[noteMainId])) {
         if (isString(lockedNotes[noteMainId].password)) {
@@ -596,16 +544,16 @@ export const makeGetDoShowTitle = () => {
   return createSelector(
     state => getNoteFPaths(state),
     state => state.lockSettings.lockedNotes,
-    (__, noteIdOrObj) => {
-      if (isString(noteIdOrObj)) return noteIdOrObj;
-      if (isObject(noteIdOrObj)) return noteIdOrObj.id;
-      return null;
+    (state, noteIdOrObj) => {
+      if (isString(noteIdOrObj)) return getNote(noteIdOrObj, state.notes);
+      return noteIdOrObj;
     },
-    (noteFPaths, lockedNotes, noteId) => {
-      if (!isString(noteId)) return false;
+    (noteFPaths, lockedNotes, note) => {
+      if (!isObject(note)) return false;
 
-      const { toRootIds } = listNoteIds(noteFPaths);
-      const noteMainId = getMainId(noteId, toRootIds);
+      const { toRootIds } = listNoteMetas(noteFPaths);
+      const noteMainId = getMainId(note, toRootIds);
+
       if (isObject(lockedNotes[noteMainId])) {
         if ([true, false].includes(lockedNotes[noteMainId].doShowTitle)) {
           return lockedNotes[noteMainId].doShowTitle;
@@ -622,30 +570,32 @@ export const makeGetLockListStatus = () => {
     state => state.lockSettings.lockedLists,
     (__, listName) => listName,
     (doForceLock, lockedLists, listName) => {
-      if (!isString(listName)) return null;
-
-      if (isObject(lockedLists[listName])) {
-        if (isString(lockedLists[listName].password)) {
-          if (doForceLock) return LOCKED;
-          if (isNumber(lockedLists[listName].unlockedDT)) return UNLOCKED;
-          return LOCKED;
-        }
-      }
-      return null;
+      return getLockListStatus(doForceLock, lockedLists, listName);
     },
   );
 };
 
-const _getCurrentLockListStatus = makeGetLockListStatus();
-export const getCurrentLockListStatus = (state) => {
-  return _getCurrentLockListStatus(state, state.display.listName);
-};
+export const getCurrentLockListStatus = createSelector(
+  state => state.display.doForceLock,
+  state => state.lockSettings.lockedLists,
+  state => state.display.listName,
+  state => state.display.queryString,
+  (doForceLock, lockedLists, listName, queryString) => {
+    if (queryString) {
+      if (doForceLock) return LOCKED;
+      return null;
+    }
+    return getLockListStatus(doForceLock, lockedLists, listName);
+  },
+);
 
 export const getCanChangeListNames = createSelector(
   state => state.display.doForceLock,
-  state => state.display.listName,
   state => state.lockSettings.lockedLists,
-  (doForceLock, listName, lockedLists) => {
+  state => state.display.listName,
+  state => state.display.queryString,
+  (doForceLock, lockedLists, listName, queryString) => {
+    if (queryString) return true;
     if (listName !== MY_NOTES) return true;
 
     if (isObject(lockedLists[listName])) {
@@ -657,3 +607,153 @@ export const getCanChangeListNames = createSelector(
     return true;
   },
 );
+
+export const makeGetTagStatus = () => {
+  return createSelector(
+    state => getNoteFPaths(state),
+    state => getTagFPaths(state),
+    state => state.pendingTags,
+    (state, noteIdOrObj) => {
+      if (isString(noteIdOrObj)) return getNote(noteIdOrObj, state.notes);
+      return noteIdOrObj;
+    },
+    (noteFPaths, tagFPaths, pendingTags, note) => {
+      if (!isObject(note)) return null;
+
+      const { toRootIds } = listNoteMetas(noteFPaths);
+      const tags = getTags(tagFPaths, pendingTags, toRootIds);
+      const noteMainId = getMainId(note, toRootIds);
+
+      if (noteMainId in tags) {
+        if ('status' in tags[noteMainId]) return tags[noteMainId].status;
+        return TAGGED;
+      }
+
+      return null;
+    }
+  );
+};
+
+export const makeGetTnAndDns = () => {
+  return createSelector(
+    state => getNoteFPaths(state),
+    state => getTagFPaths(state),
+    state => state.pendingTags,
+    state => state.settings.tagNameMap,
+    (state, noteIdOrObj) => {
+      if (isString(noteIdOrObj)) return getNote(noteIdOrObj, state.notes);
+      return noteIdOrObj;
+    },
+    (noteFPaths, tagFPaths, pendingTags, tagNameMap, note) => {
+      if (!isObject(note)) return [];
+
+      const { toRootIds } = listNoteMetas(noteFPaths);
+      const tags = getTags(tagFPaths, pendingTags, toRootIds);
+      const noteMainId = getMainId(note, toRootIds);
+
+      if (!isObject(tags[noteMainId])) return [];
+
+      const tnAndDns = [];
+      for (const { tagName } of tags[noteMainId].values) {
+        const { tagNameObj } = getTagNameObj(tagName, tagNameMap);
+        if (!isObject(tagNameObj)) continue;
+        tnAndDns.push({
+          tagName, displayName: tagNameObj.displayName, color: tagNameObj.color,
+        });
+      }
+      return tnAndDns;
+    },
+    {
+      memoizeOptions: {
+        resultEqualityCheck: (x, y) => {
+          if (x.length !== y.length) return false;
+          for (let i = 0; i < x.length; i++) {
+            if (!isEqual(x[i], y[i])) return false;
+          }
+          return true;
+        },
+      },
+    },
+  );
+};
+
+export const getTagEditor = createSelector(
+  state => getNoteFPaths(state),
+  state => getTagFPaths(state),
+  state => state.pendingTags,
+  state => state.settings.tagNameMap,
+  state => getNote(state.display.selectingNoteId, state.notes),
+  state => state.tagEditor,
+  (noteFPaths, tagFPaths, pendingTags, tagNameMap, note, tagEditor) => {
+
+    const editor = { ...tagEditor };
+    if (!editor.didValuesEdit && isObject(note)) {
+      const { toRootIds } = listNoteMetas(noteFPaths);
+      const tags = getTags(tagFPaths, pendingTags, toRootIds);
+      const noteMainId = getMainId(note, toRootIds);
+
+      if (noteMainId in tags) {
+        const { values } = tags[noteMainId];
+
+        editor.values = [];
+        for (const { tagName } of values) {
+          const { tagNameObj } = getTagNameObj(tagName, tagNameMap);
+          if (!isObject(tagNameObj)) continue;
+          editor.values.push({
+            tagName, displayName: tagNameObj.displayName, color: tagNameObj.color,
+          });
+        }
+      }
+    }
+    if (!editor.didHintsEdit) {
+      editor.hints = [];
+      for (const tagNameObj of tagNameMap) {
+        const { tagName, displayName, color } = tagNameObj;
+
+        const found = editor.values.some(value => value.tagName === tagName);
+        editor.hints.push({ tagName, displayName, color, isBlur: found });
+      }
+    }
+    return editor;
+  },
+  {
+    memoizeOptions: {
+      resultEqualityCheck: (x, y) => {
+        const [xKeys, yKeys] = [Object.keys(x), Object.keys(y)];
+        const keys = [...new Set([...xKeys, ...yKeys])];
+
+        for (const key of keys) {
+          if (!(key in x) || !(key in y)) return false;
+          if (key === 'values') {
+            const [xValues, yValues] = [x[key], y[key]];
+            if (!Array.isArray(xValues) || !Array.isArray(yValues)) return false;
+            if (xValues.length !== yValues.length) return false;
+            for (let i = 0; i < xValues.length; i++) {
+              if (!isEqual(xValues[i], yValues[i])) return false;
+            }
+            continue;
+          }
+          if (x[key] !== y[key]) return false;
+        }
+        return true;
+      },
+    },
+  },
+);
+
+export const makeGetTagNameEditor = () => {
+  return createSelector(
+    state => state.settings.tagNameMap,
+    state => state.tagNameEditors,
+    (__, key) => key,
+    (tagNameMap, tagNameEditors, key) => {
+      const state = { ...initialTagNameEditorState };
+
+      const { tagNameObj } = getTagNameObj(key, tagNameMap);
+      if (tagNameObj) state.value = tagNameObj.displayName;
+
+      return { ...state, ...tagNameEditors[key] };
+    },
+    { memoizeOptions: { resultEqualityCheck: isEqual } },
+  );
+};

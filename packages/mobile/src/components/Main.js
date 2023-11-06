@@ -14,14 +14,17 @@ import NoteListMenuPopup from './NoteListMenuPopup';
 import NoteListItemMenuPopup from './NoteListItemMenuPopup';
 import PinMenuPopup from './PinMenuPopup';
 import LockMenuPopup from './LockMenuPopup';
+import TagEditorPopup from './TagEditorPopup';
 import {
   ExportNoteAsPdfCompletePopup, ExportNoteAsPdfErrorPopup,
 } from './ExportNoteAsPdfPopup';
 import SettingsPopup from './SettingsPopup';
 import SettingsListsMenuPopup from './SettingsListsMenuPopup';
+import SettingsTagsMenuPopup from './SettingsTagsMenuPopup';
 import DateFormatMenuPopup from './DateFormatMenuPopup';
 import TimePickPopup from './TimePickPopup';
 import PinErrorPopup from './PinErrorPopup';
+import TagErrorPopup from './TagErrorPopup';
 import {
   SettingsUpdateErrorPopup, SettingsConflictErrorPopup,
 } from './SettingsErrorPopup';
@@ -61,13 +64,16 @@ const Main = () => {
       <NoteListItemMenuPopup />
       <PinMenuPopup />
       <LockMenuPopup />
+      <TagEditorPopup />
       <ExportNoteAsPdfCompletePopup />
       <ExportNoteAsPdfErrorPopup />
       <SettingsPopup />
       <SettingsListsMenuPopup />
+      <SettingsTagsMenuPopup />
       <DateFormatMenuPopup />
       <TimePickPopup />
       <PinErrorPopup />
+      <TagErrorPopup />
       <SettingsConflictErrorPopup />
       <SettingsUpdateErrorPopup />
       <ListNamesPopup />

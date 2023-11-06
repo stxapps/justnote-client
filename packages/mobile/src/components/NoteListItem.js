@@ -6,10 +6,10 @@ import { Circle } from 'react-native-animated-spinkit';
 
 import { PINNED, LOCKED, VALID, INVALID, BLK_MODE } from '../types/const';
 import {
-  makeGetPinStatus, makeGetLockNoteStatus, makeGetUnsavedNote,
+  makeGetPinStatus, makeGetTagStatus, makeGetLockNoteStatus, makeGetUnsavedNote,
   makeGetIsExportingNoteAsPdf, getThemeMode,
 } from '../selectors';
-import { isDiedStatus, isBusyStatus, isPinningStatus } from '../utils';
+import { isDiedStatus, isBusyStatus, isPinningStatus, isTaggingStatus } from '../utils';
 
 import { useTailwind } from '.';
 import NoteListItemContent from './NoteListItemContent';
@@ -20,11 +20,13 @@ const NoteListItem = (props) => {
 
   const { note } = props;
   const getPinStatus = useMemo(makeGetPinStatus, []);
+  const getTagStatus = useMemo(makeGetTagStatus, []);
   const getLockNoteStatus = useMemo(makeGetLockNoteStatus, []);
   const getUnsavedNote = useMemo(makeGetUnsavedNote, []);
   const getIsExportingNoteAsPdf = useMemo(makeGetIsExportingNoteAsPdf, []);
   const noteId = useSelector(state => state.display.noteId);
   const pinStatus = useSelector(state => getPinStatus(state, note));
+  const tagStatus = useSelector(state => getTagStatus(state, note));
   const lockStatus = useSelector(state => getLockNoteStatus(state, note));
   const unsavedNote = useSelector(state => getUnsavedNote(state, note));
   const isExporting = useSelector(state => getIsExportingNoteAsPdf(state, note));
@@ -36,6 +38,7 @@ const NoteListItem = (props) => {
   const isUnsavedValid = unsavedNote.status === VALID;
   const isUnsavedInvalid = unsavedNote.status === INVALID;
   const isPinning = isPinningStatus(pinStatus);
+  const isTagging = isTaggingStatus(tagStatus);
 
   const renderBusy = () => {
     const triangleStyle = {
@@ -124,7 +127,7 @@ const NoteListItem = (props) => {
   } else if (isConflicted || isDied || isUnsavedInvalid) {
     content = <NoteListItemError note={note} unsavedNote={unsavedNote} />;
   } else {
-    content = <NoteListItemContent note={note} pinStatus={pinStatus} />;
+    content = <NoteListItemContent note={note} pinStatus={pinStatus} tagStatus={tagStatus} />;
   }
 
   return (
@@ -134,6 +137,7 @@ const NoteListItem = (props) => {
       {(isUnsavedValid && note.id !== noteId) && renderUnsaved()}
       {isExporting && renderExporting()}
       {isPinning && renderPinning()}
+      {isTagging && renderBusy()}
       {[PINNED].includes(pinStatus) && renderPin()}
       {note.id === noteId && <View style={tailwind(`absolute inset-y-0 top-0 right-0 w-1 ${isConflicted || isDied ? 'bg-red-100' : 'bg-green-600'}`)} />}
     </View>

@@ -9,7 +9,9 @@ export const didChange = {
   doSectionNotesByMonth: false,
   doMoreEditorFontSizes: false,
   listNameMap: false,
+  tagNameMap: false,
   purchases: false,
+  newTagNameObjs: [],
 };
 
 export const cachedFPaths = {
@@ -23,11 +25,18 @@ export const cachedServerFPaths = {
 const scrollPanel = {
   contentHeight: 0,
   layoutHeight: 0,
-  pageYOffset: 0,
+  scrollY: 0,
 };
 
 const keyboard = {
   height: 0,
+};
+
+const fetch = {
+  fetchedLnOrQts: [],
+  fetchedNoteIds: [],
+  doShowLoading: false,
+  doForce: false,
 };
 
 const runAfterFetchTask = {
@@ -51,6 +60,10 @@ const changeListName = {
   changingListName: null,
 };
 
+const updateQueryString = {
+  updatingQueryString: null,
+};
+
 const updateBulkEdit = {
   selectedNoteId: null,
 };
@@ -62,6 +75,10 @@ const showNoteListMenuPopup = {
 const showNLIMPopup = {
   selectedNoteId: null,
   selectedRect: null,
+};
+
+const showUNEPopup = {
+  selectedNoteId: null,
 };
 
 const deleteOldNotes = {
@@ -103,11 +120,12 @@ const platform = {
 export const syncMode = {
   doSyncMode: platform.isReactNative ? true : false,
   didChange: false,
+  didReload: false,
 };
 
 const sync = {
-  isSyncing: false,
-  newSyncObj: null,
+  updateAction: Infinity,
+  haveUpdate: false,
   lastSyncDT: 0,
 };
 
@@ -128,10 +146,10 @@ const appState = {
 };
 
 const vars = {
-  cachedFPaths, cachedServerFPaths, scrollPanel, keyboard, runAfterFetchTask,
+  cachedFPaths, cachedServerFPaths, scrollPanel, keyboard, fetch, runAfterFetchTask,
   randomHouseworkTasks, updateNoteIdUrlHash, updateNoteId, changeListName,
-  updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, deleteOldNotes, updateSettings,
-  updateSettingsPopup, notesReducer, displayReducer, editorReducer, iap, platform,
-  syncMode, sync, importAllData, deleteSyncData, appState,
+  updateQueryString, updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, showUNEPopup,
+  deleteOldNotes, updateSettings, updateSettingsPopup, notesReducer, displayReducer,
+  editorReducer, iap, platform, syncMode, sync, importAllData, deleteSyncData, appState,
 };
 export default vars;
