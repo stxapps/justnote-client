@@ -1469,49 +1469,48 @@ export const updateExportAllDataProgress = (progress) => {
 };
 
 const deleteAllNotes = async (dispatch, noteMetas, progress) => {
+  let addedDT = Date.now();
+
   for (let i = 0, j = noteMetas.length; i < j; i += N_NOTES) {
     const selectedNoteMetas = noteMetas.slice(i, i + N_NOTES);
 
-    const fpaths = [];
-    for (const meta of selectedNoteMetas) fpaths.push(...meta.fpaths);
+    const fromListNames = [], emptyFromNotes = [], toListNames = [], toNotes = [];
+    for (const meta of selectedNoteMetas) {
+      // Dummy contents are enough and good for performance
+      const media = [];
+      for (const fpath of meta.fpaths) {
+        const { subName } = extractNoteFPath(fpath);
+        if (subName !== INDEX + DOT_JSON) {
+          media.push({ name: subName, content: '' });
+        }
+      }
 
-    const contents = [];
-    for (let k = 0; k < fpaths.length; k++) {
-      if (fpaths[k].endsWith(INDEX + DOT_JSON)) contents.push({ title: '', body: '' });
-      else contents.push('');
-    }
-
-    const tnResult = dataApi.toNotes(selectedNoteMetas, fpaths, contents);
-    const selectedNotes = tnResult.notes;
-
-    let now = Date.now();
-    const toNotes = {}, fromNotes = {};
-    for (let k = 0; k < selectedNoteMetas.length; k++) {
-      const meta = selectedNoteMetas[k];
-      const note = selectedNotes[k];
-
-      if (!toNotes[meta.listName]) toNotes[meta.listName] = [];
-      toNotes[meta.listName].push({
-        ...note,
-        parentIds: [note.id],
-        id: `deleted${now}${randomString(4)}`,
+      const fromListName = meta.listName;
+      const fromNote = {
+        parentIds: meta.parentIds,
+        id: meta.id,
+        title: '', body: '', media,
+        addedDT: meta.addedDT,
+        updatedDT: meta.updatedDT,
+      };
+      const toNote = {
+        ...fromNote,
+        parentIds: [fromNote.id], id: `deleted${addedDT}${randomString(4)}`,
         title: '', body: '', media: [],
-        updatedDT: now,
-      });
-      now += 1;
+        updatedDT: addedDT,
+      };
+      addedDT += 1;
 
-      if (!fromNotes[meta.listName]) fromNotes[meta.listName] = [];
-      fromNotes[meta.listName].push(clearNoteData(note));
+      fromListNames.push(fromListName);
+      emptyFromNotes.push(clearNoteData(fromNote));
+      toListNames.push(fromListName);
+      toNotes.push(toNote);
     }
 
-    for (const [_listName, _notes] of Object.entries(toNotes)) {
-      await dataApi.putNotes({ listName: _listName, notes: _notes });
-    }
+    await dataApi.putNotes({ listNames: toListNames, notes: toNotes });
 
     try {
-      for (const [_listName, _notes] of Object.entries(fromNotes)) {
-        await dataApi.putNotes({ listName: _listName, notes: _notes });
-      }
+      await dataApi.putNotes({ listNames: fromListNames, notes: emptyFromNotes });
     } catch (error) {
       console.log('deleteAllNotes error: ', error);
       // error in this step should be fine
@@ -1677,8 +1676,6 @@ export const deleteAllData = () => async (dispatch, getState) => {
     await deleteAllTags(dispatch, tags, progress);
     await fileApi.deleteFiles(staticFPaths);
 
-    await syncAndWait(false, 1)(dispatch, getState);
-
     // Need to close the settings popup to update the url hash,
     //   as DELETE_ALL_DATA will set isSettingsPopupShown to false.
     if (getState().display.isSettingsPopupShown) {
@@ -1686,6 +1683,8 @@ export const deleteAllData = () => async (dispatch, getState) => {
       updatePopupUrlHash(SETTINGS_POPUP, false);
     }
     dispatch({ type: DELETE_ALL_DATA });
+
+    dispatch(sync(false, 1));
   } catch (error) {
     dispatch(updateDeleteAllDataProgress({ total: -1, done: -1, error: `${error}` }));
     return;

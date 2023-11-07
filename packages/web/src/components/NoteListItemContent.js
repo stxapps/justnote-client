@@ -182,8 +182,8 @@ const NoteListItemContent = (props) => {
         <div className={tailwind('flex flex-wrap items-center justify-start pt-1')}>
           {tnAndDns.map((tnAndDn, i) => {
             return (
-              <button key={tnAndDn.tagName} onClick={() => dispatch(updateQueryString(tnAndDn.tagName, true))} className={tailwind(`group mt-2 block rounded-full bg-gray-100 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-0 blk:bg-gray-700 blk:focus:ring-gray-500 blk:focus:ring-offset-2 blk:focus:ring-offset-gray-900 ${i === 0 ? '' : 'ml-2'} ${isBulkEditing ? '' : 'hover:bg-gray-200 blk:hover:bg-gray-600'}`)} disabled={isBulkEditing}>
-                <div className={tailwind(`text-xs text-gray-500 blk:text-gray-300 ${isBulkEditing ? '' : 'group-hover:text-gray-700 blk:group-hover:text-gray-100'}`)}>{tnAndDn.displayName}</div>
+              <button key={tnAndDn.tagName} onClick={() => dispatch(updateQueryString(tnAndDn.tagName, true))} className={tailwind(`group mt-2 block max-w-full rounded-full bg-gray-100 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-0 blk:bg-gray-700 blk:focus:ring-gray-500 blk:focus:ring-offset-2 blk:focus:ring-offset-gray-900 ${i === 0 ? '' : 'ml-2'} ${isBulkEditing ? '' : 'hover:bg-gray-200 blk:hover:bg-gray-600'}`)} disabled={isBulkEditing}>
+                <div className={tailwind(`truncate text-xs text-gray-500 blk:text-gray-300 ${isBulkEditing ? '' : 'group-hover:text-gray-700 blk:group-hover:text-gray-100'}`)}>{tnAndDn.displayName}</div>
               </button>
             );
           })}

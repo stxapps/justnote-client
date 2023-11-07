@@ -110,7 +110,7 @@ const NoteListItemContent = (props) => {
         <View style={tailwind('flex-row flex-wrap items-center justify-start pt-1')}>
           {tnAndDns.map((tnAndDn, i) => {
             return (
-              <TouchableOpacity key={tnAndDn.tagName} onPress={() => dispatch(updateQueryString(tnAndDn.tagName, true))} style={tailwind(`mt-2 rounded-full bg-gray-100 px-2 py-1 blk:bg-gray-700 ${i === 0 ? '' : 'ml-2'}`)} disabled={isBulkEditing}>
+              <TouchableOpacity key={tnAndDn.tagName} onPress={() => dispatch(updateQueryString(tnAndDn.tagName, true))} style={tailwind(`mt-2 max-w-full rounded-full bg-gray-100 px-2 py-1 blk:bg-gray-700 ${i === 0 ? '' : 'ml-2'}`)} disabled={isBulkEditing}>
                 <Text style={tailwind('text-xs font-normal text-gray-500 blk:text-gray-300')} numberOfLines={1} ellipsizeMode="tail">{tnAndDn.displayName}</Text>
               </TouchableOpacity>
             );

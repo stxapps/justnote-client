@@ -96,6 +96,7 @@ const NoteListItemMenuPopup = () => {
       onCancelBtnClick();
       dispatch(updatePopup(PIN_MENU_POPUP, true, anchorPosition));
     } else if (text === ADD_TAGS || text === MANAGE_TAGS) {
+      onCancelBtnClick();
       dispatch(updateTagEditorPopup(true, selectingNoteId, text === ADD_TAGS));
     } else if (text === SHARE) {
       onCancelBtnClick();
