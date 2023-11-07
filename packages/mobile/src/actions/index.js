@@ -237,15 +237,23 @@ const handlePendingSignIn = (url) => async (dispatch, getState) => {
 
 const handleAppStateChange = (nextAppState) => async (dispatch, getState) => {
   const isUserSignedIn = await userSession.isUserSignedIn();
-  const now = Date.now();
 
   if (nextAppState === APP_STATE_ACTIVE) {
-    if (getState().display.doForceLock) {
+    const doForceLock = getState().display.doForceLock;
+    const isLong = (Date.now() - vars.appState.lastChangeDT) > 21 * 60 * 1000;
+    const lockedLists = getState().lockSettings.lockedLists;
+    const doNoChangeMyNotes = (
+      isObject(lockedLists[MY_NOTES]) &&
+      lockedLists[MY_NOTES].canChangeListNames === false
+    );
+    if (doForceLock || (isUserSignedIn && isLong)) {
       if (Platform.OS === 'android') FlagSecure.deactivate();
-      const isLong = (now - vars.appState.lastChangeDT) > 21 * 60 * 1000;
-      // If isLong is true, on web, need to update url hash if noteId !== null
+      // If on web and isLong is true, need to update url hash if noteId !== null
       //   like in refreshFetched.
-      dispatch({ type: UPDATE_LOCKS_FOR_ACTIVE_APP, payload: { isLong } });
+      dispatch({
+        type: UPDATE_LOCKS_FOR_ACTIVE_APP,
+        payload: { isLong, doNoChangeMyNotes },
+      });
     }
 
     if (isUserSignedIn) {
@@ -258,7 +266,9 @@ const handleAppStateChange = (nextAppState) => async (dispatch, getState) => {
 
     if (!isUserSignedIn) return;
 
-    const interval = (now - vars.sync.lastSyncDT) / 1000 / 60 / 60;
+    const interval = (Date.now() - vars.sync.lastSyncDT) / 1000 / 60 / 60;
+    if (interval < 0.3) return;
+
     dispatch(sync(interval > 1, 0));
   }
 
