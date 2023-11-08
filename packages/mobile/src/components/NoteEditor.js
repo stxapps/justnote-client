@@ -1,56 +1,30 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef } from 'react';
 import { View, Text } from 'react-native';
 import { useSelector } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
-import {
-  DUMMY_NOTE_OBJ, DUMMY_UNSAVED_NOTE_OBJ, INVALID, LOCKED, NEW_NOTE,
-} from '../types/const';
-import { makeGetLockNoteStatus, getCurrentLockListStatus } from '../selectors';
-import { isObject, isDiedStatus } from '../utils';
+import { DUMMY_NOTE_OBJ, DUMMY_UNSAVED_NOTE_OBJ, INVALID } from '../types/const';
+import { isDiedStatus } from '../utils';
 
 import { useTailwind } from '.';
 import NoteEditorTopBar from './NoteEditorTopBar';
 import NoteEditorEditor from './NoteEditorEditor';
 import NoteEditorBulkEdit from './NoteEditorBulkEdit';
-import {
-  NoteEditorSavedConflict, NoteEditorUnsavedConflict,
-} from './NoteEditorConflict';
+import { NoteEditorSavedConflict, NoteEditorUnsavedConflict } from './NoteEditorConflict';
 import NoteEditorRetry from './NoteEditorRetry';
 import NoteEditorLock from './NoteEditorLock';
 
 const NoteEditor = (props) => {
 
   const { note, unsavedNote, isFullScreen, onToggleFullScreen, width } = props;
-  const getLockNoteStatus = useMemo(makeGetLockNoteStatus, []);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
-  const lockNoteStatus = useSelector(state => getLockNoteStatus(state, note));
-  const lockListStatus = useSelector(state => getCurrentLockListStatus(state));
   const isContentEditor = useRef(false);
   const tailwind = useTailwind();
 
   const isUnsavedInvalid = unsavedNote.status === INVALID;
-  const isLocked = [lockNoteStatus, lockListStatus].includes(LOCKED);
 
   const _render = () => {
     isContentEditor.current = false;
-
-    const editorEditor = (
-      <View style={tailwind('h-full w-full bg-white blk:bg-gray-900')}>
-        <View style={tailwind('h-full w-full bg-white blk:bg-gray-900')}>
-          <NoteEditorTopBar note={note} unsavedNote={unsavedNote} isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} width={width} />
-          <NoteEditorEditor key="NoteEditorEditor" note={note} unsavedNote={unsavedNote} />
-        </View>
-      </View>
-    );
-
-    if (isLocked) {
-      if (isObject(note) && note.id === NEW_NOTE) {
-        isContentEditor.current = true;
-        return editorEditor;
-      }
-      return <NoteEditorLock note={note} lockNoteStatus={lockNoteStatus} lockListStatus={lockListStatus} />;
-    }
 
     if (isBulkEditing) return <NoteEditorBulkEdit width={width} />;
     if (!note) {
@@ -78,7 +52,14 @@ const NoteEditor = (props) => {
     }
 
     isContentEditor.current = true;
-    return editorEditor;
+    return (
+      <View style={tailwind('h-full w-full bg-white blk:bg-gray-900')}>
+        <View style={tailwind('h-full w-full bg-white blk:bg-gray-900')}>
+          <NoteEditorTopBar note={note} unsavedNote={unsavedNote} isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} width={width} />
+          <NoteEditorEditor key="NoteEditorEditor" note={note} unsavedNote={unsavedNote} />
+        </View>
+      </View>
+    );
   };
 
   // As on Android, WebView is slow, try to preload WebView with CKEditor here.
@@ -92,11 +73,17 @@ const NoteEditor = (props) => {
           </View>
         </View>
         {content}
+        <NoteEditorLock note={note} />
       </React.Fragment>
     );
   }
 
-  return content;
+  return (
+    <React.Fragment>
+      {content}
+      <NoteEditorLock note={note} />
+    </React.Fragment>
+  );
 };
 
 export default React.memo(NoteEditor);

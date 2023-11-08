@@ -228,7 +228,7 @@ const ColsPanel = () => {
         </button>}
       </div>
       <div onMouseDown={onRightResizerMouseDown} onTouchStart={onRightResizerTouchStart} onTouchEnd={onTouchEnd} className={tailwind(`relative cursor-resize overflow-visible border-l border-gray-100 bg-white pr-1 blk:border-gray-800 blk:bg-gray-900 ${resizer2Classes}`)} />
-      <div className={tailwind('flex-1 overflow-hidden bg-white blk:bg-gray-900')}>
+      <div className={tailwind('relative flex-1 overflow-hidden bg-white blk:bg-gray-900')}>
         <NoteEditor note={note} unsavedNote={unsavedNote} isFullScreen={state.isPane3FullScreen} onToggleFullScreen={onTogglePane3FullScreen} />
       </div>
     </div>

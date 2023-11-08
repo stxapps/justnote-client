@@ -1,16 +1,24 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 
 import { updateNoteIdUrlHash } from '../actions';
-import { LG_WIDTH, LOCKED } from '../types/const';
+import { LG_WIDTH, LOCKED, NEW_NOTE } from '../types/const';
+import { makeGetLockNoteStatus, getCurrentLockListStatus } from '../selectors';
+import { isObject } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
 const NoteEditorLock = (props) => {
 
-  const { note, lockNoteStatus, lockListStatus } = props;
+  const { note } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
+  const getLockNoteStatus = useMemo(makeGetLockNoteStatus, []);
+  const lockNoteStatus = useSelector(state => getLockNoteStatus(state, note));
+  const lockListStatus = useSelector(state => getCurrentLockListStatus(state));
   const didClick = useRef(false);
   const tailwind = useTailwind();
+
+  const isLocked = [lockNoteStatus, lockListStatus].includes(LOCKED);
 
   const onRightPanelCloseBtnClick = () => {
     if (didClick.current) return;
@@ -21,6 +29,8 @@ const NoteEditorLock = (props) => {
   useEffect(() => {
     didClick.current = false;
   }, [note, lockNoteStatus, lockListStatus]);
+
+  if ((isObject(note) && note.id === NEW_NOTE) || !isLocked) return null;
 
   let title, body, bottomText;
   if (safeAreaWidth < LG_WIDTH) {
@@ -40,7 +50,7 @@ const NoteEditorLock = (props) => {
   }
 
   return (
-    <div className={tailwind('relative h-full w-full bg-white blk:bg-gray-900')}>
+    <div className={tailwind('absolute inset-0 bg-white blk:bg-gray-900')}>
       <div className={tailwind('relative px-4 pb-4 sm:px-6 sm:pb-6 lg:hidden')}>
         <div className={tailwind('h-16 w-full')} />
         <h3 className={tailwind('pt-5 text-lg font-medium text-gray-800 blk:text-gray-200')}>{title}</h3>

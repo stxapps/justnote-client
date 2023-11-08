@@ -247,6 +247,12 @@ const handleAppStateChange = (nextAppState) => async (dispatch, getState) => {
       lockedLists[MY_NOTES].canChangeListNames === false
     );
     if (doForceLock || (isUserSignedIn && isLong)) {
+      const isEditorFocused = getState().display.isEditorFocused;
+      if (isLong && isEditorFocused) {
+        if (vars.keyboard.height > 0) dispatch(increaseBlurCount());
+        dispatch(handleUnsavedNote(getState().display.noteId));
+      }
+
       if (Platform.OS === 'android') FlagSecure.deactivate();
       // If on web and isLong is true, need to update url hash if noteId !== null
       //   like in refreshFetched.

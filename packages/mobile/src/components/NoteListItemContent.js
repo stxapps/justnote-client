@@ -106,7 +106,7 @@ const NoteListItemContent = (props) => {
     if (tnAndDns.length === 0) return null;
 
     return (
-      <View style={tailwind(`pl-3 sm:pl-5 ${tagClassNames}`)}>
+      <View style={tailwind(`pl-3 pr-3 sm:pl-5 ${tagClassNames}`)}>
         <View style={tailwind('flex-row flex-wrap items-center justify-start pt-1')}>
           {tnAndDns.map((tnAndDn, i) => {
             return (
