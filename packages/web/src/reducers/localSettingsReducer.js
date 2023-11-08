@@ -2,10 +2,10 @@ import { loop, Cmd } from 'redux-loop';
 
 import { updateLocalSettings } from '../actions';
 import {
-  INIT, FETCH_COMMIT, UPDATE_SETTINGS_COMMIT, UPDATE_INFO_COMMIT, MERGE_SETTINGS_COMMIT,
-  UPDATE_DO_SYNC_MODE, UPDATE_DO_SYNC_MODE_INPUT, CANCEL_CHANGED_SYNC_MODE,
-  UPDATE_DO_USE_LOCAL_THEME, UPDATE_LOCAL_THEME, UPDATE_EDITOR_IS_UPLOADING,
-  CLEAN_UP_STATIC_FILES_COMMIT, DELETE_ALL_DATA, RESET_STATE,
+  INIT, UPDATE_USER, FETCH_COMMIT, UPDATE_SETTINGS_COMMIT, UPDATE_INFO_COMMIT,
+  MERGE_SETTINGS_COMMIT, UPDATE_DO_SYNC_MODE, UPDATE_DO_SYNC_MODE_INPUT,
+  CANCEL_CHANGED_SYNC_MODE, UPDATE_DO_USE_LOCAL_THEME, UPDATE_LOCAL_THEME,
+  UPDATE_EDITOR_IS_UPLOADING, CLEAN_UP_STATIC_FILES_COMMIT, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import { WHT_MODE } from '../types/const';
 import {
@@ -20,6 +20,16 @@ const localSettingsReducer = (state = initialState, action) => {
   if (action.type === INIT) {
     const { localSettings } = action.payload;
     return { ...state, ...localSettings };
+  }
+
+  if (action.type === UPDATE_USER) {
+    const { isUserSignedIn } = action.payload;
+    if (!isUserSignedIn) return state;
+
+    const newState = { ...state, signInDT: Date.now() };
+    return loop(
+      newState, Cmd.run(updateLocalSettings(), { args: [Cmd.dispatch, Cmd.getState] })
+    );
   }
 
   if (action.type === FETCH_COMMIT) {

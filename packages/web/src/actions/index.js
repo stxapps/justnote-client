@@ -1038,7 +1038,8 @@ export const fetch = () => async (dispatch, getState) => {
     result.notes = lResult.notes;
   } catch (error) {
     console.log('fetch error: ', error);
-    dispatch({ type: FETCH_ROLLBACK, payload: { ...payload, error } });
+    const signInDT = getState().localSettings.signInDT;
+    dispatch({ type: FETCH_ROLLBACK, payload: { ...payload, error, signInDT } });
     dispatch(deleteFetchingInfo(fthId));
     return;
   }
@@ -3411,7 +3412,8 @@ const syncInQueue = (
     vars.sync.lastSyncDT = Date.now();
   } catch (error) {
     console.log('Sync error: ', error);
-    dispatch({ type: SYNC_ROLLBACK, payload: error });
+    const signInDT = getState().localSettings.signInDT;
+    dispatch({ type: SYNC_ROLLBACK, payload: { error, signInDT } });
     if (waitResolve) waitResolve(false);
   }
 };

@@ -356,7 +356,7 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === FETCH_ROLLBACK) {
-    const { fthId, error } = action.payload;
+    const { fthId, error, signInDT } = action.payload;
 
     const newState = { ...state };
     newState.fetchingInfos = state.fetchingInfos.filter(info => info.fthId !== fthId);
@@ -375,7 +375,15 @@ const displayReducer = (state = initialState, action) => {
         error.hubError.statusCode === 401
       )
     ) {
-      newState.isAccessErrorPopupShown = true;
+      if (
+        !isNumber(signInDT) ||
+        (Date.now() - signInDT > 360 * 24 * 60 * 60 * 1000)
+      ) {
+        // Bug alert: Exceed usage rate limit also error 401.
+        // If signed in less than 360 days, less likely the token expires,
+        //   more about rate limit error.
+        newState.isAccessErrorPopupShown = true;
+      }
     }
     if (
       isObject(error) &&
@@ -743,23 +751,30 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === SYNC_ROLLBACK) {
+    const { error, signInDT } = action.payload;
+
     const newState = { ...state, syncProgress: { status: SYNC_ROLLBACK } };
     if (
       (
-        isObject(action.payload) &&
-        isString(action.payload.message) &&
+        isObject(error) &&
+        isString(error.message) &&
         (
-          action.payload.message.includes('401') ||
-          action.payload.message.includes('GaiaError error 7')
+          error.message.includes('401') ||
+          error.message.includes('GaiaError error 7')
         )
       ) ||
       (
-        isObject(action.payload) &&
-        isObject(action.payload.hubError) &&
-        action.payload.hubError.statusCode === 401
+        isObject(error) &&
+        isObject(error.hubError) &&
+        error.hubError.statusCode === 401
       )
     ) {
-      newState.isAccessErrorPopupShown = true;
+      if (
+        !isNumber(signInDT) ||
+        (Date.now() - signInDT > 360 * 24 * 60 * 60 * 1000)
+      ) {
+        newState.isAccessErrorPopupShown = true;
+      }
     }
     return newState;
   }

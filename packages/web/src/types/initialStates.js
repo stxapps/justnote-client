@@ -50,6 +50,7 @@ export const initialLocalSettingsState = {
   defaultThemeCustomOptions: [
     { ...whtModeThemeCustomOptions }, { ...blkModeThemeCustomOptions },
   ],
+  signInDT: null,
 };
 
 export const initialInfoState = {
