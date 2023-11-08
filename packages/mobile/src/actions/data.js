@@ -1471,8 +1471,10 @@ export const updateExportAllDataProgress = (progress) => {
 const deleteAllNotes = async (dispatch, noteMetas, progress) => {
   let addedDT = Date.now();
 
-  for (let i = 0, j = noteMetas.length; i < j; i += N_NOTES) {
-    const selectedNoteMetas = noteMetas.slice(i, i + N_NOTES);
+  // One at a time to not overwhelm the server
+  const nNotes = vars.syncMode.doSyncMode ? N_NOTES : 1;
+  for (let i = 0, j = noteMetas.length; i < j; i += nNotes) {
+    const selectedNoteMetas = noteMetas.slice(i, i + nNotes);
 
     const fromListNames = [], emptyFromNotes = [], toListNames = [], toNotes = [];
     for (const meta of selectedNoteMetas) {
@@ -1523,8 +1525,11 @@ const deleteAllNotes = async (dispatch, noteMetas, progress) => {
 
 const deleteAllPins = async (dispatch, pins, progress) => {
   let now = Date.now();
-  for (let i = 0; i < pins.length; i += N_NOTES) {
-    const _pins = pins.slice(i, i + N_NOTES);
+
+  // One at a time to not overwhelm the server
+  const nNotes = vars.syncMode.doSyncMode ? N_NOTES : 1;
+  for (let i = 0; i < pins.length; i += nNotes) {
+    const _pins = pins.slice(i, i + nNotes);
 
     const toPins = [], fromPins = [];
     for (const { rank, updatedDT, addedDT, id } of _pins) {
@@ -1550,8 +1555,11 @@ const deleteAllPins = async (dispatch, pins, progress) => {
 
 const deleteAllTags = async (dispatch, tags, progress) => {
   let now = Date.now();
-  for (let i = 0; i < tags.length; i += N_NOTES) {
-    const _tags = tags.slice(i, i + N_NOTES);
+
+  // One at a time to not overwhelm the server
+  const nNotes = vars.syncMode.doSyncMode ? N_NOTES : 1;
+  for (let i = 0; i < tags.length; i += nNotes) {
+    const _tags = tags.slice(i, i + nNotes);
 
     const toFPaths = [], fromFPaths = [];
     for (const { values } of _tags) {
@@ -2001,7 +2009,7 @@ const _deleteSyncData = async (dispatch, getState) => {
   if (progress.total === 0) return;
 
   try {
-    const nItems = 3;
+    const nItems = 1;
     for (let i = 0, j = nUpdatedIds.length; i < j; i += nItems) {
       const _nUpdatedIds = nUpdatedIds.slice(i, i + nItems);
       await Promise.all(_nUpdatedIds.map(id => {

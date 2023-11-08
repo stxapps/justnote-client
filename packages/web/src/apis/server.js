@@ -13,7 +13,7 @@ const _userSession = userSession._userSession;
 let networkInfos = []; // info = { rId, dt, nRequests }
 
 const respectLimit = async (rId, nRequests) => {
-  const LIMIT = 100; // 100 requests per minute.
+  const LIMIT = 72; // Requests per minute
   const ONE_MINUTE = 60 * 1000;
   const N_TRIES = 4;
 
@@ -38,7 +38,7 @@ const respectLimit = async (rId, nRequests) => {
       break;
     }
     if (currentTry < N_TRIES) {
-      const frac = sample([0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250]);
+      const frac = sample([1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]);
       let duration = ONE_MINUTE - (Date.now() - tDT) + frac;
       if (duration < 0) duration = 0;
       if (duration > ONE_MINUTE + frac) duration = ONE_MINUTE + frac;
