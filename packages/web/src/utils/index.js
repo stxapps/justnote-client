@@ -462,17 +462,11 @@ export const getAllListNames = (listNameObjs) => {
   return listNames;
 };
 
-export const getListNamesFromNoteMetas = (noteMetas, conflictedMetas) => {
+export const getListNamesFromNoteMetas = (noteMetas) => {
   const listNames = [];
   for (const meta of noteMetas) {
     const { listName } = meta;
     if (!listNames.includes(listName)) listNames.push(listName);
-  }
-  for (const cMeta of conflictedMetas) {
-    for (const meta of cMeta.metas) {
-      const { listName } = meta;
-      if (!listNames.includes(listName)) listNames.push(listName);
-    }
   }
   return listNames;
 };

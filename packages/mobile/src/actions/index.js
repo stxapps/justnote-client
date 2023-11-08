@@ -671,7 +671,7 @@ export const fetch = () => async (dispatch, getState) => {
       result.info = sResult.info;
       // List names should be retrieve from settings
       //   but also retrive from file paths in case the settings is gone.
-      result.listNames = getListNamesFromNoteMetas(noteMetas, conflictedMetas);
+      result.listNames = getListNamesFromNoteMetas([...noteMetas, ...conflictedMetas]);
       result.tagNames = getInUseTagNames(noteFPaths, tagFPaths);
 
       if (result.settings) {
@@ -2499,7 +2499,7 @@ export const cancelDiedSettings = () => async (dispatch, getState) => {
 
   const { noteMetas, conflictedMetas } = listNoteMetas(noteFPaths);
 
-  const listNames = getListNamesFromNoteMetas(noteMetas, conflictedMetas);
+  const listNames = getListNamesFromNoteMetas([...noteMetas, ...conflictedMetas]);
   const tagNames = getInUseTagNames(noteFPaths, tagFPaths);
   let doFetch = (
     settings.sortOn !== snapshotSettings.sortOn ||
@@ -2578,7 +2578,7 @@ export const mergeSettings = (selectedId) => async (dispatch, getState) => {
 
   const { noteMetas, conflictedMetas } = listNoteMetas(noteFPaths);
 
-  const listNames = getListNamesFromNoteMetas(noteMetas, conflictedMetas);
+  const listNames = getListNamesFromNoteMetas([...noteMetas, ...conflictedMetas]);
   const tagNames = getInUseTagNames(noteFPaths, tagFPaths);
   const doFetch = (
     settings.sortOn !== currentSettings.sortOn ||
