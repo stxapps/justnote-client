@@ -560,7 +560,7 @@ const displayReducer = (state = initialState, action) => {
 
     newState.showingNoteInfos = [];
     for (const info of state.showingNoteInfos) {
-      const i = ids.find(id => id === info.id);
+      const i = ids.findIndex(id => id === info.id);
       if (i < 0) {
         newState.showingNoteInfos.push(info);
         continue;

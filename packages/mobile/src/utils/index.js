@@ -2271,8 +2271,8 @@ export const getNNoteMetas = (params) => {
 
   const slCfWths = conflictWiths.filter(conflictWith => {
     for (const id of conflictWith) {
-      const conflictedId = conflictedMetas.find(meta => meta.id === id);
-      if (conflictedId.listName === listName) return true;
+      const conflictedMeta = conflictedMetas.find(meta => meta.id === id);
+      if (conflictedMeta.listName === listName) return true;
     }
     return false;
   });
