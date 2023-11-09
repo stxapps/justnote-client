@@ -47,11 +47,11 @@ const NoteListItems = () => {
       return [];
     }
 
-    const { conflictedNotes, pinnedNotes, notes: noPinnedNotes } = notes;
+    const { sortedCfNts, pinnedNotes, noPinnedNotes } = notes;
 
     let prevMonth = null;
 
-    const _data = Array.isArray(conflictedNotes) ? [...conflictedNotes] : [];
+    const _data = Array.isArray(sortedCfNts) ? [...sortedCfNts] : [];
     if (Array.isArray(pinnedNotes)) _data.push(...pinnedNotes);
     if (Array.isArray(noPinnedNotes)) {
       for (const note of noPinnedNotes) {

@@ -747,15 +747,15 @@ const _poolListNameAndNotes = (noteMetas, payloadNotes, stateNotes) => {
   });
 };
 
-const _getInfosFromNotes = (conflictedNotes, pinnedNotes, notes) => {
+const _getInfosFromNotes = (sortedCfNts, pinnedNotes, noPinnedNotes) => {
   const infos = [];
-  for (const note of conflictedNotes) {
+  for (const note of sortedCfNts) {
     infos.push({ id: note.id, isConflicted: true, isPinned: false });
   }
   for (const note of pinnedNotes) {
     infos.push({ id: note.id, isConflicted: false, isPinned: true });
   }
-  for (const note of notes) {
+  for (const note of noPinnedNotes) {
     infos.push({ id: note.id, isConflicted: false, isPinned: false });
   }
   return infos;
@@ -789,10 +789,14 @@ export const updateFetched = (
     else updatingNoteMetas.push(meta);
   }
 
-  let cfNts = _poolConflictedNotes(
+  const cfNtsPerId = {};
+  const cfNts = _poolConflictedNotes(
     conflictedMetas, payload.conflictedNotes, conflictedNotes
   );
-  cfNts = cfNts.filter(cfNt => isObject(cfNt));
+  for (const cfNt of cfNts) {
+    if (!isObject(cfNt)) continue;
+    cfNtsPerId[cfNt.id] = cfNt;
+  }
 
   const ntsPerLn = {}, updatingNotes = [];
   const updatingLnAndNts = _poolListNameAndNotes(
@@ -810,7 +814,7 @@ export const updateFetched = (
   if (noDisplay) {
     dispatch({
       type: UPDATE_FETCHED,
-      payload: { lnOrQt: payload.lnOrQt, conflictedNotes: cfNts, notes: ntsPerLn },
+      payload: { lnOrQt: payload.lnOrQt, conflictedNotes: cfNtsPerId, notes: ntsPerLn },
     });
     addFetchedToVars(payload.lnOrQt, payload.conflictedNotes, payload.notes, vars);
     return;
@@ -850,7 +854,7 @@ export const updateFetched = (
   dispatch({
     type: UPDATE_FETCHED,
     payload: {
-      lnOrQt: payload.lnOrQt, conflictedNotes: cfNts, notes: ntsPerLn,
+      lnOrQt: payload.lnOrQt, conflictedNotes: cfNtsPerId, notes: ntsPerLn,
       infos, hasMore: payload.hasMore, doChangeListCount,
       doClearSelectedNoteIds: true,
     },

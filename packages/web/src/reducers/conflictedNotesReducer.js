@@ -2,8 +2,8 @@ import {
   FETCH_COMMIT, UPDATE_FETCHED, UPDATE_FETCHED_MORE, MERGE_NOTES, MERGE_NOTES_COMMIT,
   MERGE_NOTES_ROLLBACK, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
-import { ID, MERGING, DIED_MERGING } from '../types/const';
-import { _ } from '../utils/obj';
+import { MERGING, DIED_MERGING } from '../types/const';
+import { isObject } from '../utils';
 
 const initialState = {};
 
@@ -19,9 +19,9 @@ const conflictedNotesReducer = (state = initialState, action) => {
 
   if (action.type === UPDATE_FETCHED || action.type === UPDATE_FETCHED_MORE) {
     const { conflictedNotes } = action.payload;
-    if (!Array.isArray(conflictedNotes) || conflictedNotes.length === 0) return state;
+    if (!isObject(conflictedNotes)) return state;
 
-    return { ...state, ..._.mapKeys(conflictedNotes, ID) };
+    return { ...state, ...conflictedNotes };
   }
 
   if (action.type === MERGE_NOTES) {

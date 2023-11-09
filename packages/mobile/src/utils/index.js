@@ -2348,7 +2348,13 @@ export const addFetchedToVars = (lnOrQt, conflictedNotes, notes, vars) => {
     fetchedLnOrQts.push(lnOrQt);
   }
 
-  if (Array.isArray(conflictedNotes)) {
+  if (isObject(conflictedNotes) && !Array.isArray(conflictedNotes)) {
+    for (const id in conflictedNotes) {
+      for (const note of conflictedNotes[id].notes) {
+        if (!fetchedNoteIds.includes(note.id)) fetchedNoteIds.push(note.id);
+      }
+    }
+  } else if (Array.isArray(conflictedNotes)) {
     for (const cfNt of conflictedNotes) {
       for (const note of cfNt.notes) {
         if (!fetchedNoteIds.includes(note.id)) fetchedNoteIds.push(note.id);

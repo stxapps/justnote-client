@@ -182,15 +182,20 @@ const fetchNotes = async (noteMetas) => {
 
   await fetchStaticFiles(conflictedNotes, notes);
 
-  const notesPerLn = {};
+  const cfNtsPerId = {};
+  for (const note of conflictedNotes) {
+    cfNtsPerId[note.id] = note;
+  }
+
+  const ntsPerLn = {};
   for (let i = 0; i < listNames.length; i++) {
     const [listName, note] = [listNames[i], notes[i]];
 
-    if (!isObject(notesPerLn[listName])) notesPerLn[listName] = {};
-    notesPerLn[listName][note.id] = note;
+    if (!isObject(ntsPerLn[listName])) ntsPerLn[listName] = {};
+    ntsPerLn[listName][note.id] = note;
   }
 
-  return { conflictedNotes, notes: notesPerLn };
+  return { conflictedNotes: cfNtsPerId, notes: ntsPerLn };
 };
 
 const fetchStaticFiles = async (conflictedNotes, notes) => {

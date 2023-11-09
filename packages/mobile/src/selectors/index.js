@@ -116,7 +116,7 @@ export const getNotes = createSelectorNotes(
     }
 
     if (searchString === '') {
-      return { conflictedNotes: cNotes, pinnedNotes: pNotes, notes: sNotes };
+      return { sortedCfNts: cNotes, pinnedNotes: pNotes, noPinnedNotes: sNotes };
     }
 
     const { toRootIds } = listNoteMetas(noteFPaths);
@@ -128,7 +128,7 @@ export const getNotes = createSelectorNotes(
       return isStringIn(note, searchString, lockedNotes, toRootIds);
     });
 
-    return { conflictedNotes: cNotes, pinnedNotes: spNotes, notes: ssNotes };
+    return { sortedCfNts: cNotes, pinnedNotes: spNotes, noPinnedNotes: ssNotes };
   }
 );
 
