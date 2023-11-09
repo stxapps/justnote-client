@@ -1762,6 +1762,8 @@ export const get24HFormattedTime = (hStr, mStr, period) => {
 };
 
 export const doContainStaleNotes = (notes) => {
+  if (!isObject(notes)) return false;
+
   for (const listName in notes) {
     for (const note of Object.values(notes[listName])) {
       if (note.title === '' && note.body === '') return true;

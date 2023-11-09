@@ -402,9 +402,10 @@ const displayReducer = (state = initialState, action) => {
   ) {
     const newState = { ...state };
 
-    const { notes } = action.payload;
-    if (doContainStaleNotes(notes)) newState.isStaleErrorPopupShown = true;
-
+    if ('notes' in action.payload) {
+      const { notes } = action.payload;
+      if (doContainStaleNotes(notes)) newState.isStaleErrorPopupShown = true;
+    }
     if ('infos' in action.payload) {
       const { infos } = action.payload;
       if (Array.isArray(infos)) {
