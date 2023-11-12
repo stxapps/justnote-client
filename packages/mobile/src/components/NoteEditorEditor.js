@@ -250,7 +250,7 @@ const NoteEditorEditor = (props) => {
   }, [dispatch]);
 
   const onGetEditingData = useCallback((value) => {
-    if (!isFocusedRef.current) return;
+    if (!isString(value) || !isFocusedRef.current) return;
 
     const [title, _body] = splitOnFirst(value, SEP);
     const { body, media } = replaceObjectUrls(
