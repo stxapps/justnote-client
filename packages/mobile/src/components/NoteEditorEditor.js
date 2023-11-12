@@ -15,7 +15,7 @@ import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, UTF8, VALID } from '../types/const';
 import { getThemeMode, getDoMoreEditorFontSizes } from '../selectors';
 import {
   replaceObjectUrls, splitOnFirst, escapeDoubleQuotes, getFileExt, containUppercase,
-  isStringTitleIn,
+  isStringTitleIn, isString,
 } from '../utils';
 import cache from '../utils/cache';
 import vars from '../vars';
@@ -217,6 +217,7 @@ const NoteEditorEditor = (props) => {
   }, [onUpdateIsUploading]);
 
   const onGetData = useCallback((value) => {
+    if (!isString(value)) return;
 
     const [title, _body] = splitOnFirst(value, SEP);
     const { body, media } = replaceObjectUrls(
