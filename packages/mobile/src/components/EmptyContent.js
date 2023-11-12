@@ -51,7 +51,7 @@ const EmptyContent = () => {
             <Path d="M12 24C12 22.9391 12.4214 21.9217 13.1716 21.1716C13.9217 20.4214 14.9391 20 16 20H32C33.0609 20 34.0783 20.4214 34.8284 21.1716C35.5786 21.9217 36 22.9391 36 24V28C36 29.0609 35.5786 30.0783 34.8284 30.8284C34.0783 31.5786 33.0609 32 32 32H4H8C9.06087 32 10.0783 31.5786 10.8284 30.8284C11.5786 30.0783 12 29.0609 12 28V24Z" />
           </Svg>
         </View>
-        <Text style={tailwind('mt-6 text-center text-base font-semibold tracking-wide text-gray-800 blk:text-gray-200 lg:text-sm')}>No notes in {displayName}</Text>
+        <Text style={tailwind('mt-6 text-center text-base font-semibold tracking-wide text-gray-800 blk:text-gray-200 lg:text-sm')}>No notes in #{displayName}</Text>
         <Text style={[tailwind('mt-4 text-center text-sm font-normal tracking-wide text-gray-500 blk:text-gray-400'), { lineHeight: 22 }]}>Tap <Text style={tailwind('text-sm font-semibold text-gray-600 blk:text-gray-300')}>{textName}</Text> from the menu to show notes here.</Text>
       </View>
     );
