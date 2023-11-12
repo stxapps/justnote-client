@@ -405,13 +405,13 @@ const NoteEditorEditor = (props) => {
   }, [isEditorReady, changeListNameCount]);
 
   useEffect(() => {
-    if (!isEditorReady) return;
+    if (!isEditorReady || !webView.current) return;
     if (updateQueryStringCount !== prevUpdateQueryStringCount.current) {
       getDataAction.current = GET_DATA_UPDATE_QUERY_STRING;
-      onGetData();
+      webView.current.injectJavaScript('window.justnote.getData(); true;');
       prevUpdateQueryStringCount.current = updateQueryStringCount;
     }
-  }, [isEditorReady, updateQueryStringCount, onGetData]);
+  }, [isEditorReady, updateQueryStringCount]);
 
   useEffect(() => {
     /*
@@ -480,13 +480,13 @@ const NoteEditorEditor = (props) => {
   }, [isEditorReady, showNLIMPopupCount]);
 
   useEffect(() => {
-    if (!isEditorReady) return;
+    if (!isEditorReady || !webView.current) return;
     if (showUNEPopupCount !== prevShowUNEPopupCount.current) {
       getDataAction.current = GET_DATA_SHOW_UNE_POPUP;
-      onGetData();
+      webView.current.injectJavaScript('window.justnote.getData(); true;');
       prevShowUNEPopupCount.current = showUNEPopupCount;
     }
-  }, [isEditorReady, showUNEPopupCount, onGetData]);
+  }, [isEditorReady, showUNEPopupCount]);
 
   useEffect(() => {
     onUpdateIsUploading(false);
