@@ -538,6 +538,7 @@ const displayReducer = (state = initialState, action) => {
     newState.showingNoteInfos = [];
     for (const info of state.showingNoteInfos) {
       if (info.id === conflictedNote.id) {
+        if (newState.listName !== toListName) continue;
         newState.showingNoteInfos.push({ ...info, id: toNote.id, isConflicted: false });
         continue;
       }

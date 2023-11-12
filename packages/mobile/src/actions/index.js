@@ -249,7 +249,7 @@ const handleAppStateChange = (nextAppState) => async (dispatch, getState) => {
     if (doForceLock || (isUserSignedIn && isLong)) {
       const isEditorFocused = getState().display.isEditorFocused;
       if (isLong && isEditorFocused) {
-        if (vars.keyboard.height > 0) dispatch(increaseBlurCount());
+        dispatch(increaseBlurCount());
         dispatch(handleUnsavedNote(getState().display.noteId));
       }
 
