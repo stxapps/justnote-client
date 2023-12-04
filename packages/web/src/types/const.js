@@ -63,6 +63,7 @@ export const STALE_ERROR_POPUP = 'STALE_ERROR_POPUP';
 export const USE_SYNC_ERROR_POPUP = 'USE_SYNC_ERROR_POPUP';
 export const LOCK_MENU_POPUP = 'LOCK_MENU_POPUP';
 export const LOCK_EDITOR_POPUP = 'LOCK_EDITOR_POPUP';
+export const SWWU_POPUP = 'SWWU_POPUP';
 
 export const ADDED = 'ADDED';
 export const ADDING = 'ADDING';
