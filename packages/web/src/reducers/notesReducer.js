@@ -361,7 +361,7 @@ const notesReducer = (state = initialState, action) => {
       } else if (status === DIED_DELETING) {
         newState[listName][id] = { ...state[listName][id], status: ADDED };
       } else {
-        throw new Error(`Invalid status: ${status} of note id: ${id}`);
+        console.log(`Invalid status: ${status} of note id: ${id}`);
       }
     }
 

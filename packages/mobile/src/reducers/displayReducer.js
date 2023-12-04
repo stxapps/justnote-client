@@ -323,7 +323,7 @@ const displayReducer = (state = initialState, action) => {
       return newState;
     }
 
-    throw new Error(`Invalid type: ${action.type} and payload: ${action.payload}`);
+    return state;
   }
 
   if (action.type === FETCH_COMMIT) {
