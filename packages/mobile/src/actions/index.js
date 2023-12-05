@@ -78,23 +78,25 @@ import {
 } from '../types/actionTypes';
 import {
   DOMAIN_NAME, APP_URL_SCHEME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH, PAYWALL_POPUP,
-  SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP, CONFIRM_DISCARD_POPUP,
-  NOTE_LIST_MENU_POPUP, NOTE_LIST_ITEM_MENU_POPUP, LOCK_EDITOR_POPUP, LOCK_MENU_POPUP,
-  TAG_EDITOR_POPUP, MOVE_ACTION_NOTE_COMMANDS, MOVE_ACTION_NOTE_ITEM_MENU,
-  DELETE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
-  DISCARD_ACTION_UPDATE_LIST_NAME, DISCARD_ACTION_UPDATE_TAG_NAME, MY_NOTES, TRASH, ID,
-  NEW_NOTE, NEW_NOTE_OBJ, DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
-  N_NOTES, N_DAYS, CD_ROOT, INFO, INDEX, DOT_JSON, SHOW_SYNCED, LG_WIDTH,
-  IAP_VERIFY_URL, IAP_STATUS_URL, APPSTORE, PLAYSTORE, COM_JUSTNOTECC,
-  COM_JUSTNOTECC_SUPPORTER, SIGNED_TEST_STRING, VALID, INVALID, UNKNOWN, ERROR, ACTIVE,
-  SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS, WHT_MODE,
-  BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE, FEATURE_DATE_FORMAT,
-  FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES, FEATURE_LOCK,
-  FEATURE_TAG, NOTE_DATE_FORMATS, NO_PERMISSION_GRANTED, VALID_PASSWORD, PASSWORD_MSGS,
-  LOCK_ACTION_ADD_LOCK_NOTE, LOCK_ACTION_UNLOCK_NOTE, LOCK_ACTION_ADD_LOCK_LIST,
-  APP_STATE_ACTIVE, APP_STATE_INACTIVE, APP_STATE_BACKGROUND, LOCAL_NOTE_ATTRS,
-  TASK_TYPE, TASK_DO_FORCE_LIST_FPATHS, TASK_UPDATE_ACTION, ADDED, SHOWING_STATUSES,
-  VALID_TAG_NAME, DUPLICATE_TAG_NAME, TAG_NAME_MSGS, UPDATED_DT,
+  SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP, CONFIRM_DELETE_POPUP,
+  CONFIRM_DISCARD_POPUP, NOTE_LIST_MENU_POPUP, NOTE_LIST_ITEM_MENU_POPUP,
+  LOCK_EDITOR_POPUP, LOCK_MENU_POPUP, TAG_EDITOR_POPUP, MOVE_ACTION_NOTE_COMMANDS,
+  MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_ITEM_MENU,
+  DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_LIST_NAME,
+  DISCARD_ACTION_UPDATE_TAG_NAME, MY_NOTES, TRASH, ID, NEW_NOTE, NEW_NOTE_OBJ,
+  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES, N_DAYS, CD_ROOT,
+  INFO, INDEX, DOT_JSON, SHOW_SYNCED, LG_WIDTH, IAP_VERIFY_URL, IAP_STATUS_URL,
+  APPSTORE, PLAYSTORE, COM_JUSTNOTECC, COM_JUSTNOTECC_SUPPORTER, SIGNED_TEST_STRING,
+  VALID, INVALID, UNKNOWN, ERROR, ACTIVE, SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT,
+  SETTINGS_VIEW_LISTS, WHT_MODE, BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE,
+  FEATURE_DATE_FORMAT, FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES,
+  FEATURE_LOCK, FEATURE_TAG, NOTE_DATE_FORMATS, NO_PERMISSION_GRANTED, VALID_PASSWORD,
+  PASSWORD_MSGS, LOCK_ACTION_ADD_LOCK_NOTE, LOCK_ACTION_UNLOCK_NOTE,
+  LOCK_ACTION_ADD_LOCK_LIST, APP_STATE_ACTIVE, APP_STATE_INACTIVE, APP_STATE_BACKGROUND,
+  LOCAL_NOTE_ATTRS, TASK_TYPE, TASK_DO_FORCE_LIST_FPATHS, TASK_UPDATE_ACTION, ADDED,
+  SHOWING_STATUSES, IN_USE_LIST_NAME, LIST_NAME_MSGS, VALID_TAG_NAME,
+  DUPLICATE_TAG_NAME, IN_USE_TAG_NAME, TAG_NAME_MSGS, UPDATED_DT,
+  DELETE_ACTION_LIST_NAME, DELETE_ACTION_TAG_NAME,
 } from '../types/const';
 import {
   isEqual, isArrayEqual, isObject, isString, isNumber, sleep, separateUrlAndParam,
@@ -2267,6 +2269,42 @@ export const moveListName = (listName, direction) => {
 
 export const moveToListName = (listName, parent) => {
   return { type: MOVE_TO_LIST_NAME, payload: { listName, parent } };
+};
+
+export const checkDeleteListName = (listNameEditorKey, listNameObj) => async (
+  dispatch, getState
+) => {
+  const listNames = [listNameObj.listName];
+  listNames.push(...getAllListNames(listNameObj.children));
+
+  const noteFPaths = getNoteFPaths(getState());
+  const { noteMetas, conflictedMetas } = listNoteMetas(noteFPaths);
+
+  const inUseListNames = new Set();
+  for (const meta of [...noteMetas, ...conflictedMetas]) {
+    for (const fpath of meta.fpaths) {
+      inUseListNames.add(extractNoteFPath(fpath).listName);
+    }
+  }
+
+  const canDeletes = [];
+  for (const listName of listNames) canDeletes.push(!inUseListNames.has(listName));
+
+  if (!canDeletes.every(canDelete => canDelete === true)) {
+    dispatch(updateListNameEditors({
+      [listNameEditorKey]: {
+        msg: LIST_NAME_MSGS[IN_USE_LIST_NAME], isCheckingCanDelete: false,
+      },
+    }));
+    return;
+  }
+
+  dispatch(updateSelectingListName(listNameObj.listName));
+  dispatch(updateDeleteAction(DELETE_ACTION_LIST_NAME));
+  dispatch(updatePopup(CONFIRM_DELETE_POPUP, true));
+  dispatch(updateListNameEditors({
+    [listNameEditorKey]: { msg: '', isCheckingCanDelete: false },
+  }));
 };
 
 export const deleteListNames = (listNames) => async (dispatch, getState) => {
@@ -4825,6 +4863,30 @@ export const moveTagName = (tagName, direction) => {
 
 export const updateTagNameColor = (tagName, newColor) => {
 
+};
+
+export const checkDeleteTagName = (tagNameEditorKey, tagNameObj) => async (
+  dispatch, getState
+) => {
+  const noteFPaths = getNoteFPaths(getState());
+  const tagFPaths = getTagFPaths(getState());
+  const inUseTagNames = getInUseTagNames(noteFPaths, tagFPaths);
+
+  if (inUseTagNames.includes(tagNameObj.tagName)) {
+    dispatch(updateTagNameEditors({
+      [tagNameEditorKey]: {
+        msg: TAG_NAME_MSGS[IN_USE_TAG_NAME], isCheckingCanDelete: false,
+      },
+    }));
+    return;
+  }
+
+  dispatch(updateSelectingTagName(tagNameObj.tagName));
+  dispatch(updateDeleteAction(DELETE_ACTION_TAG_NAME));
+  dispatch(updatePopup(CONFIRM_DELETE_POPUP, true));
+  dispatch(updateTagNameEditors({
+    [tagNameEditorKey]: { msg: '', isCheckingCanDelete: false },
+  }));
 };
 
 export const deleteTagNames = (tagNames) => {

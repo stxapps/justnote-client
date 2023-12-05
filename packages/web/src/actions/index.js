@@ -85,7 +85,8 @@ import {
   PADDLE_RANDOM_ID, VALID_PASSWORD, PASSWORD_MSGS, LOCK_ACTION_ADD_LOCK_NOTE,
   LOCK_ACTION_UNLOCK_NOTE, LOCK_ACTION_ADD_LOCK_LIST, LOCAL_NOTE_ATTRS, TASK_TYPE,
   TASK_DO_FORCE_LIST_FPATHS, TASK_UPDATE_ACTION, ADDED, SHOWING_STATUSES,
-  VALID_TAG_NAME, DUPLICATE_TAG_NAME, TAG_NAME_MSGS, UPDATED_DT,
+  IN_USE_LIST_NAME, LIST_NAME_MSGS, VALID_TAG_NAME, DUPLICATE_TAG_NAME, IN_USE_TAG_NAME,
+  TAG_NAME_MSGS, UPDATED_DT, DELETE_ACTION_LIST_NAME, DELETE_ACTION_TAG_NAME,
 } from '../types/const';
 import {
   throttle, extractUrl, urlHashToObj, objToUrlHash, isBusyStatus, isEqual, isArrayEqual,
@@ -2612,6 +2613,42 @@ export const moveToListName = (listName, parent) => {
   return { type: MOVE_TO_LIST_NAME, payload: { listName, parent } };
 };
 
+export const checkDeleteListName = (listNameEditorKey, listNameObj) => async (
+  dispatch, getState
+) => {
+  const listNames = [listNameObj.listName];
+  listNames.push(...getAllListNames(listNameObj.children));
+
+  const noteFPaths = getNoteFPaths(getState());
+  const { noteMetas, conflictedMetas } = listNoteMetas(noteFPaths);
+
+  const inUseListNames = new Set();
+  for (const meta of [...noteMetas, ...conflictedMetas]) {
+    for (const fpath of meta.fpaths) {
+      inUseListNames.add(extractNoteFPath(fpath).listName);
+    }
+  }
+
+  const canDeletes = [];
+  for (const listName of listNames) canDeletes.push(!inUseListNames.has(listName));
+
+  if (!canDeletes.every(canDelete => canDelete === true)) {
+    dispatch(updateListNameEditors({
+      [listNameEditorKey]: {
+        msg: LIST_NAME_MSGS[IN_USE_LIST_NAME], isCheckingCanDelete: false,
+      },
+    }));
+    return;
+  }
+
+  dispatch(updateSelectingListName(listNameObj.listName));
+  dispatch(updateDeleteAction(DELETE_ACTION_LIST_NAME));
+  updatePopupUrlHash(CONFIRM_DELETE_POPUP, true);
+  dispatch(updateListNameEditors({
+    [listNameEditorKey]: { msg: '', isCheckingCanDelete: false },
+  }));
+};
+
 export const deleteListNames = (listNames) => async (dispatch, getState) => {
   const { listNameMap } = getState().settings;
 
@@ -5067,6 +5104,30 @@ export const moveTagName = (tagName, direction) => {
 
 export const updateTagNameColor = (tagName, newColor) => {
 
+};
+
+export const checkDeleteTagName = (tagNameEditorKey, tagNameObj) => async (
+  dispatch, getState
+) => {
+  const noteFPaths = getNoteFPaths(getState());
+  const tagFPaths = getTagFPaths(getState());
+  const inUseTagNames = getInUseTagNames(noteFPaths, tagFPaths);
+
+  if (inUseTagNames.includes(tagNameObj.tagName)) {
+    dispatch(updateTagNameEditors({
+      [tagNameEditorKey]: {
+        msg: TAG_NAME_MSGS[IN_USE_TAG_NAME], isCheckingCanDelete: false,
+      },
+    }));
+    return;
+  }
+
+  dispatch(updateSelectingTagName(tagNameObj.tagName));
+  dispatch(updateDeleteAction(DELETE_ACTION_TAG_NAME));
+  updatePopupUrlHash(CONFIRM_DELETE_POPUP, true);
+  dispatch(updateTagNameEditors({
+    [tagNameEditorKey]: { msg: '', isCheckingCanDelete: false },
+  }));
 };
 
 export const deleteTagNames = (tagNames) => {

@@ -8,9 +8,8 @@ import {
 } from '../types/const';
 import {
   isObject, createNoteFPath, createDataFName, extractNoteFPath, createPinFPath,
-  addFPath, listNoteMetas, getStaticFPath, getLastSettingsFPaths, excludeNotObjContents,
+  addFPath, getStaticFPath, getLastSettingsFPaths, excludeNotObjContents,
   batchGetFileWithRetry, batchPutFileWithRetry, batchDeleteFileWithRetry,
-  getInUseTagNames,
 } from '../utils';
 import { syncMode } from '../vars';
 import {
@@ -310,36 +309,6 @@ const putNotes = async (params) => {
   return { successListNames, successNotes, errorListNames, errorNotes, errors };
 };
 
-const canDeleteListNames = async (listNames) => {
-  const { noteFPaths } = await listFPaths();
-  const { noteMetas, conflictedMetas } = listNoteMetas(noteFPaths);
-
-  const inUseListNames = new Set();
-  for (const meta of [...noteMetas, ...conflictedMetas]) {
-    for (const fpath of meta.fpaths) {
-      inUseListNames.add(extractNoteFPath(fpath).listName);
-    }
-  }
-
-  const canDeletes = [];
-  for (const listName of listNames) canDeletes.push(!inUseListNames.has(listName));
-
-  return canDeletes;
-};
-
-const canDeleteTagNames = async (tagNames) => {
-  const { noteFPaths, tagFPaths } = await listFPaths();
-
-  const inUseTagNames = getInUseTagNames(noteFPaths, tagFPaths);
-
-  const canDeletes = [];
-  for (const tagName of tagNames) {
-    canDeletes.push(!inUseTagNames.includes(tagName));
-  }
-
-  return canDeletes;
-};
-
 const putPins = async (params) => {
   const { pins } = params;
 
@@ -566,11 +535,10 @@ const putLockSettings = async (lockSettings) => {
 
 const data = {
   getApi, listFPaths, listServerFPaths, toNotes, fetchStgsAndInfo, fetchNotes,
-  putNotes, canDeleteListNames, canDeleteTagNames, putPins, deletePins, getFiles,
-  putFiles, deleteFiles, getServerFilesToLocal, putLocalFilesToServer, deleteServerFiles,
-  getLocalSettings, putLocalSettings, getUnsavedNotes, putUnsavedNote,
-  deleteUnsavedNotes, deleteAllUnsavedNotes, deleteAllLocalFiles, deleteAllSyncedFiles,
-  getLockSettings, putLockSettings,
+  putNotes, putPins, deletePins, getFiles, putFiles, deleteFiles, getServerFilesToLocal,
+  putLocalFilesToServer, deleteServerFiles, getLocalSettings, putLocalSettings,
+  getUnsavedNotes, putUnsavedNote, deleteUnsavedNotes, deleteAllUnsavedNotes,
+  deleteAllLocalFiles, deleteAllSyncedFiles, getLockSettings, putLockSettings,
 };
 
 export default data;
