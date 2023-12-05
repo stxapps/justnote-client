@@ -317,20 +317,20 @@
   padding-left: 40px;
 }
 
-.ck.ck-editor__editable p a {
+.ck.ck-editor__editable p a, .ck.ck-editor__editable li a {
   color: var(--jn-editor-blue-700);
   cursor: pointer;
 }
 
-.blk-mode .ck.ck-editor__editable p a {
+.blk-mode .ck.ck-editor__editable p a, .blk-mode .ck.ck-editor__editable li a {
   color: var(--jn-editor-blue-500);
 }
 
-.blk-mode .ck.ck-editor__editable p a.ck-link_selected {
+.blk-mode .ck.ck-editor__editable p a.ck-link_selected, .blk-mode .ck.ck-editor__editable li a.ck-link_selected {
   color: var(--jn-editor-blue-200);
 }
 
-.ck.ck-editor__editable p a:hover {
+.ck.ck-editor__editable p a:hover, .ck.ck-editor__editable li a:hover {
   text-decoration: underline;
 }
 

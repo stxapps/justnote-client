@@ -379,13 +379,19 @@
 - https://justnote.cc
 * ckeditor
 ** repo
+- Before upgrade
+  + copy all changing files
+  + replace all changing files including build dir
+    ~ revert back _package.json to package.json
+    ~ replace ckeditor5-build-decoupled-document with the one in tmp
 - merge from upstream/stable to origin/stable
   + git pull upstream stable
   + git push origin stable
 - merge from stable to justnote
-  + git co justnote, copy 3 changing files
-  + git co the version in stable, replace all changes files including build dir
-  + git co justnote, revert changes and merge stable, then apply changes from the 3 files
+  + git co justnote
+  + git merge stable
+  + git push origin justnote
+- Copy ckeditor5-build-decoupled-document in tmp for next time
 - apply change
   + change package.json to _package.json
   + edit packages/ckeditor5-build-decoupled-document/package.json
