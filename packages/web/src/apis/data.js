@@ -3,8 +3,9 @@ import lsgApi from './localSg';
 import ldbApi from './localDb';
 import fileApi from './localFile';
 import {
-  UNSAVED_NOTES_UNSAVED, UNSAVED_NOTES_SAVED, INDEX, DOT_JSON, CD_ROOT, N_NOTES,
-  COLS_PANEL_STATE, LOCAL_SETTINGS_STATE, LOCK_SETTINGS_STATE,
+  NOTES, SETTINGS, INFO, PINS, TAGS, UNSAVED_NOTES_UNSAVED, UNSAVED_NOTES_SAVED, INDEX,
+  DOT_JSON, CD_ROOT, N_NOTES, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE,
+  LOCK_SETTINGS_STATE,
 } from '../types/const';
 import {
   isObject, createNoteFPath, createDataFName, extractNoteFPath, createPinFPath,
@@ -386,7 +387,7 @@ const getFiles = async (fpaths, dangerouslyIgnoreError = false) => {
 
 const putFiles = async (fpaths, contents, dangerouslyIgnoreError = false) => {
   // Bug alert: Do not support getting static files. Use serverApi or fileApi directly.
-  const result = { responses: [], fpaths: [], contents: [] };
+  const result = { responses: [] };
 
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
     const selectedFPaths = fpaths.slice(i, i + N_NOTES);
@@ -396,11 +397,12 @@ const putFiles = async (fpaths, contents, dangerouslyIgnoreError = false) => {
     );
     for (const response of responses) {
       result.responses.push(response);
-      result.fpaths.push(response.fpath);
-      result.contents.push(response.content);
 
       if (!syncMode.doSyncMode && response.success) {
-        await ldbApi.putFile(response.fpath, response.content);
+        const { fpath, content } = response;
+        if ([NOTES, SETTINGS, INFO, PINS, TAGS].some(el => fpath.startsWith(el))) {
+          await ldbApi.putFile(fpath, content);
+        }
       }
     }
   }

@@ -112,7 +112,7 @@ const putFile = async (fpath, content, options = putFileOptions) => {
 
 const putFiles = async (fpaths, contents, dangerouslyIgnoreError = false) => {
   // No order guarantee btw fpaths and responses
-  const result = { responses: [], fpaths: [], contents: [] };
+  const result = { responses: [] };
 
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
     const selectedFPaths = fpaths.slice(i, i + N_NOTES);
@@ -122,8 +122,6 @@ const putFiles = async (fpaths, contents, dangerouslyIgnoreError = false) => {
     );
     for (const response of responses) {
       result.responses.push(response);
-      result.fpaths.push(response.fpath);
-      result.contents.push(response.content);
     }
   }
 
