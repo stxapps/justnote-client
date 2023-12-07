@@ -71,19 +71,23 @@ const getFile = async (fpath, options = {}) => {
   return content;
 };
 
-const getFiles = async (_fpaths, dangerouslyIgnoreError = false) => {
+const getFiles = async (fpaths, dangerouslyIgnoreError = false) => {
+  // No order guarantee btw fpaths and responses
+  const result = { responses: [], fpaths: [], contents: [] };
 
-  const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
-  for (let i = 0, j = _fpaths.length; i < j; i += N_NOTES) {
-    const selectedFPaths = _fpaths.slice(i, i + N_NOTES);
+  for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
+    const selectedFPaths = fpaths.slice(i, i + N_NOTES);
     const responses = await batchGetFileWithRetry(
       getFile, selectedFPaths, 0, dangerouslyIgnoreError
     );
-    fpaths.push(...responses.map(({ fpath }) => fpath));
-    contents.push(...responses.map(({ content }) => content));
+    for (const response of responses) {
+      result.responses.push(response);
+      result.fpaths.push(response.fpath);
+      result.contents.push(response.content);
+    }
   }
 
-  return { fpaths, contents };
+  return result;
 };
 
 const putFileOptions = { dangerouslyIgnoreEtag: true };
@@ -106,12 +110,24 @@ const putFile = async (fpath, content, options = putFileOptions) => {
   return publicUrl;
 };
 
-const putFiles = async (fpaths, contents) => {
+const putFiles = async (fpaths, contents, dangerouslyIgnoreError = false) => {
+  // No order guarantee btw fpaths and responses
+  const result = { responses: [], fpaths: [], contents: [] };
+
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
-    const _fpaths = fpaths.slice(i, i + N_NOTES);
-    const _contents = contents.slice(i, i + N_NOTES);
-    await batchPutFileWithRetry(putFile, _fpaths, _contents, 0);
+    const selectedFPaths = fpaths.slice(i, i + N_NOTES);
+    const selectedContents = contents.slice(i, i + N_NOTES);
+    const responses = await batchPutFileWithRetry(
+      putFile, selectedFPaths, selectedContents, 0, dangerouslyIgnoreError
+    );
+    for (const response of responses) {
+      result.responses.push(response);
+      result.fpaths.push(response.fpath);
+      result.contents.push(response.content);
+    }
   }
+
+  return result;
 };
 
 const deleteFile = async (fpath, options = {}) => {
@@ -133,8 +149,8 @@ const deleteFile = async (fpath, options = {}) => {
 
 const deleteFiles = async (fpaths) => {
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
-    const _fpaths = fpaths.slice(i, i + N_NOTES);
-    await batchDeleteFileWithRetry(deleteFile, _fpaths, 0);
+    const selectedFPaths = fpaths.slice(i, i + N_NOTES);
+    await batchDeleteFileWithRetry(deleteFile, selectedFPaths, 0);
   }
 };
 

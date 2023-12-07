@@ -168,9 +168,18 @@ const fetchNotes = async (noteMetas) => {
     }
   }
 
-  const responses = await batchGetFileWithRetry(getApi().getFile, _fpaths, 0, true);
+  const remainFPaths = [], fpaths = [], contents = [];
+  for (const fpath of _fpaths) {
+    if (fpath.includes(CD_ROOT + '/')) {
+      fpaths.push(fpath);
+      contents.push('');
+      continue;
+    }
+    remainFPaths.push(fpath);
+  }
 
-  const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
+  // No order guarantee btw remainFPaths and responses
+  const { responses } = await getFiles(remainFPaths, true);
   for (const { fpath, content } of responses) {
     fpaths.push(fpath);
     contents.push(content);
@@ -179,7 +188,7 @@ const fetchNotes = async (noteMetas) => {
   const conflictedNotes = toConflictedNotes(conflictedMetas, fpaths, contents);
   const { listNames, notes } = toNotes(metas, fpaths, contents);
 
-  await fetchStaticFiles(conflictedNotes, notes);
+  await fetchServerStaticFiles(conflictedNotes, notes);
 
   const cfNtsPerId = {};
   for (const note of conflictedNotes) {
@@ -197,7 +206,7 @@ const fetchNotes = async (noteMetas) => {
   return { conflictedNotes: cfNtsPerId, notes: ntsPerLn };
 };
 
-const fetchStaticFiles = async (conflictedNotes, notes) => {
+const fetchServerStaticFiles = async (conflictedNotes, notes) => {
   if (syncMode.doSyncMode) return;
 
   const fpaths = [];
@@ -226,13 +235,14 @@ const fetchStaticFiles = async (conflictedNotes, notes) => {
 
   const files = await fileApi.getFiles(fpaths); // Check if already exists locally
 
-  const remainedFPaths = [];
+  const remainFPaths = [];
   for (let i = 0; i < files.fpaths.length; i++) {
-    const fpath = files.fpaths[i], content = files.contents[i];
-    if (content === undefined) remainedFPaths.push(fpath);
+    const [fpath, content] = [files.fpaths[i], files.contents[i]];
+    if (content === undefined) remainFPaths.push(fpath);
   }
 
-  await getServerFilesToLocal(remainedFPaths);
+  const sFiles = await serverApi.getFiles(remainFPaths, true);
+  await fileApi.putFiles(sFiles.fpaths, sFiles.contents);
 };
 
 const putNotes = async (params) => {
@@ -273,11 +283,8 @@ const putNotes = async (params) => {
   // So if errors, can leave the added fpaths as is. They won't interfere.
   await putFiles(mediaFPaths, mediaContents);
 
-  // Beware size should be max at N_NOTES, so can call batchPutFileWithRetry directly.
   // Use dangerouslyIgnoreError=true to manage which succeeded/failed manually.
-  const responses = await batchPutFileWithRetry(
-    getApi().putFile, fpaths, contents, 0, !!manuallyManageError
-  );
+  const { responses } = await putFiles(fpaths, contents, !!manuallyManageError);
   for (const response of responses) {
     const { listName, id } = noteMap[response.fpath];
     if (response.success) {
@@ -336,58 +343,84 @@ const deletePins = async (params) => {
   return { pins };
 };
 
-const getFiles = async (_fpaths, dangerouslyIgnoreError = false) => {
+const getFiles = async (fpaths, dangerouslyIgnoreError = false) => {
+  // Bug alert: Do not support getting static files. Use serverApi or fileApi directly.
+  const result = { responses: [], fpaths: [], contents: [] };
 
-  const fpaths = [], contents = []; // No order guarantee btw _fpaths and responses
-  for (let i = 0, j = _fpaths.length; i < j; i += N_NOTES) {
-    const selectedFPaths = _fpaths.slice(i, i + N_NOTES);
+  const remainFPaths = [];
+  if (syncMode.doSyncMode) {
+    remainFPaths.push(...fpaths);
+  } else {
+    const files = await ldbApi.getFiles(fpaths, true);
+    for (let i = 0; i < files.fpaths.length; i++) {
+      const [fpath, content] = [files.fpaths[i], files.contents[i]];
+      if (content === undefined) {
+        remainFPaths.push(fpath);
+        continue;
+      }
+
+      result.responses.push({ content, fpath, success: true });
+      result.fpaths.push(fpath);
+      result.contents.push(content);
+    }
+  }
+
+  for (let i = 0, j = remainFPaths.length; i < j; i += N_NOTES) {
+    const selectedFPaths = remainFPaths.slice(i, i + N_NOTES);
     const responses = await batchGetFileWithRetry(
       getApi().getFile, selectedFPaths, 0, dangerouslyIgnoreError
     );
-    fpaths.push(...responses.map(({ fpath }) => fpath));
-    contents.push(...responses.map(({ content }) => content));
+    for (const response of responses) {
+      result.responses.push(response);
+      result.fpaths.push(response.fpath);
+      result.contents.push(response.content);
+
+      if (!syncMode.doSyncMode && response.success) {
+        await ldbApi.putFile(response.fpath, response.content);
+      }
+    }
   }
 
-  return { fpaths, contents };
+  return result;
 };
 
 const putFiles = async (fpaths, contents, dangerouslyIgnoreError = false) => {
+  // Bug alert: Do not support getting static files. Use serverApi or fileApi directly.
+  const result = { responses: [], fpaths: [], contents: [] };
 
-  const responses = []; // No order guarantee btw fpaths and responses
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
-    const _fpaths = fpaths.slice(i, i + N_NOTES);
-    const _contents = contents.slice(i, i + N_NOTES);
-    const _responses = await batchPutFileWithRetry(
-      getApi().putFile, _fpaths, _contents, 0, dangerouslyIgnoreError
+    const selectedFPaths = fpaths.slice(i, i + N_NOTES);
+    const selectedContents = contents.slice(i, i + N_NOTES);
+    const responses = await batchPutFileWithRetry(
+      getApi().putFile, selectedFPaths, selectedContents, 0, dangerouslyIgnoreError
     );
-    responses.push(..._responses);
+    for (const response of responses) {
+      result.responses.push(response);
+      result.fpaths.push(response.fpath);
+      result.contents.push(response.content);
+
+      if (!syncMode.doSyncMode && response.success) {
+        await ldbApi.putFile(response.fpath, response.content);
+      }
+    }
   }
 
-  return responses;
+  return result;
 };
 
 const deleteFiles = async (fpaths) => {
+  // Bug alert: Do not support getting static files. Use serverApi or fileApi directly.
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
-    const _fpaths = fpaths.slice(i, i + N_NOTES);
-    await batchDeleteFileWithRetry(getApi().deleteFile, _fpaths, 0);
+    const selectedFPaths = fpaths.slice(i, i + N_NOTES);
+    await batchDeleteFileWithRetry(getApi().deleteFile, selectedFPaths, 0);
+
+    if (!syncMode.doSyncMode) await ldbApi.deleteFiles(selectedFPaths);
   }
-};
-
-const getServerFilesToLocal = async (_fpaths) => {
-  if (syncMode.doSyncMode) return;
-  const { fpaths, contents } = await getFiles(_fpaths, true);
-  await fileApi.putFiles(fpaths, contents);
-};
-
-const putLocalFilesToServer = async (fpaths) => {
-  if (syncMode.doSyncMode) return;
-  const files = await fileApi.getFiles(fpaths);
-  await putFiles(files.fpaths, files.contents);
 };
 
 const deleteServerFiles = async (fpaths) => {
   if (syncMode.doSyncMode) return;
-  await deleteFiles(fpaths);
+  await serverApi.deleteFiles(fpaths);
 };
 
 const getLocalSettings = async () => {
@@ -494,12 +527,6 @@ const deleteAllLocalFiles = async () => {
   await fileApi.deleteAllFiles();
 };
 
-const deleteAllSyncedFiles = async () => {
-  const fpaths = [];
-  await ldbApi.listFiles(fpath => fpaths.push(fpath));
-  await ldbApi.deleteFiles(fpaths);
-};
-
 const getLockSettings = async () => {
   // BUG Alert: new object, not ref to the object in initialLockSettingsState!
   const lockSettings = { ...initialLockSettingsState };
@@ -534,11 +561,11 @@ const putLockSettings = async (lockSettings) => {
 };
 
 const data = {
-  getApi, listFPaths, listServerFPaths, toNotes, fetchStgsAndInfo, fetchNotes,
-  putNotes, putPins, deletePins, getFiles, putFiles, deleteFiles, getServerFilesToLocal,
-  putLocalFilesToServer, deleteServerFiles, getLocalSettings, putLocalSettings,
-  getUnsavedNotes, putUnsavedNote, deleteUnsavedNotes, deleteAllUnsavedNotes,
-  deleteAllLocalFiles, deleteAllSyncedFiles, getLockSettings, putLockSettings,
+  listFPaths, listServerFPaths, toNotes, fetchStgsAndInfo, fetchNotes, putNotes,
+  putPins, deletePins, getFiles, putFiles, deleteFiles, deleteServerFiles,
+  getLocalSettings, putLocalSettings, getUnsavedNotes, putUnsavedNote,
+  deleteUnsavedNotes, deleteAllUnsavedNotes, deleteAllLocalFiles, getLockSettings,
+  putLockSettings,
 };
 
 export default data;

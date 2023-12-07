@@ -2426,8 +2426,8 @@ const _cleanUpStaticFiles = async (dispatch, getState) => {
 
   if (unusedFPaths.length > 0) {
     console.log('In cleanUpStaticFiles, found unused fpaths on server:', unusedFPaths);
-    // Too risky. Clean up locally for now. If do, need to sync!
-    //await dataApi.batchDeleteFileWithRetry(unusedFPaths, 0);
+    // Too risky. Clean up locally for now.
+    //await serverApi.deleteFiles(unusedFPaths);
     await fileApi.deleteFiles(unusedFPaths);
   }
 
@@ -2869,8 +2869,7 @@ const applySyncModeInQueue = (dispatch, getState) => async () => {
 
   // No need to clear vars as reload the page!
 
-  // Need to clear the local storage in case of clean up already.
-  await dataApi.deleteAllSyncedFiles();
+  // No need to clear the local storage as both modes use the same data.
 
   // Do it directly instead of dispatch(updateDoSyncMode(false));
   //   to make sure storing before reload.
@@ -2926,8 +2925,6 @@ export const cancelDiedSettings = () => async (dispatch, getState) => {
 };
 
 export const disableSyncMode = () => async (dispatch, getState) => {
-  await dataApi.deleteAllSyncedFiles();
-
   const localSettings = await dataApi.getLocalSettings();
   localSettings.doSyncMode = false;
   localSettings.doSyncModeInput = false;
@@ -3115,8 +3112,12 @@ const syncInQueue = (
 
       let content;
       if (allLeafFPaths.includes(fpath)) {
-        // No order guarantee but this is just one file
-        content = (await dataApi.getFiles([fpath])).contents[0];
+        if (fpath.includes(CD_ROOT + '/')) {
+          content = '';
+        } else {
+          // No order guarantee but this is just one file
+          content = (await dataApi.getFiles([fpath])).contents[0];
+        }
       } else {
         if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
         else content = '';
@@ -3182,7 +3183,12 @@ const syncInQueue = (
       haveUpdate = true;
 
       if (allLeafFPaths.includes(fpath)) {
-        _gFPaths.push(fpath);
+        if (fpath.includes(CD_ROOT + '/')) {
+          fpaths.push(fpath);
+          contents.push('');
+        } else {
+          _gFPaths.push(fpath);
+        }
         continue;
       }
 
