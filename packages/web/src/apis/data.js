@@ -377,7 +377,10 @@ const getFiles = async (fpaths, dangerouslyIgnoreError = false) => {
       result.contents.push(response.content);
 
       if (!syncMode.doSyncMode && response.success) {
-        await ldbApi.putFile(response.fpath, response.content);
+        const { fpath, content } = response;
+        if ([NOTES, SETTINGS, INFO, PINS, TAGS].some(el => fpath.startsWith(el))) {
+          await ldbApi.putFile(fpath, content);
+        }
       }
     }
   }
@@ -386,7 +389,7 @@ const getFiles = async (fpaths, dangerouslyIgnoreError = false) => {
 };
 
 const putFiles = async (fpaths, contents, dangerouslyIgnoreError = false) => {
-  // Bug alert: Do not support getting static files. Use serverApi or fileApi directly.
+  // Bug alert: Do not support putting static files. Use serverApi or fileApi directly.
   const result = { responses: [] };
 
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
@@ -411,12 +414,17 @@ const putFiles = async (fpaths, contents, dangerouslyIgnoreError = false) => {
 };
 
 const deleteFiles = async (fpaths) => {
-  // Bug alert: Do not support getting static files. Use serverApi or fileApi directly.
+  // Bug alert: Do not support deleting static files. Use serverApi or fileApi directly.
   for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
     const selectedFPaths = fpaths.slice(i, i + N_NOTES);
     await batchDeleteFileWithRetry(getApi().deleteFile, selectedFPaths, 0);
 
-    if (!syncMode.doSyncMode) await ldbApi.deleteFiles(selectedFPaths);
+    if (!syncMode.doSyncMode) {
+      const ldbFPaths = selectedFPaths.filter(fpath => {
+        return [NOTES, SETTINGS, INFO, PINS, TAGS].some(el => fpath.startsWith(el));
+      });
+      await ldbApi.deleteFiles(ldbFPaths);
+    }
   }
 };
 
