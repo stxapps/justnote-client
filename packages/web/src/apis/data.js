@@ -243,7 +243,10 @@ const fetchServerStaticFiles = async (conflictedNotes, notes) => {
   }
 
   const sFiles = await serverApi.getFiles(remainFPaths, true);
-  await fileApi.putFiles(sFiles.fpaths, sFiles.contents);
+  for (let i = 0; i < sFiles.fpaths.length; i++) {
+    if (sFiles.contents[i] === null) continue;
+    await fileApi.putFile(sFiles.fpaths[i], sFiles.contents[i]);
+  }
 };
 
 const putNotes = async (params) => {
