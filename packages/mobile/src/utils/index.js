@@ -1952,7 +1952,7 @@ export const batchGetFileWithRetry = async (
     fpaths.map(fpath =>
       getFile(fpath)
         .then(content => ({ content, fpath, success: true }))
-        .catch(error => ({ error, fpath, content: null, success: false }))
+        .catch(error => ({ error, content: null, fpath, success: false }))
     )
   );
 
@@ -1986,7 +1986,7 @@ export const batchPutFileWithRetry = async (
   const responses = await Promise.all(
     fpaths.map((fpath, i) =>
       putFile(fpath, contents[i])
-        .then(publicUrl => ({ publicUrl, fpath, success: true }))
+        .then(publicUrl => ({ publicUrl, fpath, content: contents[i], success: true }))
         .catch(error => ({ error, fpath, content: contents[i], success: false }))
     )
   );

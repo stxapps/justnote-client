@@ -80,23 +80,24 @@ import {
   DOMAIN_NAME, APP_URL_SCHEME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH, PAYWALL_POPUP,
   SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP, CONFIRM_DELETE_POPUP,
   CONFIRM_DISCARD_POPUP, NOTE_LIST_MENU_POPUP, NOTE_LIST_ITEM_MENU_POPUP,
-  LOCK_EDITOR_POPUP, LOCK_MENU_POPUP, TAG_EDITOR_POPUP, MOVE_ACTION_NOTE_COMMANDS,
-  MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_ITEM_MENU,
-  DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_LIST_NAME,
-  DISCARD_ACTION_UPDATE_TAG_NAME, MY_NOTES, TRASH, ID, NEW_NOTE, NEW_NOTE_OBJ,
-  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES, N_DAYS, CD_ROOT,
-  INFO, INDEX, DOT_JSON, SHOW_SYNCED, LG_WIDTH, IAP_VERIFY_URL, IAP_STATUS_URL,
-  APPSTORE, PLAYSTORE, COM_JUSTNOTECC, COM_JUSTNOTECC_SUPPORTER, SIGNED_TEST_STRING,
-  VALID, INVALID, UNKNOWN, ERROR, ACTIVE, SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT,
-  SETTINGS_VIEW_LISTS, WHT_MODE, BLK_MODE, CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE,
-  FEATURE_DATE_FORMAT, FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES,
-  FEATURE_LOCK, FEATURE_TAG, NOTE_DATE_FORMATS, NO_PERMISSION_GRANTED, VALID_PASSWORD,
-  PASSWORD_MSGS, LOCK_ACTION_ADD_LOCK_NOTE, LOCK_ACTION_UNLOCK_NOTE,
-  LOCK_ACTION_ADD_LOCK_LIST, APP_STATE_ACTIVE, APP_STATE_INACTIVE, APP_STATE_BACKGROUND,
-  LOCAL_NOTE_ATTRS, TASK_TYPE, TASK_DO_FORCE_LIST_FPATHS, TASK_UPDATE_ACTION, ADDED,
-  SHOWING_STATUSES, IN_USE_LIST_NAME, LIST_NAME_MSGS, VALID_TAG_NAME,
-  DUPLICATE_TAG_NAME, IN_USE_TAG_NAME, TAG_NAME_MSGS, UPDATED_DT,
-  DELETE_ACTION_LIST_NAME, DELETE_ACTION_TAG_NAME,
+  LOCK_EDITOR_POPUP, LOCK_MENU_POPUP, TAG_EDITOR_POPUP, SWWU_POPUP,
+  MOVE_ACTION_NOTE_COMMANDS, MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS,
+  DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
+  DISCARD_ACTION_UPDATE_LIST_NAME, DISCARD_ACTION_UPDATE_TAG_NAME, MY_NOTES, TRASH, ID,
+  NEW_NOTE, NEW_NOTE_OBJ, DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
+  N_NOTES, N_DAYS, CD_ROOT, INFO, INDEX, DOT_JSON, SHOW_SYNCED, LG_WIDTH,
+  IAP_VERIFY_URL, IAP_STATUS_URL, APPSTORE, PLAYSTORE, COM_JUSTNOTECC,
+  COM_JUSTNOTECC_SUPPORTER, SIGNED_TEST_STRING, VALID, INVALID, UNKNOWN, ERROR, ACTIVE,
+  SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS, WHT_MODE, BLK_MODE,
+  CUSTOM_MODE, FEATURE_PIN, FEATURE_APPEARANCE, FEATURE_DATE_FORMAT,
+  FEATURE_SECTION_NOTES_BY_MONTH, FEATURE_MORE_EDITOR_FONT_SIZES, FEATURE_LOCK,
+  FEATURE_TAG, NOTE_DATE_FORMATS, NO_PERMISSION_GRANTED, VALID_PASSWORD, PASSWORD_MSGS,
+  LOCK_ACTION_ADD_LOCK_NOTE, LOCK_ACTION_UNLOCK_NOTE, LOCK_ACTION_ADD_LOCK_LIST,
+  APP_STATE_ACTIVE, APP_STATE_INACTIVE, APP_STATE_BACKGROUND, LOCAL_NOTE_ATTRS,
+  TASK_TYPE, TASK_DO_FORCE_LIST_FPATHS, TASK_UPDATE_ACTION, ADDED, SHOWING_STATUSES,
+  IN_USE_LIST_NAME, LIST_NAME_MSGS, VALID_TAG_NAME, DUPLICATE_TAG_NAME,
+  IN_USE_TAG_NAME, TAG_NAME_MSGS, UPDATED_DT, DELETE_ACTION_LIST_NAME,
+  DELETE_ACTION_TAG_NAME,
 } from '../types/const';
 import {
   isEqual, isArrayEqual, isObject, isString, isNumber, sleep, separateUrlAndParam,
@@ -2093,8 +2094,8 @@ const _cleanUpStaticFiles = async (dispatch, getState) => {
 
   if (unusedFPaths.length > 0) {
     console.log('In cleanUpStaticFiles, found unused fpaths on server:', unusedFPaths);
-    // Too risky. Clean up locally for now. If do, need to sync!
-    //await dataApi.batchDeleteFileWithRetry(unusedFPaths, 0);
+    // Too risky. Clean up locally for now.
+    //await serverApi.deleteFiles(unusedFPaths);
     await fileApi.deleteFiles(unusedFPaths);
   }
 
@@ -2301,7 +2302,7 @@ export const checkDeleteListName = (listNameEditorKey, listNameObj) => async (
 
   dispatch(updateSelectingListName(listNameObj.listName));
   dispatch(updateDeleteAction(DELETE_ACTION_LIST_NAME));
-  dispatch(updatePopup(CONFIRM_DELETE_POPUP, true));
+  updatePopupUrlHash(CONFIRM_DELETE_POPUP, true);
   dispatch(updateListNameEditors({
     [listNameEditorKey]: { msg: '', isCheckingCanDelete: false },
   }));
@@ -2739,8 +2740,12 @@ const syncInQueue = (
 
       let content;
       if (allLeafFPaths.includes(fpath)) {
-        // No order guarantee but this is just one file
-        content = (await dataApi.getFiles([fpath])).contents[0];
+        if (fpath.includes(CD_ROOT + '/')) {
+          content = '';
+        } else {
+          // No order guarantee but this is just one file
+          content = (await dataApi.getFiles([fpath])).contents[0];
+        }
       } else {
         if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
         else content = '';
@@ -2806,7 +2811,12 @@ const syncInQueue = (
       haveUpdate = true;
 
       if (allLeafFPaths.includes(fpath)) {
-        _gFPaths.push(fpath);
+        if (fpath.includes(CD_ROOT + '/')) {
+          fpaths.push(fpath);
+          contents.push('');
+        } else {
+          _gFPaths.push(fpath);
+        }
         continue;
       }
 
@@ -4883,7 +4893,7 @@ export const checkDeleteTagName = (tagNameEditorKey, tagNameObj) => async (
 
   dispatch(updateSelectingTagName(tagNameObj.tagName));
   dispatch(updateDeleteAction(DELETE_ACTION_TAG_NAME));
-  dispatch(updatePopup(CONFIRM_DELETE_POPUP, true));
+  updatePopupUrlHash(CONFIRM_DELETE_POPUP, true);
   dispatch(updateTagNameEditors({
     [tagNameEditorKey]: { msg: '', isCheckingCanDelete: false },
   }));
@@ -4895,4 +4905,8 @@ export const deleteTagNames = (tagNames) => {
 
 export const updateSelectingTagName = (tagName) => {
   return { type: UPDATE_SELECTING_TAG_NAME, payload: tagName };
+};
+
+export const showSWWUPopup = () => async (dispatch, getState) => {
+  dispatch(updatePopup(SWWU_POPUP, true));
 };

@@ -27,9 +27,8 @@ import {
   indexOfClosingTag, createNoteFPath, createDataFName, extractNoteFPath,
   extractDataFName, extractDataId, listNoteMetas, listSettingsMetas,
   createSettingsFPath, getSettingsFPaths, getLastSettingsFPaths, extractPinFPath,
-  getPins, batchGetFileWithRetry, extractFPath, copyListNameObjs,
-  getFormattedTimeStamp, getDataParentIds, createPinFPath, extractTagFPath, getTags,
-  createTagFPath,
+  getPins, extractFPath, copyListNameObjs, getFormattedTimeStamp, getDataParentIds,
+  createPinFPath, extractTagFPath, getTags, createTagFPath,
 } from '../utils';
 import { initialSettingsState, initialInfoState } from '../types/initialStates';
 import vars from '../vars';
@@ -1335,11 +1334,18 @@ export const exportAllData = () => async (dispatch, getState) => {
 
     const errorResponses = [], idMap = {};
     for (let i = 0; i < fpaths.length; i += N_NOTES) {
-      const successResponses = [];
       const selectedFPaths = fpaths.slice(i, i + N_NOTES);
-      const responses = await batchGetFileWithRetry(
-        dataApi.getApi().getFile, selectedFPaths, 0, true
-      );
+
+      const successResponses = [], remainFPaths = [];
+      for (const fpath of selectedFPaths) {
+        if (fpath.startsWith(NOTES) && fpath.includes(CD_ROOT + '/')) {
+          successResponses.push({ content: '', fpath, success: true });
+        } else {
+          remainFPaths.push(fpath);
+        }
+      }
+
+      const { responses } = await dataApi.getFiles(remainFPaths, true);
       for (const response of responses) {
         if (response.success) successResponses.push(response);
         else errorResponses.push(response);
