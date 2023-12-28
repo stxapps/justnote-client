@@ -127,7 +127,7 @@ const parseEvernoteImportedFile = async (dispatch, getState, zip, entries) => {
       let title = '';
       const tMatch = content.match(/<h1[^>]*>([\s\S]+?)<\/h1>/i);
       if (tMatch) title = tMatch[1].trim().replace(/\r?\n/g, '');
-      title = stripHtml(title);
+      title = stripHtml(title, false, true);
       if (title === 'Untitled') title = '';
 
       let body = '';

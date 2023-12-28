@@ -697,7 +697,7 @@ export const getFullYearMonth = (dt) => {
   return { year, month };
 };
 
-export const stripHtml = (s, doInsertNewLine = false) => {
+export const stripHtml = (s, doInsertNewLine = false, doKeepSpaces = false) => {
   if (doInsertNewLine) {
     s = s.replace(/<\/p>/gi, '\n</p>');
     s = s.replace(/<\/li>/gi, '\n</li>');
@@ -712,12 +712,12 @@ export const stripHtml = (s, doInsertNewLine = false) => {
   const codeRe = /&(nbsp|amp|quot|lt|gt);/g;
   const codeMap = { 'nbsp': ' ', 'amp': '&', 'quot': '"', 'lt': '<', 'gt': '>' };
 
-  if (doInsertNewLine) s = s.replace(/(<([^>]+)>)/gi, '');
+  if (doInsertNewLine || doKeepSpaces) s = s.replace(/(<([^>]+)>)/gi, '');
   else s = s.replace(/(<([^>]+)>)/gi, ' ');
 
   s = s.replace(codeRe, (match, entity) => codeMap[entity]);
 
-  if (doInsertNewLine) { /* do nothing here */ }
+  if (doInsertNewLine || doKeepSpaces) { /* do nothing here */ }
   else s = s.replace(/\s+/g, ' ');
 
   s = s.trim();
