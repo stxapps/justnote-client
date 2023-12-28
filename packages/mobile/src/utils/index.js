@@ -709,24 +709,19 @@ export const stripHtml = (s, doInsertNewLine = false) => {
     }
   }
 
+  const codeRe = /&(nbsp|amp|quot|lt|gt);/g;
+  const codeMap = { 'nbsp': ' ', 'amp': '&', 'quot': '"', 'lt': '<', 'gt': '>' };
+
   if (doInsertNewLine) s = s.replace(/(<([^>]+)>)/gi, '');
   else s = s.replace(/(<([^>]+)>)/gi, ' ');
 
-  s = replaceHtmlEntities(s);
+  s = s.replace(codeRe, (match, entity) => codeMap[entity]);
 
   if (doInsertNewLine) { /* do nothing here */ }
   else s = s.replace(/\s+/g, ' ');
 
   s = s.trim();
   return s;
-};
-
-export const replaceHtmlEntities = (text) => {
-  const codeRe = /&(nbsp|amp|quot|lt|gt);/g;
-  const codeMap = { 'nbsp': ' ', 'amp': '&', 'quot': '"', 'lt': '<', 'gt': '>' };
-
-  const rText = text.replace(codeRe, (match, entity) => codeMap[entity]);
-  return rText;
 };
 
 const sortClassNamesInBody = (body) => {

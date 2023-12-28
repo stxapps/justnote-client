@@ -28,7 +28,7 @@ import {
   extractDataFName, extractDataId, listNoteMetas, listSettingsMetas,
   createSettingsFPath, getSettingsFPaths, getLastSettingsFPaths, extractPinFPath,
   getPins, extractFPath, copyListNameObjs, getFormattedTimeStamp, getDataParentIds,
-  createPinFPath, extractTagFPath, getTags, createTagFPath, replaceHtmlEntities,
+  createPinFPath, extractTagFPath, getTags, createTagFPath, stripHtml,
 } from '../utils';
 import { initialSettingsState, initialInfoState } from '../types/initialStates';
 import vars from '../vars';
@@ -126,11 +126,8 @@ const parseEvernoteImportedFile = async (dispatch, getState, importDPath, entrie
 
       let title = '';
       const tMatch = content.match(/<h1[^>]*>([\s\S]+?)<\/h1>/i);
-      if (tMatch) title = tMatch[1].trim().replace(/\r?\n/g, ' ');
-      if (title.startsWith('<b>') && title.endsWith('</b>')) {
-        title = title.slice(3, -4).trim();
-      }
-      title = replaceHtmlEntities(title);
+      if (tMatch) title = tMatch[1].trim().replace(/\r?\n/g, '');
+      title = stripHtml(title);
       if (title === 'Untitled') title = '';
 
       let body = '';
