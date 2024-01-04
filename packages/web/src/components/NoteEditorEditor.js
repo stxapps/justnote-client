@@ -620,7 +620,7 @@ const NoteEditorEditor = (props) => {
 
   useEffect(() => {
     const beforeUnloadListener = (e) => {
-      if (!isEditorReady) return;
+      if (!isEditorReady || !isFocusedRef.current) return;
 
       const title = titleInput.current.value.trimEnd();
       const { body } = replaceObjectUrls(
