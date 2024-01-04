@@ -72,53 +72,61 @@ const _getBestMap = (fpath, idMap) => {
   return bestKey ? idMap[bestKey] : null;
 };
 
-const _getListObjs = (ulElem, listObjs) => {
-  let listObj;
-  for (const node of ulElem.childNodes) {
+const _populateListObj = (listElem, listObj) => {
+  let listItemObj;
+  for (const node of listElem.childNodes) {
     if (node.nodeName.toLowerCase() === 'ul') {
-      const nestedListObj = isObject(listObj) ? listObj.listObjs : listObjs;
-      _getListObjs(node, nestedListObj);
+      let nestedListObj = listObj;
+      if (isObject(listItemObj)) {
+        nestedListObj = { tag: 'ul', items: [] };
+        listItemObj.listObjs.push(nestedListObj);
+      }
+      _populateListObj(node, nestedListObj);
+    } else if (node.nodeName.toLowerCase() === 'ol') {
+      let nestedListObj = listObj;
+      if (isObject(listItemObj)) {
+        nestedListObj = { tag: 'ol', items: [] };
+        listItemObj.listObjs.push(nestedListObj);
+      }
+      _populateListObj(node, nestedListObj);
     } else if (node.nodeName.toLowerCase() === 'li') {
-      let found = false;
+      listItemObj = { texts: [], listObjs: [] };
       for (const cNode of node.childNodes) {
         if (cNode.className !== 'list-content') continue;
 
-        listObj = { texts: [], listObjs: [] };
         for (const tNode of cNode.childNodes) {
           if (tNode.nodeName.toLowerCase() === 'img') {
-            found = true;
-
             const text = tNode.outerHTML;
-            listObj.texts.push(text);
+            listItemObj.texts.push(text);
           } else if (tNode.className === 'para') {
-            found = true;
-
             const text = tNode.innerHTML;
-            listObj.texts.push(text);
+            listItemObj.texts.push(text);
+          } else {
+            throw new Error('Evernote invalid list content node');
           }
         }
-        listObjs.push(listObj);
       }
-      if (!found) {
+      if (listItemObj.texts.length === 0) {
         throw new Error('Evernote invalid list li node');
       }
+      listObj.items.push(listItemObj);
     } else {
       throw new Error('Evernote invalid list node');
     }
   }
 };
 
-const _getListHtml = (listObjs) => {
-  let listHtml = '<ul>';
-  for (const listObj of listObjs) {
+const _getListHtml = (listObj) => {
+  let listHtml = listObj.tag === 'ol' ? '<ol>' : '<ul>';
+  for (const item of listObj.items) {
     listHtml += '<li>';
-    listHtml += listObj.texts.join('<br>');
-    if (listObj.listObjs.length > 0) {
-      listHtml += _getListHtml(listObj.listObjs);
+    listHtml += item.texts.join('<br>');
+    for (const nestedListObj of item.listObjs) {
+      listHtml += _getListHtml(nestedListObj);
     }
     listHtml += '</li>';
   }
-  listHtml += '</ul>';
+  listHtml += listObj.tag === 'ol' ? '</ol>' : '</ul>';
   return listHtml;
 };
 
@@ -346,10 +354,21 @@ const parseEvernoteImportedFile = async (dispatch, getState, zip, entries) => {
 
       // list tags
       pos = -1;
-      while ((pos = body.indexOf('<ul role="list">', pos + 1)) !== -1) {
+      while (true) {
+        const uPos = body.indexOf('<ul role="list">', pos + 1);
+        const oPos = body.indexOf('<ol role="list">', pos + 1);
+
+        let tag, openTag, closeTag;
+        if ((oPos >= 0 && uPos < 0) || (oPos >= 0 && uPos >= 0 && oPos < uPos)) {
+          [pos, tag, openTag, closeTag] = [oPos, 'ol', '<ol', '</ol>'];
+        } else {
+          [pos, tag, openTag, closeTag] = [uPos, 'ul', '<ul', '</ul>'];
+        }
+        if (pos < 0) break;
+
         let html = body.slice(pos);
 
-        const endIndex = indexOfClosingTag(html, '<ul', '</ul>');
+        const endIndex = indexOfClosingTag(html, openTag, closeTag);
         if (endIndex < 0) continue;
 
         html = html.slice(0, endIndex).trim();
@@ -358,12 +377,12 @@ const parseEvernoteImportedFile = async (dispatch, getState, zip, entries) => {
           const template = document.createElement('template');
           template.innerHTML = html;
 
-          const listObjs = [];
+          const listObj = { tag, items: [] };
           const elem = template.content.firstChild;
-          _getListObjs(elem, listObjs);
+          _populateListObj(elem, listObj);
 
-          if (listObjs.length > 0) {
-            const listHtml = _getListHtml(listObjs);
+          if (listObj.items.length > 0) {
+            const listHtml = _getListHtml(listObj);
             body = body.slice(0, pos) + listHtml + body.slice(pos + endIndex);
           }
         } catch (error) {
@@ -373,8 +392,8 @@ const parseEvernoteImportedFile = async (dispatch, getState, zip, entries) => {
       }
 
       // Preserve empty lines from Evernote to CKEditor
-      body = body.replaceAll('<div class="para"><br></div>', '<p><br></p>');
-      body = body.replaceAll('<div class="para">&nbsp;</div>', '<p><br></p>');
+      body = body.replace(/<div[^>]+class="para"[^>]*><br><\/div>/gi, '<p><br></p>');
+      body = body.replace(/<div[^>]+class="para"[^>]*>&nbsp;<\/div>/gi, '<p><br></p>');
 
       if (title || body) {
         fpaths.push(`${dpath}/index.json`);
