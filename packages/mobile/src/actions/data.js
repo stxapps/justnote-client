@@ -102,10 +102,10 @@ const _populateListObj = (listElem, listObj) => {
 
         for (const tNode of cNode.childNodes) {
           if (DomUtils.getName(tNode).toLowerCase() === 'img') {
-            const text = DomUtils.getOuterHTML(tNode);
+            const text = DomUtils.getOuterHTML(tNode, { encodeEntities: 'utf8' });
             listItemObj.texts.push(text);
           } else if (tNode.attribs && tNode.attribs['class'] === 'para') {
-            const text = DomUtils.getInnerHTML(tNode);
+            const text = DomUtils.getInnerHTML(tNode, { encodeEntities: 'utf8' });
             listItemObj.texts.push(text);
           } else {
             throw new Error('Evernote invalid list content node');
