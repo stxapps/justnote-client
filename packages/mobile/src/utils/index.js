@@ -2078,7 +2078,7 @@ export const extractFPath = (fpath) => {
   const fpathParts = fpath.split('/');
   const fname = fpathParts[fpathParts.length - 1];
   const fnameParts = fname.split('.');
-  const fext = fnameParts[fnameParts.length - 1];
+  const fext = fnameParts.length >= 2 ? fnameParts[fnameParts.length - 1] : '';
   return { fpath, fpathParts, fname, fnameParts, fext };
 };
 

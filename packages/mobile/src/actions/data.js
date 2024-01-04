@@ -45,6 +45,97 @@ const importAllDataLoop = async (fpaths, contents) => {
   }
 };
 
+const _getBestMap = (fpath, idMap) => {
+  // Export from Windows, path separator is \
+  if (!fpath.includes('/') && fpath.includes('\\')) {
+    fpath = fpath.replace('\\', '/');
+  }
+  if (!fpath.includes('/') && fpath.includes(':')) {
+    fpath = fpath.replace(':', '/');
+  }
+
+  const { fpathParts } = extractFPath(fpath);
+  const rParts = fpathParts.reverse();
+
+  let bestLength = 0, bestKey = null;
+  for (const key of Object.keys(idMap)) {
+    const { fpathParts: keyFPathParts } = extractFPath(key);
+    const rKeyParts = keyFPathParts.reverse();
+
+    if (rParts[0] !== rKeyParts[0]) continue;
+
+    let length = 1;
+    const maxLength = Math.min(rParts.length, rKeyParts.length);
+    for (let i = 1; i < maxLength; i++) {
+      if (rParts[i] !== rKeyParts[i]) break;
+      length += 1;
+    }
+    if (length > bestLength) {
+      [bestLength, bestKey] = [length, key];
+    }
+  }
+
+  return bestKey ? idMap[bestKey] : null;
+};
+
+const _populateListObj = (listElem, listObj) => {
+  let listItemObj;
+  for (const node of listElem.childNodes) {
+    if (DomUtils.getName(node).toLowerCase() === 'ul') {
+      let nestedListObj = listObj;
+      if (isObject(listItemObj)) {
+        nestedListObj = { tag: 'ul', items: [] };
+        listItemObj.listObjs.push(nestedListObj);
+      }
+      _populateListObj(node, nestedListObj);
+    } else if (DomUtils.getName(node).toLowerCase() === 'ol') {
+      let nestedListObj = listObj;
+      if (isObject(listItemObj)) {
+        nestedListObj = { tag: 'ol', items: [] };
+        listItemObj.listObjs.push(nestedListObj);
+      }
+      _populateListObj(node, nestedListObj);
+    } else if (DomUtils.getName(node).toLowerCase() === 'li') {
+      listItemObj = { texts: [], listObjs: [] };
+      for (const cNode of node.childNodes) {
+        if (!cNode.attribs || cNode.attribs['class'] !== 'list-content') continue;
+
+        for (const tNode of cNode.childNodes) {
+          if (DomUtils.getName(tNode).toLowerCase() === 'img') {
+            const text = DomUtils.getOuterHTML(tNode);
+            listItemObj.texts.push(text);
+          } else if (tNode.attribs && tNode.attribs['class'] === 'para') {
+            const text = DomUtils.getInnerHTML(tNode);
+            listItemObj.texts.push(text);
+          } else {
+            throw new Error('Evernote invalid list content node');
+          }
+        }
+      }
+      if (listItemObj.texts.length === 0) {
+        throw new Error('Evernote invalid list li node');
+      }
+      listObj.items.push(listItemObj);
+    } else {
+      throw new Error('Evernote invalid list node');
+    }
+  }
+};
+
+const _getListHtml = (listObj) => {
+  let listHtml = listObj.tag === 'ol' ? '<ol>' : '<ul>';
+  for (const item of listObj.items) {
+    listHtml += '<li>';
+    listHtml += item.texts.join('<br>');
+    for (const nestedListObj of item.listObjs) {
+      listHtml += _getListHtml(nestedListObj);
+    }
+    listHtml += '</li>';
+  }
+  listHtml += listObj.tag === 'ol' ? '</ol>' : '</ul>';
+  return listHtml;
+};
+
 const parseEvernoteImportedFile = async (dispatch, getState, importDPath, entries) => {
 
   const htmlEntries = [], imgEntries = [];
@@ -62,6 +153,10 @@ const parseEvernoteImportedFile = async (dispatch, getState, importDPath, entrie
       imgEntries.push(entry);
       continue;
     }
+    if (fext === '') { // possible some images have no extention
+      imgEntries.push(entry);
+      continue;
+    }
   }
 
   const progress = { total: htmlEntries.length + imgEntries.length, done: 0 };
@@ -74,14 +169,12 @@ const parseEvernoteImportedFile = async (dispatch, getState, importDPath, entrie
     const selectedEntries = imgEntries.slice(i, i + N_NOTES);
 
     for (const entry of selectedEntries) {
-      const { fpathParts, fnameParts, fext } = extractFPath(entry.filename);
+      const { fext } = extractFPath(entry.filename);
 
-      const fpath = `${IMAGES}/${randomString(4)}-${randomString(4)}-${randomString(4)}-${randomString(4)}.${fext}`;
+      let fpath = `${IMAGES}/${randomString(4)}-${randomString(4)}-${randomString(4)}-${randomString(4)}`;
+      if (fext) fpath += `.${fext}`;
 
-      // Also includes dir name to be matched with src in the html
-      if (fpathParts.length < 2) continue;
-      const dir = fpathParts[fpathParts.length - 2] + '/';
-      idMap[dir + fnameParts.slice(0, -1).join('.')] = fpath;
+      idMap[entry.filename] = fpath;
 
       const destFPath = `${Dirs.DocumentDir}/${fpath}`;
       const destDPath = Util.dirname(destFPath);
@@ -134,14 +227,17 @@ const parseEvernoteImportedFile = async (dispatch, getState, importDPath, entrie
       const bMatch = content.match(/<en-note[^>]*>([\s\S]+?)<\/en-note>/i);
       if (bMatch) body = bMatch[1].trim().replace(/\r?\n/g, '');
 
+      // clean up
+      body = body.replace(/<icons[^>]*>([\s\S]+?)<\/icons>/gi, '');
+      body = body.replace(/<meta[^>]*>/gi, '');
+      body = body.replace(/<note-attributes[^>]*>([\s\S]+?)<\/note-attributes>/gi, '');
+      body = body.replace(/<h1[^>]*>([\s\S]+?)<\/h1>/gi, '');
+      body = body.trim();
+
       // img tags
       for (const match of body.matchAll(/<img[^>]+?src="([^"]+)"[^>]*>/gi)) {
-        const { fpath, fpathParts, fnameParts } = extractFPath(match[1]);
-
-        if (fpathParts.length < 2 || fnameParts.length < 2) continue;
-
-        const dir = fpathParts[fpathParts.length - 2] + '/';
-        const imgFPath = idMap[dir + fnameParts.slice(0, -1).join('.')];
+        const fpath = match[1];
+        const imgFPath = _getBestMap(fpath, idMap);
         if (imgFPath) {
           body = body.split(fpath).join('cdroot/' + imgFPath);
 
@@ -254,6 +350,48 @@ const parseEvernoteImportedFile = async (dispatch, getState, importDPath, entrie
         }
       }
 
+      // list tags
+      pos = -1;
+      while (true) {
+        const uPos = body.indexOf('<ul role="list">', pos + 1);
+        const oPos = body.indexOf('<ol role="list">', pos + 1);
+
+        let tag, openTag, closeTag;
+        if ((oPos >= 0 && uPos < 0) || (oPos >= 0 && uPos >= 0 && oPos < uPos)) {
+          [pos, tag, openTag, closeTag] = [oPos, 'ol', '<ol', '</ol>'];
+        } else {
+          [pos, tag, openTag, closeTag] = [uPos, 'ul', '<ul', '</ul>'];
+        }
+        if (pos < 0) break;
+
+        let html = body.slice(pos);
+
+        const endIndex = indexOfClosingTag(html, openTag, closeTag);
+        if (endIndex < 0) continue;
+
+        html = html.slice(0, endIndex).trim();
+
+        try {
+          const dom = parseDocument(html);
+
+          const listObj = { tag, items: [] };
+          const elem = dom.firstChild;
+          _populateListObj(elem, listObj);
+
+          if (listObj.items.length > 0) {
+            const listHtml = _getListHtml(listObj);
+            body = body.slice(0, pos) + listHtml + body.slice(pos + endIndex);
+          }
+        } catch (error) {
+          console.log('Evernote list tag error', error);
+          continue;
+        }
+      }
+
+      // Preserve empty lines from Evernote to CKEditor
+      body = body.replace(/<div[^>]+class="para"[^>]*><br><\/div>/gi, '<p><br></p>');
+      body = body.replace(/<div[^>]+class="para"[^>]*>&nbsp;<\/div>/gi, '<p><br></p>');
+
       if (title || body) {
         fpaths.push(`${dpath}/index.json`);
         contents.push({ title, body });
@@ -341,7 +479,8 @@ const parseGKeepImportedFile = async (dispatch, getState, importDPath, entries) 
       const { fnameParts, fext } = extractFPath(entry.filename);
       if (fnameParts.length < 2) continue;
 
-      const fpath = `${IMAGES}/${randomString(4)}-${randomString(4)}-${randomString(4)}-${randomString(4)}.${fext}`;
+      let fpath = `${IMAGES}/${randomString(4)}-${randomString(4)}-${randomString(4)}-${randomString(4)}`;
+      if (fext) fpath += `.${fext}`;
 
       // As file name can be .jpg but attachment in note.json can be .jpeg
       //   so need to ignore the ext.
