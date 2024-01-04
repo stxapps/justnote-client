@@ -709,7 +709,7 @@ export const stripHtml = (s, doInsertNewLine = false, doKeepSpaces = false) => {
     }
 
     s = s.replace(/<\/div>/gi, '\n</div>');
-    s = s.replace(/<br[\s]*[\/]*>/gi, '\n');
+    s = s.replace(/<br[\s]*[/]*>/gi, '\n');
   }
 
   const codeRe = /&(nbsp|amp|quot|lt|gt);/g;

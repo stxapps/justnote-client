@@ -4080,7 +4080,12 @@ export const exportNoteAsPdf = () => async (dispatch, getState) => {
     html = html.replace(/__-body-__/g, body);
     if (Platform.OS === 'ios') html = html.replace(' mx-12 my-16"', '"');
 
-    name = note.title ? `${note.title}` : 'Justnote\'s note';
+    name = note.title ? `${note.title}` : '';
+    for (const ch of ['\\', '/', ':', '*', '?', '"', '<', '>', '|']) {
+      name = name.replaceAll(ch, ' ');
+    }
+    name = name.replace(/\s+/g, ' ').trim();
+    if (!name) name = 'Justnote\'s note';
     if (name.length > 56) name = name.slice(0, 56);
     name += ` ${getFormattedTimeStamp(new Date())}`;
 
