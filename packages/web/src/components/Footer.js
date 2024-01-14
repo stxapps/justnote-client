@@ -47,7 +47,7 @@ const Footer = () => {
           </a>
         </div>
         <p className={tailwind('mt-8 text-center text-base text-gray-400')}>
-          &copy; 2023 <a className={tailwind('rounded-sm text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://www.stxapps.com" target="_blank" rel="noreferrer">STX Apps Co., Ltd.</a>. All rights reserved.
+          &copy; {(new Date()).getFullYear()} <a className={tailwind('rounded-sm text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://www.stxapps.com" target="_blank" rel="noreferrer">STX Apps Co., Ltd.</a>. All rights reserved.
         </p>
       </div>
     </footer>

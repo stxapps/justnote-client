@@ -2297,7 +2297,7 @@ export const getNNoteMetas = (params) => {
   const cbMetas = [...cfMetas, ...pdMetas, ...npMetas];
 
   // With pins, can't fetch further from the current point
-  let metas = [], metasWithPcEc = [];
+  const metas = [], metasWithPcEc = [];
   for (const meta of cbMetas) {
     const { id } = meta;
     const mainId = getMainId(id, toRootIds);
@@ -2703,7 +2703,7 @@ export const getNNoteMetasByQt = (params) => {
 
   const cbMetas = [...pdMetas, ...npMetas];
 
-  let metas = [], metasWithPcEc = [];
+  const metas = [], metasWithPcEc = [];
   for (const meta of cbMetas) {
     const { id } = meta;
     const mainId = getMainId(id, toRootIds);

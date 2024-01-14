@@ -51,7 +51,7 @@ const SettingsPopupAbout = (props) => {
           </a>
         </div>
         <div className={tailwind('pt-16 lg:flex lg:justify-between')}>
-          <p className={tailwind('text-left text-base text-gray-400 blk:text-gray-500')}>© 2023 <a className={tailwind('rounded-sm text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:text-gray-500 blk:hover:text-gray-400 blk:focus:ring-gray-500')} href="https://www.stxapps.com" target="_blank" rel="noreferrer">STX Apps Co., Ltd.</a></p>
+          <p className={tailwind('text-left text-base text-gray-400 blk:text-gray-500')}>© {(new Date()).getFullYear()} <a className={tailwind('rounded-sm text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:text-gray-500 blk:hover:text-gray-400 blk:focus:ring-gray-500')} href="https://www.stxapps.com" target="_blank" rel="noreferrer">STX Apps Co., Ltd.</a></p>
           <p className={tailwind('text-left text-base text-gray-400 blk:text-gray-500')}>All rights reserved.</p>
         </div>
       </div>
