@@ -8,9 +8,10 @@ import {
 import {
   isStringIn, isObject, isString, isEqual, isTitleEqual, isBodyEqual, getListNameObj,
   getMainId, getValidProduct as _getValidProduct, getValidPurchase as _getValidPurchase,
-  listNoteMetas, getNoteFPaths, getPinFPaths, getPins, doEnableExtraFeatures,
-  getFormattedNoteDate, isNumber, isMobile as _isMobile, getDataParentIds, getNote,
-  doesIncludeFetchingMore, getLockListStatus, getTagFPaths, getTags, getTagNameObj,
+  listNoteMetas, getNoteFPaths, getSsltFPaths, getPinFPaths, getPins,
+  doEnableExtraFeatures, getFormattedNoteDate, isNumber, isMobile as _isMobile,
+  getDataParentIds, getNote, doesIncludeFetchingMore, getLockListStatus, getTagFPaths,
+  getTags, getTagNameObj,
 } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 import {
@@ -79,9 +80,11 @@ export const getNotes = createSelectorNotes(
   state => state,
   (state) => {
     const noteFPaths = getNoteFPaths(state);
+    const ssltFPaths = getSsltFPaths(state);
     const conflictedNotes = state.conflictedNotes;
     const notes = state.notes;
     const queryString = state.display.queryString;
+    const pendingSslts = state.pendingSslts;
     const pendingTags = state.pendingTags;
     const lockedNotes = state.lockSettings.lockedNotes;
     const searchString = state.display.searchString;
@@ -119,7 +122,7 @@ export const getNotes = createSelectorNotes(
       return { sortedCfNts: cNotes, pinnedNotes: pNotes, noPinnedNotes: sNotes };
     }
 
-    const { toRootIds } = listNoteMetas(noteFPaths);
+    const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
 
     const spNotes = pNotes.filter(note => {
       return isStringIn(note, searchString, lockedNotes, toRootIds);
@@ -223,16 +226,18 @@ export const getDoEnableExtraFeatures = createSelector(
 export const makeGetPinStatus = () => {
   return createSelector(
     state => getNoteFPaths(state),
+    state => getSsltFPaths(state),
     state => getPinFPaths(state),
+    state => state.pendingSslts,
     state => state.pendingPins,
     (state, noteIdOrObj) => {
       if (isString(noteIdOrObj)) return getNote(noteIdOrObj, state.notes);
       return noteIdOrObj;
     },
-    (noteFPaths, pinFPaths, pendingPins, note) => {
+    (noteFPaths, ssltFPaths, pinFPaths, pendingSslts, pendingPins, note) => {
       if (!isObject(note)) return null;
 
-      const { toRootIds } = listNoteMetas(noteFPaths);
+      const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
       const pins = getPins(pinFPaths, pendingPins, false, toRootIds);
       const noteMainId = getMainId(note, toRootIds);
 
@@ -436,9 +441,11 @@ export const makeIsTimePickMinuteItemSelected = () => {
 export const makeGetUnsavedNote = () => {
   return createSelector(
     state => getNoteFPaths(state),
+    state => getSsltFPaths(state),
+    state => state.pendingSslts,
     state => state.unsavedNotes,
     (__, note) => note,
-    (noteFPaths, unsavedNotes, note) => {
+    (noteFPaths, ssltFPaths, pendingSslts, unsavedNotes, note) => {
       // Valid - found an unsaved note
       // Invalid - found a confliced unsaved note
       // null - Not found or not different
@@ -456,7 +463,7 @@ export const makeGetUnsavedNote = () => {
 
       if (note.id === NEW_NOTE) return result;
 
-      const { toParents } = listNoteMetas(noteFPaths);
+      const { toParents } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
       const parentIds = getDataParentIds(note.id, toParents);
 
       for (const parentId of parentIds) {
@@ -517,15 +524,17 @@ export const makeGetLockNoteStatus = () => {
   return createSelector(
     state => state.display.doForceLock,
     state => getNoteFPaths(state),
+    state => getSsltFPaths(state),
+    state => state.pendingSslts,
     state => state.lockSettings.lockedNotes,
     (state, noteIdOrObj) => {
       if (isString(noteIdOrObj)) return getNote(noteIdOrObj, state.notes);
       return noteIdOrObj;
     },
-    (doForceLock, noteFPaths, lockedNotes, note) => {
+    (doForceLock, noteFPaths, ssltFPaths, pendingSslts, lockedNotes, note) => {
       if (!isObject(note)) return null;
 
-      const { toRootIds } = listNoteMetas(noteFPaths);
+      const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
       const noteMainId = getMainId(note, toRootIds);
 
       if (isObject(lockedNotes[noteMainId])) {
@@ -543,15 +552,17 @@ export const makeGetLockNoteStatus = () => {
 export const makeGetDoShowTitle = () => {
   return createSelector(
     state => getNoteFPaths(state),
+    state => getSsltFPaths(state),
+    state => state.pendingSslts,
     state => state.lockSettings.lockedNotes,
     (state, noteIdOrObj) => {
       if (isString(noteIdOrObj)) return getNote(noteIdOrObj, state.notes);
       return noteIdOrObj;
     },
-    (noteFPaths, lockedNotes, note) => {
+    (noteFPaths, ssltFPaths, pendingSslts, lockedNotes, note) => {
       if (!isObject(note)) return false;
 
-      const { toRootIds } = listNoteMetas(noteFPaths);
+      const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
       const noteMainId = getMainId(note, toRootIds);
 
       if (isObject(lockedNotes[noteMainId])) {
@@ -611,16 +622,18 @@ export const getCanChangeListNames = createSelector(
 export const makeGetTagStatus = () => {
   return createSelector(
     state => getNoteFPaths(state),
+    state => getSsltFPaths(state),
     state => getTagFPaths(state),
+    state => state.pendingSslts,
     state => state.pendingTags,
     (state, noteIdOrObj) => {
       if (isString(noteIdOrObj)) return getNote(noteIdOrObj, state.notes);
       return noteIdOrObj;
     },
-    (noteFPaths, tagFPaths, pendingTags, note) => {
+    (noteFPaths, ssltFPaths, tagFPaths, pendingSslts, pendingTags, note) => {
       if (!isObject(note)) return null;
 
-      const { toRootIds } = listNoteMetas(noteFPaths);
+      const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
       const tags = getTags(tagFPaths, pendingTags, toRootIds);
       const noteMainId = getMainId(note, toRootIds);
 
@@ -637,17 +650,19 @@ export const makeGetTagStatus = () => {
 export const makeGetTnAndDns = () => {
   return createSelector(
     state => getNoteFPaths(state),
+    state => getSsltFPaths(state),
     state => getTagFPaths(state),
+    state => state.pendingSslts,
     state => state.pendingTags,
     state => state.settings.tagNameMap,
     (state, noteIdOrObj) => {
       if (isString(noteIdOrObj)) return getNote(noteIdOrObj, state.notes);
       return noteIdOrObj;
     },
-    (noteFPaths, tagFPaths, pendingTags, tagNameMap, note) => {
+    (noteFPaths, ssltFPaths, tagFPaths, pendingSslts, pendingTags, tagNameMap, note) => {
       if (!isObject(note)) return [];
 
-      const { toRootIds } = listNoteMetas(noteFPaths);
+      const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
       const tags = getTags(tagFPaths, pendingTags, toRootIds);
       const noteMainId = getMainId(note, toRootIds);
 
@@ -679,16 +694,21 @@ export const makeGetTnAndDns = () => {
 
 export const getTagEditor = createSelector(
   state => getNoteFPaths(state),
+  state => getSsltFPaths(state),
   state => getTagFPaths(state),
+  state => state.pendingSslts,
   state => state.pendingTags,
   state => state.settings.tagNameMap,
   state => getNote(state.display.selectingNoteId, state.notes),
   state => state.tagEditor,
-  (noteFPaths, tagFPaths, pendingTags, tagNameMap, note, tagEditor) => {
+  (
+    noteFPaths, ssltFPaths, tagFPaths, pendingSslts, pendingTags, tagNameMap, note,
+    tagEditor,
+  ) => {
 
     const editor = { ...tagEditor };
     if (!editor.didValuesEdit && isObject(note)) {
-      const { toRootIds } = listNoteMetas(noteFPaths);
+      const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
       const tags = getTags(tagFPaths, pendingTags, toRootIds);
       const noteMainId = getMainId(note, toRootIds);
 

@@ -3,14 +3,15 @@ import lsgApi from './localSg';
 import ldbApi from './localDb';
 import fileApi from './localFile';
 import {
-  NOTES, SETTINGS, INFO, PINS, TAGS, UNSAVED_NOTES_UNSAVED, UNSAVED_NOTES_SAVED, INDEX,
-  DOT_JSON, CD_ROOT, N_NOTES, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE,
+  NOTES, SSLTS, SETTINGS, INFO, PINS, TAGS, UNSAVED_NOTES_UNSAVED, UNSAVED_NOTES_SAVED,
+  INDEX, DOT_JSON, CD_ROOT, N_NOTES, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE,
   LOCK_SETTINGS_STATE,
 } from '../types/const';
 import {
-  isObject, createNoteFPath, createDataFName, extractNoteFPath, createPinFPath,
-  addFPath, getStaticFPath, getLastSettingsFPaths, excludeNotObjContents,
-  batchGetFileWithRetry, batchPutFileWithRetry, batchDeleteFileWithRetry,
+  isObject, createNoteFPath, createDataFName, extractNoteFPath, createSsltFPath,
+  createPinFPath, addFPath, getStaticFPath, getLastSettingsFPaths,
+  excludeNotObjContents, batchGetFileWithRetry, batchPutFileWithRetry,
+  batchDeleteFileWithRetry,
 } from '../utils';
 import { syncMode } from '../vars';
 import {
@@ -24,8 +25,8 @@ const getApi = () => {
 
 const _listFPaths = async (listFiles) => {
   const fpaths = {
-    noteFPaths: [], staticFPaths: [], settingsFPaths: [], infoFPath: null,
-    pinFPaths: [], tagFPaths: [],
+    noteFPaths: [], ssltFPaths: [], staticFPaths: [], settingsFPaths: [],
+    infoFPath: null, pinFPaths: [], tagFPaths: [],
   };
   await listFiles((fpath) => {
     addFPath(fpaths, fpath);
@@ -320,6 +321,49 @@ const putNotes = async (params) => {
   return { successListNames, successNotes, errorListNames, errorNotes, errors };
 };
 
+const moveNotes = async (params) => {
+  // Must DELETE the next line in the next version!
+  const result = await putNotes(params);
+
+  try {
+    const { listNames, notes, manuallyManageError } = params;
+
+    let now = Date.now();
+
+    const fpaths = [], contents = [], noteMap = {};
+    for (let i = 0; i < listNames.length; i++) {
+      const [listName, note] = [listNames[i], notes[i]];
+      const fpath = createSsltFPath(listName, now, now, note.id);
+      fpaths.push(fpath);
+      contents.push({});
+      noteMap[fpath] = { listName, note };
+      now += 1;
+    }
+
+    const successListNames = [], successNotes = [];
+    const errorListNames = [], errorNotes = [], errors = [];
+
+    const { responses } = await putFiles(fpaths, contents, !!manuallyManageError);
+    for (const response of responses) {
+      const { listName, note } = noteMap[response.fpath];
+      if (response.success) {
+        successListNames.push(listName);
+        successNotes.push(note);
+      } else {
+        errorListNames.push(listName);
+        errorNotes.push(note);
+        errors.push(response.error);
+      }
+    }
+
+    //return { successListNames, successNotes, errorListNames, errorNotes, errors };
+  } catch (error) {
+    console.log('Error here is fine for now.', error);
+  }
+
+  return result;
+};
+
 const putPins = async (params) => {
   const { pins } = params;
 
@@ -381,7 +425,9 @@ const getFiles = async (fpaths, dangerouslyIgnoreError = false) => {
 
       if (!syncMode.doSyncMode && response.success) {
         const { fpath, content } = response;
-        if ([NOTES, SETTINGS, INFO, PINS, TAGS].some(el => fpath.startsWith(el))) {
+        if (
+          [NOTES, SSLTS, SETTINGS, INFO, PINS, TAGS].some(el => fpath.startsWith(el))
+        ) {
           await ldbApi.putFile(fpath, content);
         }
       }
@@ -406,7 +452,9 @@ const putFiles = async (fpaths, contents, dangerouslyIgnoreError = false) => {
 
       if (!syncMode.doSyncMode && response.success) {
         const { fpath, content } = response;
-        if ([NOTES, SETTINGS, INFO, PINS, TAGS].some(el => fpath.startsWith(el))) {
+        if (
+          [NOTES, SSLTS, SETTINGS, INFO, PINS, TAGS].some(el => fpath.startsWith(el))
+        ) {
           await ldbApi.putFile(fpath, content);
         }
       }
@@ -424,7 +472,9 @@ const deleteFiles = async (fpaths) => {
 
     if (!syncMode.doSyncMode) {
       const ldbFPaths = selectedFPaths.filter(fpath => {
-        return [NOTES, SETTINGS, INFO, PINS, TAGS].some(el => fpath.startsWith(el));
+        return (
+          [NOTES, SSLTS, SETTINGS, INFO, PINS, TAGS].some(el => fpath.startsWith(el))
+        );
       });
       await ldbApi.deleteFiles(ldbFPaths);
     }
@@ -575,7 +625,7 @@ const putLockSettings = async (lockSettings) => {
 
 const data = {
   listFPaths, listServerFPaths, toNotes, fetchStgsAndInfo, fetchNotes, putNotes,
-  putPins, deletePins, getFiles, putFiles, deleteFiles, deleteServerFiles,
+  moveNotes, putPins, deletePins, getFiles, putFiles, deleteFiles, deleteServerFiles,
   getLocalSettings, putLocalSettings, getUnsavedNotes, putUnsavedNote,
   deleteUnsavedNotes, deleteAllUnsavedNotes, deleteAllLocalFiles, getLockSettings,
   putLockSettings,
