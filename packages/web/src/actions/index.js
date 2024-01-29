@@ -1805,7 +1805,8 @@ const _moveNotes = (toListName, ids) => async (dispatch, getState) => {
 
   // Remove below in the next version and call cleanUpSslts in a reducer like pins/tags
   try {
-    await emptyNotes(fromNotes.map(note => note.id), getState);
+    const unusedIds = payload.successNotes.map(note => note.fromNote.id);
+    await emptyNotes(unusedIds, getState);
     await cleanUpSslts(dispatch, getState);
   } catch (error) {
     console.log('moveNotes clean up error: ', error);
@@ -1904,7 +1905,7 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
   let addedDT = Date.now();
 
   const fromListNames = [], fromNotes = [];
-  const toListNames = [], toNotes = [], unusedFPaths = [];
+  const toListNames = [], toNotes = [];
   for (const id of ids) {
     const { listName, note } = getListNameAndNote(id, notes);
     if (!isString(listName) || !isObject(note)) {
@@ -1923,10 +1924,6 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
       fromListName, fromNote,
     };
     addedDT += 1;
-
-    for (const { name } of fromNote.media) {
-      if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
-    }
 
     fromListNames.push(fromListName);
     fromNotes.push(fromNote);
@@ -1952,7 +1949,15 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
   dispatch({ type: DELETE_NOTES_COMMIT, payload });
 
   try {
-    await emptyNotes(fromNotes.map(note => note.id), getState);
+    const unusedIds = [], unusedFPaths = [];
+    for (const note of payload.successNotes) {
+      unusedIds.push(note.fromNote.id);
+      for (const { name } of note.fromNote.media) {
+        if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
+      }
+    }
+
+    await emptyNotes(unusedIds, getState);
     await dataApi.deleteServerFiles(unusedFPaths);
     await fileApi.deleteFiles(unusedFPaths);
     await cleanUpLocks(dispatch, getState);
@@ -2089,7 +2094,8 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       // Remove below in the next version
       try {
-        await emptyNotes(fromNotes.map(note => note.id), getState);
+        const unusedIds = payload.successNotes.map(note => note.fromNote.id);
+        await emptyNotes(unusedIds, getState);
         await cleanUpSslts(dispatch, getState);
       } catch (error) {
         console.log('retryDiedNotes move clean up error: ', error);
@@ -2108,11 +2114,6 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
         fromListName: listName, fromNote: note,
       }];
       addedDT += 1;
-
-      const unusedFPaths = [];
-      for (const { name } of note.media) {
-        if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
-      }
 
       const safeAreaWidth = getState().window.width;
       if (isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
@@ -2136,7 +2137,15 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       dispatch({ type: DELETE_NOTES_COMMIT, payload });
 
       try {
-        await emptyNotes(fromNotes.map(note => note.id), getState);
+        const unusedIds = [], unusedFPaths = [];
+        for (const note of payload.successNotes) {
+          unusedIds.push(note.fromNote.id);
+          for (const { name } of note.fromNote.media) {
+            if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
+          }
+        }
+
+        await emptyNotes(unusedIds, getState);
         await dataApi.deleteServerFiles(unusedFPaths);
         await fileApi.deleteFiles(unusedFPaths);
         await cleanUpLocks(dispatch, getState);
@@ -2329,7 +2338,7 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
   const trashNoteMetas = noteMetas.filter(meta => meta.listName === fromListName);
 
   const fromListNames = [], fromNotes = [];
-  const toListNames = [], toNotes = [], unusedFPaths = [];
+  const toListNames = [], toNotes = [];
   for (const meta of trashNoteMetas) {
     const interval = Date.now() - meta.updatedDT;
     const days = interval / 1000 / 60 / 60 / 24;
@@ -2360,10 +2369,6 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
       fromListName, fromNote,
     };
     addedDT += 1;
-
-    for (const { name } of fromNote.media) {
-      if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
-    }
 
     fromListNames.push(fromListName);
     fromNotes.push(fromNote);
@@ -2397,7 +2402,15 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
   vars.deleteOldNotes.ids = null;
 
   try {
-    await emptyNotes(fromNoteIds, getState);
+    const unusedIds = [], unusedFPaths = []
+    for (const note of payload.successNotes) {
+      unusedIds.push(note.fromNote.id);
+      for (const { name } of note.fromNote.media) {
+        if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
+      }
+    }
+
+    await emptyNotes(unusedIds, getState);
     await dataApi.deleteServerFiles(unusedFPaths);
     await fileApi.deleteFiles(unusedFPaths);
     await cleanUpLocks(dispatch, getState);
