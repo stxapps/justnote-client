@@ -1397,7 +1397,7 @@ export const exportAllData = () => async (dispatch, getState) => {
 
   const lockSettings = getState().lockSettings;
 
-  const fpaths = [], fileFPaths = [], fpToLn = {};
+  const fpaths = [], fileFPaths = [], nfpToLn = {};
   let pins, tags, toRootIds;
   try {
     const {
@@ -1421,7 +1421,7 @@ export const exportAllData = () => async (dispatch, getState) => {
             if (!fpaths.includes(staticFPath)) fpaths.push(staticFPath);
           }
         }
-        fpToLn[fpath] = meta.listName;
+        nfpToLn[fpath] = meta.listName;
       }
     }
 
@@ -1476,7 +1476,7 @@ export const exportAllData = () => async (dispatch, getState) => {
 
       for (let { fpath, content } of successResponses) {
         if (fpath.startsWith(NOTES)) {
-          const listName = fpToLn[fpath];
+          const listName = nfpToLn[fpath];
           const { fname, subName } = extractNoteFPath(fpath);
           const { id, parentIds } = extractDataFName(fname);
 

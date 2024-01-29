@@ -9,12 +9,13 @@ const initialState = {};
 const pendingSsltsReducer = (state = initialState, action) => {
 
   if (action.type === MOVE_NOTES) {
-    const { listNames, notes } = action.payload;
+    const { toListNames, toNotes } = action.payload;
 
     const newState = { ...state };
-    for (let i = 0; i < listNames.length; i++) {
-      const [listName, note] = [listNames[i], notes[i]];
-      newState[note.id] = { listName, status: MOVING };
+    for (let i = 0; i < toListNames.length; i++) {
+      const [listName, note] = [toListNames[i], toNotes[i]];
+      // Need fromNote for toRootIds, can remove in the next version.
+      newState[note.fromNote.id] = { listName, status: MOVING };
     }
     return newState;
   }
@@ -27,31 +28,34 @@ const pendingSsltsReducer = (state = initialState, action) => {
     const newState = { ...state };
     for (let i = 0; i < successListNames.length; i++) {
       const note = successNotes[i];
-      delete newState[note.id];
+      // Need fromNote for toRootIds, can remove in the next version.
+      delete newState[note.fromNote.id];
     }
     for (let i = 0; i < errorListNames.length; i++) {
       const [listName, note] = [errorListNames[i], errorNotes[i]];
-      newState[note.id] = { listName, status: DIED_MOVING };
+      // Need fromNote for toRootIds, can remove in the next version.
+      newState[note.fromNote.id] = { listName, status: DIED_MOVING };
     }
     return newState;
   }
 
   if (action.type === MOVE_NOTES_ROLLBACK) {
-    const { listNames, notes } = action.payload;
+    const { toListNames, toNotes } = action.payload;
 
     const newState = { ...state };
-    for (let i = 0; i < listNames.length; i++) {
-      const [listName, note] = [listNames[i], notes[i]];
-      newState[note.id] = { listName, status: DIED_MOVING };
+    for (let i = 0; i < toListNames.length; i++) {
+      const [listName, note] = [toListNames[i], toNotes[i]];
+      // Need fromNote for toRootIds, can remove in the next version.
+      newState[note.fromNote.id] = { listName, status: DIED_MOVING };
     }
     return newState;
   }
 
   if (action.type === CANCEL_DIED_NOTES) {
-    const { ids } = action.payload;
+    const { ids, fromIds } = action.payload;
 
     const newState = { ...state };
-    for (const id of ids) {
+    for (const id of [...ids, ...fromIds]) {
       delete newState[id];
     }
     return newState;
