@@ -1596,14 +1596,21 @@ const applyPcNotesToMetas = (pcListNames, pcNotes, noteMetas, toRootIds) => {
 
     if (Array.isArray(parentIds) && parentIds.length > 0) {
       tRIds[id] = tRIds[parentIds[0]];
+      pIds.push(id);
       pIds.push(...parentIds);
+      pIds.push(getMainId(parentIds[0], tRIds))
     } else {
       tRIds[id] = id;
+      pIds.push(id);
     }
   }
 
   for (const meta of noteMetas) {
     if (pIds.includes(meta.id)) continue;
+
+    const mainId = getMainId(meta.id, tRIds);
+    if (pIds.includes(mainId)) continue;
+
     metas.push(meta);
   }
 
