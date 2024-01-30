@@ -2021,7 +2021,6 @@ export const getListNameAndNote = (id, notes) => {
   }
   if (selectedNotes.length > 0) return selectedNotes[0];
 
-
   return { listName: null, note: null };
 };
 

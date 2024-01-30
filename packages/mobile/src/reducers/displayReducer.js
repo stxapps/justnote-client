@@ -2,7 +2,7 @@ import {
   UPDATE_LIST_NAME, UPDATE_QUERY_STRING, UPDATE_SEARCH_STRING, UPDATE_NOTE_ID,
   UPDATE_POPUP, FETCH_COMMIT, FETCH_ROLLBACK, UPDATE_FETCHED, FETCH_MORE_ROLLBACK,
   UPDATE_FETCHED_MORE, REFRESH_FETCHED, ADD_FETCHING_INFO, DELETE_FETCHING_INFO,
-  SET_SHOWING_NOTE_INFOS, ADD_NOTE, UPDATE_NOTE, MOVE_NOTES_COMMIT, DELETE_NOTES_COMMIT,
+  SET_SHOWING_NOTE_INFOS, ADD_NOTE, UPDATE_NOTE, MOVE_NOTES, DELETE_NOTES_COMMIT,
   DISCARD_NOTE, MERGE_NOTES_COMMIT, CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
   UPDATE_HANDLING_SIGN_IN, UPDATE_BULK_EDITING, ADD_SELECTED_NOTE_IDS,
   DELETE_SELECTED_NOTE_IDS, UPDATE_SELECTING_NOTE_ID, UPDATE_SELECTING_LIST_NAME,
@@ -523,7 +523,18 @@ const displayReducer = (state = initialState, action) => {
     return newState;
   }
 
-  if (action.type === MOVE_NOTES_COMMIT || action.type === DELETE_NOTES_COMMIT) {
+  if (action.type === MOVE_NOTES) {
+    // Need to remove from showingLinkIds immediately as new moving uses the same id.
+    const { fromNotes } = action.payload;
+
+    const fromIds = fromNotes.map(note => note.id);
+    return {
+      ...state,
+      showingNoteInfos: _filterIfNotNull(state.showingNoteInfos, fromIds),
+    };
+  }
+
+  if (action.type === DELETE_NOTES_COMMIT) {
     const { successNotes } = action.payload;
 
     const fromIds = successNotes.map(note => note.fromNote.id);

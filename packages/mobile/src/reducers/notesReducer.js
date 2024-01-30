@@ -4,12 +4,12 @@ import {
   tryUpdateFetched, tryUpdateFetchedMore, runAfterFetchTask, unpinNotes, tryUpdateSynced,
 } from '../actions';
 import {
-  FETCH, FETCH_COMMIT, UPDATE_FETCHED, FETCH_MORE_COMMIT, UPDATE_FETCHED_MORE, ADD_NOTE,
-  ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK, UPDATE_NOTE, UPDATE_NOTE_COMMIT,
-  UPDATE_NOTE_ROLLBACK, MOVE_NOTES, MOVE_NOTES_COMMIT, MOVE_NOTES_ROLLBACK,
-  DELETE_NOTES, DELETE_NOTES_COMMIT, DELETE_NOTES_ROLLBACK, CANCEL_DIED_NOTES,
-  DELETE_OLD_NOTES_IN_TRASH_COMMIT, MERGE_NOTES_COMMIT, SYNC_COMMIT, DELETE_ALL_DATA,
-  RESET_STATE,
+  FETCH, FETCH_COMMIT, UPDATE_FETCHED, FETCH_MORE_COMMIT, UPDATE_FETCHED_MORE,
+  SET_SHOWING_NOTE_INFOS, ADD_NOTE, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK, UPDATE_NOTE,
+  UPDATE_NOTE_COMMIT, UPDATE_NOTE_ROLLBACK, MOVE_NOTES, MOVE_NOTES_COMMIT,
+  MOVE_NOTES_ROLLBACK, DELETE_NOTES, DELETE_NOTES_COMMIT, DELETE_NOTES_ROLLBACK,
+  CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH_COMMIT, MERGE_NOTES_COMMIT, SYNC_COMMIT,
+  DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   TRASH, ARCHIVE, ID, STATUS, ADDED, ADDING, DIED_ADDING, UPDATING, DIED_UPDATING,
@@ -50,6 +50,7 @@ const notesReducer = (state = initialState, action) => {
 
     const newState = { ...state };
     if (isObject(notes)) {
+      if (isObject(newState[lnOrQt]) && !isObject(notes[lnOrQt])) notes[lnOrQt] = {};
       for (const listName in notes) {
         // Adding/moving fpaths are not there when start fetching.
         //   F FC A AC, A AC F FC -> Fine
@@ -137,6 +138,19 @@ const notesReducer = (state = initialState, action) => {
     }
 
     return newState;
+  }
+
+  if (action.type === SET_SHOWING_NOTE_INFOS) {
+    if ('listNameToClearNotes' in action.payload) {
+      const { listNameToClearNotes: listName } = action.payload;
+
+      const newState = { ...state };
+      if (isObject(newState[listName])) {
+        const processingNotes = _.exclude(state[listName], STATUS, ADDED);
+        newState[listName] = { ...processingNotes };
+      }
+      return newState;
+    }
   }
 
   if (action.type === ADD_NOTE) {

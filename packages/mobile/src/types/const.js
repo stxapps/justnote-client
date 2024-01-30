@@ -102,6 +102,7 @@ export const EDGE_TRIGGER = 'EDGE_TRIGGER'; // bottom or right of the trigger
 
 export const CD_ROOT = 'cdroot';
 export const NOTES = 'notes';
+export const SSLTS = 'sslts';
 export const IMAGES = 'images';
 export const SETTINGS = 'settings';
 export const INFO = 'info';

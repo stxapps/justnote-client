@@ -103,18 +103,19 @@ import {
   isEqual, isArrayEqual, isObject, isString, isNumber, sleep, separateUrlAndParam,
   getUserImageUrl, randomString, stripHtml, isTitleEqual, isBodyEqual, clearNoteData,
   getStaticFPath, deriveFPaths, getListNameObj, getAllListNames, getMainId,
-  createDataFName, listNoteMetas, getNoteFPaths, getStaticFPaths, createSettingsFPath,
-  getSettingsFPaths, getLastSettingsFPaths, getInfoFPath, getLatestPurchase,
-  getValidPurchase, doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins,
-  separatePinnedValues, getRawPins, getFormattedTime, get24HFormattedTime,
-  getFormattedTimeStamp, getMineSubType, getNote, getEditingListNameEditors,
-  getListNamesFromNoteMetas, applySubscriptionOfferDetails, validatePassword,
-  doContainListName, doListContainUnlocks, getListNameAndNote, newObject, getNNoteMetas,
-  addFetchedToVars, isFetchedNoteMeta, doesIncludeFetching, sortNotes, sortWithPins,
-  doesIncludeFetchingMore, isFetchingInterrupted, getTagFPaths, getInUseTagNames,
-  getEditingTagNameEditors, getNNoteMetasByQt, extractNoteFPath,
-  validateTagNameDisplayName, getTagNameObjFromDisplayName, getTagNameObj, getTags,
-  getRawTags, extractTagFPath, createTagFPath,
+  createDataFName, listNoteMetas, getNoteFPaths, getSsltFPaths, getStaticFPaths,
+  createSettingsFPath, getSettingsFPaths, getLastSettingsFPaths, getInfoFPath,
+  getLatestPurchase, getValidPurchase, doEnableExtraFeatures, extractPinFPath,
+  getPinFPaths, getPins, separatePinnedValues, getRawPins, getFormattedTime,
+  get24HFormattedTime, getFormattedTimeStamp, getMineSubType, getNote,
+  getEditingListNameEditors, getListNamesFromNoteMetas, applySubscriptionOfferDetails,
+  validatePassword, doContainListName, doListContainUnlocks, getListNameAndNote,
+  newObject, getNNoteMetas, addFetchedToVars, isFetchedNoteMeta, doesIncludeFetching,
+  sortNotes, sortWithPins, doesIncludeFetchingMore, isFetchingInterrupted,
+  getTagFPaths, getInUseTagNames, getEditingTagNameEditors, getNNoteMetasByQt,
+  extractNoteFPath, extractSsltFPath, validateTagNameDisplayName,
+  getTagNameObjFromDisplayName, getTagNameObj, getTags, getRawTags, extractTagFPath,
+  createTagFPath, getNoteMainIds,
 } from '../utils';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
@@ -593,6 +594,7 @@ export const fetch = () => async (dispatch, getState) => {
   const didFetchSettings = getState().display.didFetchSettings;
   const fetchingInfos = getState().display.fetchingInfos;
   const doForceLock = getState().display.doForceLock;
+  const pendingSslts = getState().pendingSslts;
   const pendingPins = getState().pendingPins;
   const pendingTags = getState().pendingTags;
   const lockedNotes = getState().lockSettings.lockedNotes;
@@ -602,6 +604,7 @@ export const fetch = () => async (dispatch, getState) => {
   let doDescendingOrder = getState().settings.doDescendingOrder;
 
   let noteFPaths = getNoteFPaths(getState());
+  let ssltFPaths = getSsltFPaths(getState());
   let pinFPaths = getPinFPaths(getState());
   let tagFPaths = getTagFPaths(getState());
 
@@ -619,14 +622,16 @@ export const fetch = () => async (dispatch, getState) => {
     let metas, metasWithPcEc;
     if (queryString) {
       const _result = getNNoteMetasByQt({
-        noteFPaths, notes, sortOn, doDescendingOrder, pinFPaths, pendingPins,
-        tagFPaths, pendingTags, doForceLock, lockedNotes, lockedLists, queryString,
+        noteFPaths, ssltFPaths, pendingSslts, notes, sortOn, doDescendingOrder,
+        pinFPaths, pendingPins, tagFPaths, pendingTags, doForceLock, lockedNotes,
+        lockedLists, queryString,
       });
       [metas, metasWithPcEc] = [_result.metas, _result.metasWithPcEc];
       bin.hasMore = _result.hasMore;
     } else {
       const _result = getNNoteMetas({
-        noteFPaths, notes, listName, sortOn, doDescendingOrder, pinFPaths, pendingPins,
+        noteFPaths, ssltFPaths, pendingSslts, notes, listName, sortOn,
+        doDescendingOrder, pinFPaths, pendingPins,
       });
       [metas, metasWithPcEc] = [_result.metas, _result.metasWithPcEc];
       bin.hasMore = _result.hasMore;
@@ -640,10 +645,13 @@ export const fetch = () => async (dispatch, getState) => {
     }
     if (bin.unfetchedNoteMetas.length === 0) {
       const infos = _getInfosFromMetas(metasWithPcEc);
-      dispatch({
-        type: SET_SHOWING_NOTE_INFOS,
-        payload: { infos, hasMore: bin.hasMore, doClearSelectedNoteIds: true },
-      });
+      const payload = {
+        infos, hasMore: bin.hasMore, doClearSelectedNoteIds: true,
+      };
+      if (lnOrQt === listName && bin.fetchedNoteMetas.length === 0) {
+        payload.listNameToClearNotes = lnOrQt;
+      }
+      dispatch({ type: SET_SHOWING_NOTE_INFOS, payload });
       // E.g., in settings commit, reset fetchedLnOrQts but not fetchedNoteIds,
       //   need to add lnOrQt for correctness.
       addFetchedToVars(lnOrQt, null, null, vars);
@@ -661,11 +669,13 @@ export const fetch = () => async (dispatch, getState) => {
   try {
     if (!didFetch || !didFetchSettings) {
       const fResult = await dataApi.listFPaths(true);
-      noteFPaths = fResult.noteFPaths;
+      [noteFPaths, ssltFPaths] = [fResult.noteFPaths, fResult.ssltFPaths];
       [pinFPaths, tagFPaths] = [fResult.pinFPaths, fResult.tagFPaths];
       const [settingsFPaths, infoFPath] = [fResult.settingsFPaths, fResult.infoFPath];
 
-      const { noteMetas, conflictedMetas } = listNoteMetas(noteFPaths);
+      const {
+        noteMetas, conflictedMetas, toRootIds,
+      } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
 
       const sResult = await dataApi.fetchStgsAndInfo(settingsFPaths, infoFPath);
       result.doFetchStgsAndInfo = true;
@@ -674,8 +684,10 @@ export const fetch = () => async (dispatch, getState) => {
       result.info = sResult.info;
       // List names should be retrieve from settings
       //   but also retrive from file paths in case the settings is gone.
-      result.listNames = getListNamesFromNoteMetas([...noteMetas, ...conflictedMetas]);
-      result.tagNames = getInUseTagNames(noteFPaths, tagFPaths);
+      result.listNames = getListNamesFromNoteMetas(noteMetas, conflictedMetas);
+      result.tagNames = getInUseTagNames(
+        noteMetas, conflictedMetas, toRootIds, tagFPaths
+      );
 
       if (result.settings) {
         sortOn = result.settings.sortOn;
@@ -685,14 +697,15 @@ export const fetch = () => async (dispatch, getState) => {
       let metas;
       if (queryString) {
         const _result = getNNoteMetasByQt({
-          noteFPaths, notes, sortOn, doDescendingOrder, pinFPaths, pendingPins,
-          tagFPaths, pendingTags, doForceLock, lockedNotes, lockedLists, queryString,
+          noteFPaths, ssltFPaths, pendingSslts, notes, sortOn, doDescendingOrder,
+          pinFPaths, pendingPins, tagFPaths, pendingTags, doForceLock, lockedNotes,
+          lockedLists, queryString,
         });
         [metas, bin.hasMore] = [_result.metas, _result.hasMore];
       } else {
         const _result = getNNoteMetas({
-          noteFPaths, notes, listName, sortOn, doDescendingOrder, pinFPaths,
-          pendingPins,
+          noteFPaths, ssltFPaths, pendingSslts, notes, listName, sortOn,
+          doDescendingOrder, pinFPaths, pendingPins,
         });
         [metas, bin.hasMore] = [_result.metas, _result.hasMore];
       }
@@ -777,13 +790,16 @@ export const updateFetched = (
 
   const conflictedNotes = getState().conflictedNotes;
   const notes = getState().notes;
+  const pendingSslts = getState().pendingSslts;
   const pendingPins = getState().pendingPins;
   const sortOn = getState().settings.sortOn;
   const doDescendingOrder = getState().settings.doDescendingOrder;
+
   const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
   const pinFPaths = getPinFPaths(getState());
 
-  const { toRootIds } = listNoteMetas(noteFPaths);
+  const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
 
   const conflictedMetas = [], updatingNoteMetas = [];
   const { fetchedNoteMetas, unfetchedNoteMetas } = payload;
@@ -874,6 +890,7 @@ export const fetchMore = () => async (dispatch, getState) => {
   const showingNoteInfos = getState().display.showingNoteInfos;
   const doForceLock = getState().display.doForceLock;
   const cachedFetchedMore = getState().fetchedMore;
+  const pendingSslts = getState().pendingSslts;
   const pendingPins = getState().pendingPins;
   const pendingTags = getState().pendingTags;
   const lockedNotes = getState().lockSettings.lockedNotes;
@@ -883,6 +900,7 @@ export const fetchMore = () => async (dispatch, getState) => {
   const doDescendingOrder = getState().settings.doDescendingOrder;
 
   const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
   const pinFPaths = getPinFPaths(getState());
   const tagFPaths = getTagFPaths(getState());
 
@@ -928,16 +946,16 @@ export const fetchMore = () => async (dispatch, getState) => {
   let metas, metasWithPcEc;
   if (queryString) {
     const _result = getNNoteMetasByQt({
-      noteFPaths, notes, sortOn, doDescendingOrder, pinFPaths, pendingPins, tagFPaths,
-      pendingTags, doForceLock, lockedNotes, lockedLists, queryString,
-      excludingIds: safNoteIds,
+      noteFPaths, ssltFPaths, pendingSslts, notes, sortOn, doDescendingOrder,
+      pinFPaths, pendingPins, tagFPaths, pendingTags, doForceLock, lockedNotes,
+      lockedLists, queryString, excludingIds: safNoteIds,
     });
     [metas, metasWithPcEc] = [_result.metas, _result.metasWithPcEc];
     [bin.hasMore, bin.hasDisorder] = [_result.hasMore, _result.hasDisorder];
   } else {
     const _result = getNNoteMetas({
-      noteFPaths, notes, listName, sortOn, doDescendingOrder, pinFPaths, pendingPins,
-      excludingIds: safNoteIds,
+      noteFPaths, ssltFPaths, pendingSslts, notes, listName, sortOn, doDescendingOrder,
+      pinFPaths, pendingPins, excludingIds: safNoteIds,
     });
     [metas, metasWithPcEc] = [_result.metas, _result.metasWithPcEc];
     [bin.hasMore, bin.hasDisorder] = [_result.hasMore, _result.hasDisorder];
@@ -964,7 +982,7 @@ export const fetchMore = () => async (dispatch, getState) => {
   const payload = { listName, queryString, lnOrQt, fthId, safNoteIds };
   dispatch({ type: FETCH_MORE, payload });
 
-  let result = {};
+  const result = {};
   try {
     const lResult = await dataApi.fetchNotes(bin.unfetchedNoteMetas);
     result.fetchedNoteMetas = bin.fetchedNoteMetas;
@@ -1053,10 +1071,13 @@ export const updateFetchedMore = (
   const conflictedNotes = getState().conflictedNotes;
   const notes = getState().notes;
   const showingNoteInfos = getState().display.showingNoteInfos;
+  const pendingSslts = getState().pendingSslts;
   const pendingPins = getState().pendingPins;
   const sortOn = getState().settings.sortOn;
   const doDescendingOrder = getState().settings.doDescendingOrder;
+
   const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
   const pinFPaths = getPinFPaths(getState());
 
   if (!Array.isArray(showingNoteInfos)) {
@@ -1079,7 +1100,7 @@ export const updateFetchedMore = (
     return;
   }
 
-  const { toRootIds } = listNoteMetas(noteFPaths);
+  const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
 
   const processingNotes = [];
   if (isObject(notes[payload.lnOrQt])) {
@@ -1171,15 +1192,18 @@ const sortShowingNoteInfos = async (dispatch, getState) => {
   const conflictedNotes = getState().conflictedNotes;
   const notes = getState().notes;
   const showingNoteInfos = getState().display.showingNoteInfos;
+  const pendingSslts = getState().pendingSslts;
   const pendingPins = getState().pendingPins;
   const sortOn = getState().settings.sortOn;
   const doDescendingOrder = getState().settings.doDescendingOrder;
+
   const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
   const pinFPaths = getPinFPaths(getState());
 
   if (!Array.isArray(showingNoteInfos)) return;
 
-  const { toRootIds } = listNoteMetas(noteFPaths);
+  const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
 
   const fsCfNts = [], fsNts = [];
   for (const info of showingNoteInfos) {
@@ -1306,7 +1330,6 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
   }
 
   const fromNote = newObject(note, LOCAL_NOTE_ATTRS);
-  const emptyFromNote = clearNoteData(fromNote);
   const toNote = {
     ...fromNote,
     parentIds: [fromNote.id], id: `${addedDT}${randomString(4)}`,
@@ -1337,7 +1360,7 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
   dispatch({ type: UPDATE_NOTE_COMMIT, payload });
 
   try {
-    await dataApi.putNotes({ listNames: [listName], notes: [emptyFromNote] });
+    await emptyNotes([fromNote.id], getState);
     await dataApi.deleteServerFiles(serverUnusedFPaths);
     await fileApi.deleteFiles(localUnusedFPaths);
   } catch (error) {
@@ -1403,7 +1426,7 @@ const _moveNotes = (toListName, ids) => async (dispatch, getState) => {
   const notes = getState().notes;
   let addedDT = Date.now();
 
-  const fromListNames = [], fromNotes = [], emptyFromNotes = [];
+  const fromListNames = [], fromNotes = [];
   const toListNames = [], toNotes = [];
   for (const id of ids) {
     const { listName, note } = getListNameAndNote(id, notes);
@@ -1428,7 +1451,6 @@ const _moveNotes = (toListName, ids) => async (dispatch, getState) => {
 
     fromListNames.push(fromListName);
     fromNotes.push(fromNote);
-    emptyFromNotes.push(clearNoteData(fromNote));
     toListNames.push(toListName);
     toNotes.push(toNote);
   }
@@ -1438,7 +1460,7 @@ const _moveNotes = (toListName, ids) => async (dispatch, getState) => {
   addFetchedToVars(null, null, toNotes, vars);
 
   try {
-    const result = await dataApi.putNotes({
+    const result = await dataApi.moveNotes({
       listNames: toListNames, notes: toNotes, manuallyManageError: true,
     });
     payload = { ...payload, ...result };
@@ -1450,8 +1472,11 @@ const _moveNotes = (toListName, ids) => async (dispatch, getState) => {
 
   dispatch({ type: MOVE_NOTES_COMMIT, payload });
 
+  // Remove below in the next version and call cleanUpSslts in a reducer like pins/tags
   try {
-    await dataApi.putNotes({ listNames: fromListNames, notes: emptyFromNotes });
+    const unusedIds = payload.successNotes.map(note => note.fromNote.id);
+    await emptyNotes(unusedIds, getState);
+    await cleanUpSslts(dispatch, getState);
   } catch (error) {
     console.log('moveNotes clean up error: ', error);
     // error in this step should be fine
@@ -1504,14 +1529,52 @@ export const moveNotes = (toListName) => async (dispatch, getState) => {
   dispatch(moveNotesWithAction(toListName, moveAction));
 };
 
+export const cleanUpSslts = async (dispatch, getState) => {
+  const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
+
+  const {
+    noteMetas, conflictedMetas, toRootIds, ssltInfos,
+  } = listNoteMetas(noteFPaths, ssltFPaths, {});
+  const noteMainIds = getNoteMainIds(noteMetas, conflictedMetas, toRootIds);
+
+  const unusedSsltFPaths = [];
+  for (const fpath of ssltFPaths) {
+    const { id } = extractSsltFPath(fpath);
+    const ssltMainId = getMainId(id, toRootIds);
+
+    if (
+      !isString(ssltMainId) ||
+      !noteMainIds.includes(ssltMainId) ||
+      !isObject(ssltInfos[ssltMainId]) ||
+      ssltInfos[ssltMainId].fpath !== fpath
+    ) {
+      unusedSsltFPaths.push(fpath);
+      if (unusedSsltFPaths.length >= N_NOTES) break;
+    }
+  }
+
+  if (unusedSsltFPaths.length > 0) {
+    try {
+      await dataApi.deleteFiles(unusedSsltFPaths);
+    } catch (error) {
+      console.log('cleanUpSslts error: ', error);
+      // error in this step should be fine
+    }
+  }
+
+  // Uncomment below in the next version
+  //dispatch(sync());
+};
+
 const _deleteNotes = (ids) => async (dispatch, getState) => {
   if (ids.length === 0) return;
 
   const notes = getState().notes;
   let addedDT = Date.now();
 
-  const fromListNames = [], fromNotes = [], emptyFromNotes = [];
-  const toListNames = [], toNotes = [], unusedFPaths = [];
+  const fromListNames = [], fromNotes = [];
+  const toListNames = [], toNotes = [];
   for (const id of ids) {
     const { listName, note } = getListNameAndNote(id, notes);
     if (!isString(listName) || !isObject(note)) {
@@ -1531,13 +1594,8 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
     };
     addedDT += 1;
 
-    for (const { name } of fromNote.media) {
-      if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
-    }
-
     fromListNames.push(fromListName);
     fromNotes.push(fromNote);
-    emptyFromNotes.push(clearNoteData(fromNote));
     toListNames.push(fromListName);
     toNotes.push(toNote);
   }
@@ -1560,7 +1618,15 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
   dispatch({ type: DELETE_NOTES_COMMIT, payload });
 
   try {
-    await dataApi.putNotes({ listNames: fromListNames, notes: emptyFromNotes });
+    const unusedIds = [], unusedFPaths = [];
+    for (const note of payload.successNotes) {
+      unusedIds.push(note.fromNote.id);
+      for (const { name } of note.fromNote.media) {
+        if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
+      }
+    }
+
+    await emptyNotes(unusedIds, getState);
     await dataApi.deleteServerFiles(unusedFPaths);
     await fileApi.deleteFiles(unusedFPaths);
     await cleanUpLocks(dispatch, getState);
@@ -1642,14 +1708,13 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       dispatch({ type: ADD_NOTE_COMMIT, payload });
       dispatch(sync());
     } else if (status === DIED_UPDATING) {
-      const toNote = note;
-      const emptyFromNote = clearNoteData(note.fromNote);
+      const [fromNote, toNote] = [note.fromNote, note];
 
       const {
         usedFPaths, serverUnusedFPaths, localUnusedFPaths,
-      } = deriveFPaths(toNote.media, note.fromNote.media);
+      } = deriveFPaths(toNote.media, fromNote.media);
 
-      const payload = { listName, fromNote: note.fromNote, toNote };
+      const payload = { listName, fromNote, toNote };
       dispatch({ type: UPDATE_NOTE, payload });
       if (sortOn === UPDATED_DT) await sortShowingNoteInfos(dispatch, getState);
 
@@ -1666,7 +1731,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       dispatch({ type: UPDATE_NOTE_COMMIT, payload });
 
       try {
-        await dataApi.putNotes({ listNames: [listName], notes: [emptyFromNote] });
+        await emptyNotes([fromNote.id], getState);
         await dataApi.deleteServerFiles(serverUnusedFPaths);
         await fileApi.deleteFiles(localUnusedFPaths);
       } catch (error) {
@@ -1676,17 +1741,14 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       dispatch(sync());
     } else if (status === DIED_MOVING) {
-      const fromListNames = [note.fromListName];
-      const fromNotes = [note.fromNote];
-      const emptyFromNotes = [clearNoteData(note.fromNote)];
-      const toListNames = [listName];
-      const toNotes = [note];
+      const [fromListNames, fromNotes] = [[note.fromListName], [note.fromNote]];
+      const [toListNames, toNotes] = [[listName], [note]];
 
       let payload = { fromListNames, fromNotes, toListNames, toNotes };
       dispatch({ type: MOVE_NOTES, payload });
 
       try {
-        const result = await dataApi.putNotes({
+        const result = await dataApi.moveNotes({
           listNames: toListNames, notes: toNotes, manuallyManageError: true,
         });
         payload = { ...payload, ...result };
@@ -1699,8 +1761,11 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       vars.editorReducer.didRetryMovingNote = true;
       dispatch({ type: MOVE_NOTES_COMMIT, payload });
 
+      // Remove below in the next version
       try {
-        await dataApi.putNotes({ listNames: fromListNames, notes: emptyFromNotes });
+        const unusedIds = payload.successNotes.map(note => note.fromNote.id);
+        await emptyNotes(unusedIds, getState);
+        await cleanUpSslts(dispatch, getState);
       } catch (error) {
         console.log('retryDiedNotes move clean up error: ', error);
         // error in this step should be fine
@@ -1708,9 +1773,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       dispatch(sync());
     } else if (status === DIED_DELETING) {
-      const fromListNames = [listName];
-      const fromNotes = [note];
-      const emptyFromNotes = [clearNoteData(note)];
+      const [fromListNames, fromNotes] = [[listName], [note]];
       const toListNames = [listName];
       const toNotes = [{
         ...note,
@@ -1720,11 +1783,6 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
         fromListName: listName, fromNote: note,
       }];
       addedDT += 1;
-
-      const unusedFPaths = [];
-      for (const { name } of note.media) {
-        if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
-      }
 
       const safeAreaWidth = getState().window.width;
       if (isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
@@ -1748,9 +1806,18 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       dispatch({ type: DELETE_NOTES_COMMIT, payload });
 
       try {
-        await dataApi.putNotes({ listNames: fromListNames, notes: emptyFromNotes });
+        const unusedIds = [], unusedFPaths = [];
+        for (const note of payload.successNotes) {
+          unusedIds.push(note.fromNote.id);
+          for (const { name } of note.fromNote.media) {
+            if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
+          }
+        }
+
+        await emptyNotes(unusedIds, getState);
         await dataApi.deleteServerFiles(unusedFPaths);
         await fileApi.deleteFiles(unusedFPaths);
+        await cleanUpLocks(dispatch, getState);
       } catch (error) {
         console.log('retryDiedNotes delete clean up error: ', error);
         // error in this step should be fine
@@ -1806,7 +1873,7 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
   const conflictedNote = getState().conflictedNotes[noteId];
   const addedDT = Date.now();
 
-  const fromListNames = [], emptyFromNotes = [], noteMedia = [];
+  const fromListNames = [], fromNotes = [], noteMedia = [];
   let toListName, toNote;
   for (let i = 0; i < conflictedNote.notes.length; i++) {
     const [listName, note] = [conflictedNote.listNames[i], conflictedNote.notes[i]];
@@ -1823,7 +1890,7 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
     }
 
     fromListNames.push(listName);
-    emptyFromNotes.push(clearNoteData(note));
+    fromNotes.push(note);
     noteMedia.push(...note.media);
   }
 
@@ -1861,7 +1928,7 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
   await sortShowingNoteInfos(dispatch, getState);
 
   try {
-    await dataApi.putNotes({ listNames: fromListNames, notes: emptyFromNotes });
+    await emptyNotes(fromNotes.map(note => note.id), getState);
     await dataApi.deleteServerFiles(serverUnusedFPaths);
     await fileApi.deleteFiles(localUnusedFPaths);
   } catch (error) {
@@ -1870,6 +1937,32 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
   }
 
   dispatch(sync());
+};
+
+const emptyNotes = async (ids, getState) => {
+  const pendingSslts = getState().pendingSslts;
+
+  const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
+
+  const { toFPaths } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
+
+  const fpaths = [], contents = [];
+  for (const id of ids) {
+    if (!Array.isArray(toFPaths[id])) continue;
+    for (const fpath of toFPaths[id]) {
+      if (fpath.includes(CD_ROOT + '/')) continue; // Already empty string
+
+      let content;
+      if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
+      else content = '';
+
+      fpaths.push(fpath);
+      contents.push(content);
+    }
+  }
+
+  await dataApi.putFiles(fpaths, contents);
 };
 
 export const runAfterFetchTask = () => async (dispatch, getState) => {
@@ -1903,13 +1996,18 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
   let addedDT = Date.now();
 
   const fromListName = TRASH;
-  const noteFPaths = getNoteFPaths(getState());
-  const { noteMetas } = listNoteMetas(noteFPaths);
+  if (getState().display.listName === fromListName) return;
 
+  const pendingSslts = getState().pendingSslts;
+
+  const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
+
+  const { noteMetas } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
   const trashNoteMetas = noteMetas.filter(meta => meta.listName === fromListName);
 
-  const fromListNames = [], fromNotes = [], emptyFromNotes = [];
-  const toListNames = [], toNotes = [], unusedFPaths = [];
+  const fromListNames = [], fromNotes = [];
+  const toListNames = [], toNotes = [];
   for (const meta of trashNoteMetas) {
     const interval = Date.now() - meta.updatedDT;
     const days = interval / 1000 / 60 / 60 / 24;
@@ -1941,17 +2039,11 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
     };
     addedDT += 1;
 
-    for (const { name } of fromNote.media) {
-      if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
-    }
-
     fromListNames.push(fromListName);
     fromNotes.push(fromNote);
-    emptyFromNotes.push(clearNoteData(fromNote));
     toListNames.push(fromListName);
     toNotes.push(toNote);
-
-    if (fromListNames.length > N_NOTES) break;
+    if (fromListNames.length >= N_NOTES) break;
   }
   if (fromListNames.length === 0) return;
 
@@ -1979,7 +2071,15 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
   vars.deleteOldNotes.ids = null;
 
   try {
-    await dataApi.putNotes({ listNames: fromListNames, notes: emptyFromNotes });
+    const unusedIds = [], unusedFPaths = []
+    for (const note of payload.successNotes) {
+      unusedIds.push(note.fromNote.id);
+      for (const { name } of note.fromNote.media) {
+        if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
+      }
+    }
+
+    await emptyNotes(unusedIds, getState);
     await dataApi.deleteServerFiles(unusedFPaths);
     await fileApi.deleteFiles(unusedFPaths);
     await cleanUpLocks(dispatch, getState);
@@ -2063,11 +2163,18 @@ export const onShowNLIMPopup = (title, body, media) => async (
 };
 
 const _cleanUpStaticFiles = async (dispatch, getState) => {
-  const noteFPaths = getNoteFPaths(getState());
   const unsavedNotes = getState().unsavedNotes;
+  const pendingSslts = getState().pendingSslts;
+
+  const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
+
+  const {
+    noteMetas, conflictedMetas, toRootIds,
+  } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
+  const noteMainIds = getNoteMainIds(noteMetas, conflictedMetas, toRootIds);
 
   const usedFPaths = [];
-  const { noteMetas, conflictedMetas } = listNoteMetas(noteFPaths);
   for (const meta of [...noteMetas, ...conflictedMetas]) {
     for (const fpath of meta.fpaths) {
       if (fpath.includes(CD_ROOT + '/')) usedFPaths.push(getStaticFPath(fpath));
@@ -2081,54 +2188,39 @@ const _cleanUpStaticFiles = async (dispatch, getState) => {
     }
   }
 
-  // Delete unused static files in server
   let staticFPaths = getStaticFPaths(getState());
-  // if syncMode, staticFPaths is always empty.
+  if (vars.syncMode.doSyncMode) staticFPaths = await fileApi.getStaticFPaths();
 
-  let unusedFPaths = [];
+  const unusedFPaths = [];
   for (const fpath of staticFPaths) {
     if (usedFPaths.includes(fpath)) continue;
     unusedFPaths.push(fpath);
+    if (unusedFPaths.length >= N_NOTES) break;
   }
-  unusedFPaths = unusedFPaths.slice(0, N_NOTES);
 
   if (unusedFPaths.length > 0) {
-    console.log('In cleanUpStaticFiles, found unused fpaths on server:', unusedFPaths);
-    // Too risky. Clean up locally for now.
-    //await serverApi.deleteFiles(unusedFPaths);
-    await fileApi.deleteFiles(unusedFPaths);
-  }
-
-  if (
-    getState().display.isEditorFocused ||
-    getState().display.isEditorBusy ||
-    getState().editor.isUploading
-  ) return;
-
-  // Delete unused static files in local
-  staticFPaths = await fileApi.getStaticFPaths();
-
-  unusedFPaths = [];
-  for (const fpath of staticFPaths) {
-    if (usedFPaths.includes(fpath)) continue;
-    unusedFPaths.push(fpath);
-  }
-  unusedFPaths = unusedFPaths.slice(0, N_NOTES);
-
-  if (unusedFPaths.length > 0) {
+    // Too risky, don't do it for now!
+    //await dataApi.deleteServerFiles(unusedFPaths);
     await fileApi.deleteFiles(unusedFPaths);
   }
 
   // Delete unused unsaved notes
-  let unusedIds = [];
+  const unusedIds = [];
   for (const k in unsavedNotes) {
     const { id, title, body, savedTitle, savedBody } = unsavedNotes[k];
-    if (id === getState().display.noteId) continue;
+    if (id === NEW_NOTE || id === getState().display.noteId) continue;
+
+    const mainId = getMainId(id, toRootIds);
+    if (!isString(mainId) || !noteMainIds.includes(mainId)) {
+      // Too risky, don't it for now!
+      console.log('Found unsavedNote with no noteMainId', unsavedNotes[k]);
+    }
+
     if (isTitleEqual(title, savedTitle) && isBodyEqual(body, savedBody)) {
       unusedIds.push(id);
+      if (unusedIds.length >= N_NOTES) break;
     }
   }
-  unusedIds = unusedIds.slice(0, N_NOTES);
 
   if (unusedIds.length > 0) dispatch(deleteUnsavedNotes(unusedIds));
 };
@@ -2136,6 +2228,12 @@ const _cleanUpStaticFiles = async (dispatch, getState) => {
 export const cleanUpStaticFiles = () => async (dispatch, getState) => {
   const { cleanUpStaticFilesDT } = getState().localSettings;
   if (!cleanUpStaticFilesDT) return;
+
+  if (
+    getState().display.isEditorFocused ||
+    getState().display.isEditorBusy ||
+    getState().editor.isUploading
+  ) return;
 
   const now = Date.now();
   let p = 1.0 / (N_DAYS * 24 * 60 * 60 * 1000) * Math.abs(now - cleanUpStaticFilesDT);
@@ -2278,18 +2376,20 @@ export const checkDeleteListName = (listNameEditorKey, listNameObj) => async (
   const listNames = [listNameObj.listName];
   listNames.push(...getAllListNames(listNameObj.children));
 
-  const noteFPaths = getNoteFPaths(getState());
-  const { noteMetas, conflictedMetas } = listNoteMetas(noteFPaths);
+  const pendingSslts = getState().pendingSslts;
 
-  const inUseListNames = new Set();
-  for (const meta of [...noteMetas, ...conflictedMetas]) {
-    for (const fpath of meta.fpaths) {
-      inUseListNames.add(extractNoteFPath(fpath).listName);
-    }
-  }
+  const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
+
+  const {
+    noteMetas, conflictedMetas,
+  } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
+  const inUseListNames = getListNamesFromNoteMetas(noteMetas, conflictedMetas);
 
   const canDeletes = [];
-  for (const listName of listNames) canDeletes.push(!inUseListNames.has(listName));
+  for (const listName of listNames) {
+    canDeletes.push(!inUseListNames.includes(listName));
+  }
 
   if (!canDeletes.every(canDelete => canDelete === true)) {
     dispatch(updateListNameEditors({
@@ -2537,13 +2637,18 @@ export const cancelDiedSettings = () => async (dispatch, getState) => {
   const settings = getState().settings;
   const snapshotSettings = getState().snapshot.settings;
 
+  const pendingSslts = getState().pendingSslts;
+
   const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
   const tagFPaths = getTagFPaths(getState());
 
-  const { noteMetas, conflictedMetas } = listNoteMetas(noteFPaths);
+  const {
+    noteMetas, conflictedMetas, toRootIds,
+  } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
 
-  const listNames = getListNamesFromNoteMetas([...noteMetas, ...conflictedMetas]);
-  const tagNames = getInUseTagNames(noteFPaths, tagFPaths);
+  const listNames = getListNamesFromNoteMetas(noteMetas, conflictedMetas);
+  const tagNames = getInUseTagNames(noteMetas, conflictedMetas, toRootIds, tagFPaths);
   let doFetch = (
     settings.sortOn !== snapshotSettings.sortOn ||
     settings.doDescendingOrder !== snapshotSettings.doDescendingOrder
@@ -2616,13 +2721,18 @@ export const mergeSettings = (selectedId) => async (dispatch, getState) => {
     if (k in _settings) settings[k] = _settings[k];
   }
 
+  const pendingSslts = getState().pendingSslts;
+
   const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
   const tagFPaths = getTagFPaths(getState());
 
-  const { noteMetas, conflictedMetas } = listNoteMetas(noteFPaths);
+  const {
+    noteMetas, conflictedMetas, toRootIds,
+  } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
 
-  const listNames = getListNamesFromNoteMetas([...noteMetas, ...conflictedMetas]);
-  const tagNames = getInUseTagNames(noteFPaths, tagFPaths);
+  const listNames = getListNamesFromNoteMetas(noteMetas, conflictedMetas);
+  const tagNames = getInUseTagNames(noteMetas, conflictedMetas, toRootIds, tagFPaths);
   const doFetch = (
     settings.sortOn !== currentSettings.sortOn ||
     settings.doDescendingOrder !== currentSettings.doDescendingOrder
@@ -2667,9 +2777,12 @@ const syncInQueue = (
 
   try {
     const {
-      noteFPaths, staticFPaths, settingsFPaths, infoFPath, pinFPaths, tagFPaths,
+      noteFPaths, ssltFPaths, staticFPaths, settingsFPaths, infoFPath, pinFPaths,
+      tagFPaths,
     } = await dataApi.listServerFPaths(doForceListFPaths);
-    const { noteMetas, conflictedMetas } = listNoteMetas(noteFPaths);
+    const {
+      noteMetas, conflictedMetas,
+    } = listNoteMetas(noteFPaths, ssltFPaths, {});
 
     const leafFPaths = [];
     for (const meta of noteMetas) leafFPaths.push(...meta.fpaths);
@@ -2677,6 +2790,7 @@ const syncInQueue = (
 
     const {
       noteFPaths: _noteFPaths,
+      ssltFPaths: _ssltFPaths,
       settingsFPaths: _settingsFPaths,
       infoFPath: _infoFPath,
       pinFPaths: _pinFPaths,
@@ -2685,17 +2799,18 @@ const syncInQueue = (
     const _staticFPaths = await fileApi.getStaticFPaths();
     const {
       noteMetas: _noteMetas, conflictedMetas: _conflictedMetas,
-    } = listNoteMetas(_noteFPaths);
+    } = listNoteMetas(_noteFPaths, _ssltFPaths, {});
 
     const _leafFPaths = [];
     for (const meta of _noteMetas) _leafFPaths.push(...meta.fpaths);
     for (const meta of _conflictedMetas) _leafFPaths.push(...meta.fpaths);
 
     const allNoteFPaths = [...new Set([...noteFPaths, ..._noteFPaths])];
+    const allSsltFPaths = [...new Set([...ssltFPaths, ..._ssltFPaths])];
     const {
       noteMetas: allNoteMetas, conflictedMetas: allConflictedMetas,
-      toRootIds: allToRootIds,
-    } = listNoteMetas(allNoteFPaths);
+      toRootIds: allToRootIds, ssltInfos: allSsltInfos,
+    } = listNoteMetas(allNoteFPaths, allSsltFPaths, {});
 
     const allLeafFPaths = [];
     for (const meta of allNoteMetas) allLeafFPaths.push(...meta.fpaths);
@@ -2707,6 +2822,10 @@ const syncInQueue = (
         allLeafStaticFPaths.push(getStaticFPath(fpath));
       }
     }
+
+    const allNoteMainIds = getNoteMainIds(
+      allNoteMetas, allConflictedMetas, allToRootIds
+    );
 
     // 1. Server side: upload all fpaths
     let fpaths = [], contents = [];
@@ -2770,6 +2889,7 @@ const syncInQueue = (
       }
 
       if (allLeafFPaths.includes(fpath)) continue;
+      if (fpath.includes(CD_ROOT + '/')) continue; // Already empty string
 
       let content;
       if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
@@ -2778,6 +2898,11 @@ const syncInQueue = (
       fpaths.push(fpath);
       contents.push(content);
     }
+    // Too risky, don't do it for now!
+    /*for (const staticFPath of staticFPaths) {
+      if (allLeafStaticFPaths.includes(staticFPath)) continue;
+      if (!deletedFPaths.includes(staticFPath)) deletedFPaths.push(staticFPath);
+    }*/
     await serverApi.putFiles(fpaths, contents);
     await serverApi.deleteFiles(deletedFPaths);
 
@@ -2854,6 +2979,7 @@ const syncInQueue = (
       }
 
       if (allLeafFPaths.includes(fpath)) continue;
+      if (fpath.includes(CD_ROOT + '/')) continue; // Already empty string
 
       let content;
       if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
@@ -2862,8 +2988,56 @@ const syncInQueue = (
       fpaths.push(fpath);
       contents.push(content);
     }
+    // Can't just delete, maybe unsavedNotes!
+    /*for (const staticFPath of _staticFPaths) {
+      if (allLeafStaticFPaths.includes(staticFPath)) continue;
+      if (!deletedFPaths.includes(staticFPath)) deletedFPaths.push(staticFPath);
+    }*/
     await dataApi.putFiles(fpaths, contents);
     await fileApi.deleteFiles(deletedFPaths);
+
+    // Sslts
+    const leafSsltFPaths = [];
+    for (const ssltMainId in allSsltInfos) {
+      if (!allNoteMainIds.includes(ssltMainId)) continue;
+      leafSsltFPaths.push(allSsltInfos[ssltMainId].fpath);
+    }
+
+    // 1. Server side: upload leaf ssltFPaths
+    fpaths = []; contents = [];
+    for (const fpath of leafSsltFPaths) {
+      if (ssltFPaths.includes(fpath)) continue;
+      fpaths.push(fpath);
+      contents.push({});
+    }
+    await serverApi.putFiles(fpaths, contents);
+
+    // 2. Server side: delete obsolete ssltFPaths
+    fpaths = []; contents = [];
+    for (const fpath of ssltFPaths) {
+      if (leafSsltFPaths.includes(fpath)) continue;
+      fpaths.push(fpath);
+    }
+    await serverApi.deleteFiles(fpaths);
+
+    // 3. Local side: download leaf ssltFPaths
+    fpaths = []; contents = [];
+    for (const fpath of leafSsltFPaths) {
+      if (_ssltFPaths.includes(fpath)) continue;
+      haveUpdate = true;
+
+      fpaths.push(fpath);
+      contents.push({});
+    }
+    await dataApi.putFiles(fpaths, contents);
+
+    // 4. Local side: delete obsolete ssltFPaths
+    fpaths = []; contents = [];
+    for (const fpath of _ssltFPaths) {
+      if (leafSsltFPaths.includes(fpath)) continue;
+      fpaths.push(fpath);
+    }
+    await dataApi.deleteFiles(fpaths);
 
     // Settings
     const { fpaths: settingsLeafFPaths } = getLastSettingsFPaths(settingsFPaths);
@@ -2971,17 +3145,13 @@ const syncInQueue = (
 
     // Pins
     const allPinFPaths = [...new Set([...pinFPaths, ..._pinFPaths])];
-    const leafPins = {};
-    for (const fpath of allPinFPaths) {
-      const { updatedDT, id } = extractPinFPath(fpath);
+    const allPins = getRawPins(allPinFPaths, allToRootIds);
 
-      const _id = id.startsWith('deleted') ? id.slice(7) : id;
-      const pinMainId = getMainId(_id, allToRootIds);
-
-      if (pinMainId in leafPins && leafPins[pinMainId].updatedDT > updatedDT) continue;
-      leafPins[pinMainId] = { updatedDT, fpath };
+    const leafPinFPaths = [];
+    for (const pinMainId in allPins) {
+      if (!allNoteMainIds.includes(pinMainId)) continue;
+      leafPinFPaths.push(allPins[pinMainId].fpath);
     }
-    const leafPinFPaths = Object.values(leafPins).map(el => el.fpath);
 
     // 1. Server side: upload leaf pinFPaths
     fpaths = []; contents = [];
@@ -3021,19 +3191,15 @@ const syncInQueue = (
 
     // Tags
     const allTagFPaths = [...new Set([...tagFPaths, ..._tagFPaths])];
-    const leafTags = {};
-    for (const fpath of allTagFPaths) {
-      const { tagName, updatedDT, id } = extractTagFPath(fpath);
+    const allTags = getRawTags(allTagFPaths, allToRootIds);
 
-      const _id = id.startsWith('deleted') ? id.slice(7) : id;
-      const mainId = getMainId(_id, allToRootIds);
-
-      const leafKey = `${mainId}-${tagName}`;
-
-      if (leafKey in leafTags && leafTags[leafKey].updatedDT > updatedDT) continue;
-      leafTags[leafKey] = { updatedDT, fpath };
+    const leafTagFPaths = [];
+    for (const tagMainId in allTags) {
+      if (!allNoteMainIds.includes(tagMainId)) continue;
+      for (const value of allTags[tagMainId].values) {
+        leafTagFPaths.push(value.fpath);
+      }
     }
-    const leafTagFPaths = Object.values(leafTags).map(el => el.fpath);
 
     // 1. Server side: upload leaf tagFPaths
     fpaths = []; contents = [];
@@ -3713,11 +3879,14 @@ export const pinNotes = (ids) => async (dispatch, getState) => {
     return;
   }
 
-  const noteFPaths = getNoteFPaths(getState());
-  const pinFPaths = getPinFPaths(getState());
+  const pendingSslts = getState().pendingSslts;
   const pendingPins = getState().pendingPins;
 
-  const { toRootIds } = listNoteMetas(noteFPaths);
+  const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
+  const pinFPaths = getPinFPaths(getState());
+
+  const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
   const currentPins = getPins(pinFPaths, pendingPins, true, toRootIds);
   const currentRanks = Object.values(currentPins).map(pin => pin.rank).sort();
 
@@ -3755,12 +3924,15 @@ export const pinNotes = (ids) => async (dispatch, getState) => {
 };
 
 export const unpinNotes = (ids) => async (dispatch, getState) => {
-  const noteFPaths = getNoteFPaths(getState());
-  const pinFPaths = getPinFPaths(getState());
+  const pendingSslts = getState().pendingSslts;
   const pendingPins = getState().pendingPins;
 
-  const { toRootIds } = listNoteMetas(noteFPaths);
-  let currentPins = getPins(pinFPaths, pendingPins, true, toRootIds);
+  const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
+  const pinFPaths = getPinFPaths(getState());
+
+  const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
+  const currentPins = getPins(pinFPaths, pendingPins, true, toRootIds);
 
   let now = Date.now();
   const pins = [];
@@ -3801,16 +3973,19 @@ export const unpinNotes = (ids) => async (dispatch, getState) => {
 export const movePinnedNote = (id, direction) => async (dispatch, getState) => {
   const notes = getState().notes;
   const showingNoteInfos = getState().display.showingNoteInfos;
-  const noteFPaths = getNoteFPaths(getState());
-  const pinFPaths = getPinFPaths(getState());
+  const pendingSslts = getState().pendingSslts;
   const pendingPins = getState().pendingPins;
+
+  const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
+  const pinFPaths = getPinFPaths(getState());
 
   if (!Array.isArray(showingNoteInfos)) {
     console.log('In movePinnedNote, no showingNoteInfos found for note id: ', id);
     return;
   }
 
-  const { toRootIds } = listNoteMetas(noteFPaths);
+  const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
 
   const fsNts = [];
   for (const info of showingNoteInfos) {
@@ -3897,37 +4072,39 @@ export const cancelDiedPins = () => async (dispatch, getState) => {
 };
 
 export const cleanUpPins = () => async (dispatch, getState) => {
+  const pendingSslts = getState().pendingSslts;
+
   const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
   const pinFPaths = getPinFPaths(getState());
 
-  const { toRootIds } = listNoteMetas(noteFPaths);
+  const {
+    noteMetas, conflictedMetas, toRootIds,
+  } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
+  const noteMainIds = getNoteMainIds(noteMetas, conflictedMetas, toRootIds);
   const pins = getRawPins(pinFPaths, toRootIds);
 
-  let unusedPins = [];
+  const unusedPinFPaths = [];
   for (const fpath of pinFPaths) {
-    const { rank, updatedDT, addedDT, id } = extractPinFPath(fpath);
+    const { id } = extractPinFPath(fpath);
 
     const _id = id.startsWith('deleted') ? id.slice(7) : id;
     const pinMainId = getMainId(_id, toRootIds);
 
     if (
       !isString(pinMainId) ||
+      !noteMainIds.includes(pinMainId) ||
       !isObject(pins[pinMainId]) ||
-      (
-        rank !== pins[pinMainId].rank ||
-        updatedDT !== pins[pinMainId].updatedDT ||
-        addedDT !== pins[pinMainId].addedDT ||
-        id !== pins[pinMainId].id
-      )
+      pins[pinMainId].fpath !== fpath
     ) {
-      unusedPins.push({ rank, updatedDT, addedDT, id });
+      unusedPinFPaths.push(fpath);
+      if (unusedPinFPaths.length >= N_NOTES) break;
     }
   }
-  unusedPins = unusedPins.slice(0, N_NOTES);
 
-  if (unusedPins.length > 0) {
+  if (unusedPinFPaths.length > 0) {
     try {
-      await dataApi.deletePins({ pins: unusedPins });
+      await dataApi.deleteFiles(unusedPinFPaths);
     } catch (error) {
       console.log('cleanUpPins error: ', error);
       // error in this step should be fine
@@ -4209,9 +4386,12 @@ export const addLockNote = (
   dispatch(updateLockEditor({ isLoadingShown: true, errMsg: '' }));
   await sleep(16);
 
-  const noteFPaths = getNoteFPaths(getState());
-  const { toRootIds } = listNoteMetas(noteFPaths);
+  const pendingSslts = getState().pendingSslts;
 
+  const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
+
+  const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
   const noteMainId = getMainId(noteId, toRootIds);
   password = await userSession.encrypt(password);
 
@@ -4241,9 +4421,12 @@ export const removeLockNote = (noteId, password) => async (dispatch, getState) =
   dispatch(updateLockEditor({ isLoadingShown: true, errMsg: '' }));
   await sleep(16);
 
-  const noteFPaths = getNoteFPaths(getState());
-  const { toRootIds } = listNoteMetas(noteFPaths);
+  const pendingSslts = getState().pendingSslts;
 
+  const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
+
+  const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
   const noteMainId = getMainId(noteId, toRootIds);
   const lockedNote = getState().lockSettings.lockedNotes[noteMainId];
 
@@ -4266,9 +4449,12 @@ export const removeLockNote = (noteId, password) => async (dispatch, getState) =
 };
 
 export const lockNote = (noteId) => async (dispatch, getState) => {
-  const noteFPaths = getNoteFPaths(getState());
-  const { toRootIds } = listNoteMetas(noteFPaths);
+  const pendingSslts = getState().pendingSslts;
 
+  const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
+
+  const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
   const noteMainId = getMainId(noteId, toRootIds);
 
   dispatch({ type: LOCK_NOTE, payload: { noteId, noteMainId } });
@@ -4317,9 +4503,12 @@ export const unlockNote = (noteId, password) => async (dispatch, getState) => {
   dispatch(updateLockEditor({ isLoadingShown: true, errMsg: '' }));
   await sleep(16);
 
-  const noteFPaths = getNoteFPaths(getState());
-  const { toRootIds } = listNoteMetas(noteFPaths);
+  const pendingSslts = getState().pendingSslts;
 
+  const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
+
+  const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
   const noteMainId = getMainId(noteId, toRootIds);
   const lockedNote = getState().lockSettings.lockedNotes[noteMainId];
 
@@ -4439,9 +4628,12 @@ export const unlockList = (listName, password) => async (dispatch, getState) => 
 const cleanUpLocks = async (dispatch, getState) => {
   const { listNameMap } = getState().settings;
   const lockSettings = getState().lockSettings;
+  const pendingSslts = getState().pendingSslts;
 
   const noteFPaths = getNoteFPaths(getState());
-  const { toLeafIds } = listNoteMetas(noteFPaths);
+  const ssltFPaths = getSsltFPaths(getState());
+
+  const { toLeafIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
 
   const noteMainIds = [];
   for (const noteMainId in lockSettings.lockedNotes) {
@@ -4599,10 +4791,13 @@ export const updateTagDataSStep = (id, values) => async (dispatch, getState) => 
   }
 
   if (newTagNameObjs.length === 0) {
+    const pendingSslts = getState().pendingSslts;
+
     const noteFPaths = getNoteFPaths(getState());
+    const ssltFPaths = getSsltFPaths(getState());
     const tagFPaths = getTagFPaths(getState());
 
-    const { toRootIds } = listNoteMetas(noteFPaths);
+    const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
     const solvedTags = getTags(tagFPaths, {}, toRootIds);
     const mainId = getMainId(id, toRootIds);
 
@@ -4624,10 +4819,13 @@ export const updateTagDataSStep = (id, values) => async (dispatch, getState) => 
 };
 
 export const updateTagDataTStep = (id, values) => async (dispatch, getState) => {
+  const pendingSslts = getState().pendingSslts;
+
   const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
   const tagFPaths = getTagFPaths(getState());
 
-  const { toRootIds } = listNoteMetas(noteFPaths);
+  const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
   const solvedTags = getTags(tagFPaths, {}, toRootIds);
   const mainId = getMainId(id, toRootIds);
 
@@ -4758,7 +4956,12 @@ export const retryDiedTags = () => async (dispatch, getState) => {
 export const cancelDiedTags = () => async (dispatch, getState) => {
   const settings = getState().settings;
   const snapshotSettings = getState().snapshot.settings;
+  const pendingSslts = getState().pendingSslts;
   const pendingTags = getState().pendingTags;
+
+  const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
+  const tagFPaths = getTagFPaths(getState());
 
   const isTamEqual = isEqual(settings.tagNameMap, snapshotSettings.tagNameMap);
 
@@ -4788,9 +4991,13 @@ export const cancelDiedTags = () => async (dispatch, getState) => {
       if (!usedTagNames.includes(obj.tagName)) usedTagNames.push(obj.tagName);
     }
 
-    const tagFPaths = getTagFPaths(getState());
-    for (const fpath of tagFPaths) {
-      const { tagName } = extractTagFPath(fpath);
+    const {
+      noteMetas, conflictedMetas, toRootIds,
+    } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
+    const inUseTagNames = getInUseTagNames(
+      noteMetas, conflictedMetas, toRootIds, tagFPaths
+    );
+    for (const tagName of inUseTagNames) {
       if (!usedTagNames.includes(tagName)) usedTagNames.push(tagName);
     }
 
@@ -4804,36 +5011,39 @@ export const cancelDiedTags = () => async (dispatch, getState) => {
 };
 
 export const cleanUpTags = () => async (dispatch, getState) => {
+  const pendingSslts = getState().pendingSslts;
+
   const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
   const tagFPaths = getTagFPaths(getState());
 
-  const { toRootIds } = listNoteMetas(noteFPaths);
+  const {
+    noteMetas, conflictedMetas, toRootIds,
+  } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
+  const noteMainIds = getNoteMainIds(noteMetas, conflictedMetas, toRootIds);
   const tags = getRawTags(tagFPaths, toRootIds);
 
-  let unusedTagFPaths = [];
+  const unusedTagFPaths = [];
   for (const fpath of tagFPaths) {
-    const { tagName, rank, updatedDT, addedDT, id } = extractTagFPath(fpath);
+    if (unusedTagFPaths.length >= N_NOTES) break;
+
+    const { id } = extractTagFPath(fpath);
 
     const _id = id.startsWith('deleted') ? id.slice(7) : id;
     const tagMainId = getMainId(_id, toRootIds);
 
-    if (!isString(tagMainId) || !isObject(tags[tagMainId])) {
+    if (
+      !isString(tagMainId) ||
+      !noteMainIds.includes(tagMainId) ||
+      !isObject(tags[tagMainId])
+    ) {
       unusedTagFPaths.push(fpath);
       continue;
     }
 
-    const found = tags[tagMainId].values.some(value => {
-      return (
-        value.tagName === tagName &&
-        value.rank === rank &&
-        value.updatedDT === updatedDT &&
-        value.addedDT === addedDT &&
-        value.id === id
-      );
-    });
+    const found = tags[tagMainId].values.some(value => value.fpath === fpath);
     if (!found) unusedTagFPaths.push(fpath);
   }
-  unusedTagFPaths = unusedTagFPaths.slice(0, N_NOTES);
 
   if (unusedTagFPaths.length > 0) {
     try {
@@ -4883,10 +5093,19 @@ export const updateTagNameColor = (tagName, newColor) => {
 export const checkDeleteTagName = (tagNameEditorKey, tagNameObj) => async (
   dispatch, getState
 ) => {
-  const noteFPaths = getNoteFPaths(getState());
-  const tagFPaths = getTagFPaths(getState());
-  const inUseTagNames = getInUseTagNames(noteFPaths, tagFPaths);
+  const pendingSslts = getState().pendingSslts;
 
+  const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
+  const tagFPaths = getTagFPaths(getState());
+
+  const {
+    noteMetas, conflictedMetas, toRootIds,
+  } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
+
+  const inUseTagNames = getInUseTagNames(
+    noteMetas, conflictedMetas, toRootIds, tagFPaths
+  );
   if (inUseTagNames.includes(tagNameObj.tagName)) {
     dispatch(updateTagNameEditors({
       [tagNameEditorKey]: {

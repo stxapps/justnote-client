@@ -8,12 +8,12 @@ import {
   UPDATE_TAG_DATA_T_STEP, UPDATE_TAG_DATA_T_STEP_ROLLBACK,
 } from '../types/actionTypes';
 import {
-  HASH_FRAGMENT_IDENTIFIER, HTTP, MAX_CHARS, CD_ROOT, STATUS, NOTES, IMAGES, SETTINGS,
-  INFO, PINS, TAGS, INDEX, DOT_JSON, ADDED, ADDING, UPDATING, MOVING, DELETING, MERGING,
-  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, DIED_MERGING, VALID_URL,
-  NO_URL, ASK_CONFIRM_URL, VALID_LIST_NAME, NO_LIST_NAME, TOO_LONG_LIST_NAME,
-  DUPLICATE_LIST_NAME, COM_JUSTNOTECC_SUPPORTER, ACTIVE, NO_RENEW, GRACE, ON_HOLD,
-  PAUSED, UNKNOWN, NOTE_DATE_FORMAT_SYSTEM, NOTE_DATE_FORMAT_YSMSD,
+  HASH_FRAGMENT_IDENTIFIER, HTTP, MAX_CHARS, CD_ROOT, STATUS, NOTES, SSLTS, IMAGES,
+  SETTINGS, INFO, PINS, TAGS, INDEX, DOT_JSON, ADDED, ADDING, UPDATING, MOVING,
+  DELETING, MERGING, DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
+  DIED_MERGING, VALID_URL, NO_URL, ASK_CONFIRM_URL, VALID_LIST_NAME, NO_LIST_NAME,
+  TOO_LONG_LIST_NAME, DUPLICATE_LIST_NAME, COM_JUSTNOTECC_SUPPORTER, ACTIVE, NO_RENEW,
+  GRACE, ON_HOLD, PAUSED, UNKNOWN, NOTE_DATE_FORMAT_SYSTEM, NOTE_DATE_FORMAT_YSMSD,
   NOTE_DATE_FORMAT_MSDSY, NOTE_DATE_FORMAT_DSMSY, NOTE_DATE_FORMAT_YHMHD,
   NOTE_DATE_FORMAT_MHDHY, NOTE_DATE_FORMAT_DHMHY, NOTE_DATE_FORMAT_YOMOD,
   NOTE_DATE_FORMAT_MODOY, NOTE_DATE_FORMAT_DOMOY, NOTE_DATE_FORMAT_YMMMD,
@@ -462,9 +462,9 @@ export const getAllListNames = (listNameObjs) => {
   return listNames;
 };
 
-export const getListNamesFromNoteMetas = (noteMetas) => {
+export const getListNamesFromNoteMetas = (noteMetas, conflictedMetas) => {
   const listNames = [];
-  for (const meta of noteMetas) {
+  for (const meta of [...noteMetas, ...conflictedMetas]) {
     const { listName } = meta;
     if (!listNames.includes(listName)) listNames.push(listName);
   }
@@ -1118,6 +1118,31 @@ export const extractNoteFPath = (fpath) => {
   return { listName, fname, subName };
 };
 
+export const createSsltFPath = (listName, updatedDT, addedDT, id) => {
+  return `${SSLTS}/${listName}/${updatedDT}/${addedDT}/${id}${DOT_JSON}`;
+};
+
+export const extractSsltFPath = (fpath) => {
+  const arr = fpath.split('/');
+  if (arr.length !== 5) console.log(`In extractSsltFPath, invalid fpath: ${fpath}`);
+
+  let id, ext;
+  const [listName, fname] = [arr[1] || '', arr[4] || ''];
+  const [updatedDTStr, addedDTStr] = [arr[2] || '', arr[3] || ''];
+
+  const updatedDT = parseInt(updatedDTStr, 10);
+  const addedDT = parseInt(addedDTStr, 10);
+
+  const dotIndex = fname.lastIndexOf('.');
+  if (dotIndex === -1) {
+    [id, ext] = [fname, ''];
+  } else {
+    [id, ext] = [fname.substring(0, dotIndex), fname.substring(dotIndex + 1)];
+  }
+
+  return { listName, updatedDT, addedDT, id, ext };
+};
+
 export const createSettingsFPath = (fname) => {
   return `${SETTINGS}${fname}${DOT_JSON}`;
 };
@@ -1182,6 +1207,8 @@ export const addFPath = (fpaths, fpath) => {
 
   if (fpath.startsWith(NOTES)) {
     if (!fpaths.noteFPaths.includes(fpath)) fpaths.noteFPaths.push(fpath);
+  } else if (fpath.startsWith(SSLTS)) {
+    if (!fpaths.ssltFPaths.includes(fpath)) fpaths.ssltFPaths.push(fpath);
   } else if (fpath.startsWith(IMAGES)) {
     if (!fpaths.staticFPaths.includes(fpath)) fpaths.staticFPaths.push(fpath);
   } else if (fpath.startsWith(SETTINGS)) {
@@ -1207,6 +1234,8 @@ export const addFPath = (fpaths, fpath) => {
 export const deleteFPath = (fpaths, fpath) => {
   if (fpath.startsWith(NOTES)) {
     fpaths.noteFPaths = fpaths.noteFPaths.filter(el => el !== fpath);
+  } else if (fpath.startsWith(SSLTS)) {
+    fpaths.ssltFPaths = fpaths.ssltFPaths.filter(el => el !== fpath);
   } else if (fpath.startsWith(IMAGES)) {
     fpaths.staticFPaths = fpaths.staticFPaths.filter(el => el !== fpath);
   } else if (fpath.startsWith(SETTINGS)) {
@@ -1226,6 +1255,9 @@ export const copyFPaths = (fpaths) => {
   let newNoteFPaths = [];
   if (Array.isArray(fpaths.noteFPaths)) newNoteFPaths = [...fpaths.noteFPaths];
 
+  let newSsltFPaths = [];
+  if (Array.isArray(fpaths.ssltFPaths)) newSsltFPaths = [...fpaths.ssltFPaths];
+
   let newStaticFPaths = [];
   if (Array.isArray(fpaths.staticFPaths)) newStaticFPaths = [...fpaths.staticFPaths];
 
@@ -1243,6 +1275,7 @@ export const copyFPaths = (fpaths) => {
   return {
     ...fpaths,
     noteFPaths: newNoteFPaths,
+    ssltFPaths: newSsltFPaths,
     staticFPaths: newStaticFPaths,
     settingsFPaths: newSettingsFPaths,
     pinFPaths: newPinFPaths,
@@ -1259,6 +1292,17 @@ export const getNoteFPaths = (state) => {
     return state.cachedFPaths.fpaths.noteFPaths;
   }
   return [];
+};
+
+export const getSsltFPaths = (state) => {
+  if (
+    isObject(state.cachedFPaths) &&
+    isObject(state.cachedFPaths.fpaths) &&
+    isObject(state.cachedFPaths.fpaths.ssltFPaths)
+  ) {
+    return state.cachedFPaths.fpaths.ssltFPaths;
+  }
+  return {};
 };
 
 export const getStaticFPaths = (state) => {
@@ -1338,9 +1382,9 @@ export const getDataParentIds = (leafId, toParents) => {
 };
 
 const getDataRootIds = (leafId, toParents) => {
-  const rootIds = [];
+  const rootIds = [], passedIds = [leafId];
 
-  let pendingIds = [leafId], passedIds = [leafId];
+  let pendingIds = [leafId];
   while (pendingIds.length > 0) {
     let id = pendingIds[0];
     pendingIds = pendingIds.slice(1);
@@ -1375,7 +1419,7 @@ const getDataRootIds = (leafId, toParents) => {
     if (!doBreak && !rootIds.includes(id)) rootIds.push(id);
   }
 
-  return rootIds;
+  return { rootIds, passedIds };
 };
 
 const getDataOldestRootId = (rootIds) => {
@@ -1391,10 +1435,7 @@ const getDataOldestRootId = (rootIds) => {
 };
 
 const _listMetas = (dataFPaths, extractDataFPath, workingSubName) => {
-  const ids = [];
-  const toFPaths = {};
-  const toParents = {};
-  const toChildren = {};
+  const ids = [], toFPaths = {}, toParents = {}, toChildren = {};
   for (const fpath of dataFPaths) {
     const { fname, subName } = extractDataFPath(fpath);
     const { id, parentIds } = extractDataFName(fname);
@@ -1424,6 +1465,9 @@ const _listMetas = (dataFPaths, extractDataFPath, workingSubName) => {
     }
   }
 
+  // Process from leaves for the same rootIds and better performance.
+  ids.sort().reverse();
+
   const leafIds = [];
   for (const id of ids) {
     if (!toChildren[id]) {
@@ -1434,9 +1478,10 @@ const _listMetas = (dataFPaths, extractDataFPath, workingSubName) => {
 
   const toRootIds = {};
   for (const id of ids) {
-    const rootIds = getDataRootIds(id, toParents);
+    if (isString(toRootIds[id])) continue;
+    const { rootIds, passedIds } = getDataRootIds(id, toParents);
     const rootId = getDataOldestRootId(rootIds);
-    toRootIds[id] = rootId;
+    for (const passedId of passedIds) toRootIds[passedId] = rootId;
   }
 
   const toLeafIds = {};
@@ -1480,8 +1525,10 @@ const _listMetas = (dataFPaths, extractDataFPath, workingSubName) => {
 };
 
 export const listNoteMetas = createSelector(
-  noteFPaths => noteFPaths,
-  noteFPaths => {
+  (...args) => args[0],
+  (...args) => args[1],
+  (...args) => args[2],
+  (noteFPaths, ssltFPaths, pendingSslts) => {
     // Possible to have cdroot paths but not index.json and vice versa.
     //   i.e. update/move error and cancel died notes.
     // So use only index.json for listMetas.
@@ -1489,9 +1536,49 @@ export const listNoteMetas = createSelector(
       metas, conflictedMetas, conflictWiths, toRootIds, toParents, toFPaths, toLeafIds,
       allIds,
     } = _listMetas(noteFPaths, extractNoteFPath, INDEX + DOT_JSON);
+
+    const ssltInfos = {};
+    for (const fpath of ssltFPaths) {
+      const { listName, updatedDT, addedDT, id } = extractSsltFPath(fpath);
+
+      const mainId = getMainId(id, toRootIds);
+      if (!isString(mainId)) continue;
+
+      if (isObject(ssltInfos[mainId]) && ssltInfos[mainId].updatedDT >= updatedDT) {
+        continue;
+      }
+      ssltInfos[mainId] = { listName, updatedDT, addedDT, id, fpath };
+    }
+    for (const id in pendingSslts) {
+      const { listName } = pendingSslts[id];
+      const mainId = getMainId(id, toRootIds);
+      if (!isString(mainId)) continue;
+
+      const info = isObject(ssltInfos[mainId]) ? { ...ssltInfos[mainId] } : {};
+      info.listName = listName;
+
+      ssltInfos[mainId] = info;
+    }
+
+    const mMetas = [], mConflictedMetas = [];
+    for (const meta of metas) {
+      const mainId = getMainId(meta.id, toRootIds);
+      if (!isString(mainId)) continue;
+
+      if (isObject(ssltInfos[mainId])) meta.listName = ssltInfos[mainId].listName;
+      mMetas.push(meta);
+    }
+    for (const meta of conflictedMetas) {
+      const mainId = getMainId(meta.id, toRootIds);
+      if (!isString(mainId)) continue;
+
+      if (isObject(ssltInfos[mainId])) meta.listName = ssltInfos[mainId].listName;
+      mConflictedMetas.push(meta);
+    }
+
     return {
-      noteMetas: metas, conflictedMetas, conflictWiths, toRootIds, toParents, toFPaths,
-      toLeafIds, allIds,
+      noteMetas: mMetas, conflictedMetas: mConflictedMetas, conflictWiths, toRootIds,
+      toParents, toFPaths, toLeafIds, allIds, ssltInfos,
     };
   },
 );
@@ -1500,33 +1587,30 @@ const applyPcNotesToMetas = (pcListNames, pcNotes, noteMetas, toRootIds) => {
   const metas = [], tRIds = { ...toRootIds }, pIds = [];
   for (let i = 0; i < pcListNames.length; i++) {
     const [listName, note] = [pcListNames[i], pcNotes[i]];
-    const { parentIds, id, addedDT, updatedDT, media } = note;
+    const { parentIds, id, addedDT, updatedDT } = note;
 
-    const fname = createDataFName(id, parentIds);
-    const fpath = createNoteFPath(listName, fname, INDEX + DOT_JSON);
-    const fpaths = [fpath];
-    if (media) {
-      for (const { name } of media) {
-        const mdFPath = createNoteFPath(listName, fname, name);
-        if (!fpaths.includes(mdFPath)) fpaths.push(mdFPath);
-      }
-    }
-
-    const [isConflicted, conflictWith] = [false, null];
+    const [isConflicted, conflictWith, fpaths] = [false, null, []];
     metas.push({
       parentIds, id, addedDT, updatedDT, isConflicted, conflictWith, fpaths, listName,
     });
 
     if (Array.isArray(parentIds) && parentIds.length > 0) {
       tRIds[id] = tRIds[parentIds[0]];
+      pIds.push(id);
       pIds.push(...parentIds);
+      pIds.push(getMainId(parentIds[0], tRIds))
     } else {
       tRIds[id] = id;
+      pIds.push(id);
     }
   }
 
   for (const meta of noteMetas) {
     if (pIds.includes(meta.id)) continue;
+
+    const mainId = getMainId(meta.id, tRIds);
+    if (pIds.includes(mainId)) continue;
+
     metas.push(meta);
   }
 
@@ -1553,6 +1637,14 @@ export const getMainId = (idOrNote, toRootIds) => {
   return toRootIds[id];
 };
 
+export const getNoteMainIds = (noteMetas, conflictedMetas, toRootIds) => {
+  const noteMainIds = [];
+  for (const meta of [...noteMetas, ...conflictedMetas]) {
+    noteMainIds.push(getMainId(meta.id, toRootIds));
+  }
+  return noteMainIds;
+};
+
 export const getPinFPaths = (state) => {
   if (
     isObject(state.cachedFPaths) &&
@@ -1575,45 +1667,10 @@ export const getRawPins = (pinFPaths, toRootIds) => {
 
     // duplicate id, choose the latest updatedDT
     if (pinMainId in pins && pins[pinMainId].updatedDT > updatedDT) continue;
-    pins[pinMainId] = { rank, updatedDT, addedDT, id };
+    pins[pinMainId] = { rank, updatedDT, addedDT, id, fpath };
   }
 
   return pins;
-};
-
-const _getPins = (pinFPaths, pendingPins, doExcludeUnpinning, toRootIds) => {
-  const pins = getRawPins(pinFPaths, toRootIds);
-
-  for (const id in pendingPins) {
-    const { status, rank, updatedDT, addedDT } = pendingPins[id];
-    const pinMainId = getMainId(id, toRootIds);
-    if (!isString(pinMainId)) continue;
-
-    if ([PIN_NOTE, PIN_NOTE_ROLLBACK].includes(status)) {
-      pins[pinMainId] = { status, rank, updatedDT, addedDT, id };
-    } else if ([UNPIN_NOTE, UNPIN_NOTE_ROLLBACK].includes(status)) {
-      if (doExcludeUnpinning) {
-        delete pins[pinMainId];
-      } else {
-        // Can't delete just yet, need for showing loading.
-        pins[pinMainId] = { status, rank, updatedDT, addedDT, id };
-      }
-    } else if ([
-      MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_ROLLBACK,
-    ].includes(status)) {
-      pins[pinMainId] = { status, rank, updatedDT, addedDT, id };
-    } else {
-      console.log('getPins: unsupport pin status: ', status);
-    }
-  }
-
-  const filteredPins = {};
-  for (const pinMainId in pins) {
-    if (pins[pinMainId].id.startsWith('deleted')) continue;
-    filteredPins[pinMainId] = pins[pinMainId];
-  }
-
-  return filteredPins;
 };
 
 export const getPins = createSelector(
@@ -1621,7 +1678,40 @@ export const getPins = createSelector(
   (...args) => args[1],
   (...args) => args[2],
   (...args) => args[3],
-  _getPins,
+  (pinFPaths, pendingPins, doExcludeUnpinning, toRootIds) => {
+    const pins = getRawPins(pinFPaths, toRootIds);
+
+    for (const id in pendingPins) {
+      const { status, rank, updatedDT, addedDT } = pendingPins[id];
+      const pinMainId = getMainId(id, toRootIds);
+      if (!isString(pinMainId)) continue;
+
+      if ([PIN_NOTE, PIN_NOTE_ROLLBACK].includes(status)) {
+        pins[pinMainId] = { status, rank, updatedDT, addedDT, id };
+      } else if ([UNPIN_NOTE, UNPIN_NOTE_ROLLBACK].includes(status)) {
+        if (doExcludeUnpinning) {
+          delete pins[pinMainId];
+        } else {
+          // Can't delete just yet, need for showing loading.
+          pins[pinMainId] = { status, rank, updatedDT, addedDT, id };
+        }
+      } else if ([
+        MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_ROLLBACK,
+      ].includes(status)) {
+        pins[pinMainId] = { status, rank, updatedDT, addedDT, id };
+      } else {
+        console.log('getPins: unsupport pin status: ', status);
+      }
+    }
+
+    const filteredPins = {};
+    for (const pinMainId in pins) {
+      if (pins[pinMainId].id.startsWith('deleted')) continue;
+      filteredPins[pinMainId] = pins[pinMainId];
+    }
+
+    return filteredPins;
+  },
 );
 
 export const separatePinnedValues = (
@@ -1677,19 +1767,17 @@ export const sortNotes = (notes, sortOn, doDescendingOrder) => {
   return sortedNotes;
 };
 
-const _listSettingsMetas = (settingsFPaths) => {
-  const {
-    metas, conflictedMetas, conflictWiths, toRootIds, toParents, toFPaths, allIds,
-  } = _listMetas(settingsFPaths, extractSettingsFPath, undefined);
-  return {
-    settingsMetas: metas, conflictedMetas, conflictWiths, toRootIds, toParents,
-    toFPaths, allIds,
-  };
-};
-
 export const listSettingsMetas = createSelector(
   settingsFPaths => settingsFPaths,
-  _listSettingsMetas,
+  (settingsFPaths) => {
+    const {
+      metas, conflictedMetas, conflictWiths, toRootIds, toParents, toFPaths, allIds,
+    } = _listMetas(settingsFPaths, extractSettingsFPath, undefined);
+    return {
+      settingsMetas: metas, conflictedMetas, conflictWiths, toRootIds, toParents,
+      toFPaths, allIds,
+    };
+  },
 );
 
 export const getLastSettingsFPaths = (settingsFPaths) => {
@@ -1899,26 +1987,48 @@ export const excludeNotObjContents = (fpaths, contents) => {
 };
 
 export const getNote = (id, notes) => {
+  const selectedNotes = [];
   for (const listName in notes) {
     if (isObject(notes[listName]) && isObject(notes[listName][id])) {
-      return notes[listName][id];
+      selectedNotes.push(notes[listName][id]);
     }
   }
+
+  for (const note of selectedNotes) {
+    if (note.status !== ADDED) return note;
+  }
+  for (const note of selectedNotes) {
+    if (note.status === ADDED) return note;
+  }
+  if (selectedNotes.length > 0) return selectedNotes[0];
+
   return null;
 };
 
 export const getListNameAndNote = (id, notes) => {
+  const selectedNotes = [];
   for (const listName in notes) {
     if (isObject(notes[listName]) && isObject(notes[listName][id])) {
-      return { listName, note: notes[listName][id] };
+      selectedNotes.push({ listName, note: notes[listName][id] });
     }
   }
+
+  for (const { listName, note } of selectedNotes) {
+    if (note.status !== ADDED) return { listName, note };
+  }
+  for (const { listName, note } of selectedNotes) {
+    if (note.status === ADDED) return { listName, note };
+  }
+  if (selectedNotes.length > 0) return selectedNotes[0];
+
   return { listName: null, note: null };
 };
 
 export const getIdsAndParentIds = (ids, cachedFPaths) => {
   const noteFPaths = getNoteFPaths({ cachedFPaths });
-  const { toParents } = listNoteMetas(noteFPaths);
+  const ssltFPaths = getSsltFPaths({ cachedFPaths });
+
+  const { toParents } = listNoteMetas(noteFPaths, ssltFPaths, {});
 
   const parentIds = [];
   for (const id of ids) {
@@ -2184,10 +2294,12 @@ export const doListContainUnlocks = (state) => {
   const notes = state.notes;
   const queryString = state.display.queryString;
   const showingNoteInfos = state.display.showingNoteInfos;
+  const pendingSslts = state.pendingSslts;
 
   const noteFPaths = getNoteFPaths(state);
-  const { toRootIds } = listNoteMetas(noteFPaths);
+  const ssltFPaths = getSsltFPaths(state);
 
+  const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
   const { lockedNotes, lockedLists } = state.lockSettings;
 
   if (queryString) {
@@ -2243,7 +2355,8 @@ const toConflictedMetas = (noteMetas, conflictWiths) => {
 
 export const getNNoteMetas = (params) => {
   const {
-    noteFPaths, notes, listName, sortOn, doDescendingOrder, pinFPaths, pendingPins,
+    noteFPaths, ssltFPaths, pendingSslts, notes, listName, sortOn, doDescendingOrder,
+    pinFPaths, pendingPins,
   } = params;
 
   let excludingIds = [], excludingMainIds = [];
@@ -2267,7 +2380,7 @@ export const getNNoteMetas = (params) => {
 
   const {
     noteMetas: _noteMetas, conflictedMetas, conflictWiths, toRootIds: _toRootIds,
-  } = listNoteMetas(noteFPaths);
+  } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
   const {
     noteMetas, toRootIds,
   } = applyPcNotesToMetas(pcListNames, pcNotes, _noteMetas, _toRootIds);
@@ -2452,7 +2565,7 @@ export const getRawTags = (tagFPaths, toRootIds) => {
 
     const i = values.findIndex(tag => tag.tagName === tagName);
     if (i < 0) {
-      values.push({ tagName, rank, updatedDT, addedDT, id });
+      values.push({ tagName, rank, updatedDT, addedDT, id, fpath });
       continue;
     }
 
@@ -2461,7 +2574,7 @@ export const getRawTags = (tagFPaths, toRootIds) => {
     tags[mainId].values = [
       ...values.slice(0, i),
       ...values.slice(i + 1),
-      { tagName, rank, updatedDT, addedDT, id },
+      { tagName, rank, updatedDT, addedDT, id, fpath },
     ];
   }
 
@@ -2476,35 +2589,33 @@ export const getRawTags = (tagFPaths, toRootIds) => {
   return tags;
 };
 
-const _getTags = (tagFPaths, pendingTags, toRootIds) => {
-  // Values from getRawTags and from pendingTags are different.
-  // E.g., no id from pendingTags.
-  const tags = getRawTags(tagFPaths, toRootIds);
-
-  const filteredTags = {};
-  for (const mainId in tags) {
-    const values = tags[mainId].values.filter(value => {
-      return !value.id.startsWith('deleted');
-    });
-    if (values.length === 0) continue;
-    filteredTags[mainId] = { ...tags[mainId], values };
-  }
-
-  for (const id in pendingTags) {
-    const mainId = getMainId(id, toRootIds);
-    if (!isString(mainId)) continue;
-
-    filteredTags[mainId] = { ...filteredTags[mainId], ...pendingTags[id] };
-  }
-
-  return filteredTags;
-};
-
 export const getTags = createSelector(
   (...args) => args[0],
   (...args) => args[1],
   (...args) => args[2],
-  _getTags,
+  (tagFPaths, pendingTags, toRootIds) => {
+    // Values from getRawTags and from pendingTags are different.
+    // E.g., no id from pendingTags.
+    const tags = getRawTags(tagFPaths, toRootIds);
+
+    const filteredTags = {};
+    for (const mainId in tags) {
+      const values = tags[mainId].values.filter(value => {
+        return !value.id.startsWith('deleted');
+      });
+      if (values.length === 0) continue;
+      filteredTags[mainId] = { ...tags[mainId], values };
+    }
+
+    for (const id in pendingTags) {
+      const mainId = getMainId(id, toRootIds);
+      if (!isString(mainId)) continue;
+
+      filteredTags[mainId] = { ...filteredTags[mainId], ...pendingTags[id] };
+    }
+
+    return filteredTags;
+  },
 );
 
 export const getTagNameObj = (tagName, tagNameObjs) => {
@@ -2576,13 +2687,8 @@ export const copyTagNameObjs = (tagNameObjs, excludedTagNames = []) => {
   return objs;
 };
 
-export const getInUseTagNames = (noteFPaths, tagFPaths) => {
-  const { noteMetas, conflictedMetas, toRootIds } = listNoteMetas(noteFPaths);
-
-  const noteMainIds = [];
-  for (const meta of [...noteMetas, ...conflictedMetas]) {
-    noteMainIds.push(getMainId(meta.id, toRootIds));
-  }
+export const getInUseTagNames = (noteMetas, conflictedMetas, toRootIds, tagFPaths) => {
+  const noteMainIds = getNoteMainIds(noteMetas, conflictedMetas, toRootIds);
 
   const inUseTagNames = [];
   for (const fpath of tagFPaths) {
@@ -2660,8 +2766,9 @@ const getNoteMetasByTagName = (
 
 export const getNNoteMetasByQt = (params) => {
   const {
-    noteFPaths, notes, sortOn, doDescendingOrder, pinFPaths, pendingPins, tagFPaths,
-    pendingTags, doForceLock, lockedNotes, lockedLists, queryString,
+    noteFPaths, ssltFPaths, pendingSslts, notes, sortOn, doDescendingOrder, pinFPaths,
+    pendingPins, tagFPaths, pendingTags, doForceLock, lockedNotes, lockedLists,
+    queryString,
   } = params;
 
   let excludingIds = [], excludingMainIds = [];
@@ -2680,7 +2787,9 @@ export const getNNoteMetasByQt = (params) => {
     }
   }
 
-  const { noteMetas: _noteMetas, toRootIds: _toRootIds } = listNoteMetas(noteFPaths);
+  const {
+    noteMetas: _noteMetas, toRootIds: _toRootIds,
+  } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
   const {
     noteMetas, toRootIds,
   } = applyPcNotesToMetas(pcListNames, pcNotes, _noteMetas, _toRootIds);
