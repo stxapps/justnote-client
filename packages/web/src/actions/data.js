@@ -1814,8 +1814,8 @@ const deleteUpdatedNoteSyncData = async (id, nmRst, sslts, pins, tags) => {
     if (vars.syncMode.doSyncMode) await serverApi.putFiles([fpath], [content]);
     await dataApi.putFiles([fpath], [content]);
 
-    if (vars.syncMode.doSyncMode) await serverApi.deleteFiles([sslt.fpaths]);
-    await dataApi.deleteFiles([sslt.fpaths]);
+    if (vars.syncMode.doSyncMode) await serverApi.deleteFiles(sslt.fpaths);
+    await dataApi.deleteFiles(sslt.fpaths);
   }
 
   const pin = pins[mainId];
