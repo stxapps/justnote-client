@@ -1805,7 +1805,7 @@ const _moveNotes = (toListName, ids) => async (dispatch, getState) => {
 
   // Remove below in the next version and call cleanUpSslts in a reducer like pins/tags
   try {
-    const unusedIds = payload.successNotes.map(note => note.fromNote.id);
+    const unusedIds = payload.successNotes.map(sNote => sNote.fromNote.id);
     await emptyNotes(unusedIds, getState);
     await cleanUpSslts(dispatch, getState);
   } catch (error) {
@@ -1950,9 +1950,9 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
 
   try {
     const unusedIds = [], unusedFPaths = [];
-    for (const note of payload.successNotes) {
-      unusedIds.push(note.fromNote.id);
-      for (const { name } of note.fromNote.media) {
+    for (const sNote of payload.successNotes) {
+      unusedIds.push(sNote.fromNote.id);
+      for (const { name } of sNote.fromNote.media) {
         if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
       }
     }
@@ -2094,7 +2094,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       // Remove below in the next version
       try {
-        const unusedIds = payload.successNotes.map(note => note.fromNote.id);
+        const unusedIds = payload.successNotes.map(sNote => sNote.fromNote.id);
         await emptyNotes(unusedIds, getState);
         await cleanUpSslts(dispatch, getState);
       } catch (error) {
@@ -2138,9 +2138,9 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       try {
         const unusedIds = [], unusedFPaths = [];
-        for (const note of payload.successNotes) {
-          unusedIds.push(note.fromNote.id);
-          for (const { name } of note.fromNote.media) {
+        for (const sNote of payload.successNotes) {
+          unusedIds.push(sNote.fromNote.id);
+          for (const { name } of sNote.fromNote.media) {
             if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
           }
         }
@@ -2402,10 +2402,10 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
   vars.deleteOldNotes.ids = null;
 
   try {
-    const unusedIds = [], unusedFPaths = []
-    for (const note of payload.successNotes) {
-      unusedIds.push(note.fromNote.id);
-      for (const { name } of note.fromNote.media) {
+    const unusedIds = [], unusedFPaths = [];
+    for (const sNote of payload.successNotes) {
+      unusedIds.push(sNote.fromNote.id);
+      for (const { name } of sNote.fromNote.media) {
         if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
       }
     }

@@ -1598,7 +1598,7 @@ const applyPcNotesToMetas = (pcListNames, pcNotes, noteMetas, toRootIds) => {
       tRIds[id] = tRIds[parentIds[0]];
       pIds.push(id);
       pIds.push(...parentIds);
-      pIds.push(getMainId(parentIds[0], tRIds))
+      pIds.push(getMainId(parentIds[0], tRIds));
     } else {
       tRIds[id] = id;
       pIds.push(id);

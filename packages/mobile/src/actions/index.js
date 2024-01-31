@@ -101,21 +101,20 @@ import {
 } from '../types/const';
 import {
   isEqual, isArrayEqual, isObject, isString, isNumber, sleep, separateUrlAndParam,
-  getUserImageUrl, randomString, stripHtml, isTitleEqual, isBodyEqual, clearNoteData,
-  getStaticFPath, deriveFPaths, getListNameObj, getAllListNames, getMainId,
-  createDataFName, listNoteMetas, getNoteFPaths, getSsltFPaths, getStaticFPaths,
-  createSettingsFPath, getSettingsFPaths, getLastSettingsFPaths, getInfoFPath,
-  getLatestPurchase, getValidPurchase, doEnableExtraFeatures, extractPinFPath,
-  getPinFPaths, getPins, separatePinnedValues, getRawPins, getFormattedTime,
-  get24HFormattedTime, getFormattedTimeStamp, getMineSubType, getNote,
-  getEditingListNameEditors, getListNamesFromNoteMetas, applySubscriptionOfferDetails,
-  validatePassword, doContainListName, doListContainUnlocks, getListNameAndNote,
-  newObject, getNNoteMetas, addFetchedToVars, isFetchedNoteMeta, doesIncludeFetching,
-  sortNotes, sortWithPins, doesIncludeFetchingMore, isFetchingInterrupted,
-  getTagFPaths, getInUseTagNames, getEditingTagNameEditors, getNNoteMetasByQt,
-  extractNoteFPath, extractSsltFPath, validateTagNameDisplayName,
-  getTagNameObjFromDisplayName, getTagNameObj, getTags, getRawTags, extractTagFPath,
-  createTagFPath, getNoteMainIds,
+  getUserImageUrl, randomString, stripHtml, isTitleEqual, isBodyEqual, getStaticFPath,
+  deriveFPaths, getListNameObj, getAllListNames, getMainId, createDataFName,
+  listNoteMetas, getNoteFPaths, getSsltFPaths, getStaticFPaths, createSettingsFPath,
+  getSettingsFPaths, getLastSettingsFPaths, getInfoFPath, getLatestPurchase,
+  getValidPurchase, doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins,
+  separatePinnedValues, getRawPins, getFormattedTime, get24HFormattedTime,
+  getFormattedTimeStamp, getMineSubType, getNote, getEditingListNameEditors,
+  getListNamesFromNoteMetas, applySubscriptionOfferDetails, validatePassword,
+  doContainListName, doListContainUnlocks, getListNameAndNote, newObject,
+  getNNoteMetas, addFetchedToVars, isFetchedNoteMeta, doesIncludeFetching, sortNotes,
+  sortWithPins, doesIncludeFetchingMore, isFetchingInterrupted, getTagFPaths,
+  getInUseTagNames, getEditingTagNameEditors, getNNoteMetasByQt, extractNoteFPath,
+  extractSsltFPath, validateTagNameDisplayName, getTagNameObjFromDisplayName,
+  getTagNameObj, getTags, getRawTags, extractTagFPath, createTagFPath, getNoteMainIds,
 } from '../utils';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
@@ -1474,7 +1473,7 @@ const _moveNotes = (toListName, ids) => async (dispatch, getState) => {
 
   // Remove below in the next version and call cleanUpSslts in a reducer like pins/tags
   try {
-    const unusedIds = payload.successNotes.map(note => note.fromNote.id);
+    const unusedIds = payload.successNotes.map(sNote => sNote.fromNote.id);
     await emptyNotes(unusedIds, getState);
     await cleanUpSslts(dispatch, getState);
   } catch (error) {
@@ -1619,9 +1618,9 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
 
   try {
     const unusedIds = [], unusedFPaths = [];
-    for (const note of payload.successNotes) {
-      unusedIds.push(note.fromNote.id);
-      for (const { name } of note.fromNote.media) {
+    for (const sNote of payload.successNotes) {
+      unusedIds.push(sNote.fromNote.id);
+      for (const { name } of sNote.fromNote.media) {
         if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
       }
     }
@@ -1763,7 +1762,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       // Remove below in the next version
       try {
-        const unusedIds = payload.successNotes.map(note => note.fromNote.id);
+        const unusedIds = payload.successNotes.map(sNote => sNote.fromNote.id);
         await emptyNotes(unusedIds, getState);
         await cleanUpSslts(dispatch, getState);
       } catch (error) {
@@ -1807,9 +1806,9 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       try {
         const unusedIds = [], unusedFPaths = [];
-        for (const note of payload.successNotes) {
-          unusedIds.push(note.fromNote.id);
-          for (const { name } of note.fromNote.media) {
+        for (const sNote of payload.successNotes) {
+          unusedIds.push(sNote.fromNote.id);
+          for (const { name } of sNote.fromNote.media) {
             if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
           }
         }
@@ -2071,10 +2070,10 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
   vars.deleteOldNotes.ids = null;
 
   try {
-    const unusedIds = [], unusedFPaths = []
-    for (const note of payload.successNotes) {
-      unusedIds.push(note.fromNote.id);
-      for (const { name } of note.fromNote.media) {
+    const unusedIds = [], unusedFPaths = [];
+    for (const sNote of payload.successNotes) {
+      unusedIds.push(sNote.fromNote.id);
+      for (const { name } of sNote.fromNote.media) {
         if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
       }
     }
