@@ -37,7 +37,9 @@ const SignIn = (props) => {
     setLoadingShown(true);
     setTimeout(() => {
       const secretKey = secretKeyInput.replace(/\s+/g, ' ').trim();
-      walletApi.restoreAccount(secretKey).then((data) => {
+      walletApi.restoreAccount(
+        { domainName, appName, appIconUrl, appScopes }, secretKey
+      ).then((data) => {
         didClick.current = false;
         setLoadingShown(false);
 
@@ -68,9 +70,7 @@ const SignIn = (props) => {
     didClick.current = true;
     setLoadingShown(true);
     setTimeout(() => {
-      walletApi.chooseAccount(
-        walletData.current, { domainName, appName, appIconUrl, appScopes }, accountIndex
-      ).then((data) => {
+      walletApi.chooseAccount(walletData.current, accountIndex).then((data) => {
         didClick.current = false;
         setLoadingShown(false);
         props.onChooseAccountBtnClick(data);
