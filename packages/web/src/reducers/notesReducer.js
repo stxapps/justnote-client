@@ -1,7 +1,8 @@
 import { loop, Cmd } from 'redux-loop';
 
 import {
-  tryUpdateFetched, tryUpdateFetchedMore, runAfterFetchTask, unpinNotes, tryUpdateSynced,
+  tryUpdateFetched, tryUpdateFetchedMore, cleanUpSslts, runAfterFetchTask, unpinNotes,
+  tryUpdateSynced,
 } from '../actions';
 import {
   FETCH, FETCH_COMMIT, UPDATE_FETCHED, FETCH_MORE_COMMIT, UPDATE_FETCHED_MORE,
@@ -12,10 +13,10 @@ import {
   DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
-  TRASH, ARCHIVE, ID, STATUS, ADDED, ADDING, DIED_ADDING, UPDATING, DIED_UPDATING,
-  MOVING, DIED_MOVING, DELETING, DIED_DELETING,
+  MY_NOTES, TRASH, ARCHIVE, ID, STATUS, ADDED, ADDING, DIED_ADDING, UPDATING,
+  DIED_UPDATING, MOVING, DIED_MOVING, DELETING, DIED_DELETING,
 } from '../types/const';
-import { isObject, getArraysPerKey } from '../utils';
+import { isObject, getArraysPerKey, doContainListName } from '../utils';
 import { _ } from '../utils/obj';
 import vars from '../vars';
 
@@ -36,8 +37,30 @@ const notesReducer = (state = initialState, action) => {
   }
 
   if (action.type === FETCH_COMMIT) {
+    const {
+      doFetchStgsAndInfo, settings, conflictedSettings, listNames,
+    } = action.payload;
+
+    let newState = state;
+    if (
+      doFetchStgsAndInfo &&
+      isObject(settings) &&
+      (!Array.isArray(conflictedSettings) || conflictedSettings.length === 0)
+    ) {
+      newState = {};
+      for (const listName in state) {
+        let doCtLn = false;
+        if (listNames.includes(listName)) doCtLn = true;
+        if (doContainListName(listName, settings.listNameMap)) doCtLn = true;
+        if ([MY_NOTES, TRASH, ARCHIVE].includes(listName)) doCtLn = true;
+        if (!doCtLn) continue;
+
+        newState[listName] = { ...state[listName] };
+      }
+    }
+
     return loop(
-      state,
+      newState,
       Cmd.run(
         tryUpdateFetched(action.payload),
         { args: [Cmd.dispatch, Cmd.getState] }
@@ -273,7 +296,9 @@ const notesReducer = (state = initialState, action) => {
         Cmd.run(unpinNotes(toUnpinIds), { args: [Cmd.dispatch, Cmd.getState] })
       );
     }
-    return newState;
+    return loop(
+      newState, Cmd.run(cleanUpSslts(), { args: [Cmd.dispatch, Cmd.getState] })
+    );
   }
 
   if (action.type === MOVE_NOTES_ROLLBACK) {

@@ -120,8 +120,7 @@ const editorReducer = (state = initialState, action) => {
   }
 
   if (action.type === MOVE_NOTES_COMMIT) {
-    if (!vars.editorReducer.didRetryMovingNote) return state;
-    vars.editorReducer.didRetryMovingNote = false;
+    if (!action.payload.didRetry) return state;
     return { ...state, checkToFocusCount: state.checkToFocusCount + 1 };
   }
 

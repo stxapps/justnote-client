@@ -14,8 +14,7 @@ const pendingSsltsReducer = (state = initialState, action) => {
     const newState = { ...state };
     for (let i = 0; i < toListNames.length; i++) {
       const [listName, note] = [toListNames[i], toNotes[i]];
-      // Need fromNote for toRootIds, can remove in the next version.
-      newState[note.fromNote.id] = { listName, status: MOVING };
+      newState[note.id] = { listName, status: MOVING };
     }
     return newState;
   }
@@ -28,13 +27,11 @@ const pendingSsltsReducer = (state = initialState, action) => {
     const newState = { ...state };
     for (let i = 0; i < successListNames.length; i++) {
       const note = successNotes[i];
-      // Need fromNote for toRootIds, can remove in the next version.
-      delete newState[note.fromNote.id];
+      delete newState[note.id];
     }
     for (let i = 0; i < errorListNames.length; i++) {
       const [listName, note] = [errorListNames[i], errorNotes[i]];
-      // Need fromNote for toRootIds, can remove in the next version.
-      newState[note.fromNote.id] = { listName, status: DIED_MOVING };
+      newState[note.id] = { listName, status: DIED_MOVING };
     }
     return newState;
   }
@@ -45,8 +42,7 @@ const pendingSsltsReducer = (state = initialState, action) => {
     const newState = { ...state };
     for (let i = 0; i < toListNames.length; i++) {
       const [listName, note] = [toListNames[i], toNotes[i]];
-      // Need fromNote for toRootIds, can remove in the next version.
-      newState[note.fromNote.id] = { listName, status: DIED_MOVING };
+      newState[note.id] = { listName, status: DIED_MOVING };
     }
     return newState;
   }

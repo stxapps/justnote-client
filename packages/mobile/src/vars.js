@@ -102,7 +102,6 @@ const displayReducer = {
 };
 
 const editorReducer = {
-  didRetryMovingNote: false,
   didClickEditUnsaved: false,
   didIncreaseBlurCount: false,
 };

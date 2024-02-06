@@ -322,46 +322,37 @@ const putNotes = async (params) => {
 };
 
 const moveNotes = async (params) => {
-  // Must DELETE the next line in the next version!
-  const result = await putNotes(params);
+  const { listNames, notes, manuallyManageError } = params;
 
-  try {
-    const { listNames, notes, manuallyManageError } = params;
+  let now = Date.now();
 
-    let now = Date.now();
-
-    const fpaths = [], contents = [], noteMap = {};
-    for (let i = 0; i < listNames.length; i++) {
-      const [listName, note] = [listNames[i], notes[i]];
-      const fpath = createSsltFPath(listName, now, now, note.id);
-      fpaths.push(fpath);
-      contents.push({});
-      noteMap[fpath] = { listName, note };
-      now += 1;
-    }
-
-    const successListNames = [], successNotes = [];
-    const errorListNames = [], errorNotes = [], errors = [];
-
-    const { responses } = await putFiles(fpaths, contents, !!manuallyManageError);
-    for (const response of responses) {
-      const { listName, note } = noteMap[response.fpath];
-      if (response.success) {
-        successListNames.push(listName);
-        successNotes.push(note);
-      } else {
-        errorListNames.push(listName);
-        errorNotes.push(note);
-        errors.push(response.error);
-      }
-    }
-
-    //return { successListNames, successNotes, errorListNames, errorNotes, errors };
-  } catch (error) {
-    console.log('Error here is fine for now.', error);
+  const fpaths = [], contents = [], noteMap = {};
+  for (let i = 0; i < listNames.length; i++) {
+    const [listName, note] = [listNames[i], notes[i]];
+    const fpath = createSsltFPath(listName, now, now, note.id);
+    fpaths.push(fpath);
+    contents.push({});
+    noteMap[fpath] = { listName, note };
+    now += 1;
   }
 
-  return result;
+  const successListNames = [], successNotes = [];
+  const errorListNames = [], errorNotes = [], errors = [];
+
+  const { responses } = await putFiles(fpaths, contents, !!manuallyManageError);
+  for (const response of responses) {
+    const { listName, note } = noteMap[response.fpath];
+    if (response.success) {
+      successListNames.push(listName);
+      successNotes.push(note);
+    } else {
+      errorListNames.push(listName);
+      errorNotes.push(note);
+      errors.push(response.error);
+    }
+  }
+
+  return { successListNames, successNotes, errorListNames, errorNotes, errors };
 };
 
 const putPins = async (params) => {

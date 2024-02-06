@@ -1423,7 +1423,6 @@ const _moveNotes = (toListName, ids) => async (dispatch, getState) => {
   if (ids.length === 0) return;
 
   const notes = getState().notes;
-  let addedDT = Date.now();
 
   const fromListNames = [], fromNotes = [];
   const toListNames = [], toNotes = [];
@@ -1440,13 +1439,7 @@ const _moveNotes = (toListName, ids) => async (dispatch, getState) => {
       continue;
     }
 
-    const toId = `${addedDT}${randomString(4)}`;
-    const toNote = {
-      ...fromNote,
-      parentIds: [fromNote.id], id: toId, updatedDT: addedDT,
-      fromListName, fromNote,
-    };
-    addedDT += 1;
+    const toNote = { ...fromNote, fromListName, fromNote };
 
     fromListNames.push(fromListName);
     fromNotes.push(fromNote);
@@ -1470,18 +1463,6 @@ const _moveNotes = (toListName, ids) => async (dispatch, getState) => {
   }
 
   dispatch({ type: MOVE_NOTES_COMMIT, payload });
-
-  // Remove below in the next version and call cleanUpSslts in a reducer like pins/tags
-  try {
-    const unusedIds = payload.successNotes.map(sNote => sNote.fromNote.id);
-    await emptyNotes(unusedIds, getState);
-    await cleanUpSslts(dispatch, getState);
-  } catch (error) {
-    console.log('moveNotes clean up error: ', error);
-    // error in this step should be fine
-  }
-
-  dispatch(sync());
 };
 
 export const moveNotesWithAction = (toListName, moveAction) => async (
@@ -1528,7 +1509,7 @@ export const moveNotes = (toListName) => async (dispatch, getState) => {
   dispatch(moveNotesWithAction(toListName, moveAction));
 };
 
-export const cleanUpSslts = async (dispatch, getState) => {
+export const cleanUpSslts = () => async (dispatch, getState) => {
   const noteFPaths = getNoteFPaths(getState());
   const ssltFPaths = getSsltFPaths(getState());
 
@@ -1562,8 +1543,7 @@ export const cleanUpSslts = async (dispatch, getState) => {
     }
   }
 
-  // Uncomment below in the next version
-  //dispatch(sync());
+  dispatch(sync());
 };
 
 const _deleteNotes = (ids) => async (dispatch, getState) => {
@@ -1743,7 +1723,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       const [fromListNames, fromNotes] = [[note.fromListName], [note.fromNote]];
       const [toListNames, toNotes] = [[listName], [note]];
 
-      let payload = { fromListNames, fromNotes, toListNames, toNotes };
+      let payload = { fromListNames, fromNotes, toListNames, toNotes, didRetry: true };
       dispatch({ type: MOVE_NOTES, payload });
 
       try {
@@ -1757,20 +1737,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
         return;
       }
 
-      vars.editorReducer.didRetryMovingNote = true;
       dispatch({ type: MOVE_NOTES_COMMIT, payload });
-
-      // Remove below in the next version
-      try {
-        const unusedIds = payload.successNotes.map(sNote => sNote.fromNote.id);
-        await emptyNotes(unusedIds, getState);
-        await cleanUpSslts(dispatch, getState);
-      } catch (error) {
-        console.log('retryDiedNotes move clean up error: ', error);
-        // error in this step should be fine
-      }
-
-      dispatch(sync());
     } else if (status === DIED_DELETING) {
       const [fromListNames, fromNotes] = [[listName], [note]];
       const toListNames = [listName];

@@ -525,7 +525,8 @@ const displayReducer = (state = initialState, action) => {
 
   if (action.type === MOVE_NOTES) {
     // Need to remove from showingLinkIds immediately as new moving uses the same id.
-    const { fromNotes } = action.payload;
+    const { fromNotes, didRetry } = action.payload;
+    if (didRetry) return state;
 
     const fromIds = fromNotes.map(note => note.id);
     return {
