@@ -3204,9 +3204,6 @@ const syncInQueue = (
     await dataApi.deleteFiles(fpaths);
 
     if (syncQueue.length <= 1) {
-      if (vars.sync.updateAction < updateAction) updateAction = vars.sync.updateAction;
-      if (!haveUpdate) haveUpdate = vars.sync.haveUpdate;
-
       dispatch({
         type: SYNC_COMMIT, payload: { updateAction, haveUpdate },
       });
@@ -3219,6 +3216,9 @@ const syncInQueue = (
     vars.sync.lastSyncDT = Date.now();
   } catch (error) {
     console.log('Sync error: ', error);
+    if (updateAction < vars.sync.updateAction) vars.sync.updateAction = updateAction;
+    if (haveUpdate) vars.sync.haveUpdate = haveUpdate;
+
     const signInDT = getState().localSettings.signInDT;
     dispatch({ type: SYNC_ROLLBACK, payload: { error, signInDT } });
     if (waitResolve) waitResolve(false);
@@ -3244,9 +3244,6 @@ export const sync = (doForceListFPaths = false, updateAction = 0) => async (
 
     if (foundDoForce && foundUpdateAction) return;
   }
-  if (syncQueue.length === 0) {
-    [vars.sync.updateAction, vars.sync.haveUpdate] = [Infinity, false];
-  }
 
   const task = syncInQueue(null, doForceListFPaths, updateAction, dispatch, getState);
   task[TASK_DO_FORCE_LIST_FPATHS] = doForceListFPaths;
@@ -3260,9 +3257,6 @@ export const syncAndWait = (doForceListFPaths = false, updateAction = 0) => asyn
   if (syncQueue.length >= 7) {
     console.log('Sync queue length is too high:', syncQueue.length);
     return false;
-  }
-  if (syncQueue.length === 0) {
-    [vars.sync.updateAction, vars.sync.haveUpdate] = [Infinity, false];
   }
 
   const waitPromise = new Promise(resolve => {
@@ -3281,6 +3275,10 @@ export const syncAndWait = (doForceListFPaths = false, updateAction = 0) => asyn
 export const tryUpdateSynced = (updateAction, haveUpdate) => async (
   dispatch, getState
 ) => {
+  if (vars.sync.updateAction < updateAction) updateAction = vars.sync.updateAction;
+  if (!haveUpdate) haveUpdate = vars.sync.haveUpdate;
+  [vars.sync.updateAction, vars.sync.haveUpdate] = [Infinity, false];
+
   if (updateAction === 2) return;
   if (updateAction === 1) {
     dispatch(updateSynced());
