@@ -109,6 +109,12 @@ const performFiles = async (data) => {
   return results;
 };
 
+const deleteFiles = async (fpaths) => {
+  for (const fpath of fpaths) {
+    await deleteFile(fpath);
+  }
+};
+
 const deleteAllFiles = async () => {
   // BUG Alert: localFile also uses IndexedDB too!
   // Make sure also want to delete all files in localFile as well!
@@ -177,8 +183,8 @@ const canUseSync = async () => {
 };
 
 const localDb = {
-  cachedFPaths, getFile, performFiles, deleteAllFiles, listFiles, exists,
-  getUnsavedNoteFPaths, canUseSync,
+  cachedFPaths, getFile, putFile, deleteFile, performFiles, deleteFiles, deleteAllFiles,
+  listFiles, exists, getUnsavedNoteFPaths, canUseSync,
 };
 
 export default localDb;
