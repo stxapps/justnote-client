@@ -5,13 +5,14 @@ import fileApi from './localFile';
 import {
   NOTES, SSLTS, SETTINGS, INFO, PINS, TAGS, UNSAVED_NOTES_UNSAVED, UNSAVED_NOTES_SAVED,
   INDEX, DOT_JSON, CD_ROOT, N_NOTES, COLS_PANEL_STATE, LOCAL_SETTINGS_STATE,
-  LOCK_SETTINGS_STATE,
+  LOCK_SETTINGS_STATE, PUT_FILE, DELETE_FILE,
 } from '../types/const';
 import {
   isObject, createNoteFPath, createDataFName, extractNoteFPath, createSsltFPath,
   createPinFPath, addFPath, getStaticFPath, getLastSettingsFPaths,
-  excludeNotObjContents, batchGetFileWithRetry, batchPutFileWithRetry,
-  batchDeleteFileWithRetry,
+  excludeNotObjContents, batchGetFileWithRetry, batchPerformFilesInfos,
+  batchPerformFilesIfEnough, getPerformFilesValueSize, getPerformFilesDataPerId,
+  getPerformFilesResultsPerId, throwIfPerformFilesError,
 } from '../utils';
 import { syncMode } from '../vars';
 import {
@@ -214,7 +215,7 @@ const fetchServerStaticFiles = async (conflictedNotes, notes) => {
   const fpaths = [];
   for (const conflictedNote of conflictedNotes) {
     for (const note of conflictedNote.notes) {
-      if (note.media) {
+      if (Array.isArray(note.media)) {
         for (const { name } of note.media) {
           if (name.startsWith(CD_ROOT + '/')) {
             const staticFPath = getStaticFPath(name);
@@ -225,7 +226,7 @@ const fetchServerStaticFiles = async (conflictedNotes, notes) => {
     }
   }
   for (const note of notes) {
-    if (note.media) {
+    if (Array.isArray(note.media)) {
       for (const { name } of note.media) {
         if (name.startsWith(CD_ROOT + '/')) {
           const staticFPath = getStaticFPath(name);
@@ -235,164 +236,247 @@ const fetchServerStaticFiles = async (conflictedNotes, notes) => {
     }
   }
 
-  const files = await fileApi.getFiles(fpaths); // Check if already exists locally
-
-  const remainFPaths = [];
-  for (let i = 0; i < files.fpaths.length; i++) {
-    const [fpath, content] = [files.fpaths[i], files.contents[i]];
+  const remainFPaths = []; // Check if already exists locally
+  for (const fpath of fpaths) {
+    const content = await fileApi.getFile(fpath);
     if (content === undefined) remainFPaths.push(fpath);
   }
 
-  const sFiles = await serverApi.getFiles(remainFPaths, true);
-  for (let i = 0; i < sFiles.fpaths.length; i++) {
-    if (sFiles.contents[i] === null) continue;
-    await fileApi.putFile(sFiles.fpaths[i], sFiles.contents[i]);
+  for (let i = 0; i < remainFPaths.length; i += N_NOTES) {
+    const sldFPaths = remainFPaths.slice(i, i + N_NOTES);
+    const files = await serverApi.getFiles(sldFPaths, true);
+    for (const { fpath, content } of files.responses) {
+      if (content === null) continue;
+      await fileApi.putFile(fpath, content);
+    }
   }
+};
+
+const _putNotes = async (listNames, notes, staticFPaths, manuallyManageError) => {
+  // Put static files and cdroot fpaths first, and index.json file last.
+  // So if errors, can leave the added fpaths as is. They won't interfere.
+  let sValues = [], eValues = [], cValues = [];
+  if (!syncMode.doSyncMode && Array.isArray(staticFPaths)) {
+    for (const fpath of staticFPaths) {
+      const content = await fileApi.getFile(fpath)
+      sValues.push({ id: fpath, type: PUT_FILE, path: fpath, content });
+
+      [sValues, eValues] = await batchPerformFilesIfEnough(
+        performFiles, sValues, eValues, [], []
+      );
+    }
+  }
+  for (let i = 0; i < listNames.length; i++) {
+    const [listName, note] = [listNames[i], notes[i]];
+    const fname = createDataFName(note.id, note.parentIds);
+
+    if (Array.isArray(note.media)) {
+      for (const { name, content } of note.media) {
+        const fpath = createNoteFPath(listName, fname, name)
+        eValues.push({ id: fpath, type: PUT_FILE, path: fpath, content });
+      }
+      [sValues, eValues] = await batchPerformFilesIfEnough(
+        performFiles, sValues, eValues, [], []
+      );
+    }
+
+    const fpath = createNoteFPath(listName, fname, INDEX + DOT_JSON);
+    const content = { title: note.title, body: note.body };
+    cValues.push({ id: note.id, type: PUT_FILE, path: fpath, content });
+  }
+
+  const minSize = batchPerformFilesInfos.cSize;
+  const preSize = (
+    batchPerformFilesInfos.sSize * sValues.length +
+    batchPerformFilesInfos.eSize * eValues.length
+  );
+  let preValues = [...sValues, ...eValues], mainValues = [], totalSize = preSize;
+  const allResults = [];
+  for (const value of cValues) {
+    const size = getPerformFilesValueSize(value, minSize);
+
+    if (totalSize + size >= batchPerformFilesInfos.maxSize) {
+      if (preValues.length > 0) {
+        const data = { values: preValues, isSequential: false, nItemsForNs: N_NOTES };
+        const results = await performFiles(data);
+        throwIfPerformFilesError(data, results);
+        allResults.push(...results);
+        [preValues, totalSize] = [[], totalSize - preSize];
+      }
+      if (totalSize + size >= batchPerformFilesInfos.maxSize) {
+        const data = { values: mainValues, isSequential: false, nItemsForNs: N_NOTES };
+        const results = await performFiles(data);
+        if (manuallyManageError !== true) throwIfPerformFilesError(data, results);
+        allResults.push(...results);
+        if (results.some(result => !result.success)) return allResults;
+        [mainValues, totalSize] = [[], 0];
+      }
+    }
+
+    mainValues.push(value);
+    totalSize += size;
+  }
+
+  let data;
+  if (preValues.length > 0) {
+    const preData = { values: preValues, isSequential: false, nItemsForNs: N_NOTES };
+    const mainData = { values: mainValues, isSequential: false, nItemsForNs: N_NOTES };
+    data = {
+      values: [preData, mainData], isSequential: true, nItemsForNs: N_NOTES,
+    };
+  } else {
+    data = { values: mainValues, isSequential: false, nItemsForNs: N_NOTES };
+  }
+  const results = await performFiles(data);
+  if (manuallyManageError !== true) throwIfPerformFilesError(data, results);
+  allResults.push(...results);
+
+  return allResults;
 };
 
 const putNotes = async (params) => {
   const { listNames, notes, staticFPaths, manuallyManageError } = params;
 
-  const mediaFPaths = [], mediaContents = [];
-  if (!syncMode.doSyncMode && Array.isArray(staticFPaths)) {
-    const files = await fileApi.getFiles(staticFPaths);
-    for (let i = 0; i < files.fpaths.length; i++) {
-      mediaFPaths.push(files.fpaths[i]);
-      mediaContents.push(files.contents[i]);
-    }
-  }
+  const successListNames = [], successNotes = [];
+  const errorListNames = [], errorNotes = [], errors = [];
 
-  const fpaths = [], contents = [], noteMap = {};
+  const results = await _putNotes(listNames, notes, staticFPaths, manuallyManageError);
+  const resultsPerId = getPerformFilesResultsPerId(results);
+
   for (let i = 0; i < listNames.length; i++) {
     const [listName, note] = [listNames[i], notes[i]];
 
-    const fname = createDataFName(note.id, note.parentIds);
-    const fpath = createNoteFPath(listName, fname, INDEX + DOT_JSON);
-
-    fpaths.push(fpath);
-    contents.push({ title: note.title, body: note.body });
-    if (note.media) {
-      for (const { name, content } of note.media) {
-        mediaFPaths.push(createNoteFPath(listName, fname, name));
-        mediaContents.push(content);
-      }
-    }
-    noteMap[fpath] = { listName, id: note.id };
-  }
-
-  const _successListNames = [], _successNoteIds = [];
-  const successListNames = [], successNoteIds = [], successNotes = [];
-  const errorListNames = [], errorNoteIds = [], errorNotes = [], errors = [];
-
-  // Put static files and cdroot fpaths first, and index.json file last.
-  // So if errors, can leave the added fpaths as is. They won't interfere.
-  await putFiles(mediaFPaths, mediaContents);
-
-  // Use dangerouslyIgnoreError=true to manage which succeeded/failed manually.
-  const { responses } = await putFiles(fpaths, contents, !!manuallyManageError);
-  for (const response of responses) {
-    const { listName, id } = noteMap[response.fpath];
-    if (response.success) {
-      if (!_successNoteIds.includes(id)) {
-        _successListNames.push(listName);
-        _successNoteIds.push(id);
-      }
+    const result = resultsPerId[note.id];
+    if (isObject(result) && result.success) {
+      successListNames.push(listName);
+      successNotes.push(note);
     } else {
-      if (!errorNoteIds.includes(id)) {
-        errorListNames.push(listName);
-        errorNoteIds.push(id);
-        errors.push(response.error);
-      }
+      let error = new Error('Error on previous dependent item');
+      if (isObject(result)) error = new Error(result.error);
+
+      errorListNames.push(listName);
+      errorNotes.push(note);
+      errors.push(error);
     }
   }
-  for (let i = 0; i < _successListNames.length; i++) {
-    const [listName, id] = [_successListNames[i], _successNoteIds[i]];
-    if (errorNoteIds.includes(id)) continue;
-    successListNames.push(listName);
-    successNoteIds.push(id);
-  }
-
-  const itnMap = {};
-  for (const note of notes) itnMap[note.id] = note;
-
-  for (const id of successNoteIds) successNotes.push(itnMap[id]);
-  for (const id of errorNoteIds) errorNotes.push(itnMap[id]);
 
   return { successListNames, successNotes, errorListNames, errorNotes, errors };
 };
 
 const moveNotes = async (params) => {
-  const { listNames, notes, manuallyManageError } = params;
+  const { listNames, notes } = params;
 
   let now = Date.now();
 
-  const fpaths = [], contents = [], noteMap = {};
+  const values = [];
   for (let i = 0; i < listNames.length; i++) {
     const [listName, note] = [listNames[i], notes[i]];
     const fpath = createSsltFPath(listName, now, now, note.id);
-    fpaths.push(fpath);
-    contents.push({});
-    noteMap[fpath] = { listName, note };
+    values.push({ id: note.id, type: PUT_FILE, path: fpath, content: {} });
     now += 1;
   }
 
   const successListNames = [], successNotes = [];
   const errorListNames = [], errorNotes = [], errors = [];
 
-  const { responses } = await putFiles(fpaths, contents, !!manuallyManageError);
-  for (const response of responses) {
-    const { listName, note } = noteMap[response.fpath];
-    if (response.success) {
+  const data = { values, isSequential: false, nItemsForNs: N_NOTES };
+  const results = await performFiles(data);
+  const resultsPerId = getPerformFilesResultsPerId(results);
+
+  for (let i = 0; i < listNames.length; i++) {
+    const [listName, note] = [listNames[i], notes[i]];
+
+    const result = resultsPerId[note.id];
+    if (isObject(result) && result.success) {
       successListNames.push(listName);
       successNotes.push(note);
     } else {
+      let error = new Error('Error on previous dependent item');
+      if (isObject(result)) error = new Error(result.error);
+
       errorListNames.push(listName);
       errorNotes.push(note);
-      errors.push(response.error);
+      errors.push(error);
     }
   }
 
   return { successListNames, successNotes, errorListNames, errorNotes, errors };
 };
 
+const putSettings = async (params) => {
+  const { settingsFPaths, settingsContents } = params;
+
+  const values = [];
+  for (let i = 0; i < settingsFPaths.length; i++) {
+    const [fpath, content] = [settingsFPaths[i], settingsContents[i]];
+    values.push({ id: fpath, type: PUT_FILE, path: fpath, content: content });
+  }
+
+  const data = { values, isSequential: false, nItemsForNs: N_NOTES };
+  const results = await performFiles(data);
+  throwIfPerformFilesError(data, results);
+};
+
+const putInfos = async (params) => {
+  const { infoFPaths, infos } = params;
+
+  const values = [];
+  for (let i = 0; i < infoFPaths.length; i++) {
+    const [fpath, content] = [infoFPaths[i], infos[i]];
+    values.push({ id: fpath, type: PUT_FILE, path: fpath, content: content });
+  }
+
+  const data = { values, isSequential: false, nItemsForNs: N_NOTES };
+  const results = await performFiles(data);
+  throwIfPerformFilesError(data, results);
+};
+
+const deleteInfos = async (params) => {
+  const { infoFPaths } = params;
+
+  const values = [];
+  for (const fpath of infoFPaths) {
+    values.push(
+      { id: fpath, type: DELETE_FILE, path: fpath, doIgnoreDoesNotExistError: true }
+    );
+  }
+
+  const data = { values, isSequential: false, nItemsForNs: N_NOTES };
+  const results = await performFiles(data);
+  throwIfPerformFilesError(data, results);
+};
+
 const putPins = async (params) => {
   const { pins } = params;
 
-  const fpaths = [], contents = [];
+  const values = [];
   for (const pin of pins) {
-    fpaths.push(createPinFPath(pin.rank, pin.updatedDT, pin.addedDT, pin.id));
-    contents.push({});
+    const fpath = createPinFPath(pin.rank, pin.updatedDT, pin.addedDT, pin.id);
+    values.push({ id: fpath, type: PUT_FILE, path: fpath, content: {} });
   }
-  // Use dangerouslyIgnoreError=true to manage which succeeded/failed manually.
+
+  const data = { values, isSequential: false, nItemsForNs: N_NOTES };
+  const results = await performFiles(data);
   // Bug alert: if several pins and error, rollback is incorrect
   //   as some are successful but some aren't.
-  await putFiles(fpaths, contents);
-
-  return { pins };
-};
-
-const deletePins = async (params) => {
-  const { pins } = params;
-
-  const pinFPaths = pins.map(pin => {
-    return createPinFPath(pin.rank, pin.updatedDT, pin.addedDT, pin.id);
-  });
-  await deleteFiles(pinFPaths);
+  throwIfPerformFilesError(data, results);
 
   return { pins };
 };
 
 const getFiles = async (fpaths, dangerouslyIgnoreError = false) => {
-  // Bug alert: Do not support getting static files. Use serverApi or fileApi directly.
   const result = { responses: [], fpaths: [], contents: [] };
 
   const remainFPaths = [];
   if (syncMode.doSyncMode) {
+    // Bug alert: Do not support static files. Use fileApi directly.
     remainFPaths.push(...fpaths);
   } else {
-    const files = await ldbApi.getFiles(fpaths, true);
-    for (let i = 0; i < files.fpaths.length; i++) {
-      const [fpath, content] = [files.fpaths[i], files.contents[i]];
+    for (const fpath of fpaths) {
+      let content;
+      if ([NOTES, SSLTS, SETTINGS, INFO, PINS, TAGS].some(el => fpath.startsWith(el))) {
+        content = await ldbApi.getFile(fpath, true);
+      }
       if (content === undefined) {
         remainFPaths.push(fpath);
         continue;
@@ -428,53 +512,34 @@ const getFiles = async (fpaths, dangerouslyIgnoreError = false) => {
   return result;
 };
 
-const putFiles = async (fpaths, contents, dangerouslyIgnoreError = false) => {
-  // Bug alert: Do not support putting static files. Use serverApi or fileApi directly.
-  const result = { responses: [] };
+const performFiles = async (data) => {
+  let results;
+  if (syncMode.doSyncMode) {
+    // Bug alert: Do not support static files. Use fileApi directly.
+    results = await ldbApi.performFiles(data);
+  } else {
+    results = await serverApi.performFiles(data);
 
-  for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
-    const selectedFPaths = fpaths.slice(i, i + N_NOTES);
-    const selectedContents = contents.slice(i, i + N_NOTES);
-    const responses = await batchPutFileWithRetry(
-      getApi().putFile, selectedFPaths, selectedContents, 0, dangerouslyIgnoreError
-    );
-    for (const response of responses) {
-      result.responses.push(response);
+    const dataPerId = getPerformFilesDataPerId(data);
+    for (const result of results) {
+      if (!result.success) continue;
 
-      if (!syncMode.doSyncMode && response.success) {
-        const { fpath, content } = response;
-        if (
-          [NOTES, SSLTS, SETTINGS, INFO, PINS, TAGS].some(el => fpath.startsWith(el))
-        ) {
+      const { type, path: fpath, content } = dataPerId[result.id];
+      if (
+        [NOTES, SSLTS, SETTINGS, INFO, PINS, TAGS].some(el => fpath.startsWith(el))
+      ) {
+        if (type === PUT_FILE) {
           await ldbApi.putFile(fpath, content);
+        } else if (type === DELETE_FILE) {
+          await ldbApi.deleteFile(fpath);
+        } else {
+          console.log('In blockstack.performFiles, invalid data:', data);
         }
       }
     }
   }
 
-  return result;
-};
-
-const deleteFiles = async (fpaths) => {
-  // Bug alert: Do not support deleting static files. Use serverApi or fileApi directly.
-  for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
-    const selectedFPaths = fpaths.slice(i, i + N_NOTES);
-    await batchDeleteFileWithRetry(getApi().deleteFile, selectedFPaths, 0);
-
-    if (!syncMode.doSyncMode) {
-      const ldbFPaths = selectedFPaths.filter(fpath => {
-        return (
-          [NOTES, SSLTS, SETTINGS, INFO, PINS, TAGS].some(el => fpath.startsWith(el))
-        );
-      });
-      await ldbApi.deleteFiles(ldbFPaths);
-    }
-  }
-};
-
-const deleteServerFiles = async (fpaths) => {
-  if (syncMode.doSyncMode) return;
-  await serverApi.deleteFiles(fpaths);
+  return results;
 };
 
 const getLocalSettings = async () => {
@@ -499,12 +564,11 @@ const putLocalSettings = async (localSettings) => {
 };
 
 const getUnsavedNotes = async () => {
-  const _fpaths = await ldbApi.getUnsavedNoteFPaths();
-  const { fpaths, contents } = await ldbApi.getFiles(_fpaths, true);
+  const fpaths = await ldbApi.getUnsavedNoteFPaths();
 
   const unsavedArr = [], savedMap = {};
-  for (let i = 0; i < fpaths.length; i++) {
-    const fpath = fpaths[i], content = contents[i];
+  for (const fpath of fpaths) {
+    const content = await ldbApi.getFile(fpath, true);
 
     if (fpath.startsWith(UNSAVED_NOTES_UNSAVED)) {
       const id = fpath.slice((UNSAVED_NOTES_UNSAVED + '/').length, -1 * DOT_JSON.length);
@@ -616,7 +680,7 @@ const putLockSettings = async (lockSettings) => {
 
 const data = {
   listFPaths, listServerFPaths, toNotes, fetchStgsAndInfo, fetchNotes, putNotes,
-  moveNotes, putPins, deletePins, getFiles, putFiles, deleteFiles, deleteServerFiles,
+  moveNotes, putSettings, putInfos, deleteInfos, putPins, getFiles, performFiles,
   getLocalSettings, putLocalSettings, getUnsavedNotes, putUnsavedNote,
   deleteUnsavedNotes, deleteAllUnsavedNotes, deleteAllLocalFiles, getLockSettings,
   putLockSettings,

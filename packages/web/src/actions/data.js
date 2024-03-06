@@ -10,34 +10,23 @@ import {
 } from '../types/actionTypes';
 import {
   SETTINGS_POPUP, MY_NOTES, TRASH, ARCHIVE, ADDED_DT, UPDATED_DT, N_NOTES, CD_ROOT,
-  NOTES, IMAGES, SETTINGS, INFO, PINS, TAGS, INDEX, DOT_JSON,
+  NOTES, SSLTS, IMAGES, SETTINGS, INFO, PINS, TAGS, INDEX, DOT_JSON,
   NOTE_DATE_SHOWING_MODE_HIDE, NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS,
-  IMAGE_FILE_EXTS, HTML_FILE_EXTS,
+  IMAGE_FILE_EXTS, HTML_FILE_EXTS, PUT_FILE, DELETE_FILE,
 } from '../types/const';
 import {
-  isEqual, isObject, isString, isNumber, sleep, randomString, getStaticFPath,
-  getMainId, isListNameObjsValid, isTagNameObjsValid, indexOfClosingTag,
-  createNoteFPath, createDataFName, extractNoteFPath, extractDataFName, extractDataId,
-  listNoteMetas, listSettingsMetas, createSettingsFPath, getSettingsFPaths,
-  getLastSettingsFPaths, extractPinFPath, getPins, extractFPath, copyListNameObjs,
-  getFormattedTimeStamp, getDataParentIds, createPinFPath, extractTagFPath, getTags,
-  createTagFPath, stripHtml, createSsltFPath, extractSsltFPath, getNoteMainIds,
+  isEqual, isObject, isString, isNumber, randomString, getStaticFPath, getMainId,
+  isListNameObjsValid, isTagNameObjsValid, indexOfClosingTag, createNoteFPath,
+  createDataFName, extractNoteFPath, extractDataFName, extractDataId, listNoteMetas,
+  listSettingsMetas, createSettingsFPath, getSettingsFPaths, getLastSettingsFPaths,
+  extractPinFPath, getPins, extractFPath, copyListNameObjs, getFormattedTimeStamp,
+  getDataParentIds, createPinFPath, extractTagFPath, getTags, createTagFPath,
+  stripHtml, createSsltFPath, extractSsltFPath, getNoteMainIds,
+  batchPerformFilesIfEnough, throwIfPerformFilesError,
 } from '../utils';
 import { isUint8Array } from '../utils/index-web';
 import { initialSettingsState, initialInfoState } from '../types/initialStates';
 import vars from '../vars';
-
-const importAllDataLoop = async (fpaths, contents) => {
-  // One at a time to not overwhelm the server
-  const nNotes = vars.syncMode.doSyncMode ? N_NOTES : 1;
-  for (let i = 0; i < fpaths.length; i += nNotes) {
-    const _fpaths = fpaths.slice(i, i + nNotes);
-    const _contents = contents.slice(i, i + nNotes);
-    await dataApi.putFiles(_fpaths, _contents);
-
-    await sleep(300);
-  }
-};
 
 const _getBestMap = (fpath, idMap) => {
   // Export from Windows, path separator is \
@@ -158,11 +147,11 @@ const parseEvernoteImportedFile = async (dispatch, getState, zip, entries) => {
 
   if (progress.total === 0) return;
 
+  let sValues = [], eValues = [], cValues = [], now = Date.now();
   const idMap = {};
-  for (let i = 0, j = imgEntries.length; i < j; i += N_NOTES) {
+  for (let i = 0; i < imgEntries.length; i += N_NOTES) {
     const selectedEntries = imgEntries.slice(i, i + N_NOTES);
 
-    const fpaths = [], contents = [];
     for (const entry of selectedEntries) {
       const { fext } = extractFPath(entry.filename);
 
@@ -177,23 +166,22 @@ const parseEvernoteImportedFile = async (dispatch, getState, zip, entries) => {
       if (vars.syncMode.doSyncMode) {
         await fileApi.putFile(fpath, content);
       } else {
-        fpaths.push(fpath);
-        contents.push(content);
+        sValues.push({ id: fpath, type: PUT_FILE, path: fpath, content });
       }
     }
 
-    await importAllDataLoop(fpaths, contents);
+    [sValues, eValues, cValues] = await batchPerformFilesIfEnough(
+      dataApi.performFiles, sValues, eValues, cValues, [], 1, false
+    );
 
     progress.done += selectedEntries.length;
     dispatch(updateImportAllDataProgress(progress));
   }
 
-  let now = Date.now();
   const listName = MY_NOTES;
-  for (let i = 0, j = htmlEntries.length; i < j; i += N_NOTES) {
+  for (let i = 0; i < htmlEntries.length; i += N_NOTES) {
     const selectedEntries = htmlEntries.slice(i, i + N_NOTES);
 
-    const fpaths = [], contents = [];
     for (const entry of selectedEntries) {
       const content = await entry.getData(new zip.TextWriter());
       if (!content) continue;
@@ -241,8 +229,9 @@ const parseEvernoteImportedFile = async (dispatch, getState, zip, entries) => {
         if (imgFPath) {
           body = body.split(fpath).join('cdroot/' + imgFPath);
 
-          fpaths.push(`${dpath}/cdroot/${imgFPath}`);
-          contents.push('');
+          const eFPath = `${dpath}/cdroot/${imgFPath}`;
+          const eContent = '';
+          eValues.push({ id: eFPath, type: PUT_FILE, path: eFPath, content: eContent });
         }
       }
 
@@ -396,12 +385,16 @@ const parseEvernoteImportedFile = async (dispatch, getState, zip, entries) => {
       body = body.replace(/<div[^>]+class="para"[^>]*>&nbsp;<\/div>/gi, '<p><br></p>');
 
       if (title || body) {
-        fpaths.push(`${dpath}/index.json`);
-        contents.push({ title, body });
+        const cFPath = `${dpath}/index.json`;
+        const cContent = { title, body };
+        cValues.push({ id: cFPath, type: PUT_FILE, path: cFPath, content: cContent });
       }
     }
 
-    await importAllDataLoop(fpaths, contents);
+    const doForce = !(i + N_NOTES < htmlEntries.length);
+    [sValues, eValues, cValues] = await batchPerformFilesIfEnough(
+      dataApi.performFiles, sValues, eValues, cValues, [], 1, doForce
+    );
 
     progress.done += selectedEntries.length;
     dispatch(updateImportAllDataProgress(progress));
@@ -438,7 +431,7 @@ const parseGKeepImportedFile = async (dispatch, getState, zip, entries) => {
 
   if (progress.total === 0) return;
 
-  let now = Date.now();
+  let sValues = [], eValues = [], cValues = [], now = Date.now();
   const labelIdMap = {};
   if (labelsEntries.length > 0) {
     const settings = { ...initialSettingsState };
@@ -467,17 +460,16 @@ const parseGKeepImportedFile = async (dispatch, getState, zip, entries) => {
     const fpath = createSettingsFPath(fname);
     now += 1;
 
-    await importAllDataLoop([fpath], [settings]);
+    cValues.push({ id: fpath, type: PUT_FILE, path: fpath, content: settings });
 
     progress.done += labelsEntries.length;
     dispatch(updateImportAllDataProgress(progress));
   }
 
   const imgIdMap = {};
-  for (let i = 0, j = imgEntries.length; i < j; i += N_NOTES) {
+  for (let i = 0; i < imgEntries.length; i += N_NOTES) {
     const selectedEntries = imgEntries.slice(i, i + N_NOTES);
 
-    const fpaths = [], contents = [];
     for (const entry of selectedEntries) {
       const { fnameParts, fext } = extractFPath(entry.filename);
       if (fnameParts.length < 2) continue;
@@ -495,21 +487,21 @@ const parseGKeepImportedFile = async (dispatch, getState, zip, entries) => {
       if (vars.syncMode.doSyncMode) {
         await fileApi.putFile(fpath, content);
       } else {
-        fpaths.push(fpath);
-        contents.push(content);
+        sValues.push({ id: fpath, type: PUT_FILE, path: fpath, content });
       }
     }
 
-    await importAllDataLoop(fpaths, contents);
+    [sValues, eValues, cValues] = await batchPerformFilesIfEnough(
+      dataApi.performFiles, sValues, eValues, cValues, [], 1, false
+    );
 
     progress.done += selectedEntries.length;
     dispatch(updateImportAllDataProgress(progress));
   }
 
-  for (let i = 0, j = jsonEntries.length; i < j; i += N_NOTES) {
+  for (let i = 0; i < jsonEntries.length; i += N_NOTES) {
     const selectedEntries = jsonEntries.slice(i, i + N_NOTES);
 
-    const fpaths = [], contents = [];
     for (const entry of selectedEntries) {
       let content = await entry.getData(new zip.TextWriter());
       if (!content) continue;
@@ -574,8 +566,11 @@ const parseGKeepImportedFile = async (dispatch, getState, zip, entries) => {
             imgHtml += '" /></figure>';
             body += imgHtml;
 
-            fpaths.push(`${dpath}/cdroot/${imgFPath}`);
-            contents.push('');
+            const eFPath = `${dpath}/cdroot/${imgFPath}`;
+            const eContent = '';
+            eValues.push(
+              { id: eFPath, type: PUT_FILE, path: eFPath, content: eContent }
+            );
           }
         }
       }
@@ -602,12 +597,16 @@ const parseGKeepImportedFile = async (dispatch, getState, zip, entries) => {
       }
 
       if (title || body) {
-        fpaths.push(`${dpath}/index.json`);
-        contents.push({ title, body });
+        const cFPath = `${dpath}/index.json`;
+        const cContent = { title, body };
+        cValues.push({ id: cFPath, type: PUT_FILE, path: cFPath, content: cContent });
       }
     }
 
-    await importAllDataLoop(fpaths, contents);
+    const doForce = !(i + N_NOTES < jsonEntries.length);
+    [sValues, eValues, cValues] = await batchPerformFilesIfEnough(
+      dataApi.performFiles, sValues, eValues, cValues, [], 1, doForce
+    );
 
     progress.done += selectedEntries.length;
     dispatch(updateImportAllDataProgress(progress));
@@ -675,7 +674,7 @@ const parseRawImportedFile = async (dispatch, getState, zip, entries) => {
 
   if (progress.total === 0) return;
 
-  let now = Date.now();
+  let sValues = [], eValues = [], cValues = [], now = Date.now();
   const idMap = {};
   if (!isDirMapEmpty) {
     const settings = { ...initialSettingsState };
@@ -694,16 +693,15 @@ const parseRawImportedFile = async (dispatch, getState, zip, entries) => {
     const fpath = createSettingsFPath(fname);
     now += 1;
 
-    await importAllDataLoop([fpath], [settings]);
+    cValues.push({ id: fpath, type: PUT_FILE, path: fpath, content: settings });
 
     progress.done += 1;
     dispatch(updateImportAllDataProgress(progress));
   }
 
-  for (let i = 0, j = rawEntries.length; i < j; i += N_NOTES) {
+  for (let i = 0; i < rawEntries.length; i += N_NOTES) {
     const selectedEntries = rawEntries.slice(i, i + N_NOTES);
 
-    const fpaths = [], contents = [];
     for (const entry of selectedEntries) {
       const { fpathParts, fnameParts, fext } = extractFPath(entry.filename);
 
@@ -732,12 +730,16 @@ const parseRawImportedFile = async (dispatch, getState, zip, entries) => {
       }
 
       if (title || body) {
-        fpaths.push(`${dpath}/index.json`);
-        contents.push({ title, body });
+        const cFPath = `${dpath}/index.json`;
+        const cContent = { title, body };
+        cValues.push({ id: cFPath, type: PUT_FILE, path: cFPath, content: cContent });
       }
     }
 
-    await importAllDataLoop(fpaths, contents);
+    const doForce = !(i + N_NOTES < rawEntries.length);
+    [sValues, eValues, cValues] = await batchPerformFilesIfEnough(
+      dataApi.performFiles, sValues, eValues, cValues, [], 1, doForce
+    );
 
     progress.done += selectedEntries.length;
     dispatch(updateImportAllDataProgress(progress));
@@ -834,7 +836,13 @@ const _parseJustnoteSettings = async (getState, zip, settingsEntries) => {
   const fpath = createSettingsFPath(fname);
   now += 1;
 
-  await importAllDataLoop([fpath], [latestSettingsPart.content]);
+  const values = [
+    { id: fpath, type: PUT_FILE, path: fpath, content: latestSettingsPart.content },
+  ];
+
+  const data = { values, isSequential: false, nItemsForNs: 1 };
+  const results = await dataApi.performFiles(data);
+  throwIfPerformFilesError(data, results);
 };
 
 const parseJustnoteSettings = async (
@@ -848,10 +856,10 @@ const parseJustnoteSettings = async (
 const parseJustnoteImages = async (
   dispatch, existFPaths, zip, imgEntries, progress
 ) => {
-  for (let i = 0, j = imgEntries.length; i < j; i += N_NOTES) {
+  let sValues = [];
+  for (let i = 0; i < imgEntries.length; i += N_NOTES) {
     const selectedEntries = imgEntries.slice(i, i + N_NOTES);
 
-    const fpaths = [], contents = [];
     for (const entry of selectedEntries) {
       const { fpath, fpathParts, fnameParts } = extractFPath(entry.filename);
       if (fpathParts.length !== 2 || fpathParts[0] !== IMAGES) continue;
@@ -865,27 +873,93 @@ const parseJustnoteImages = async (
       if (vars.syncMode.doSyncMode) {
         await fileApi.putFile(fpath, content);
       } else {
-        fpaths.push(fpath);
-        contents.push(content);
+        sValues.push({ id: fpath, type: PUT_FILE, path: fpath, content });
       }
     }
 
-    await importAllDataLoop(fpaths, contents);
+    const doForce = !(i + N_NOTES < imgEntries.length);
+    [sValues] = await batchPerformFilesIfEnough(
+      dataApi.performFiles, sValues, [], [], [], 1, doForce
+    );
 
     progress.done += selectedEntries.length;
     dispatch(updateImportAllDataProgress(progress));
   }
 };
 
-const parseJustnoteNotes = async (
-  dispatch, existFPaths, toParents, leafIds, ssltInfos, zip, noteEntries, idMap,
-  progress
+const _pushSsltValue = (
+  ssltInfos, idMap, psInfos, fpathParts, id, parentId, eValues, existSslts
 ) => {
-  let now = Date.now(), existSslts = [];
-  for (let i = 0, j = noteEntries.length; i < j; i += N_NOTES) {
+  const mId = idMap[id] ? idMap[id] : id;
+  if (existSslts.includes(mId)) return;
+
+  const psInfo = psInfos[id];
+  const listName = isObject(psInfo) ? psInfo.listName : fpathParts[1];
+
+  let doPut = false;
+  if (idMap[id]) {
+    if (fpathParts[1] !== listName) doPut = true;
+  } else {
+    const ssltInfo = ssltInfos[parentId] || ssltInfos[id];
+
+    if (isObject(ssltInfo) && isObject(psInfo)) {
+      if (ssltInfo.listName !== listName) doPut = true;
+    } else if (isObject(ssltInfo) && !isObject(psInfo)) {
+      if (ssltInfo.listName !== listName) doPut = true;
+    } else if (!isObject(!ssltInfo) && isObject(psInfo)) {
+      if (fpathParts[1] !== listName) doPut = true;
+    }
+  }
+  if (listName === TRASH) doPut = true;
+  if (doPut) {
+    const now = Date.now();
+    const ssltFPath = createSsltFPath(listName, now, now, mId);
+    eValues.push({ id: ssltFPath, type: PUT_FILE, path: ssltFPath, content: {} });
+  }
+
+  existSslts.push(mId);
+};
+
+const parseJustnoteNotes = async (
+  dispatch, existFPaths, toParents, leafIds, ssltInfos, zip, noteEntries, ssltEntries,
+  idMap, progress
+) => {
+  const psInfos = {}, existSslts = [];
+  for (const entry of ssltEntries) {
+    const { fpath, fpathParts, fnameParts } = extractFPath(entry.path);
+    if (fpathParts.length !== 5 || fpathParts[0] !== SSLTS) continue;
+    if (fnameParts.length !== 2) continue;
+
+    const listName = fpathParts[1];
+    if (listName.length === 0) continue;
+
+    const updatedDT = fpathParts[2], addedDT = fpathParts[3], fname = fpathParts[4];
+    if (!(/^\d+$/.test(updatedDT))) continue;
+    if (!(/^\d+$/.test(addedDT))) continue;
+    if (!fname.endsWith(DOT_JSON)) continue;
+
+    const id = fname.slice(0, -5);
+    const tokens = id.split('-');
+    if (![3, 4].includes(tokens.length)) continue;
+    if (!(/^\d+$/.test(tokens[0]))) continue;
+    if (tokens.length === 4 && !(/^\d+$/.test(tokens[3]))) continue;
+
+    const pdUpdatedDT = parseInt(updatedDT, 10);
+
+    if (isObject(psInfos[id]) && psInfos[id].updatedDT > pdUpdatedDT) continue;
+
+    const content = entry.data;
+    if (!isEqual(content, {})) continue;
+
+    psInfos[id] = { updatedDT: pdUpdatedDT, listName, fpath };
+  }
+  progress.done += ssltEntries.length;
+  dispatch(updateImportAllDataProgress(progress));
+
+  let sValues = [], eValues = [], cValues = [];
+  for (let i = 0; i < noteEntries.length; i += N_NOTES) {
     const selectedEntries = noteEntries.slice(i, i + N_NOTES);
 
-    const fpaths = [], contents = [];
     for (const entry of selectedEntries) {
       const { fpath, fpathParts } = extractFPath(entry.filename);
       if (fpath.includes(CD_ROOT + '/')) {
@@ -895,7 +969,6 @@ const parseJustnoteNotes = async (
       }
       if (fpathParts[0] !== NOTES) continue;
 
-      const listName = fpathParts[1];
       const { id, parentIds } = extractDataFName(fpathParts[2]);
       if (!(/^\d+[A-Za-z]+$/.test(id))) continue;
 
@@ -954,8 +1027,11 @@ const parseJustnoteNotes = async (
             rootFPathParts[3] = INDEX + DOT_JSON;
 
             // If there's a parent, add a parent id with empty note content.
-            fpaths.push(rootFPathParts.join('/'));
-            contents.push({ title: '', body: '' });
+            const rootFPath = rootFPathParts.join('/');
+            const rootContent = { title: '', body: '' };
+            eValues.push(
+              { id: rootFPath, type: PUT_FILE, path: rootFPath, content: rootContent }
+            );
           }
 
           let newId = id;
@@ -968,10 +1044,12 @@ const parseJustnoteNotes = async (
         }
         fpathParts[2] = idMap[fpathParts[2]];
 
-        fpaths.push(fpathParts.join('/'));
-        contents.push(content);
+        const newFPath = fpathParts.join('/');
+        cValues.push({ id: newFPath, type: PUT_FILE, path: newFPath, content });
 
-        // No need sslts as a new id, use default list name in the fpath.
+        _pushSsltValue(
+          ssltInfos, idMap, psInfos, fpathParts, id, parentId, eValues, existSslts
+        );
 
         continue;
       }
@@ -1000,32 +1078,26 @@ const parseJustnoteNotes = async (
 
         if (!existFPaths.includes(rootFPath) && !idMap[rootFPath]) {
           // If there's a parent, add a parent id with empty note content.
-          fpaths.push(rootFPath);
-          contents.push({ title: '', body: '' });
+          const rootContent = { title: '', body: '' };
+          eValues.push(
+            { id: rootFPath, type: PUT_FILE, path: rootFPath, content: rootContent }
+          );
           idMap[rootFPath] = parentId; // Just for checking already added the parent.
         }
       }
       if (!existFPaths.includes(fpath)) {
-        fpaths.push(fpath);
-        contents.push(content);
+        cValues.push({ id: fpath, type: PUT_FILE, path: fpath, content });
       }
 
-      const ssltInfo = ssltInfos[parentId] || ssltInfos[id];
-      if (isObject(ssltInfo) && ssltInfo.listName !== listName) {
-        if (parentId && existSslts.includes(`${listName}${parentId}`)) continue;
-        if (existSslts.includes(`${listName}${id}`)) continue;
-
-        const ssltFPath = createSsltFPath(listName, now, now, id);
-        fpaths.push(ssltFPath);
-        contents.push({});
-        now += 1;
-
-        if (parentId) existSslts.push(`${listName}${parentId}`);
-        existSslts.push(`${listName}${id}`);
-      }
+      _pushSsltValue(
+        ssltInfos, idMap, psInfos, fpathParts, id, parentId, eValues, existSslts
+      );
     }
 
-    await importAllDataLoop(fpaths, contents);
+    const doForce = !(i + N_NOTES < noteEntries.length);
+    [sValues, eValues, cValues] = await batchPerformFilesIfEnough(
+      dataApi.performFiles, sValues, eValues, cValues, [], 1, doForce
+    );
 
     progress.done += selectedEntries.length;
     dispatch(updateImportAllDataProgress(progress));
@@ -1035,11 +1107,10 @@ const parseJustnoteNotes = async (
 const parseJustnotePins = async (
   dispatch, toRootIds, pins, zip, pinEntries, idMap, progress
 ) => {
-  let now = Date.now();
-  for (let i = 0, j = pinEntries.length; i < j; i += N_NOTES) {
+  let sValues = [], eValues = [], now = Date.now();
+  for (let i = 0; i < pinEntries.length; i += N_NOTES) {
     const selectedEntries = pinEntries.slice(i, i + N_NOTES);
 
-    const fpaths = [], contents = [];
     for (const entry of selectedEntries) {
       const { fpathParts, fnameParts } = extractFPath(entry.filename);
       if (fpathParts.length !== 5 || fpathParts[0] !== PINS) continue;
@@ -1070,8 +1141,8 @@ const parseJustnotePins = async (
       if (idMap[id]) {
         fpathParts[fpathParts.length - 1] = idMap[id] + DOT_JSON;
 
-        fpaths.push(fpathParts.join('/'));
-        contents.push(content);
+        const newFPath = fpathParts.join('/');
+        eValues.push({ id: newFPath, type: PUT_FILE, path: newFPath, content });
         continue;
       }
 
@@ -1089,11 +1160,14 @@ const parseJustnotePins = async (
       fpathParts[2] = `${now}`;
       now += 1;
 
-      fpaths.push(fpathParts.join('/'));
-      contents.push(content);
+      const newFPath = fpathParts.join('/');
+      eValues.push({ id: newFPath, type: PUT_FILE, path: newFPath, content });
     }
 
-    await importAllDataLoop(fpaths, contents);
+    const doForce = !(i + N_NOTES < pinEntries.length);
+    [sValues, eValues] = await batchPerformFilesIfEnough(
+      dataApi.performFiles, sValues, eValues, [], [], 1, doForce
+    );
 
     progress.done += selectedEntries.length;
     dispatch(updateImportAllDataProgress(progress));
@@ -1103,11 +1177,10 @@ const parseJustnotePins = async (
 const parseJustnoteTags = async (
   dispatch, toRootIds, tags, zip, tagEntries, idMap, progress
 ) => {
-  let now = Date.now();
-  for (let i = 0, j = tagEntries.length; i < j; i += N_NOTES) {
+  let sValues = [], eValues = [], now = Date.now();
+  for (let i = 0; i < tagEntries.length; i += N_NOTES) {
     const selectedEntries = tagEntries.slice(i, i + N_NOTES);
 
-    const fpaths = [], contents = [];
     for (const entry of selectedEntries) {
       const { fpathParts, fnameParts } = extractFPath(entry.filename);
       if (fpathParts.length !== 6 || fpathParts[0] !== TAGS) continue;
@@ -1141,8 +1214,8 @@ const parseJustnoteTags = async (
       if (idMap[id]) {
         fpathParts[fpathParts.length - 1] = idMap[id] + DOT_JSON;
 
-        fpaths.push(fpathParts.join('/'));
-        contents.push(content);
+        const newFPath = fpathParts.join('/');
+        eValues.push({ id: newFPath, type: PUT_FILE, path: newFPath, content });
         continue;
       }
 
@@ -1156,11 +1229,14 @@ const parseJustnoteTags = async (
       fpathParts[3] = `${now}`;
       now += 1;
 
-      fpaths.push(fpathParts.join('/'));
-      contents.push(content);
+      const newFPath = fpathParts.join('/');
+      eValues.push({ id: newFPath, type: PUT_FILE, path: newFPath, content });
     }
 
-    await importAllDataLoop(fpaths, contents);
+    const doForce = !(i + N_NOTES < tagEntries.length);
+    [sValues, eValues] = await batchPerformFilesIfEnough(
+      dataApi.performFiles, sValues, eValues, [], [], 1, doForce
+    );
 
     progress.done += selectedEntries.length;
     dispatch(updateImportAllDataProgress(progress));
@@ -1171,11 +1247,10 @@ const parseJustnoteImportedFile = async (dispatch, getState, zip, entries) => {
 
   await syncAndWait(true, 2)(dispatch, getState);
 
-  let existFPaths = [], toRootIds, toParents, leafIds = [], ssltInfos;
-
   const fpaths = await dataApi.listFPaths(true);
   if (vars.syncMode.doSyncMode) fpaths.staticFPaths = await fileApi.getStaticFPaths();
 
+  let existFPaths = [], leafIds = [];
   existFPaths.push(...fpaths.noteFPaths);
   existFPaths.push(...fpaths.ssltFPaths);
   existFPaths.push(...fpaths.pinFPaths);
@@ -1183,18 +1258,17 @@ const parseJustnoteImportedFile = async (dispatch, getState, zip, entries) => {
   existFPaths.push(...fpaths.staticFPaths);
   existFPaths.push(...fpaths.settingsFPaths);
 
-  const nmRst = listNoteMetas(fpaths.noteFPaths, fpaths.ssltFPaths, {});
-  toRootIds = nmRst.toRootIds;
-  toParents = nmRst.toParents;
-  for (const meta of [...nmRst.noteMetas, ...nmRst.conflictedMetas]) {
+  const {
+    noteMetas, conflictedMetas, toRootIds, toParents, ssltInfos,
+  } = listNoteMetas(fpaths.noteFPaths, fpaths.ssltFPaths, {});
+  for (const meta of [...noteMetas, ...conflictedMetas]) {
     leafIds.push(meta.id);
   }
-  ssltInfos = nmRst.ssltInfos;
 
   const pins = getPins(fpaths.pinFPaths, {}, false, toRootIds);
   const tags = getTags(fpaths.tagFPaths, {}, toRootIds);
 
-  const noteEntries = [], pinEntries = [], tagEntries = [];
+  const noteEntries = [], ssltEntries = [], pinEntries = [], tagEntries = [];
   const imgEntries = [], settingsEntries = [];
   for (const entry of entries) {
     if (entry.directory) continue;
@@ -1203,6 +1277,10 @@ const parseJustnoteImportedFile = async (dispatch, getState, zip, entries) => {
 
     if (fpath.startsWith(NOTES)) {
       noteEntries.push(entry);
+      continue;
+    }
+    if (fpath.startsWith(SSLTS)) {
+      ssltEntries.push(entry);
       continue;
     }
     if (fpath.startsWith(PINS)) {
@@ -1224,7 +1302,7 @@ const parseJustnoteImportedFile = async (dispatch, getState, zip, entries) => {
   }
 
   const total = (
-    noteEntries.length + pinEntries.length + tagEntries.length +
+    noteEntries.length + ssltEntries.length + pinEntries.length + tagEntries.length +
     imgEntries.length + settingsEntries.length
   );
   const progress = { total, done: 0 };
@@ -1237,8 +1315,8 @@ const parseJustnoteImportedFile = async (dispatch, getState, zip, entries) => {
 
   const idMap = {};
   await parseJustnoteNotes(
-    dispatch, existFPaths, toParents, leafIds, ssltInfos, zip, noteEntries, idMap,
-    progress
+    dispatch, existFPaths, toParents, leafIds, ssltInfos, zip, noteEntries,
+    ssltEntries, idMap, progress
   );
   await parseJustnotePins(
     dispatch, toRootIds, pins, zip, pinEntries, idMap, progress
@@ -1364,26 +1442,6 @@ const _canExport = (noteMeta, lockSettings, toRootIds) => {
   return true;
 };
 
-const _filterPins = (pins, noteMainIds) => {
-  const filteredPins = [];
-  for (const pinMainId in pins) {
-    if (!noteMainIds.includes(pinMainId)) continue;
-    filteredPins.push(pins[pinMainId]);
-  }
-
-  return filteredPins;
-};
-
-const _filterTags = (tags, noteMainIds) => {
-  const filteredTags = [];
-  for (const tagMainId in tags) {
-    if (!noteMainIds.includes(tagMainId)) continue;
-    filteredTags.push(tags[tagMainId]);
-  }
-
-  return filteredTags;
-};
-
 export const exportAllData = () => async (dispatch, getState) => {
   dispatch(updateExportAllDataProgress({ total: 'calculating...', done: 0 }));
 
@@ -1397,54 +1455,66 @@ export const exportAllData = () => async (dispatch, getState) => {
 
   const lockSettings = getState().lockSettings;
 
-  const fpaths = [], fileFPaths = [], nfpToLn = {};
-  let pins, tags, toRootIds;
+  let lfpRst;
   try {
-    const {
-      noteFPaths, ssltFPaths, settingsFPaths, pinFPaths, tagFPaths,
-    } = await dataApi.listFPaths(true);
-    const nmRst = listNoteMetas(noteFPaths, ssltFPaths, {});
-    toRootIds = nmRst.toRootIds;
-
-    const noteMainIds = [];
-    for (const meta of [...nmRst.noteMetas, ...nmRst.conflictedMetas]) {
-      if (!_canExport(meta, lockSettings, toRootIds)) continue;
-      noteMainIds.push(getMainId(meta.id, toRootIds));
-
-      for (const fpath of meta.fpaths) {
-        fpaths.push(fpath);
-        if (fpath.includes(CD_ROOT + '/')) {
-          const staticFPath = getStaticFPath(fpath);
-          if (vars.syncMode.doSyncMode) {
-            if (!fileFPaths.includes(staticFPath)) fileFPaths.push(staticFPath);
-          } else {
-            if (!fpaths.includes(staticFPath)) fpaths.push(staticFPath);
-          }
-        }
-        nfpToLn[fpath] = meta.listName;
-      }
-    }
-
-    const lsfpsResult = getLastSettingsFPaths(settingsFPaths);
-    if (lsfpsResult.fpaths.length > 0) {
-      const lastSettingsFPath = lsfpsResult.fpaths[0];
-      const { contents } = await dataApi.getFiles([lastSettingsFPath], true);
-      if (!isEqual(initialSettingsState, contents[0])) {
-        fpaths.push(lastSettingsFPath);
-      }
-    }
-
-    pins = getPins(pinFPaths, {}, false, toRootIds);
-    pins = _filterPins(pins, noteMainIds);
-
-    tags = getTags(tagFPaths, {}, toRootIds);
-    tags = _filterTags(tags, noteMainIds);
+    lfpRst = await dataApi.listFPaths();
   } catch (error) {
     dispatch(updateExportAllDataProgress({ total: -1, done: -1, error: `${error}` }));
     return;
   }
 
-  const total = fpaths.length + fileFPaths.length + pins.length + tags.length;
+  const {
+    noteMetas, conflictedMetas, toRootIds, ssltInfos,
+  } = listNoteMetas(lfpRst.noteFPaths, lfpRst.ssltFPaths, {});
+  const pins = getPins(lfpRst.pinFPaths, {}, false, toRootIds);
+  const tags = getTags(lfpRst.tagFPaths, {}, toRootIds);
+
+  const fpaths = [], fileFPaths = [], noteMainIds = [];
+  const ssltObjs = [], pinObjs = [], tagObjs = [];
+
+  for (const meta of [...noteMetas, ...conflictedMetas]) {
+    if (!_canExport(meta, lockSettings, toRootIds)) continue;
+
+    for (const fpath of meta.fpaths) {
+      fpaths.push(fpath);
+      if (fpath.includes(CD_ROOT + '/')) {
+        const staticFPath = getStaticFPath(fpath);
+        if (vars.syncMode.doSyncMode) {
+          if (!fileFPaths.includes(staticFPath)) fileFPaths.push(staticFPath);
+        } else {
+          if (!fpaths.includes(staticFPath)) fpaths.push(staticFPath);
+        }
+      }
+    }
+    noteMainIds.push(getMainId(meta.id, toRootIds));
+  }
+
+  for (const mainId in ssltInfos) {
+    if (!noteMainIds.includes(mainId)) continue;
+    ssltObjs.push(ssltInfos[mainId]);
+  }
+  for (const mainId in pins) {
+    if (!noteMainIds.includes(mainId)) continue;
+    pinObjs.push(pins[mainId]);
+  }
+  for (const mainId in tags) {
+    if (!noteMainIds.includes(mainId)) continue;
+    tagObjs.push(tags[mainId]);
+  }
+
+  const lsfpsResult = getLastSettingsFPaths(lfpRst.settingsFPaths);
+  if (lsfpsResult.fpaths.length > 0) {
+    const lastSettingsFPath = lsfpsResult.fpaths[0];
+    const { contents } = await dataApi.getFiles([lastSettingsFPath], true);
+    if (!isEqual(initialSettingsState, contents[0])) {
+      fpaths.push(lastSettingsFPath);
+    }
+  }
+
+  const total = (
+    fpaths.length + fileFPaths.length + ssltObjs.length + pinObjs.length +
+    tagObjs.length
+  );
   const progress = { total, done: 0 };
   dispatch(updateExportAllDataProgress(progress));
 
@@ -1476,8 +1546,7 @@ export const exportAllData = () => async (dispatch, getState) => {
 
       for (let { fpath, content } of successResponses) {
         if (fpath.startsWith(NOTES)) {
-          const listName = nfpToLn[fpath];
-          const { fname, subName } = extractNoteFPath(fpath);
+          const { listName, fname, subName } = extractNoteFPath(fpath);
           const { id, parentIds } = extractDataFName(fname);
 
           let newFName = fname;
@@ -1511,7 +1580,7 @@ export const exportAllData = () => async (dispatch, getState) => {
       }
     }
 
-    for (let i = 0, j = fileFPaths.length; i < j; i += N_NOTES) {
+    for (let i = 0; i < fileFPaths.length; i += N_NOTES) {
       const selectedFPaths = fileFPaths.slice(i, i + N_NOTES);
 
       for (const fpath of selectedFPaths) {
@@ -1531,10 +1600,29 @@ export const exportAllData = () => async (dispatch, getState) => {
     }
 
     // Need idMap to be all populated before mapping pinId to a new id.
-    for (let i = 0, j = pins.length; i < j; i += N_NOTES) {
-      const selectedPins = pins.slice(i, i + N_NOTES);
+    for (let i = 0; i < ssltObjs.length; i += N_NOTES) {
+      const sldSsltObjs = ssltObjs.slice(i, i + N_NOTES);
 
-      for (const { rank, updatedDT, addedDT, id } of selectedPins) {
+      for (const { listName, updatedDT, addedDT, id } of sldSsltObjs) {
+        let mappedId = id;
+        if (idMap[toRootIds[id]]) mappedId = idMap[toRootIds[id]];
+
+        const fpath = createSsltFPath(listName, updatedDT, addedDT, mappedId);
+        const content = JSON.stringify({});
+
+        const reader = new zip.TextReader(content);
+        await zipWriter.add(fpath, reader);
+      }
+
+      progress.done += sldSsltObjs.length;
+      if (progress.done < progress.total) {
+        dispatch(updateExportAllDataProgress(progress));
+      }
+    }
+    for (let i = 0; i < pinObjs.length; i += N_NOTES) {
+      const sldPinObjs = pinObjs.slice(i, i + N_NOTES);
+
+      for (const { rank, updatedDT, addedDT, id } of sldPinObjs) {
         let mappedId = id;
         if (idMap[toRootIds[id]]) mappedId = idMap[toRootIds[id]];
 
@@ -1545,15 +1633,15 @@ export const exportAllData = () => async (dispatch, getState) => {
         await zipWriter.add(fpath, reader);
       }
 
-      progress.done += selectedPins.length;
+      progress.done += sldPinObjs.length;
       if (progress.done < progress.total) {
         dispatch(updateExportAllDataProgress(progress));
       }
     }
-    for (let i = 0, j = tags.length; i < j; i += N_NOTES) {
-      const selectedTags = tags.slice(i, i + N_NOTES);
+    for (let i = 0; i < tagObjs.length; i += N_NOTES) {
+      const sldTagObjs = tagObjs.slice(i, i + N_NOTES);
 
-      for (const { values } of selectedTags) {
+      for (const { values } of sldTagObjs) {
         for (const { tagName, rank, updatedDT, addedDT, id } of values) {
           let mappedId = id;
           if (idMap[toRootIds[id]]) mappedId = idMap[toRootIds[id]];
@@ -1566,7 +1654,7 @@ export const exportAllData = () => async (dispatch, getState) => {
         }
       }
 
-      progress.done += selectedTags.length;
+      progress.done += sldTagObjs.length;
       if (progress.done < progress.total) {
         dispatch(updateExportAllDataProgress(progress));
       }
@@ -1595,69 +1683,24 @@ export const updateExportAllDataProgress = (progress) => {
   };
 };
 
-const deleteAllNotes = async (dispatch, noteMetas, toFPaths, progress) => {
-  let addedDT = Date.now();
-
-  // One at a time to not overwhelm the server
-  const nNotes = vars.syncMode.doSyncMode ? N_NOTES : 1;
-  for (let i = 0, j = noteMetas.length; i < j; i += nNotes) {
-    const selectedNoteMetas = noteMetas.slice(i, i + nNotes);
-
-    const fromFPaths = [], fromContents = [], toListNames = [], toNotes = [];
-    for (const meta of selectedNoteMetas) {
-      // Dummy contents are enough and good for performance
-      const media = [];
-      for (const fpath of meta.fpaths) {
-        const { subName } = extractNoteFPath(fpath);
-        if (subName !== INDEX + DOT_JSON) {
-          media.push({ name: subName, content: '' });
-        }
-      }
-
-      const fromListName = meta.listName;
-      const fromNote = {
-        parentIds: meta.parentIds,
-        id: meta.id,
-        title: '', body: '', media,
-        addedDT: meta.addedDT,
-        updatedDT: meta.updatedDT,
-      };
-      const toNote = {
-        ...fromNote,
-        parentIds: [fromNote.id], id: `deleted${addedDT}${randomString(4)}`,
-        title: '', body: '', media: [],
-        updatedDT: addedDT,
-      };
-      addedDT += 1;
-
-      toListNames.push(fromListName);
-      toNotes.push(toNote);
-
-      if (!Array.isArray(toFPaths[fromNote.id])) continue;
-      for (const fpath of toFPaths[fromNote.id]) {
-        if (fpath.includes(CD_ROOT + '/')) continue; // Already empty string
-
-        let content;
-        if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
-        else content = '';
-
-        fromFPaths.push(fpath);
-        fromContents.push(content);
-      }
-    }
-
-    await dataApi.putNotes({ listNames: toListNames, notes: toNotes });
-
-    try {
-      await dataApi.putFiles(fromFPaths, fromContents);
-    } catch (error) {
-      console.log('deleteAllNotes error: ', error);
-      // error in this step should be fine
-    }
-
-    progress.done += selectedNoteMetas.length;
-    dispatch(updateDeleteAllDataProgress(progress));
+const deleteIfEnough = async (values, pValues, nNotes, doForce) => {
+  if (!doForce && values.length < nNotes && pValues.length < nNotes) {
+    return [values, pValues];
   }
+
+  const data = { values, isSequential: false, nItemsForNs: 1 };
+  const results = await dataApi.performFiles(data);
+  throwIfPerformFilesError(data, results);
+
+  try {
+    const pData = { values: pValues, isSequential: false, nItemsForNs: 1 };
+    await dataApi.performFiles(pData);
+  } catch (error) {
+    console.log('deleteAllNotes error: ', error);
+    // error in this step should be fine
+  }
+
+  return [[], []];
 };
 
 export const deleteAllData = () => async (dispatch, getState) => {
@@ -1715,67 +1758,114 @@ export const deleteAllData = () => async (dispatch, getState) => {
   if (progress.total === 0) return;
 
   try {
-    await deleteAllNotes(dispatch, allNoteMetas, toFPaths, progress);
+    let values = [], pValues = [], addedDT = Date.now(), nNotes = 32;
+    for (let i = 0; i < allNoteMetas.length; i += nNotes) {
+      const sldNoteMetas = allNoteMetas.slice(i, i + nNotes);
+      for (const meta of sldNoteMetas) {
+        const fromId = meta.id;
+        const toId = `deleted${addedDT}${randomString(4)}`
+        const toFName = createDataFName(toId, [fromId]);
+        const toFPath = createNoteFPath(meta.listName, toFName, INDEX + DOT_JSON);
+        const toContent = { title: '', body: '' };
+        values.push({ id: toFPath, type: PUT_FILE, path: toFPath, content: toContent });
+        addedDT += 1;
+
+        [values, pValues] = await deleteIfEnough(values, pValues, nNotes, false);
+
+        if (Array.isArray(toFPaths[fromId])) {
+          for (const fpath of toFPaths[fromId]) {
+            if (fpath.includes(CD_ROOT + '/')) continue; // Already empty string
+
+            if (fpath.endsWith(INDEX + DOT_JSON)) {
+              const content = { title: '', body: '' };
+              pValues.push({ id: fpath, type: PUT_FILE, path: fpath, content });
+            } else {
+              pValues.push({ id: fpath, type: PUT_FILE, path: fpath, content: '' });
+            }
+
+            [values, pValues] = await deleteIfEnough(values, pValues, nNotes, false);
+          }
+        }
+      }
+
+      progress.done += sldNoteMetas.length;
+      if (progress.done < progress.total) {
+        dispatch(updateDeleteAllDataProgress(progress));
+      }
+    }
 
     if (settingsFPaths.length > 0) {
-      const now = Date.now();
-      const fname = createDataFName(`${now}${randomString(4)}`, settingsIds);
-      const newSettingsFPath = createSettingsFPath(fname);
+      const toFName = createDataFName(`${addedDT}${randomString(4)}`, settingsIds);
+      const toFPath = createSettingsFPath(toFName);
+      const toContent = { ...initialSettingsState };
+      values.push({ id: toFPath, type: PUT_FILE, path: toFPath, content: toContent });
+      addedDT += 1;
 
-      await dataApi.putFiles([newSettingsFPath], [{ ...initialSettingsState }]);
-      try {
-        await dataApi.putFiles(settingsFPaths, settingsFPaths.map(() => ({})));
-      } catch (error) {
-        console.log('deleteAllData error: ', error);
-        // error in this step should be fine
+      [values, pValues] = await deleteIfEnough(values, pValues, nNotes, false);
+
+      for (const fpath of settingsFPaths) {
+        pValues.push({ id: fpath, type: PUT_FILE, path: fpath, content: {} });
+
+        [values, pValues] = await deleteIfEnough(values, pValues, nNotes, false);
       }
 
       progress.done += settingsFPaths.length;
-      dispatch(updateDeleteAllDataProgress(progress));
+      if (progress.done < progress.total) {
+        dispatch(updateDeleteAllDataProgress(progress));
+      }
     }
     if (infoFPath) {
-      const now = Date.now();
-      const newInfoFPath = `${INFO}${now}${DOT_JSON}`;
+      const toFPath = `${INFO}${addedDT}${DOT_JSON}`;
+      const toContent = { ...initialInfoState };
+      values.push({ id: toFPath, type: PUT_FILE, path: toFPath, content: toContent });
+      addedDT += 1;
 
-      await dataApi.putFiles([newInfoFPath], [{ ...initialInfoState }]);
-      try {
-        await dataApi.deleteFiles([infoFPath]);
-      } catch (error) {
-        console.log('deleteAllData error: ', error);
-        // error in this step should be fine
-      }
+      const pValue = { id: infoFPath, type: DELETE_FILE, path: infoFPath };
+      pValue.doIgnoreDoesNotExistError = true;
+      pValues.push(pValue);
+
+      [values, pValues] = await deleteIfEnough(values, pValues, nNotes, false);
 
       progress.done += 1;
-      dispatch(updateDeleteAllDataProgress(progress));
+      if (progress.done < progress.total) {
+        dispatch(updateDeleteAllDataProgress(progress));
+      }
     }
 
-    // One at a time to not overwhelm the server
-    const nNotes = vars.syncMode.doSyncMode ? N_NOTES : 1;
     for (let i = 0; i < staticFPaths.length; i += nNotes) {
-      const selectedFPaths = staticFPaths.slice(i, i + nNotes);
-      try {
-        await dataApi.deleteServerFiles(staticFPaths);
-      } catch (error) {
-        console.log('deleteAllData error: ', error);
-        // error in this step should be fine
+      const sldFPaths = staticFPaths.slice(i, i + nNotes);
+      if (!vars.syncMode.doSyncMode) {
+        for (const fpath of sldFPaths) {
+          const pValue = { id: fpath, type: DELETE_FILE, path: fpath };
+          pValue.doIgnoreDoesNotExistError = true;
+          pValues.push(pValue);
+
+          [values, pValues] = await deleteIfEnough(values, pValues, nNotes, false);
+        }
       }
 
-      progress.done += selectedFPaths.length;
-      dispatch(updateDeleteAllDataProgress(progress));
+      progress.done += sldFPaths.length;
+      if (progress.done < progress.total) {
+        dispatch(updateDeleteAllDataProgress(progress));
+      }
     }
     for (let i = 0; i < otherFPaths.length; i += nNotes) {
-      const selectedFPaths = otherFPaths.slice(i, i + nNotes);
-      try {
-        dataApi.deleteFiles(selectedFPaths);
-      } catch (error) {
-        console.log('deleteAllData error: ', error);
-        // error in this step should be fine
+      const sldFPaths = otherFPaths.slice(i, i + nNotes);
+      for (const fpath of sldFPaths) {
+        const pValue = { id: fpath, type: DELETE_FILE, path: fpath };
+        pValue.doIgnoreDoesNotExistError = true;
+        pValues.push(pValue);
+
+        [values, pValues] = await deleteIfEnough(values, pValues, nNotes, false);
       }
 
-      progress.done += selectedFPaths.length;
-      dispatch(updateDeleteAllDataProgress(progress));
+      progress.done += sldFPaths.length;
+      if (progress.done < progress.total) {
+        dispatch(updateDeleteAllDataProgress(progress));
+      }
     }
 
+    [values, pValues] = await deleteIfEnough(values, pValues, nNotes, true);
     await fileApi.deleteFiles(staticFPaths);
 
     // Need to close the settings popup to update the url hash,
@@ -2113,7 +2203,7 @@ const _deleteSyncData = async (dispatch, getState) => {
 
   try {
     const nItems = 1;
-    for (let i = 0, j = nUpdatedIds.length; i < j; i += nItems) {
+    for (let i = 0; i < nUpdatedIds.length; i += nItems) {
       const _nUpdatedIds = nUpdatedIds.slice(i, i + nItems);
       await Promise.all(_nUpdatedIds.map(id => {
         return deleteUpdatedNoteSyncData(id, nmRst, sslts, pins, tags);
@@ -2122,7 +2212,7 @@ const _deleteSyncData = async (dispatch, getState) => {
       progress.done += _nUpdatedIds.length;
       dispatch(updateDeleteSyncDataProgress(progress));
     }
-    for (let i = 0, j = nDeletedIds.length; i < j; i += nItems) {
+    for (let i = 0; i < nDeletedIds.length; i += nItems) {
       const _nDeletedIds = nDeletedIds.slice(i, i + nItems);
       await Promise.all(_nDeletedIds.map(id => {
         return deleteDeletedNoteSyncData(id, nmRst);
@@ -2131,7 +2221,7 @@ const _deleteSyncData = async (dispatch, getState) => {
       progress.done += _nDeletedIds.length;
       dispatch(updateDeleteSyncDataProgress(progress));
     }
-    for (let i = 0, j = sUpdatedIds.length; i < j; i += nItems) {
+    for (let i = 0; i < sUpdatedIds.length; i += nItems) {
       const _sUpdatedIds = sUpdatedIds.slice(i, i + nItems);
       await Promise.all(_sUpdatedIds.map(id => {
         return deleteUpdatedSettingsSyncData(id, smRst);
@@ -2140,7 +2230,7 @@ const _deleteSyncData = async (dispatch, getState) => {
       progress.done += _sUpdatedIds.length;
       dispatch(updateDeleteSyncDataProgress(progress));
     }
-    for (let i = 0, j = pDeletedIds.length; i < j; i += nItems) {
+    for (let i = 0; i < pDeletedIds.length; i += nItems) {
       const _pDeletedIds = pDeletedIds.slice(i, i + nItems);
       await Promise.all(_pDeletedIds.map(id => {
         return deleteDeletedPinSyncData(id, pins);
@@ -2149,7 +2239,7 @@ const _deleteSyncData = async (dispatch, getState) => {
       progress.done += _pDeletedIds.length;
       dispatch(updateDeleteSyncDataProgress(progress));
     }
-    for (let i = 0, j = tDeletedInfos.length; i < j; i += nItems) {
+    for (let i = 0; i < tDeletedInfos.length; i += nItems) {
       const _tDeletedInfos = tDeletedInfos.slice(i, i + nItems);
       await Promise.all(_tDeletedInfos.map(info => {
         return deleteDeletedTagSyncData(info.tagName, info.mainId, tags);
@@ -2158,7 +2248,7 @@ const _deleteSyncData = async (dispatch, getState) => {
       progress.done += _tDeletedInfos.length;
       dispatch(updateDeleteSyncDataProgress(progress));
     }
-    for (let i = 0, j = unusedFPaths.length; i < j; i += nItems) {
+    for (let i = 0; i < unusedFPaths.length; i += nItems) {
       const _unusedFPaths = unusedFPaths.slice(i, i + nItems);
       if (vars.syncMode.doSyncMode) await serverApi.deleteFiles(_unusedFPaths);
       await dataApi.deleteFiles(_unusedFPaths);

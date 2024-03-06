@@ -900,11 +900,11 @@ export const deriveFPaths = (media, noteMedia) => {
 
   for (const { name } of media) {
     if (!name.startsWith(CD_ROOT + '/')) continue;
-    if (noteMedia && noteMedia.some(m => m.name === name)) continue;
+    if (Array.isArray(noteMedia) && noteMedia.some(m => m.name === name)) continue;
     usedFPaths.push(getStaticFPath(name));
   }
 
-  if (noteMedia) {
+  if (Array.isArray(noteMedia)) {
     for (const { name } of noteMedia) {
       if (!name.startsWith(CD_ROOT + '/')) continue;
       if (media.some(m => m.name === name)) continue;
@@ -1767,63 +1767,63 @@ export const sortNotes = (notes, sortOn, doDescendingOrder) => {
   return sortedNotes;
 };
 
-export const listSettingsMetas = createSelector(
+export const listSettingsMetas = (settingsFPaths) => {
+  const {
+    metas, conflictedMetas, conflictWiths, toRootIds, toParents, toFPaths, allIds,
+  } = _listMetas(settingsFPaths, extractSettingsFPath, undefined);
+  return {
+    settingsMetas: metas, conflictedMetas, conflictWiths, toRootIds, toParents,
+    toFPaths, allIds,
+  };
+};
+
+export const getLastSettingsFPaths = createSelector(
   settingsFPaths => settingsFPaths,
   (settingsFPaths) => {
-    const {
-      metas, conflictedMetas, conflictWiths, toRootIds, toParents, toFPaths, allIds,
-    } = _listMetas(settingsFPaths, extractSettingsFPath, undefined);
-    return {
-      settingsMetas: metas, conflictedMetas, conflictWiths, toRootIds, toParents,
-      toFPaths, allIds,
-    };
+    const _v1FPaths = [], _v2FPaths = [];
+    for (const fpath of settingsFPaths) {
+      const { fname } = extractSettingsFPath(fpath);
+      const { id } = extractDataFName(fname);
+      const { dt } = extractDataId(id);
+
+      if (!isString(id) || id.length === 0 || !isNumber(dt)) continue;
+      if (/\d/.test(id[id.length - 1])) _v1FPaths.push({ fpath, id, dt });
+      else _v2FPaths.push(fpath);
+    }
+
+    let v1FPath;
+    for (const _v1FPath of _v1FPaths) {
+      if (!isObject(v1FPath)) {
+        v1FPath = _v1FPath;
+        continue;
+      }
+      if (v1FPath.dt < _v1FPath.dt) v1FPath = _v1FPath;
+    }
+
+    const v2FPaths = [];
+    const { settingsMetas, conflictedMetas } = listSettingsMetas(_v2FPaths);
+    for (const meta of [...settingsMetas, ...conflictedMetas]) {
+      for (const fpath of meta.fpaths) {
+        v2FPaths.push({ fpath, id: meta.id, dt: meta.updatedDT });
+      }
+    }
+
+    let _lastFPaths = [...v2FPaths];
+    if (isObject(v1FPath)) {
+      if (v2FPaths.every(el => el.dt < v1FPath.dt)) _lastFPaths.push(v1FPath);
+    }
+    _lastFPaths = _lastFPaths.sort((a, b) => b.dt - a.dt);
+
+    const lastFPaths = [], lastIds = [];
+    for (const lastFPath of _lastFPaths) {
+      if (lastFPaths.includes(lastFPath.fpath)) continue;
+      lastFPaths.push(lastFPath.fpath);
+      lastIds.push(lastFPath.id);
+    }
+
+    return { fpaths: lastFPaths, ids: lastIds };
   },
 );
-
-export const getLastSettingsFPaths = (settingsFPaths) => {
-  const _v1FPaths = [], _v2FPaths = [];
-  for (const fpath of settingsFPaths) {
-    const { fname } = extractSettingsFPath(fpath);
-    const { id } = extractDataFName(fname);
-    const { dt } = extractDataId(id);
-
-    if (!isString(id) || id.length === 0 || !isNumber(dt)) continue;
-    if (/\d/.test(id[id.length - 1])) _v1FPaths.push({ fpath, id, dt });
-    else _v2FPaths.push(fpath);
-  }
-
-  let v1FPath;
-  for (const _v1FPath of _v1FPaths) {
-    if (!isObject(v1FPath)) {
-      v1FPath = _v1FPath;
-      continue;
-    }
-    if (v1FPath.dt < _v1FPath.dt) v1FPath = _v1FPath;
-  }
-
-  const v2FPaths = [];
-  const { settingsMetas, conflictedMetas } = listSettingsMetas(_v2FPaths);
-  for (const meta of [...settingsMetas, ...conflictedMetas]) {
-    for (const fpath of meta.fpaths) {
-      v2FPaths.push({ fpath, id: meta.id, dt: meta.updatedDT });
-    }
-  }
-
-  let _lastFPaths = [...v2FPaths];
-  if (isObject(v1FPath)) {
-    if (v2FPaths.every(el => el.dt < v1FPath.dt)) _lastFPaths.push(v1FPath);
-  }
-  _lastFPaths = _lastFPaths.sort((a, b) => b.dt - a.dt);
-
-  const lastFPaths = [], lastIds = [];
-  for (const lastFPath of _lastFPaths) {
-    if (lastFPaths.includes(lastFPath.fpath)) continue;
-    lastFPaths.push(lastFPath.fpath);
-    lastIds.push(lastFPath.id);
-  }
-
-  return { fpaths: lastFPaths, ids: lastIds };
-};
 
 export const getFormattedTime = (timeStr, is24HFormat) => {
   const [hStr, mStr] = timeStr.trim().split(':');
@@ -2092,99 +2092,76 @@ export const batchGetFileWithRetry = async (
   return responses;
 };
 
-export const batchPutFileWithRetry = async (
-  putFile, fpaths, contents, callCount, dangerouslyIgnoreError = false
-) => {
-
-  const responses = await Promise.all(
-    fpaths.map((fpath, i) =>
-      putFile(fpath, contents[i])
-        .then(publicUrl => ({ publicUrl, fpath, content: contents[i], success: true }))
-        .catch(error => ({ error, fpath, content: contents[i], success: false }))
-    )
-  );
-
-  const failedResponses = responses.filter(({ success }) => !success);
-  const failedFPaths = failedResponses.map(({ fpath }) => fpath);
-  const failedContents = failedResponses.map(({ content }) => content);
-
-  if (failedResponses.length) {
-    if (callCount + 1 >= MAX_TRY) {
-      if (dangerouslyIgnoreError) {
-        console.log('batchPutFileWithRetry error: ', failedResponses[0].error);
-        return responses;
-      }
-      throw failedResponses[0].error;
-    }
-
-    return [
-      ...responses.filter(({ success }) => success),
-      ...(await batchPutFileWithRetry(
-        putFile, failedFPaths, failedContents, callCount + 1, dangerouslyIgnoreError
-      )),
-    ];
-  }
-
-  return responses;
+export const batchPerformFilesInfos = {
+  maxSize: 1.0, sSize: 1 / 7, eSize: 1 / 18, cSize: 1 / 12, dSize: 1 / 28,
 };
 
-export const batchDeleteFileWithRetry = async (
-  deleteFile, fpaths, callCount, dangerouslyIgnoreError = false
+export const getPerformFilesValueSize = (value, minSize) => {
+  let size = minSize;
+  if (isObject(value.content)) {
+    let len = 0;
+    if (isString(value.content.title)) len += value.content.title.length;
+    if (isString(value.content.body)) len += value.content.body.length;
+
+    // 1 character -> 3 bytes -> encrypted size -> MiB
+    const calSize = (len * 3 * 2) / (1024 * 1024);
+    // normalize to 1 with 20 Mib max size
+    size = Math.min(size, calSize / 20);
+  }
+  return size;
+};
+
+export const batchPerformFilesIfEnough = async (
+  performFiles, sValues, eValues, cValues, dValues,
+  nItemsForNs = N_NOTES, doForce = false
 ) => {
-
-  const responses = await Promise.all(
-    fpaths.map((fpath) =>
-      deleteFile(fpath)
-        .then(() => ({ fpath, success: true }))
-        .catch(error => {
-          // BUG ALERT
-          // Treat not found error as not an error as local data might be out-dated.
-          //   i.e. user tries to delete a not-existing file, it's ok.
-          // Anyway, if the file should be there, this will hide the real error!
-          if (
-            isObject(error) &&
-            isString(error.message) &&
-            (
-              (
-                error.message.includes('failed to delete') &&
-                error.message.includes('404')
-              ) ||
-              (
-                error.message.includes('deleteFile Error') &&
-                error.message.includes('GaiaError error 5')
-              ) ||
-              error.message.includes('does_not_exist') ||
-              error.message.includes('file_not_found')
-            )
-          ) {
-            return { fpath, success: true };
-          }
-          return { error, fpath, success: false };
-        })
-    )
+  // sValues: static files, eValues: empty contents/empty objects,
+  // cValues: content files, dValues: delete files,
+  const totalSize = (
+    sValues.length * batchPerformFilesInfos.sSize +
+    eValues.length * batchPerformFilesInfos.eSize +
+    cValues.length * batchPerformFilesInfos.cSize +
+    dValues.length * batchPerformFilesInfos.dSize
   );
-
-  const failedResponses = responses.filter(({ success }) => !success);
-  const failedFPaths = failedResponses.map(({ fpath }) => fpath);
-
-  if (failedResponses.length) {
-    if (callCount + 1 >= MAX_TRY) {
-      if (dangerouslyIgnoreError) {
-        console.log('batchDeleteFileWithRetry error: ', failedResponses[0].error);
-        return responses;
-      }
-      throw failedResponses[0].error;
-    }
-
-    return [
-      ...responses.filter(({ success }) => success),
-      ...(await batchDeleteFileWithRetry(
-        deleteFile, failedFPaths, callCount + 1, dangerouslyIgnoreError
-      )),
-    ];
+  if (!doForce && totalSize < batchPerformFilesInfos.maxSize) {
+    return [sValues, eValues, cValues, dValues];
   }
 
-  return responses;
+  let actValues = [], actSize = 0, remainArray = [[], [], [], []];
+  const iter = [
+    { i: 0, values: sValues, minSize: batchPerformFilesInfos.sSize },
+    { i: 1, values: eValues, minSize: batchPerformFilesInfos.eSize },
+    { i: 2, values: cValues, minSize: batchPerformFilesInfos.cSize },
+    { i: 3, values: dValues, minSize: batchPerformFilesInfos.dSize },
+  ];
+  for (const { i, values, minSize } of iter) {
+    for (const value of values) {
+      let size = minSize;
+      if (i === 2) size = getPerformFilesValueSize(value, minSize);
+
+      if (actSize + size >= batchPerformFilesInfos.maxSize) {
+        const data = { values: actValues, isSequential: false, nItemsForNs };
+        const results = await performFiles(data);
+        throwIfPerformFilesError(data, results);
+
+        [actValues, actSize, remainArray] = [[], 0, [[], [], [], []]];
+      }
+
+      actValues.push(value);
+      actSize += size;
+      remainArray[i].push(value);
+    }
+  }
+
+  if (doForce) {
+    const data = { values: actValues, isSequential: false, nItemsForNs };
+    const results = await performFiles(data);
+    throwIfPerformFilesError(data, results);
+
+    [actValues, actSize, remainArray] = [[], 0, [[], [], [], []]];
+  }
+
+  return remainArray;
 };
 
 export const extractFPath = (fpath) => {
@@ -2860,4 +2837,46 @@ export const getArraysPerKey = (keys, values) => {
     arraysPerKey[key].push(value);
   }
   return arraysPerKey;
+};
+
+export const getPerformFilesDataPerId = (data) => {
+  let dataPerId = {};
+  if (Array.isArray(data.values) && [true, false].includes(data.isSequential)) {
+    for (const value of data.values) {
+      const _dataPerId = getPerformFilesDataPerId(value);
+      dataPerId = { ...dataPerId, ..._dataPerId };
+    }
+  } else if (isString(data.id) && isString(data.type) && isString(data.path)) {
+    dataPerId[data.id] = data;
+  } else {
+    console.log('In getPerformFilesDataPerId, invalid data:', data);
+  }
+  return dataPerId;
+};
+
+export const getPerformFilesResultsPerId = (results) => {
+  const resultPerId = {};
+  for (const result of results) {
+    resultPerId[result.id] = result;
+  }
+  return resultPerId;
+};
+
+const _throwIfPerformFilesError = (data, resultsPerId) => {
+  if (Array.isArray(data.values) && [true, false].includes(data.isSequential)) {
+    for (const value of data.values) {
+      _throwIfPerformFilesError(value, resultsPerId);
+    }
+  } else if (isString(data.id) && isString(data.type) && isString(data.path)) {
+    const result = resultsPerId[data.id];
+    if (!isObject(result)) throw new Error('Error on previous dependent item');
+    if (!result.success) throw new Error(result.error);
+  } else {
+    console.log('In getPerformFilesDataPerId, invalid data:', data);
+  }
+};
+
+export const throwIfPerformFilesError = (data, results) => {
+  const resultsPerId = getPerformFilesResultsPerId(results);
+  _throwIfPerformFilesError(data, resultsPerId);
 };

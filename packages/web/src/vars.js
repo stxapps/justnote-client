@@ -144,11 +144,16 @@ const appState = {
   lastChangeDT: Date.now(),
 };
 
+const user = {
+  hubUrl: null,
+};
+
 const vars = {
   cachedFPaths, cachedServerFPaths, scrollPanel, keyboard, fetch, runAfterFetchTask,
   randomHouseworkTasks, updateNoteIdUrlHash, updateNoteId, changeListName,
   updateQueryString, updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, showUNEPopup,
   deleteOldNotes, updateSettings, updateSettingsPopup, notesReducer, displayReducer,
   editorReducer, iap, platform, syncMode, sync, importAllData, deleteSyncData, appState,
+  user,
 };
 export default vars;
