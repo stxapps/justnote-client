@@ -72,8 +72,8 @@ const performFile = async (data) => {
   const { id, type, path: fpath } = data;
 
   if (type === PUT_FILE) {
-    const publicUrl = await putFile(fpath, data.content);
-    return { success: true, id, publicUrl };
+    await putFile(fpath, data.content);
+    return { success: true, id };
   }
 
   if (type === DELETE_FILE) {
