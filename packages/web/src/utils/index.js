@@ -2139,7 +2139,7 @@ export const batchPerformFilesIfEnough = async (
       let size = minSize;
       if (i === 2) size = getPerformFilesValueSize(value, minSize);
 
-      if (actSize + size >= batchPerformFilesInfos.maxSize) {
+      if (actSize + size > batchPerformFilesInfos.maxSize) {
         const data = { values: actValues, isSequential: false, nItemsForNs };
         const results = await performFiles(data);
         throwIfPerformFilesError(data, results);

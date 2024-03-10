@@ -295,7 +295,7 @@ const _putNotes = async (listNames, notes, staticFPaths, manuallyManageError) =>
   for (const value of cValues) {
     const size = getPerformFilesValueSize(value, minSize);
 
-    if (totalSize + size >= batchPerformFilesInfos.maxSize) {
+    if (totalSize + size > batchPerformFilesInfos.maxSize) {
       if (preValues.length > 0) {
         const data = { values: preValues, isSequential: false, nItemsForNs: N_NOTES };
         const results = await performFiles(data);
@@ -303,7 +303,7 @@ const _putNotes = async (listNames, notes, staticFPaths, manuallyManageError) =>
         allResults.push(...results);
         [preValues, totalSize] = [[], totalSize - preSize];
       }
-      if (totalSize + size >= batchPerformFilesInfos.maxSize) {
+      if (totalSize + size > batchPerformFilesInfos.maxSize) {
         const data = { values: mainValues, isSequential: false, nItemsForNs: N_NOTES };
         const results = await performFiles(data);
         if (manuallyManageError !== true) throwIfPerformFilesError(data, results);

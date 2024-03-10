@@ -926,7 +926,7 @@ const parseJustnoteNotes = async (
 ) => {
   const psInfos = {}, existSslts = [];
   for (const entry of ssltEntries) {
-    const { fpath, fpathParts, fnameParts } = extractFPath(entry.path);
+    const { fpath, fpathParts, fnameParts } = extractFPath(entry.filename);
     if (fpathParts.length !== 5 || fpathParts[0] !== SSLTS) continue;
     if (fnameParts.length !== 2) continue;
 
@@ -938,18 +938,19 @@ const parseJustnoteNotes = async (
     if (!(/^\d+$/.test(addedDT))) continue;
     if (!fname.endsWith(DOT_JSON)) continue;
 
-    const id = fname.slice(0, -5);
-    const tokens = id.split('-');
-    if (![3, 4].includes(tokens.length)) continue;
-    if (!(/^\d+$/.test(tokens[0]))) continue;
-    if (tokens.length === 4 && !(/^\d+$/.test(tokens[3]))) continue;
+    let content = await entry.getData(new zip.TextWriter());
+    if (!content) continue;
 
-    const pdUpdatedDT = parseInt(updatedDT, 10);
+    try {
+      content = JSON.parse(content);
+      if (!isEqual(content, {})) continue;
+    } catch (error) {
+      console.log('JSON.parse sslt content error: ', error);
+      continue;
+    }
 
+    const id = fnameParts[0], pdUpdatedDT = parseInt(updatedDT, 10);
     if (isObject(psInfos[id]) && psInfos[id].updatedDT > pdUpdatedDT) continue;
-
-    const content = entry.data;
-    if (!isEqual(content, {})) continue;
 
     psInfos[id] = { updatedDT: pdUpdatedDT, listName, fpath };
   }
@@ -1070,12 +1071,14 @@ const parseJustnoteNotes = async (
       // If already exist, skip. So if errors, can continue where it left off.
       // Or if no exist, add as is.
       // Need to check per file as error can happen on any files.
-      if (parentId) {
+      if (parentId && !(parentId in toParents)) {
         const rootFPathParts = [...fpathParts.slice(0, 4)];
         rootFPathParts[2] = parentId;
         rootFPathParts[3] = INDEX + DOT_JSON;
         const rootFPath = rootFPathParts.join('/');
 
+        // Can't just check with existFPaths (need to check with toParents above)
+        //  as listName might be different between rootFPath and leafFPath.
         if (!existFPaths.includes(rootFPath) && !idMap[rootFPath]) {
           // If there's a parent, add a parent id with empty note content.
           const rootContent = { title: '', body: '' };
@@ -2080,7 +2083,7 @@ const deleteSyncDataIfEnough = async (values, doForce = false) => {
 
   let actValues = [];
   for (const value of values) {
-    if (actValues.length + 1 >= nNotes) {
+    if (actValues.length + 1 > nNotes) {
       const data = { values: actValues, isSequential: true, nItemsForNs: 1 };
       if (vars.syncMode.doSyncMode) {
         const results = await serverApi.performFiles(data);
