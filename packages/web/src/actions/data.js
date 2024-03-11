@@ -2076,9 +2076,9 @@ const getDeletedTagSyncData = (tagName, id, tags) => {
 
 const _deleteSyncDataIfEnough = async (arrOfVls, dValues) => {
   const values = [];
-  for (const vls of arrOfVls) {
-    if (!Array.isArray(vls) || vls.length === 0) continue;
-    const data = { values: vls, isSequential: true, nItemsForNs: 1 };
+  for (const eValues of arrOfVls) {
+    if (eValues.length === 0) continue;
+    const data = { values: eValues, isSequential: true, nItemsForNs: 1 };
     values.push(data);
   }
   values.push(...dValues);
@@ -2109,11 +2109,10 @@ const deleteSyncDataIfEnough = async (arrOfVls, dValues, doForce = false) => {
       const value = values[col];
       if (actCount + 1 > nNotes) {
         await _deleteSyncDataIfEnough(actArrOfVls, actDValues);
-
         [actArrOfVls, actDValues, actCount] = [[], [], 0];
       }
 
-      if (!Array.isArray(actArrOfVls[row])) actArrOfVls[row] = [];
+      while (actArrOfVls.length <= row) actArrOfVls.push([]);
       actArrOfVls[row].push(value);
       actCount += 1;
     }
@@ -2132,6 +2131,7 @@ const deleteSyncDataIfEnough = async (arrOfVls, dValues, doForce = false) => {
     [actArrOfVls, actDValues, actCount] = [[], [], 0];
   }
 
+  actArrOfVls = actArrOfVls.filter(values => values.length > 0);
   return [actArrOfVls, actDValues];
 };
 
