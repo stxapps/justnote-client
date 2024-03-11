@@ -1910,9 +1910,8 @@ const getUpdatedNoteSyncData = (id, nmRst, sslts, pins, tags) => {
   if (isObject(sslt) && ![id, transitId, rootId].includes(sslt.id)) {
     const { listName, updatedDT, addedDT } = extractSsltFPath(sslt.fpath);
     const fpath = createSsltFPath(listName, updatedDT, addedDT, id);
-    const content = {};
+    values.push({ id: fpath, type: PUT_FILE, path: fpath, content: {} });
 
-    values.push({ id: fpath, type: PUT_FILE, path: fpath, content });
     for (const dFPath of sslt.fpaths) {
       const value = { id: dFPath, type: DELETE_FILE, path: dFPath };
       value.doIgnoreDoesNotExistError = true;
@@ -1928,9 +1927,8 @@ const getUpdatedNoteSyncData = (id, nmRst, sslts, pins, tags) => {
   ) {
     const { rank, updatedDT, addedDT } = extractPinFPath(pin.fpath);
     const fpath = createPinFPath(rank, updatedDT, addedDT, id);
-    const content = {};
+    values.push({ id: fpath, type: PUT_FILE, path: fpath, content: {} });
 
-    values.push({ id: fpath, type: PUT_FILE, path: fpath, content });
     for (const dFPath of pin.fpaths) {
       const value = { id: dFPath, type: DELETE_FILE, path: dFPath };
       value.doIgnoreDoesNotExistError = true;
@@ -1950,9 +1948,8 @@ const getUpdatedNoteSyncData = (id, nmRst, sslts, pins, tags) => {
         const fpath = createTagFPath(
           eRst.tagName, eRst.rank, eRst.updatedDT, eRst.addedDT, id
         );
-        const content = {};
+        values.push({ id: fpath, type: PUT_FILE, path: fpath, content: {} });
 
-        values.push({ id: fpath, type: PUT_FILE, path: fpath, content });
         for (const dFPath of tag.fpaths) {
           const value = { id: dFPath, type: DELETE_FILE, path: dFPath };
           value.doIgnoreDoesNotExistError = true;
@@ -2001,8 +1998,7 @@ const getUpdatedSettingsSyncData = (id, smRst) => {
   const values = [];
   const fname = createDataFName(transitId, [rootId]);
   const fpath = createSettingsFPath(fname);
-  const content = {};
-  values.push({ id: fpath, type: PUT_FILE, path: fpath, content });
+  values.push({ id: fpath, type: PUT_FILE, path: fpath, content: {} });
 
   const parentIds = getDataParentIds(id, smRst.toParents);
 
@@ -2078,39 +2074,65 @@ const getDeletedTagSyncData = (tagName, id, tags) => {
   return values
 };
 
-const deleteSyncDataIfEnough = async (values, doForce = false) => {
+const _deleteSyncDataIfEnough = async (arrOfVls, dValues) => {
+  const values = [];
+  for (const vls of arrOfVls) {
+    if (!Array.isArray(vls) || vls.length === 0) continue;
+    const data = { values: vls, isSequential: true, nItemsForNs: 1 };
+    values.push(data);
+  }
+  values.push(...dValues);
+
+  const data = { values, isSequential: false, nItemsForNs: 1 };
+  if (vars.syncMode.doSyncMode) {
+    const results = await serverApi.performFiles(data);
+    throwIfPerformFilesError(data, results);
+  }
+  const results = await dataApi.performFiles(data);
+  throwIfPerformFilesError(data, results);
+};
+
+const deleteSyncDataIfEnough = async (arrOfVls, dValues, doForce = false) => {
   const nNotes = 30;
 
-  let actValues = [];
-  for (const value of values) {
-    if (actValues.length + 1 > nNotes) {
-      const data = { values: actValues, isSequential: true, nItemsForNs: 1 };
-      if (vars.syncMode.doSyncMode) {
-        const results = await serverApi.performFiles(data);
-        throwIfPerformFilesError(data, results);
+  let colLen = 0;
+  for (const values of arrOfVls) {
+    if (colLen < values.length) colLen = values.length;
+  }
+
+  let actArrOfVls = [], actDValues = [], actCount = 0;
+  for (let col = 0; col < colLen; col++) {
+    for (let row = 0; row < arrOfVls.length; row++) {
+      const values = arrOfVls[row];
+      if (col >= values.length) continue;
+
+      const value = values[col];
+      if (actCount + 1 > nNotes) {
+        await _deleteSyncDataIfEnough(actArrOfVls, actDValues);
+
+        [actArrOfVls, actDValues, actCount] = [[], [], 0];
       }
-      const results = await dataApi.performFiles(data);
-      throwIfPerformFilesError(data, results);
 
-      actValues = [];
+      if (!Array.isArray(actArrOfVls[row])) actArrOfVls[row] = [];
+      actArrOfVls[row].push(value);
+      actCount += 1;
     }
-
-    actValues.push(value);
+  }
+  for (const value of dValues) {
+    if (actCount + 1 > nNotes) {
+      await _deleteSyncDataIfEnough(actArrOfVls, actDValues);
+      [actArrOfVls, actDValues, actCount] = [[], [], 0];
+    }
+    actDValues.push(value);
+    actCount += 1;
   }
 
   if (doForce) {
-    const data = { values: actValues, isSequential: true, nItemsForNs: 1 };
-    if (vars.syncMode.doSyncMode) {
-      const results = await serverApi.performFiles(data);
-      throwIfPerformFilesError(data, results);
-    }
-    const results = await dataApi.performFiles(data);
-    throwIfPerformFilesError(data, results);
-
-    actValues = [];
+    await _deleteSyncDataIfEnough(actArrOfVls, actDValues);
+    [actArrOfVls, actDValues, actCount] = [[], [], 0];
   }
 
-  return actValues;
+  return [actArrOfVls, actDValues];
 };
 
 const _deleteSyncData = async (dispatch, getState) => {
@@ -2266,14 +2288,14 @@ const _deleteSyncData = async (dispatch, getState) => {
   if (progress.total === 0) return;
 
   try {
-    let dValues = [];
+    let arrOfVls = [], dValues = [];
     for (let i = 0; i < nUpdatedIds.length; i += N_NOTES) {
       const _nUpdatedIds = nUpdatedIds.slice(i, i + N_NOTES);
       for (const id of _nUpdatedIds) {
         const values = getUpdatedNoteSyncData(id, nmRst, sslts, pins, tags);
-        dValues.push(...values);
+        arrOfVls.push(values);
       }
-      dValues = await deleteSyncDataIfEnough(dValues);
+      [arrOfVls, dValues] = await deleteSyncDataIfEnough(arrOfVls, dValues);
 
       progress.done += _nUpdatedIds.length;
       if (progress.done < progress.total) {
@@ -2284,9 +2306,9 @@ const _deleteSyncData = async (dispatch, getState) => {
       const _sUpdatedIds = sUpdatedIds.slice(i, i + N_NOTES);
       for (const id of _sUpdatedIds) {
         const values = getUpdatedSettingsSyncData(id, smRst);
-        dValues.push(...values);
+        arrOfVls.push(values);
       }
-      dValues = await deleteSyncDataIfEnough(dValues);
+      [arrOfVls, dValues] = await deleteSyncDataIfEnough(arrOfVls, dValues);
 
       progress.done += _sUpdatedIds.length;
       if (progress.done < progress.total) {
@@ -2297,9 +2319,9 @@ const _deleteSyncData = async (dispatch, getState) => {
       const _nDeletedIds = nDeletedIds.slice(i, i + N_NOTES);
       for (const id of _nDeletedIds) {
         const values = getDeletedNoteSyncData(id, nmRst);
-        dValues.push(...values);
+        arrOfVls.push(values);
       }
-      dValues = await deleteSyncDataIfEnough(dValues);
+      [arrOfVls, dValues] = await deleteSyncDataIfEnough(arrOfVls, dValues);
 
       progress.done += _nDeletedIds.length;
       if (progress.done < progress.total) {
@@ -2310,9 +2332,9 @@ const _deleteSyncData = async (dispatch, getState) => {
       const _pDeletedIds = pDeletedIds.slice(i, i + N_NOTES);
       for (const id of _pDeletedIds) {
         const values = getDeletedPinSyncData(id, pins);
-        dValues.push(...values);
+        arrOfVls.push(values);
       }
-      dValues = await deleteSyncDataIfEnough(dValues);
+      [arrOfVls, dValues] = await deleteSyncDataIfEnough(arrOfVls, dValues);
 
       progress.done += _pDeletedIds.length;
       if (progress.done < progress.total) {
@@ -2323,9 +2345,9 @@ const _deleteSyncData = async (dispatch, getState) => {
       const _tDeletedInfos = tDeletedInfos.slice(i, i + N_NOTES);
       for (const info of _tDeletedInfos) {
         const values = getDeletedTagSyncData(info.tagName, info.mainId, tags);
-        dValues.push(...values);
+        arrOfVls.push(values);
       }
-      dValues = await deleteSyncDataIfEnough(dValues);
+      [arrOfVls, dValues] = await deleteSyncDataIfEnough(arrOfVls, dValues);
 
       progress.done += _tDeletedInfos.length;
       if (progress.done < progress.total) {
@@ -2339,7 +2361,7 @@ const _deleteSyncData = async (dispatch, getState) => {
           { id: fpath, type: DELETE_FILE, path: fpath, doIgnoreDoesNotExistError: true }
         );
       }
-      dValues = await deleteSyncDataIfEnough(dValues);
+      [arrOfVls, dValues] = await deleteSyncDataIfEnough(arrOfVls, dValues);
 
       progress.done += _unusedFPaths.length;
       if (progress.done < progress.total) {
@@ -2347,7 +2369,7 @@ const _deleteSyncData = async (dispatch, getState) => {
       }
     }
 
-    dValues = await deleteSyncDataIfEnough(dValues, true);
+    [arrOfVls, dValues] = await deleteSyncDataIfEnough(arrOfVls, dValues, true);
     dispatch(updateDeleteSyncDataProgress(progress));
   } catch (error) {
     dispatch(updateDeleteSyncDataProgress({ total: -1, done: -1, error: `${error}` }));
