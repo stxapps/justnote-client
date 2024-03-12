@@ -4,9 +4,7 @@ import {
   NOTES, SSLTS, SETTINGS, INFO, PINS, TAGS, UNSAVED_NOTES, DOT_JSON, PUT_FILE,
   DELETE_FILE,
 } from '../types/const';
-import {
-  isObject, isString, copyFPaths, addFPath, deleteFPath,
-} from '../utils';
+import { isObject, isString, copyFPaths, addFPath, deleteFPath } from '../utils';
 import { cachedFPaths } from '../vars';
 
 // Need cache to work even without IndexedDB.

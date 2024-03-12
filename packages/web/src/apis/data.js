@@ -258,7 +258,7 @@ const _putNotes = async (listNames, notes, staticFPaths, manuallyManageError) =>
   let sValues = [], eValues = [], cValues = [];
   if (!syncMode.doSyncMode && Array.isArray(staticFPaths)) {
     for (const fpath of staticFPaths) {
-      const content = await fileApi.getFile(fpath)
+      const content = await fileApi.getFile(fpath);
       sValues.push({ id: fpath, type: PUT_FILE, path: fpath, content });
 
       [sValues, eValues] = await batchPerformFilesIfEnough(
@@ -272,7 +272,7 @@ const _putNotes = async (listNames, notes, staticFPaths, manuallyManageError) =>
 
     if (Array.isArray(note.media)) {
       for (const { name, content } of note.media) {
-        const fpath = createNoteFPath(listName, fname, name)
+        const fpath = createNoteFPath(listName, fname, name);
         eValues.push({ id: fpath, type: PUT_FILE, path: fpath, content });
       }
       [sValues, eValues] = await batchPerformFilesIfEnough(
@@ -488,7 +488,7 @@ const getFiles = async (fpaths, dangerouslyIgnoreError = false) => {
     }
   }
 
-  for (let i = 0, j = remainFPaths.length; i < j; i += N_NOTES) {
+  for (let i = 0; i < remainFPaths.length; i += N_NOTES) {
     const selectedFPaths = remainFPaths.slice(i, i + N_NOTES);
     const responses = await batchGetFileWithRetry(
       getApi().getFile, selectedFPaths, 0, dangerouslyIgnoreError

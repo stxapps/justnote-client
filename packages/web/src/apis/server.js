@@ -76,7 +76,7 @@ const getFiles = async (fpaths, dangerouslyIgnoreError = false) => {
   // No order guarantee btw fpaths and responses
   const result = { responses: [], fpaths: [], contents: [] };
 
-  for (let i = 0, j = fpaths.length; i < j; i += N_NOTES) {
+  for (let i = 0; i < fpaths.length; i += N_NOTES) {
     const selectedFPaths = fpaths.slice(i, i + N_NOTES);
     const responses = await batchGetFileWithRetry(
       getFile, selectedFPaths, 0, dangerouslyIgnoreError

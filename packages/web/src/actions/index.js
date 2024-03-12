@@ -2041,7 +2041,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       try {
         const result = await dataApi.moveNotes({
-          listNames: toListNames, notes: toNotes
+          listNames: toListNames, notes: toNotes,
         });
         payload = { ...payload, ...result };
       } catch (error) {
@@ -2493,7 +2493,9 @@ const _cleanUpStaticFiles = async (dispatch, getState) => {
     }
     if (unusedValues.length > 0) {
       // Too risky, don't do it for now!
-      //const data = { values: unusedValues, isSequential: false, nItemsForNs: N_NOTES };
+      //const data = {
+      //  values: unusedValues, isSequential: false, nItemsForNs: N_NOTES,
+      //};
       //await dataApi.performFiles(data);
     }
   }
@@ -2525,7 +2527,7 @@ const _cleanUpStaticFiles = async (dispatch, getState) => {
 
     if (isTitleEqual(title, savedTitle) && isBodyEqual(body, savedBody)) {
       unusedIds.push(id);
-      if (unusedIds.length >= N_NOTES) break;
+      if (unusedIds.length >= nNotes) break;
     }
   }
 
@@ -3344,7 +3346,7 @@ const syncInQueue = (
     }
     for (let i = 0; i < gFPaths.length; i += N_NOTES) {
       const sldFPaths = gFPaths.slice(i, i + N_NOTES);
-      // No order guarantee btw _gFPaths and gContents
+      // No order guarantee btw gFPaths and gContents
       const files = await serverApi.getFiles(sldFPaths);
       for (const { fpath, content } of files.responses) {
         lcValues.push({ id: fpath, type: PUT_FILE, path: fpath, content });
@@ -3477,7 +3479,7 @@ const syncInQueue = (
     }
     for (let i = 0; i < gFPaths.length; i += N_NOTES) {
       const sldFPaths = gFPaths.slice(i, i + N_NOTES);
-      // No order guarantee btw _gFPaths and gContents
+      // No order guarantee btw gFPaths and gContents
       const files = await serverApi.getFiles(sldFPaths);
       for (const { fpath, content } of files.responses) {
         lcValues.push({ id: fpath, type: PUT_FILE, path: fpath, content });

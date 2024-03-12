@@ -1778,7 +1778,7 @@ export const deleteAllData = () => async (dispatch, getState) => {
       const sldNoteMetas = allNoteMetas.slice(i, i + N_NOTES);
       for (const meta of sldNoteMetas) {
         const fromId = meta.id;
-        const toId = `deleted${addedDT}${randomString(4)}`
+        const toId = `deleted${addedDT}${randomString(4)}`;
         const toFName = createDataFName(toId, [fromId]);
         const toFPath = createNoteFPath(meta.listName, toFName, INDEX + DOT_JSON);
         const toContent = { title: '', body: '' };
@@ -2071,7 +2071,7 @@ const getDeletedTagSyncData = (tagName, id, tags) => {
       { id: fpath, type: DELETE_FILE, path: fpath, doIgnoreDoesNotExistError: true }
     );
   }
-  return values
+  return values;
 };
 
 const _deleteSyncDataIfEnough = async (arrOfVls, dValues) => {
