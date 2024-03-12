@@ -2,8 +2,9 @@ import MMKVStorage from 'react-native-mmkv-storage';
 
 import {
   IS_USER_DUMMY, NOTES, SSLTS, SETTINGS, INFO, PINS, TAGS, UNSAVED_NOTES, DOT_JSON,
+  PUT_FILE, DELETE_FILE,
 } from '../types/const';
-import { isObject, copyFPaths, addFPath, deleteFPath } from '../utils';
+import { isObject, isString, copyFPaths, addFPath, deleteFPath } from '../utils';
 import { cachedFPaths } from '../vars';
 
 let _instance = null;
@@ -50,15 +51,6 @@ const getFile = async (fpath, dangerouslyIgnoreUndefined = false) => {
   return content;
 };
 
-const getFiles = async (fpaths, dangerouslyIgnoreUndefined = false) => {
-  const contents = [];
-  for (const fpath of fpaths) {
-    const content = await getFile(fpath, dangerouslyIgnoreUndefined);
-    contents.push(content);
-  }
-  return { fpaths, contents };
-};
-
 const putFile = async (fpath, content) => {
   if (fpath.endsWith(DOT_JSON)) await getInstance().setMapAsync(fpath, content);
   else await getInstance().setStringAsync(fpath, content);
@@ -72,12 +64,6 @@ const putFile = async (fpath, content) => {
   return fpath;
 };
 
-const putFiles = async (fpaths, contents) => {
-  for (let i = 0; i < fpaths.length; i++) {
-    await putFile(fpaths[i], contents[i]);
-  }
-};
-
 const deleteFile = async (fpath) => {
   await getInstance().removeItem(fpath);
 
@@ -88,6 +74,47 @@ const deleteFile = async (fpath) => {
   }
 
   return true;
+};
+
+const performFile = async (data) => {
+  const { id, type, path: fpath } = data;
+
+  if (type === PUT_FILE) {
+    await putFile(fpath, data.content);
+    return { success: true, id };
+  }
+
+  if (type === DELETE_FILE) {
+    await deleteFile(fpath);
+    return { success: true, id };
+  }
+
+  throw new Error(`Invalid data.type: ${data.type}`);
+};
+
+const performFiles = async (data) => {
+  const results = [];
+
+  if (Array.isArray(data.values) && [true, false].includes(data.isSequential)) {
+    for (const value of data.values) {
+      const pResults = await performFiles(value);
+      results.push(...pResults);
+      if (data.isSequential && pResults.some(result => !result.success)) break;
+    }
+  } else if (isString(data.id) && isString(data.type) && isString(data.path)) {
+    try {
+      const result = await performFile(data);
+      results.push(result);
+    } catch (error) {
+      results.push({
+        error: error.toString().slice(0, 999), success: false, id: data.id,
+      });
+    }
+  } else {
+    console.log('In localDb.performFiles, invalid data:', data);
+  }
+
+  return results;
 };
 
 const deleteFiles = async (fpaths) => {
@@ -139,8 +166,8 @@ const canUseSync = async () => {
 
 const localDb = {
   isUserDummy, updateUserDummy, getItem, setItem, removeItem,
-  cachedFPaths, getFile, getFiles, putFile, putFiles, deleteFile, deleteFiles,
-  deleteAllFiles, listFiles, exists, getUnsavedNoteFPaths, canUseSync,
+  cachedFPaths, getFile, putFile, deleteFile, performFiles, deleteFiles, deleteAllFiles,
+  listFiles, exists, getUnsavedNoteFPaths, canUseSync,
 };
 
 export default localDb;

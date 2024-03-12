@@ -77,8 +77,8 @@ import {
   DELETE_TAG_NAMES, UPDATE_SELECTING_TAG_NAME, RESET_STATE,
 } from '../types/actionTypes';
 import {
-  DOMAIN_NAME, APP_URL_SCHEME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH, PAYWALL_POPUP,
-  SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP, CONFIRM_DELETE_POPUP,
+  SD_HUB_URL, DOMAIN_NAME, APP_URL_SCHEME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH,
+  PAYWALL_POPUP, SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP, CONFIRM_DELETE_POPUP,
   CONFIRM_DISCARD_POPUP, NOTE_LIST_MENU_POPUP, NOTE_LIST_ITEM_MENU_POPUP,
   LOCK_EDITOR_POPUP, LOCK_MENU_POPUP, TAG_EDITOR_POPUP, SWWU_POPUP,
   MOVE_ACTION_NOTE_COMMANDS, MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS,
@@ -97,7 +97,7 @@ import {
   TASK_TYPE, TASK_DO_FORCE_LIST_FPATHS, TASK_UPDATE_ACTION, ADDED, SHOWING_STATUSES,
   IN_USE_LIST_NAME, LIST_NAME_MSGS, VALID_TAG_NAME, DUPLICATE_TAG_NAME,
   IN_USE_TAG_NAME, TAG_NAME_MSGS, UPDATED_DT, DELETE_ACTION_LIST_NAME,
-  DELETE_ACTION_TAG_NAME,
+  DELETE_ACTION_TAG_NAME, PUT_FILE, DELETE_FILE,
 } from '../types/const';
 import {
   isEqual, isArrayEqual, isObject, isString, isNumber, sleep, separateUrlAndParam,
@@ -115,6 +115,7 @@ import {
   getInUseTagNames, getEditingTagNameEditors, getNNoteMetasByQt, extractNoteFPath,
   extractSsltFPath, validateTagNameDisplayName, getTagNameObjFromDisplayName,
   getTagNameObj, getTags, getRawTags, extractTagFPath, createTagFPath, getNoteMainIds,
+  throwIfPerformFilesError, batchPerformFilesIfEnough,
 } from '../utils';
 import { _ } from '../utils/obj';
 import { initialSettingsState } from '../types/initialStates';
@@ -157,11 +158,12 @@ export const init = () => async (dispatch, getState) => {
 
   const isUserSignedIn = await userSession.isUserSignedIn();
   const isUserDummy = await ldbApi.isUserDummy();
-  let username = null, userImage = null;
+  let username = null, userImage = null, userHubUrl = null;
   if (isUserSignedIn) {
     const userData = await userSession.loadUserData();
     username = userData.username;
     userImage = getUserImageUrl(userData);
+    userHubUrl = userData.hubUrl;
   }
 
   const darkMatches = Appearance.getColorScheme() === 'dark';
@@ -185,6 +187,7 @@ export const init = () => async (dispatch, getState) => {
       isUserDummy,
       username,
       userImage,
+      userHubUrl,
       href: null,
       windowWidth: null,
       windowHeight: null,
@@ -325,6 +328,7 @@ export const updateUserSignedIn = () => async (dispatch, getState) => {
       isUserSignedIn: true,
       username: userData.username,
       image: getUserImageUrl(userData),
+      hubUrl: userData.hubUrl,
     },
   });
 };
@@ -1307,13 +1311,7 @@ export const addNote = (title, body, media, listName) => async (
 
   dispatch({ type: ADD_NOTE_COMMIT, payload });
 
-  try {
-    await fileApi.deleteFiles(localUnusedFPaths);
-  } catch (error) {
-    console.log('addNote clean up error: ', error);
-    // error in this step should be fine
-  }
-
+  await cleanUpNotes(null, null, localUnusedFPaths, getState);
   dispatch(sync());
 };
 
@@ -1358,15 +1356,7 @@ export const updateNote = (title, body, media, id) => async (dispatch, getState)
 
   dispatch({ type: UPDATE_NOTE_COMMIT, payload });
 
-  try {
-    await emptyNotes([fromNote.id], getState);
-    await dataApi.deleteServerFiles(serverUnusedFPaths);
-    await fileApi.deleteFiles(localUnusedFPaths);
-  } catch (error) {
-    console.log('updateNote clean up error: ', error);
-    // error in this step should be fine
-  }
-
+  await cleanUpNotes([fromNote.id], serverUnusedFPaths, localUnusedFPaths, getState);
   dispatch(sync());
 };
 
@@ -1452,9 +1442,7 @@ const _moveNotes = (toListName, ids) => async (dispatch, getState) => {
   addFetchedToVars(null, null, toNotes, vars);
 
   try {
-    const result = await dataApi.moveNotes({
-      listNames: toListNames, notes: toNotes, manuallyManageError: true,
-    });
+    const result = await dataApi.moveNotes({ listNames: toListNames, notes: toNotes });
     payload = { ...payload, ...result };
   } catch (error) {
     console.log('moveNotes error: ', error);
@@ -1518,7 +1506,10 @@ export const cleanUpSslts = () => async (dispatch, getState) => {
   } = listNoteMetas(noteFPaths, ssltFPaths, {});
   const noteMainIds = getNoteMainIds(noteMetas, conflictedMetas, toRootIds);
 
-  const unusedSsltFPaths = [];
+  let nNotes = N_NOTES;
+  if (getState().user.hubUrl === SD_HUB_URL) nNotes = 60;
+
+  const unusedValues = [];
   for (const fpath of ssltFPaths) {
     const { id } = extractSsltFPath(fpath);
     const ssltMainId = getMainId(id, toRootIds);
@@ -1529,14 +1520,17 @@ export const cleanUpSslts = () => async (dispatch, getState) => {
       !isObject(ssltInfos[ssltMainId]) ||
       ssltInfos[ssltMainId].fpath !== fpath
     ) {
-      unusedSsltFPaths.push(fpath);
-      if (unusedSsltFPaths.length >= N_NOTES) break;
+      unusedValues.push(
+        { id: fpath, type: DELETE_FILE, path: fpath, doIgnoreDoesNotExistError: true }
+      );
+      if (unusedValues.length >= nNotes) break;
     }
   }
 
-  if (unusedSsltFPaths.length > 0) {
+  if (unusedValues.length > 0) {
     try {
-      await dataApi.deleteFiles(unusedSsltFPaths);
+      const data = { values: unusedValues, isSequential: false, nItemsForNs: N_NOTES };
+      await dataApi.performFiles(data);
     } catch (error) {
       console.log('cleanUpSslts error: ', error);
       // error in this step should be fine
@@ -1596,24 +1590,16 @@ const _deleteNotes = (ids) => async (dispatch, getState) => {
 
   dispatch({ type: DELETE_NOTES_COMMIT, payload });
 
-  try {
-    const unusedIds = [], unusedFPaths = [];
-    for (const sNote of payload.successNotes) {
-      unusedIds.push(sNote.fromNote.id);
-      for (const { name } of sNote.fromNote.media) {
-        if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
-      }
+  const unusedIds = [], unusedFPaths = [];
+  for (const sNote of payload.successNotes) {
+    unusedIds.push(sNote.fromNote.id);
+    for (const { name } of sNote.fromNote.media) {
+      if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
     }
-
-    await emptyNotes(unusedIds, getState);
-    await dataApi.deleteServerFiles(unusedFPaths);
-    await fileApi.deleteFiles(unusedFPaths);
-    await cleanUpLocks(dispatch, getState);
-  } catch (error) {
-    console.log('deleteNotes clean up error: ', error);
-    // error in this step should be fine
   }
 
+  await cleanUpNotes(unusedIds, unusedFPaths, unusedFPaths, getState);
+  await cleanUpLocks(dispatch, getState);
   dispatch(sync());
 };
 
@@ -1709,15 +1695,9 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       dispatch({ type: UPDATE_NOTE_COMMIT, payload });
 
-      try {
-        await emptyNotes([fromNote.id], getState);
-        await dataApi.deleteServerFiles(serverUnusedFPaths);
-        await fileApi.deleteFiles(localUnusedFPaths);
-      } catch (error) {
-        console.log('retryDiedNotes update clean up error: ', error);
-        // error in this step should be fine
-      }
-
+      await cleanUpNotes(
+        [fromNote.id], serverUnusedFPaths, localUnusedFPaths, getState
+      );
       dispatch(sync());
     } else if (status === DIED_MOVING) {
       const [fromListNames, fromNotes] = [[note.fromListName], [note.fromNote]];
@@ -1728,7 +1708,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       try {
         const result = await dataApi.moveNotes({
-          listNames: toListNames, notes: toNotes, manuallyManageError: true,
+          listNames: toListNames, notes: toNotes,
         });
         payload = { ...payload, ...result };
       } catch (error) {
@@ -1771,24 +1751,16 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
       dispatch({ type: DELETE_NOTES_COMMIT, payload });
 
-      try {
-        const unusedIds = [], unusedFPaths = [];
-        for (const sNote of payload.successNotes) {
-          unusedIds.push(sNote.fromNote.id);
-          for (const { name } of sNote.fromNote.media) {
-            if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
-          }
+      const unusedIds = [], unusedFPaths = [];
+      for (const sNote of payload.successNotes) {
+        unusedIds.push(sNote.fromNote.id);
+        for (const { name } of sNote.fromNote.media) {
+          if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
         }
-
-        await emptyNotes(unusedIds, getState);
-        await dataApi.deleteServerFiles(unusedFPaths);
-        await fileApi.deleteFiles(unusedFPaths);
-        await cleanUpLocks(dispatch, getState);
-      } catch (error) {
-        console.log('retryDiedNotes delete clean up error: ', error);
-        // error in this step should be fine
       }
 
+      await cleanUpNotes(unusedIds, unusedFPaths, unusedFPaths, getState);
+      await cleanUpLocks(dispatch, getState);
       dispatch(sync());
     } else {
       throw new Error(`Invalid status: ${status} of id: ${id}`);
@@ -1893,19 +1865,15 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
   dispatch({ type: MERGE_NOTES_COMMIT, payload });
   await sortShowingNoteInfos(dispatch, getState);
 
-  try {
-    await emptyNotes(fromNotes.map(note => note.id), getState);
-    await dataApi.deleteServerFiles(serverUnusedFPaths);
-    await fileApi.deleteFiles(localUnusedFPaths);
-  } catch (error) {
-    console.log('mergeNote clean up error: ', error);
-    // error in this step should be fine
-  }
-
+  await cleanUpNotes(
+    fromNotes.map(note => note.id), serverUnusedFPaths, localUnusedFPaths, getState
+  );
   dispatch(sync());
 };
 
-const emptyNotes = async (ids, getState) => {
+const cleanUpNotes = async (
+  fromNoteIds, serverUnusedFPaths, localUnusedFPaths, getState
+) => {
   const pendingSslts = getState().pendingSslts;
 
   const noteFPaths = getNoteFPaths(getState());
@@ -1913,22 +1881,42 @@ const emptyNotes = async (ids, getState) => {
 
   const { toFPaths } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
 
-  const fpaths = [], contents = [];
-  for (const id of ids) {
-    if (!Array.isArray(toFPaths[id])) continue;
-    for (const fpath of toFPaths[id]) {
-      if (fpath.includes(CD_ROOT + '/')) continue; // Already empty string
+  const values = [];
+  if (Array.isArray(fromNoteIds)) {
+    for (const id of fromNoteIds) {
+      if (!Array.isArray(toFPaths[id])) continue;
+      for (const fpath of toFPaths[id]) {
+        if (fpath.includes(CD_ROOT + '/')) continue; // Already empty string
 
-      let content;
-      if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
-      else content = '';
+        let content;
+        if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
+        else content = '';
 
-      fpaths.push(fpath);
-      contents.push(content);
+        values.push({ id: fpath, type: PUT_FILE, path: fpath, content });
+      }
+    }
+  }
+  if (!vars.syncMode.doSyncMode && Array.isArray(serverUnusedFPaths)) {
+    for (const fpath of serverUnusedFPaths) {
+      values.push(
+        { id: fpath, type: DELETE_FILE, path: fpath, doIgnoreDoesNotExistError: true }
+      );
     }
   }
 
-  await dataApi.putFiles(fpaths, contents);
+  if (values.length > 0) {
+    try {
+      const data = { values, isSequential: false, nItemsForNs: N_NOTES };
+      await dataApi.performFiles(data);
+    } catch (error) {
+      console.log('cleanUpNotes error: ', error);
+      // error in this step should be fine
+    }
+  }
+
+  if (Array.isArray(localUnusedFPaths)) {
+    await fileApi.deleteFiles(localUnusedFPaths);
+  }
 };
 
 export const runAfterFetchTask = () => async (dispatch, getState) => {
@@ -1969,13 +1957,22 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
   const noteFPaths = getNoteFPaths(getState());
   const ssltFPaths = getSsltFPaths(getState());
 
-  const { noteMetas } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
+  const {
+    noteMetas, toRootIds, ssltInfos,
+  } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
   const trashNoteMetas = noteMetas.filter(meta => meta.listName === fromListName);
 
   const fromListNames = [], fromNotes = [];
   const toListNames = [], toNotes = [];
   for (const meta of trashNoteMetas) {
-    const interval = Date.now() - meta.updatedDT;
+    const mainId = getMainId(meta.id, toRootIds);
+
+    let updatedDT = meta.updatedDT;
+    if (isObject(ssltInfos[mainId]) && ssltInfos[mainId].updatedDT > updatedDT) {
+      updatedDT = ssltInfos[mainId].updatedDT;
+    }
+
+    const interval = Date.now() - updatedDT;
     const days = interval / 1000 / 60 / 60 / 24;
 
     if (days <= N_DAYS) continue;
@@ -2036,24 +2033,16 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
   dispatch({ type: DELETE_OLD_NOTES_IN_TRASH_COMMIT, payload });
   vars.deleteOldNotes.ids = null;
 
-  try {
-    const unusedIds = [], unusedFPaths = [];
-    for (const sNote of payload.successNotes) {
-      unusedIds.push(sNote.fromNote.id);
-      for (const { name } of sNote.fromNote.media) {
-        if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
-      }
+  const unusedIds = [], unusedFPaths = [];
+  for (const sNote of payload.successNotes) {
+    unusedIds.push(sNote.fromNote.id);
+    for (const { name } of sNote.fromNote.media) {
+      if (name.startsWith(CD_ROOT + '/')) unusedFPaths.push(getStaticFPath(name));
     }
-
-    await emptyNotes(unusedIds, getState);
-    await dataApi.deleteServerFiles(unusedFPaths);
-    await fileApi.deleteFiles(unusedFPaths);
-    await cleanUpLocks(dispatch, getState);
-  } catch (error) {
-    console.log('deleteOldNotesInTrash clean up error: ', error);
-    // error in this step should be fine
   }
 
+  await cleanUpNotes(unusedIds, unusedFPaths, unusedFPaths, getState);
+  await cleanUpLocks(dispatch, getState);
   dispatch(sync());
 };
 
@@ -2140,6 +2129,9 @@ const _cleanUpStaticFiles = async (dispatch, getState) => {
   } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
   const noteMainIds = getNoteMainIds(noteMetas, conflictedMetas, toRootIds);
 
+  let nNotes = N_NOTES;
+  if (getState().user.hubUrl === SD_HUB_URL) nNotes = 60;
+
   const usedFPaths = [];
   for (const meta of [...noteMetas, ...conflictedMetas]) {
     for (const fpath of meta.fpaths) {
@@ -2154,19 +2146,37 @@ const _cleanUpStaticFiles = async (dispatch, getState) => {
     }
   }
 
-  let staticFPaths = getStaticFPaths(getState());
-  if (vars.syncMode.doSyncMode) staticFPaths = await fileApi.getStaticFPaths();
+  if (!vars.syncMode.doSyncMode) {
+    // Delete unused static files in server
+    const staticFPaths = getStaticFPaths(getState());
+
+    const unusedValues = [];
+    for (const fpath of staticFPaths) {
+      if (usedFPaths.includes(fpath)) continue;
+      unusedValues.push(
+        { id: fpath, type: DELETE_FILE, path: fpath, doIgnoreDoesNotExistError: true }
+      );
+      if (unusedValues.length >= nNotes) break;
+    }
+    if (unusedValues.length > 0) {
+      // Too risky, don't do it for now!
+      //const data = {
+      //  values: unusedValues, isSequential: false, nItemsForNs: N_NOTES,
+      //};
+      //await dataApi.performFiles(data);
+    }
+  }
+
+  // Delete unused static files in local
+  const staticFPaths = await fileApi.getStaticFPaths();
 
   const unusedFPaths = [];
   for (const fpath of staticFPaths) {
     if (usedFPaths.includes(fpath)) continue;
     unusedFPaths.push(fpath);
-    if (unusedFPaths.length >= N_NOTES) break;
+    if (unusedFPaths.length >= nNotes) break;
   }
-
   if (unusedFPaths.length > 0) {
-    // Too risky, don't do it for now!
-    //await dataApi.deleteServerFiles(unusedFPaths);
     await fileApi.deleteFiles(unusedFPaths);
   }
 
@@ -2184,7 +2194,7 @@ const _cleanUpStaticFiles = async (dispatch, getState) => {
 
     if (isTitleEqual(title, savedTitle) && isBodyEqual(body, savedBody)) {
       unusedIds.push(id);
-      if (unusedIds.length >= N_NOTES) break;
+      if (unusedIds.length >= nNotes) break;
     }
   }
 
@@ -2502,7 +2512,9 @@ const updateSettingsInQueue = (dispatch, getState) => async () => {
   dispatch({ type: UPDATE_SETTINGS, payload });
 
   try {
-    await dataApi.putFiles([settingsFPath], [settings]);
+    await dataApi.putSettings({
+      settingsFPaths: [settingsFPath], settingsContents: [settings],
+    });
   } catch (error) {
     console.log('updateSettings error: ', error);
     dispatch({ type: UPDATE_SETTINGS_ROLLBACK, payload: { ...payload, error } });
@@ -2516,14 +2528,8 @@ const updateSettingsInQueue = (dispatch, getState) => async () => {
   dispatch({ type: TRY_UPDATE_SETTINGS_COMMIT });
   vars.updateSettings.doFetch = false;
 
-  try {
-    await dataApi.putFiles(_settingsFPaths, _settingsFPaths.map(() => ({})));
-    await cleanUpLocks(dispatch, getState);
-  } catch (error) {
-    console.log('updateSettings clean up error: ', error);
-    // error in this step should be fine
-  }
-
+  await cleanUpSettings(_settingsFPaths);
+  await cleanUpLocks(dispatch, getState);
   // Subsequent updateSettings or updateInfo might be the same and just return.
   await syncAndWait()(dispatch, getState);
 };
@@ -2535,6 +2541,20 @@ const updateSettings = async (dispatch, getState) => {
   const task = updateSettingsInQueue(dispatch, getState);
   task[TASK_TYPE] = UPDATE_SETTINGS;
   taskQueue.push(task);
+};
+
+const cleanUpSettings = async (settingsFPaths) => {
+  if (settingsFPaths.length === 0) return;
+
+  try {
+    await dataApi.putSettings({
+      settingsFPaths: settingsFPaths,
+      settingsContents: settingsFPaths.map(() => ({})),
+    });
+  } catch (error) {
+    console.log('cleanUpSettings error: ', error);
+    // error in this step should be fine
+  }
 };
 
 const updateInfoInQueue = (dispatch, getState) => async () => {
@@ -2555,7 +2575,7 @@ const updateInfoInQueue = (dispatch, getState) => async () => {
   dispatch({ type: UPDATE_INFO, payload });
 
   try {
-    await dataApi.putFiles([infoFPath], [info]);
+    await dataApi.putInfos({ infoFPaths: [infoFPath], infos: [info] });
   } catch (error) {
     console.log('updateInfo error: ', error);
     dispatch({ type: UPDATE_INFO_ROLLBACK, payload: { ...payload, error } });
@@ -2566,13 +2586,7 @@ const updateInfoInQueue = (dispatch, getState) => async () => {
   dispatch({ type: UPDATE_INFO_COMMIT, payload });
   dispatch({ type: TRY_UPDATE_INFO_COMMIT });
 
-  try {
-    if (_infoFPath) await dataApi.deleteFiles([_infoFPath]);
-  } catch (error) {
-    console.log('updateInfo clean up error: ', error);
-    // error in this step should be fine
-  }
-
+  if (isString(_infoFPath)) await cleanUpInfos([_infoFPath]);
   await syncAndWait()(dispatch, getState);
 };
 
@@ -2582,6 +2596,17 @@ const updateInfo = async (dispatch, getState) => {
   const task = updateInfoInQueue(dispatch, getState);
   task[TASK_TYPE] = UPDATE_INFO;
   taskQueue.push(task);
+};
+
+const cleanUpInfos = async (infoFPaths) => {
+  if (infoFPaths.length === 0) return;
+
+  try {
+    await dataApi.deleteInfos({ infoFPaths });
+  } catch (error) {
+    console.log('updateInfo clean up error: ', error);
+    // error in this step should be fine
+  }
 };
 
 const applySyncMode = async (dispatch, getState) => {
@@ -2648,7 +2673,9 @@ const mergeSettingsInQueue = (
 ) => async () => {
 
   try {
-    await dataApi.putFiles([settingsFPath], [settings]);
+    await dataApi.putSettings(
+      { settingsFPaths: [settingsFPath], settingsContents: [settings] }
+    );
   } catch (error) {
     console.log('mergeSettings error: ', error);
     dispatch({ type: MERGE_SETTINGS_ROLLBACK, payload: { ...payload, error } });
@@ -2659,13 +2686,7 @@ const mergeSettingsInQueue = (
   dispatch({ type: MERGE_SETTINGS_COMMIT, payload });
   vars.updateSettings.doFetch = false;
 
-  try {
-    await dataApi.putFiles(_settingsFPaths, _settingsFPaths.map(() => ({})));
-  } catch (error) {
-    console.log('mergeSettings clean up error: ', error);
-    // error in this step should be fine
-  }
-
+  await cleanUpSettings(_settingsFPaths);
   await syncAndWait()(dispatch, getState);
 };
 
@@ -2794,7 +2815,7 @@ const syncInQueue = (
     );
 
     // 1. Server side: upload all fpaths
-    let fpaths = [], contents = [];
+    let fpaths = [], sValues = [], eValues = [], cValues = [], dValues = [];
     for (const fpath of _noteFPaths) {
       if (fpath.includes(CD_ROOT + '/')) {
         const staticFPath = getStaticFPath(fpath);
@@ -2807,14 +2828,18 @@ const syncInQueue = (
             const fileFPath = 'file://' + staticFPath;
             if (!fpaths.includes(fileFPath)) {
               fpaths.push(fileFPath);
-              contents.push('');
+              sValues.push(
+                { id: fileFPath, type: PUT_FILE, path: fileFPath, content: '' }
+              );
             }
           } else {
             if (!fpaths.includes(staticFPath)) {
+              fpaths.push(staticFPath);
               const content = await fileApi.getFile(staticFPath);
               if (content !== undefined) {
-                fpaths.push(staticFPath);
-                contents.push(content);
+                sValues.push(
+                  { id: staticFPath, type: PUT_FILE, path: staticFPath, content }
+                );
               }
             }
           }
@@ -2823,26 +2848,31 @@ const syncInQueue = (
 
       if (noteFPaths.includes(fpath)) continue;
 
-      let content;
+      fpaths.push(fpath);
       if (allLeafFPaths.includes(fpath)) {
         if (fpath.includes(CD_ROOT + '/')) {
-          content = '';
+          eValues.push({ id: fpath, type: PUT_FILE, path: fpath, content: '' });
         } else {
           // No order guarantee but this is just one file
-          content = (await dataApi.getFiles([fpath])).contents[0];
+          const content = (await dataApi.getFiles([fpath])).contents[0];
+          cValues.push({ id: fpath, type: PUT_FILE, path: fpath, content });
         }
       } else {
-        if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
-        else content = '';
+        if (fpath.endsWith(INDEX + DOT_JSON)) {
+          const content = { title: '', body: '' };
+          eValues.push({ id: fpath, type: PUT_FILE, path: fpath, content });
+        } else {
+          eValues.push({ id: fpath, type: PUT_FILE, path: fpath, content: '' });
+        }
       }
-      fpaths.push(fpath);
-      contents.push(content);
+
+      [sValues, eValues, cValues, dValues] = await batchPerformFilesIfEnough(
+        serverApi.performFiles, sValues, eValues, cValues, dValues
+      );
     }
-    await serverApi.putFiles(fpaths, contents);
 
     // 2. Server side: loop used to be leaves in server and set to empty
-    fpaths = []; contents = [];
-    let deletedFPaths = [];
+    fpaths = [];
     for (const fpath of leafFPaths) {
       if (fpath.includes(CD_ROOT + '/')) {
         const staticFPath = getStaticFPath(fpath);
@@ -2850,31 +2880,39 @@ const syncInQueue = (
           !allLeafStaticFPaths.includes(staticFPath) &&
           staticFPaths.includes(staticFPath)
         ) {
-          if (!deletedFPaths.includes(staticFPath)) deletedFPaths.push(staticFPath);
+          if (!fpaths.includes(staticFPath)) {
+            fpaths.push(staticFPath);
+
+            const value = { id: staticFPath, type: DELETE_FILE, path: staticFPath };
+            value.doIgnoreDoesNotExistError = true;
+            dValues.push(value);
+          }
         }
       }
 
       if (allLeafFPaths.includes(fpath)) continue;
       if (fpath.includes(CD_ROOT + '/')) continue; // Already empty string
 
-      let content;
-      if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
-      else content = '';
+      if (fpath.endsWith(INDEX + DOT_JSON)) {
+        const content = { title: '', body: '' };
+        eValues.push({ id: fpath, type: PUT_FILE, path: fpath, content });
+      } else {
+        eValues.push({ id: fpath, type: PUT_FILE, path: fpath, content: '' });
+      }
 
-      fpaths.push(fpath);
-      contents.push(content);
+      [sValues, eValues, cValues, dValues] = await batchPerformFilesIfEnough(
+        serverApi.performFiles, sValues, eValues, cValues, dValues
+      );
     }
     // Too risky, don't do it for now!
     /*for (const staticFPath of staticFPaths) {
       if (allLeafStaticFPaths.includes(staticFPath)) continue;
       if (!deletedFPaths.includes(staticFPath)) deletedFPaths.push(staticFPath);
     }*/
-    await serverApi.putFiles(fpaths, contents);
-    await serverApi.deleteFiles(deletedFPaths);
 
     // 3. Local side: download all fpaths
-    fpaths = []; contents = [];
-    let _gFPaths = [], gStaticFPaths = [];
+    let gFPaths = [], gStaticFPaths = [];
+    let lsValues = [], leValues = [], lcValues = [], ldValues = [];
     for (const fpath of noteFPaths) {
       if (fpath.includes(CD_ROOT + '/')) {
         const staticFPath = getStaticFPath(fpath);
@@ -2903,36 +2941,51 @@ const syncInQueue = (
 
       if (allLeafFPaths.includes(fpath)) {
         if (fpath.includes(CD_ROOT + '/')) {
-          fpaths.push(fpath);
-          contents.push('');
+          leValues.push({ id: fpath, type: PUT_FILE, path: fpath, content: '' });
         } else {
-          _gFPaths.push(fpath);
+          gFPaths.push(fpath);
         }
         continue;
       }
 
-      let content;
-      if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
-      else content = '';
+      if (fpath.endsWith(INDEX + DOT_JSON)) {
+        const content = { title: '', body: '' };
+        leValues.push({ id: fpath, type: PUT_FILE, path: fpath, content });
+      } else {
+        leValues.push({ id: fpath, type: PUT_FILE, path: fpath, content: '' });
+      }
 
-      fpaths.push(fpath);
-      contents.push(content);
+      [lsValues, leValues, lcValues, ldValues] = await batchPerformFilesIfEnough(
+        dataApi.performFiles, lsValues, leValues, lcValues, ldValues
+      );
     }
-    // No order guarantee btw _gFPaths and gContents
-    let { fpaths: gFPaths, contents: gContents } = await serverApi.getFiles(_gFPaths);
     if (vars.platform.isReactNative) {
       await serverApi.getFiles(gStaticFPaths, true);
     } else {
-      const gStaticFiles = await serverApi.getFiles(gStaticFPaths, true);
-      for (let i = 0; i < gStaticFiles.fpaths.length; i++) {
-        if (gStaticFiles.contents[i] === null) continue;
-        await fileApi.putFile(gStaticFiles.fpaths[i], gStaticFiles.contents[i]);
+      for (let i = 0; i < gStaticFPaths.length; i += N_NOTES) {
+        const sldFPaths = gStaticFPaths.slice(i, i + N_NOTES);
+        const files = await serverApi.getFiles(sldFPaths, true);
+        for (const { fpath, content } of files.responses) {
+          if (content === null) continue;
+          await fileApi.putFile(fpath, content);
+        }
       }
     }
-    await dataApi.putFiles([...fpaths, ...gFPaths], [...contents, ...gContents]);
+    for (let i = 0; i < gFPaths.length; i += N_NOTES) {
+      const sldFPaths = gFPaths.slice(i, i + N_NOTES);
+      // No order guarantee btw gFPaths and gContents
+      const files = await serverApi.getFiles(sldFPaths);
+      for (const { fpath, content } of files.responses) {
+        lcValues.push({ id: fpath, type: PUT_FILE, path: fpath, content });
+      }
+
+      [lsValues, leValues, lcValues, ldValues] = await batchPerformFilesIfEnough(
+        dataApi.performFiles, lsValues, leValues, lcValues, ldValues
+      );
+    }
 
     // 4. Local side: loop used to be leaves in local and set to empty
-    fpaths = []; contents = []; deletedFPaths = [];
+    fpaths = [];
     for (const fpath of _leafFPaths) {
       if (fpath.includes(CD_ROOT + '/')) {
         const staticFPath = getStaticFPath(fpath);
@@ -2940,27 +2993,30 @@ const syncInQueue = (
           !allLeafStaticFPaths.includes(staticFPath) &&
           _staticFPaths.includes(staticFPath)
         ) {
-          if (!deletedFPaths.includes(staticFPath)) deletedFPaths.push(staticFPath);
+          if (!fpaths.includes(staticFPath)) fpaths.push(staticFPath);
         }
       }
 
       if (allLeafFPaths.includes(fpath)) continue;
       if (fpath.includes(CD_ROOT + '/')) continue; // Already empty string
 
-      let content;
-      if (fpath.endsWith(INDEX + DOT_JSON)) content = { title: '', body: '' };
-      else content = '';
+      if (fpath.endsWith(INDEX + DOT_JSON)) {
+        const content = { title: '', body: '' };
+        leValues.push({ id: fpath, type: PUT_FILE, path: fpath, content });
+      } else {
+        leValues.push({ id: fpath, type: PUT_FILE, path: fpath, content: '' });
+      }
 
-      fpaths.push(fpath);
-      contents.push(content);
+      [lsValues, leValues, lcValues, ldValues] = await batchPerformFilesIfEnough(
+        dataApi.performFiles, lsValues, leValues, lcValues, ldValues
+      );
     }
     // Can't just delete, maybe unsavedNotes!
     /*for (const staticFPath of _staticFPaths) {
       if (allLeafStaticFPaths.includes(staticFPath)) continue;
       if (!deletedFPaths.includes(staticFPath)) deletedFPaths.push(staticFPath);
     }*/
-    await dataApi.putFiles(fpaths, contents);
-    await fileApi.deleteFiles(deletedFPaths);
+    await fileApi.deleteFiles(fpaths);
 
     // Sslts
     const leafSsltFPaths = [];
@@ -2970,40 +3026,39 @@ const syncInQueue = (
     }
 
     // 1. Server side: upload leaf ssltFPaths
-    fpaths = []; contents = [];
     for (const fpath of leafSsltFPaths) {
       if (ssltFPaths.includes(fpath)) continue;
-      fpaths.push(fpath);
-      contents.push({});
+      eValues.push({ id: fpath, type: PUT_FILE, path: fpath, content: {} });
     }
-    await serverApi.putFiles(fpaths, contents);
 
     // 2. Server side: delete obsolete ssltFPaths
-    fpaths = []; contents = [];
     for (const fpath of ssltFPaths) {
       if (leafSsltFPaths.includes(fpath)) continue;
-      fpaths.push(fpath);
+      dValues.push(
+        { id: fpath, type: DELETE_FILE, path: fpath, doIgnoreDoesNotExistError: true }
+      );
     }
-    await serverApi.deleteFiles(fpaths);
+    [sValues, eValues, cValues, dValues] = await batchPerformFilesIfEnough(
+      serverApi.performFiles, sValues, eValues, cValues, dValues
+    );
 
     // 3. Local side: download leaf ssltFPaths
-    fpaths = []; contents = [];
     for (const fpath of leafSsltFPaths) {
       if (_ssltFPaths.includes(fpath)) continue;
       haveUpdate = true;
-
-      fpaths.push(fpath);
-      contents.push({});
+      leValues.push({ id: fpath, type: PUT_FILE, path: fpath, content: {} });
     }
-    await dataApi.putFiles(fpaths, contents);
 
     // 4. Local side: delete obsolete ssltFPaths
-    fpaths = []; contents = [];
     for (const fpath of _ssltFPaths) {
       if (leafSsltFPaths.includes(fpath)) continue;
-      fpaths.push(fpath);
+      ldValues.push(
+        { id: fpath, type: DELETE_FILE, path: fpath, doIgnoreDoesNotExistError: true }
+      );
     }
-    await dataApi.deleteFiles(fpaths);
+    [lsValues, leValues, lcValues, ldValues] = await batchPerformFilesIfEnough(
+      dataApi.performFiles, lsValues, leValues, lcValues, ldValues
+    );
 
     // Settings
     const { fpaths: settingsLeafFPaths } = getLastSettingsFPaths(settingsFPaths);
@@ -3013,7 +3068,6 @@ const syncInQueue = (
     const { fpaths: settingsAllLeafFPaths } = getLastSettingsFPaths(settingsAllFPaths);
 
     // 1. Server side: upload all settingsFPaths
-    fpaths = []; contents = [];
     for (const fpath of _settingsFPaths) {
       if (settingsFPaths.includes(fpath)) continue;
 
@@ -3021,50 +3075,52 @@ const syncInQueue = (
       if (settingsAllLeafFPaths.includes(fpath)) {
         // No order guarantee but this is just one file
         content = (await dataApi.getFiles([fpath])).contents[0];
+        cValues.push({ id: fpath, type: PUT_FILE, path: fpath, content });
       } else {
         content = {};
+        eValues.push({ id: fpath, type: PUT_FILE, path: fpath, content });
       }
-      fpaths.push(fpath);
-      contents.push(content);
     }
-    await serverApi.putFiles(fpaths, contents);
 
     // 2. Server side: loop used to be leaves in server and set to empty
-    fpaths = []; contents = [];
     for (const fpath of settingsLeafFPaths) {
       if (settingsAllLeafFPaths.includes(fpath)) continue;
-      fpaths.push(fpath);
-      contents.push({});
+      eValues.push({ id: fpath, type: PUT_FILE, path: fpath, content: {} });
     }
-    await serverApi.putFiles(fpaths, contents);
+    [sValues, eValues, cValues, dValues] = await batchPerformFilesIfEnough(
+      serverApi.performFiles, sValues, eValues, cValues, dValues
+    );
 
     // 3. Local side: download all settingsFPaths
-    fpaths = []; contents = [];
-    _gFPaths = [];
+    gFPaths = [];
     for (const fpath of settingsFPaths) {
       if (_settingsFPaths.includes(fpath)) continue;
       haveUpdate = true;
 
       if (settingsAllLeafFPaths.includes(fpath)) {
-        _gFPaths.push(fpath);
+        gFPaths.push(fpath);
         continue;
       }
 
-      fpaths.push(fpath);
-      contents.push({});
+      leValues.push({ id: fpath, type: PUT_FILE, path: fpath, content: {} });
     }
-    // No order guarantee btw _gFPaths and gContents
-    ({ fpaths: gFPaths, contents: gContents } = await serverApi.getFiles(_gFPaths));
-    await dataApi.putFiles([...fpaths, ...gFPaths], [...contents, ...gContents]);
+    for (let i = 0; i < gFPaths.length; i += N_NOTES) {
+      const sldFPaths = gFPaths.slice(i, i + N_NOTES);
+      // No order guarantee btw gFPaths and gContents
+      const files = await serverApi.getFiles(sldFPaths);
+      for (const { fpath, content } of files.responses) {
+        lcValues.push({ id: fpath, type: PUT_FILE, path: fpath, content });
+      }
+    }
 
     // 4. Local side: loop used to be leaves in local and set to empty
-    fpaths = []; contents = [];
     for (const fpath of _settingsLeafFPaths) {
       if (settingsAllLeafFPaths.includes(fpath)) continue;
-      fpaths.push(fpath);
-      contents.push({});
+      leValues.push({ id: fpath, type: PUT_FILE, path: fpath, content: {} });
     }
-    await dataApi.putFiles(fpaths, contents);
+    [lsValues, leValues, lcValues, ldValues] = await batchPerformFilesIfEnough(
+      dataApi.performFiles, lsValues, leValues, lcValues, ldValues
+    );
 
     // Info
     //   action: 0 - no info or already the same,
@@ -3092,21 +3148,36 @@ const syncInQueue = (
 
       // No order guarantee but this is just one file
       const content = (await serverApi.getFiles([infoFPath])).contents[0];
-      await dataApi.putFiles([infoFPath], [content]);
+      lcValues.push({ id: infoFPath, type: PUT_FILE, path: infoFPath, content });
 
       // Delete obsolete version in device
-      if (_infoFPath) await dataApi.deleteFiles([_infoFPath]);
+      if (_infoFPath) {
+        const value = { id: _infoFPath, type: DELETE_FILE, path: _infoFPath };
+        value.doIgnoreDoesNotExistError = false;
+        ldValues.push(value);
+      }
 
       haveUpdate = true;
+      [lsValues, leValues, lcValues, ldValues] = await batchPerformFilesIfEnough(
+        dataApi.performFiles, lsValues, leValues, lcValues, ldValues
+      );
     } else if (syncInfoAction === 2) {
       // Upload from device to server
 
       // No order guarantee but this is just one file
       const content = (await dataApi.getFiles([_infoFPath])).contents[0];
-      await serverApi.putFiles([_infoFPath], [content]);
+      cValues.push({ id: _infoFPath, type: PUT_FILE, path: _infoFPath, content });
 
       // Delete obsolete version in server
-      if (infoFPath) await serverApi.deleteFiles([infoFPath]);
+      if (infoFPath) {
+        const value = { id: infoFPath, type: DELETE_FILE, path: infoFPath };
+        value.doIgnoreDoesNotExistError = true;
+        dValues.push(value);
+      }
+
+      [sValues, eValues, cValues, dValues] = await batchPerformFilesIfEnough(
+        serverApi.performFiles, sValues, eValues, cValues, dValues
+      );
     } else throw new Error(`Invalid syncInfoAction: ${syncInfoAction}`);
 
     // Pins
@@ -3120,40 +3191,39 @@ const syncInQueue = (
     }
 
     // 1. Server side: upload leaf pinFPaths
-    fpaths = []; contents = [];
     for (const fpath of leafPinFPaths) {
       if (pinFPaths.includes(fpath)) continue;
-      fpaths.push(fpath);
-      contents.push({});
+      eValues.push({ id: fpath, type: PUT_FILE, path: fpath, content: {} });
     }
-    await serverApi.putFiles(fpaths, contents);
 
     // 2. Server side: delete obsolete pinFPaths
-    fpaths = []; contents = [];
     for (const fpath of pinFPaths) {
       if (leafPinFPaths.includes(fpath)) continue;
-      fpaths.push(fpath);
+      dValues.push(
+        { id: fpath, type: DELETE_FILE, path: fpath, doIgnoreDoesNotExistError: true }
+      );
     }
-    await serverApi.deleteFiles(fpaths);
+    [sValues, eValues, cValues, dValues] = await batchPerformFilesIfEnough(
+      serverApi.performFiles, sValues, eValues, cValues, dValues
+    );
 
     // 3. Local side: download leaf pinFPaths
-    fpaths = []; contents = [];
     for (const fpath of leafPinFPaths) {
       if (_pinFPaths.includes(fpath)) continue;
       haveUpdate = true;
-
-      fpaths.push(fpath);
-      contents.push({});
+      leValues.push({ id: fpath, type: PUT_FILE, path: fpath, content: {} });
     }
-    await dataApi.putFiles(fpaths, contents);
 
     // 4. Local side: delete obsolete pinFPaths
-    fpaths = []; contents = [];
     for (const fpath of _pinFPaths) {
       if (leafPinFPaths.includes(fpath)) continue;
-      fpaths.push(fpath);
+      ldValues.push(
+        { id: fpath, type: DELETE_FILE, path: fpath, doIgnoreDoesNotExistError: true }
+      );
     }
-    await dataApi.deleteFiles(fpaths);
+    [lsValues, leValues, lcValues, ldValues] = await batchPerformFilesIfEnough(
+      dataApi.performFiles, lsValues, leValues, lcValues, ldValues
+    );
 
     // Tags
     const allTagFPaths = [...new Set([...tagFPaths, ..._tagFPaths])];
@@ -3168,40 +3238,39 @@ const syncInQueue = (
     }
 
     // 1. Server side: upload leaf tagFPaths
-    fpaths = []; contents = [];
     for (const fpath of leafTagFPaths) {
       if (tagFPaths.includes(fpath)) continue;
-      fpaths.push(fpath);
-      contents.push({});
+      eValues.push({ id: fpath, type: PUT_FILE, path: fpath, content: {} });
     }
-    await serverApi.putFiles(fpaths, contents);
 
     // 2. Server side: delete obsolete tagFPaths
-    fpaths = []; contents = [];
     for (const fpath of tagFPaths) {
       if (leafTagFPaths.includes(fpath)) continue;
-      fpaths.push(fpath);
+      dValues.push(
+        { id: fpath, type: DELETE_FILE, path: fpath, doIgnoreDoesNotExistError: true }
+      );
     }
-    await serverApi.deleteFiles(fpaths);
+    [sValues, eValues, cValues, dValues] = await batchPerformFilesIfEnough(
+      serverApi.performFiles, sValues, eValues, cValues, dValues, N_NOTES, true
+    );
 
     // 3. Local side: download leaf tagFPaths
-    fpaths = []; contents = [];
     for (const fpath of leafTagFPaths) {
       if (_tagFPaths.includes(fpath)) continue;
       haveUpdate = true;
-
-      fpaths.push(fpath);
-      contents.push({});
+      leValues.push({ id: fpath, type: PUT_FILE, path: fpath, content: {} });
     }
-    await dataApi.putFiles(fpaths, contents);
 
     // 4. Local side: delete obsolete tagFPaths
-    fpaths = []; contents = [];
     for (const fpath of _tagFPaths) {
       if (leafTagFPaths.includes(fpath)) continue;
-      fpaths.push(fpath);
+      ldValues.push(
+        { id: fpath, type: DELETE_FILE, path: fpath, doIgnoreDoesNotExistError: true }
+      );
     }
-    await dataApi.deleteFiles(fpaths);
+    [lsValues, leValues, lcValues, ldValues] = await batchPerformFilesIfEnough(
+      dataApi.performFiles, lsValues, leValues, lcValues, ldValues, N_NOTES, true
+    );
 
     if (syncQueue.length <= 1) {
       dispatch({
@@ -3887,7 +3956,7 @@ export const pinNotes = (ids) => async (dispatch, getState) => {
   dispatch({ type: PIN_NOTE_COMMIT, payload });
 };
 
-export const unpinNotes = (ids) => async (dispatch, getState) => {
+export const unpinNotes = (ids, doSync = false) => async (dispatch, getState) => {
   const pendingSslts = getState().pendingSslts;
   const pendingPins = getState().pendingPins;
 
@@ -3914,7 +3983,7 @@ export const unpinNotes = (ids) => async (dispatch, getState) => {
     // As for every move note to ARCHIVE and TRASH, will try to unpin the note too,
     //  if no pin to unpin, just return.
     console.log('In unpinNotes, no pin found for ids: ', ids);
-    // No need to dispatch(cleanUpPins()); here as no pins change, reduce call sync.
+    if (doSync) dispatch(sync());
     return;
   }
 
@@ -4048,7 +4117,10 @@ export const cleanUpPins = () => async (dispatch, getState) => {
   const noteMainIds = getNoteMainIds(noteMetas, conflictedMetas, toRootIds);
   const pins = getRawPins(pinFPaths, toRootIds);
 
-  const unusedPinFPaths = [];
+  let nNotes = N_NOTES;
+  if (getState().user.hubUrl === SD_HUB_URL) nNotes = 60;
+
+  const unusedValues = [];
   for (const fpath of pinFPaths) {
     const { id } = extractPinFPath(fpath);
 
@@ -4061,14 +4133,17 @@ export const cleanUpPins = () => async (dispatch, getState) => {
       !isObject(pins[pinMainId]) ||
       pins[pinMainId].fpath !== fpath
     ) {
-      unusedPinFPaths.push(fpath);
-      if (unusedPinFPaths.length >= N_NOTES) break;
+      unusedValues.push(
+        { id: fpath, type: DELETE_FILE, path: fpath, doIgnoreDoesNotExistError: true }
+      );
+      if (unusedValues.length >= nNotes) break;
     }
   }
 
-  if (unusedPinFPaths.length > 0) {
+  if (unusedValues.length > 0) {
     try {
-      await dataApi.deleteFiles(unusedPinFPaths);
+      const data = { values: unusedValues, isSequential: false, nItemsForNs: N_NOTES };
+      await dataApi.performFiles(data);
     } catch (error) {
       console.log('cleanUpPins error: ', error);
       // error in this step should be fine
@@ -4714,7 +4789,9 @@ const updateTagDataSStepInQueue = (payload, dispatch, getState) => async () => {
     vars.updateSettings.doFetch = doFetch;
 
     try {
-      await dataApi.putFiles([settingsFPath], [settings]);
+      await dataApi.putSettings(
+        { settingsFPaths: [settingsFPath], settingsContents: [settings] }
+      );
     } catch (error) {
       console.log('updateTagDataSStep error: ', error);
       dispatch({
@@ -4724,12 +4801,7 @@ const updateTagDataSStepInQueue = (payload, dispatch, getState) => async () => {
       return;
     }
 
-    try {
-      await dataApi.putFiles(_settingsFPaths, _settingsFPaths.map(() => ({})));
-    } catch (error) {
-      console.log('updateTagDataSStep clean up error: ', error);
-      // error in this step should be fine
-    }
+    await cleanUpSettings(_settingsFPaths);
   }
 
   dispatch({ type: UPDATE_TAG_DATA_S_STEP_COMMIT, payload });
@@ -4877,7 +4949,7 @@ export const updateTagDataTStep = (id, values) => async (dispatch, getState) => 
 
   let now = Date.now();
 
-  const fpaths = [], contents = [];
+  const pfValues = [];
   for (const tagName in combinedValues) {
     const value = combinedValues[tagName];
     if (value.diffType === DIFF_EQUAL) continue;
@@ -4886,8 +4958,10 @@ export const updateTagDataTStep = (id, values) => async (dispatch, getState) => 
     if (value.diffType === DIFF_DELETE) _id = `deleted${id}`;
 
     const addedDT = isNumber(value.addedDT) ? value.addedDT : now;
-    fpaths.push(createTagFPath(tagName, value.rank, now, addedDT, _id));
-    contents.push({});
+    const fpath = createTagFPath(tagName, value.rank, now, addedDT, _id);
+    pfValues.push(
+      { id: fpath, type: PUT_FILE, path: fpath, content: {} }
+    );
     now += 1;
   }
 
@@ -4895,7 +4969,9 @@ export const updateTagDataTStep = (id, values) => async (dispatch, getState) => 
   dispatch({ type: UPDATE_TAG_DATA_T_STEP, payload });
 
   try {
-    await dataApi.putFiles(fpaths, contents);
+    const data = { values: pfValues, isSequential: false, nItemsForNs: N_NOTES };
+    const results = await dataApi.performFiles(data);
+    throwIfPerformFilesError(data, results);
   } catch (error) {
     console.log('updateTagDataTStep error: ', error);
     dispatch({ type: UPDATE_TAG_DATA_T_STEP_ROLLBACK, payload: { ...payload, error } });
@@ -4987,9 +5063,12 @@ export const cleanUpTags = () => async (dispatch, getState) => {
   const noteMainIds = getNoteMainIds(noteMetas, conflictedMetas, toRootIds);
   const tags = getRawTags(tagFPaths, toRootIds);
 
-  const unusedTagFPaths = [];
+  let nNotes = N_NOTES;
+  if (getState().user.hubUrl === SD_HUB_URL) nNotes = 60;
+
+  const unusedValues = [];
   for (const fpath of tagFPaths) {
-    if (unusedTagFPaths.length >= N_NOTES) break;
+    if (unusedValues.length >= nNotes) break;
 
     const { id } = extractTagFPath(fpath);
 
@@ -5001,17 +5080,24 @@ export const cleanUpTags = () => async (dispatch, getState) => {
       !noteMainIds.includes(tagMainId) ||
       !isObject(tags[tagMainId])
     ) {
-      unusedTagFPaths.push(fpath);
+      unusedValues.push(
+        { id: fpath, type: DELETE_FILE, path: fpath, doIgnoreDoesNotExistError: true }
+      );
       continue;
     }
 
     const found = tags[tagMainId].values.some(value => value.fpath === fpath);
-    if (!found) unusedTagFPaths.push(fpath);
+    if (!found) {
+      unusedValues.push(
+        { id: fpath, type: DELETE_FILE, path: fpath, doIgnoreDoesNotExistError: true }
+      );
+    }
   }
 
-  if (unusedTagFPaths.length > 0) {
+  if (unusedValues.length > 0) {
     try {
-      await dataApi.deleteFiles(unusedTagFPaths);
+      const data = { values: unusedValues, isSequential: false, nItemsForNs: N_NOTES };
+      await dataApi.performFiles(data);
     } catch (error) {
       console.log('cleanUpTags error: ', error);
       // error in this step should be fine

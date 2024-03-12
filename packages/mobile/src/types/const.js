@@ -1,5 +1,8 @@
 export const DOMAIN_NAME = 'https://justnote.cc';
 
+export const HR_HUB_URL = 'https://hub.hiro.so';
+export const SD_HUB_URL = 'https://hub.stacksdrive.com';
+
 export const APP_NAME = 'Justnote';
 export const APP_ICON_NAME = 'logo-for-stacks-access.png';
 export const APP_SCOPES = ['store_write'];
@@ -337,3 +340,6 @@ export const TAG_NAME_MSGS = {
 export const TASK_TYPE = 'jnTaskType';
 export const TASK_DO_FORCE_LIST_FPATHS = 'jnDoForceListFPaths';
 export const TASK_UPDATE_ACTION = 'jnUpdateAction';
+
+export const PUT_FILE = 'putFile';
+export const DELETE_FILE = 'deleteFile';

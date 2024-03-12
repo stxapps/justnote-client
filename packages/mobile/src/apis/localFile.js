@@ -26,15 +26,6 @@ const getFile = async (fpath, dir = Dirs.DocumentDir, encoding = BASE64) => {
   return content;
 };
 
-const getFiles = async (fpaths, dir = Dirs.DocumentDir, encoding = BASE64) => {
-  const contents = [];
-  for (const fpath of fpaths) {
-    const content = await getFile(fpath, dir, encoding);
-    contents.push(content);
-  }
-  return { fpaths, contents };
-};
-
 const putFile = async (fpath, content, dir = Dirs.DocumentDir, encoding = BASE64) => {
   fpath = deriveFPath(fpath, dir);
 
@@ -45,12 +36,6 @@ const putFile = async (fpath, content, dir = Dirs.DocumentDir, encoding = BASE64
 
   /* @ts-expect-error */
   await FileSystem.writeFile(fpath, content, encoding);
-};
-
-const putFiles = async (fpaths, contents, dir = Dirs.DocumentDir, encoding = BASE64) => {
-  for (let i = 0; i < fpaths.length; i++) {
-    await putFile(fpaths[i], contents[i], dir, encoding);
-  }
 };
 
 const deleteFile = async (fpath, dir = Dirs.DocumentDir) => {
@@ -132,8 +117,8 @@ const getStaticFPaths = async () => {
 };
 
 const localFile = {
-  getFile, getFiles, putFile, putFiles, deleteFile, deleteFiles, deleteAllFiles,
-  exists, mkdir, getStaticFPaths,
+  getFile, putFile, deleteFile, deleteFiles, deleteAllFiles, getStaticFPaths,
+  exists, mkdir,
 };
 
 export default localFile;

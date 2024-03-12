@@ -293,7 +293,7 @@ const notesReducer = (state = initialState, action) => {
     if (toUnpinIds.length > 0) {
       return loop(
         newState,
-        Cmd.run(unpinNotes(toUnpinIds), { args: [Cmd.dispatch, Cmd.getState] })
+        Cmd.run(unpinNotes(toUnpinIds, true), { args: [Cmd.dispatch, Cmd.getState] })
       );
     }
     return loop(
