@@ -24,7 +24,7 @@ const userReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_USER) {
-    vars.user.hubUrl = action.payload.hubUrl;
+    if ('hubUrl' in action.payload) vars.user.hubUrl = action.payload.hubUrl;
     return { ...state, ...action.payload };
   }
 
