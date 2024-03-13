@@ -2106,7 +2106,7 @@ export const getPerformFilesValueSize = (value, minSize) => {
     // 1 character -> 3 bytes -> encrypted size -> MiB
     const calSize = (len * 3 * 2) / (1024 * 1024);
     // normalize to 1 with 20 Mib max size
-    size = Math.min(size, calSize / 20);
+    size = Math.max(size, calSize / 20);
   }
   return size;
 };
