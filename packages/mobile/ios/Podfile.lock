@@ -325,7 +325,7 @@ PODS:
   - react-native-blockstack (0.4.6):
     - Blockstack
     - React
-  - react-native-document-picker (9.0.1):
+  - react-native-document-picker (9.1.1):
     - React-Core
   - react-native-flipper (0.164.0):
     - React-Core
@@ -449,7 +449,7 @@ PODS:
   - ZIPFoundation (0.9.11)
 
 DEPENDENCIES:
-  - Blockstack (from `https://github.com/bracedotto/blockstack-ios.git`, commit `45bcb11`)
+  - Blockstack (from `https://github.com/bracedotto/blockstack-ios.git`, commit `af931a9`)
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
@@ -558,7 +558,7 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   Blockstack:
-    :commit: 45bcb11
+    :commit: af931a9
     :git: https://github.com/bracedotto/blockstack-ios.git
   boost:
     :podspec: "../node_modules/react-native/third-party-podspecs/boost.podspec"
@@ -661,7 +661,7 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   Blockstack:
-    :commit: 45bcb11
+    :commit: af931a9
     :git: https://github.com/bracedotto/blockstack-ios.git
 
 SPEC CHECKSUMS:
@@ -708,7 +708,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 0553c9fe7218e1f127be070bd5a4d2fc19fb8190
   React-logger: cffcc09e8aba8a3014be8d18da7f922802e9f19e
   react-native-blockstack: a54aed35a241b7be1e735a334f9c644f6d9237fe
-  react-native-document-picker: 2b8f18667caee73a96708a82b284a4f40b30a156
+  react-native-document-picker: 3599b238843369026201d2ef466df53f77ae0452
   react-native-flipper: c33a4995958ef12a2b2f8290d63bed7adeed7634
   react-native-html-to-pdf: ceabb4877a3c0b1e61945142f177be2a8e247c3e
   react-native-mmkv-storage: 209432836f405981816f1b7bfb0e82baaf84f02a
@@ -743,6 +743,6 @@ SPEC CHECKSUMS:
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
   ZIPFoundation: b1f0de4eed33e74a676f76e12559ab6b75990197
 
-PODFILE CHECKSUM: 7c38895f0c76ad0e6c7c6ffe3c85d9e20905a7c0
+PODFILE CHECKSUM: c3d645ebe28c7ac5809643ebd592d6762458f2b0
 
 COCOAPODS: 1.12.1
