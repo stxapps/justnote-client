@@ -1524,11 +1524,9 @@ const _listMetas = (dataFPaths, extractDataFPath, workingSubName) => {
   };
 };
 
-export const listNoteMetas = createSelector(
-  (...args) => args[0],
-  (...args) => args[1],
-  (...args) => args[2],
-  (noteFPaths, ssltFPaths, pendingSslts) => {
+const _listNoteMetas = createSelector(
+  noteFPaths => noteFPaths,
+  (noteFPaths) => {
     // Possible to have cdroot paths but not index.json and vice versa.
     //   i.e. update/move error and cancel died notes.
     // So use only index.json for listMetas.
@@ -1537,6 +1535,17 @@ export const listNoteMetas = createSelector(
       allIds,
     } = _listMetas(noteFPaths, extractNoteFPath, INDEX + DOT_JSON);
 
+    return {
+      metas, conflictedMetas, conflictWiths, toRootIds, toParents, toFPaths, toLeafIds,
+      allIds,
+    };
+  },
+);
+
+const _listSsltInfos = createSelector(
+  (...args) => args[0],
+  (...args) => args[1],
+  (ssltFPaths, toRootIds) => {
     const ssltInfos = {};
     for (const fpath of ssltFPaths) {
       const { listName, updatedDT, addedDT, id } = extractSsltFPath(fpath);
@@ -1549,39 +1558,50 @@ export const listNoteMetas = createSelector(
       }
       ssltInfos[mainId] = { listName, updatedDT, addedDT, id, fpath };
     }
-    for (const id in pendingSslts) {
-      const { listName } = pendingSslts[id];
-      const mainId = getMainId(id, toRootIds);
-      if (!isString(mainId)) continue;
 
-      const info = isObject(ssltInfos[mainId]) ? { ...ssltInfos[mainId] } : {};
-      info.listName = listName;
-
-      ssltInfos[mainId] = info;
-    }
-
-    const mMetas = [], mConflictedMetas = [];
-    for (const meta of metas) {
-      const mainId = getMainId(meta.id, toRootIds);
-      if (!isString(mainId)) continue;
-
-      if (isObject(ssltInfos[mainId])) meta.listName = ssltInfos[mainId].listName;
-      mMetas.push(meta);
-    }
-    for (const meta of conflictedMetas) {
-      const mainId = getMainId(meta.id, toRootIds);
-      if (!isString(mainId)) continue;
-
-      if (isObject(ssltInfos[mainId])) meta.listName = ssltInfos[mainId].listName;
-      mConflictedMetas.push(meta);
-    }
-
-    return {
-      noteMetas: mMetas, conflictedMetas: mConflictedMetas, conflictWiths, toRootIds,
-      toParents, toFPaths, toLeafIds, allIds, ssltInfos,
-    };
+    return ssltInfos;
   },
 );
+
+export const listNoteMetas = (noteFPaths, ssltFPaths, pendingSslts) => {
+  const {
+    metas, conflictedMetas, conflictWiths, toRootIds, toParents, toFPaths, toLeafIds,
+    allIds,
+  } = _listNoteMetas(noteFPaths);
+  const ssltInfos = _listSsltInfos(ssltFPaths, toRootIds);
+
+  for (const id in pendingSslts) {
+    const { listName } = pendingSslts[id];
+    const mainId = getMainId(id, toRootIds);
+    if (!isString(mainId)) continue;
+
+    const info = isObject(ssltInfos[mainId]) ? { ...ssltInfos[mainId] } : {};
+    info.listName = listName;
+
+    ssltInfos[mainId] = info;
+  }
+
+  const mMetas = [], mConflictedMetas = [];
+  for (const meta of metas) {
+    const mainId = getMainId(meta.id, toRootIds);
+    if (!isString(mainId)) continue;
+
+    if (isObject(ssltInfos[mainId])) meta.listName = ssltInfos[mainId].listName;
+    mMetas.push(meta);
+  }
+  for (const meta of conflictedMetas) {
+    const mainId = getMainId(meta.id, toRootIds);
+    if (!isString(mainId)) continue;
+
+    if (isObject(ssltInfos[mainId])) meta.listName = ssltInfos[mainId].listName;
+    mConflictedMetas.push(meta);
+  }
+
+  return {
+    noteMetas: mMetas, conflictedMetas: mConflictedMetas, conflictWiths, toRootIds,
+    toParents, toFPaths, toLeafIds, allIds, ssltInfos,
+  };
+};
 
 const applyPcNotesToMetas = (pcListNames, pcNotes, noteMetas, toRootIds) => {
   const metas = [], tRIds = { ...toRootIds }, pIds = [];
@@ -1656,63 +1676,61 @@ export const getPinFPaths = (state) => {
   return [];
 };
 
-export const getRawPins = (pinFPaths, toRootIds) => {
-  const pins = {};
-  for (const fpath of pinFPaths) {
-    const { rank, updatedDT, addedDT, id } = extractPinFPath(fpath);
-
-    const _id = id.startsWith('deleted') ? id.slice(7) : id;
-    const pinMainId = getMainId(_id, toRootIds);
-    if (!isString(pinMainId)) continue;
-
-    // duplicate id, choose the latest updatedDT
-    if (pinMainId in pins && pins[pinMainId].updatedDT > updatedDT) continue;
-    pins[pinMainId] = { rank, updatedDT, addedDT, id, fpath };
-  }
-
-  return pins;
-};
-
-export const getPins = createSelector(
+export const getRawPins = createSelector(
   (...args) => args[0],
   (...args) => args[1],
-  (...args) => args[2],
-  (...args) => args[3],
-  (pinFPaths, pendingPins, doExcludeUnpinning, toRootIds) => {
-    const pins = getRawPins(pinFPaths, toRootIds);
+  (pinFPaths, toRootIds) => {
+    const pins = {};
+    for (const fpath of pinFPaths) {
+      const { rank, updatedDT, addedDT, id } = extractPinFPath(fpath);
 
-    for (const id in pendingPins) {
-      const { status, rank, updatedDT, addedDT } = pendingPins[id];
-      const pinMainId = getMainId(id, toRootIds);
+      const _id = id.startsWith('deleted') ? id.slice(7) : id;
+      const pinMainId = getMainId(_id, toRootIds);
       if (!isString(pinMainId)) continue;
 
-      if ([PIN_NOTE, PIN_NOTE_ROLLBACK].includes(status)) {
-        pins[pinMainId] = { status, rank, updatedDT, addedDT, id };
-      } else if ([UNPIN_NOTE, UNPIN_NOTE_ROLLBACK].includes(status)) {
-        if (doExcludeUnpinning) {
-          delete pins[pinMainId];
-        } else {
-          // Can't delete just yet, need for showing loading.
-          pins[pinMainId] = { status, rank, updatedDT, addedDT, id };
-        }
-      } else if ([
-        MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_ROLLBACK,
-      ].includes(status)) {
-        pins[pinMainId] = { status, rank, updatedDT, addedDT, id };
-      } else {
-        console.log('getPins: unsupport pin status: ', status);
-      }
+      // duplicate id, choose the latest updatedDT
+      if (pinMainId in pins && pins[pinMainId].updatedDT > updatedDT) continue;
+      pins[pinMainId] = { rank, updatedDT, addedDT, id, fpath };
     }
 
-    const filteredPins = {};
-    for (const pinMainId in pins) {
-      if (pins[pinMainId].id.startsWith('deleted')) continue;
-      filteredPins[pinMainId] = pins[pinMainId];
-    }
-
-    return filteredPins;
+    return pins;
   },
 );
+
+export const getPins = (pinFPaths, pendingPins, doExcludeUnpinning, toRootIds) => {
+  const pins = getRawPins(pinFPaths, toRootIds);
+
+  for (const id in pendingPins) {
+    const { status, rank, updatedDT, addedDT } = pendingPins[id];
+    const pinMainId = getMainId(id, toRootIds);
+    if (!isString(pinMainId)) continue;
+
+    if ([PIN_NOTE, PIN_NOTE_ROLLBACK].includes(status)) {
+      pins[pinMainId] = { status, rank, updatedDT, addedDT, id };
+    } else if ([UNPIN_NOTE, UNPIN_NOTE_ROLLBACK].includes(status)) {
+      if (doExcludeUnpinning) {
+        delete pins[pinMainId];
+      } else {
+        // Can't delete just yet, need for showing loading.
+        pins[pinMainId] = { status, rank, updatedDT, addedDT, id };
+      }
+    } else if ([
+      MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_ROLLBACK,
+    ].includes(status)) {
+      pins[pinMainId] = { status, rank, updatedDT, addedDT, id };
+    } else {
+      console.log('getPins: unsupport pin status: ', status);
+    }
+  }
+
+  const filteredPins = {};
+  for (const pinMainId in pins) {
+    if (pins[pinMainId].id.startsWith('deleted')) continue;
+    filteredPins[pinMainId] = pins[pinMainId];
+  }
+
+  return filteredPins;
+};
 
 export const separatePinnedValues = (
   sortedValues, pinFPaths, pendingPins, toRootIds, getValueMainId,
@@ -2527,73 +2545,72 @@ export const getTagFPaths = (state) => {
   return [];
 };
 
-export const getRawTags = (tagFPaths, toRootIds) => {
-  const tags = {};
-  for (const fpath of tagFPaths) {
-    const { tagName, rank, updatedDT, addedDT, id } = extractTagFPath(fpath);
-
-    const _id = id.startsWith('deleted') ? id.slice(7) : id;
-    const mainId = getMainId(_id, toRootIds);
-    if (!isString(mainId)) continue;
-
-    if (!isObject(tags[mainId])) tags[mainId] = { values: [] };
-
-    const { values } = tags[mainId];
-
-    const i = values.findIndex(tag => tag.tagName === tagName);
-    if (i < 0) {
-      values.push({ tagName, rank, updatedDT, addedDT, id, fpath });
-      continue;
-    }
-
-    if (values[i].updatedDT > updatedDT) continue;
-
-    tags[mainId].values = [
-      ...values.slice(0, i),
-      ...values.slice(i + 1),
-      { tagName, rank, updatedDT, addedDT, id, fpath },
-    ];
-  }
-
-  for (const mainId in tags) {
-    tags[mainId].values.sort((a, b) => { // Beware sort in place
-      if (a.rank < b.rank) return -1;
-      if (a.rank > b.rank) return 1;
-      return 0;
-    });
-  }
-
-  return tags;
-};
-
-export const getTags = createSelector(
+export const getRawTags = createSelector(
   (...args) => args[0],
   (...args) => args[1],
-  (...args) => args[2],
-  (tagFPaths, pendingTags, toRootIds) => {
-    // Values from getRawTags and from pendingTags are different.
-    // E.g., no id from pendingTags.
-    const tags = getRawTags(tagFPaths, toRootIds);
+  (tagFPaths, toRootIds) => {
+    const tags = {};
+    for (const fpath of tagFPaths) {
+      const { tagName, rank, updatedDT, addedDT, id } = extractTagFPath(fpath);
 
-    const filteredTags = {};
-    for (const mainId in tags) {
-      const values = tags[mainId].values.filter(value => {
-        return !value.id.startsWith('deleted');
-      });
-      if (values.length === 0) continue;
-      filteredTags[mainId] = { ...tags[mainId], values };
-    }
-
-    for (const id in pendingTags) {
-      const mainId = getMainId(id, toRootIds);
+      const _id = id.startsWith('deleted') ? id.slice(7) : id;
+      const mainId = getMainId(_id, toRootIds);
       if (!isString(mainId)) continue;
 
-      filteredTags[mainId] = { ...filteredTags[mainId], ...pendingTags[id] };
+      if (!isObject(tags[mainId])) tags[mainId] = { values: [] };
+
+      const { values } = tags[mainId];
+
+      const i = values.findIndex(tag => tag.tagName === tagName);
+      if (i < 0) {
+        values.push({ tagName, rank, updatedDT, addedDT, id, fpath });
+        continue;
+      }
+
+      if (values[i].updatedDT > updatedDT) continue;
+
+      tags[mainId].values = [
+        ...values.slice(0, i),
+        ...values.slice(i + 1),
+        { tagName, rank, updatedDT, addedDT, id, fpath },
+      ];
     }
 
-    return filteredTags;
+    for (const mainId in tags) {
+      tags[mainId].values.sort((a, b) => { // Beware sort in place
+        if (a.rank < b.rank) return -1;
+        if (a.rank > b.rank) return 1;
+        return 0;
+      });
+    }
+
+    return tags;
   },
 );
+
+export const getTags = (tagFPaths, pendingTags, toRootIds) => {
+  // Values from getRawTags and from pendingTags are different.
+  // E.g., no id from pendingTags.
+  const tags = getRawTags(tagFPaths, toRootIds);
+
+  const filteredTags = {};
+  for (const mainId in tags) {
+    const values = tags[mainId].values.filter(value => {
+      return !value.id.startsWith('deleted');
+    });
+    if (values.length === 0) continue;
+    filteredTags[mainId] = { ...tags[mainId], values };
+  }
+
+  for (const id in pendingTags) {
+    const mainId = getMainId(id, toRootIds);
+    if (!isString(mainId)) continue;
+
+    filteredTags[mainId] = { ...filteredTags[mainId], ...pendingTags[id] };
+  }
+
+  return filteredTags;
+};
 
 export const getTagNameObj = (tagName, tagNameObjs) => {
   if (!tagName || !tagNameObjs) return { tagNameObj: null };
