@@ -108,13 +108,13 @@ import {
   getValidPurchase, doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins,
   separatePinnedValues, getRawPins, getFormattedTime, get24HFormattedTime,
   getFormattedTimeStamp, getMineSubType, getNote, getEditingListNameEditors,
-  getListNamesFromNoteMetas, applySubscriptionOfferDetails, validatePassword,
-  doContainListName, doListContainUnlocks, getListNameAndNote, newObject,
-  getNNoteMetas, addFetchedToVars, isFetchedNoteMeta, doesIncludeFetching, sortNotes,
-  sortWithPins, doesIncludeFetchingMore, isFetchingInterrupted, getTagFPaths,
-  getInUseTagNames, getEditingTagNameEditors, getNNoteMetasByQt, extractNoteFPath,
-  extractSsltFPath, validateTagNameDisplayName, getTagNameObjFromDisplayName,
-  getTagNameObj, getTags, getRawTags, extractTagFPath, createTagFPath, getNoteMainIds,
+  applySubscriptionOfferDetails, validatePassword, doContainListName,
+  doListContainUnlocks, getListNameAndNote, newObject, getNNoteMetas, addFetchedToVars,
+  isFetchedNoteMeta, doesIncludeFetching, sortNotes, sortWithPins,
+  doesIncludeFetchingMore, isFetchingInterrupted, getTagFPaths, getInUseTagNames,
+  getEditingTagNameEditors, getNNoteMetasByQt, extractNoteFPath, extractSsltFPath,
+  validateTagNameDisplayName, getTagNameObjFromDisplayName, getTagNameObj, getTags,
+  getRawTags, extractTagFPath, createTagFPath, getNoteMainIds,
   throwIfPerformFilesError, batchPerformFilesIfEnough,
 } from '../utils';
 import { _ } from '../utils/obj';
@@ -677,7 +677,7 @@ export const fetch = () => async (dispatch, getState) => {
       const [settingsFPaths, infoFPath] = [fResult.settingsFPaths, fResult.infoFPath];
 
       const {
-        noteMetas, conflictedMetas, toRootIds,
+        noteMetas, conflictedMetas, toRootIds, inUseListNames,
       } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
 
       const sResult = await dataApi.fetchStgsAndInfo(settingsFPaths, infoFPath);
@@ -687,9 +687,9 @@ export const fetch = () => async (dispatch, getState) => {
       result.info = sResult.info;
       // List names should be retrieve from settings
       //   but also retrive from file paths in case the settings is gone.
-      result.listNames = getListNamesFromNoteMetas(noteMetas, conflictedMetas);
+      result.listNames = inUseListNames;
       result.tagNames = getInUseTagNames(
-        noteMetas, conflictedMetas, toRootIds, tagFPaths
+        noteMetas, conflictedMetas, toRootIds, tagFPaths, pendingTags
       );
 
       if (result.settings) {
@@ -1957,6 +1957,8 @@ export const deleteOldNotesInTrash = () => async (dispatch, getState) => {
   const noteFPaths = getNoteFPaths(getState());
   const ssltFPaths = getSsltFPaths(getState());
 
+  // Include pendingSslts so not delete restoring notes,
+  // For moving to Trash, need to > N_DAYS, should be fine.
   const {
     noteMetas, toRootIds, ssltInfos,
   } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
@@ -2357,10 +2359,7 @@ export const checkDeleteListName = (listNameEditorKey, listNameObj) => async (
   const noteFPaths = getNoteFPaths(getState());
   const ssltFPaths = getSsltFPaths(getState());
 
-  const {
-    noteMetas, conflictedMetas,
-  } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
-  const inUseListNames = getListNamesFromNoteMetas(noteMetas, conflictedMetas);
+  const { inUseListNames } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
 
   const canDeletes = [];
   for (const listName of listNames) {
@@ -2629,17 +2628,20 @@ export const cancelDiedSettings = () => async (dispatch, getState) => {
   const snapshotSettings = getState().snapshot.settings;
 
   const pendingSslts = getState().pendingSslts;
+  const pendingTags = getState().pendingTags;
 
   const noteFPaths = getNoteFPaths(getState());
   const ssltFPaths = getSsltFPaths(getState());
   const tagFPaths = getTagFPaths(getState());
 
   const {
-    noteMetas, conflictedMetas, toRootIds,
+    noteMetas, conflictedMetas, toRootIds, inUseListNames,
   } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
 
-  const listNames = getListNamesFromNoteMetas(noteMetas, conflictedMetas);
-  const tagNames = getInUseTagNames(noteMetas, conflictedMetas, toRootIds, tagFPaths);
+  const listNames = inUseListNames;
+  const tagNames = getInUseTagNames(
+    noteMetas, conflictedMetas, toRootIds, tagFPaths, pendingTags
+  );
   let doFetch = (
     settings.sortOn !== snapshotSettings.sortOn ||
     settings.doDescendingOrder !== snapshotSettings.doDescendingOrder
@@ -2709,17 +2711,20 @@ export const mergeSettings = (selectedId) => async (dispatch, getState) => {
   }
 
   const pendingSslts = getState().pendingSslts;
+  const pendingTags = getState().pendingTags;
 
   const noteFPaths = getNoteFPaths(getState());
   const ssltFPaths = getSsltFPaths(getState());
   const tagFPaths = getTagFPaths(getState());
 
   const {
-    noteMetas, conflictedMetas, toRootIds,
+    noteMetas, conflictedMetas, toRootIds, inUseListNames,
   } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
 
-  const listNames = getListNamesFromNoteMetas(noteMetas, conflictedMetas);
-  const tagNames = getInUseTagNames(noteMetas, conflictedMetas, toRootIds, tagFPaths);
+  const listNames = inUseListNames;
+  const tagNames = getInUseTagNames(
+    noteMetas, conflictedMetas, toRootIds, tagFPaths, pendingTags
+  );
   const doFetch = (
     settings.sortOn !== currentSettings.sortOn ||
     settings.doDescendingOrder !== currentSettings.doDescendingOrder
@@ -5035,7 +5040,7 @@ export const cancelDiedTags = () => async (dispatch, getState) => {
       noteMetas, conflictedMetas, toRootIds,
     } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
     const inUseTagNames = getInUseTagNames(
-      noteMetas, conflictedMetas, toRootIds, tagFPaths
+      noteMetas, conflictedMetas, toRootIds, tagFPaths, {}
     );
     for (const tagName of inUseTagNames) {
       if (!usedTagNames.includes(tagName)) usedTagNames.push(tagName);
@@ -5144,6 +5149,7 @@ export const checkDeleteTagName = (tagNameEditorKey, tagNameObj) => async (
   dispatch, getState
 ) => {
   const pendingSslts = getState().pendingSslts;
+  const pendingTags = getState().pendingTags;
 
   const noteFPaths = getNoteFPaths(getState());
   const ssltFPaths = getSsltFPaths(getState());
@@ -5154,7 +5160,7 @@ export const checkDeleteTagName = (tagNameEditorKey, tagNameObj) => async (
   } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
 
   const inUseTagNames = getInUseTagNames(
-    noteMetas, conflictedMetas, toRootIds, tagFPaths
+    noteMetas, conflictedMetas, toRootIds, tagFPaths, pendingTags
   );
   if (inUseTagNames.includes(tagNameObj.tagName)) {
     dispatch(updateTagNameEditors({

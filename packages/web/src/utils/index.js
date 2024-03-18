@@ -462,15 +462,6 @@ export const getAllListNames = (listNameObjs) => {
   return listNames;
 };
 
-export const getListNamesFromNoteMetas = (noteMetas, conflictedMetas) => {
-  const listNames = [];
-  for (const meta of [...noteMetas, ...conflictedMetas]) {
-    const { listName } = meta;
-    if (!listNames.includes(listName)) listNames.push(listName);
-  }
-  return listNames;
-};
-
 export const isDiedStatus = (status) => {
   return [
     DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, DIED_MERGING,
@@ -1582,7 +1573,7 @@ export const listNoteMetas = (noteFPaths, ssltFPaths, pendingSslts) => {
     ssltInfos[mainId] = info;
   }
 
-  const mMetas = [], mConflictedMetas = [];
+  const mMetas = [], mConflictedMetas = [], inUseListNames = [];
   for (const meta of metas) {
     const mainId = getMainId(meta.id, toRootIds);
     if (!isString(mainId)) continue;
@@ -1590,6 +1581,13 @@ export const listNoteMetas = (noteFPaths, ssltFPaths, pendingSslts) => {
     let listName = meta.listName;
     if (isObject(ssltInfos[mainId])) listName = ssltInfos[mainId].listName;
     mMetas.push({ ...meta, listName });
+
+    // 1. initLn, 2. initLn + pending, 3. initLn + sslt, 4. initList + sslt + pending
+    let pListName = meta.listName;
+    if (isObject(rawSsltInfos[mainId])) pListName = rawSsltInfos[mainId].listName;
+
+    if (!inUseListNames.includes(listName)) inUseListNames.push(listName);
+    if (!inUseListNames.includes(pListName)) inUseListNames.push(pListName);
   }
   for (const meta of conflictedMetas) {
     const mainId = getMainId(meta.id, toRootIds);
@@ -1598,11 +1596,17 @@ export const listNoteMetas = (noteFPaths, ssltFPaths, pendingSslts) => {
     let listName = meta.listName;
     if (isObject(ssltInfos[mainId])) listName = ssltInfos[mainId].listName;
     mConflictedMetas.push({ ...meta, listName });
+
+    let pListName = meta.listName;
+    if (isObject(rawSsltInfos[mainId])) pListName = rawSsltInfos[mainId].listName;
+
+    if (!inUseListNames.includes(listName)) inUseListNames.push(listName);
+    if (!inUseListNames.includes(pListName)) inUseListNames.push(pListName);
   }
 
   return {
     noteMetas: mMetas, conflictedMetas: mConflictedMetas, conflictWiths, toRootIds,
-    toParents, toFPaths, toLeafIds, allIds, ssltInfos,
+    toParents, toFPaths, toLeafIds, allIds, ssltInfos, inUseListNames,
   };
 };
 
@@ -2685,7 +2689,9 @@ export const copyTagNameObjs = (tagNameObjs, excludedTagNames = []) => {
   return objs;
 };
 
-export const getInUseTagNames = (noteMetas, conflictedMetas, toRootIds, tagFPaths) => {
+export const getInUseTagNames = (
+  noteMetas, conflictedMetas, toRootIds, tagFPaths, pendingTags
+) => {
   const noteMainIds = getNoteMainIds(noteMetas, conflictedMetas, toRootIds);
 
   const inUseTagNames = [];
@@ -2696,6 +2702,13 @@ export const getInUseTagNames = (noteMetas, conflictedMetas, toRootIds, tagFPath
     if (!isString(tagMainId) || !noteMainIds.includes(tagMainId)) continue;
 
     if (!inUseTagNames.includes(tagName)) inUseTagNames.push(tagName);
+  }
+  for (const id in pendingTags) {
+    const { values } = pendingTags[id];
+    for (const value of values) {
+      const { tagName } = value;
+      if (!inUseTagNames.includes(tagName)) inUseTagNames.push(tagName);
+    }
   }
 
   return inUseTagNames;
