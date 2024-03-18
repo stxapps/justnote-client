@@ -1552,10 +1552,10 @@ const _listSsltInfos = createSelector(
 
       const mainId = getMainId(id, toRootIds);
       if (!isString(mainId)) continue;
-
       if (isObject(ssltInfos[mainId]) && ssltInfos[mainId].updatedDT >= updatedDT) {
         continue;
       }
+
       ssltInfos[mainId] = { listName, updatedDT, addedDT, id, fpath };
     }
 
@@ -1568,8 +1568,9 @@ export const listNoteMetas = (noteFPaths, ssltFPaths, pendingSslts) => {
     metas, conflictedMetas, conflictWiths, toRootIds, toParents, toFPaths, toLeafIds,
     allIds,
   } = _listNoteMetas(noteFPaths);
-  const ssltInfos = _listSsltInfos(ssltFPaths, toRootIds);
+  const rawSsltInfos = _listSsltInfos(ssltFPaths, toRootIds);
 
+  const ssltInfos = { ...rawSsltInfos };
   for (const id in pendingSslts) {
     const { listName } = pendingSslts[id];
     const mainId = getMainId(id, toRootIds);
@@ -1586,15 +1587,17 @@ export const listNoteMetas = (noteFPaths, ssltFPaths, pendingSslts) => {
     const mainId = getMainId(meta.id, toRootIds);
     if (!isString(mainId)) continue;
 
-    if (isObject(ssltInfos[mainId])) meta.listName = ssltInfos[mainId].listName;
-    mMetas.push(meta);
+    let listName = meta.listName;
+    if (isObject(ssltInfos[mainId])) listName = ssltInfos[mainId].listName;
+    mMetas.push({ ...meta, listName });
   }
   for (const meta of conflictedMetas) {
     const mainId = getMainId(meta.id, toRootIds);
     if (!isString(mainId)) continue;
 
-    if (isObject(ssltInfos[mainId])) meta.listName = ssltInfos[mainId].listName;
-    mConflictedMetas.push(meta);
+    let listName = meta.listName;
+    if (isObject(ssltInfos[mainId])) listName = ssltInfos[mainId].listName;
+    mConflictedMetas.push({ ...meta, listName });
   }
 
   return {
@@ -1698,8 +1701,9 @@ export const getRawPins = createSelector(
 );
 
 export const getPins = (pinFPaths, pendingPins, doExcludeUnpinning, toRootIds) => {
-  const pins = getRawPins(pinFPaths, toRootIds);
+  const rawPins = getRawPins(pinFPaths, toRootIds);
 
+  const pins = { ...rawPins };
   for (const id in pendingPins) {
     const { status, rank, updatedDT, addedDT } = pendingPins[id];
     const pinMainId = getMainId(id, toRootIds);
