@@ -5,7 +5,8 @@ import Svg, { Path } from 'react-native-svg';
 
 import { updateBulkEdit, updateNoteId, fetch, sync } from '../actions';
 import {
-  TRASH, NEW_NOTE, NEW_NOTE_OBJ, MAX_SELECTED_NOTE_IDS, VALID, LOCKED,
+  SD_HUB_URL, TRASH, NEW_NOTE, NEW_NOTE_OBJ, MAX_SELECTED_NOTE_IDS,
+  SD_MAX_SELECTED_NOTE_IDS, VALID, LOCKED,
 } from '../types/const';
 import {
   getIsShowingNoteInfosNull, makeGetUnsavedNote, getCurrentLockListStatus,
@@ -35,6 +36,10 @@ const NoteList = (props) => {
   const lockStatus = useSelector(state => getCurrentLockListStatus(state));
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
   const isUserDummy = useSelector(state => state.user.isUserDummy);
+  const maxSelectedNoteIds = useSelector(state => {
+    if (state.user.hubUrl === SD_HUB_URL) return SD_MAX_SELECTED_NOTE_IDS;
+    return MAX_SELECTED_NOTE_IDS;
+  });
   const prevListName = useRef(null);
   const prevQueryString = useRef(null);
   const prevDidFetch = useRef(null);
@@ -89,7 +94,7 @@ const NoteList = (props) => {
               </Svg>
             </View>
             <View style={tailwind('ml-3 flex-shrink flex-grow')}>
-              <Text style={tailwind('text-left text-sm font-normal leading-5 text-red-800')}>To prevent network overload, up to {MAX_SELECTED_NOTE_IDS} items can be selected.</Text>
+              <Text style={tailwind('text-left text-sm font-normal leading-5 text-red-800')}>To prevent network overload, up to {maxSelectedNoteIds} items can be selected.</Text>
             </View>
           </View>
         </Animated.View>

@@ -20,14 +20,14 @@ import {
   UPDATE_DELETE_SYNC_DATA_PROGRESS, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
-  SIGN_UP_POPUP, SIGN_IN_POPUP, PROFILE_POPUP, NOTE_LIST_MENU_POPUP,
+  SD_HUB_URL, SIGN_UP_POPUP, SIGN_IN_POPUP, PROFILE_POPUP, NOTE_LIST_MENU_POPUP,
   NOTE_LIST_ITEM_MENU_POPUP, LIST_NAMES_POPUP, PIN_MENU_POPUP, TAG_EDITOR_POPUP,
   PAYWALL_POPUP, SIDEBAR_POPUP, SEARCH_POPUP, SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP,
   SETTINGS_TAGS_MENU_POPUP, TIME_PICK_POPUP, DATE_FORMAT_MENU_POPUP, LOCK_MENU_POPUP,
   LOCK_EDITOR_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, CONFIRM_AS_DUMMY_POPUP,
   CONFIRM_EXIT_DUMMY_POPUP, ACCESS_ERROR_POPUP, STALE_ERROR_POPUP, USE_SYNC_ERROR_POPUP,
   SWWU_POPUP, MY_NOTES, TRASH, ARCHIVE, UPDATING, DIED_ADDING, DIED_UPDATING,
-  DIED_MOVING, MAX_SELECTED_NOTE_IDS, SETTINGS_VIEW_ACCOUNT,
+  DIED_MOVING, MAX_SELECTED_NOTE_IDS, SD_MAX_SELECTED_NOTE_IDS, SETTINGS_VIEW_ACCOUNT,
 } from '../types/const';
 import {
   doContainListName, doContainTagName, isObject, isString, isNumber,
@@ -636,7 +636,7 @@ const displayReducer = (state = initialState, action) => {
     for (const noteId of action.payload) {
       if (!selectedNoteIds.includes(noteId)) selectedNoteIds.push(noteId);
     }
-    if (selectedNoteIds.length > MAX_SELECTED_NOTE_IDS) {
+    if (selectedNoteIds.length > getMaxSelectedNoteIds()) {
       return { ...state, isSelectedNoteIdsMaxErrorShown: true };
     }
     return { ...state, selectedNoteIds };
@@ -647,7 +647,7 @@ const displayReducer = (state = initialState, action) => {
     for (const noteId of state.selectedNoteIds) {
       if (!action.payload.includes(noteId)) selectedNoteIds.push(noteId);
     }
-    const isShown = selectedNoteIds.length > MAX_SELECTED_NOTE_IDS;
+    const isShown = selectedNoteIds.length > getMaxSelectedNoteIds();
     return { ...state, selectedNoteIds, isSelectedNoteIdsMaxErrorShown: isShown };
   }
 
@@ -987,6 +987,11 @@ const displayReducer = (state = initialState, action) => {
 const _filterIfNotNull = (arr, excludingIds) => {
   if (!Array.isArray(arr)) return arr;
   return arr.filter(el => !excludingIds.includes(el.id));
+};
+
+const getMaxSelectedNoteIds = () => {
+  if (vars.user.hubUrl === SD_HUB_URL) return SD_MAX_SELECTED_NOTE_IDS;
+  return MAX_SELECTED_NOTE_IDS;
 };
 
 export default displayReducer;

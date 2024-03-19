@@ -124,6 +124,7 @@ export const N_NOTES = 10;
 export const MAX_TRY = 1;
 export const N_DAYS = 45;
 export const MAX_SELECTED_NOTE_IDS = 10;
+export const SD_MAX_SELECTED_NOTE_IDS = 40;
 export const MAX_CHARS = 600;
 
 export const ID = 'id';

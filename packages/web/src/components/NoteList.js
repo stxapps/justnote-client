@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import { updateNoteIdUrlHash, fetch } from '../actions';
 import {
-  TRASH, NEW_NOTE, NEW_NOTE_OBJ, MAX_SELECTED_NOTE_IDS, VALID, LOCKED,
+  SD_HUB_URL, TRASH, NEW_NOTE, NEW_NOTE_OBJ, MAX_SELECTED_NOTE_IDS,
+  SD_MAX_SELECTED_NOTE_IDS, VALID, LOCKED,
 } from '../types/const';
 import {
   getIsShowingNoteInfosNull, makeGetUnsavedNote, getCurrentLockListStatus,
@@ -32,6 +33,10 @@ const NoteList = (props) => {
   );
   const unsavedNote = useSelector(state => getUnsavedNote(state, NEW_NOTE_OBJ));
   const lockStatus = useSelector(state => getCurrentLockListStatus(state));
+  const maxSelectedNoteIds = useSelector(state => {
+    if (state.user.hubUrl === SD_HUB_URL) return SD_MAX_SELECTED_NOTE_IDS;
+    return MAX_SELECTED_NOTE_IDS;
+  });
   const prevListName = useRef(null);
   const prevQueryString = useRef(null);
   const prevDidFetch = useRef(null);
@@ -60,7 +65,7 @@ const NoteList = (props) => {
                 </svg>
               </div>
               <div className={tailwind('ml-3 mt-0.5')}>
-                <h3 className={tailwind('text-left text-sm leading-5 text-red-800')}>To prevent network overload, up to {MAX_SELECTED_NOTE_IDS} items can be selected.</h3>
+                <h3 className={tailwind('text-left text-sm leading-5 text-red-800')}>To prevent network overload, up to {maxSelectedNoteIds} items can be selected.</h3>
               </div>
             </div>
           </div>
