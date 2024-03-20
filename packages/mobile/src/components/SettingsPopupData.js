@@ -9,7 +9,9 @@ import {
   deleteAllData, updateDeleteAllDataProgress, deleteSyncData,
   updateDeleteSyncDataProgress,
 } from '../actions/data';
-import { DOMAIN_NAME, HASH_SUPPORT, SM_WIDTH, BLK_MODE } from '../types/const';
+import {
+  DOMAIN_NAME, HASH_SUPPORT, SD_HUB_URL, SM_WIDTH, BLK_MODE,
+} from '../types/const';
 import { getThemeMode } from '../selectors';
 
 import { useSafeAreaFrame, useTailwind } from '.';
@@ -21,7 +23,17 @@ const _SettingsPopupData = (props) => {
     onToExportAllDataViewBtnClick, onToDeleteAllDataViewBtnClick,
     onToDeleteSyncDataViewBtnClick,
   } = props;
+  const hubUrl = useSelector(state => state.user.hubUrl);
   const tailwind = useTailwind();
+
+  let [hubName, hubNameUrl] = ['hub.hiro.so', 'https://hub.hiro.so/hub_info'];
+  let [hubProvider, hubProviderUrl] = ['Hiro Systems', 'https://www.hiro.so'];
+  if (hubUrl === SD_HUB_URL) {
+    hubName = 'hub.stacksdrive.com';
+    hubNameUrl = 'https://hub.stacksdrive.com/hub_info';
+    hubProvider = 'STX Apps Co., Ltd.';
+    hubProviderUrl = 'https://www.stxapps.com';
+  }
 
   return (
     <View style={tailwind('p-4 md:p-6')}>
@@ -33,7 +45,7 @@ const _SettingsPopupData = (props) => {
       </View>
       <View style={tailwind('mt-6 md:mt-0')}>
         <Text style={tailwind('text-base font-medium leading-5 text-gray-800 blk:text-gray-100')}>Data Server</Text>
-        <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Justnote stores your data in a Stacks data server. You can specify which Stacks data server to store your data. By default, your Stacks data server is at <Text onPress={() => Linking.openURL('https://hub.hiro.so/hub_info')} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>hub.hiro.so</Text> provided by <Text onPress={() => Linking.openURL('https://www.hiro.so')} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>Hiro Systems</Text>. You can also deploy your own Stacks data server. To change your Stacks data server, you need to record your server’s information on the Stacks blockchain. Justnote stores your data on the server specified in the blockchain. For more details, please visit <Text onPress={() => Linking.openURL('https://docs.stacks.co/docs/gaia')} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>Stacks Gaia</Text>.</Text>
+        <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Justnote stores your data in a Stacks data server. You can specify which Stacks data server to store your data. By default, your Stacks data server is at <Text onPress={() => Linking.openURL(hubNameUrl)} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>{hubName}</Text> provided by <Text onPress={() => Linking.openURL(hubProviderUrl)} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>{hubProvider}</Text>. You can also deploy your own Stacks data server. To change your Stacks data server, you need to record your server’s information on the Stacks blockchain. Justnote stores your data on the server specified in the blockchain. For more details, please visit <Text onPress={() => Linking.openURL('https://docs.stacks.co/docs/gaia')} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>Stacks Gaia</Text>.</Text>
       </View>
       <View style={tailwind('mt-8')}>
         <TouchableOpacity onPress={onToImportAllDataViewBtnClick}>
