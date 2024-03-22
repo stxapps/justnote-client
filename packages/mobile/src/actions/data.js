@@ -890,7 +890,7 @@ const _pushSsltValue = (
       if (ssltInfo.listName !== listName) doPut = true;
     } else if (isObject(ssltInfo) && !isObject(psInfo)) {
       if (ssltInfo.listName !== listName) doPut = true;
-    } else if (!isObject(!ssltInfo) && isObject(psInfo)) {
+    } else if (!isObject(ssltInfo) && isObject(psInfo)) {
       if (fpathParts[1] !== listName) doPut = true;
     }
   }
