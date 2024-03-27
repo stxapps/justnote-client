@@ -331,6 +331,8 @@ PODS:
     - React-Core
   - react-native-html-to-pdf (0.12.0):
     - React
+  - react-native-image-resizer (3.0.7):
+    - React-Core
   - react-native-mmkv-storage (0.4.4):
     - MMKV (= 1.2.7)
     - React-Core
@@ -408,9 +410,9 @@ PODS:
     - React-jsi (= 0.70.3)
     - React-logger (= 0.70.3)
     - React-perflogger (= 0.70.3)
-  - ReactNativeFileAccess (3.0.4):
+  - ReactNativeFileAccess (3.0.7):
     - React-Core
-    - ZIPFoundation (= 0.9.11)
+    - ZIPFoundation
   - ReactNativeKeyboardManager (6.5.11-2):
     - IQKeyboardManagerSwift (= 6.5.11)
     - React-Core
@@ -501,6 +503,7 @@ DEPENDENCIES:
   - react-native-document-picker (from `../node_modules/react-native-document-picker`)
   - react-native-flipper (from `../node_modules/react-native-flipper`)
   - react-native-html-to-pdf (from `../node_modules/react-native-html-to-pdf`)
+  - "react-native-image-resizer (from `../node_modules/@bam.tech/react-native-image-resizer`)"
   - react-native-mmkv-storage (from `../node_modules/react-native-mmkv-storage`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-webview (from `../node_modules/react-native-webview`)
@@ -610,6 +613,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-flipper"
   react-native-html-to-pdf:
     :path: "../node_modules/react-native-html-to-pdf"
+  react-native-image-resizer:
+    :path: "../node_modules/@bam.tech/react-native-image-resizer"
   react-native-mmkv-storage:
     :path: "../node_modules/react-native-mmkv-storage"
   react-native-safe-area-context:
@@ -711,6 +716,7 @@ SPEC CHECKSUMS:
   react-native-document-picker: 3599b238843369026201d2ef466df53f77ae0452
   react-native-flipper: c33a4995958ef12a2b2f8290d63bed7adeed7634
   react-native-html-to-pdf: ceabb4877a3c0b1e61945142f177be2a8e247c3e
+  react-native-image-resizer: 681f7607418b97c084ba2d0999b153b103040d8a
   react-native-mmkv-storage: 209432836f405981816f1b7bfb0e82baaf84f02a
   react-native-safe-area-context: 36cc67648134e89465663b8172336a19eeda493d
   react-native-webview: b8ec89966713985111a14d6e4bf98d8b54bced0d
@@ -726,7 +732,7 @@ SPEC CHECKSUMS:
   React-RCTVibration: b9a58ffdd18446f43d493a4b0ecd603ee86be847
   React-runtimeexecutor: e9b1f9310158a1e265bcdfdfd8c62d6174b947a2
   ReactCommon: 01064177e66d652192c661de899b1076da962fd9
-  ReactNativeFileAccess: 4530e3be4d5069454c6c6389096d8cb78c897f2c
+  ReactNativeFileAccess: d4d003cbad463ef6db88fe2881ffbc5c3990a52c
   ReactNativeKeyboardManager: 60292dbac467c49841a7d69588208ec4a4f7b2a2
   RNDeviceTimeFormat: 9c3020c6fbfac054dfbadb017755ea2ae519e689
   RNFastImage: 5c9c9fed9c076e521b3f509fe79e790418a544e8
@@ -743,6 +749,6 @@ SPEC CHECKSUMS:
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
   ZIPFoundation: b1f0de4eed33e74a676f76e12559ab6b75990197
 
-PODFILE CHECKSUM: 967ab03b4c0dc10379b7a86cb20aa192e7b33a06
+PODFILE CHECKSUM: 188fe1d35ea82826df0fad3c037804c120cfea86
 
 COCOAPODS: 1.12.1
