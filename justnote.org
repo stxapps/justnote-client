@@ -242,6 +242,7 @@
 - yarn add tailwindcss-labeled-groups
 - yarn add idb-keyval
 - yarn add jest-diff queue
+- yarn add blueimp-load-image
 ** Server steps
 *** namecheap
 - use ALIAS for root domain
@@ -290,6 +291,7 @@
 - yarn add react-native-flag-secure
 - yarn add --dev redux-flipper react-native-flipper@0.164.0
 - yarn add jest-diff queue event-target-fallback
+- yarn add @bam.tech/react-native-image-resizer
 - Font
   + Create react-native.config.js
   + Run npx react-native-asset

@@ -2119,7 +2119,7 @@ export const batchGetFileWithRetry = async (
 };
 
 export const batchPerformFilesInfos = {
-  maxSize: 1.0, sSize: 1 / 7, eSize: 1 / 18, cSize: 1 / 12, dSize: 1 / 28,
+  maxSize: 1.0, sSize: 1 / 4, eSize: 1 / 18, cSize: 1 / 12, dSize: 1 / 28,
 };
 
 export const getPerformFilesValueSize = (value, minSize) => {

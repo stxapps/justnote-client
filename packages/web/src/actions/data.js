@@ -1,3 +1,4 @@
+import loadImage from 'blueimp-load-image';
 import { saveAs } from 'file-saver';
 
 import dataApi from '../apis/data';
@@ -24,7 +25,7 @@ import {
   stripHtml, createSsltFPath, extractSsltFPath, getNoteMainIds,
   batchPerformFilesIfEnough, throwIfPerformFilesError,
 } from '../utils';
-import { isUint8Array } from '../utils/index-web';
+import { isUint8Array, isBlob, convertCanvasToBlob } from '../utils/index-web';
 import { initialSettingsState, initialInfoState } from '../types/initialStates';
 import vars from '../vars';
 
@@ -119,6 +120,12 @@ const _getListHtml = (listObj) => {
   return listHtml;
 };
 
+const _getImageType = (type, fext) => {
+  if (isString(type) && type.length > 0) return type;
+  if (fext === 'png') return 'image/png';
+  return 'image/jpeg';
+};
+
 const parseEvernoteImportedFile = async (dispatch, getState, zip, entries) => {
 
   const htmlEntries = [], imgEntries = [];
@@ -160,8 +167,17 @@ const parseEvernoteImportedFile = async (dispatch, getState, zip, entries) => {
 
       idMap[entry.filename] = fpath;
 
-      const content = await entry.getData(new zip.BlobWriter());
-      if (!content) continue;
+      let content = await entry.getData(new zip.BlobWriter());
+      if (!isBlob(content)) continue;
+
+      if (content.size > 360 * 1000) {
+        const imageOptions = {
+          maxWidth: 1688, maxHeight: 1688, orientation: true, meta: true, canvas: true,
+        };
+        const imageData = await loadImage(content, imageOptions);
+        const imageType = _getImageType(content.type, fext);
+        content = await convertCanvasToBlob(imageData.image, imageType);
+      }
 
       if (vars.syncMode.doSyncMode) {
         await fileApi.putFile(fpath, content);
@@ -481,8 +497,17 @@ const parseGKeepImportedFile = async (dispatch, getState, zip, entries) => {
       //   so need to ignore the ext.
       imgIdMap[fnameParts.slice(0, -1).join('.')] = fpath;
 
-      const content = await entry.getData(new zip.BlobWriter());
-      if (!content) continue;
+      let content = await entry.getData(new zip.BlobWriter());
+      if (!isBlob(content)) continue;
+
+      if (content.size > 360 * 1000) {
+        const imageOptions = {
+          maxWidth: 1688, maxHeight: 1688, orientation: true, meta: true, canvas: true,
+        };
+        const imageData = await loadImage(content, imageOptions);
+        const imageType = _getImageType(content.type, fext);
+        content = await convertCanvasToBlob(imageData.image, imageType);
+      }
 
       if (vars.syncMode.doSyncMode) {
         await fileApi.putFile(fpath, content);

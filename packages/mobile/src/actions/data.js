@@ -6,6 +6,7 @@ import DocumentPicker, {
   types as DocumentPickerTypes,
 } from 'react-native-document-picker';
 import { parseDocument, DomUtils } from 'htmlparser2';
+import ImageResizer from '@bam.tech/react-native-image-resizer';
 
 import dataApi from '../apis/data';
 import serverApi from '../apis/server';
@@ -125,6 +126,11 @@ const _getListHtml = (listObj) => {
   return listHtml;
 };
 
+const _getImageType = (fext) => {
+  if (fext.toLowerCase() === 'png') return 'PNG';
+  return 'JPEG';
+};
+
 const parseEvernoteImportedFile = async (dispatch, getState, importDPath, entries) => {
 
   const htmlEntries = [], imgEntries = [];
@@ -170,7 +176,22 @@ const parseEvernoteImportedFile = async (dispatch, getState, importDPath, entrie
       const destDPath = Util.dirname(destFPath);
       const doExist = await FileSystem.exists(destDPath);
       if (!doExist) await FileSystem.mkdir(destDPath);
-      await FileSystem.cp(`${importDPath}/${entry.filename}`, destFPath);
+
+      let srcFPath = `${importDPath}/${entry.filename}`;
+      const { size } = await FileSystem.stat(srcFPath);
+      if (size > 360 * 1000) {
+        const srcUri = (Platform.OS === 'android' ? 'file://' : '') + srcFPath;
+        const imageOptions = /** @type any */({
+          mode: 'contain', onlyScaleDown: true,
+        });
+        const imageType = _getImageType(fext);
+        const { path } = await ImageResizer.createResizedImage(
+          srcUri, 1688, 1688, imageType, 92, 0, null, false, imageOptions
+        );
+        srcFPath = path;
+      }
+
+      await FileSystem.cp(srcFPath, destFPath);
     }
 
     progress.done += selectedEntries.length;
@@ -483,7 +504,22 @@ const parseGKeepImportedFile = async (dispatch, getState, importDPath, entries) 
       const destDPath = Util.dirname(destFPath);
       const doExist = await FileSystem.exists(destDPath);
       if (!doExist) await FileSystem.mkdir(destDPath);
-      await FileSystem.cp(`${importDPath}/${entry.filename}`, destFPath);
+
+      let srcFPath = `${importDPath}/${entry.filename}`;
+      const { size } = await FileSystem.stat(srcFPath);
+      if (size > 360 * 1000) {
+        const srcUri = (Platform.OS === 'android' ? 'file://' : '') + srcFPath;
+        const imageOptions = /** @type any */({
+          mode: 'contain', onlyScaleDown: true,
+        });
+        const imageType = _getImageType(fext);
+        const { path } = await ImageResizer.createResizedImage(
+          srcUri, 1688, 1688, imageType, 92, 0, null, false, imageOptions
+        );
+        srcFPath = path;
+      }
+
+      await FileSystem.cp(srcFPath, destFPath);
     }
 
     progress.done += selectedEntries.length;

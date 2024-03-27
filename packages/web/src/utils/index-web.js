@@ -24,3 +24,7 @@ export const convertDataUrlToBlob = async (dataUrl) => {
   const blob = await res.blob();
   return blob;
 };
+
+export const convertCanvasToBlob = (canvas, type) => {
+  return new Promise(resolve => canvas.toBlob(resolve, type));
+};

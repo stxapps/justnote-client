@@ -18,6 +18,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@bam.tech/react-native-image-resizer": "^3.0.7",
     "@wewatch/lexorank": "^1.0.3",
     "axios": "^1.6.2",
     "event-target-fallback": "^1.0.0",
