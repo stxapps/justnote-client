@@ -1470,6 +1470,13 @@ const _canExport = (noteMeta, lockSettings, toRootIds) => {
   return true;
 };
 
+const _addToZip = async (zipWriter, fpath, reader) => {
+  if (zipWriter.filenames instanceof Set) {
+    if (zipWriter.filenames.has(fpath)) return;
+  }
+  await zipWriter.add(fpath, reader);
+};
+
 export const exportAllData = () => async (dispatch, getState) => {
   dispatch(updateExportAllDataProgress({ total: 'calculating...', done: 0 }));
 
@@ -1599,7 +1606,7 @@ export const exportAllData = () => async (dispatch, getState) => {
           reader = new zip.BlobReader(content);
         }
 
-        await zipWriter.add(fpath, reader);
+        await _addToZip(zipWriter, fpath, reader);
       }
 
       progress.done += successResponses.length;
@@ -1618,7 +1625,7 @@ export const exportAllData = () => async (dispatch, getState) => {
         if (isUint8Array(content)) content = new Blob([content]);
 
         const reader = new zip.BlobReader(content);
-        await zipWriter.add(fpath, reader);
+        await _addToZip(zipWriter, fpath, reader);
       }
 
       progress.done += selectedFPaths.length;
@@ -1639,7 +1646,7 @@ export const exportAllData = () => async (dispatch, getState) => {
         const content = JSON.stringify({});
 
         const reader = new zip.TextReader(content);
-        await zipWriter.add(fpath, reader);
+        await _addToZip(zipWriter, fpath, reader);
       }
 
       progress.done += sldSsltObjs.length;
@@ -1658,7 +1665,7 @@ export const exportAllData = () => async (dispatch, getState) => {
         const content = JSON.stringify({});
 
         const reader = new zip.TextReader(content);
-        await zipWriter.add(fpath, reader);
+        await _addToZip(zipWriter, fpath, reader);
       }
 
       progress.done += sldPinObjs.length;
@@ -1678,7 +1685,7 @@ export const exportAllData = () => async (dispatch, getState) => {
           const content = JSON.stringify({});
 
           const reader = new zip.TextReader(content);
-          await zipWriter.add(fpath, reader);
+          await _addToZip(zipWriter, fpath, reader);
         }
       }
 

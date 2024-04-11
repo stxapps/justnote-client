@@ -424,7 +424,7 @@ export const handleUrlHash = () => {
   window.location.replace(urlObj.toString());
 };
 
-export const redirectToMain = () => {
+const redirectToMain = () => {
   // Need timeout for window.history.back() to update the href first.
   setTimeout(() => {
     const urlObj = new Url(window.location.href, {});
