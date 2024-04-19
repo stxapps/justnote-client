@@ -307,7 +307,7 @@ const Landing = () => {
                       </div>
                       <div className={tailwind('ml-4')}>
                         <div className={tailwind('text-base font-medium leading-6 tracking-tight text-gray-800')}>john whitham</div>
-                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring')} href="https://play.google.com/store/apps/details?id=com.justnotecc&hl=en&gl=US" target="_blank" rel="noreferrer">Google Play Reviews</a>
+                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://play.google.com/store/apps/details?id=com.justnotecc&hl=en&gl=US" target="_blank" rel="noreferrer">Google Play Reviews</a>
                       </div>
                     </figcaption>
                   </figure>
@@ -323,7 +323,7 @@ const Landing = () => {
                       </div>
                       <div className={tailwind('ml-4')}>
                         <div className={tailwind('text-base font-medium leading-6 tracking-tight text-gray-800')}>Krishna Pandit</div>
-                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring')} href="https://play.google.com/store/apps/details?id=com.justnotecc&hl=en&gl=US" target="_blank" rel="noreferrer">Google Play Reviews</a>
+                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://play.google.com/store/apps/details?id=com.justnotecc&hl=en&gl=US" target="_blank" rel="noreferrer">Google Play Reviews</a>
                       </div>
                     </figcaption>
                   </figure>
@@ -343,7 +343,7 @@ const Landing = () => {
                       </div>
                       <div className={tailwind('ml-4')}>
                         <div className={tailwind('text-base font-medium leading-6 tracking-tight text-gray-800')}>Daniel Holenstein</div>
-                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring')} href="https://twitter.com/DanielHolenste2/status/1582937273754333184" target="_blank" rel="noreferrer">@DanielHolenste2</a>
+                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://twitter.com/DanielHolenste2/status/1582937273754333184" target="_blank" rel="noreferrer">@DanielHolenste2</a>
                       </div>
                     </figcaption>
                   </figure>
@@ -359,7 +359,7 @@ const Landing = () => {
                       </div>
                       <div className={tailwind('ml-4')}>
                         <div className={tailwind('text-base font-medium leading-6 tracking-tight text-gray-800')}>Meme</div>
-                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring')} href="https://twitter.com/Mefnat/status/1741634298669596779" target="_blank" rel="noreferrer">@Mefnat</a>
+                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://twitter.com/Mefnat/status/1741634298669596779" target="_blank" rel="noreferrer">@Mefnat</a>
                       </div>
                     </figcaption>
                   </figure>
@@ -379,7 +379,7 @@ const Landing = () => {
                       </div>
                       <div className={tailwind('ml-4')}>
                         <div className={tailwind('text-base font-medium leading-6 tracking-tight text-gray-800')}>ALIN WANDERLUST</div>
-                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring')} href="https://play.google.com/store/apps/details?id=com.justnotecc&hl=en&gl=US" target="_blank" rel="noreferrer">Google Play Reviews</a>
+                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://play.google.com/store/apps/details?id=com.justnotecc&hl=en&gl=US" target="_blank" rel="noreferrer">Google Play Reviews</a>
                       </div>
                     </figcaption>
                   </figure>
@@ -395,7 +395,7 @@ const Landing = () => {
                       </div>
                       <div className={tailwind('ml-4')}>
                         <div className={tailwind('text-base font-medium leading-6 tracking-tight text-gray-800')}>Infinite Insights</div>
-                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring')} href="https://x.com/Manyonge12/status/1626885376794140672" target="_blank" rel="noreferrer">@Manyonge12</a>
+                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://x.com/Manyonge12/status/1626885376794140672" target="_blank" rel="noreferrer">@Manyonge12</a>
                       </div>
                     </figcaption>
                   </figure>

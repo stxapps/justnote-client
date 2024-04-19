@@ -522,7 +522,7 @@ const _SettingsPopupIapRestore = (props) => {
       <div className={tailwind('mt-7 mb-4')}>
         <div className={tailwind('flex items-center')}>
           <div className={tailwind('ball-clip-rotate blk:ball-clip-rotate-blk')}>
-            nn            <div />
+            <div />
           </div>
           <p className={tailwind('ml-1 text-base text-gray-500 blk:text-gray-400')}>Restoring...</p>
         </div>
