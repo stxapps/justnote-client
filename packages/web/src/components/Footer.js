@@ -1,6 +1,8 @@
 import React from 'react';
 
-import { HASH_ABOUT, HASH_TERMS, HASH_PRIVACY, HASH_SUPPORT } from '../types/const';
+import {
+  HASH_ABOUT, HASH_TERMS, HASH_PRIVACY, HASH_PRICING, HASH_SUPPORT,
+} from '../types/const';
 
 import { useTailwind } from '.';
 
@@ -24,6 +26,11 @@ const Footer = () => {
           <div className={tailwind('px-5 py-2')}>
             <a className={tailwind('rounded-sm text-base text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400')} href={'/' + HASH_PRIVACY}>
               Privacy
+            </a>
+          </div>
+          <div className={tailwind('px-5 py-2')}>
+            <a className={tailwind('rounded-sm text-base text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400')} href={'/' + HASH_PRICING}>
+              Pricing
             </a>
           </div>
           <div className={tailwind('px-5 py-2')}>

@@ -28,6 +28,13 @@ import ubiquitous4x from '../images/ubiquitous@4x.png';
 import availableOnPlayStore from '../images/available-on-play-store.svg';
 import availableOnAppStore from '../images/available-on-app-store.svg';
 
+import kindWordsAW from '../images/kind_words_alin_wanderlust.png';
+import kindWordsDH from '../images/kind_words_daniel_holenstein.jpg';
+import kindWordsII from '../images/kind_words_infinite_insights.jpg';
+import kindWordsJW from '../images/kind_words_john_whitham.jpg';
+import kindWordsKP from '../images/kind_words_krishna_pandit.jpg';
+import kindWordsM from '../images/kind_words_meme.jpg';
+
 import creator from '../images/creator.png';
 
 const Landing = () => {
@@ -109,11 +116,9 @@ const Landing = () => {
             <div className={tailwind('mx-auto mt-16 max-w-7xl px-4 sm:mt-24 sm:px-6')}>
               <div className={tailwind('text-center')}>
                 <h1 className={tailwind('text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl md:text-5xl')}>
-                  <span className={tailwind('block')}>A <span className={tailwind('text-green-600')}>privacy-focused</span> note taking app</span>
+                  <span className={tailwind('block')}>A <span className={tailwind('text-green-600')}>privacy-focused</span> note-taking app</span>
                 </h1>
-                <p className={tailwind('mx-auto mt-3 max-w-md text-base text-gray-500 sm:text-lg md:mt-5 md:max-w-3xl md:text-xl')}>
-                  Justnote is a note taking app that you can use easily, take a note rapidly, and importantly, have full control of your data.
-                </p>
+                <p className={tailwind('mx-auto mt-3 max-w-md text-base text-gray-500 sm:text-lg md:mt-5 md:max-w-3xl md:text-xl')}>Justnote is a privacy-focused note-taking app that you can use easily, take notes rapidly, and, importantly, truly own your account and data.</p>
                 <div className={tailwind('mx-auto mt-5 max-w-md sm:flex sm:justify-center md:mt-8')}>
                   <button onClick={onSignUpBtnClick} className={tailwind('flex w-full items-center justify-center rounded-md border border-transparent bg-green-600 px-8 py-3 text-base font-medium text-white shadow hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 sm:w-max md:py-4 md:px-10 md:text-lg')}>
                     Get started
@@ -143,9 +148,7 @@ const Landing = () => {
         <div className={tailwind('relative mx-auto max-w-7xl px-4 pt-24 pb-16 sm:px-6 sm:pt-32 sm:pb-24 lg:px-8')}>
           <div className={tailwind('relative lg:grid lg:grid-cols-3 lg:gap-x-8')}>
             <div className={tailwind('lg:col-span-1')}>
-              <h2 className={tailwind('text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl')}>
-                A better way to take note
-              </h2>
+              <h2 className={tailwind('text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl')}>A better way to take note</h2>
             </div>
             <div className={tailwind('mt-10 space-y-10 sm:grid sm:grid-cols-2 sm:gap-x-8 sm:gap-y-10 sm:space-y-0 lg:col-span-2 lg:mt-0')}>
               <div>
@@ -156,9 +159,7 @@ const Landing = () => {
                 </div>
                 <div className={tailwind('mt-5')}>
                   <h3 className={tailwind('text-lg font-medium leading-6 text-gray-900')}>Simple</h3>
-                  <p className={tailwind('mt-2 text-base text-gray-500')}>
-                    Justnote is a simple note taking app, yet powerful enough. Our WYSIWYG rich text editor comes with features like bold, underline, font color, and background color.
-                  </p>
+                  <p className={tailwind('mt-2 text-base text-gray-500')}>Justnote is a simple note-taking app, yet powerful enough. Our WYSIWYG-rich text editor has features like bold, underline, font color, and background color.</p>
                 </div>
               </div>
               <div>
@@ -170,9 +171,7 @@ const Landing = () => {
                 </div>
                 <div className={tailwind('mt-5')}>
                   <h3 className={tailwind('text-lg font-medium leading-6 text-gray-900')}>Fast</h3>
-                  <p className={tailwind('mt-2 text-base text-gray-500')}>
-                    You can take a note easily and quickly. Justnote is your quick note taking app that you can use for your to-do lists, reminders, shopping lists, memos, thoughts, etc.
-                  </p>
+                  <p className={tailwind('mt-2 text-base text-gray-500')}>You can take notes easily and quickly. Justnote is your quick note-taking app for your to-do lists, reminders, shopping lists, memos, thoughts, etc.</p>
                 </div>
               </div>
               <div>
@@ -183,9 +182,7 @@ const Landing = () => {
                 </div>
                 <div className={tailwind('mt-5')}>
                   <h3 className={tailwind('text-lg font-medium leading-6 text-gray-900')}>Ubiquitous</h3>
-                  <p className={tailwind('mt-2 text-base text-gray-500')}>
-                    Justnote is available on web, iOS, and Android. You can use Justnote on any of your devices. All your notes are synced across your devices automatically.
-                  </p>
+                  <p className={tailwind('mt-2 text-base text-gray-500')}>Justnote is available on the web, iOS, and Android. You can use Justnote on any of your devices. All your notes are synced across your devices automatically.</p>
                 </div>
               </div>
               <div>
@@ -196,9 +193,7 @@ const Landing = () => {
                 </div>
                 <div className={tailwind('mt-5')}>
                   <h3 className={tailwind('text-lg font-medium leading-6 text-gray-900')}>Privacy focused</h3>
-                  <p className={tailwind('mt-2 text-base text-gray-500')}>
-                    Your identity lives in blockchain and only you can control it. All your data are encrypted and only your private key can decrypt them and see the content inside.
-                  </p>
+                  <p className={tailwind('mt-2 text-base text-gray-500')}>Your account is cryptographically generated; only you can control it. All your data are encrypted; only you can decrypt them and see the content inside.</p>
                 </div>
               </div>
             </div>
@@ -208,14 +203,44 @@ const Landing = () => {
       <div className={tailwind('relative bg-white py-16 sm:py-24')}>
         <div className={tailwind('mx-auto max-w-md px-4 text-center sm:max-w-3xl sm:px-6 lg:max-w-7xl lg:px-8')}>
           <h2 className={tailwind('text-base font-semibold uppercase tracking-wider text-indigo-600')}>Safe & Secure</h2>
-          <p className={tailwind('mt-2 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl')}>
-            With privacy at heart powered by <a className={tailwind('rounded text-indigo-600 hover:underline focus:outline-none focus:ring-2 focus:ring-indigo-500')} href="https://www.stacks.co" target="_blank" rel="noreferrer">Stacks</a>
-          </p>
-          <p className={tailwind('mx-auto mt-5 max-w-prose text-xl text-gray-500')}>
-            Stacks technology empowers Justnote to be a decentralized app on the Bitcoin blockchain so you have true ownership of your identity and your data.
-          </p>
+          <p className={tailwind('mt-2 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl')}>With privacy at heart powered by <a className={tailwind('rounded text-indigo-600 hover:underline focus:outline-none focus:ring-2 focus:ring-indigo-500')} href="https://www.hiro.so/stacks-js" target="_blank" rel="noreferrer">Stacks</a></p>
+          <p className={tailwind('mx-auto mt-5 max-w-prose text-xl text-gray-500')}>Web3 technology from Stacks empowers Justnote to be a decentralized app, allowing users to truly own their accounts and data.</p>
           <div className={tailwind('mt-12')}>
-            <div className={tailwind('grid grid-cols-1 gap-8 lg:grid-cols-3')}>
+            <div className={tailwind('grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-5 xl:gap-8')}>
+              <div className={tailwind('mx-auto pt-6')}>
+                <div className={tailwind('flow-root h-full max-w-sm rounded-lg bg-gray-50 px-6 pb-8')}>
+                  <div className={tailwind('-mt-6')}>
+                    <div>
+                      <span className={tailwind('inline-flex items-center justify-center rounded-md bg-indigo-500 p-3 shadow-lg')}>
+                        <svg className={tailwind('h-6 w-6 text-white')} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path fillRule="evenodd" clipRule="evenodd" d="M18 8.00001C18.0003 8.93719 17.781 9.86139 17.3598 10.6986C16.9386 11.5357 16.3271 12.2626 15.5744 12.8209C14.8216 13.3792 13.9486 13.7534 13.0252 13.9135C12.1018 14.0737 11.1538 14.0153 10.257 13.743L10 14L9 15L8 16H6V18H2V14L6.257 9.74301C6.00745 8.91803 5.93857 8.04896 6.05504 7.19496C6.17152 6.34096 6.47062 5.52208 6.93199 4.79406C7.39336 4.06604 8.00616 3.44596 8.72869 2.97603C9.45122 2.50611 10.2665 2.19736 11.1191 2.07082C11.9716 1.94427 12.8415 2.0029 13.6693 2.2427C14.4972 2.4825 15.2637 2.89785 15.9166 3.46048C16.5696 4.02311 17.0936 4.71981 17.4531 5.50315C17.8127 6.2865 17.9992 7.13811 18 8.00001ZM12 4.00001C11.7348 4.00001 11.4804 4.10537 11.2929 4.29291C11.1054 4.48044 11 4.7348 11 5.00001C11 5.26523 11.1054 5.51958 11.2929 5.70712C11.4804 5.89466 11.7348 6.00001 12 6.00001C12.5304 6.00001 13.0391 6.21073 13.4142 6.5858C13.7893 6.96087 14 7.46958 14 8.00001C14 8.26523 14.1054 8.51959 14.2929 8.70712C14.4804 8.89466 14.7348 9.00001 15 9.00001C15.2652 9.00001 15.5196 8.89466 15.7071 8.70712C15.8946 8.51959 16 8.26523 16 8.00001C16 6.93915 15.5786 5.92173 14.8284 5.17159C14.0783 4.42144 13.0609 4.00001 12 4.00001Z" />
+                        </svg>
+                      </span>
+                    </div>
+                    <h3 className={tailwind('mt-8 text-lg font-medium tracking-tight text-gray-900')}>Account</h3>
+                    <p className={tailwind('mt-5 text-left text-base text-gray-500')}><a className={tailwind('rounded font-medium text-indigo-600 hover:underline focus:outline-none focus:ring-2 focus:ring-indigo-500')} href="https://docs.stacks.co/stacks-101/accounts" target="_blank" rel="noreferrer">Your account</a> is cryptographically generated; only you, with your Secret Key, can control it.</p>
+                    <h4 className={tailwind('mt-7 text-left text-base font-medium tracking-tight text-gray-900')}>No ban on your owned account</h4>
+                    <p className={tailwind('mt-3 text-left text-base text-gray-500')}>Your account cannot be locked, banned, or deleted by anyone, as your Secret Key is required to access and modify your account.</p>
+                  </div>
+                </div>
+              </div>
+              <div className={tailwind('mx-auto pt-6')}>
+                <div className={tailwind('flow-root h-full max-w-sm rounded-lg bg-gray-50 px-6 pb-8')}>
+                  <div className={tailwind('-mt-6')}>
+                    <div>
+                      <span className={tailwind('inline-flex items-center justify-center rounded-md bg-indigo-500 p-3 shadow-lg')}>
+                        <svg className={tailwind('h-6 w-6 text-white')} viewBox="0 0 34 38" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M17 9.27273C12.7392 9.27273 9.27273 12.7392 9.27273 17C9.27273 21.2608 12.7392 24.7273 17 24.7273C21.2608 24.7273 24.7273 21.2608 24.7273 17C24.7273 12.7392 21.2608 9.27273 17 9.27273ZM21.1047 12.3621C21.2917 12.529 21.471 12.7067 21.6364 12.8937L20.7369 13.7947L20.4804 13.5196L20.2037 13.2631L21.1047 12.3621ZM19.0555 11.1566C19.2935 11.2401 19.5268 11.3375 19.7494 11.4487L19.2517 12.6233L18.8499 12.4378L18.5609 12.3312L19.0555 11.1566ZM16.6245 10.8182H17.3755V12.0916L17 12.0777L16.6245 12.0916V10.8182ZM14.9816 11.1412L15.4685 12.3188L15.1485 12.4363L14.7745 12.6063L14.2893 11.4286C14.5118 11.3205 14.7452 11.2246 14.9816 11.1412ZM11.4487 14.2506L12.6233 14.7452L12.4394 15.147L12.3312 15.4375L11.1566 14.943C11.2401 14.7035 11.3375 14.4732 11.4487 14.2506ZM10.8182 16.6214H12.0916L12.0777 16.9969L12.0916 17.3725H10.8182V16.6214ZM11.4302 19.7076C11.322 19.4835 11.2246 19.2517 11.1412 19.0122L12.3204 18.5254L12.4378 18.8468L12.6063 19.2177L11.4302 19.7076ZM12.7886 21.7384L12.257 21.2083L13.2615 20.2006L13.5181 20.4757L13.7947 20.7323L12.7886 21.7384ZM13.5196 13.5196L13.2631 13.7947L12.3636 12.8937C12.529 12.7067 12.7083 12.529 12.8953 12.3621L13.7963 13.2631L13.5196 13.5196ZM14.9445 22.8434C14.7065 22.7599 14.4732 22.6625 14.2506 22.5513L14.7483 21.3767L15.1501 21.5622L15.4406 21.6704L14.9445 22.8434ZM17.3755 23.1818H16.6245V21.9068L17 21.9207L17.3755 21.9068V23.1818ZM19.0168 22.8573L18.5315 21.6781L18.8515 21.5606L19.2255 21.3906L19.7107 22.5683C19.4882 22.678 19.2548 22.7754 19.0168 22.8573ZM17 20.0909C15.2923 20.0909 13.9091 18.7077 13.9091 17C13.9091 16.371 14.0961 15.7884 14.4175 15.3L15.5365 16.4189L16.3432 15.6122L15.2135 14.4794C15.7173 14.1208 16.3324 13.9091 17 13.9091C18.7077 13.9091 20.0909 15.2938 20.0909 17C20.0909 18.7062 18.7077 20.0909 17 20.0909ZM21.1047 21.6317L20.2037 20.7307L20.4804 20.4742L20.7369 20.1991L21.6364 21.1001C21.471 21.2886 21.2917 21.4664 21.1047 21.6317ZM22.5513 19.7447L21.3767 19.2486L21.5606 18.8484L21.6688 18.5563L22.8434 19.0524C22.7599 19.2888 22.6625 19.5222 22.5513 19.7447ZM23.1818 17.3725H21.9084L21.9223 16.9969L21.9084 16.6214H23.1818V17.3725ZM22.8573 14.9801L21.6781 15.4669L21.5606 15.1455L21.3922 14.7715L22.5698 14.2862C22.678 14.5103 22.7738 14.7436 22.8573 14.9801ZM23.1818 34H30.9091V37.0909H23.1818V34ZM3.09091 34H10.8182V37.0909H3.09091V34ZM0 0V32.4545H34V0H0ZM17 26.2727C11.8753 26.2727 7.72727 22.1247 7.72727 17C7.72727 11.8737 11.8753 7.72727 17 7.72727C22.1247 7.72727 26.2727 11.8753 26.2727 17C26.2727 22.1247 22.1247 26.2727 17 26.2727Z" />
+                        </svg>
+                      </span>
+                    </div>
+                    <h3 className={tailwind('mt-8 text-lg font-medium tracking-tight text-gray-900')}>Encryption</h3>
+                    <p className={tailwind('mt-5 text-left text-base text-gray-500')}>Everything is encrypted; only you, with your Secret Key, can see the content inside.</p>
+                    <h4 className={tailwind('mt-7 text-left text-base font-medium tracking-tight text-gray-900')}>No targeted ads and data breach</h4>
+                    <p className={tailwind('mt-3 text-left text-base text-gray-500')}>No one can see the content inside your data, so it cannot be used to create targeted ads. If your data is stolen, no information is leaked.</p>
+                  </div>
+                </div>
+              </div>
               <div className={tailwind('mx-auto pt-6')}>
                 <div className={tailwind('flow-root h-full max-w-sm rounded-lg bg-gray-50 px-6 pb-8')}>
                   <div className={tailwind('-mt-6')}>
@@ -232,56 +257,10 @@ const Landing = () => {
                         </svg>
                       </span>
                     </div>
-                    <h3 className={tailwind('mt-8 text-lg font-medium tracking-tight text-gray-900')}>Identity</h3>
-                    <p className={tailwind('mt-5 text-left text-base text-gray-500')}>
-                      Your identity lives in blockchain and only you with your Secret Key can access it and control it.
-                    </p>
-                    <h4 className={tailwind('mt-7 text-base font-medium tracking-tight text-gray-900')}>No ban on your owned identity</h4>
-                    <p className={tailwind('mt-3 text-left text-base text-gray-500')}>
-                      Your identity cannot be locked, banned, or deleted by anyone as your Secret Key is required to make a change to your identity in the blockchain.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className={tailwind('mx-auto pt-6')}>
-                <div className={tailwind('flow-root h-full max-w-sm rounded-lg bg-gray-50 px-6 pb-8')}>
-                  <div className={tailwind('-mt-6')}>
-                    <div>
-                      <span className={tailwind('inline-flex items-center justify-center rounded-md bg-indigo-500 p-3 shadow-lg')}>
-                        <svg className={tailwind('h-6 w-6 text-white')} viewBox="0 0 40 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                          <path fillRule="evenodd" clipRule="evenodd" d="M6 8C6 7.46957 6.21071 6.96086 6.58579 6.58579C6.96086 6.21071 7.46957 6 8 6H32C32.5304 6 33.0391 6.21071 33.4142 6.58579C33.7893 6.96086 34 7.46957 34 8C34 8.53043 33.7893 9.03914 33.4142 9.41421C33.0391 9.78929 32.5304 10 32 10H8C7.46957 10 6.96086 9.78929 6.58579 9.41421C6.21071 9.03914 6 8.53043 6 8ZM6 16C6 15.4696 6.21071 14.9609 6.58579 14.5858C6.96086 14.2107 7.46957 14 8 14H32C32.5304 14 33.0391 14.2107 33.4142 14.5858C33.7893 14.9609 34 15.4696 34 16C34 16.5304 33.7893 17.0391 33.4142 17.4142C33.0391 17.7893 32.5304 18 32 18H8C7.46957 18 6.96086 17.7893 6.58579 17.4142C6.21071 17.0391 6 16.5304 6 16ZM6 24C6 23.4696 6.21071 22.9609 6.58579 22.5858C6.96086 22.2107 7.46957 22 8 22H32C32.5304 22 33.0391 22.2107 33.4142 22.5858C33.7893 22.9609 34 23.4696 34 24C34 24.5304 33.7893 25.0391 33.4142 25.4142C33.0391 25.7893 32.5304 26 32 26H8C7.46957 26 6.96086 25.7893 6.58579 25.4142C6.21071 25.0391 6 24.5304 6 24ZM6 32C6 31.4696 6.21071 30.9609 6.58579 30.5858C6.96086 30.2107 7.46957 30 8 30H32C32.5304 30 33.0391 30.2107 33.4142 30.5858C33.7893 30.9609 34 31.4696 34 32C34 32.5304 33.7893 33.0391 33.4142 33.4142C33.0391 33.7893 32.5304 34 32 34H8C7.46957 34 6.96086 33.7893 6.58579 33.4142C6.21071 33.0391 6 32.5304 6 32Z" />
-                        </svg>
-                      </span>
-                    </div>
                     <h3 className={tailwind('mt-8 text-lg font-medium tracking-tight text-gray-900')}>Data Storage</h3>
-                    <p className={tailwind('mt-5 text-left text-base text-gray-500')}>
-                      Your data lives in the storage of your choice and only you with your Secret Key can change it.
-                    </p>
-                    <h4 className={tailwind('mt-7 text-base font-medium tracking-tight text-gray-900')}>No lock out of your own data</h4>
-                    <p className={tailwind('mt-3 text-left text-base text-gray-500')}>
-                      You can always access your data directly whenever you want as you have full control of your data storage. Plus, you can manage who can access your data too.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className={tailwind('mx-auto pt-6')}>
-                <div className={tailwind('flow-root h-full max-w-sm rounded-lg bg-gray-50 px-6 pb-8')}>
-                  <div className={tailwind('-mt-6')}>
-                    <div>
-                      <span className={tailwind('inline-flex items-center justify-center rounded-md bg-indigo-500 p-3 shadow-lg')}>
-                        <svg className={tailwind('h-6 w-6 text-white')} viewBox="0 0 34 38" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                          <path d="M17 9.27273C12.7392 9.27273 9.27273 12.7392 9.27273 17C9.27273 21.2608 12.7392 24.7273 17 24.7273C21.2608 24.7273 24.7273 21.2608 24.7273 17C24.7273 12.7392 21.2608 9.27273 17 9.27273ZM21.1047 12.3621C21.2917 12.529 21.471 12.7067 21.6364 12.8937L20.7369 13.7947L20.4804 13.5196L20.2037 13.2631L21.1047 12.3621ZM19.0555 11.1566C19.2935 11.2401 19.5268 11.3375 19.7494 11.4487L19.2517 12.6233L18.8499 12.4378L18.5609 12.3312L19.0555 11.1566ZM16.6245 10.8182H17.3755V12.0916L17 12.0777L16.6245 12.0916V10.8182ZM14.9816 11.1412L15.4685 12.3188L15.1485 12.4363L14.7745 12.6063L14.2893 11.4286C14.5118 11.3205 14.7452 11.2246 14.9816 11.1412ZM11.4487 14.2506L12.6233 14.7452L12.4394 15.147L12.3312 15.4375L11.1566 14.943C11.2401 14.7035 11.3375 14.4732 11.4487 14.2506ZM10.8182 16.6214H12.0916L12.0777 16.9969L12.0916 17.3725H10.8182V16.6214ZM11.4302 19.7076C11.322 19.4835 11.2246 19.2517 11.1412 19.0122L12.3204 18.5254L12.4378 18.8468L12.6063 19.2177L11.4302 19.7076ZM12.7886 21.7384L12.257 21.2083L13.2615 20.2006L13.5181 20.4757L13.7947 20.7323L12.7886 21.7384ZM13.5196 13.5196L13.2631 13.7947L12.3636 12.8937C12.529 12.7067 12.7083 12.529 12.8953 12.3621L13.7963 13.2631L13.5196 13.5196ZM14.9445 22.8434C14.7065 22.7599 14.4732 22.6625 14.2506 22.5513L14.7483 21.3767L15.1501 21.5622L15.4406 21.6704L14.9445 22.8434ZM17.3755 23.1818H16.6245V21.9068L17 21.9207L17.3755 21.9068V23.1818ZM19.0168 22.8573L18.5315 21.6781L18.8515 21.5606L19.2255 21.3906L19.7107 22.5683C19.4882 22.678 19.2548 22.7754 19.0168 22.8573ZM17 20.0909C15.2923 20.0909 13.9091 18.7077 13.9091 17C13.9091 16.371 14.0961 15.7884 14.4175 15.3L15.5365 16.4189L16.3432 15.6122L15.2135 14.4794C15.7173 14.1208 16.3324 13.9091 17 13.9091C18.7077 13.9091 20.0909 15.2938 20.0909 17C20.0909 18.7062 18.7077 20.0909 17 20.0909ZM21.1047 21.6317L20.2037 20.7307L20.4804 20.4742L20.7369 20.1991L21.6364 21.1001C21.471 21.2886 21.2917 21.4664 21.1047 21.6317ZM22.5513 19.7447L21.3767 19.2486L21.5606 18.8484L21.6688 18.5563L22.8434 19.0524C22.7599 19.2888 22.6625 19.5222 22.5513 19.7447ZM23.1818 17.3725H21.9084L21.9223 16.9969L21.9084 16.6214H23.1818V17.3725ZM22.8573 14.9801L21.6781 15.4669L21.5606 15.1455L21.3922 14.7715L22.5698 14.2862C22.678 14.5103 22.7738 14.7436 22.8573 14.9801ZM23.1818 34H30.9091V37.0909H23.1818V34ZM3.09091 34H10.8182V37.0909H3.09091V34ZM0 0V32.4545H34V0H0ZM17 26.2727C11.8753 26.2727 7.72727 22.1247 7.72727 17C7.72727 11.8737 11.8753 7.72727 17 7.72727C22.1247 7.72727 26.2727 11.8753 26.2727 17C26.2727 22.1247 22.1247 26.2727 17 26.2727Z" />
-                        </svg>
-                      </span>
-                    </div>
-                    <h3 className={tailwind('mt-8 text-lg font-medium tracking-tight text-gray-900')}>Encryption</h3>
-                    <p className={tailwind('mt-5 text-left text-base text-gray-500')}>
-                      Everything is encrypted  and only you with your Secret Key can see the content inside.
-                    </p>
-                    <h4 className={tailwind('mt-7 text-base font-medium tracking-tight text-gray-900')}>No targeted ads and No data breach risk</h4>
-                    <p className={tailwind('mt-3 text-left text-base text-gray-500')}>
-                      As no one can see the content inside your data, your data cannot be used to make targeted ads on you. Also, there is no risk if your data is stolen.
-                    </p>
+                    <p className={tailwind('mt-5 text-left text-base text-gray-500')}>Your data lives in <a className={tailwind('rounded font-medium text-indigo-600 hover:underline focus:outline-none focus:ring-2 focus:ring-indigo-500')} href="https://docs.stacks.co/stacks-in-depth/gaia" target="_blank" rel="noreferrer">a data server</a> of your choice; only you, with your Secret Key, can change it.</p>
+                    <h4 className={tailwind('mt-7 text-left text-base font-medium tracking-tight text-gray-900')}>No lock out of your own data</h4>
+                    <p className={tailwind('mt-3 text-left text-base text-gray-500')}>You can manage your data and set permissions directly, as you can host your own data server or choose any data server provider.</p>
                   </div>
                 </div>
               </div>
@@ -297,7 +276,7 @@ const Landing = () => {
           <div className={tailwind('md:ml-auto md:w-1/2 md:pl-10')}>
             <h2 className={tailwind('text-base font-semibold uppercase tracking-wider text-gray-300')}>Ubiquitous</h2>
             <p className={tailwind('mt-2 text-3xl font-extrabold tracking-tight text-white sm:text-4xl')}>Justnote Mobile</p>
-            <p className={tailwind('mt-3 text-lg text-gray-300')}>Take notes on the go. Access your notes, edit them, and create new ones anytime anywhere on any of your devices.</p>
+            <p className={tailwind('mt-3 text-lg text-gray-300')}>Take notes on the go. Access your notes, edit them, and create new ones anytime, anywhere, on any device.</p>
             <div className={tailwind('mt-8 flex justify-center md:justify-start')}>
               <a className={tailwind('group block focus:outline-none')} href="https://apps.apple.com/us/app/id1570111019" target="_blank" rel="noreferrer">
                 <img className={tailwind('h-12 rounded shadow group-hover:ring group-focus:ring')} src={availableOnAppStore} alt="Available on App Store" />
@@ -309,6 +288,123 @@ const Landing = () => {
           </div>
         </div>
       </div>
+      <div className={tailwind('relative bg-white py-16 sm:py-24')}>
+        <div className={tailwind('mx-auto max-w-md px-4 text-left sm:max-w-3xl sm:px-6 lg:max-w-7xl lg:px-8')}>
+          <h2 className={tailwind('text-base font-semibold uppercase tracking-wider text-green-600')}>Testimonials</h2>
+          <p className={tailwind('mt-2.5 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl')}>Some kind words...</p>
+          <p className={tailwind('mt-3 text-xl text-gray-500')}>Don't just take our word for it. Hear what real people say about us.</p>
+          <ul className={tailwind('mt-12 grid grid-cols-1 gap-8 lg:grid-cols-3')}>
+            <li>
+              <ul>
+                <li>
+                  <figure className={tailwind('mx-auto max-w-2xl rounded-2xl bg-white p-6 shadow-md ring-1 ring-gray-900/5')}>
+                    <blockquote>
+                      <p className={tailwind(`text-lg tracking-tight text-gray-800 before:content-['“'] after:content-['”']`)}>Just discovered this one. Been looking for a notes app without all the bloat as many end up adding too many functions to be user friendly really. This one has what I need in a good looking app at a decent price.</p>
+                    </blockquote>
+                    <figcaption className={tailwind('mt-6 flex items-center')}>
+                      <div className={tailwind('overflow-hidden rounded-full bg-gray-50')}>
+                        <img className={tailwind('h-12 w-12 object-cover')} src={kindWordsJW} alt="" />
+                      </div>
+                      <div className={tailwind('ml-4')}>
+                        <div className={tailwind('text-base font-medium leading-6 tracking-tight text-gray-800')}>john whitham</div>
+                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring')} href="https://play.google.com/store/apps/details?id=com.justnotecc&hl=en&gl=US" target="_blank" rel="noreferrer">Google Play Reviews</a>
+                      </div>
+                    </figcaption>
+                  </figure>
+                </li>
+                <li className={tailwind('mt-8')}>
+                  <figure className={tailwind('mx-auto max-w-2xl rounded-2xl bg-white p-6 shadow-md ring-1 ring-gray-900/5')}>
+                    <blockquote>
+                      <p className={tailwind(`text-lg tracking-tight text-gray-800 before:content-['“'] after:content-['”']`)}>Clean, secure, easy to use and beautifully designed.</p>
+                    </blockquote>
+                    <figcaption className={tailwind('mt-6 flex items-center')}>
+                      <div className={tailwind('overflow-hidden rounded-full bg-gray-50')}>
+                        <img className={tailwind('h-12 w-12 object-cover')} src={kindWordsKP} alt="" />
+                      </div>
+                      <div className={tailwind('ml-4')}>
+                        <div className={tailwind('text-base font-medium leading-6 tracking-tight text-gray-800')}>Krishna Pandit</div>
+                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring')} href="https://play.google.com/store/apps/details?id=com.justnotecc&hl=en&gl=US" target="_blank" rel="noreferrer">Google Play Reviews</a>
+                      </div>
+                    </figcaption>
+                  </figure>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <ul>
+                <li className={tailwind('hidden lg:list-item')}>
+                  <figure className={tailwind('mx-auto max-w-2xl rounded-2xl bg-white p-6 shadow-md ring-1 ring-gray-900/5')}>
+                    <blockquote>
+                      <p className={tailwind(`text-lg tracking-tight text-gray-800 before:content-['“'] after:content-['”']`)}>The dark theme is beautifully implemented. Thank you <a className={tailwind('rounded hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://twitter.com/justnotecc" target="_blank" rel="noreferrer">@justnotecc</a></p>
+                    </blockquote>
+                    <figcaption className={tailwind('mt-6 flex items-center')}>
+                      <div className={tailwind('overflow-hidden rounded-full bg-gray-50')}>
+                        <img className={tailwind('h-12 w-12 object-cover')} src={kindWordsDH} alt="" />
+                      </div>
+                      <div className={tailwind('ml-4')}>
+                        <div className={tailwind('text-base font-medium leading-6 tracking-tight text-gray-800')}>Daniel Holenstein</div>
+                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring')} href="https://twitter.com/DanielHolenste2/status/1582937273754333184" target="_blank" rel="noreferrer">@DanielHolenste2</a>
+                      </div>
+                    </figcaption>
+                  </figure>
+                </li>
+                <li className={tailwind('lg:mt-8')}>
+                  <figure className={tailwind('mx-auto max-w-2xl rounded-2xl bg-white p-6 shadow-md ring-1 ring-gray-900/5')}>
+                    <blockquote>
+                      <p className={tailwind(`text-lg tracking-tight text-gray-800 before:content-['“'] after:content-['”']`)}>Hey, quick check out on this secure and privacy-focused notes taking application, where your identity can be controlled safely and everything kept simple and fast + device syncing: <a className={tailwind('rounded hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://twitter.com/justnotecc" target="_blank" rel="noreferrer">@justnotecc</a></p>
+                    </blockquote>
+                    <figcaption className={tailwind('mt-6 flex items-center')}>
+                      <div className={tailwind('overflow-hidden rounded-full bg-gray-50')}>
+                        <img className={tailwind('h-12 w-12 object-cover')} src={kindWordsM} alt="" />
+                      </div>
+                      <div className={tailwind('ml-4')}>
+                        <div className={tailwind('text-base font-medium leading-6 tracking-tight text-gray-800')}>Meme</div>
+                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring')} href="https://twitter.com/Mefnat/status/1741634298669596779" target="_blank" rel="noreferrer">@Mefnat</a>
+                      </div>
+                    </figcaption>
+                  </figure>
+                </li>
+              </ul>
+            </li>
+            <li className={tailwind('hidden lg:list-item')}>
+              <ul>
+                <li>
+                  <figure className={tailwind('mx-auto max-w-2xl rounded-2xl bg-white p-6 shadow-md ring-1 ring-gray-900/5')}>
+                    <blockquote>
+                      <p className={tailwind(`text-lg tracking-tight text-gray-800 before:content-['“'] after:content-['”']`)}>Interface so clean and comfortable to use 💚</p>
+                    </blockquote>
+                    <figcaption className={tailwind('mt-6 flex items-center')}>
+                      <div className={tailwind('overflow-hidden rounded-full bg-gray-50')}>
+                        <img className={tailwind('h-12 w-12 object-cover')} src={kindWordsAW} alt="" />
+                      </div>
+                      <div className={tailwind('ml-4')}>
+                        <div className={tailwind('text-base font-medium leading-6 tracking-tight text-gray-800')}>ALIN WANDERLUST</div>
+                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring')} href="https://play.google.com/store/apps/details?id=com.justnotecc&hl=en&gl=US" target="_blank" rel="noreferrer">Google Play Reviews</a>
+                      </div>
+                    </figcaption>
+                  </figure>
+                </li>
+                <li className={tailwind('lg:mt-8')}>
+                  <figure className={tailwind('mx-auto max-w-2xl rounded-2xl bg-white p-6 shadow-md ring-1 ring-gray-900/5')}>
+                    <blockquote>
+                      <p className={tailwind(`text-lg tracking-tight text-gray-800 before:content-['“'] after:content-['”']`)}>Take your note-taking game to the next level with <a className={tailwind('rounded hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://twitter.com/hashtag/Justnote" target="_blank" rel="noreferrer">#Justnote</a>! Securely and conveniently jot down your ideas on any device. Inspired by Evernote, Google Keep, Joplin, and Notion. Built on <a className={tailwind('rounded hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://twitter.com/hashtag/Stacks" target="_blank" rel="noreferrer">#Stacks</a>.</p>
+                    </blockquote>
+                    <figcaption className={tailwind('mt-6 flex items-center')}>
+                      <div className={tailwind('overflow-hidden rounded-full bg-gray-50')}>
+                        <img className={tailwind('h-12 w-12 object-cover')} src={kindWordsII} alt="" />
+                      </div>
+                      <div className={tailwind('ml-4')}>
+                        <div className={tailwind('text-base font-medium leading-6 tracking-tight text-gray-800')}>Infinite Insights</div>
+                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring')} href="https://x.com/Manyonge12/status/1626885376794140672" target="_blank" rel="noreferrer">@Manyonge12</a>
+                      </div>
+                    </figcaption>
+                  </figure>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
       <section className={tailwind('overflow-hidden bg-white py-12 md:py-20 lg:py-24')}>
         <div className={tailwind('relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8')}>
           <div className={tailwind('relative')}>
@@ -318,12 +414,8 @@ const Landing = () => {
                 <svg className={tailwind('absolute top-0 left-0 hidden h-36 w-36 -translate-x-8 -translate-y-24 transform text-green-200 opacity-50 sm:block')} stroke="currentColor" fill="none" viewBox="0 0 144 144" aria-hidden="true">
                   <path strokeWidth="2" d="M41.485 15C17.753 31.753 1 59.208 1 89.455c0 24.664 14.891 39.09 32.109 39.09 16.287 0 28.386-13.03 28.386-28.387 0-15.356-10.703-26.524-24.663-26.524-2.792 0-6.515.465-7.446.93 2.327-15.821 17.218-34.435 32.11-43.742L41.485 15zm80.04 0c-23.268 16.753-40.02 44.208-40.02 74.455 0 24.664 14.891 39.09 32.109 39.09 15.822 0 28.386-13.03 28.386-28.387 0-15.356-11.168-26.524-25.129-26.524-2.792 0-6.049.465-6.98.93 2.327-15.821 16.753-34.435 31.644-43.742L121.525 15z" />
                 </svg>
-                <p>
-                  Hi everyone, I want to share with you why I create Justnote. It’s a note taking app I want to have myself. I want to have a simple, small, and fast one without annoying ads. I want an app that I can take a quick small note when I'm on the run and I can get back to it easily when I need information in that note. So here I am. I hope that as it’s useful to me and I love it, it’s also useful to you and you love it too.
-                </p>
-                <p className={tailwind('pt-6')}>
-                  You can be sure that I don’t be evil and with Stacks technology, I can’t. You can use Justnote with peace of mind. Your identity is always yours. Your data is always yours. No nightmare you’re banned from your account or you lose all your data whatsoever.
-                </p>
+                <p>Hi everyone, I want to share with you why I created Justnote. It's a note-taking app I want to have myself. I want a simple, small, and fast one without annoying ads. I want an app to take a quick, small note when I'm on the run and get back to it quickly when I need information in that note. So here I am. I hope that as it's useful to me and I love it, it's also useful to you, and you love it too.</p>
+                <p className={tailwind('pt-6')}>You can be sure that I don't be evil, and with Web3 technology from Stacks, I can't. You can use Justnote with peace of mind. Your account and data are always yours. No nightmare that you're banned from your account or you'll lose all your data.</p>
               </div>
               <footer className={tailwind('mt-8')}>
                 <div className={tailwind('md:flex md:items-center md:justify-center')}>
@@ -331,7 +423,7 @@ const Landing = () => {
                     <img className={tailwind('mx-auto h-10 w-10 rounded-full')} src={creator} alt="" />
                   </div>
                   <div className={tailwind('mt-3 text-center md:mt-0 md:ml-4 md:flex md:items-center')}>
-                    <div className={tailwind('text-base font-medium text-gray-900')}>Wit T.</div>
+                    <a className={tailwind('rounded text-base font-medium text-gray-800 hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://twitter.com/0xc22b" target="_blank" rel="noreferrer">@0xc22b</a>
                     <svg className={tailwind('mx-1 hidden h-5 w-5 text-green-600 md:block')} fill="currentColor" viewBox="0 0 20 20">
                       <path d="M11 0h3L9 20H6l5-20z" />
                     </svg>
@@ -351,7 +443,7 @@ const Landing = () => {
                 <h2 className={tailwind('text-3xl font-extrabold text-white sm:text-4xl')}>
                   <span className={tailwind('block')}>Ready to dive in?</span>
                 </h2>
-                <p className={tailwind('mt-4 text-lg leading-6 text-green-200')}>Let’s try Justnote - a simple, fast, and privacy-focused note taking app that you will love.</p>
+                <p className={tailwind('mt-4 text-lg leading-6 text-green-200')}>Let's try Justnote - a simple, fast, and privacy-focused note-taking app you will love.</p>
                 <button onClick={onSignUpBtnClick} className={tailwind('mt-8 inline-flex items-center rounded-md border border-transparent bg-white px-6 py-3 text-base font-medium text-green-600 shadow hover:text-green-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500 focus:ring-offset-2')}>
                   Get started now
                   <svg style={{ marginTop: '0.125rem' }} className={tailwind('ml-2 w-1.5')} viewBox="0 0 6 10" fill="currentColor" xmlns="http://www.w3.org/2000/svg">

@@ -3,7 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { init } from '../actions';
 import {
-  HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY, HASH_SUPPORT,
+  HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY, HASH_PRICING,
+  HASH_SUPPORT,
 } from '../types/const';
 import { extractUrl } from '../utils';
 
@@ -12,6 +13,7 @@ import Landing from './Landing';
 import About from './About';
 import Terms from './Terms';
 import Privacy from './Privacy';
+import Pricing from './Pricing';
 import Support from './Support';
 import ErrorBoundary from './ErrorBoundary';
 
@@ -37,6 +39,7 @@ const App = () => {
   if (pathname === '/about') return <About />;
   if (pathname === '/terms') return <Terms />;
   if (pathname === '/privacy') return <Privacy />;
+  if (pathname === '/pricing') return <Pricing />;
   if (pathname === '/support') return <Support />;
 
   if (
@@ -45,6 +48,7 @@ const App = () => {
   if (hash.startsWith(HASH_ABOUT)) return <About />;
   if (hash.startsWith(HASH_TERMS)) return <Terms />;
   if (hash.startsWith(HASH_PRIVACY)) return <Privacy />;
+  if (hash.startsWith(HASH_PRICING)) return <Pricing />;
   if (hash.startsWith(HASH_SUPPORT)) return <Support />;
 
   if (isUserSignedIn === true) {

@@ -25,7 +25,7 @@ const _SettingsPopupData = (props) => {
   if (hubUrl === SD_HUB_URL) {
     hubName = 'hub.stacksdrive.com';
     hubNameUrl = 'https://hub.stacksdrive.com/hub_info';
-    hubProvider = 'STX Apps Co., Ltd.';
+    hubProvider = 'STX Apps';
     hubProviderUrl = 'https://www.stxapps.com';
   }
 
@@ -39,13 +39,13 @@ const _SettingsPopupData = (props) => {
       </div>
       <div className={tailwind('mt-6 md:mt-0')}>
         <h4 className={tailwind('text-base font-medium leading-none text-gray-800 blk:text-gray-100')}>Data Server</h4>
-        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Justnote stores your data in a Stacks data server. You can specify which Stacks data server to store your data. By default, your Stacks data server is at <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href={hubNameUrl} target="_blank" rel="noreferrer">{hubName}</a> provided by <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href={hubProviderUrl} target="_blank" rel="noreferrer">{hubProvider}</a>. You can also deploy your own Stacks data server. To change your Stacks data server, you need to record your server’s information on the Stacks blockchain. Justnote stores your data on the server specified in the blockchain. For more details, please visit <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href="https://docs.stacks.co/stacks-in-depth/gaia" target="_blank" rel="noreferrer">Stacks Gaia</a>.</p>
+        <p className={tailwind('mt-3.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Justnote stores your data in a Stacks data server. You can specify which Stacks data server to store your data in. By default, your Stacks data server is at <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href={hubNameUrl} target="_blank" rel="noreferrer">{hubName}</a> provided by <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href={hubProviderUrl} target="_blank" rel="noreferrer">{hubProvider}</a>. You can also deploy your own Stacks data server. To change your Stacks data server, you must record your server's information on the Stacks blockchain. Justnote stores your data on the server specified in the blockchain. For more details, please visit <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href="https://docs.stacks.co/stacks-in-depth/gaia" target="_blank" rel="noreferrer">Stacks Gaia</a>.</p>
       </div>
       <div className={tailwind('mt-8')}>
         <button onClick={onToImportAllDataViewBtnClick} className={tailwind('w-full rounded-sm text-left focus:outline-none focus:ring-2 focus:ring-gray-400 blk:focus:ring-gray-500')}>
           <h4 className={tailwind('text-base font-medium text-gray-800 underline hover:text-gray-900 blk:text-gray-100 blk:hover:text-white')}>Import Data</h4>
         </button>
-        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Import data from a zip file. The zip file can be exported from note taking apps like <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href="https://takeout.google.com/" target="_blank" rel="noreferrer">Google Keep</a>, <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href="https://help.evernote.com/hc/en-us/articles/209005557-Export-notes-and-notebooks-as-ENEX-or-HTML" target="_blank" rel="noreferrer">Evernote</a> (as multiple web pages (.html) and manually zip the folder), and our website.</p>
+        <p className={tailwind('mt-3 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Import data from a zip file. The zip file can be exported from note-taking apps like <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href="https://takeout.google.com/" target="_blank" rel="noreferrer">Google Keep</a>, <a className={tailwind('rounded underline hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 blk:hover:text-gray-200 blk:focus:ring-gray-500')} href="https://help.evernote.com/hc/en-us/articles/209005557-Export-notes-and-notebooks-as-ENEX-or-HTML" target="_blank" rel="noreferrer">Evernote</a> (as multiple web pages (.html) and manually zip the folder), and our website.</p>
       </div>
       <div className={tailwind('mt-8')}>
         <button onClick={onToExportAllDataViewBtnClick} className={tailwind('w-full rounded-sm text-left focus:outline-none focus:ring-2 focus:ring-gray-400 blk:focus:ring-gray-500')}>
@@ -57,13 +57,13 @@ const _SettingsPopupData = (props) => {
         <button onClick={onToDeleteAllDataViewBtnClick} className={tailwind('w-full rounded-sm text-left focus:outline-none focus:ring-2 focus:ring-gray-400 blk:focus:ring-gray-500')}>
           <h4 className={tailwind('text-base font-medium text-gray-800 underline hover:text-gray-900 blk:text-gray-100 blk:hover:text-white')}>Delete All Data</h4>
         </button>
-        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Delete all your data including but not limited to all your saved notes in all lists, all your created lists, and all your settings.</p>
+        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Delete all your data, including but not limited to all your saved notes in all lists, all your created lists, and all your settings.</p>
       </div>
       <div className={tailwind('mt-8 mb-4')}>
         <button onClick={onToDeleteSyncDataViewBtnClick} className={tailwind('w-full rounded-sm text-left focus:outline-none focus:ring-2 focus:ring-gray-400 blk:focus:ring-gray-500')}>
           <h4 className={tailwind('text-base font-medium text-gray-800 underline hover:text-gray-900 blk:text-gray-100 blk:hover:text-white')}>Clean Up Sync Logs</h4>
         </button>
-        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Clean up your sync logs used for syncing your data across your devices.</p>
+        <p className={tailwind('mt-2.5 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Clean up the sync logs used to sync your data across your devices.</p>
       </div>
     </div>
   );
@@ -373,13 +373,13 @@ const _SettingsPopupDataDelete = (props) => {
         </button>
         <h3 className={tailwind('pb-2 text-xl font-medium leading-none text-gray-800 blk:text-gray-100 md:pb-0')}>Delete All Data</h3>
       </div>
-      <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Delete all your data including but not limited to all your saved notes in all lists, all your created lists, and all your settings.</p>
+      <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Delete all your data, including but not limited to all your saved notes in all lists, all your created lists, and all your settings.</p>
       <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>This will only remove all your data, not your account. You will still be able to sign in.</p>
       <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>It may take several minutes to delete all your data.</p>
       <p className={tailwind('mt-6 text-base leading-relaxed text-red-500 blk:text-red-500')}>This action CANNOT be undone.</p>
       <div className={tailwind('mt-6 flex items-center')}>
         <input onChange={onConfirmInputChange} checked={didCheckConfirm} className={tailwind('h-4 w-4 cursor-pointer rounded border-gray-400 bg-white text-gray-600 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 blk:border-gray-400 blk:bg-gray-900 blk:text-green-500 blk:focus:ring-gray-500 blk:focus:ring-offset-gray-900')} id="confirm-input" name="confirm-input" type="checkbox" />
-        <label htmlFor="confirm-input" className={tailwind('ml-2 block cursor-pointer text-base text-gray-500 blk:text-gray-400')}>Yes, I’m absolutely sure I want to delete all my data.</label>
+        <label htmlFor="confirm-input" className={tailwind('ml-2 block cursor-pointer text-base text-gray-500 blk:text-gray-400')}>Yes, I'm absolutely sure I want to delete all my data.</label>
       </div>
       {actionPanel}
     </div>
@@ -417,7 +417,7 @@ const _SettingsPopupDataDeleteSync = (props) => {
     actionPanel = (
       <div className={tailwind('mt-7 mb-4')}>
         <button onClick={onDeleteSyncDataBtnClick} type="button" className={tailwind('block rounded-md border border-gray-300 bg-white px-2 py-2 text-sm text-gray-500 shadow-sm hover:border-gray-400 hover:text-gray-600 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 blk:border-gray-400 blk:bg-gray-900 blk:text-gray-300 blk:hover:border-gray-300 blk:hover:text-gray-200 blk:focus:border-gray-300 blk:focus:ring-gray-500 blk:focus:ring-offset-gray-900')}>
-          Clean Up My Sync Logs
+          Clean Up Sync Logs
         </button>
       </div>
     );
@@ -480,8 +480,8 @@ const _SettingsPopupDataDeleteSync = (props) => {
         </button>
         <h3 className={tailwind('pb-2 text-xl font-medium leading-none text-gray-800 blk:text-gray-100 md:pb-0')}>Clean Up Sync Logs</h3>
       </div>
-      <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Clean up your sync logs used for syncing your data across your devices.</p>
-      <p className={tailwind('mt-6 text-base leading-relaxed text-red-500 blk:text-red-500')}>You need to sign out on all other devices first. If not, the sync logs will be synced back and may cause some notes to have a conflicted version.</p>
+      <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Clean up the sync logs used to sync your data across your devices.</p>
+      <p className={tailwind('mt-6 text-base leading-relaxed text-red-500 blk:text-red-500')}>You need to sign out on all other devices first. If not, the sync logs will be synced back, which may cause some notes to have a conflicted version.</p>
       <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>Cleaning up sync logs helps reduce sync time as fewer sync logs to download and compare for new updates.</p>
       <p className={tailwind('mt-6 text-base leading-relaxed text-gray-500 blk:text-gray-400')}>It may take several minutes to clean up all your sync logs.</p>
       {actionPanel}
