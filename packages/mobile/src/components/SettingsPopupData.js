@@ -31,7 +31,7 @@ const _SettingsPopupData = (props) => {
   if (hubUrl === SD_HUB_URL) {
     hubName = 'hub.stacksdrive.com';
     hubNameUrl = 'https://hub.stacksdrive.com/hub_info';
-    hubProvider = 'STX Apps Co., Ltd.';
+    hubProvider = 'STX Apps';
     hubProviderUrl = 'https://www.stxapps.com';
   }
 
@@ -45,13 +45,13 @@ const _SettingsPopupData = (props) => {
       </View>
       <View style={tailwind('mt-6 md:mt-0')}>
         <Text style={tailwind('text-base font-medium leading-5 text-gray-800 blk:text-gray-100')}>Data Server</Text>
-        <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Justnote stores your data in a Stacks data server. You can specify which Stacks data server to store your data. By default, your Stacks data server is at <Text onPress={() => Linking.openURL(hubNameUrl)} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>{hubName}</Text> provided by <Text onPress={() => Linking.openURL(hubProviderUrl)} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>{hubProvider}</Text>. You can also deploy your own Stacks data server. To change your Stacks data server, you need to record your server’s information on the Stacks blockchain. Justnote stores your data on the server specified in the blockchain. For more details, please visit <Text onPress={() => Linking.openURL('https://docs.stacks.co/docs/gaia')} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>Stacks Gaia</Text>.</Text>
+        <Text style={tailwind('mt-3.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Justnote stores your data in a Stacks data server. You can specify which Stacks data server to store your data in. By default, your Stacks data server is at <Text onPress={() => Linking.openURL(hubNameUrl)} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>{hubName}</Text> provided by <Text onPress={() => Linking.openURL(hubProviderUrl)} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>{hubProvider}</Text>. You can also deploy your own Stacks data server. To change your Stacks data server, you must record your server's information on the Stacks blockchain. Justnote stores your data on the server specified in the blockchain. For more details, please visit <Text onPress={() => Linking.openURL('https://docs.stacks.co/stacks-in-depth/gaia')} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>Stacks Gaia</Text>.</Text>
       </View>
       <View style={tailwind('mt-8')}>
         <TouchableOpacity onPress={onToImportAllDataViewBtnClick}>
           <Text style={tailwind('text-base font-medium leading-5 text-gray-800 underline blk:text-gray-100')}>Import Data</Text>
         </TouchableOpacity>
-        <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Import data from a zip file. The zip file can be exported from note taking apps like <Text onPress={() => Linking.openURL('https://takeout.google.com/')} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>Google Keep</Text>, <Text onPress={() => Linking.openURL('https://help.evernote.com/hc/en-us/articles/209005557-Export-notes-and-notebooks-as-ENEX-or-HTML')} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>Evernote</Text> (as multiple web pages (.html) and manually zip the folder), and our website.</Text>
+        <Text style={tailwind('mt-3 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Import data from a zip file. The zip file can be exported from note-taking apps like <Text onPress={() => Linking.openURL('https://takeout.google.com/')} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>Google Keep</Text>, <Text onPress={() => Linking.openURL('https://help.evernote.com/hc/en-us/articles/209005557-Export-notes-and-notebooks-as-ENEX-or-HTML')} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>Evernote</Text> (as multiple web pages (.html) and manually zip the folder), and our website/app.</Text>
       </View>
       <View style={tailwind('mt-8')}>
         <TouchableOpacity onPress={onToExportAllDataViewBtnClick}>
@@ -63,13 +63,13 @@ const _SettingsPopupData = (props) => {
         <TouchableOpacity onPress={onToDeleteAllDataViewBtnClick}>
           <Text style={tailwind('text-base font-medium leading-5 text-gray-800 underline blk:text-gray-100')}>Delete All Data</Text>
         </TouchableOpacity>
-        <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Delete all your data including but not limited to all your saved notes in all lists, all your created lists, and all your settings.</Text>
+        <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Delete all your data, including but not limited to all your saved notes in all lists, all your created lists, and all your settings.</Text>
       </View>
       <View style={tailwind('mt-8 mb-4')}>
         <TouchableOpacity onPress={onToDeleteSyncDataViewBtnClick}>
           <Text style={tailwind('text-base font-medium leading-5 text-gray-800 underline blk:text-gray-100')}>Clean Up Sync Logs</Text>
         </TouchableOpacity>
-        <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Clean up your sync logs used for syncing your data across your devices.</Text>
+        <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Clean up the sync logs used to sync your data across your devices.</Text>
       </View>
     </View>
   );
@@ -386,13 +386,13 @@ const _SettingsPopupDataDelete = (props) => {
         </TouchableOpacity>
         <Text style={tailwind('pb-2 text-xl font-medium leading-6 text-gray-800 blk:text-gray-100 md:pb-0')}>Delete All Data</Text>
       </View>
-      <Text style={tailwind('mt-6 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Delete all your data including but not limited to all your saved notes in all lists, all your created lists, and all your settings.</Text>
+      <Text style={tailwind('mt-6 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Delete all your data, including but not limited to all your saved notes in all lists, all your created lists, and all your settings.</Text>
       <Text style={tailwind('mt-6 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>This will only remove all your data, not your account. You will still be able to sign in.</Text>
       <Text style={tailwind('mt-6 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>It may take several minutes to delete all your data.</Text>
       <Text style={tailwind('mt-6 text-base font-normal leading-6.5 text-red-500 blk:text-red-500')}>This action CANNOT be undone.</Text>
       <View style={tailwind('mt-6 flex-row items-center')}>
         <Switch onValueChange={onConfirmInputChange} style={tailwind('flex-shrink-0 flex-grow-0')} value={didCheckConfirm} thumbColor={Platform.OS === 'android' ? didCheckConfirm ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} ios_backgroundColor={switchIosTrackColorOff} />
-        <Text style={tailwind('ml-2 flex-shrink flex-grow text-base font-normal text-gray-500 blk:text-gray-400')}>Yes, I’m absolutely sure I want to delete all my data.</Text>
+        <Text style={tailwind('ml-2 flex-shrink flex-grow text-base font-normal text-gray-500 blk:text-gray-400')}>Yes, I'm absolutely sure I want to delete all my data.</Text>
       </View>
       {actionPanel}
     </View>
@@ -431,7 +431,7 @@ const _SettingsPopupDataDeleteSync = (props) => {
     actionPanel = (
       <TouchableOpacity onPress={onDeleteSyncDataBtnClick} style={tailwind('mt-7 mb-4 items-start justify-start')}>
         <View style={tailwind('rounded-md border border-gray-300 bg-white px-2 py-2 shadow-sm blk:border-gray-400 blk:bg-gray-900')}>
-          <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-300')}>Clean Up My Sync Logs</Text>
+          <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-300')}>Clean Up Sync Logs</Text>
         </View>
       </TouchableOpacity>
     );
@@ -492,8 +492,8 @@ const _SettingsPopupDataDeleteSync = (props) => {
         </TouchableOpacity>
         <Text style={tailwind('pb-2 text-xl font-medium leading-6 text-gray-800 blk:text-gray-100 md:pb-0')}>Clean Up Sync Logs</Text>
       </View>
-      <Text style={tailwind('mt-6 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Clean up your sync logs used for syncing your data across your devices.</Text>
-      <Text style={tailwind('mt-6 text-base font-normal leading-6.5 text-red-500 blk:text-red-500')}>You need to sign out on all other devices first. If not, the sync logs will be synced back and may cause some notes to have a conflicted version.</Text>
+      <Text style={tailwind('mt-6 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Clean up the sync logs used to sync your data across your devices.</Text>
+      <Text style={tailwind('mt-6 text-base font-normal leading-6.5 text-red-500 blk:text-red-500')}>You need to sign out on all other devices first. If not, the sync logs will be synced back, which may cause some notes to have a conflicted version.</Text>
       <Text style={tailwind('mt-6 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Cleaning up sync logs helps reduce sync time as fewer sync logs to download and compare for new updates.</Text>
       <Text style={tailwind('mt-6 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>It may take several minutes to clean up all your sync logs.</Text>
       {actionPanel}

@@ -423,7 +423,7 @@ const Landing = () => {
                     <img className={tailwind('mx-auto h-10 w-10 rounded-full')} src={creator} alt="" />
                   </div>
                   <div className={tailwind('mt-3 text-center md:mt-0 md:ml-4 md:flex md:items-center')}>
-                    <a className={tailwind('rounded text-base font-medium text-gray-800 hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://twitter.com/0xc22b" target="_blank" rel="noreferrer">@0xc22b</a>
+                    <a className={tailwind('rounded text-base font-medium text-gray-500 hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://twitter.com/0xc22b" target="_blank" rel="noreferrer">@0xc22b</a>
                     <svg className={tailwind('mx-1 hidden h-5 w-5 text-green-600 md:block')} fill="currentColor" viewBox="0 0 20 20">
                       <path d="M11 0h3L9 20H6l5-20z" />
                     </svg>
