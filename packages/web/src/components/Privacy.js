@@ -52,7 +52,7 @@ const Privacy = () => {
               <h1 className={tailwind('mt-2 block text-center text-3xl font-extrabold leading-8 tracking-tight text-gray-900 sm:text-4xl')}>Privacy Policy</h1>
             </div>
             <div className={tailwind('prose mx-auto mt-10 text-gray-500')}>
-              <p>This Privacy Policy is effective as of xx Apr 2024.</p>
+              <p>This Privacy Policy is effective as of 24 Apr 2024.</p>
               <h3>Summary</h3>
               <p>We don't rent, sell or share your information with other companies or advertisers. Our optional paid subscription is the only way we make money, so our incentives are aligned with yours.</p>
               <h3>Intro</h3>

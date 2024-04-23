@@ -1,7 +1,10 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import Url from 'url-parse';
 
-import { updatePopup, updateSettingsPopup, updateSettingsViewId } from '../actions';
+import {
+  updatePopupUrlHash, updateSettingsPopup, updateSettingsViewId,
+} from '../actions';
 import { SIGN_UP_POPUP, SETTINGS_VIEW_IAP } from '../types/const';
 import { isObject, getValidPurchase } from '../utils';
 
@@ -20,16 +23,19 @@ const Pricing = () => {
 
   const onGetStartedBtnClick = () => {
     if (isUserSignedIn) {
-      // Empty hash like this, so no reload, popHistoryState is called,
-      //   but # in the url. componentDidMount in Main will handle it.
-      window.location.hash = '';
+      const urlObj = new Url(window.location.href, {});
+      urlObj.set('hash', '');
+      const href = urlObj.toString();
+      window.history.pushState(null, '', href);
 
-      dispatch(updateSettingsViewId(SETTINGS_VIEW_IAP, false));
-      dispatch(updateSettingsPopup(true));
+      setTimeout(() => {
+        dispatch(updateSettingsViewId(SETTINGS_VIEW_IAP, false));
+        dispatch(updateSettingsPopup(true));
+      }, 1);
       return;
     }
 
-    dispatch(updatePopup(SIGN_UP_POPUP, true));
+    dispatch(updatePopupUrlHash(SIGN_UP_POPUP, true));
   };
 
   useEffect(() => {

@@ -2622,7 +2622,10 @@ export const updateSettingsPopup = (isShown, doCheckEditing = false) => async (
     await sleep(250);
     if (window.location.hash.includes('stp=true')) {
       console.log('Seem settings popup is still showing, force reset.');
-      window.location.hash = ''; // Need to reset i.e. close search popup too.
+      const urlObj = new Url(window.location.href, {});
+      urlObj.set('hash', '');
+      const href = urlObj.toString();
+      window.history.pushState(null, '', href); // Close others i.e. search popup too.
     }
   }
 };
