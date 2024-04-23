@@ -148,7 +148,7 @@ const Landing = () => {
         <div className={tailwind('relative mx-auto max-w-7xl px-4 pt-24 pb-16 sm:px-6 sm:pt-32 sm:pb-24 lg:px-8')}>
           <div className={tailwind('relative lg:grid lg:grid-cols-3 lg:gap-x-8')}>
             <div className={tailwind('lg:col-span-1')}>
-              <h2 className={tailwind('text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl')}>A better way to take note</h2>
+              <h2 className={tailwind('text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl')}>A better way to take notes</h2>
             </div>
             <div className={tailwind('mt-10 space-y-10 sm:grid sm:grid-cols-2 sm:gap-x-8 sm:gap-y-10 sm:space-y-0 lg:col-span-2 lg:mt-0')}>
               <div>

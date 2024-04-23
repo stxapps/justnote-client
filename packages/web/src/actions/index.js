@@ -2622,10 +2622,15 @@ export const updateSettingsPopup = (isShown, doCheckEditing = false) => async (
     await sleep(250);
     if (window.location.hash.includes('stp=true')) {
       console.log('Seem settings popup is still showing, force reset.');
-      const urlObj = new Url(window.location.href, {});
-      urlObj.set('hash', '');
-      const href = urlObj.toString();
-      window.history.pushState(null, '', href); // Close others i.e. search popup too.
+      window.location.hash = ''; // Bug alert: close others i.e. search popup too.
+      setTimeout(() => {
+        const urlObj = new Url(window.location.href, {});
+        if (urlObj.hash === '#') {
+          urlObj.set('hash', ''); // Remove empty hash /#
+          const href = urlObj.toString();
+          window.history.replaceState(window.history.state, '', href);
+        }
+      }, 1);
     }
   }
 };
