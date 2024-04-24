@@ -6,7 +6,8 @@ import {
   updatePopupUrlHash, updateSettingsPopup, updateSettingsViewId,
 } from '../actions';
 import { SIGN_UP_POPUP, SETTINGS_VIEW_IAP } from '../types/const';
-import { isObject, getValidPurchase } from '../utils';
+import { getValidPurchase } from '../selectors';
+import { isObject } from '../utils';
 
 import { useTailwind } from '.';
 import TopBar from './TopBar';
