@@ -104,7 +104,7 @@ const ConfirmExitDummyPopup = () => {
           <View style={tailwind('mt-3 flex-shrink flex-grow sm:mt-0 sm:ml-4')}>
             <Text style={tailwind('text-center text-lg font-medium leading-6 text-gray-900 blk:text-white sm:text-left')}>Delete everything and exit?</Text>
             <View style={tailwind('mt-2')}>
-              <Text style={tailwind('text-center text-sm font-normal text-gray-500 blk:text-gray-400 sm:text-left')}>Without an account, when exit, everything will be permanently deleted. You can sign up first to encrypt and sync all your notes to server.</Text>
+              <Text style={tailwind('text-center text-sm font-normal text-gray-500 blk:text-gray-400 sm:text-left')}>Without an account, when you exit, everything will be permanently deleted. You can sign up first to encrypt and sync all your notes to the server.</Text>
             </View>
           </View>
         </View>

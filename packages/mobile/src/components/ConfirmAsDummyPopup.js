@@ -104,7 +104,7 @@ const ConfirmAsDummyPopup = () => {
           <View style={tailwind('mt-3 flex-shrink flex-grow sm:mt-0 sm:ml-4')}>
             <Text style={tailwind('text-center text-lg font-medium leading-6 text-gray-900 blk:text-white sm:text-left')}>Confirm continue?</Text>
             <View style={tailwind('mt-2')}>
-              <Text style={tailwind('text-center text-sm font-normal text-gray-500 blk:text-gray-400 sm:text-left')}>Without an account, your notes cannot be encrypted and synced to server. If you lose your device or accidentally uninstall the app, you'll lose your notes forever.</Text>
+              <Text style={tailwind('text-center text-sm font-normal text-gray-500 blk:text-gray-400 sm:text-left')}>Without an account, your notes cannot be encrypted and synced to the server. If you lose your device or accidentally uninstall the app, you'll lose your notes forever.</Text>
             </View>
           </View>
         </View>

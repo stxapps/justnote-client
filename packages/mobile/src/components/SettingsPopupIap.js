@@ -255,7 +255,7 @@ const IapHome = (props) => {
           <Text style={tailwind('ml-3 text-base font-medium text-gray-500 blk:text-gray-400')}>Section by month</Text>
         </View>
       </View>
-      <View style={tailwind('lg:flex-row lg:justify-evenly lg:pt-5')}>
+      <View style={tailwind('lg:flex-row lg:justify-start lg:pt-5')}>
         <View style={tailwind('flex-row items-center justify-start pt-2 lg:pt-0')}>
           <Svg style={tailwind('flex-shrink-0 flex-grow-0 font-normal text-green-600 blk:text-green-400')} width={20} height={20} viewBox="0 0 20 20" fill="currentColor">
             <Path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
