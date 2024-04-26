@@ -20,10 +20,11 @@ import {
   isListNameObjsValid, isTagNameObjsValid, indexOfClosingTag, createNoteFPath,
   createDataFName, extractNoteFPath, extractDataFName, extractDataId, listNoteMetas,
   listSettingsMetas, createSettingsFPath, getSettingsFPaths, getLastSettingsFPaths,
-  extractPinFPath, getPins, extractFPath, copyListNameObjs, getFormattedTimeStamp,
+  extractPinFPath, getPins, extractFPath, copyListNameObjs,
+  copyListNameObjsWithExactExclude, getAllListNames, getFormattedTimeStamp,
   getDataParentIds, createPinFPath, extractTagFPath, getTags, createTagFPath,
   stripHtml, createSsltFPath, extractSsltFPath, getNoteMainIds,
-  batchPerformFilesIfEnough, throwIfPerformFilesError,
+  batchPerformFilesIfEnough, throwIfPerformFilesError, copyTagNameObjs,
 } from '../utils';
 import { isUint8Array, isBlob, convertCanvasToBlob } from '../utils/index-web';
 import { initialSettingsState, initialInfoState } from '../types/initialStates';
@@ -450,7 +451,17 @@ const parseGKeepImportedFile = async (dispatch, getState, zip, entries) => {
   let sValues = [], eValues = [], cValues = [], now = Date.now();
   const labelIdMap = {};
   if (labelsEntries.length > 0) {
-    const settings = { ...initialSettingsState };
+    await syncAndWait(true, 2)(dispatch, getState);
+
+    let settings = { ...initialSettingsState };
+    const settingsFPaths = getSettingsFPaths(getState());
+    const lsfpsResult = getLastSettingsFPaths(settingsFPaths);
+    if (lsfpsResult.fpaths.length > 0) {
+      const { contents } = await dataApi.getFiles(lsfpsResult.fpaths, true);
+      for (const content of contents) {
+        if (isObject(content)) settings = { ...content };
+      }
+    }
     settings.listNameMap = copyListNameObjs(settings.listNameMap);
 
     for (const labelsEntry of labelsEntries) {
@@ -467,12 +478,7 @@ const parseGKeepImportedFile = async (dispatch, getState, zip, entries) => {
       }
     }
 
-    await syncAndWait(true, 2)(dispatch, getState);
-
-    const settingsFPaths = getSettingsFPaths(getState());
-    const { ids: settingsParentIds } = getLastSettingsFPaths(settingsFPaths);
-
-    const fname = createDataFName(`${now}${randomString(4)}`, settingsParentIds);
+    const fname = createDataFName(`${now}${randomString(4)}`, lsfpsResult.ids);
     const fpath = createSettingsFPath(fname);
     now += 1;
 
@@ -702,19 +708,24 @@ const parseRawImportedFile = async (dispatch, getState, zip, entries) => {
   let sValues = [], eValues = [], cValues = [], now = Date.now();
   const idMap = {};
   if (!isDirMapEmpty) {
-    const settings = { ...initialSettingsState };
+    await syncAndWait(true, 2)(dispatch, getState);
+
+    let settings = { ...initialSettingsState };
+    const settingsFPaths = getSettingsFPaths(getState());
+    const lsfpsResult = getLastSettingsFPaths(settingsFPaths);
+    if (lsfpsResult.fpaths.length > 0) {
+      const { contents } = await dataApi.getFiles(lsfpsResult.fpaths, true);
+      for (const content of contents) {
+        if (isObject(content)) settings = { ...content };
+      }
+    }
     settings.listNameMap = copyListNameObjs(settings.listNameMap);
 
     const nowObj = { now };
     _addListNameObj(settings.listNameMap, dirMap, idMap, nowObj);
     now = nowObj.now;
 
-    await syncAndWait(true, 2)(dispatch, getState);
-
-    const settingsFPaths = getSettingsFPaths(getState());
-    const { ids: settingsParentIds } = getLastSettingsFPaths(settingsFPaths);
-
-    const fname = createDataFName(`${now}${randomString(4)}`, settingsParentIds);
+    const fname = createDataFName(`${now}${randomString(4)}`, lsfpsResult.ids);
     const fpath = createSettingsFPath(fname);
     now += 1;
 
@@ -769,6 +780,28 @@ const parseRawImportedFile = async (dispatch, getState, zip, entries) => {
     progress.done += selectedEntries.length;
     dispatch(updateImportAllDataProgress(progress));
   }
+};
+
+const _combineListNameMap = (settings, content) => {
+  if (!isObject(settings) || !Array.isArray(settings.listNameMap)) return;
+  if (!isObject(content) || !Array.isArray(content.listNameMap)) return;
+
+  settings.listNameMap = copyListNameObjs(settings.listNameMap);
+
+  const excludedListNames = getAllListNames(settings.listNameMap);
+  const objs = copyListNameObjsWithExactExclude(content.listNameMap, excludedListNames);
+  settings.listNameMap.push(...objs);
+};
+
+const _combineTagNameMap = (settings, content) => {
+  if (!isObject(settings) || !Array.isArray(settings.tagNameMap)) return;
+  if (!isObject(content) || !Array.isArray(content.tagNameMap)) return;
+
+  settings.tagNameMap = copyTagNameObjs(settings.tagNameMap);
+
+  const excludedTagNames = settings.tagNameMap.map(tagNameObj => tagNameObj.tagName);
+  const objs = copyTagNameObjs(content.tagNameMap, excludedTagNames);
+  settings.tagNameMap.push(...objs);
 };
 
 const _parseJustnoteSettings = async (getState, zip, settingsEntries) => {
@@ -836,23 +869,26 @@ const _parseJustnoteSettings = async (getState, zip, settingsEntries) => {
     settingsParts.push({ dt, content });
   }
 
-  let latestSettingsPart;
+  let latestDt, latestSettings;
   for (const settingsPart of settingsParts) {
-    if (!isObject(latestSettingsPart)) {
-      latestSettingsPart = settingsPart;
+    if (!isNumber(latestDt) || !isObject(latestSettings)) {
+      [latestDt, latestSettings] = [settingsPart.dt, settingsPart.content];
       continue;
     }
-    if (latestSettingsPart.dt < settingsPart.dt) latestSettingsPart = settingsPart;
+    if (settingsPart.dt <= latestDt) continue;
+    [latestDt, latestSettings] = [settingsPart.dt, settingsPart.content];
   }
-  if (!isObject(latestSettingsPart)) return;
+  if (!isObject(latestSettings)) return;
 
   const settingsFPaths = getSettingsFPaths(getState());
   const lsfpsResult = getLastSettingsFPaths(settingsFPaths);
   if (lsfpsResult.fpaths.length > 0) {
-    const lastSettingsFPath = lsfpsResult.fpaths[0];
-    const { contents } = await dataApi.getFiles([lastSettingsFPath], true);
-    if (isEqual(latestSettingsPart.content, contents[0])) {
-      return;
+    const { contents } = await dataApi.getFiles(lsfpsResult.fpaths, true);
+    for (const content of contents) {
+      if (isEqual(latestSettings, content)) return;
+
+      _combineListNameMap(latestSettings, content);
+      _combineTagNameMap(latestSettings, content);
     }
   }
 
@@ -862,7 +898,7 @@ const _parseJustnoteSettings = async (getState, zip, settingsEntries) => {
   now += 1;
 
   const values = [
-    { id: fpath, type: PUT_FILE, path: fpath, content: latestSettingsPart.content },
+    { id: fpath, type: PUT_FILE, path: fpath, content: latestSettings },
   ];
 
   const data = { values, isSequential: false, nItemsForNs: 1 };
