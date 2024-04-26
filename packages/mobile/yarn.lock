@@ -6384,10 +6384,10 @@ react-native-fast-image@^8.6.3:
   resolved "https://registry.yarnpkg.com/react-native-fast-image/-/react-native-fast-image-8.6.3.tgz#6edc3f9190092a909d636d93eecbcc54a8822255"
   integrity sha512-Sdw4ESidXCXOmQ9EcYguNY2swyoWmx53kym2zRsvi+VeFCHEdkO+WG1DK+6W81juot40bbfLNhkc63QnWtesNg==
 
-react-native-file-access@^3.0.7:
-  version "3.0.7"
-  resolved "https://registry.yarnpkg.com/react-native-file-access/-/react-native-file-access-3.0.7.tgz#7d2530dc474678849d569bea3284e7579ec9b7e2"
-  integrity sha512-6uqq5om5NNI+g2QAmM5uQqSt3QQgcfkEYbBB9HNNHxOxKtPysNINR+CoYlgeDyFfWQDtTUEBKS0AKy5rup7IEQ==
+react-native-file-access@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/react-native-file-access/-/react-native-file-access-3.1.0.tgz#0e7371bc82a0899e6ad99560a5503c35801dcf4c"
+  integrity sha512-wOpfKpJ8s4Csfjcvf7H4L1EtmejM07HQpndzMRWAianLC50EsPc78iV8TQaw5yI7j18rh9fWMqpevz8f5a1rsA==
 
 react-native-flag-secure@^1.0.4:
   version "1.0.4"
@@ -6451,10 +6451,10 @@ react-native-webview@^13.2.2:
     escape-string-regexp "2.0.0"
     invariant "2.2.4"
 
-react-native-zip-archive@^6.0.9:
-  version "6.0.9"
-  resolved "https://registry.yarnpkg.com/react-native-zip-archive/-/react-native-zip-archive-6.0.9.tgz#9a1456f1dc6a9d7bb13135a00775e07cda247997"
-  integrity sha512-IYf3yHJ7sHzj9ucO3Amx/TtsZcTgHdfj+Dar8p1e32E+wBsn7mv0PDp2X/oCLGci0nG9i2DBstrnCW74/7NLYQ==
+react-native-zip-archive@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/react-native-zip-archive/-/react-native-zip-archive-6.1.0.tgz#beed62dea9c7ff1e4fd4b6ce0e496ede5ab2f96f"
+  integrity sha512-FEt6O8YD/Is48HGXuHndFktod7S2cUdf0C+B2XRHWeS3zs/gXlzOGo1gcwUxdMyqQwEwnFuAqlYvUK4BNGQsDg==
 
 react-native@0.70.3:
   version "0.70.3"
