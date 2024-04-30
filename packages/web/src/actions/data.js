@@ -911,7 +911,9 @@ const parseJustnoteSettings = async (
 ) => {
   await _parseJustnoteSettings(getState, zip, settingsEntries);
   progress.done += settingsEntries.length;
-  dispatch(updateImportAllDataProgress(progress));
+  if (settingsEntries.length > 0) {
+    dispatch(updateImportAllDataProgress(progress));
+  }
 };
 
 const parseJustnoteImages = async (
@@ -1016,7 +1018,9 @@ const parseJustnoteNotes = async (
     psInfos[id] = { updatedDT: pdUpdatedDT, listName, fpath };
   }
   progress.done += ssltEntries.length;
-  dispatch(updateImportAllDataProgress(progress));
+  if (ssltEntries.length > 0) {
+    dispatch(updateImportAllDataProgress(progress));
+  }
 
   let sValues = [], eValues = [], cValues = [];
   for (let i = 0; i < noteEntries.length; i += N_NOTES) {
