@@ -52,25 +52,13 @@
       "form_factor": "narrow"
     },
     {
-      "src": "ss-mobile-3.png",
-      "type": "image/png",
-      "sizes": "1242x2688",
-      "form_factor": "narrow"
-    },
-    {
       "src": "ss-mobile-4.png",
       "type": "image/png",
       "sizes": "1242x2688",
       "form_factor": "narrow"
     },
     {
-      "src": "ss-mobile-5.png",
-      "type": "image/png",
-      "sizes": "1242x2688",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "ss-mobile-6.png",
+      "src": "ss-mobile-7.png",
       "type": "image/png",
       "sizes": "1242x2688",
       "form_factor": "narrow"
@@ -82,31 +70,7 @@
       "form_factor": "wide"
     },
     {
-      "src": "ss-wide-2.png",
-      "type": "image/png",
-      "sizes": "2732x2048",
-      "form_factor": "wide"
-    },
-    {
-      "src": "ss-wide-3.png",
-      "type": "image/png",
-      "sizes": "2732x2048",
-      "form_factor": "wide"
-    },
-    {
       "src": "ss-wide-4.png",
-      "type": "image/png",
-      "sizes": "2732x2048",
-      "form_factor": "wide"
-    },
-    {
-      "src": "ss-wide-5.png",
-      "type": "image/png",
-      "sizes": "2732x2048",
-      "form_factor": "wide"
-    },
-    {
-      "src": "ss-wide-6.png",
       "type": "image/png",
       "sizes": "2732x2048",
       "form_factor": "wide"
