@@ -17,13 +17,7 @@ import SignInPopup from './SignInPopup';
 import logoFull from '../images/logo-full.svg';
 
 import mainDesktopInDarkChrome from '../images/main-desktop-in-dark-chrome.png';
-import mainDesktopInDarkChrome2x from '../images/main-desktop-in-dark-chrome@2x.png';
-import mainDesktopInDarkChrome3x from '../images/main-desktop-in-dark-chrome@3x.png';
-
 import ubiquitous from '../images/ubiquitous.png';
-import ubiquitous2x from '../images/ubiquitous@2x.png';
-import ubiquitous3x from '../images/ubiquitous@3x.png';
-import ubiquitous4x from '../images/ubiquitous@4x.png';
 
 import availableOnPlayStore from '../images/available-on-play-store.svg';
 import availableOnAppStore from '../images/available-on-app-store.svg';
@@ -136,7 +130,7 @@ const Landing = () => {
               <div className={tailwind('w-full flex-1 bg-gray-800')} />
             </div>
             <div className={tailwind('mx-auto max-w-4xl px-4 sm:px-6')}>
-              <img className={tailwind('relative mx-auto rounded-lg shadow-lg')} src={mainDesktopInDarkChrome} srcSet={`${mainDesktopInDarkChrome} 1x, ${mainDesktopInDarkChrome2x} 2x, ${mainDesktopInDarkChrome3x} 3x`} alt="App screenshot" />
+              <img className={tailwind('relative mx-auto rounded-lg shadow-lg')} src={mainDesktopInDarkChrome} srcSet={`${mainDesktopInDarkChrome} 1x, https://justnote.cc/static/media/main-desktop-in-dark-chrome@2x.2680806c7ba525189099.png 2x, https://justnote.cc/static/media/main-desktop-in-dark-chrome@3x.a7c1d62c03c69d6d5b13.png 3x`} alt="App screenshot" />
             </div>
           </div>
         </div>
@@ -270,7 +264,7 @@ const Landing = () => {
       </div>
       <div ref={ubiquitousSection} className={tailwind('relative bg-gray-800')}>
         <div className={tailwind('h-64 bg-gray-800 sm:h-72 md:absolute md:left-0 md:h-full md:w-1/2')}>
-          <img className={tailwind('h-full w-full object-cover object-top sm:object-contain sm:object-bottom md:ml-3 md:object-cover lg:ml-0 lg:object-contain')} src={ubiquitous} srcSet={`${ubiquitous} 1x, ${ubiquitous2x} 2x, ${ubiquitous3x} 3x, ${ubiquitous4x} 4x`} alt="" />
+          <img className={tailwind('h-full w-full object-cover object-top sm:object-contain sm:object-bottom md:ml-3 md:object-cover lg:ml-0 lg:object-contain')} src={ubiquitous} srcSet={`${ubiquitous} 1x, https://justnote.cc/static/media/ubiquitous@2x.71c0141141e0fa456d7f.png 2x, https://justnote.cc/static/media/ubiquitous@3x.f547ca5abc4dd9ef38e1.png 3x, https://justnote.cc/static/media/ubiquitous@4x.18cacd577760c818a450.png 4x`} alt="" />
         </div>
         <div className={tailwind('relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16')}>
           <div className={tailwind('md:ml-auto md:w-1/2 md:pl-10')}>
