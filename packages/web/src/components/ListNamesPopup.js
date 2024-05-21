@@ -2,9 +2,13 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
 
-import { updatePopupUrlHash, moveNotes, moveToListName } from '../actions';
+import {
+  updatePopupUrlHash, moveNotes, moveToListName, updateSettingsPopup,
+  updateSettingsViewId,
+} from '../actions';
 import {
   LIST_NAMES_POPUP, TRASH, LIST_NAMES_MODE_MOVE_NOTES, LIST_NAMES_MODE_MOVE_LIST_NAME,
+  SETTINGS_VIEW_LISTS,
 } from '../types/const';
 import { getListNameMap } from '../selectors';
 import {
@@ -32,6 +36,7 @@ const ListNamesPopup = () => {
   const [currentListName, setCurrentListName] = useState(null);
   const [derivedIsShown, setDerivedIsShown] = useState(isShown);
   const [derivedAnchorPosition, setDerivedAnchorPosition] = useState(anchorPosition);
+  const [derivedMode, setDerivedMode] = useState(mode);
   const [derivedListName, setDerivedListName] = useState(listName);
   const [derivedSelectingListName, setDerivedSelectingListName] = useState(
     selectingListName
@@ -68,32 +73,48 @@ const ListNamesPopup = () => {
     didClick.current = true;
   };
 
-  const onMoveToItemBtnClick = (selectedListName) => {
+  const onNewBtnClick = () => {
     if (didClick.current) return;
     onCancelBtnClick();
-    if (mode === MODE_MOVE_LIST_NAME) {
+
+    // As this and closing listNames popup both call window.history.back(),
+    //   need to be in different js clock cycle.
+    setTimeout(() => {
+      dispatch(updateSettingsViewId(SETTINGS_VIEW_LISTS, false));
+      dispatch(updateSettingsPopup(true));
+    }, 100);
+    didClick.current = true;
+  };
+
+  const onLnItemBtnClick = (selectedListName) => {
+    if (didClick.current) return;
+    onCancelBtnClick();
+    if (derivedMode === MODE_MOVE_LIST_NAME) {
       dispatch(moveToListName(derivedSelectingListName, selectedListName));
-    } else if (mode === MODE_MOVE_NOTES) {
+    } else if (derivedMode === MODE_MOVE_NOTES) {
       // As this and closing listNames popup both call window.history.back(),
       //   need to be in different js clock cycle.
       setTimeout(() => dispatch(moveNotes(selectedListName)), 100);
-    } else throw new Error(`Invalid mode: ${mode}`);
+    } else {
+      console.log('In ListNamesPopup.onLnItemBtnClick, invalid mode:', derivedMode);
+    }
     didClick.current = true;
   };
 
   const onMoveHereBtnClick = () => {
     if (didClick.current) return;
     onCancelBtnClick();
-    if (mode === MODE_MOVE_LIST_NAME) {
+    if (derivedMode === MODE_MOVE_LIST_NAME) {
       dispatch(moveToListName(derivedSelectingListName, currentListName));
-    } else if (mode === MODE_MOVE_NOTES) {
-      if (!currentListName) {
-        throw new Error(`Invalid currentListName: ${currentListName}`);
-      }
+    } else if (derivedMode === MODE_MOVE_NOTES) {
       // As this and closing listNames popup both call window.history.back(),
       //   need to be in different js clock cycle.
-      setTimeout(() => dispatch(moveNotes(currentListName)), 100);
-    } else throw new Error(`Invalid mode: ${mode}`);
+      setTimeout(() => {
+        if (currentListName) dispatch(moveNotes(currentListName));
+      }, 100);
+    } else {
+      console.log('In ListNamesPopup.onMoveHereBtnClick, invalid mode:', derivedMode);
+    }
     didClick.current = true;
   };
 
@@ -118,7 +139,7 @@ const ListNamesPopup = () => {
       cancelBtn.current.focus();
       didClick.current = false;
     }
-  }, [derivedIsShown]);
+  }, [derivedIsShown, derivedMode]);
 
   useEffect(() => {
     const transition = /** @type import('framer-motion').Tween */({ ...slideFMV });
@@ -126,8 +147,11 @@ const ListNamesPopup = () => {
     return () => controls.stop();
   }, [backCount, slideAnim]);
 
-  if (derivedIsShown !== isShown) {
-    if (!derivedIsShown && isShown) {
+  if (derivedIsShown !== isShown || derivedMode !== mode) {
+    if (
+      (!derivedIsShown && isShown) ||
+      (derivedIsShown && isShown && derivedMode !== mode)
+    ) {
       setDerivedAnchorPosition(anchorPosition);
       setDerivedListName(listName);
       setDerivedSelectingListName(selectingListName);
@@ -141,7 +165,8 @@ const ListNamesPopup = () => {
         setCurrentListName(p);
       }
     }
-    setDerivedIsShown(isShown);
+    if (derivedIsShown !== isShown) setDerivedIsShown(isShown);
+    if (derivedMode !== mode) setDerivedMode(mode);
   }
 
   if (!derivedIsShown || !derivedAnchorPosition) return (
@@ -178,20 +203,20 @@ const ListNamesPopup = () => {
           if (!obj.children || obj.children.length === 0) btnClassNames += ' pr-4';
 
           let disabled = false, forwardDisabled = false;
-          if (mode === MODE_MOVE_LIST_NAME) {
+          if (derivedMode === MODE_MOVE_LIST_NAME) {
             const { parent: p } = getListNameObj(
               derivedSelectingListName, derivedListNameMap
             );
             disabled = [TRASH, derivedSelectingListName, p].includes(obj.listName);
             forwardDisabled = [TRASH, derivedSelectingListName].includes(obj.listName);
-          } else if (mode === MODE_MOVE_NOTES) {
+          } else if (derivedMode === MODE_MOVE_NOTES) {
             disabled = [TRASH, derivedListName].includes(obj.listName);
             forwardDisabled = [TRASH].includes(obj.listName);
           }
 
           return (
             <div key={obj.listName} className={tailwind('flex w-full flex-row items-center justify-start')}>
-              <button onClick={() => onMoveToItemBtnClick(obj.listName)} className={tailwind(`group flex min-w-0 flex-shrink flex-grow flex-row items-center pl-4 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none blk:hover:bg-gray-700 blk:focus:bg-gray-700 ${btnClassNames}`)} disabled={disabled}>
+              <button onClick={() => onLnItemBtnClick(obj.listName)} className={tailwind(`group flex min-w-0 flex-shrink flex-grow flex-row items-center pl-4 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none blk:hover:bg-gray-700 blk:focus:bg-gray-700 ${btnClassNames}`)} disabled={disabled}>
                 <p className={tailwind(`truncate text-left text-sm ${disabled ? 'text-gray-400 blk:text-gray-500' : 'text-gray-700 group-hover:text-gray-900 group-focus:text-gray-900 blk:text-gray-200 blk:group-hover:text-white blk:group-focus:text-white'}`)}>{obj.displayName}</p>
               </button>
               {(obj.children && obj.children.length > 0) && <button onClick={() => onForwardBtnClick(obj.listName)} className={tailwind('group flex h-10 w-10 flex-shrink-0 flex-grow-0 items-center justify-center focus:outline-none')} disabled={forwardDisabled}>
@@ -211,10 +236,10 @@ const ListNamesPopup = () => {
     const contentStyle = { x: slideAnim };
 
     let moveHereDisabled = false;
-    if (mode === MODE_MOVE_LIST_NAME) {
+    if (derivedMode === MODE_MOVE_LIST_NAME) {
       const { parent: p } = getListNameObj(derivedSelectingListName, derivedListNameMap);
       moveHereDisabled = [TRASH, p].includes(currentListName);
-    } else if (mode === MODE_MOVE_NOTES) {
+    } else if (derivedMode === MODE_MOVE_NOTES) {
       moveHereDisabled = (
         !currentListName || [TRASH, derivedListName].includes(currentListName)
       );
@@ -229,6 +254,11 @@ const ListNamesPopup = () => {
             </svg>
           </button>}
           <p className={tailwind(`flex-shrink flex-grow truncate text-sm font-semibold text-gray-600 blk:text-gray-200 ${currentListName ? 'pr-4' : 'px-4'}`)}>{displayName}</p>
+          {derivedMode === MODE_MOVE_NOTES && <button onClick={onNewBtnClick} className={tailwind('group flex h-10 w-10 flex-shrink-0 flex-grow-0 items-center justify-center focus:outline-none')}>
+            <svg className={tailwind('h-5 w-5 rounded text-gray-500 group-hover:text-gray-700 group-focus:ring-2 group-focus:ring-offset-0 group-focus:ring-gray-400 blk:text-gray-300 blk:group-hover:text-gray-100 blk:group-focus:ring-gray-500')} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path fillRule="evenodd" clipRule="evenodd" d="M10 5C10.2652 5 10.5196 5.10536 10.7071 5.29289C10.8946 5.48043 11 5.73478 11 6V9H14C14.2652 9 14.5196 9.10536 14.7071 9.29289C14.8946 9.48043 15 9.73478 15 10C15 10.2652 14.8946 10.5196 14.7071 10.7071C14.5196 10.8946 14.2652 11 14 11H11V14C11 14.2652 10.8946 14.5196 10.7071 14.7071C10.5196 14.8946 10.2652 15 10 15C9.73478 15 9.48043 14.8946 9.29289 14.7071C9.10536 14.5196 9 14.2652 9 14V11H6C5.73478 11 5.48043 10.8946 5.29289 10.7071C5.10536 10.5196 5 10.2652 5 10C5 9.73478 5.10536 9.48043 5.29289 9.29289C5.48043 9.10536 5.73478 9 6 9H9V6C9 5.73478 9.10536 5.48043 9.29289 5.29289C9.48043 5.10536 9.73478 5 10 5Z" />
+            </svg>
+          </button>}
         </div>
         <div className={tailwind('flex w-full flex-1 flex-col overflow-hidden')}>
           <motion.div className={tailwind('flex-1 overflow-auto')} style={contentStyle}>
@@ -236,7 +266,7 @@ const ListNamesPopup = () => {
           </motion.div>
         </div>
         <div className={tailwind('flex w-full flex-shrink-0 flex-grow-0 flex-row items-center justify-end border-t border-gray-200 px-3 py-2.5 blk:border-gray-600')}>
-          <button onClick={onMoveHereBtnClick} className={tailwind(`rounded-full border bg-white px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 blk:bg-gray-800 blk:focus:ring-gray-500 blk:focus:ring-offset-gray-800 ${moveHereDisabled ? 'border-gray-300 blk:border-gray-600' : 'border-gray-400 hover:border-gray-500 blk:border-gray-400 blk:hover:border-gray-300'} ${moveHereDisabled ? 'text-gray-400 blk:text-gray-500' : 'text-gray-500 hover:text-gray-600 blk:text-gray-300 blk:hover:text-gray-200'}`)} disabled={moveHereDisabled}>
+          <button onClick={onMoveHereBtnClick} className={tailwind(`rounded-md border bg-white px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 blk:bg-gray-800 blk:focus:ring-gray-500 blk:focus:ring-offset-gray-800 ${moveHereDisabled ? 'border-gray-300 blk:border-gray-600' : 'border-gray-400 hover:border-gray-500 blk:border-gray-400 blk:hover:border-gray-300'} ${moveHereDisabled ? 'text-gray-400 blk:text-gray-500' : 'text-gray-500 hover:text-gray-600 blk:text-gray-300 blk:hover:text-gray-200'}`)} disabled={moveHereDisabled}>
             {moveHereDisabled ? 'View only' : 'Move here'}
           </button>
         </div>
