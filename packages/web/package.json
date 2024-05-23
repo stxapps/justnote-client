@@ -1,6 +1,6 @@
 {
   "name": "justnotecc",
-  "version": "0.23.4",
+  "version": "0.24.0",
   "private": true,
   "scripts": {
     "patch-js": "node bin/patch.js",
