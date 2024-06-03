@@ -423,7 +423,7 @@ PODS:
     - React-Core
     - SDWebImage (~> 5.11.1)
     - SDWebImageWebPCoder (~> 0.8.4)
-  - RNIap (12.10.5):
+  - RNIap (12.13.2):
     - React-Core
   - RNShare (9.1.0):
     - React-Core
@@ -736,7 +736,7 @@ SPEC CHECKSUMS:
   ReactNativeKeyboardManager: 60292dbac467c49841a7d69588208ec4a4f7b2a2
   RNDeviceTimeFormat: 9c3020c6fbfac054dfbadb017755ea2ae519e689
   RNFastImage: 5c9c9fed9c076e521b3f509fe79e790418a544e8
-  RNIap: c397f49db45af3b10dca64b2325f21bb8078ad21
+  RNIap: b30126ab51607421ba595d534a3710d2796212f4
   RNShare: a9e83e3300d1bdc3b681a53507954ddb11118aa6
   RNSVG: 53c661b76829783cdaf9b7a57258f3d3b4c28315
   RNZipArchive: ef9451b849c45a29509bf44e65b788829ab07801
