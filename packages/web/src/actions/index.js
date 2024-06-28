@@ -4556,6 +4556,8 @@ export const cleanUpPins = () => async (dispatch, getState) => {
 // Need to separate bulk edit here, not in the actions like moveNotes,
 //   because unpinNotes can be called in reducers and might intervene the isBulkEditing.
 export const bulkPinNotes = (ids) => async (dispatch, getState) => {
+  if (ids.length === 0) return;
+
   const isBulkEditing = getState().display.isBulkEditing;
   if (isBulkEditing) updateBulkEditUrlHash(false);
 
@@ -4563,6 +4565,8 @@ export const bulkPinNotes = (ids) => async (dispatch, getState) => {
 };
 
 export const bulkUnpinNotes = (ids, doSync = false) => async (dispatch, getState) => {
+  if (ids.length === 0) return;
+
   const isBulkEditing = getState().display.isBulkEditing;
   if (isBulkEditing) updateBulkEditUrlHash(false);
 
@@ -5027,9 +5031,9 @@ const _initTagEditorState = (getState) => {
   const pendingSslts = getState().pendingSslts
   const pendingTags = getState().pendingTags;
   const tagNameMap = getState().settings.tagNameMap;
-  const selectingLinkId = getState().display.selectingLinkId;
+  const selectingNoteId = getState().display.selectingNoteId;
   const isBulkEditing = getState().display.isBulkEditing;
-  const selectedLinkIds = getState().display.selectedLinkIds;
+  const selectedNoteIds = getState().display.selectedNoteIds;
 
   const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
 
@@ -5037,11 +5041,17 @@ const _initTagEditorState = (getState) => {
 
   let ids;
   if (isBulkEditing) {
-    if (selectedLinkIds.length === 0) return editor;
-    ids = selectedLinkIds;
+    if (selectedNoteIds.length === 0) {
+      editor.mode = INVALID;
+      return editor;
+    }
+    ids = selectedNoteIds;
   } else {
-    if (!isString(selectingLinkId)) return editor;
-    ids = [selectingLinkId];
+    if (!isString(selectingNoteId)) {
+      editor.mode = INVALID;
+      return editor;
+    }
+    ids = [selectingNoteId];
   }
   editor.ids = ids;
 
@@ -5109,6 +5119,16 @@ export const updateTagEditorPopup = (isShown, doCheckEnableExtraFeatures) => asy
     }
 
     const payload = _initTagEditorState(getState);
+    if (payload.mode === INVALID) {
+      if (getState().display.isNoteListItemMenuPopupShown) {
+        updatePopupUrlHash(NOTE_LIST_ITEM_MENU_POPUP, false, null);
+      }
+      if (getState().display.isBulkEditMenuPopupShown) {
+        updatePopupUrlHash(BULK_EDIT_MENU_POPUP, false, null);
+      }
+      return;
+    }
+
     dispatch({ type: UPDATE_TAG_EDITOR, payload });
     updatePopupUrlHash(TAG_EDITOR_POPUP, true, null, true);
     return;
