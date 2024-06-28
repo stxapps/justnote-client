@@ -4,7 +4,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   updateNoteIdUrlHash, increaseSaveNoteCount, increaseDiscardNoteCount,
 } from '../actions';
-import { NEW_NOTE, ADDED, VALID, LG_WIDTH } from '../types/const';
+import {
+  NEW_NOTE, ADDED, VALID, LG_WIDTH, NOTE_COMMANDS_MODE_NETB,
+} from '../types/const';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 import NoteCommands from './NoteCommands';
@@ -89,7 +91,7 @@ const NoteEditorTopBar = (props) => {
     if (isEditorFocused || unsavedNote.status === VALID) {
       commands = renderFocusedCommands();
     } else {
-      commands = <NoteCommands isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} />;
+      commands = <NoteCommands mode={NOTE_COMMANDS_MODE_NETB} isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} />;
     }
   }
 

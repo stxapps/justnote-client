@@ -12,6 +12,7 @@ import SidebarProfilePopup from './SidebarProfilePopup';
 import NoteListMenuPopup from './NoteListMenuPopup';
 import NoteListItemMenuPopup from './NoteListItemMenuPopup';
 import PinMenuPopup from './PinMenuPopup';
+import BulkEditMenuPopup from './BulkEditMenuPopup';
 import LockMenuPopup from './LockMenuPopup';
 import TagEditorPopup from './TagEditorPopup';
 import SettingsPopup from './SettingsPopup';
@@ -90,6 +91,7 @@ const Main = () => {
       <NoteListMenuPopup />
       <NoteListItemMenuPopup />
       <PinMenuPopup />
+      <BulkEditMenuPopup />
       <LockMenuPopup />
       <TagEditorPopup />
       <SettingsPopup />

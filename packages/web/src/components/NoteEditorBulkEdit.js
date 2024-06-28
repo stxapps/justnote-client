@@ -2,6 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { updateBulkEditUrlHash } from '../actions';
+import { NOTE_COMMANDS_MODE_NEBE } from '../types/const';
 import { getSelectedNoteIdsLength } from '../selectors';
 
 import { useTailwind } from '.';
@@ -24,7 +25,7 @@ const NoteEditorBulkEdit = () => {
           <h3 className={tailwind('pt-5 text-lg font-medium text-white')}>{selectedNoteIdsLength} Notes selected</h3>
           <p className={tailwind('pt-7 text-sm font-normal text-white')}>Please choose an action below.</p>
           <div className={tailwind('pt-3')}>
-            <NoteCommands isOnDarkBackground={true} isLeftAlign={true} />
+            <NoteCommands mode={NOTE_COMMANDS_MODE_NEBE} isOnDarkBackground={true} isLeftAlign={true} />
           </div>
         </div>
         <button onClick={onExitBtnClick} className={tailwind('group absolute top-4 right-4 p-3 text-white focus:outline-none')}>

@@ -2,6 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { updateBulkEditUrlHash } from '../actions';
+import { NOTE_COMMANDS_MODE_NLTBBE } from '../types/const';
 import { getSelectedNoteIdsLength } from '../selectors';
 
 import { useTailwind } from '.';
@@ -32,7 +33,7 @@ const NoteListTopBarBulkEdit = () => {
             <h1 className={tailwind('truncate text-lg font-medium leading-6 text-gray-900 blk:text-gray-100')}>{selectedNoteIdsLength} Selected</h1>
           </div>
           <div className={tailwind('h-full flex-shrink-0 flex-grow-0 pl-4')}>
-            <NoteCommands />
+            <NoteCommands mode={NOTE_COMMANDS_MODE_NLTBBE} />
           </div>
         </div>
       </div>

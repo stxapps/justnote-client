@@ -86,7 +86,7 @@ const NoteListItemMenuPopup = () => {
     } else if (text === MANAGE_PIN) {
       updatePopupUrlHash(PIN_MENU_POPUP, true, anchorPosition, true);
     } else if (text === ADD_TAGS || text === MANAGE_TAGS) {
-      dispatch(updateTagEditorPopup(true, selectingNoteId, text === ADD_TAGS));
+      dispatch(updateTagEditorPopup(true, text === ADD_TAGS));
     } else if (text === VIEW_AS_WEBPAGE) {
       onCancelBtnClick();
       dispatch(viewNoteAsWebpage());

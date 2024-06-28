@@ -82,3 +82,13 @@ export const initialTagNameEditorState = {
   focusCount: 0,
   blurCount: 0,
 };
+
+export const initialTagEditorState = {
+  ids: null,
+  mode: null,
+  values: [], // [{ tagName, displayName, color }, ...]
+  hints: [], // [{ tagName, displayName, color, isShown }, ...]
+  displayName: '',
+  color: '',
+  msg: '',
+};

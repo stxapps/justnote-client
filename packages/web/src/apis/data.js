@@ -446,22 +446,56 @@ const deleteInfos = async (params) => {
   throwIfPerformFilesError(data, results);
 };
 
+const _putPins = async (values, pinsPerFPath) => {
+  const data = { values, isSequential: false, nItemsForNs: N_NOTES };
+  const results = await performFiles(data);
+  const resultsPerId = getPerformFilesResultsPerId(results);
+
+  const successPins = [], errorPins = [], errors = [];
+  for (const fpath in pinsPerFPath) {
+    const [pin, result] = [pinsPerFPath[fpath], resultsPerId[fpath]];
+    if (isObject(result) && result.success) {
+      successPins.push(pin);
+    } else {
+      let error = new Error('Error on previous dependent item');
+      if (isObject(result)) error = new Error(result.error);
+
+      errorPins.push(pin);
+      errors.push(error);
+    }
+  }
+
+  return { successPins, errorPins, errors };
+};
+
 const putPins = async (params) => {
   const { pins } = params;
 
-  const values = [];
+  const values = [], pinsPerFPath = {};
   for (const pin of pins) {
     const fpath = createPinFPath(pin.rank, pin.updatedDT, pin.addedDT, pin.id);
     values.push({ id: fpath, type: PUT_FILE, path: fpath, content: {} });
+    pinsPerFPath[fpath] = pin;
   }
 
-  const data = { values, isSequential: false, nItemsForNs: N_NOTES };
-  const results = await performFiles(data);
-  // Bug alert: if several pins and error, rollback is incorrect
-  //   as some are successful but some aren't.
-  throwIfPerformFilesError(data, results);
+  const result = await _putPins(values, pinsPerFPath);
+  return result;
+};
 
-  return { pins };
+const deletePins = async (params) => {
+  const { pins } = params;
+
+  const values = [], pinsPerFPath = {};
+  for (const pin of pins) {
+    const fpath = createPinFPath(
+      pin.rank, pin.updatedDT, pin.addedDT, `deleted${pin.id}`
+    );
+    values.push({ id: fpath, type: PUT_FILE, path: fpath, content: {} });
+    pinsPerFPath[fpath] = pin;
+  }
+
+  const result = await _putPins(values, pinsPerFPath);
+  return result;
 };
 
 const getFiles = async (fpaths, dangerouslyIgnoreError = false) => {
@@ -680,8 +714,8 @@ const putLockSettings = async (lockSettings) => {
 
 const data = {
   listFPaths, listServerFPaths, toNotes, fetchStgsAndInfo, fetchNotes, putNotes,
-  moveNotes, putSettings, putInfos, deleteInfos, putPins, getFiles, performFiles,
-  getLocalSettings, putLocalSettings, getUnsavedNotes, putUnsavedNote,
+  moveNotes, putSettings, putInfos, deleteInfos, putPins, deletePins, getFiles,
+  performFiles, getLocalSettings, putLocalSettings, getUnsavedNotes, putUnsavedNote,
   deleteUnsavedNotes, deleteAllUnsavedNotes, deleteAllLocalFiles, getLockSettings,
   putLockSettings,
 };
