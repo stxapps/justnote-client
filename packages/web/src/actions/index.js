@@ -5418,14 +5418,13 @@ export const updateTagDataTStep = (ids, valuesPerId) => async (dispatch, getStat
   const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
   const solvedTags = getTags(tagFPaths, {}, toRootIds);
 
-  const pfValues = [], pfValuesPerMid = {}, dltdTnsPerMid = {};
+  const pfValues = [], pfValuesPerMid = {};
   for (const id of ids) {
     const [mainId, values] = [getMainId(id, toRootIds), valuesPerId[id]];
     const result = _getTpfValues(id, mainId, values, solvedTags);
 
     pfValues.push(...result.pfValues);
     pfValuesPerMid[mainId] = result.pfValues;
-    dltdTnsPerMid[mainId] = result.deletedTagNames;
   }
 
   const payload = { ids, valuesPerId };
