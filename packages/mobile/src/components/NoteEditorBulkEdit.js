@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
 import { updateBulkEdit } from '../actions';
+import { NOTE_COMMANDS_MODE_NEBE } from '../types/const';
 import { getSelectedNoteIdsLength } from '../selectors';
 
 import { useTailwind } from '.';
@@ -31,7 +32,7 @@ const NoteEditorBulkEdit = (props) => {
             <Text style={tailwind('pt-5 text-lg font-medium text-white')}>{selectedNoteIdsLength} Notes selected</Text>
             <Text style={tailwind('pt-7 text-sm font-normal text-white')}>Please choose an action below.</Text>
             <View style={tailwind('flex-row pt-3')}>
-              <NoteCommands isOnDarkBackground={true} isLeftAlign={true} />
+              <NoteCommands mode={NOTE_COMMANDS_MODE_NEBE} isOnDarkBackground={true} isLeftAlign={true} />
             </View>
           </View>
           <TouchableOpacity onPress={onExitBtnClick} style={tailwind('absolute top-4 right-4 rounded p-3')}>

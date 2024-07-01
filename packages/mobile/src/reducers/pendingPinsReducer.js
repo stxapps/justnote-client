@@ -26,12 +26,21 @@ const pendingPinsReducer = (state = initialState, action) => {
   }
 
   if (action.type === PIN_NOTE_COMMIT || action.type === UNPIN_NOTE_COMMIT) {
-    const { pins } = action.payload;
+    const { successPins, errorPins } = action.payload;
+
+    let errorStatus = PIN_NOTE_ROLLBACK;
+    if (action.type === UNPIN_NOTE_COMMIT) errorStatus = UNPIN_NOTE_ROLLBACK;
 
     const newState = { ...state };
-    for (const pin of pins) delete newState[pin.id];
+    for (const pin of successPins) delete newState[pin.id];
+    for (const pin of errorPins) newState[pin.id] = { ...pin, status: errorStatus };
 
-    return loop(newState, Cmd.run(cleanUpPins(), { args: [Cmd.dispatch, Cmd.getState] }));
+    if (errorPins.length === 0) {
+      return loop(
+        newState, Cmd.run(cleanUpPins(), { args: [Cmd.dispatch, Cmd.getState] })
+      );
+    }
+    return newState;
   }
 
   if (action.type === PIN_NOTE_ROLLBACK || action.type === UNPIN_NOTE_ROLLBACK) {
@@ -49,17 +58,25 @@ const pendingPinsReducer = (state = initialState, action) => {
   }
 
   if (action.type === MOVE_PINNED_NOTE_COMMIT) {
-    const { id } = action.payload;
+    const { successPins, errorPins } = action.payload;
 
     const newState = { ...state };
-    delete newState[id];
+    for (const pin of successPins) delete newState[pin.id];
+    for (const pin of errorPins) {
+      newState[pin.id] = { ...pin, status: MOVE_PINNED_NOTE_ROLLBACK };
+    }
 
-    return loop(newState, Cmd.run(cleanUpPins(), { args: [Cmd.dispatch, Cmd.getState] }));
+    if (errorPins.length === 0) {
+      return loop(
+        newState, Cmd.run(cleanUpPins(), { args: [Cmd.dispatch, Cmd.getState] })
+      );
+    }
+    return newState;
   }
 
   if (action.type === MOVE_PINNED_NOTE_ROLLBACK) {
-    const pin = action.payload;
-    return { ...state, [pin.id]: { ...pin, status: action.type } };
+    const { rank, updatedDT, addedDT, id } = action.payload;
+    return { ...state, [id]: { rank, updatedDT, addedDT, id, status: action.type } };
   }
 
   if (action.type === CANCEL_DIED_PINS) {

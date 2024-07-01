@@ -7,7 +7,9 @@ import { Circle } from 'react-native-animated-spinkit';
 import {
   updateNoteId, increaseSaveNoteCount, increaseDiscardNoteCount,
 } from '../actions';
-import { NEW_NOTE, ADDED, VALID, LG_WIDTH, BLK_MODE } from '../types/const';
+import {
+  NEW_NOTE, ADDED, VALID, LG_WIDTH, BLK_MODE, NOTE_COMMANDS_MODE_NETB,
+} from '../types/const';
 import { getThemeMode } from '../selectors/index';
 
 import { useSafeAreaFrame, useTailwind } from '.';
@@ -92,7 +94,7 @@ const NoteEditorTopBar = (props) => {
     if (isEditorFocused || unsavedNote.status === VALID) {
       commands = renderFocusedCommands();
     } else {
-      commands = <NoteCommands isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} />;
+      commands = <NoteCommands mode={NOTE_COMMANDS_MODE_NETB} isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} />;
     }
   }
 

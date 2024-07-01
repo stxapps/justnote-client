@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
 import { updateBulkEdit } from '../actions';
+import { NOTE_COMMANDS_MODE_NLTBBE } from '../types/const';
 import { getSelectedNoteIdsLength } from '../selectors';
 
 import { useTailwind } from '.';
@@ -32,7 +33,7 @@ const NoteListTopBarBulkEdit = () => {
             <Text style={tailwind('text-lg font-medium leading-6 text-gray-900 blk:text-gray-100')} numberOfLines={1} ellipsizeMode="tail">{selectedNoteIdsLength} Selected</Text>
           </View>
           <View style={tailwind('h-full flex-shrink-0 flex-grow-0 flex-row pl-4')}>
-            <NoteCommands />
+            <NoteCommands mode={NOTE_COMMANDS_MODE_NLTBBE} />
           </View>
         </View>
       </View>

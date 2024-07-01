@@ -23,14 +23,14 @@ import {
 } from '../types/actionTypes';
 import {
   SD_HUB_URL, SIGN_UP_POPUP, SIGN_IN_POPUP, PROFILE_POPUP, NOTE_LIST_MENU_POPUP,
-  NOTE_LIST_ITEM_MENU_POPUP, LIST_NAMES_POPUP, PIN_MENU_POPUP, TAG_EDITOR_POPUP,
-  PAYWALL_POPUP, SIDEBAR_POPUP, SEARCH_POPUP, SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP,
-  SETTINGS_TAGS_MENU_POPUP, TIME_PICK_POPUP, DATE_FORMAT_MENU_POPUP, LOCK_MENU_POPUP,
-  LOCK_EDITOR_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP,
-  CONFIRM_AS_DUMMY_POPUP, CONFIRM_EXIT_DUMMY_POPUP, ACCESS_ERROR_POPUP,
-  STALE_ERROR_POPUP, USE_SYNC_ERROR_POPUP, SWWU_POPUP, MY_NOTES, TRASH, ARCHIVE,
-  UPDATING, DIED_ADDING, DIED_UPDATING, DIED_MOVING, MAX_SELECTED_NOTE_IDS,
-  SD_MAX_SELECTED_NOTE_IDS, SETTINGS_VIEW_ACCOUNT,
+  NOTE_LIST_ITEM_MENU_POPUP, LIST_NAMES_POPUP, PIN_MENU_POPUP, BULK_EDIT_MENU_POPUP,
+  TAG_EDITOR_POPUP, PAYWALL_POPUP, SIDEBAR_POPUP, SEARCH_POPUP, SETTINGS_POPUP,
+  SETTINGS_LISTS_MENU_POPUP, SETTINGS_TAGS_MENU_POPUP, TIME_PICK_POPUP,
+  DATE_FORMAT_MENU_POPUP, LOCK_MENU_POPUP, LOCK_EDITOR_POPUP, CONFIRM_DELETE_POPUP,
+  CONFIRM_DISCARD_POPUP, CONFIRM_AS_DUMMY_POPUP, CONFIRM_EXIT_DUMMY_POPUP,
+  ACCESS_ERROR_POPUP, STALE_ERROR_POPUP, USE_SYNC_ERROR_POPUP, SWWU_POPUP, MY_NOTES,
+  TRASH, ARCHIVE, UPDATING, DIED_ADDING, DIED_UPDATING, DIED_MOVING,
+  MAX_SELECTED_NOTE_IDS, SD_MAX_SELECTED_NOTE_IDS, SETTINGS_VIEW_ACCOUNT,
 } from '../types/const';
 import {
   doContainListName, doContainTagName, isObject, isString, isNumber,
@@ -55,6 +55,8 @@ const initialState = {
   listNamesPopupPosition: null,
   isPinMenuPopupShown: false,
   pinMenuPopupPosition: null,
+  isBulkEditMenuPopupShown: false,
+  bulkEditMenuPopupPosition: null,
   isTagEditorPopupShown: false,
   isPaywallPopupShown: false,
   isSidebarPopupShown: false,
@@ -217,6 +219,15 @@ const displayReducer = (state = initialState, action) => {
         ...state,
         isPinMenuPopupShown: isShown,
         pinMenuPopupPosition: anchorPosition,
+      };
+      return newState;
+    }
+
+    if (id === BULK_EDIT_MENU_POPUP) {
+      const newState = {
+        ...state,
+        isBulkEditMenuPopupShown: isShown,
+        bulkEditMenuPopupPosition: anchorPosition,
       };
       return newState;
     }
@@ -528,7 +539,7 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === MOVE_NOTES) {
-    // Need to remove from showingLinkIds immediately as new moving uses the same id.
+    // Need to remove from showingNoteInfos immediately as new moving uses the same id.
     const { fromNotes, didRetry } = action.payload;
     if (didRetry) return state;
 
@@ -884,6 +895,8 @@ const displayReducer = (state = initialState, action) => {
       listNamesPopupPosition: null,
       isPinMenuPopupShown: false,
       pinMenuPopupPosition: null,
+      isBulkEditMenuPopupShown: false,
+      bulkEditMenuPopupPosition: null,
       isTagEditorPopupShown: false,
       isLockMenuPopupShown: false,
       lockMenuPopupPosition: null,
@@ -908,18 +921,21 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === UPDATE_TAG_DATA_T_STEP_COMMIT) {
-    const { id, values } = action.payload;
+    const { successIds, valuesPerId } = action.payload;
 
     if (state.queryString) {
       // Only tag name for now
       const tagName = state.queryString.trim();
-      const found = values.some(value => value.tagName === tagName);
-      if (!found) {
-        return {
-          ...state,
-          showingNoteInfos: _filterIfNotNull(state.showingNoteInfos, [id]),
-        };
+
+      const newState = { ...state };
+      for (const id of successIds) {
+        const values = valuesPerId[id];
+        const found = values.some(value => value.tagName === tagName);
+        if (!found) {
+          newState.showingNoteInfos = _filterIfNotNull(state.showingNoteInfos, [id]);
+        }
       }
+      return newState;
     }
 
     return state;

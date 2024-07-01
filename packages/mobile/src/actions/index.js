@@ -78,11 +78,11 @@ import {
 } from '../types/actionTypes';
 import {
   SD_HUB_URL, DOMAIN_NAME, APP_URL_SCHEME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH,
-  PAYWALL_POPUP, SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP, CONFIRM_DELETE_POPUP,
-  CONFIRM_DISCARD_POPUP, NOTE_LIST_MENU_POPUP, NOTE_LIST_ITEM_MENU_POPUP,
-  LOCK_EDITOR_POPUP, LOCK_MENU_POPUP, TAG_EDITOR_POPUP, SWWU_POPUP,
-  MOVE_ACTION_NOTE_COMMANDS, MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS,
-  DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
+  BULK_EDIT_MENU_POPUP, PAYWALL_POPUP, SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP,
+  CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, NOTE_LIST_MENU_POPUP,
+  NOTE_LIST_ITEM_MENU_POPUP, LOCK_EDITOR_POPUP, LOCK_MENU_POPUP, TAG_EDITOR_POPUP,
+  SWWU_POPUP, MOVE_ACTION_NOTE_COMMANDS, MOVE_ACTION_NOTE_ITEM_MENU,
+  DELETE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
   DISCARD_ACTION_UPDATE_LIST_NAME, DISCARD_ACTION_UPDATE_TAG_NAME, MY_NOTES, TRASH, ID,
   NEW_NOTE, NEW_NOTE_OBJ, DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
   N_NOTES, N_DAYS, CD_ROOT, INFO, INDEX, DOT_JSON, SHOW_SYNCED, LG_WIDTH,
@@ -97,7 +97,7 @@ import {
   TASK_TYPE, TASK_DO_FORCE_LIST_FPATHS, TASK_UPDATE_ACTION, ADDED, SHOWING_STATUSES,
   IN_USE_LIST_NAME, LIST_NAME_MSGS, VALID_TAG_NAME, DUPLICATE_TAG_NAME,
   IN_USE_TAG_NAME, TAG_NAME_MSGS, UPDATED_DT, DELETE_ACTION_LIST_NAME,
-  DELETE_ACTION_TAG_NAME, PUT_FILE, DELETE_FILE,
+  DELETE_ACTION_TAG_NAME, PUT_FILE, DELETE_FILE, TAGGED, NOT_SUPPORTED, STATUS,
 } from '../types/const';
 import {
   isEqual, isArrayEqual, isObject, isString, isNumber, sleep, separateUrlAndParam,
@@ -115,10 +115,10 @@ import {
   getEditingTagNameEditors, getNNoteMetasByQt, extractNoteFPath, extractSsltFPath,
   validateTagNameDisplayName, getTagNameObjFromDisplayName, getTagNameObj, getTags,
   getRawTags, extractTagFPath, createTagFPath, getNoteMainIds,
-  throwIfPerformFilesError, batchPerformFilesIfEnough,
+  getPerformFilesResultsPerId, batchPerformFilesIfEnough,
 } from '../utils';
 import { _ } from '../utils/obj';
-import { initialSettingsState } from '../types/initialStates';
+import { initialSettingsState, initialTagEditorState } from '../types/initialStates';
 import vars from '../vars';
 
 const jhfp = require('../../jhfp');
@@ -3945,6 +3945,9 @@ export const pinNotes = (ids) => async (dispatch, getState) => {
   let now = Date.now();
   const pins = [];
   for (const id of ids) {
+    const mainId = getMainId(id, toRootIds);
+    if (isObject(currentPins[mainId])) continue;
+
     const nextRank = lexoRank.toString().slice(2).replace(':', '_');
     pins.push({ rank: nextRank, updatedDT: now, addedDT: now, id });
 
@@ -3952,12 +3955,19 @@ export const pinNotes = (ids) => async (dispatch, getState) => {
     now += 1;
   }
 
-  const payload = { pins };
+  if (pins.length === 0) return;
+
+  await _pinNotes(pins, dispatch, getState);
+};
+
+const _pinNotes = async (pins, dispatch, getState) => {
+  let payload = { pins };
   dispatch({ type: PIN_NOTE, payload });
   await sortShowingNoteInfos(dispatch, getState);
 
   try {
-    await dataApi.putPins(payload);
+    const result = await dataApi.putPins(payload);
+    payload = { ...payload, ...result };
   } catch (error) {
     console.log('pinNotes error: ', error);
     dispatch({ type: PIN_NOTE_ROLLBACK, payload: { ...payload, error } });
@@ -3998,13 +4008,17 @@ export const unpinNotes = (ids, doSync = false) => async (dispatch, getState) =>
     return;
   }
 
-  const payload = { pins };
+  await _unpinNotes(pins, dispatch, getState);
+};
+
+const _unpinNotes = async (pins, dispatch, getState) => {
+  let payload = { pins };
   dispatch({ type: UNPIN_NOTE, payload });
   await sortShowingNoteInfos(dispatch, getState);
 
   try {
-    const params = { pins: pins.map(pin => ({ ...pin, id: `deleted${pin.id}` })) };
-    await dataApi.putPins(params);
+    const result = await dataApi.deletePins(payload);
+    payload = { ...payload, ...result };
   } catch (error) {
     console.log('unpinNotes error: ', error);
     dispatch({ type: UNPIN_NOTE_ROLLBACK, payload: { ...payload, error } });
@@ -4094,13 +4108,18 @@ export const movePinnedNote = (id, direction) => async (dispatch, getState) => {
 
   const now = Date.now();
   const { addedDT } = pinnedValues[i].pin;
+  const pin = { rank: nextRank, updatedDT: now, addedDT, id };
+  await _movePinnedNote(pin, dispatch, getState);
+};
 
-  const payload = { rank: nextRank, updatedDT: now, addedDT, id };
+const _movePinnedNote = async (pin, dispatch, getState) => {
+  let payload = { ...pin };
   dispatch({ type: MOVE_PINNED_NOTE, payload });
   await sortShowingNoteInfos(dispatch, getState);
 
   try {
-    await dataApi.putPins({ pins: [payload] });
+    const result = await dataApi.putPins({ pins: [payload] });
+    payload = { ...payload, ...result };
   } catch (error) {
     console.log('movePinnedNote error: ', error);
     dispatch({ type: MOVE_PINNED_NOTE_ROLLBACK, payload: { ...payload, error } });
@@ -4108,6 +4127,35 @@ export const movePinnedNote = (id, direction) => async (dispatch, getState) => {
   }
 
   dispatch({ type: MOVE_PINNED_NOTE_COMMIT, payload });
+};
+
+export const retryDiedPins = () => async (dispatch, getState) => {
+  const pendingPins = getState().pendingPins;
+
+  const pPins = [], uPins = [], mPins = [];
+  for (const id in pendingPins) {
+    const pendingPin = pendingPins[id];
+    const [status, pin] = [pendingPin.status, newObject(pendingPin, [STATUS])];
+    if (status === PIN_NOTE_ROLLBACK) {
+      pPins.push(pin);
+    } else if (status === UNPIN_NOTE_ROLLBACK) {
+      uPins.push(pin);
+    } else if (status === MOVE_PINNED_NOTE_ROLLBACK) {
+      mPins.push(pin);
+    }
+  }
+
+  if (pPins.length > 0) {
+    await _pinNotes(pPins, dispatch, getState);
+  }
+  if (uPins.length > 0) {
+    await _unpinNotes(uPins, dispatch, getState);
+  }
+  if (mPins.length > 0) {
+    for (const pin of mPins) {
+      await _movePinnedNote(pin, dispatch, getState);
+    }
+  }
 };
 
 export const cancelDiedPins = () => async (dispatch, getState) => {
@@ -4163,6 +4211,26 @@ export const cleanUpPins = () => async (dispatch, getState) => {
 
   // If add a new pin, no unused pins but need to sync anyway.
   dispatch(sync());
+};
+
+// Need to separate bulk edit here, not in the actions like moveNotes,
+//   because unpinNotes can be called in reducers and might intervene the isBulkEditing.
+export const bulkPinNotes = (ids) => async (dispatch, getState) => {
+  if (ids.length === 0) return;
+
+  const isBulkEditing = getState().display.isBulkEditing;
+  if (isBulkEditing) updateBulkEditUrlHash(false);
+
+  await pinNotes(ids)(dispatch, getState);
+};
+
+export const bulkUnpinNotes = (ids, doSync = false) => async (dispatch, getState) => {
+  if (ids.length === 0) return;
+
+  const isBulkEditing = getState().display.isBulkEditing;
+  if (isBulkEditing) updateBulkEditUrlHash(false);
+
+  await unpinNotes(ids, doSync)(dispatch, getState);
 };
 
 export const updateLocalSettings = () => async (dispatch, getState) => {
@@ -4700,21 +4768,126 @@ const cleanUpLocks = async (dispatch, getState) => {
   dispatch({ type: CLEAN_UP_LOCKS, payload: { noteMainIds, listNames } });
 };
 
-export const updateTagEditorPopup = (isShown, id, isAddTags) => async (
+const _isTagValuesDiff = (selectedValues, values) => {
+  const [isSvArr, isVArr] = [Array.isArray(selectedValues), Array.isArray(values)];
+  if (!isSvArr && !isVArr) return false;
+  if (!isSvArr || !isVArr) return true;
+  if (selectedValues.length !== values.length) return true;
+
+  for (let i = 0; i < selectedValues.length; i++) {
+    const [selectedValue, value] = [selectedValues[i], values[i]];
+    if (selectedValue.tagName !== value.tagName) return true;
+  }
+
+  return false;
+};
+
+const _initTagEditorState = (getState) => {
+  const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
+  const tagFPaths = getTagFPaths(getState());
+  const pendingSslts = getState().pendingSslts
+  const pendingTags = getState().pendingTags;
+  const tagNameMap = getState().settings.tagNameMap;
+  const selectingNoteId = getState().display.selectingNoteId;
+  const isBulkEditing = getState().display.isBulkEditing;
+  const selectedNoteIds = getState().display.selectedNoteIds;
+
+  const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
+
+  const editor = { ...initialTagEditorState };
+
+  let ids;
+  if (isBulkEditing) {
+    if (selectedNoteIds.length === 0) {
+      editor.mode = INVALID;
+      return editor;
+    }
+    ids = selectedNoteIds;
+  } else {
+    if (!isString(selectingNoteId)) {
+      editor.mode = INVALID;
+      return editor;
+    }
+    ids = [selectingNoteId];
+  }
+  editor.ids = ids;
+
+  const tags = getTags(tagFPaths, pendingTags, toRootIds);
+  const mainIds = ids.map(id => getMainId(id, toRootIds));
+
+  let selectedValues = null;
+  if (isObject(tags[mainIds[0]]) && tags[mainIds[0]].values.length > 0) {
+    selectedValues = tags[mainIds[0]].values;
+  }
+
+  for (const mainId of mainIds.slice(1)) {
+    let values = null;
+    if (isObject(tags[mainId]) && tags[mainId].values.length > 0) {
+      values = tags[mainId].values;
+    }
+
+    const isDiff = _isTagValuesDiff(selectedValues, values);
+    if (isDiff) {
+      editor.mode = NOT_SUPPORTED;
+      return editor;
+    }
+  }
+
+  if (Array.isArray(selectedValues) && selectedValues.length > 0) {
+    [editor.mode, editor.values] = [TAGGED, []];
+    for (const { tagName } of selectedValues) {
+      const { tagNameObj } = getTagNameObj(tagName, tagNameMap);
+      if (!isObject(tagNameObj)) continue;
+      editor.values.push({
+        tagName, displayName: tagNameObj.displayName, color: tagNameObj.color,
+      });
+    }
+  }
+
+  editor.hints = [];
+  for (const tagNameObj of tagNameMap) {
+    const { tagName, displayName, color } = tagNameObj;
+
+    const found = editor.values.some(value => value.tagName === tagName);
+    editor.hints.push({ tagName, displayName, color, isBlur: found });
+  }
+
+  return editor;
+};
+
+export const updateTagEditorPopup = (isShown, doCheckEnableExtraFeatures) => async (
   dispatch, getState
 ) => {
   if (isShown) {
-    if (isAddTags) {
+    if (doCheckEnableExtraFeatures) {
       const purchases = getState().info.purchases;
       if (!doEnableExtraFeatures(purchases)) {
-        updatePopupUrlHash(NOTE_LIST_ITEM_MENU_POPUP, false, null);
+        if (getState().display.isNoteListItemMenuPopupShown) {
+          updatePopupUrlHash(NOTE_LIST_ITEM_MENU_POPUP, false, null);
+        }
+        if (getState().display.isBulkEditMenuPopupShown) {
+          updatePopupUrlHash(BULK_EDIT_MENU_POPUP, false, null);
+        }
+
         dispatch(updatePaywallFeature(FEATURE_TAG));
         dispatch(updatePopup(PAYWALL_POPUP, true));
         return;
       }
     }
 
-    dispatch(updateSelectingNoteId(id));
+    const payload = _initTagEditorState(getState);
+    if (payload.mode === INVALID) {
+      if (getState().display.isNoteListItemMenuPopupShown) {
+        updatePopupUrlHash(NOTE_LIST_ITEM_MENU_POPUP, false, null);
+      }
+      if (getState().display.isBulkEditMenuPopupShown) {
+        updatePopupUrlHash(BULK_EDIT_MENU_POPUP, false, null);
+      }
+      return;
+    }
+
+    dispatch({ type: UPDATE_TAG_EDITOR, payload });
     updatePopupUrlHash(TAG_EDITOR_POPUP, true, null, true);
     return;
   }
@@ -4724,14 +4897,8 @@ export const updateTagEditorPopup = (isShown, id, isAddTags) => async (
 
 export const updateTagEditor = (values, hints, displayName, color, msg) => {
   const payload = {};
-  if (Array.isArray(values)) {
-    payload.values = values;
-    payload.didValuesEdit = true;
-  }
-  if (Array.isArray(hints)) {
-    payload.hints = hints;
-    payload.didHintsEdit = true;
-  }
+  if (Array.isArray(values)) payload.values = values;
+  if (Array.isArray(hints)) payload.hints = hints;
 
   if (isString(displayName)) payload.displayName = displayName;
   if (isString(color)) payload.color = color;
@@ -4778,6 +4945,23 @@ export const addTagEditorTagName = (values, hints, displayName, color) => async 
   dispatch(updateTagEditor(newValues, newHints, '', null, ''));
 };
 
+export const updateTagData = (ids, values) => async (dispatch, getState) => {
+  const isBulkEditing = getState().display.isBulkEditing;
+  if (isBulkEditing) updateBulkEditUrlHash(false);
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    console.log('In updateTagData, invalid ids: ', ids);
+    return;
+  }
+
+  const valuesPerId = {};
+  for (const id of ids) {
+    valuesPerId[id] = values;
+  }
+
+  await updateTagDataSStep(ids, valuesPerId)(dispatch, getState);
+};
+
 const updateTagDataSStepInQueue = (payload, dispatch, getState) => async () => {
   const settings = getState().settings;
   const snapshotSettings = getState().snapshot.settings;
@@ -4819,54 +5003,12 @@ const updateTagDataSStepInQueue = (payload, dispatch, getState) => async () => {
   vars.updateSettings.doFetch = false;
 };
 
-export const updateTagDataSStep = (id, values) => async (dispatch, getState) => {
-  if (!isString(id)) {
-    console.log('In updateTagDataSStep, invalid id: ', id);
-    return;
-  }
-
+const updateTagDataSStep = (rawIds, rawValuesPerId) => async (
+  dispatch, getState
+) => {
+  const pendingSslts = getState().pendingSslts;
   const tagNameMap = getState().settings.tagNameMap;
   const ssTagNameMap = getState().snapshot.settings.tagNameMap;
-
-  const newTagNameObjs = [];
-  for (const value of values) {
-    const { tagNameObj } = getTagNameObj(value.tagName, tagNameMap);
-    const { tagNameObj: ssTagNameObj } = getTagNameObj(value.tagName, ssTagNameMap);
-
-    if (isObject(tagNameObj) && isObject(ssTagNameObj)) continue;
-    newTagNameObjs.push(value);
-  }
-
-  if (newTagNameObjs.length === 0) {
-    const pendingSslts = getState().pendingSslts;
-
-    const noteFPaths = getNoteFPaths(getState());
-    const ssltFPaths = getSsltFPaths(getState());
-    const tagFPaths = getTagFPaths(getState());
-
-    const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
-    const solvedTags = getTags(tagFPaths, {}, toRootIds);
-    const mainId = getMainId(id, toRootIds);
-
-    const aTns = [], bTns = [];
-    if (isObject(solvedTags[mainId])) {
-      for (const value of solvedTags[mainId].values) aTns.push(value.tagName);
-    }
-    for (const value of values) bTns.push(value.tagName);
-
-    if (isArrayEqual(aTns, bTns)) return;
-  }
-
-  const payload = { id, values, newTagNameObjs };
-  dispatch({ type: UPDATE_TAG_DATA_S_STEP, payload });
-
-  const task = updateTagDataSStepInQueue(payload, dispatch, getState);
-  task[TASK_TYPE] = UPDATE_TAG_DATA_S_STEP;
-  taskQueue.push(task);
-};
-
-export const updateTagDataTStep = (id, values) => async (dispatch, getState) => {
-  const pendingSslts = getState().pendingSslts;
 
   const noteFPaths = getNoteFPaths(getState());
   const ssltFPaths = getSsltFPaths(getState());
@@ -4874,8 +5016,53 @@ export const updateTagDataTStep = (id, values) => async (dispatch, getState) => 
 
   const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
   const solvedTags = getTags(tagFPaths, {}, toRootIds);
-  const mainId = getMainId(id, toRootIds);
 
+  const ids = [], valuesPerId = {};
+  for (const id of rawIds) {
+    const [values, mainId] = [rawValuesPerId[id], getMainId(id, toRootIds)];
+
+    const aTns = [], bTns = [];
+    if (isObject(solvedTags[mainId])) {
+      for (const value of solvedTags[mainId].values) aTns.push(value.tagName);
+    }
+    for (const value of values) bTns.push(value.tagName);
+
+    if (isArrayEqual(aTns, bTns)) continue;
+
+    ids.push(id);
+    valuesPerId[id] = values;
+  }
+
+  if (ids.length === 0) return;
+
+  const newTagNameObjsPerId = {}, newTagNameObjs = [], chkdTagNames = [];
+  for (const id of ids) {
+    const values = valuesPerId[id];
+    for (const value of values) {
+      const { tagNameObj } = getTagNameObj(value.tagName, tagNameMap);
+      const { tagNameObj: ssTagNameObj } = getTagNameObj(value.tagName, ssTagNameMap);
+
+      if (isObject(tagNameObj) && isObject(ssTagNameObj)) continue;
+
+      if (!Array.isArray(newTagNameObjsPerId[id])) newTagNameObjsPerId[id] = [];
+      newTagNameObjsPerId[id].push(value);
+
+      if (!chkdTagNames.includes(value.tagName)) {
+        newTagNameObjs.push(value);
+        chkdTagNames.push(value.tagName);
+      }
+    }
+  }
+
+  const payload = { ids, valuesPerId, newTagNameObjsPerId, newTagNameObjs };
+  dispatch({ type: UPDATE_TAG_DATA_S_STEP, payload });
+
+  const task = updateTagDataSStepInQueue(payload, dispatch, getState);
+  task[TASK_TYPE] = UPDATE_TAG_DATA_S_STEP;
+  taskQueue.push(task);
+};
+
+const _getTpfValues = (id, mainId, values, solvedTags) => {
   const combinedValues = {}, aTns = [], bTns = [];
   if (isObject(solvedTags[mainId])) {
     for (const value of solvedTags[mainId].values) {
@@ -4976,31 +5163,98 @@ export const updateTagDataTStep = (id, values) => async (dispatch, getState) => 
     now += 1;
   }
 
-  const payload = { id, values };
-  dispatch({ type: UPDATE_TAG_DATA_T_STEP, payload });
+  return { pfValues };
+};
 
-  try {
-    const data = { values: pfValues, isSequential: false, nItemsForNs: N_NOTES };
-    const results = await dataApi.performFiles(data);
-    throwIfPerformFilesError(data, results);
-  } catch (error) {
-    console.log('updateTagDataTStep error: ', error);
-    dispatch({ type: UPDATE_TAG_DATA_T_STEP_ROLLBACK, payload: { ...payload, error } });
-    return;
+export const updateTagDataTStep = (ids, valuesPerId) => async (dispatch, getState) => {
+  const pendingSslts = getState().pendingSslts;
+
+  const noteFPaths = getNoteFPaths(getState());
+  const ssltFPaths = getSsltFPaths(getState());
+  const tagFPaths = getTagFPaths(getState());
+
+  const { toRootIds } = listNoteMetas(noteFPaths, ssltFPaths, pendingSslts);
+  const solvedTags = getTags(tagFPaths, {}, toRootIds);
+
+  const pfValues = [], pfValuesPerMid = {};
+  for (const id of ids) {
+    const [mainId, values] = [getMainId(id, toRootIds), valuesPerId[id]];
+    const result = _getTpfValues(id, mainId, values, solvedTags);
+
+    pfValues.push(...result.pfValues);
+    pfValuesPerMid[mainId] = result.pfValues;
   }
 
-  dispatch({ type: UPDATE_TAG_DATA_T_STEP_COMMIT, payload });
+  const payload = { ids, valuesPerId };
+  dispatch({ type: UPDATE_TAG_DATA_T_STEP, payload });
+
+  const results = [], nItems = 800;
+  for (let i = 0; i < pfValues.length; i += nItems) {
+    const selectedPfValues = pfValues.slice(i, i + nItems);
+    const data = {
+      values: selectedPfValues, isSequential: false, nItemsForNs: N_NOTES,
+    };
+
+    try {
+      const selectedResults = await dataApi.performFiles(data);
+      results.push(...selectedResults);
+    } catch (error) {
+      console.log('updateTagDataTStep error: ', error);
+      dispatch({
+        type: UPDATE_TAG_DATA_T_STEP_ROLLBACK, payload: { ...payload, error },
+      });
+      return;
+    }
+  }
+  const resultsPerId = getPerformFilesResultsPerId(results);
+
+  const successIds = [], errorIds = [], errors = [];
+  for (const id of ids) {
+    const mainId = getMainId(id, toRootIds);
+
+    let error;
+    for (const pfValue of pfValuesPerMid[mainId]) {
+      const result = resultsPerId[pfValue.id];
+      if (isObject(result) && result.success) continue;
+
+      error = new Error('Error on previous dependent item');
+      if (isObject(result)) error = new Error(result.error);
+      break;
+    }
+    if (error) {
+      errorIds.push(id);
+      errors.push(error);
+    } else {
+      successIds.push(id);
+    }
+  }
+
+  dispatch({
+    type: UPDATE_TAG_DATA_T_STEP_COMMIT,
+    payload: { ...payload, successIds, errorIds, errors },
+  });
 };
 
 export const retryDiedTags = () => async (dispatch, getState) => {
   const pendingTags = getState().pendingTags;
+
+  const sIds = [], sValuesPerId = {}, tIds = [], tValuesPerId = {};
   for (const id in pendingTags) {
     const { status, values } = pendingTags[id];
     if (status === UPDATE_TAG_DATA_S_STEP_ROLLBACK) {
-      await updateTagDataSStep(id, values)(dispatch, getState);
+      sIds.push(id);
+      sValuesPerId[id] = values;
     } else if (status === UPDATE_TAG_DATA_T_STEP_ROLLBACK) {
-      await updateTagDataTStep(id, values)(dispatch, getState);
+      tIds.push(id);
+      tValuesPerId[id] = values;
     }
+  }
+
+  if (sIds.length > 0) {
+    await updateTagDataSStep(sIds, sValuesPerId)(dispatch, getState);
+  }
+  if (tIds.length > 0) {
+    await updateTagDataTStep(tIds, tValuesPerId)(dispatch, getState);
   }
 };
 

@@ -8,8 +8,9 @@ import {
   updateListNamesMode,
 } from '../actions';
 import {
-  LIST_NAMES_POPUP, CONFIRM_DELETE_POPUP, MY_NOTES, ARCHIVE, TRASH, LG_WIDTH,
-  MOVE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_COMMANDS, LIST_NAMES_MODE_MOVE_NOTES,
+  LIST_NAMES_POPUP, BULK_EDIT_MENU_POPUP, CONFIRM_DELETE_POPUP, MY_NOTES, ARCHIVE,
+  TRASH, LG_WIDTH, MOVE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_COMMANDS,
+  LIST_NAMES_MODE_MOVE_NOTES, NOTE_COMMANDS_MODE_NETB,
 } from '../types/const';
 import { getListNameMap } from '../selectors';
 import { getListNameDisplayName, getAllListNames } from '../utils';
@@ -18,13 +19,16 @@ import { useSafeAreaFrame, useTailwind } from '.';
 
 const NoteCommands = (props) => {
 
-  const { isFullScreen, onToggleFullScreen, isOnDarkBackground, isLeftAlign } = props;
+  const {
+    mode, isFullScreen, onToggleFullScreen, isOnDarkBackground, isLeftAlign,
+  } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const listName = useSelector(state => state.display.listName);
   const queryString = useSelector(state => state.display.queryString);
   const listNameMap = useSelector(getListNameMap);
   const resetDidClickCount = useSelector(state => state.display.resetDidClickCount);
   const moveToBtn = useRef(null);
+  const moreBtn = useRef(null);
   const didClick = useRef(false);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
@@ -86,6 +90,33 @@ const NoteCommands = (props) => {
     });
   };
 
+  const onMoreBtnClick = () => {
+    moreBtn.current.measure((_fx, _fy, width, height, x, y) => {
+      let rect;
+      if (safeAreaWidth < LG_WIDTH) {
+        const newX = x + 4, newY = y + 4;
+        const newWidth = width - 12, newHeight = height - 12;
+        rect = {
+          x: newX, y: newY,
+          width: newWidth, height: newHeight,
+          top: newY, bottom: newY + newHeight,
+          left: newX, right: newX + newWidth,
+        };
+      } else {
+        const newY = y - 8;
+        const newHeight = height + 16;
+        rect = {
+          x: x, y: newY,
+          width: width, height: newHeight,
+          top: newY, bottom: newY + newHeight,
+          left: x, right: x + width,
+        };
+      }
+      dispatch(updatePopup(BULK_EDIT_MENU_POPUP, true, rect));
+      if (isFullScreen) onToggleFullScreen();
+    });
+  };
+
   useEffect(() => {
     didClick.current = false;
   }, [resetDidClickCount]);
@@ -98,12 +129,18 @@ const NoteCommands = (props) => {
   let isDeleteBtnShown = [TRASH].includes(rListName);
   let isMoveToBtnShown = (
     [ARCHIVE].includes(rListName) ||
-    (rListName === MY_NOTES && getAllListNames(listNameMap).length > 3)
+    (
+      mode === NOTE_COMMANDS_MODE_NETB &&
+      rListName === MY_NOTES &&
+      getAllListNames(listNameMap).length > 3
+    )
   );
+  let isMoreBtnShown = [MY_NOTES, ARCHIVE].includes(rListName);
   if (queryString) {
     [isArchiveBtnShown, isRemoveBtnShown, isRestoreBtnShown] = [false, true, false];
-    [isDeleteBtnShown, isMoveToBtnShown] = [false, false];
+    [isDeleteBtnShown, isMoveToBtnShown, isMoreBtnShown] = [false, false, true];
   }
+  if (mode === NOTE_COMMANDS_MODE_NETB) isMoreBtnShown = false;
 
   let btnClassNames;
   if (isOnDarkBackground) btnClassNames = 'border-white bg-white lg:border-gray-300';
@@ -158,6 +195,14 @@ const NoteCommands = (props) => {
           </Svg>
         </View>
         <Text style={tailwind(`hidden text-sm font-normal lg:ml-1 lg:flex ${textClassNames}`)}>Move to</Text>
+      </TouchableOpacity>}
+      {isMoreBtnShown && <TouchableOpacity ref={moreBtn} onPress={onMoreBtnClick} style={tailwind(`h-full flex-row items-center border pl-1 pr-1 sm:pl-2 lg:rounded-md lg:px-2 lg:py-2 lg:shadow-sm ${btnClassNames}`)}>
+        <View style={tailwind('rounded p-2 lg:p-0')}>
+          <Svg width={20} height={20} style={tailwind(`font-normal ${textClassNames}`)} viewBox="0 0 20 20" fill="currentColor">
+            <Path fillRule="evenodd" clipRule="evenodd" d="M3 5C3 4.73478 3.10536 4.48043 3.29289 4.29289C3.48043 4.10536 3.73478 4 4 4H16C16.2652 4 16.5196 4.10536 16.7071 4.29289C16.8946 4.48043 17 4.73478 17 5C17 5.26522 16.8946 5.51957 16.7071 5.70711C16.5196 5.89464 16.2652 6 16 6H4C3.73478 6 3.48043 5.89464 3.29289 5.70711C3.10536 5.51957 3 5.26522 3 5ZM3 10C3 9.73478 3.10536 9.48043 3.29289 9.29289C3.48043 9.10536 3.73478 9 4 9H10C10.2652 9 10.5196 9.10536 10.7071 9.29289C10.8946 9.48043 11 9.73478 11 10C11 10.2652 10.8946 10.5196 10.7071 10.7071C10.5196 10.8946 10.2652 11 10 11H4C3.73478 11 3.48043 10.8946 3.29289 10.7071C3.10536 10.5196 3 10.2652 3 10ZM3 15C3 14.7348 3.10536 14.4804 3.29289 14.2929C3.48043 14.1054 3.73478 14 4 14H16C16.2652 14 16.5196 14.1054 16.7071 14.2929C16.8946 14.4804 17 14.7348 17 15C17 15.2652 16.8946 15.5196 16.7071 15.7071C16.5196 15.8946 16.2652 16 16 16H4C3.73478 16 3.48043 15.8946 3.29289 15.7071C3.10536 15.5196 3 15.2652 3 15Z" />
+          </Svg>
+        </View>
+        <Text style={tailwind(`hidden text-sm font-normal lg:ml-1 lg:flex ${textClassNames}`)}>More actions</Text>
       </TouchableOpacity>}
     </React.Fragment>
   );

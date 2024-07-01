@@ -98,13 +98,14 @@ const BulkEditMenuPopup = () => {
       {menu.map((text, i) => {
         let btnClassNames = 'py-2.5';
         if (i === 0) btnClassNames += ' -mt-0.5';
-        return <button key={text} onClick={() => onMenuPopupClick(text)} className={tailwind(`block w-full truncate rounded-md pl-4 pr-4 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none blk:text-gray-200 blk:hover:bg-gray-700 blk:hover:text-white blk:focus:bg-gray-700 blk:focus:text-white ${btnClassNames}`)} role="menuitem">{text}</button>
+        return (
+          <button key={text} onClick={() => onMenuPopupClick(text)} className={tailwind(`block w-full truncate rounded-md pl-4 pr-4 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none blk:text-gray-200 blk:hover:bg-gray-700 blk:hover:text-white blk:focus:bg-gray-700 blk:focus:text-white ${btnClassNames}`)} role="menuitem">{text}</button>
+        );
       })}
     </div>
   );
 
   let popupClassNames = 'fixed min-w-36 overflow-auto rounded-lg bg-white shadow-xl ring-1 ring-black ring-opacity-5 blk:bg-gray-800 blk:ring-white blk:ring-opacity-25';
-
   let panel;
   if (popupSize) {
     const maxHeight = safeAreaHeight - 16;

@@ -539,7 +539,7 @@ const displayReducer = (state = initialState, action) => {
   }
 
   if (action.type === MOVE_NOTES) {
-    // Need to remove from showingNoteIds immediately as new moving uses the same id.
+    // Need to remove from showingNoteInfos immediately as new moving uses the same id.
     const { fromNotes, didRetry } = action.payload;
     if (didRetry) return state;
 
