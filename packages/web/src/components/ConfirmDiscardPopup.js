@@ -67,7 +67,10 @@ const ConfirmDiscardPopup = () => {
       // As this and closing confirmDiscard popup both change url hash,
       //   need to be in different js clock cycle.
       setTimeout(() => dispatch(updateSettingsPopup(false, false)), 100);
-    } else throw new Error(`Invalid discard action: ${discardAction}`);
+    } else {
+      console.log(`Invalid discard action: ${discardAction}`);
+      return; // Don't set didClick to true
+    }
 
     onConfirmDiscardCancelBtnClick();
     didClick.current = true;

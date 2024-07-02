@@ -113,6 +113,7 @@ const NoteListItemMenuPopup = () => {
       }
     } else {
       console.log(`In NoteListItemMenuPopup, invalid text: ${text}`);
+      return; // Don't set didClick to true
     }
 
     didClick.current = true;

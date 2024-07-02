@@ -58,7 +58,10 @@ const ConfirmDiscardPopup = () => {
       discardAction === DISCARD_ACTION_UPDATE_TAG_NAME
     ) {
       dispatch(updateSettingsPopup(false, false));
-    } else throw new Error(`Invalid discard action: ${discardAction}`);
+    } else {
+      console.log(`Invalid discard action: ${discardAction}`);
+      return; // Don't set didClick to true
+    }
 
     onConfirmDiscardCancelBtnClick();
     didClick.current = true;

@@ -60,6 +60,7 @@ const BulkEditMenuPopup = () => {
       dispatch(updateTagEditorPopup(true, true));
     } else {
       console.log(`In BulkEditMenuPopup, invalid text: ${text}`);
+      return; // Don't set didClick to true
     }
 
     didClick.current = true;
