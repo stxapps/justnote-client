@@ -5028,7 +5028,7 @@ const _initTagEditorState = (getState) => {
   const noteFPaths = getNoteFPaths(getState());
   const ssltFPaths = getSsltFPaths(getState());
   const tagFPaths = getTagFPaths(getState());
-  const pendingSslts = getState().pendingSslts
+  const pendingSslts = getState().pendingSslts;
   const pendingTags = getState().pendingTags;
   const tagNameMap = getState().settings.tagNameMap;
   const selectingNoteId = getState().display.selectingNoteId;

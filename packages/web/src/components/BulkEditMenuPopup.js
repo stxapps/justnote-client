@@ -93,7 +93,7 @@ const BulkEditMenuPopup = () => {
 
   const buttons = (
     <div className={tailwind('pb-1')}>
-      <div className={tailwind('h-11 flex items-center justify-start pl-4 pr-4 pt-1')}>
+      <div className={tailwind('flex h-11 items-center justify-start pl-4 pr-4 pt-1')}>
         <p className={tailwind('truncate text-left text-sm font-semibold text-gray-600 blk:text-gray-200')}>Actions</p>
       </div>
       {menu.map((text, i) => {
