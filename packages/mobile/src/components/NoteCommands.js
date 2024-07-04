@@ -27,6 +27,7 @@ const NoteCommands = (props) => {
   const queryString = useSelector(state => state.display.queryString);
   const listNameMap = useSelector(getListNameMap);
   const resetDidClickCount = useSelector(state => state.display.resetDidClickCount);
+  const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
   const moveToBtn = useRef(null);
   const moreBtn = useRef(null);
   const didClick = useRef(false);
@@ -130,12 +131,12 @@ const NoteCommands = (props) => {
   let isMoveToBtnShown = (
     [ARCHIVE].includes(rListName) ||
     (
-      mode === NOTE_COMMANDS_MODE_NETB &&
+      (!isUserSignedIn || mode === NOTE_COMMANDS_MODE_NETB) &&
       rListName === MY_NOTES &&
       getAllListNames(listNameMap).length > 3
     )
   );
-  let isMoreBtnShown = [MY_NOTES, ARCHIVE].includes(rListName);
+  let isMoreBtnShown = isUserSignedIn && [MY_NOTES, ARCHIVE].includes(rListName);
   if (queryString) {
     [isArchiveBtnShown, isRemoveBtnShown, isRestoreBtnShown] = [false, true, false];
     [isDeleteBtnShown, isMoveToBtnShown, isMoreBtnShown] = [false, false, true];
