@@ -932,7 +932,7 @@ const displayReducer = (state = initialState, action) => {
         const values = valuesPerId[id];
         const found = values.some(value => value.tagName === tagName);
         if (!found) {
-          newState.showingNoteInfos = _filterIfNotNull(state.showingNoteInfos, [id]);
+          newState.showingNoteInfos = _filterIfNotNull(newState.showingNoteInfos, [id]);
         }
       }
       return newState;
