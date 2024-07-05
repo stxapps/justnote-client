@@ -69,7 +69,6 @@ const ConfirmDiscardPopup = () => {
       setTimeout(() => dispatch(updateSettingsPopup(false, false)), 100);
     } else {
       console.log(`Invalid discard action: ${discardAction}`);
-      return; // Don't set didClick to true
     }
 
     onConfirmDiscardCancelBtnClick();
