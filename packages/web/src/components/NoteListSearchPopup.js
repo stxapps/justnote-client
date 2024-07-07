@@ -13,6 +13,7 @@ const NoteListSearchPopup = () => {
   const isShown = useSelector(state => state.display.isSearchPopupShown);
   const searchString = useSelector(state => state.display.searchString);
   const searchInput = useRef(null);
+  const prevIsShown = useRef(isShown);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
@@ -30,10 +31,13 @@ const NoteListSearchPopup = () => {
   };
 
   useEffect(() => {
-    if (isShown) searchInput.current.focus();
-    else {
-      if (searchInput.current) searchInput.current.blur();
+    if (isShown) {
+      if (!prevIsShown.current && searchInput.current) searchInput.current.focus();
+    } else {
+      if (prevIsShown.current && searchInput.current) searchInput.current.blur();
     }
+
+    prevIsShown.current = isShown;
   }, [isShown]);
 
   if (!isShown) return (

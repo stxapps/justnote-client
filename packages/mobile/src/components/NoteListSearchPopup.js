@@ -22,6 +22,7 @@ const NoteListSearchPopup = () => {
   const searchInput = useRef(null);
   const popupAnim = useRef(new Animated.Value(0)).current;
   const popupBackHandler = useRef(null);
+  const prevIsShown = useRef(isShown);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
@@ -62,13 +63,15 @@ const NoteListSearchPopup = () => {
     let didMount = true;
     if (isShown) {
       Animated.timing(popupAnim, { toValue: 1, ...popupFMV.visible }).start(() => {
-        if (searchInput.current) searchInput.current.focus();
+        if (!prevIsShown.current && searchInput.current) searchInput.current.focus();
+        prevIsShown.current = isShown;
       });
     } else {
       Animated.timing(popupAnim, { toValue: 0, ...popupFMV.hidden }).start(() => {
         if (didMount) setDidCloseAnimEnd(true);
       });
-      if (searchInput.current) searchInput.current.blur();
+      if (prevIsShown.current && searchInput.current) searchInput.current.blur();
+      prevIsShown.current = isShown;
     }
 
     registerPopupBackHandler(isShown);
