@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   ScrollView, View, Text, TouchableOpacity, TouchableWithoutFeedback, Animated,
-  BackHandler, PanResponder, Linking,
+  BackHandler, PanResponder, Linking, Platform,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
@@ -338,6 +338,9 @@ const SettingsPopup = () => {
   };
 
   const _render = (content) => {
+    let reviewUrl = DOMAIN_NAME + '/' + HASH_SUPPORT;
+    if (Platform.OS === 'ios') reviewUrl = 'https://apps.apple.com/app/id1570111019?action=write-review';
+    else if (Platform.OS === 'android') reviewUrl = 'https://play.google.com/store/apps/details?id=com.justnotecc';
 
     const sidebarCanvasStyleClasses = !isSidebarShown && didSidebarAnimEnd ? 'hidden relative' : 'absolute inset-0';
     const sidebarStyle = {
@@ -416,6 +419,12 @@ const SettingsPopup = () => {
                   </Svg>
                   <Text style={tailwind(`text-sm font-medium leading-5 ${isViewSelected(VIEW_ABOUT) ? selectedMenuTextStyleClasses : menuTextStyleClasses}`)}>About</Text>
                 </TouchableOpacity>
+                {isUserSignedIn && <TouchableOpacity onPress={() => Linking.openURL(reviewUrl)} style={tailwind(`mt-2 w-full flex-row items-center rounded-md px-2 py-2 ${menuBtnStyleClasses}`)}>
+                  <Svg style={tailwind(`mr-3 font-normal ${menuSvgStyleClasses}`)} width={20} height={20} viewBox="0 0 20 20" fill="currentColor">
+                    <Path d="M9.04897 2.927C9.34897 2.006 10.652 2.006 10.951 2.927L12.021 6.219C12.0863 6.41949 12.2134 6.59418 12.384 6.71811C12.5547 6.84203 12.7601 6.90885 12.971 6.909H16.433C17.402 6.909 17.804 8.149 17.021 8.719L14.221 10.753C14.05 10.877 13.9227 11.052 13.8573 11.2529C13.7919 11.4537 13.7918 11.6701 13.857 11.871L14.927 15.163C15.227 16.084 14.172 16.851 13.387 16.281L10.587 14.247C10.4162 14.123 10.2105 14.0562 9.99947 14.0562C9.78842 14.0562 9.58277 14.123 9.41197 14.247L6.61197 16.281C5.82797 16.851 4.77397 16.084 5.07297 15.163L6.14297 11.871C6.20815 11.6701 6.20803 11.4537 6.14264 11.2529C6.07725 11.052 5.94994 10.877 5.77897 10.753L2.97997 8.72C2.19697 8.15 2.59997 6.91 3.56797 6.91H7.02897C7.24002 6.91006 7.44568 6.84334 7.6165 6.7194C7.78732 6.59546 7.91455 6.42065 7.97997 6.22L9.04997 2.928L9.04897 2.927Z" />
+                  </Svg>
+                  <Text style={tailwind(`text-sm font-medium leading-5 ${menuTextStyleClasses}`)}>Review us</Text>
+                </TouchableOpacity>}
               </View>
             </View>
           </View>
@@ -490,6 +499,12 @@ const SettingsPopup = () => {
                       </Svg>
                       <Text style={tailwind('text-base font-medium leading-5 text-gray-500 blk:text-gray-400')}>About</Text>
                     </TouchableOpacity>
+                    {isUserSignedIn && <TouchableOpacity onPress={() => Linking.openURL(reviewUrl)} style={tailwind('mt-2 w-full flex-row items-center rounded-md px-2 py-2.5')}>
+                      <Svg style={tailwind('mr-2 font-normal text-gray-400 blk:text-gray-400')} width={20} height={20} viewBox="0 0 20 20" fill="currentColor">
+                        <Path d="M9.04897 2.927C9.34897 2.006 10.652 2.006 10.951 2.927L12.021 6.219C12.0863 6.41949 12.2134 6.59418 12.384 6.71811C12.5547 6.84203 12.7601 6.90885 12.971 6.909H16.433C17.402 6.909 17.804 8.149 17.021 8.719L14.221 10.753C14.05 10.877 13.9227 11.052 13.8573 11.2529C13.7919 11.4537 13.7918 11.6701 13.857 11.871L14.927 15.163C15.227 16.084 14.172 16.851 13.387 16.281L10.587 14.247C10.4162 14.123 10.2105 14.0562 9.99947 14.0562C9.78842 14.0562 9.58277 14.123 9.41197 14.247L6.61197 16.281C5.82797 16.851 4.77397 16.084 5.07297 15.163L6.14297 11.871C6.20815 11.6701 6.20803 11.4537 6.14264 11.2529C6.07725 11.052 5.94994 10.877 5.77897 10.753L2.97997 8.72C2.19697 8.15 2.59997 6.91 3.56797 6.91H7.02897C7.24002 6.91006 7.44568 6.84334 7.6165 6.7194C7.78732 6.59546 7.91455 6.42065 7.97997 6.22L9.04997 2.928L9.04897 2.927Z" />
+                      </Svg>
+                      <Text style={tailwind('text-base font-medium leading-5 text-gray-500 blk:text-gray-400')}>Review us</Text>
+                    </TouchableOpacity>}
                   </View>
                 </View>
               </ScrollView>
