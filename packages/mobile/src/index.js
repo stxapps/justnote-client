@@ -16,6 +16,7 @@ import { getThemeMode } from './selectors';
 import cache from './utils/cache';
 
 import App from './components/App';
+import Share from './components/Share';
 
 Text.defaultProps = Text.defaultProps || {};
 Text.defaultProps.allowFontScaling = false;
@@ -83,6 +84,18 @@ const Root = () => {
     <Provider store={store}>
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
         <_Root />
+      </SafeAreaProvider>
+    </Provider>
+  );
+};
+
+export const ShareRoot = () => {
+  return (
+    <Provider store={store}>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <SafeAreaView style={cache('SI_shareSafeAreaView', { flex: 1, backgroundColor: 'transparent' })}>
+          <Share />
+        </SafeAreaView>
       </SafeAreaProvider>
     </Provider>
   );

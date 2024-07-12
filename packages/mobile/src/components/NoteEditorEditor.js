@@ -9,7 +9,7 @@ import {
   updateEditorFocused, updateEditorBusy, saveNote, discardNote, onUpdateNoteId,
   onChangeListName, onUpdateQueryString, onUpdateBulkEdit, onShowNoteListMenuPopup,
   onShowNLIMPopup, onShowUNEPopup, updateEditorIsUploading, updateEditingNote,
-  handleUnsavedNote,
+  handleUnsavedNote, increaseWebViewKeyCount,
 } from '../actions';
 import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, UTF8, VALID } from '../types/const';
 import { getThemeMode, getDoMoreEditorFontSizes } from '../selectors';
@@ -44,6 +44,7 @@ const NoteEditorEditor = (props) => {
   const isEditorBusy = useSelector(state => state.display.isEditorBusy);
   const searchString = useSelector(state => state.display.searchString);
   const doMoreEditorFontSizes = useSelector(state => getDoMoreEditorFontSizes(state));
+  const webViewKeyCount = useSelector(state => state.editor.webViewKeyCount);
   const checkToFocusCount = useSelector(state => state.editor.checkToFocusCount);
   const saveNoteCount = useSelector(state => state.editor.saveNoteCount);
   const discardNoteCount = useSelector(state => state.editor.discardNoteCount);
@@ -69,6 +70,7 @@ const NoteEditorEditor = (props) => {
   const webView = useRef(null);
   const hackInput = useRef(null);
   const prevSearchString = useRef(searchString);
+  const prevWebViewKeyCount = useRef(webViewKeyCount);
   const prevCheckToFocusCount = useRef(0); // First mount always checks.
   const prevSaveNoteCount = useRef(saveNoteCount);
   const prevDiscardNoteCount = useRef(discardNoteCount);
@@ -320,9 +322,8 @@ const NoteEditorEditor = (props) => {
   }, []);
 
   const onContentProcessDidTerminate = useCallback(() => {
-    setEditorReady(false);
-    setTerminateCount(c => c + 1);
-  }, []);
+    dispatch(increaseWebViewKeyCount());
+  }, [dispatch]);
 
   useEffect(() => {
     noteIdRef.current = note.id;
@@ -356,6 +357,15 @@ const NoteEditorEditor = (props) => {
     if (note.id === NEW_NOTE && unsavedNote.status === null) visible = 'true';
     webView.current.injectJavaScript('window.justnote.setVisiblePoweredBy(' + visible + '); true;');
   }, [isEditorReady, note.id, unsavedNote.status]);
+
+  useEffect(() => {
+    if (webViewKeyCount !== prevWebViewKeyCount.current) {
+      setEditorReady(false);
+      setTerminateCount(c => c + 1);
+
+      prevWebViewKeyCount.current = webViewKeyCount;
+    }
+  }, [webViewKeyCount]);
 
   useEffect(() => {
     if (!isEditorReady || !webView.current) return;

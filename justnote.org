@@ -353,6 +353,11 @@
       keytool -list -v -keystore android/app/debug.keystore -alias androiddebugkey -storepass android -keypass android
     ~ *Need sha256 from Play Store Console* at Release Management > App signing > App signing certificate > SHA-256 certificate fingerprint (medium.com/@joeykaan/the-definitive-guide-to-app-links-eef50a4c26e9)
    + Upload apple-app-site-association to justnote.cc/.well-known, *not .wellknown and content type application/json!*
+- Share to Justnote
+  + yarn add https://github.com/stxapps/react-native-receive-sharing-intent#c3acb5afdae0087aef58ad806e8208ef2f280f7e
+  + In android/app/src/main/AndroidManifest.xml, add ShareActivity
+  + Create ShareActivity.java file, update values in String and Style
+  + Add AppRegistry in mobile/index.js, Create share.js file
 * test cases
 - web, mobile
 - PC, laptop, tablet, phone

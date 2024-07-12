@@ -30,5 +30,22 @@
           <data android:scheme="justnotecc" />
         </intent-filter>
       </activity>
+      <activity
+        android:name=".ShareActivity"
+        android:label="@string/share_name"
+        android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
+        android:launchMode="singleTask"
+        android:taskAffinity=""
+        android:windowSoftInputMode="adjustResize"
+        android:theme="@style/ShareTheme"
+        android:excludeFromRecents="true"
+        android:noHistory="true"
+        android:exported="true">
+        <intent-filter>
+          <action android:name="android.intent.action.SEND" />
+          <category android:name="android.intent.category.DEFAULT" />
+          <data android:mimeType="text/plain" />
+        </intent-filter>
+      </activity>
     </application>
 </manifest>

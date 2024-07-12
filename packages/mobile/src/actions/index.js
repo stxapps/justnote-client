@@ -52,7 +52,7 @@ import {
   INCREASE_UPDATE_EDITOR_WIDTH_COUNT, INCREASE_RESET_DID_CLICK_COUNT,
   INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT, INCREASE_UPDATE_BULK_EDIT_COUNT,
   INCREASE_SHOW_NOTE_LIST_MENU_POPUP_COUNT, INCREASE_SHOW_NLIM_POPUP_COUNT,
-  INCREASE_SHOW_UNE_POPUP_COUNT, UPDATE_EDITOR_IS_UPLOADING,
+  INCREASE_SHOW_UNE_POPUP_COUNT, INCREASE_WEBVIEW_KEY_COUNT, UPDATE_EDITOR_IS_UPLOADING,
   UPDATE_EDITOR_SCROLL_ENABLED, UPDATE_EDITING_NOTE, UPDATE_UNSAVED_NOTE,
   DELETE_UNSAVED_NOTES, CLEAN_UP_STATIC_FILES, CLEAN_UP_STATIC_FILES_COMMIT,
   CLEAN_UP_STATIC_FILES_ROLLBACK, UPDATE_STACKS_ACCESS, GET_PRODUCTS,
@@ -128,8 +128,9 @@ const DIFF_UPDATE = 'DIFF_UPDATE';
 const syncQueue = new TaskQueue({ concurrency: 1, autostart: true });
 const taskQueue = new TaskQueue({ concurrency: 1, autostart: true });
 
-let _getDispatch;
+let _getDispatch, _didInit;
 export const init = () => async (dispatch, getState) => {
+  if (_didInit) return;
 
   const hasSession = await userSession.hasSession();
   if (!hasSession) {
@@ -207,6 +208,7 @@ export const init = () => async (dispatch, getState) => {
   });
 
   _getDispatch = () => dispatch;
+  _didInit = true;
 };
 
 const handlePendingSignIn = (url) => async (dispatch, getState) => {
@@ -242,6 +244,7 @@ const handlePendingSignIn = (url) => async (dispatch, getState) => {
 };
 
 const handleAppStateChange = (nextAppState) => async (dispatch, getState) => {
+  // 4 cases: Main/Share x Active/Inactive
   const isUserSignedIn = await userSession.isUserSignedIn();
 
   if (nextAppState === APP_STATE_ACTIVE) {
@@ -267,6 +270,10 @@ const handleAppStateChange = (nextAppState) => async (dispatch, getState) => {
         payload: { isLong, doNoChangeMyNotes },
       });
     }
+
+    // 3 cases: landing, dummy, signed in. The latter two need to, the first is fine.
+    if (vars.translucentAdding.didExit) dispatch(increaseWebViewKeyCount());
+    vars.translucentAdding.didExit = false;
 
     if (isUserSignedIn) {
       const { purchaseStatus } = getState().iap;
@@ -3421,6 +3428,10 @@ export const updateSidebarListNamesMode = (mode) => {
   return {
     type: UPDATE_SIDEBAR_LIST_NAMES_MODE, payload: { sidebarListNamesMode: mode },
   };
+};
+
+export const increaseWebViewKeyCount = () => {
+  return { type: INCREASE_WEBVIEW_KEY_COUNT };
 };
 
 export const increaseSaveNoteCount = () => {

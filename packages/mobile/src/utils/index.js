@@ -1308,11 +1308,11 @@ export const getSsltFPaths = (state) => {
   if (
     isObject(state.cachedFPaths) &&
     isObject(state.cachedFPaths.fpaths) &&
-    isObject(state.cachedFPaths.fpaths.ssltFPaths)
+    Array.isArray(state.cachedFPaths.fpaths.ssltFPaths)
   ) {
     return state.cachedFPaths.fpaths.ssltFPaths;
   }
-  return {};
+  return [];
 };
 
 export const getStaticFPaths = (state) => {
