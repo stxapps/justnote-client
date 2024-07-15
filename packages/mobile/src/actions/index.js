@@ -1,5 +1,6 @@
 import {
   Linking, AppState, Platform, Appearance, Alert, PermissionsAndroid,
+  DeviceEventEmitter,
 } from 'react-native';
 import * as iapApi from 'react-native-iap';
 import { LexoRank } from '@wewatch/lexorank';
@@ -152,11 +153,6 @@ export const init = () => async (dispatch, getState) => {
     await handlePendingSignIn(e.url)(dispatch, getState);
   });
 
-  AppState.addEventListener('change', async (nextAppState) => {
-    await handleAppStateChange(nextAppState)(dispatch, getState);
-    vars.appState.lastChangeDT = Date.now();
-  });
-
   const isUserSignedIn = await userSession.isUserSignedIn();
   const isUserDummy = await ldbApi.isUserDummy();
   let username = null, userImage = null, userHubUrl = null;
@@ -243,9 +239,40 @@ const handlePendingSignIn = (url) => async (dispatch, getState) => {
   });
 };
 
+let _didAddAppStateChangeListener;
+export const addAppStateChangeListener = () => (dispatch, getState) => {
+  // This listener is added in Main.js and never remove.
+  // Add when needed and let it there. Also, add only once.
+  // Don't add in init, as Share also calls it.
+  // Can't dispatch after init as init might not finished yet due to await.
+  if (_didAddAppStateChangeListener) return;
+
+  if (Platform.OS === 'android') {
+    DeviceEventEmitter.addListener('onMainActivityResume', async () => {
+      const nextAppState = APP_STATE_ACTIVE;
+      await handleAppStateChange(nextAppState)(dispatch, getState);
+      vars.appState.lastChangeDT = Date.now();
+    });
+    DeviceEventEmitter.addListener('onMainActivityPause', async () => {
+      const nextAppState = APP_STATE_BACKGROUND;
+      await handleAppStateChange(nextAppState)(dispatch, getState);
+      vars.appState.lastChangeDT = Date.now();
+    });
+  } else {
+    AppState.addEventListener('change', async (nextAppState) => {
+      await handleAppStateChange(nextAppState)(dispatch, getState);
+      vars.appState.lastChangeDT = Date.now();
+    });
+  }
+
+  _didAddAppStateChangeListener = true;
+};
+
 const handleAppStateChange = (nextAppState) => async (dispatch, getState) => {
-  // 4 cases: Main/Share x Active/Inactive
-  const isUserSignedIn = await userSession.isUserSignedIn();
+  // AppState is host level, trigger events on any activity.
+  // For iOS, Share is pure native, so this won't be called. Can just use AppState.
+  // For Android, need to use ActivityState so this is called only for App, not Share.
+  const isUserSignedIn = getState().user.isUserSignedIn;
 
   if (nextAppState === APP_STATE_ACTIVE) {
     const doForceLock = getState().display.doForceLock;
@@ -273,7 +300,6 @@ const handleAppStateChange = (nextAppState) => async (dispatch, getState) => {
 
     // 3 cases: landing, dummy, signed in. The latter two need to, the first is fine.
     if (vars.translucentAdding.didExit) dispatch(increaseWebViewKeyCount());
-    vars.translucentAdding.didExit = false;
 
     if (isUserSignedIn) {
       const { purchaseStatus } = getState().iap;
@@ -285,15 +311,19 @@ const handleAppStateChange = (nextAppState) => async (dispatch, getState) => {
 
     if (!isUserSignedIn) return;
 
+    const didShare = vars.translucentAdding.didShare;
     const interval = (Date.now() - vars.sync.lastSyncDT) / 1000 / 60 / 60;
-    if (interval < 0.3) return;
+    if (!didShare && interval < 0.3) return;
 
-    dispatch(sync(interval > 1, 0));
+    dispatch(sync(didShare || interval > 1, 0));
   }
 
   let isInactive = nextAppState === APP_STATE_INACTIVE;
   if (Platform.OS === 'android') isInactive = nextAppState === APP_STATE_BACKGROUND;
   if (isInactive) {
+    vars.translucentAdding.didExit = false;
+    vars.translucentAdding.didShare = false;
+
     if (!isUserSignedIn) return;
 
     const { purchaseStatus } = getState().iap;

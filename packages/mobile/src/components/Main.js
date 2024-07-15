@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { endIapConnection } from '../actions';
+import { addAppStateChangeListener, endIapConnection } from '../actions';
 import { LG_WIDTH } from '../types/const';
 
 import { useSafeAreaFrame } from '.';
@@ -44,6 +44,10 @@ const Main = () => {
 
   // To make sure useEffect is componentWillUnmount
   const dispatchRef = useRef(dispatch);
+
+  useEffect(() => {
+    dispatch(addAppStateChangeListener());
+  }, [dispatch]);
 
   useEffect(() => {
     dispatchRef.current = dispatch;

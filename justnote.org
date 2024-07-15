@@ -358,6 +358,9 @@
   + In android/app/src/main/AndroidManifest.xml, add ShareActivity
   + Create ShareActivity.java file, update values in String and Style
   + Add AppRegistry in mobile/index.js, Create share.js file
+  + Listen to MainActivity's onResume and onPause
+    ~ Update MainActivity, use DeviceEventEmitter to emit and listen to custom events
+    ~ Not add appStateChange in init, add in Main.js instead
 * test cases
 - web, mobile
 - PC, laptop, tablet, phone

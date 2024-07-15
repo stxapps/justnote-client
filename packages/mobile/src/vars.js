@@ -150,6 +150,7 @@ const user = {
 
 const translucentAdding = {
   didExit: false,
+  didShare: false,
 };
 
 const vars = {

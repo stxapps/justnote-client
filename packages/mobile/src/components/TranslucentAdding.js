@@ -89,6 +89,8 @@ const TranslucentAdding = () => {
     }
 
     setType(RENDER_ADDED);
+    vars.translucentAdding.didShare = true;
+
     if (timeoutId.current) {
       clearTimeout(timeoutId.current);
       timeoutId.current = null;
