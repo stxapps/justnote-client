@@ -361,6 +361,19 @@
   + Listen to MainActivity's onResume and onPause
     ~ Update MainActivity, use DeviceEventEmitter to emit and listen to custom events
     ~ Not add appStateChange in init, add in Main.js instead
+  + yarn add react-native-default-preference
+  + File -> New -> Target -> Share Extension
+    ~ Save to Justnote, Swift
+  + In Info.plist under Save To Justnote
+    ~ NSExtension -> NSExtensionAttributes -> NSExtensionActivationRule -> NSExtensionActivationSupportsText -> true
+  + Add App groups from targets: Justnotecc and Save to Justnote -> Signing & Capabilities
+    ~ group.justnotecc.share
+  + Add the dependency in Podfile with target 'Save to Justnote'
+  + Add fonts to Save to Justnote
+    ~ Xcode's sidebar -> Resources, select all fonts
+    ~ Xcode's rightbar -> Target Membership, select Save to Justnote
+    ~ Save to Justnote -> Info.plist, add Fonts provided by application
+  + Add PrivacyInfo.xcprivacy
 * test cases
 - web, mobile
 - PC, laptop, tablet, phone

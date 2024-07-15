@@ -79,11 +79,12 @@ import {
 } from '../types/actionTypes';
 import {
   SD_HUB_URL, DOMAIN_NAME, APP_URL_SCHEME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH,
-  BULK_EDIT_MENU_POPUP, PAYWALL_POPUP, SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP,
-  CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, NOTE_LIST_MENU_POPUP,
-  NOTE_LIST_ITEM_MENU_POPUP, LOCK_EDITOR_POPUP, LOCK_MENU_POPUP, TAG_EDITOR_POPUP,
-  SWWU_POPUP, MOVE_ACTION_NOTE_COMMANDS, MOVE_ACTION_NOTE_ITEM_MENU,
-  DELETE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
+  APP_GROUP_SHARE, APP_GROUP_SHARE_UKEY, BULK_EDIT_MENU_POPUP, PAYWALL_POPUP,
+  SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP, CONFIRM_DELETE_POPUP,
+  CONFIRM_DISCARD_POPUP, NOTE_LIST_MENU_POPUP, NOTE_LIST_ITEM_MENU_POPUP,
+  LOCK_EDITOR_POPUP, LOCK_MENU_POPUP, TAG_EDITOR_POPUP, SWWU_POPUP,
+  MOVE_ACTION_NOTE_COMMANDS, MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS,
+  DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
   DISCARD_ACTION_UPDATE_LIST_NAME, DISCARD_ACTION_UPDATE_TAG_NAME, MY_NOTES, TRASH, ID,
   NEW_NOTE, NEW_NOTE_OBJ, DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
   N_NOTES, N_DAYS, CD_ROOT, INFO, INDEX, DOT_JSON, SHOW_SYNCED, LG_WIDTH,
@@ -121,6 +122,9 @@ import {
 import { _ } from '../utils/obj';
 import { initialSettingsState, initialTagEditorState } from '../types/initialStates';
 import vars from '../vars';
+
+import DefaultPreference from 'react-native-default-preference';
+if (Platform.OS === 'ios') DefaultPreference.setName(APP_GROUP_SHARE);
 
 const jhfp = require('../../jhfp');
 
@@ -337,6 +341,21 @@ const handleAppStateChange = (nextAppState) => async (dispatch, getState) => {
   }
 };
 
+// This is for already signed in, need to copy, so Share can work.
+// Should remove this i.e. 1 year from 20240801, when new sign in, copy there already.
+let _didCopyToAppGroupShare;
+export const copyToAppGroupShare = () => async (dispatch, getState) => {
+  if (Platform.OS !== 'ios' || _didCopyToAppGroupShare) return;
+
+  const res = await DefaultPreference.get(APP_GROUP_SHARE_UKEY);
+  if (!isString(res)) {
+    const userData = await userSession.loadUserData();
+    await DefaultPreference.set(APP_GROUP_SHARE_UKEY, JSON.stringify(userData));
+  }
+
+  _didCopyToAppGroupShare = true;
+};
+
 export const signOut = () => async (dispatch, getState) => {
   await userSession.signUserOut();
   await resetState(dispatch);
@@ -359,6 +378,9 @@ export const updateUserSignedIn = () => async (dispatch, getState) => {
   if (!isUserDummy) await resetState(dispatch);
 
   const userData = await userSession.loadUserData();
+  if (Platform.OS === 'ios') {
+    await DefaultPreference.set(APP_GROUP_SHARE_UKEY, JSON.stringify(userData));
+  }
   dispatch({
     type: UPDATE_USER,
     payload: {
@@ -381,6 +403,8 @@ export const updateUserDummy = (isUserDummy) => async (dispatch, getState) => {
 };
 
 const resetState = async (dispatch) => {
+  if (Platform.OS === 'ios') await DefaultPreference.clearAll();
+
   // clear file storage
   await dataApi.deleteAllLocalFiles();
 
