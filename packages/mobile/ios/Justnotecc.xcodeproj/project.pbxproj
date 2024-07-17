@@ -11,6 +11,48 @@
 		0403884128F69F6500179125 /* Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0403884028F69F6500179125 /* Dummy.swift */; };
 		0403884328F6A03E00179125 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0403884228F6A03E00179125 /* StoreKit.framework */; };
 		0403884528F6A74400179125 /* supporter.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 0403884428F6A74300179125 /* supporter.storekit */; };
+		04A292032C46221700544CB3 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 04A292022C46221700544CB3 /* Images.xcassets */; };
+		04A292052C47B08C00544CB3 /* Blockstack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A292042C47B08C00544CB3 /* Blockstack.swift */; };
+		04A292072C47B0A200544CB3 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A292062C47B0A200544CB3 /* Constants.swift */; };
+		04A2920C2C47B1E900544CB3 /* bigi.js in Resources */ = {isa = PBXBuildFile; fileRef = 04A292082C47B1E900544CB3 /* bigi.js */; };
+		04A2920D2C47B1E900544CB3 /* bitcoinjs.js in Resources */ = {isa = PBXBuildFile; fileRef = 04A292092C47B1E900544CB3 /* bitcoinjs.js */; };
+		04A2920E2C47B1E900544CB3 /* BigInt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A2920A2C47B1E900544CB3 /* BigInt.swift */; };
+		04A2920F2C47B1E900544CB3 /* BitcoinJS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A2920B2C47B1E900544CB3 /* BitcoinJS.swift */; };
+		04A292172C47B21B00544CB3 /* encryption.js in Resources */ = {isa = PBXBuildFile; fileRef = 04A292102C47B21B00544CB3 /* encryption.js */; };
+		04A292182C47B21B00544CB3 /* DataTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A292112C47B21B00544CB3 /* DataTypes.swift */; };
+		04A292192C47B21B00544CB3 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A292122C47B21B00544CB3 /* Extensions.swift */; };
+		04A2921A2C47B21B00544CB3 /* elliptic.js in Resources */ = {isa = PBXBuildFile; fileRef = 04A292132C47B21B00544CB3 /* elliptic.js */; };
+		04A2921B2C47B21B00544CB3 /* EncryptionJS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A292142C47B21B00544CB3 /* EncryptionJS.swift */; };
+		04A2921C2C47B21B00544CB3 /* Encryption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A292152C47B21B00544CB3 /* Encryption.swift */; };
+		04A2921D2C47B21B00544CB3 /* EllipticJS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A292162C47B21B00544CB3 /* EllipticJS.swift */; };
+		04A292232C47B23E00544CB3 /* JSONTokensJS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A2921E2C47B23E00544CB3 /* JSONTokensJS.swift */; };
+		04A292242C47B23E00544CB3 /* KeysJS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A2921F2C47B23E00544CB3 /* KeysJS.swift */; };
+		04A292252C47B23E00544CB3 /* keys.js in Resources */ = {isa = PBXBuildFile; fileRef = 04A292202C47B23E00544CB3 /* keys.js */; };
+		04A292262C47B23E00544CB3 /* jsontokens.js in Resources */ = {isa = PBXBuildFile; fileRef = 04A292212C47B23E00544CB3 /* jsontokens.js */; };
+		04A292272C47B23E00544CB3 /* Keys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A292222C47B23E00544CB3 /* Keys.swift */; };
+		04CD6DD82C452A4B00715549 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04CD6DD72C452A4B00715549 /* ShareViewController.swift */; };
+		04CD6DDB2C452A4B00715549 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 04CD6DDA2C452A4B00715549 /* Base */; };
+		04CD6DDF2C452A4B00715549 /* Save to Justnote.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 04CD6DD52C452A4B00715549 /* Save to Justnote.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		04CD6DE42C452AE800715549 /* Inter-BlackItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 724B63AD6E7A41169B4BD0B9 /* Inter-BlackItalic.otf */; };
+		04CD6DE52C452AE800715549 /* Inter-Thin.otf in Resources */ = {isa = PBXBuildFile; fileRef = 31D9788A9F654939AC32D078 /* Inter-Thin.otf */; };
+		04CD6DE62C452AE800715549 /* Inter-ThinItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = C14D7F80AD5D4EDAB146A8C0 /* Inter-ThinItalic.otf */; };
+		04CD6DE72C452AE800715549 /* Inter-ExtraBoldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 3621E61742C84EC8A5EFD9AF /* Inter-ExtraBoldItalic.otf */; };
+		04CD6DE82C452AE800715549 /* Inter-Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 222A2659DE1A4A99BE679E64 /* Inter-Italic.otf */; };
+		04CD6DE92C452AE800715549 /* Inter-ExtraBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = EA7A7C3DF58C4CB0A61EF546 /* Inter-ExtraBold.otf */; };
+		04CD6DEA2C452AE800715549 /* Inter-Black.otf in Resources */ = {isa = PBXBuildFile; fileRef = D26FCC4F90FE4BD5923831B5 /* Inter-Black.otf */; };
+		04CD6DEB2C452AE800715549 /* Inter-BoldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 60E96F2AF51A4D259F0A8BA7 /* Inter-BoldItalic.otf */; };
+		04CD6DEC2C452AE800715549 /* Inter-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = C26D7BAF274142D4B19BB0AE /* Inter-Regular.otf */; };
+		04CD6DED2C452AE800715549 /* Inter-ExtraLightItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 802D9B3BC8BE47E88E11A911 /* Inter-ExtraLightItalic.otf */; };
+		04CD6DEE2C452AE800715549 /* Inter-MediumItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 36DE7C462AA541AFBCC0F2A1 /* Inter-MediumItalic.otf */; };
+		04CD6DEF2C452AE800715549 /* Inter-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = D3279D89F79641BEB5855710 /* Inter-Light.otf */; };
+		04CD6DF02C452AE800715549 /* Inter-LightItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = A0C79E1F78F347DFA1CFDF59 /* Inter-LightItalic.otf */; };
+		04CD6DF12C452AE800715549 /* Inter-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = E1E5033F62A44DAAB8B4A303 /* Inter-SemiBold.otf */; };
+		04CD6DF22C452AE800715549 /* Inter-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = DC14F98931C44702BA60BE78 /* Inter-Bold.otf */; };
+		04CD6DF32C452AE800715549 /* Inter-SemiBoldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 7D16CBC4237C4CE6BEFD8972 /* Inter-SemiBoldItalic.otf */; };
+		04CD6DF42C452AE800715549 /* Inter-ExtraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = 400A941C174C4DDAAC131FA4 /* Inter-ExtraLight.otf */; };
+		04CD6DF52C452AE800715549 /* Inter-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 14D04C2498D94081A2B4A078 /* Inter-Medium.otf */; };
+		04CD6DF92C453BE800715549 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 04CD6DF82C453BE800715549 /* PrivacyInfo.xcprivacy */; };
+		04CD6DFA2C453BE800715549 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 04CD6DF82C453BE800715549 /* PrivacyInfo.xcprivacy */; };
 		09C6DE894C8C4DEB8950287B /* Inter-ExtraLightItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 802D9B3BC8BE47E88E11A911 /* Inter-ExtraLightItalic.otf */; };
 		0C80B921A6F3F58F76C31292 /* libPods-Justnotecc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-Justnotecc.a */; };
 		0C9F9A16A4364D94B14F2C9F /* Inter-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = D3279D89F79641BEB5855710 /* Inter-Light.otf */; };
@@ -35,6 +77,7 @@
 		A658771FCC6F41DE8AF76116 /* Inter-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = DC14F98931C44702BA60BE78 /* Inter-Bold.otf */; };
 		C04063170B954B67AA154098 /* Inter-Black.otf in Resources */ = {isa = PBXBuildFile; fileRef = D26FCC4F90FE4BD5923831B5 /* Inter-Black.otf */; };
 		CB5C9A99E9E74217AB3AECD8 /* Inter-BlackItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 724B63AD6E7A41169B4BD0B9 /* Inter-BlackItalic.otf */; };
+		ED67303CD91BFCD2F13292C6 /* libPods-Save to Justnote.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A430BB00993567A8D98F101 /* libPods-Save to Justnote.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,7 +88,28 @@
 			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
 			remoteInfo = Justnotecc;
 		};
+		04CD6DDD2C452A4B00715549 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 04CD6DD42C452A4B00715549;
+			remoteInfo = "Save to Justnote";
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		04CD6DE02C452A4B00715549 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				04CD6DDF2C452A4B00715549 /* Save to Justnote.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		00E356EE1AD99517003FC87E /* JustnoteccTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JustnoteccTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -55,6 +119,32 @@
 		0403884028F69F6500179125 /* Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dummy.swift; sourceTree = "<group>"; };
 		0403884228F6A03E00179125 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		0403884428F6A74300179125 /* supporter.storekit */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = supporter.storekit; sourceTree = "<group>"; };
+		04A292022C46221700544CB3 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		04A292042C47B08C00544CB3 /* Blockstack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Blockstack.swift; sourceTree = "<group>"; };
+		04A292062C47B0A200544CB3 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		04A292082C47B1E900544CB3 /* bigi.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = bigi.js; sourceTree = "<group>"; };
+		04A292092C47B1E900544CB3 /* bitcoinjs.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = bitcoinjs.js; sourceTree = "<group>"; };
+		04A2920A2C47B1E900544CB3 /* BigInt.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BigInt.swift; sourceTree = "<group>"; };
+		04A2920B2C47B1E900544CB3 /* BitcoinJS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinJS.swift; sourceTree = "<group>"; };
+		04A292102C47B21B00544CB3 /* encryption.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = encryption.js; sourceTree = "<group>"; };
+		04A292112C47B21B00544CB3 /* DataTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataTypes.swift; sourceTree = "<group>"; };
+		04A292122C47B21B00544CB3 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		04A292132C47B21B00544CB3 /* elliptic.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = elliptic.js; sourceTree = "<group>"; };
+		04A292142C47B21B00544CB3 /* EncryptionJS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EncryptionJS.swift; sourceTree = "<group>"; };
+		04A292152C47B21B00544CB3 /* Encryption.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Encryption.swift; sourceTree = "<group>"; };
+		04A292162C47B21B00544CB3 /* EllipticJS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EllipticJS.swift; sourceTree = "<group>"; };
+		04A2921E2C47B23E00544CB3 /* JSONTokensJS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONTokensJS.swift; sourceTree = "<group>"; };
+		04A2921F2C47B23E00544CB3 /* KeysJS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeysJS.swift; sourceTree = "<group>"; };
+		04A292202C47B23E00544CB3 /* keys.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = keys.js; sourceTree = "<group>"; };
+		04A292212C47B23E00544CB3 /* jsontokens.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = jsontokens.js; sourceTree = "<group>"; };
+		04A292222C47B23E00544CB3 /* Keys.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Keys.swift; sourceTree = "<group>"; };
+		04CD6DD52C452A4B00715549 /* Save to Justnote.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Save to Justnote.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		04CD6DD72C452A4B00715549 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		04CD6DDA2C452A4B00715549 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
+		04CD6DDC2C452A4B00715549 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		04CD6DF62C4535CD00715549 /* Justnotecc.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = Justnotecc.entitlements; path = Justnotecc/Justnotecc.entitlements; sourceTree = "<group>"; };
+		04CD6DF72C45361E00715549 /* Save to Justnote.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Save to Justnote.entitlements"; sourceTree = "<group>"; };
+		04CD6DF82C453BE800715549 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* Justnotecc.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Justnotecc.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Justnotecc/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = Justnotecc/AppDelegate.mm; sourceTree = "<group>"; };
@@ -63,7 +153,9 @@
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Justnotecc/main.m; sourceTree = "<group>"; };
 		14D04C2498D94081A2B4A078 /* Inter-Medium.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Medium.otf"; path = "../src/fonts/Inter/Inter-Medium.otf"; sourceTree = "<group>"; };
 		19F6CBCC0A4E27FBF8BF4A61 /* libPods-Justnotecc-JustnoteccTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Justnotecc-JustnoteccTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1A430BB00993567A8D98F101 /* libPods-Save to Justnote.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Save to Justnote.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		222A2659DE1A4A99BE679E64 /* Inter-Italic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Italic.otf"; path = "../src/fonts/Inter/Inter-Italic.otf"; sourceTree = "<group>"; };
+		238D1271DF017AFB6B2D0086 /* Pods-Save to Justnote.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Save to Justnote.release.xcconfig"; path = "Target Support Files/Pods-Save to Justnote/Pods-Save to Justnote.release.xcconfig"; sourceTree = "<group>"; };
 		31D9788A9F654939AC32D078 /* Inter-Thin.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Thin.otf"; path = "../src/fonts/Inter/Inter-Thin.otf"; sourceTree = "<group>"; };
 		3621E61742C84EC8A5EFD9AF /* Inter-ExtraBoldItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraBoldItalic.otf"; path = "../src/fonts/Inter/Inter-ExtraBoldItalic.otf"; sourceTree = "<group>"; };
 		36DE7C462AA541AFBCC0F2A1 /* Inter-MediumItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-MediumItalic.otf"; path = "../src/fonts/Inter/Inter-MediumItalic.otf"; sourceTree = "<group>"; };
@@ -85,6 +177,7 @@
 		D3279D89F79641BEB5855710 /* Inter-Light.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Light.otf"; path = "../src/fonts/Inter/Inter-Light.otf"; sourceTree = "<group>"; };
 		DC14F98931C44702BA60BE78 /* Inter-Bold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Bold.otf"; path = "../src/fonts/Inter/Inter-Bold.otf"; sourceTree = "<group>"; };
 		E1E5033F62A44DAAB8B4A303 /* Inter-SemiBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-SemiBold.otf"; path = "../src/fonts/Inter/Inter-SemiBold.otf"; sourceTree = "<group>"; };
+		E9A0CBC2C21B7552B9F9B263 /* Pods-Save to Justnote.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Save to Justnote.debug.xcconfig"; path = "Target Support Files/Pods-Save to Justnote/Pods-Save to Justnote.debug.xcconfig"; sourceTree = "<group>"; };
 		EA7A7C3DF58C4CB0A61EF546 /* Inter-ExtraBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraBold.otf"; path = "../src/fonts/Inter/Inter-ExtraBold.otf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -95,6 +188,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				7699B88040F8A987B510C191 /* libPods-Justnotecc-JustnoteccTests.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		04CD6DD22C452A4B00715549 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ED67303CD91BFCD2F13292C6 /* libPods-Save to Justnote.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -127,9 +228,40 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		04CD6DD62C452A4B00715549 /* Save to Justnote */ = {
+			isa = PBXGroup;
+			children = (
+				04CD6DF72C45361E00715549 /* Save to Justnote.entitlements */,
+				04CD6DD72C452A4B00715549 /* ShareViewController.swift */,
+				04CD6DD92C452A4B00715549 /* MainInterface.storyboard */,
+				04A292022C46221700544CB3 /* Images.xcassets */,
+				04CD6DDC2C452A4B00715549 /* Info.plist */,
+				04A292042C47B08C00544CB3 /* Blockstack.swift */,
+				04A292152C47B21B00544CB3 /* Encryption.swift */,
+				04A292222C47B23E00544CB3 /* Keys.swift */,
+				04A2920A2C47B1E900544CB3 /* BigInt.swift */,
+				04A292122C47B21B00544CB3 /* Extensions.swift */,
+				04A292112C47B21B00544CB3 /* DataTypes.swift */,
+				04A292062C47B0A200544CB3 /* Constants.swift */,
+				04A2920B2C47B1E900544CB3 /* BitcoinJS.swift */,
+				04A2921F2C47B23E00544CB3 /* KeysJS.swift */,
+				04A292162C47B21B00544CB3 /* EllipticJS.swift */,
+				04A292142C47B21B00544CB3 /* EncryptionJS.swift */,
+				04A2921E2C47B23E00544CB3 /* JSONTokensJS.swift */,
+				04A292092C47B1E900544CB3 /* bitcoinjs.js */,
+				04A292082C47B1E900544CB3 /* bigi.js */,
+				04A292202C47B23E00544CB3 /* keys.js */,
+				04A292132C47B21B00544CB3 /* elliptic.js */,
+				04A292102C47B21B00544CB3 /* encryption.js */,
+				04A292212C47B23E00544CB3 /* jsontokens.js */,
+			);
+			path = "Save to Justnote";
+			sourceTree = "<group>";
+		};
 		13B07FAE1A68108700A75B9A /* Justnotecc */ = {
 			isa = PBXGroup;
 			children = (
+				04CD6DF62C4535CD00715549 /* Justnotecc.entitlements */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -147,6 +279,7 @@
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				5DCACB8F33CDC322A6C60F78 /* libPods-Justnotecc.a */,
 				19F6CBCC0A4E27FBF8BF4A61 /* libPods-Justnotecc-JustnoteccTests.a */,
+				1A430BB00993567A8D98F101 /* libPods-Save to Justnote.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -164,6 +297,7 @@
 				13B07FAE1A68108700A75B9A /* Justnotecc */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* JustnoteccTests */,
+				04CD6DD62C452A4B00715549 /* Save to Justnote */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
@@ -171,6 +305,7 @@
 				0403884428F6A74300179125 /* supporter.storekit */,
 				0403884028F69F6500179125 /* Dummy.swift */,
 				0403883F28F69F6500179125 /* Justnotecc-Bridging-Header.h */,
+				04CD6DF82C453BE800715549 /* PrivacyInfo.xcprivacy */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -182,6 +317,7 @@
 			children = (
 				13B07F961A680F5B00A75B9A /* Justnotecc.app */,
 				00E356EE1AD99517003FC87E /* JustnoteccTests.xctest */,
+				04CD6DD52C452A4B00715549 /* Save to Justnote.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -218,6 +354,8 @@
 				5709B34CF0A7D63546082F79 /* Pods-Justnotecc.release.xcconfig */,
 				5B7EB9410499542E8C5724F5 /* Pods-Justnotecc-JustnoteccTests.debug.xcconfig */,
 				89C6BE57DB24E9ADA2F236DE /* Pods-Justnotecc-JustnoteccTests.release.xcconfig */,
+				E9A0CBC2C21B7552B9F9B263 /* Pods-Save to Justnote.debug.xcconfig */,
+				238D1271DF017AFB6B2D0086 /* Pods-Save to Justnote.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -246,6 +384,24 @@
 			productReference = 00E356EE1AD99517003FC87E /* JustnoteccTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		04CD6DD42C452A4B00715549 /* Save to Justnote */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 04CD6DE32C452A4B00715549 /* Build configuration list for PBXNativeTarget "Save to Justnote" */;
+			buildPhases = (
+				B2295E261E499EBA6DE2BDD4 /* [CP] Check Pods Manifest.lock */,
+				04CD6DD12C452A4B00715549 /* Sources */,
+				04CD6DD22C452A4B00715549 /* Frameworks */,
+				04CD6DD32C452A4B00715549 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Save to Justnote";
+			productName = "Save to Justnote";
+			productReference = 04CD6DD52C452A4B00715549 /* Save to Justnote.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		13B07F861A680F5B00A75B9A /* Justnotecc */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Justnotecc" */;
@@ -258,10 +414,12 @@
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				00EEFC60759A1932668264C0 /* [CP] Embed Pods Frameworks */,
 				E235C05ADACE081382539298 /* [CP] Copy Pods Resources */,
+				04CD6DE02C452A4B00715549 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				04CD6DDE2C452A4B00715549 /* PBXTargetDependency */,
 			);
 			name = Justnotecc;
 			productName = Justnotecc;
@@ -274,11 +432,15 @@
 		83CBB9F71A601CBA00E9B192 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 1540;
 				LastUpgradeCheck = 1210;
 				TargetAttributes = {
 					00E356ED1AD99517003FC87E = {
 						CreatedOnToolsVersion = 6.2;
 						TestTargetID = 13B07F861A680F5B00A75B9A;
+					};
+					04CD6DD42C452A4B00715549 = {
+						CreatedOnToolsVersion = 15.4;
 					};
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1400;
@@ -300,6 +462,7 @@
 			targets = (
 				13B07F861A680F5B00A75B9A /* Justnotecc */,
 				00E356ED1AD99517003FC87E /* JustnoteccTests */,
+				04CD6DD42C452A4B00715549 /* Save to Justnote */,
 			);
 		};
 /* End PBXProject section */
@@ -309,6 +472,40 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		04CD6DD32C452A4B00715549 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				04CD6DDB2C452A4B00715549 /* Base in Resources */,
+				04CD6DE42C452AE800715549 /* Inter-BlackItalic.otf in Resources */,
+				04A292252C47B23E00544CB3 /* keys.js in Resources */,
+				04CD6DE52C452AE800715549 /* Inter-Thin.otf in Resources */,
+				04CD6DE62C452AE800715549 /* Inter-ThinItalic.otf in Resources */,
+				04CD6DE72C452AE800715549 /* Inter-ExtraBoldItalic.otf in Resources */,
+				04CD6DE82C452AE800715549 /* Inter-Italic.otf in Resources */,
+				04CD6DE92C452AE800715549 /* Inter-ExtraBold.otf in Resources */,
+				04A2920D2C47B1E900544CB3 /* bitcoinjs.js in Resources */,
+				04CD6DEA2C452AE800715549 /* Inter-Black.otf in Resources */,
+				04CD6DEB2C452AE800715549 /* Inter-BoldItalic.otf in Resources */,
+				04A2921A2C47B21B00544CB3 /* elliptic.js in Resources */,
+				04A292032C46221700544CB3 /* Images.xcassets in Resources */,
+				04A292172C47B21B00544CB3 /* encryption.js in Resources */,
+				04CD6DEC2C452AE800715549 /* Inter-Regular.otf in Resources */,
+				04CD6DED2C452AE800715549 /* Inter-ExtraLightItalic.otf in Resources */,
+				04CD6DEE2C452AE800715549 /* Inter-MediumItalic.otf in Resources */,
+				04CD6DEF2C452AE800715549 /* Inter-Light.otf in Resources */,
+				04CD6DF02C452AE800715549 /* Inter-LightItalic.otf in Resources */,
+				04CD6DF12C452AE800715549 /* Inter-SemiBold.otf in Resources */,
+				04CD6DF22C452AE800715549 /* Inter-Bold.otf in Resources */,
+				04CD6DF32C452AE800715549 /* Inter-SemiBoldItalic.otf in Resources */,
+				04CD6DF42C452AE800715549 /* Inter-ExtraLight.otf in Resources */,
+				04A292262C47B23E00544CB3 /* jsontokens.js in Resources */,
+				04CD6DFA2C453BE800715549 /* PrivacyInfo.xcprivacy in Resources */,
+				04CD6DF52C452AE800715549 /* Inter-Medium.otf in Resources */,
+				04A2920C2C47B1E900544CB3 /* bigi.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -328,6 +525,7 @@
 				9CC7CC5C846C450495007C58 /* Inter-ExtraLight.otf in Resources */,
 				09C6DE894C8C4DEB8950287B /* Inter-ExtraLightItalic.otf in Resources */,
 				76E2C2B9A37C493BA5937EB8 /* Inter-Italic.otf in Resources */,
+				04CD6DF92C453BE800715549 /* PrivacyInfo.xcprivacy in Resources */,
 				0C9F9A16A4364D94B14F2C9F /* Inter-Light.otf in Resources */,
 				8574FA915D1A42CC9B94EA88 /* Inter-LightItalic.otf in Resources */,
 				7353272A8E5A4F549434B651 /* Inter-Medium.otf in Resources */,
@@ -392,6 +590,28 @@
 			);
 			outputPaths = (
 				"$(DERIVED_FILE_DIR)/Pods-Justnotecc-JustnoteccTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B2295E261E499EBA6DE2BDD4 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Save to Justnote-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -501,6 +721,26 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		04CD6DD12C452A4B00715549 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				04A2920E2C47B1E900544CB3 /* BigInt.swift in Sources */,
+				04A292052C47B08C00544CB3 /* Blockstack.swift in Sources */,
+				04A292232C47B23E00544CB3 /* JSONTokensJS.swift in Sources */,
+				04A2921D2C47B21B00544CB3 /* EllipticJS.swift in Sources */,
+				04A292272C47B23E00544CB3 /* Keys.swift in Sources */,
+				04CD6DD82C452A4B00715549 /* ShareViewController.swift in Sources */,
+				04A2921C2C47B21B00544CB3 /* Encryption.swift in Sources */,
+				04A292182C47B21B00544CB3 /* DataTypes.swift in Sources */,
+				04A2920F2C47B1E900544CB3 /* BitcoinJS.swift in Sources */,
+				04A292242C47B23E00544CB3 /* KeysJS.swift in Sources */,
+				04A2921B2C47B21B00544CB3 /* EncryptionJS.swift in Sources */,
+				04A292072C47B0A200544CB3 /* Constants.swift in Sources */,
+				04A292192C47B21B00544CB3 /* Extensions.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		13B07F871A680F5B00A75B9A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -519,7 +759,23 @@
 			target = 13B07F861A680F5B00A75B9A /* Justnotecc */;
 			targetProxy = 00E356F41AD99517003FC87E /* PBXContainerItemProxy */;
 		};
+		04CD6DDE2C452A4B00715549 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 04CD6DD42C452A4B00715549 /* Save to Justnote */;
+			targetProxy = 04CD6DDD2C452A4B00715549 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		04CD6DD92C452A4B00715549 /* MainInterface.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				04CD6DDA2C452A4B00715549 /* Base */,
+			);
+			name = MainInterface.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
@@ -575,6 +831,91 @@
 			};
 			name = Release;
 		};
+		04CD6DE12C452A4B00715549 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E9A0CBC2C21B7552B9F9B263 /* Pods-Save to Justnote.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = "Save to Justnote/Save to Justnote.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = DZ8XN7425J;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Save to Justnote/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Save to Justnote";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.justnotecc.justnote.Save-to-Justnote";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		04CD6DE22C452A4B00715549 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 238D1271DF017AFB6B2D0086 /* Pods-Save to Justnote.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = "Save to Justnote/Save to Justnote.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = DZ8XN7425J;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Save to Justnote/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Save to Justnote";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.justnotecc.justnote.Save-to-Justnote";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3B4392A12AC88292D35C810B /* Pods-Justnotecc.debug.xcconfig */;
@@ -582,6 +923,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Justnotecc/Justnotecc.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = DZ8XN7425J;
 				ENABLE_BITCODE = NO;
@@ -616,6 +958,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Justnotecc/Justnotecc.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = DZ8XN7425J;
 				INFOPLIST_FILE = Justnotecc/Info.plist;
@@ -786,6 +1129,15 @@
 			buildConfigurations = (
 				00E356F61AD99517003FC87E /* Debug */,
 				00E356F71AD99517003FC87E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		04CD6DE32C452A4B00715549 /* Build configuration list for PBXNativeTarget "Save to Justnote" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				04CD6DE12C452A4B00715549 /* Debug */,
+				04CD6DE22C452A4B00715549 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

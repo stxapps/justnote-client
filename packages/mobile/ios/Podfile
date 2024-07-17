@@ -86,3 +86,8 @@ target 'Justnotecc' do
     end
   end
 end
+
+target 'Save to Justnote' do
+  pod 'CryptoSwift', '~> 1.3.8'
+  pod 'NVActivityIndicatorView'
+end
