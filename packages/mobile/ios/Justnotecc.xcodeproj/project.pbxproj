@@ -853,7 +853,7 @@
 				INFOPLIST_FILE = "Save to Justnote/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Save to Justnote";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -897,7 +897,7 @@
 				INFOPLIST_FILE = "Save to Justnote/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Save to Justnote";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

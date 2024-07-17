@@ -76,6 +76,11 @@ class ShareViewController: UIViewController {
   }
   
   private func addNote(_ text: String) {
+    guard !text.isEmpty else {
+      self.renderInvalid()
+      return
+    }
+
     if !Blockstack.shared.isUserSignedIn() {
       self.renderNotSignedIn()
       return

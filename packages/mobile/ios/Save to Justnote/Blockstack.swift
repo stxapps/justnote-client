@@ -18,7 +18,13 @@ class Blockstack {
   public func addNote(_ text: String, callback: @escaping (_ publicUrl: String?, _ error: Error?) -> Void) {
     let listName = MY_NOTES
     let addedDT = Int64((Date().timeIntervalSince1970 * 1000.0).rounded())
-    let body = "<p>\(text.replacing(#/\r?\n/#, with: "<br />"))</p>"
+
+    var body = text;
+    if let regex = try? NSRegularExpression(pattern: "\r?\n") {
+      let range = NSRange(body.startIndex..., in: body)
+      body = regex.stringByReplacingMatches(in: body, range: range, withTemplate: "<br />")
+    }
+    body = "<p>\(body)</p>"
 
     let id = "\(addedDT)\(randomString(4))"
     let fpath = "notes/\(listName)/\(id)/index.json"
