@@ -79,8 +79,8 @@ import {
 } from '../types/actionTypes';
 import {
   SD_HUB_URL, DOMAIN_NAME, APP_URL_SCHEME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH,
-  APP_GROUP_SHARE, APP_GROUP_SHARE_UKEY, BULK_EDIT_MENU_POPUP, PAYWALL_POPUP,
-  SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP, CONFIRM_DELETE_POPUP,
+  APP_GROUP_SHARE, APP_GROUP_SHARE_UKEY, APP_GROUP_SHARE_SKEY, BULK_EDIT_MENU_POPUP,
+  PAYWALL_POPUP, SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP, CONFIRM_DELETE_POPUP,
   CONFIRM_DISCARD_POPUP, NOTE_LIST_MENU_POPUP, NOTE_LIST_ITEM_MENU_POPUP,
   LOCK_EDITOR_POPUP, LOCK_MENU_POPUP, TAG_EDITOR_POPUP, SWWU_POPUP,
   MOVE_ACTION_NOTE_COMMANDS, MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS,
@@ -315,7 +315,11 @@ const handleAppStateChange = (nextAppState) => async (dispatch, getState) => {
 
     if (!isUserSignedIn) return;
 
-    const didShare = vars.translucentAdding.didShare;
+    let didShare = vars.translucentAdding.didShare;
+    if (Platform.OS === 'ios') {
+      const res = await DefaultPreference.get(APP_GROUP_SHARE_SKEY);
+      didShare = res === 'didShare=true';
+    }
     const interval = (Date.now() - vars.sync.lastSyncDT) / 1000 / 60 / 60;
     if (!didShare && interval < 0.3) return;
 
@@ -327,6 +331,9 @@ const handleAppStateChange = (nextAppState) => async (dispatch, getState) => {
   if (isInactive) {
     vars.translucentAdding.didExit = false;
     vars.translucentAdding.didShare = false;
+    if (Platform.OS === 'ios') {
+      await DefaultPreference.set(APP_GROUP_SHARE_SKEY, '');
+    }
 
     if (!isUserSignedIn) return;
 

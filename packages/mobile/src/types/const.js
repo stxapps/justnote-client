@@ -358,3 +358,4 @@ export const NOTE_COMMANDS_MODE_NETB = 'NOTE_COMMANDS_MODE_NETB';
 
 export const APP_GROUP_SHARE = 'group.justnotecc.share';
 export const APP_GROUP_SHARE_UKEY = 'uKey';
+export const APP_GROUP_SHARE_SKEY = 'sKey';
