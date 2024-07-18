@@ -24,7 +24,7 @@ const RENDER_ERROR = 'RENDER_ERROR';
 
 const addNote = async (text) => {
   const listName = MY_NOTES, addedDT = Date.now();
-  const body = '<p>' + text.replace(/\r?\n/g, '<br />') + '</p>';
+  const body = '<p>' + text.replace(/\r?\n/g, '<br>') + '</p>';
   const note = {
     parentIds: null,
     id: `${addedDT}${randomString(4)}`,

@@ -772,6 +772,12 @@ export const isBodyEqual = (s1, s2) => {
   s1 = sortClassNamesInBody(s1);
   s2 = sortClassNamesInBody(s2);
 
+  // Convert <br /> to <br>
+  pattern = /<br\s*\/>/gi;
+  substitute = '<br>';
+  s1 = s1.replace(pattern, substitute);
+  s2 = s2.replace(pattern, substitute);
+
   return s1 === s2;
 };
 

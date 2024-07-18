@@ -22,7 +22,7 @@ class Blockstack {
     var body = text;
     if let regex = try? NSRegularExpression(pattern: "\r?\n") {
       let range = NSRange(body.startIndex..., in: body)
-      body = regex.stringByReplacingMatches(in: body, range: range, withTemplate: "<br />")
+      body = regex.stringByReplacingMatches(in: body, range: range, withTemplate: "<br>")
     }
     body = "<p>\(body)</p>"
 

@@ -348,7 +348,7 @@ const parseEvernoteImportedFile = async (dispatch, getState, zip, entries) => {
 
           if (lines.length > 0) {
             let codeHtml = '<pre><code>';
-            codeHtml += lines.join('<br />');
+            codeHtml += lines.join('<br>');
             codeHtml += '</code></pre>';
             body = body.split(html).join(codeHtml);
           }
@@ -574,7 +574,7 @@ const parseGKeepImportedFile = async (dispatch, getState, zip, entries) => {
       const title = content.title || '';
       let body = '';
       if (content.textContent) {
-        body = '<p>' + content.textContent.replace(/\r?\n/g, '<br />') + '</p>';
+        body = '<p>' + content.textContent.replace(/\r?\n/g, '<br>') + '</p>';
       }
 
       if (content.attachments && Array.isArray(content.attachments)) {
@@ -759,7 +759,7 @@ const parseRawImportedFile = async (dispatch, getState, zip, entries) => {
       const title = fnameParts.slice(0, -1).join('.') || '';
       let body = '';
       if (['txt'].includes(fext.toLowerCase())) {
-        body = '<p>' + content.replace(/\r?\n/g, '<br />') + '</p>';
+        body = '<p>' + content.replace(/\r?\n/g, '<br>') + '</p>';
       } else if (HTML_FILE_EXTS.includes(fext.toLowerCase())) {
         const bMatch = content.match(/<body[^>]*>([\s\S]+?)<\/body>/i);
         if (bMatch) body = bMatch[1].trim().replace(/\r?\n/g, '');
