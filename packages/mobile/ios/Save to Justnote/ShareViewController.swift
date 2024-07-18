@@ -28,15 +28,15 @@ class ShareViewController: UIViewController {
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     DispatchQueue.global(qos: .userInitiated).async {
+      // From debug, viewDidDisappear is not called, so reset values here.
+      if let t = self.timer {
+        t.invalidate()
+      }
+      self.didRenderAdded = false
+      self.timer = nil
+
       self.processRequest()
     }
-  }
-
-  override func viewDidDisappear(_ animated: Bool) {
-    super.viewDidDisappear(animated)
-
-    self.didRenderAdded = false
-    self.timer = nil
   }
 
   private func processRequest() {
@@ -51,29 +51,33 @@ class ShareViewController: UIViewController {
     for (_, attachment) in attachments.enumerated() {
       if attachment.hasItemConformingToTypeIdentifier(textContentType) {
         attachment.loadItem(forTypeIdentifier: textContentType, options: nil) { [unowned self] data, error in
-          if let text = data as? String, error == nil {
-            self.addNote(text)
+          guard let text = data as? String, error == nil else {
+            self.renderInvalid()
             return
           }
+          self.addNote(text)
         }
+        return
       }
     }
     // Support only 1 url for now. The callback is async and don't know how to await!
     for (_, attachment) in attachments.enumerated() {
       if attachment.hasItemConformingToTypeIdentifier(urlContentType) {
         attachment.loadItem(forTypeIdentifier: urlContentType, options: nil) { [unowned self] data, error in
-          if let url = data as? URL, error == nil {
-            self.addNote(url.absoluteString)
+          guard let url = data as? URL, error == nil else {
+            self.renderInvalid()
             return
           }
+          self.addNote(url.absoluteString)
         }
+        return
       }
     }
 
     self.renderInvalid()
     return
   }
-  
+
   private func addNote(_ text: String) {
     guard !text.isEmpty else {
       self.renderInvalid()
@@ -96,7 +100,7 @@ class ShareViewController: UIViewController {
       self.renderAdded()
     }
   }
-  
+
   @objc private func completeRequest() {
     if let t = self.timer {
       t.invalidate()
