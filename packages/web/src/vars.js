@@ -148,12 +148,17 @@ const user = {
   hubUrl: null,
 };
 
+const translucentAdding = {
+  didExit: false,
+  didShare: false,
+};
+
 const vars = {
   cachedFPaths, cachedServerFPaths, scrollPanel, keyboard, fetch, runAfterFetchTask,
   randomHouseworkTasks, updateNoteIdUrlHash, updateNoteId, changeListName,
   updateQueryString, updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, showUNEPopup,
   deleteOldNotes, updateSettings, updateSettingsPopup, notesReducer, displayReducer,
   editorReducer, iap, platform, syncMode, sync, importAllData, deleteSyncData, appState,
-  user,
+  user, translucentAdding,
 };
 export default vars;

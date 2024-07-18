@@ -355,3 +355,7 @@ export const NOT_SUPPORTED = 'NOT_SUPPORTED';
 export const NOTE_COMMANDS_MODE_NLTBBE = 'NOTE_COMMANDS_MODE_NLTBBE';
 export const NOTE_COMMANDS_MODE_NEBE = 'NOTE_COMMANDS_MODE_NEBE';
 export const NOTE_COMMANDS_MODE_NETB = 'NOTE_COMMANDS_MODE_NETB';
+
+export const APP_GROUP_SHARE = 'group.justnotecc.share';
+export const APP_GROUP_SHARE_UKEY = 'uKey';
+export const APP_GROUP_SHARE_SKEY = 'sKey';

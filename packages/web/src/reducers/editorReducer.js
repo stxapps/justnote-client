@@ -2,7 +2,7 @@ import { loop, Cmd } from 'redux-loop';
 
 import { putDbUnsavedNote } from '../actions';
 import {
-  INCREASE_SAVE_NOTE_COUNT, INCREASE_DISCARD_NOTE_COUNT,
+  INCREASE_WEBVIEW_KEY_COUNT, INCREASE_SAVE_NOTE_COUNT, INCREASE_DISCARD_NOTE_COUNT,
   INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT, INCREASE_UPDATE_NOTE_ID_COUNT,
   INCREASE_CHANGE_LIST_NAME_COUNT, INCREASE_UPDATE_QUERY_STRING_COUNT,
   INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT,
@@ -22,6 +22,7 @@ const initialEditingNoteState = {
   editingNoteMedia: [],
 };
 const initialState = {
+  webViewKeyCount: 0,
   checkToFocusCount: 0,
   saveNoteCount: 0,
   discardNoteCount: 0,
@@ -44,6 +45,10 @@ const initialState = {
 };
 
 const editorReducer = (state = initialState, action) => {
+
+  if (action.type === INCREASE_WEBVIEW_KEY_COUNT) {
+    return { ...state, webViewKeyCount: state.webViewKeyCount + 1 };
+  }
 
   if (action.type === INCREASE_SAVE_NOTE_COUNT) {
     return { ...state, saveNoteCount: state.saveNoteCount + 1 };
@@ -197,6 +202,7 @@ const editorReducer = (state = initialState, action) => {
   if (action.type === DELETE_ALL_DATA) {
     return {
       ...initialState,
+      webViewKeyCount: state.webViewKeyCount,
       checkToFocusCount: state.checkToFocusCount,
       saveNoteCount: state.saveNoteCount,
       discardNoteCount: state.discardNoteCount,
