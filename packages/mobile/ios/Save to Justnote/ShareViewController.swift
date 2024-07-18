@@ -1,12 +1,11 @@
 import UIKit
 import MobileCoreServices
-import UniformTypeIdentifiers
 import NVActivityIndicatorView
 
 class ShareViewController: UIViewController {
 
-  let textContentType = UTType.plainText.identifier
-  let urlContentType = UTType.url.identifier
+  let urlContentType = kUTTypeURL as String
+  let textContentType = kUTTypePlainText as String
   var didRenderAdded = false
   var timer: Timer? = nil
 
