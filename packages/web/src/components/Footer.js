@@ -29,7 +29,7 @@ const Footer = () => {
             <a className={tailwind('block rounded-sm px-2 py-1 text-base text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400')} href={'/' + HASH_SUPPORT}>Support</a>
           </div>
           <div className={tailwind('mt-2 px-3 py-1 sm:mt-0')}>
-            <a className={tailwind('block rounded-sm px-2 py-1 text-base text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://medium.com/@stxapps">Blog</a>
+            <a className={tailwind('block rounded-sm px-2 py-1 text-base text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://medium.com/@stxapps" target="_blank" rel="noreferrer">Blog</a>
           </div>
         </nav>
         <div className={tailwind('mt-8 flex items-center justify-center space-x-6')}>
