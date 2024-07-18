@@ -23,9 +23,9 @@ const SidebarSearchInput = () => {
 
   return (
     <div className={tailwind('mt-6 hidden pl-3 pr-1 lg:block')}>
-      <label htmlFor="search" className={tailwind('sr-only')}>Search</label>
+      <label htmlFor="sidebarSearch" className={tailwind('sr-only')}>Search</label>
       <div className={tailwind('relative mt-1 rounded-md bg-white shadow-sm blk:bg-gray-800')}>
-        <input onChange={onSearchInputChange} type="search" name="search" id="search" className={tailwind('block w-full rounded-md border border-gray-300 bg-white py-2 pl-9 pr-6 text-sm leading-5 text-gray-700 placeholder:text-gray-500 focus:border-gray-500 focus:outline-none focus:ring-gray-500 blk:border-gray-600 blk:bg-gray-800 blk:text-gray-200 blk:placeholder:text-gray-400 blk:focus:border-gray-400 blk:focus:ring-gray-400')} placeholder="Search" value={searchString} autoCapitalize="none" />
+        <input onChange={onSearchInputChange} type="search" name="search" id="sidebarSearch" className={tailwind('block w-full rounded-md border border-gray-300 bg-white py-2 pl-9 pr-6 text-sm leading-5 text-gray-700 placeholder:text-gray-500 focus:border-gray-500 focus:outline-none focus:ring-gray-500 blk:border-gray-600 blk:bg-gray-800 blk:text-gray-200 blk:placeholder:text-gray-400 blk:focus:border-gray-400 blk:focus:ring-gray-400')} placeholder="Search" value={searchString} autoCapitalize="none" />
         <div className={tailwind('pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3')} aria-hidden="true">
           <svg className={tailwind('mr-3 h-4 w-4 text-gray-400 blk:text-gray-500')} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />

@@ -772,9 +772,21 @@ export const isBodyEqual = (s1, s2) => {
   s1 = sortClassNamesInBody(s1);
   s2 = sortClassNamesInBody(s2);
 
+  // Convert all &nbsp; to a space
+  pattern = /&nbsp;/gi;
+  substitute = ' ';
+  s1 = s1.replace(pattern, substitute);
+  s2 = s2.replace(pattern, substitute);
+
   // Convert <br /> to <br>
   pattern = /<br\s*\/>/gi;
   substitute = '<br>';
+  s1 = s1.replace(pattern, substitute);
+  s2 = s2.replace(pattern, substitute);
+
+  // Remove spaces btw. <br> and </p>
+  pattern = /<br>\s+<\/p>/gi;
+  substitute = '<br></p>';
   s1 = s1.replace(pattern, substitute);
   s2 = s2.replace(pattern, substitute);
 
