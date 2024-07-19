@@ -78,7 +78,8 @@ class ShareViewController: UIViewController {
     return
   }
 
-  private func addNote(_ text: String) {
+  private func addNote(_ rawText: String) {
+    let text = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !text.isEmpty else {
       self.renderInvalid()
       return
