@@ -6,11 +6,13 @@ import { useSelector } from 'react-redux';
 import ReceiveSharingIntent from 'react-native-receive-sharing-intent';
 import { Flow } from 'react-native-animated-spinkit';
 import Svg, { Path } from 'react-native-svg';
+import { FileSystem } from 'react-native-file-access';
 
 import serverApi from '../apis/server';
-import { MY_NOTES, INDEX, DOT_JSON, PUT_FILE, N_NOTES } from '../types/const';
+import { MY_NOTES, INDEX, DOT_JSON, PUT_FILE, N_NOTES, UTF8 } from '../types/const';
 import {
-  randomString, createDataFName, createNoteFPath, throwIfPerformFilesError,
+  isObject, isString, randomString, createDataFName, createNoteFPath,
+  throwIfPerformFilesError,
 } from '../utils';
 import vars from '../vars';
 
@@ -21,6 +23,24 @@ const RENDER_ADDED = 'RENDER_ADDED';
 const RENDER_NOT_SIGNED_IN = 'RENDER_NOT_SIGNED_IN';
 const RENDER_INVALID = 'RENDER_INVALID';
 const RENDER_ERROR = 'RENDER_ERROR';
+
+const getText = async (files) => {
+  if (!Array.isArray(files) || !isObject(files[0])) return '';
+
+  const file = files[0];
+  if (isString(file.text)) return file.text;
+  if (isString(file.weblink)) return file.weblink;
+  if (isString(file.contentUri)) {
+    try {
+      const res = await FileSystem.readFile(file.contentUri, UTF8);
+      if (isString(res)) return res;
+    } catch (error) {
+      console.log('In TranslucentAdding.getText, error:', error);
+    }
+  }
+
+  return '';
+};
 
 const addNote = async (text) => {
   const listName = MY_NOTES, addedDT = Date.now();
@@ -67,12 +87,7 @@ const TranslucentAdding = () => {
     //  so ignore subsequent calls.
     if (type !== null) return;
 
-    if (!(files && files[0] && (files[0].text || files[0].weblink))) {
-      setType(RENDER_INVALID);
-      return;
-    }
-
-    let text = files[0].text || files[0].weblink;
+    let text = await getText(files);
     text = text.trim();
     if (text.length === 0) {
       setType(RENDER_INVALID);
