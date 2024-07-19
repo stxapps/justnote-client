@@ -364,6 +364,7 @@
   + yarn add react-native-default-preference
   + File -> New -> Target -> Share Extension
     ~ Save to Justnote, Swift
+    ~ Check iOS target the same as main app
   + In Info.plist under Save To Justnote
     ~ NSExtension -> NSExtensionAttributes -> NSExtensionActivationRule -> NSExtensionActivationSupportsText -> true
   + Add App groups from targets: Justnotecc and Save to Justnote -> Signing & Capabilities
