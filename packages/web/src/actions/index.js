@@ -5192,7 +5192,20 @@ export const addTagEditorTagName = (values, hints, displayName, color) => async 
 };
 
 export const updateTagData = (ids, values) => async (dispatch, getState) => {
-  const isBulkEditing = getState().display.isBulkEditing;
+  const { queryString, noteId, isBulkEditing } = getState().display;
+
+  if (!isBulkEditing && ids.includes(noteId) && queryString) {
+    // Only tag name for now
+    const tagName = queryString.trim();
+    const found = values.some(value => value.tagName === tagName)
+    if (!found) {
+      const safeAreaWidth = getState().window.width;
+      if (isNumber(safeAreaWidth) && safeAreaWidth >= LG_WIDTH) {
+        dispatch(updateNoteId(null));
+      }
+    }
+  }
+
   if (isBulkEditing) updateBulkEditUrlHash(false);
 
   if (!Array.isArray(ids) || ids.length === 0) {
