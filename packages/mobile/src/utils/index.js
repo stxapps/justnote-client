@@ -722,7 +722,7 @@ export const stripHtml = (s, doInsertNewLine = false, doKeepSpaces = false) => {
     s = s.replace(/<br[\s]*[/]*>/gi, '\n');
   }
 
-  const codeRe = /&(nbsp|amp|quot|lt|gt);/g;
+  const codeRe = /&(nbsp|amp|quot|lt|gt);/gi;
   const codeMap = { 'nbsp': ' ', 'amp': '&', 'quot': '"', 'lt': '<', 'gt': '>' };
 
   if (doInsertNewLine || doKeepSpaces) s = s.replace(/(<([^>]+)>)/gi, '');
@@ -772,17 +772,35 @@ export const isBodyEqual = (s1, s2) => {
   s1 = sortClassNamesInBody(s1);
   s2 = sortClassNamesInBody(s2);
 
-  // Convert all &nbsp; to a space
-  pattern = /&nbsp;/gi;
-  substitute = ' ';
-  s1 = s1.replace(pattern, substitute);
-  s2 = s2.replace(pattern, substitute);
+  // Convert html codes
+  pattern = /&(nbsp|amp|quot|lt|gt);/gi;
+  const codeMap = { 'nbsp': ' ', 'amp': '&', 'quot': '"', 'lt': '<', 'gt': '>' };
+  s1 = s1.replace(pattern, (match, entity) => codeMap[entity]);
+  s2 = s2.replace(pattern, (match, entity) => codeMap[entity]);
 
   // Convert <br /> to <br>
   pattern = /<br\s*\/>/gi;
   substitute = '<br>';
   s1 = s1.replace(pattern, substitute);
   s2 = s2.replace(pattern, substitute);
+
+  // Remove spaces btw. <p> and <br>
+  pattern = /<p>\s+<br>/gi;
+  substitute = '<p><br>';
+  s1 = s1.replace(pattern, substitute);
+  s2 = s2.replace(pattern, substitute);
+
+  // Remove spaces btw. <br> and <br>
+  pattern = /<br>\s+<br>/gi;
+  substitute = '<br><br>';
+  for (let i = 0; i < 100; i++) {
+    if (!pattern.test(s1)) break;
+    s1 = s1.replace(pattern, substitute);
+  }
+  for (let i = 0; i < 100; i++) {
+    if (!pattern.test(s2)) break;
+    s2 = s2.replace(pattern, substitute);
+  }
 
   // Remove spaces btw. <br> and </p>
   pattern = /<br>\s+<\/p>/gi;
