@@ -67,6 +67,7 @@ const TranslucentAdding = () => {
   const { height: safeAreaHeight } = useSafeAreaFrame();
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
   const [type, setType] = useState(null);
+  const didAddListener = useRef(false);
   const removeListener = useRef(null);
   const timeoutId = useRef(null);
   const tailwind = useTailwind();
@@ -75,6 +76,10 @@ const TranslucentAdding = () => {
     vars.translucentAdding.didExit = true;
     BackHandler.exitApp();
   };
+
+  const updateType = useCallback((newType) => {
+    if (newType !== type) setType(newType);
+  }, [type]);
 
   const onReceivedFiles = useCallback(async (files) => {
     ReceiveSharingIntent.clearReceivedFiles();
@@ -90,20 +95,20 @@ const TranslucentAdding = () => {
     let text = await getText(files);
     text = text.trim();
     if (text.length === 0) {
-      setType(RENDER_INVALID);
+      updateType(RENDER_INVALID);
       return;
     }
 
-    setType(RENDER_ADDING);
+    updateType(RENDER_ADDING);
 
     try {
       await addNote(text);
     } catch (error) {
-      setType(RENDER_ERROR);
+      updateType(RENDER_ERROR);
       return;
     }
 
-    setType(RENDER_ADDED);
+    updateType(RENDER_ADDED);
     vars.translucentAdding.didShare = true;
 
     if (timeoutId.current) {
@@ -111,11 +116,11 @@ const TranslucentAdding = () => {
       timeoutId.current = null;
     }
     timeoutId.current = setTimeout(() => exitApp(), 2000);
-  }, [type]);
+  }, [type, updateType]);
 
   const onErrorReceivedFiles = useCallback(() => {
-    if (type !== RENDER_ERROR) setType(RENDER_ERROR);
-  }, [type]);
+    updateType(RENDER_ERROR);
+  }, [updateType]);
 
   const onBackgroundBtnClick = () => {
     if (type === RENDER_ADDED) {
@@ -139,16 +144,20 @@ const TranslucentAdding = () => {
   }, []);
 
   useEffect(() => {
-    if (isUserSignedIn === true) {
-      if (!removeListener.current) {
-        removeListener.current = ReceiveSharingIntent.getReceivedFiles(
-          onReceivedFiles, onErrorReceivedFiles
-        );
-      }
-    } else if (isUserSignedIn === false) {
-      if (type !== RENDER_NOT_SIGNED_IN) setType(RENDER_NOT_SIGNED_IN);
+    if (![true, false].includes(isUserSignedIn)) return;
+
+    if (isUserSignedIn === false) {
+      updateType(RENDER_NOT_SIGNED_IN);
+      return;
     }
-  }, [isUserSignedIn, type, onReceivedFiles, onErrorReceivedFiles]);
+
+    if (!didAddListener.current && !removeListener.current) {
+      didAddListener.current = true;
+      removeListener.current = ReceiveSharingIntent.getReceivedFiles(
+        onReceivedFiles, onErrorReceivedFiles
+      );
+    }
+  }, [isUserSignedIn, updateType, onReceivedFiles, onErrorReceivedFiles]);
 
   const _render = (content) => {
     return (

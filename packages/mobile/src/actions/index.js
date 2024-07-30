@@ -5023,7 +5023,7 @@ export const updateTagData = (ids, values) => async (dispatch, getState) => {
   if (!isBulkEditing && ids.includes(noteId) && queryString) {
     // Only tag name for now
     const tagName = queryString.trim();
-    const found = values.some(value => value.tagName === tagName)
+    const found = values.some(value => value.tagName === tagName);
     if (!found) {
       const safeAreaWidth = getState().window.width;
       if (isNumber(safeAreaWidth) && safeAreaWidth >= LG_WIDTH) {
