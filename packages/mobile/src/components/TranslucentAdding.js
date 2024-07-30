@@ -68,6 +68,7 @@ const TranslucentAdding = () => {
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
   const [type, setType] = useState(null);
   const didAddListener = useRef(false);
+  const didReceiveFiles = useRef(false);
   const removeListener = useRef(null);
   const timeoutId = useRef(null);
   const tailwind = useTailwind();
@@ -82,15 +83,16 @@ const TranslucentAdding = () => {
   }, [type]);
 
   const onReceivedFiles = useCallback(async (files) => {
+    // Strong assumption that this component is created to save a note and then close,
+    //  so ignore subsequent calls.
+    if (didReceiveFiles.current) return;
+    didReceiveFiles.current = true;
+
     ReceiveSharingIntent.clearReceivedFiles();
     if (removeListener.current) {
       removeListener.current();
       removeListener.current = null;
     }
-
-    // Strong assumption that this component is created to save a note and then close,
-    //  so ignore subsequent calls.
-    if (type !== null) return;
 
     let text = await getText(files);
     text = text.trim();
@@ -116,7 +118,7 @@ const TranslucentAdding = () => {
       timeoutId.current = null;
     }
     timeoutId.current = setTimeout(() => exitApp(), 2000);
-  }, [type, updateType]);
+  }, [updateType]);
 
   const onErrorReceivedFiles = useCallback(() => {
     updateType(RENDER_ERROR);
