@@ -78,39 +78,35 @@ const TranslucentAdding = () => {
     BackHandler.exitApp();
   };
 
-  const updateType = useCallback((newType) => {
-    if (newType !== type) setType(newType);
-  }, [type]);
-
   const onReceivedFiles = useCallback(async (files) => {
-    // Strong assumption that this component is created to save a note and then close,
-    //  so ignore subsequent calls.
-    if (didReceiveFiles.current) return;
-    didReceiveFiles.current = true;
-
     ReceiveSharingIntent.clearReceivedFiles();
     if (removeListener.current) {
       removeListener.current();
       removeListener.current = null;
     }
 
+    // Strong assumption that this component is created to save a note and then close,
+    //  so ignore subsequent calls.
+    if (didReceiveFiles.current) return;
+    didReceiveFiles.current = true;
+
     let text = await getText(files);
     text = text.trim();
     if (text.length === 0) {
-      updateType(RENDER_INVALID);
+      setType(RENDER_INVALID);
       return;
     }
 
-    updateType(RENDER_ADDING);
+    setType(RENDER_ADDING);
 
     try {
       await addNote(text);
     } catch (error) {
-      updateType(RENDER_ERROR);
+      setType(RENDER_ERROR);
       return;
     }
 
-    updateType(RENDER_ADDED);
+    setType(RENDER_ADDED);
     vars.translucentAdding.didShare = true;
 
     if (timeoutId.current) {
@@ -118,11 +114,11 @@ const TranslucentAdding = () => {
       timeoutId.current = null;
     }
     timeoutId.current = setTimeout(() => exitApp(), 2000);
-  }, [updateType]);
+  }, []);
 
   const onErrorReceivedFiles = useCallback(() => {
-    updateType(RENDER_ERROR);
-  }, [updateType]);
+    setType(RENDER_ERROR);
+  }, []);
 
   const onBackgroundBtnClick = () => {
     if (type === RENDER_ADDED) {
@@ -149,17 +145,18 @@ const TranslucentAdding = () => {
     if (![true, false].includes(isUserSignedIn)) return;
 
     if (isUserSignedIn === false) {
-      updateType(RENDER_NOT_SIGNED_IN);
+      setType(RENDER_NOT_SIGNED_IN);
       return;
     }
 
     if (!didAddListener.current && !removeListener.current) {
       didAddListener.current = true;
+      // Bug alert: as not remove and re-add every render, dep vars are not updated.
       removeListener.current = ReceiveSharingIntent.getReceivedFiles(
         onReceivedFiles, onErrorReceivedFiles
       );
     }
-  }, [isUserSignedIn, updateType, onReceivedFiles, onErrorReceivedFiles]);
+  }, [isUserSignedIn, onReceivedFiles, onErrorReceivedFiles]);
 
   const _render = (content) => {
     return (
