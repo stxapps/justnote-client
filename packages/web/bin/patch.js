@@ -23,97 +23,31 @@ const replaceMatchedLine = (fpath, actionObjs) => {
   fs.writeFileSync(fpath, outs.join('\n') + '\n');
 };
 
-const patchWalletUtils = () => {
-  // Use new Stacks apis instead of the old one
-  let match = '    const url = `https://core.blockstack.org/v1/names/${name}`;';
-  let repmt = '    const url = `https://api.hiro.so/v1/names/${name}`;';
+const patchFetch = () => {
+  let match = '    Object.assign(fetchOpts, defaultFetchOpts, init);';
+  let repmt = "    const inputUrl = new URL(input); if (inputUrl.host.includes('hiro.so') || inputUrl.host.includes('stacks.co') || inputUrl.host.includes('blockstack.org')) { Object.assign(fetchOpts, defaultFetchOpts, init); } else { Object.assign(fetchOpts, { referrerPolicy: 'origin' }, init); }";
   replaceMatchedLine(
-    'node_modules/@stacks/wallet-sdk/dist/utils.js',
+    'node_modules/@stacks/network/dist/fetch.js',
     [{ match, repmt }],
   );
-
-  match = '    const url = `https://core.blockstack.org/v1/names/${name}`;';
-  repmt = '    const url = `https://api.hiro.so/v1/names/${name}`;';
   replaceMatchedLine(
-    'node_modules/@stacks/wallet-sdk/dist/esm/utils.js',
+    'node_modules/@stacks/network/dist/esm/fetch.js',
     [{ match, repmt }],
   );
 };
 
-const patchSignECDSA = () => {
-
-  let match = '    const signature = ecPrivate.sign(contentHash);';
-  let repmt = '    const signature = ecPrivate.sign(contentHash, { canonical: true });';
+const patchCryptoUtils = () => {
+  // Bundle gzip size will +125.2 kB, should be await import()?
+  /*let match = "            const nodeCrypto = require('crypto');";
+  let repmt = "            const nodeCrypto = require('crypto-browserify');";
   replaceMatchedLine(
-    'node_modules/@stacks/encryption/dist/ec.js',
+    'node_modules/@stacks/encryption/dist/cryptoUtils.js',
     [{ match, repmt }],
   );
-
-  match = '    const signature = ecPrivate.sign(contentHash);';
-  repmt = '    const signature = ecPrivate.sign(contentHash, { canonical: true });';
   replaceMatchedLine(
-    'node_modules/@stacks/encryption/dist/esm/ec.js',
+    'node_modules/@stacks/encryption/dist/esm/cryptoUtils.js',
     [{ match, repmt }],
-  );
-};
-
-const patchFetchReferer = () => {
-
-  replaceMatchedLine(
-    'node_modules/@stacks/common/dist/fetchUtil.js',
-    [
-      {
-        match: "        referrer: 'no-referrer',",
-        repmt: '',
-      },
-      {
-        match: "        referrerPolicy: 'no-referrer',",
-        repmt: "        referrerPolicy: 'origin',",
-      }
-    ],
-  );
-
-  replaceMatchedLine(
-    'node_modules/@stacks/common/dist/esm/fetchUtil.js',
-    [
-      {
-        match: "        referrer: 'no-referrer',",
-        repmt: '',
-      },
-      {
-        match: "        referrerPolicy: 'no-referrer',",
-        repmt: "        referrerPolicy: 'origin',",
-      }
-    ],
-  );
-
-  replaceMatchedLine(
-    'node_modules/@stacks/transactions/dist/utils.js',
-    [
-      {
-        match: "        referrer: 'no-referrer',",
-        repmt: '',
-      },
-      {
-        match: "        referrerPolicy: 'no-referrer',",
-        repmt: "        referrerPolicy: 'origin',",
-      }
-    ],
-  );
-
-  replaceMatchedLine(
-    'node_modules/@stacks/transactions/dist/esm/utils.js',
-    [
-      {
-        match: "        referrer: 'no-referrer',",
-        repmt: '',
-      },
-      {
-        match: "        referrerPolicy: 'no-referrer',",
-        repmt: "        referrerPolicy: 'origin',",
-      }
-    ],
-  );
+  );*/
 };
 
 const patchTypeReactRedux = () => {
@@ -150,8 +84,7 @@ const patchTypeReselect = () => {
   );
 };
 
-patchWalletUtils();
-patchSignECDSA();
-patchFetchReferer();
+patchFetch();
+patchCryptoUtils();
 patchTypeReactRedux();
 patchTypeReselect();

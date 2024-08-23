@@ -92,10 +92,10 @@ import {
 } from '../types/const';
 import {
   throttle, extractUrl, urlHashToObj, objToUrlHash, isBusyStatus, isEqual, isArrayEqual,
-  separateUrlAndParam, getUserImageUrl, randomString, sleep, isObject, isString,
-  isNumber, isTitleEqual, isBodyEqual, getStaticFPath, deriveFPaths, getListNameObj,
-  getAllListNames, getMainId, createDataFName, listNoteMetas, getNoteFPaths,
-  getSsltFPaths, getStaticFPaths, createSettingsFPath, getSettingsFPaths,
+  separateUrlAndParam, getUserUsername, getUserImageUrl, randomString, sleep, isObject,
+  isString, isNumber, isTitleEqual, isBodyEqual, getStaticFPath, deriveFPaths,
+  getListNameObj, getAllListNames, getMainId, createDataFName, listNoteMetas,
+  getNoteFPaths, getSsltFPaths, getStaticFPaths, createSettingsFPath, getSettingsFPaths,
   getLastSettingsFPaths, getInfoFPath, getLatestPurchase, getValidPurchase,
   doEnableExtraFeatures, extractPinFPath, getPinFPaths, getPins, separatePinnedValues,
   getRawPins, getFormattedTime, get24HFormattedTime, getWindowSize, getNote,
@@ -130,7 +130,7 @@ export const init = () => async (dispatch, getState) => {
   let username = null, userImage = null, userHubUrl = null;
   if (isUserSignedIn) {
     const userData = userSession.loadUserData();
-    username = userData.username;
+    username = getUserUsername(userData);
     userImage = getUserImageUrl(userData);
     userHubUrl = userData.hubUrl;
   }
@@ -378,7 +378,7 @@ export const updateUserSignedIn = () => async (dispatch, getState) => {
     type: UPDATE_USER,
     payload: {
       isUserSignedIn: true,
-      username: userData.username,
+      username: getUserUsername(userData),
       image: getUserImageUrl(userData),
       hubUrl: userData.hubUrl,
     },
