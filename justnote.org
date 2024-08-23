@@ -22,6 +22,7 @@
 ** www.serenity.re/en/notes
 ** skiff.com
 ** notesnook.com
+** anytype.io
 * Same Name
 ** jusnote.com - The most powerful software for managing the legal practice
 ** justnotepad.com
