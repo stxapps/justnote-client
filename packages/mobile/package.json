@@ -20,7 +20,7 @@
   "dependencies": {
     "@bam.tech/react-native-image-resizer": "^3.0.7",
     "@wewatch/lexorank": "^1.0.3",
-    "axios": "^1.6.2",
+    "axios": "^1.7.4",
     "event-target-fallback": "^1.0.0",
     "htmlparser2": "^9.0.0",
     "jest-diff": "^29.7.0",
