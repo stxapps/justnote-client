@@ -2,9 +2,8 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import Url from 'url-parse';
 
-import {
-  updatePopupUrlHash, updateSettingsPopup, updateSettingsViewId,
-} from '../actions';
+import { updatePopupUrlHash } from '../actions';
+import { updateSettingsPopup, updateSettingsViewId } from '../actions/chunk';
 import { SIGN_UP_POPUP, SETTINGS_VIEW_IAP } from '../types/const';
 import { getValidPurchase } from '../selectors';
 import { isObject } from '../utils';

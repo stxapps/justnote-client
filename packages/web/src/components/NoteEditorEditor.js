@@ -5,11 +5,13 @@ import ckeditor from '@ckeditor/ckeditor5-build-decoupled-document';
 
 import fileApi from '../apis/localFile';
 import {
-  updateEditorFocused, updateEditorBusy, saveNote, discardNote, onUpdateNoteIdUrlHash,
-  onUpdateNoteId, onChangeListName, onUpdateQueryString, onUpdateBulkEditUrlHash,
-  onShowNoteListMenuPopup, onShowNLIMPopup, onShowUNEPopup, updateEditorIsUploading,
-  updateEditingNote, handleUnsavedNote,
+  onUpdateNoteIdUrlHash, onUpdateNoteId, onUpdateBulkEditUrlHash, handleUnsavedNote,
 } from '../actions';
+import {
+  updateEditorFocused, updateEditorBusy, saveNote, discardNote, onChangeListName,
+  onUpdateQueryString, onShowNoteListMenuPopup, onShowNLIMPopup, onShowUNEPopup,
+  updateEditorIsUploading, updateEditingNote,
+} from '../actions/chunk';
 import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, BLK_MODE, VALID } from '../types/const';
 import { getThemeMode, getDoMoreEditorFontSizes } from '../selectors';
 import {

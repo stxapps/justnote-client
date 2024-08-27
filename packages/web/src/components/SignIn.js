@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-import walletApi from '../apis/wallet';
+import { walletRestoreAccount, walletChooseAccount } from '../importWrapper';
 import { HASH_SUPPORT } from '../types/const';
 import { getUserImageUrl, isIPadIPhoneIPod } from '../utils';
 
@@ -37,7 +37,7 @@ const SignIn = (props) => {
     setLoadingShown(true);
     setTimeout(() => {
       const secretKey = secretKeyInput.replace(/\s+/g, ' ').trim();
-      walletApi.restoreAccount(
+      walletRestoreAccount(
         { domainName, appName, appIconUrl, appScopes }, secretKey
       ).then((data) => {
         didClick.current = false;
@@ -61,7 +61,7 @@ const SignIn = (props) => {
         setLoadingShown(false);
         setErrorShown(true);
       });
-    }, 1);
+    }, 72);
   };
 
   const onChooseAccount = (accountIndex) => {
@@ -70,7 +70,7 @@ const SignIn = (props) => {
     didClick.current = true;
     setLoadingShown(true);
     setTimeout(() => {
-      walletApi.chooseAccount(walletData.current, accountIndex).then((data) => {
+      walletChooseAccount(walletData.current, accountIndex).then((data) => {
         didClick.current = false;
         setLoadingShown(false);
         props.onChooseAccountBtnClick(data);
@@ -80,7 +80,7 @@ const SignIn = (props) => {
         setLoadingShown(false);
         setErrorShown(true);
       });
-    }, 1);
+    }, 72);
   };
 
   useEffect(() => {

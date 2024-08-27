@@ -1,9 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import {
-  updateNoteIdUrlHash, increaseSaveNoteCount, increaseDiscardNoteCount,
-} from '../actions';
+import { updateNoteIdUrlHash } from '../actions';
+import { increaseSaveNoteCount, increaseDiscardNoteCount } from '../actions/chunk';
 import {
   NEW_NOTE, ADDED, VALID, LG_WIDTH, NOTE_COMMANDS_MODE_NETB,
 } from '../types/const';

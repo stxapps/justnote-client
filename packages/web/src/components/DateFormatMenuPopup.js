@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { updatePopupUrlHash, updateNoteDateFormat } from '../actions';
+import { updatePopupUrlHash } from '../actions';
+import { updateNoteDateFormat } from '../actions/chunk';
 import {
   DATE_FORMAT_MENU_POPUP, NOTE_DATE_FORMATS, NOTE_DATE_FORMAT_TEXTS,
 } from '../types/const';

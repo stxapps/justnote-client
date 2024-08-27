@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { updateNoteIdUrlHash, retryDiedNotes, cancelDiedNotes } from '../actions';
+import { updateNoteIdUrlHash } from '../actions';
+import { retryDiedNotes, cancelDiedNotes } from '../actions/chunk';
 import { HASH_SUPPORT, LG_WIDTH } from '../types/const';
 
 import { useSafeAreaFrame, useTailwind } from '.';

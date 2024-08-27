@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { showLockMenuPopup, showUNEPopup } from '../actions';
+import { showLockMenuPopup, showUNEPopup } from '../actions/chunk';
 import { makeGetDoShowTitle } from '../selectors';
 
 import { useTailwind } from '.';

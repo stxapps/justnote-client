@@ -20,6 +20,15 @@ export const HASH_PRIVACY = '#privacy';
 export const HASH_PRICING = '#pricing';
 export const HASH_SUPPORT = '#support';
 
+export const APP_RENDER_LOADING = 'APP_RENDER_LOADING';
+export const APP_RENDER_LANDING = 'APP_RENDER_LANDING';
+export const APP_RENDER_ABOUT = 'APP_RENDER_ABOUT';
+export const APP_RENDER_TERMS = 'APP_RENDER_TERMS';
+export const APP_RENDER_PRIVACY = 'APP_RENDER_PRIVACY';
+export const APP_RENDER_PRICING = 'APP_RENDER_PRICING';
+export const APP_RENDER_SUPPORT = 'APP_RENDER_SUPPORT';
+export const APP_RENDER_MAIN = 'APP_RENDER_MAIN';
+
 export const HTTP = 'http://';
 export const HTTPS = 'https://';
 export const WWW = 'www.';

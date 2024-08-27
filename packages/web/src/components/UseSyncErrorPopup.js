@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { updatePopup, disableSyncMode } from '../actions';
+import { updatePopup } from '../actions';
+import { disableSyncMode } from '../actions/chunk';
 import { USE_SYNC_ERROR_POPUP } from '../types/const';
 
 import { useTailwind } from '.';

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { retryDiedPins, cancelDiedPins } from '../actions';
+import { retryDiedPins, cancelDiedPins } from '../actions/chunk';
 import {
   PIN_NOTE_ROLLBACK, UNPIN_NOTE_ROLLBACK, MOVE_PINNED_NOTE_ROLLBACK,
 } from '../types/actionTypes';

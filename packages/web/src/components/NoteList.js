@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { updateNoteIdUrlHash, fetch } from '../actions';
+import { updateNoteIdUrlHash } from '../actions';
+import { fetch } from '../actions/chunk';
 import {
   SD_HUB_URL, TRASH, NEW_NOTE, NEW_NOTE_OBJ, MAX_SELECTED_NOTE_IDS,
   SD_MAX_SELECTED_NOTE_IDS, VALID, LOCKED,

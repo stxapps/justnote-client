@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { fetchMore, updateFetchedMore } from '../actions';
+import { fetchMore, updateFetchedMore } from '../actions/chunk';
 import { ADDED_DT, UPDATED_DT } from '../types/const';
 import {
   getNotes, getHasMoreNotes, getIsFetchingMore, getHasFetchedMore,

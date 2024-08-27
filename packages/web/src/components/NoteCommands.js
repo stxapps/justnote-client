@@ -1,10 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
+import { updatePopupUrlHash } from '../actions';
 import {
-  updatePopupUrlHash, moveNotesWithAction, updateMoveAction, updateDeleteAction,
-  updateListNamesMode,
-} from '../actions';
+  moveNotesWithAction, updateMoveAction, updateDeleteAction, updateListNamesMode,
+} from '../actions/chunk';
 import {
   LIST_NAMES_POPUP, BULK_EDIT_MENU_POPUP, CONFIRM_DELETE_POPUP, MY_NOTES, ARCHIVE,
   TRASH, LG_WIDTH, MOVE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_COMMANDS,

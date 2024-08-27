@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import {
-  updateNoteIdUrlHash, updateNoteId, updateBulkEditUrlHash, showNLIMPopup,
-  addSelectedNoteIds, deleteSelectedNoteIds, updateQueryString,
+  updateNoteIdUrlHash, updateNoteId, updateBulkEditUrlHash, addSelectedNoteIds,
+  deleteSelectedNoteIds,
 } from '../actions';
+import { showNLIMPopup, updateQueryString } from '../actions/chunk';
 import { LG_WIDTH } from '../types/const';
 import { makeIsNoteIdSelected, makeGetNoteDate, makeGetTnAndDns } from '../selectors';
 import {

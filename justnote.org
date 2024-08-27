@@ -23,6 +23,8 @@
 ** skiff.com
 ** notesnook.com
 ** anytype.io
+** grugnotes.com
+** github.com/flxzt/rnote
 * Same Name
 ** jusnote.com - The most powerful software for managing the legal practice
 ** justnotepad.com

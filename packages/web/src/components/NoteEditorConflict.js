@@ -5,9 +5,8 @@ import ckeditor from '@ckeditor/ckeditor5-build-decoupled-document';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import fileApi from '../apis/localFile';
-import {
-  updateNoteIdUrlHash, mergeNotes, handleUnsavedNote, deleteUnsavedNotes,
-} from '../actions';
+import { updateNoteIdUrlHash, handleUnsavedNote, deleteUnsavedNotes } from '../actions';
+import { mergeNotes } from '../actions/chunk';
 import {
   HASH_SUPPORT, MERGING, DIED_MERGING, LG_WIDTH, CD_ROOT, BLK_MODE,
 } from '../types/const';

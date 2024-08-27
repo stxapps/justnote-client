@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import {
   retryDiedSettings, cancelDiedSettings, cancelChangedSyncMode, updateSettingsPopup,
-} from '../actions';
+} from '../actions/chunk';
 import { HASH_SUPPORT, DIED_UPDATING } from '../types/const';
 
 import { useTailwind } from '.';

@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { updatePopupUrlHash, updateLockAction } from '../actions';
+import { updatePopupUrlHash } from '../actions';
+import { updateLockAction } from '../actions/chunk';
 import {
   LOCK_MENU_POPUP, LOCK_EDITOR_POPUP, LOCK_ACTION_REMOVE_LOCK_NOTE, REMOVE_LOCK,
 } from '../types/const';

@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { updatePopupUrlHash } from '../actions';
 import {
-  updatePopupUrlHash, updateLockEditor, addLockNote, removeLockNote, unlockNote,
-  addLockList, removeLockList, unlockList,
-} from '../actions';
+  updateLockEditor, addLockNote, removeLockNote, unlockNote, addLockList,
+  removeLockList, unlockList,
+} from '../actions/chunk';
 import {
   MY_NOTES, LOCK_EDITOR_POPUP, LOCK_ACTION_ADD_LOCK_NOTE, LOCK_ACTION_REMOVE_LOCK_NOTE,
   LOCK_ACTION_UNLOCK_NOTE, LOCK_ACTION_ADD_LOCK_LIST, LOCK_ACTION_REMOVE_LOCK_LIST,

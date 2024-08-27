@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { updatePopupUrlHash, unpinNotes, movePinnedNote } from '../actions';
+import { updatePopupUrlHash } from '../actions';
+import { unpinNotes, movePinnedNote } from '../actions/chunk';
 import {
   PIN_MENU_POPUP, PIN_UP, PIN_DOWN, UNPIN, SWAP_LEFT, SWAP_RIGHT,
 } from '../types/const';

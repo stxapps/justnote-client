@@ -4,7 +4,9 @@ import { saveAs } from 'file-saver';
 import dataApi from '../apis/data';
 import serverApi from '../apis/server';
 import fileApi from '../apis/localFile';
-import { updatePopupUrlHash, sync, syncAndWait } from '../actions';
+import { importZip } from '../importWrapper';
+import { updatePopupUrlHash } from '../actions';
+import { sync, syncAndWait } from '../actions/chunk';
 import {
   UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
   UPDATE_DELETE_ALL_DATA_PROGRESS, UPDATE_DELETE_SYNC_DATA_PROGRESS, DELETE_ALL_DATA,
@@ -1398,8 +1400,7 @@ const parseImportedFile = async (dispatch, getState, fileContent) => {
   dispatch(updateImportAllDataProgress({ total: 'calculating...', done: 0 }));
 
   try {
-    // @ts-expect-error
-    const zip = await import('@zip.js/zip.js');
+    const zip = await importZip();
     const reader = new zip.ZipReader(
       new zip.Uint8ArrayReader(new Uint8Array(fileContent))
     );
@@ -1596,8 +1597,7 @@ export const exportAllData = () => async (dispatch, getState) => {
   if (progress.total === 0) return;
 
   try {
-    // @ts-expect-error
-    const zip = await import('@zip.js/zip.js');
+    const zip = await importZip();
     const zipWriter = new zip.ZipWriter(new zip.BlobWriter('application/zip'));
 
     const errorResponses = [], idMap = {};

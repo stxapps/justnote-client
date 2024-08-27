@@ -3,9 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import Url from 'url-parse';
 
-import {
-  signOut, updatePopupUrlHash, updateSettingsPopup, updateSettingsViewId,
-} from '../actions';
+import { signOut, updatePopupUrlHash } from '../actions';
+import { updateSettingsPopup, updateSettingsViewId } from '../actions/chunk';
 import { HASH_SUPPORT, PROFILE_POPUP, SETTINGS_VIEW_ACCOUNT } from '../types/const';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
 

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
+import { updatePopupUrlHash } from '../actions';
 import {
-  changeListName, updatePopupUrlHash, updateQueryString, updateSidebarListNamesMode,
-} from '../actions';
+  changeListName, updateQueryString, updateSidebarListNamesMode,
+} from '../actions/chunk';
 import {
   SIDEBAR_POPUP, MY_NOTES, TRASH, ARCHIVE, LG_WIDTH,
   SIDEBAR_LIST_NAMES_MODE_CHANGE_TAG_NAME,

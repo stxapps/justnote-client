@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
 
+import { updatePopupUrlHash } from '../actions';
 import {
-  updatePopupUrlHash, moveNotes, moveToListName, updateSettingsPopup,
-  updateSettingsViewId,
-} from '../actions';
+  moveNotes, moveToListName, updateSettingsPopup, updateSettingsViewId,
+} from '../actions/chunk';
 import {
   LIST_NAMES_POPUP, TRASH, LIST_NAMES_MODE_MOVE_NOTES, LIST_NAMES_MODE_MOVE_LIST_NAME,
   SETTINGS_VIEW_LISTS,

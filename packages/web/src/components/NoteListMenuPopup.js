@@ -3,10 +3,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import Url from 'url-parse';
 
+import { signOut, updatePopupUrlHash, updateBulkEditUrlHash } from '../actions';
 import {
-  sync, updateSynced, signOut, updatePopupUrlHash, updateSettingsPopup,
-  updateSettingsViewId, updateBulkEditUrlHash, lockCurrentList,
-} from '../actions';
+  sync, updateSynced, updateSettingsPopup, updateSettingsViewId, lockCurrentList,
+} from '../actions/chunk';
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import {
   HASH_SUPPORT, NOTE_LIST_MENU_POPUP, SETTINGS_VIEW_ACCOUNT, LG_WIDTH, SHOW_SYNCED,

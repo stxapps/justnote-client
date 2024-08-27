@@ -1,12 +1,13 @@
 import React, { useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
+import { updatePopupUrlHash } from '../actions';
 import {
   updateDoSyncModeInput, updateDoDeleteOldNotesInTrash, updateSortOn,
   updateDoDescendingOrder, updateNoteDateShowingMode, updateNoteDateFormat,
   updateDoSectionNotesByMonth, updateDoMoreEditorFontSizes, updateDoUseLocalTheme,
-  updateTheme, updatePopupUrlHash,
-} from '../actions';
+  updateTheme,
+} from '../actions/chunk';
 import {
   DATE_FORMAT_MENU_POPUP, ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE,
   NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS, NOTE_DATE_FORMAT_TEXTS,

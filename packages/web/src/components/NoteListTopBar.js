@@ -1,7 +1,8 @@
 import React, { useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { updatePopupUrlHash, showNoteListMenuPopup } from '../actions';
+import { updatePopupUrlHash } from '../actions';
+import { showNoteListMenuPopup } from '../actions/chunk';
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import { SEARCH_POPUP, LG_WIDTH, UPDATING, SHOW_SYNCED } from '../types/const';
 

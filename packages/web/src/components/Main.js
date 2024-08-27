@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { endIapConnection } from '../actions';
+import { endIapConnection } from '../actions/iap';
 import { LG_WIDTH } from '../types/const';
 import { debounce, isMobile as _isMobile, scrollWindowTopOrIntoView } from '../utils';
 

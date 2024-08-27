@@ -1,9 +1,8 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import {
-  updatePopupUrlHash, updateSelectingListName, updateLockAction,
-} from '../actions';
+import { updatePopupUrlHash } from '../actions';
+import { updateSelectingListName, updateLockAction } from '../actions/chunk';
 import { LOCK_EDITOR_POPUP, LOCK_ACTION_UNLOCK_LIST } from '../types/const';
 
 import { useTailwind } from '.';

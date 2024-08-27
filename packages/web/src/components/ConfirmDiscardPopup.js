@@ -3,9 +3,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import {
-  updatePopupUrlHash, discardNote, updateNoteIdUrlHash, updateNoteId, changeListName,
-  updateBulkEditUrlHash, showNoteListMenuPopup, showNLIMPopup, updateSettingsPopup,
+  updatePopupUrlHash, updateNoteIdUrlHash, updateNoteId, updateBulkEditUrlHash,
 } from '../actions';
+import {
+  discardNote, changeListName, showNoteListMenuPopup, showNLIMPopup, updateSettingsPopup,
+} from '../actions/chunk';
 import {
   CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT,
   DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,

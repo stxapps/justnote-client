@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { updatePopupUrlHash } from '../actions';
 import {
-  updatePopupUrlHash, moveNotesWithAction, pinNotes, updateMoveAction,
+  moveNotesWithAction, pinNotes, updateMoveAction,
   updateDeleteAction, updateListNamesMode, viewNoteAsWebpage, showAddLockEditorPopup,
   lockNote, updateTagEditorPopup,
-} from '../actions';
+} from '../actions/chunk';
 import {
   MY_NOTES, TRASH, ARCHIVE, REMOVE, RESTORE, DELETE, MOVE_TO, PIN, MANAGE_PIN, PINNED,
   VIEW_AS_WEBPAGE, NOTE_LIST_ITEM_MENU_POPUP, LIST_NAMES_POPUP, PIN_MENU_POPUP,
