@@ -129,8 +129,8 @@ const Landing = () => {
               <div className={tailwind('flex-1')} />
               <div className={tailwind('w-full flex-1 bg-gray-800')} />
             </div>
-            <div className={tailwind('mx-auto max-w-4xl px-4 sm:px-6')}>
-              <img className={tailwind('relative mx-auto rounded-lg shadow-lg')} src={mainDesktopInDarkChrome} srcSet={`${mainDesktopInDarkChrome} 1x, https://justnote.cc/static/media/main-desktop-in-dark-chrome@2x.2680806c7ba525189099.png 2x, https://justnote.cc/static/media/main-desktop-in-dark-chrome@3x.a7c1d62c03c69d6d5b13.png 3x`} alt="App screenshot" />
+            <div className={tailwind('relative mx-auto max-w-4xl px-4 sm:px-6')}>
+              <img className={tailwind('mx-auto rounded-lg shadow-lg')} src={mainDesktopInDarkChrome} srcSet={`${mainDesktopInDarkChrome} 1x, https://justnote.cc/static/media/main-desktop-in-dark-chrome@2x.2680806c7ba525189099.png 2x, https://justnote.cc/static/media/main-desktop-in-dark-chrome@3x.a7c1d62c03c69d6d5b13.png 3x`} alt="App screenshot" />
             </div>
           </div>
         </div>
