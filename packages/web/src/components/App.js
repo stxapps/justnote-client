@@ -15,7 +15,6 @@ import Loading from './Loading';
 import Landing from './Landing';
 import ErrorBoundary from './ErrorBoundary';
 
-// medium.com/hackernoon/lazy-loading-and-preloading-components-in-react-16-6-804de091c82d
 // @ts-expect-error
 const _AppChunk = import('./AppChunk');
 const AppChunk = React.lazy(() => _AppChunk);
@@ -71,7 +70,7 @@ const App = () => {
   return (
     <ErrorBoundary>
       <React.Suspense fallback={<Loading />}>
-        <AppChunk />
+        <AppChunk type={type} />
       </React.Suspense>
     </ErrorBoundary>
   );
