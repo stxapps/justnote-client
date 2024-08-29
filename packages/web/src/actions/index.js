@@ -10,7 +10,8 @@ import {
   UPDATE_HANDLING_SIGN_IN, UPDATE_SEARCH_STRING, UPDATE_NOTE_ID, UPDATE_POPUP,
   UPDATE_BULK_EDITING, ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, REFRESH_FETCHED,
   INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT, INCREASE_UPDATE_NOTE_ID_COUNT,
-  INCREASE_BLUR_COUNT, INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT, UPDATE_UNSAVED_NOTE,
+  INCREASE_BLUR_COUNT, INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT,
+  INCREASE_UPDATE_BULK_EDIT_COUNT, INCREASE_WEBVIEW_KEY_COUNT, UPDATE_UNSAVED_NOTE,
   DELETE_UNSAVED_NOTES, UPDATE_STACKS_ACCESS, UPDATE_SYSTEM_THEME_MODE,
   UPDATE_IS_24H_FORMAT, RESET_STATE,
 } from '../types/actionTypes';
@@ -745,6 +746,10 @@ export const refreshFetched = () => async (dispatch, getState) => {
   dispatch({ type: REFRESH_FETCHED });
 };
 
+export const increaseWebViewKeyCount = () => {
+  return { type: INCREASE_WEBVIEW_KEY_COUNT };
+};
+
 export const increaseUpdateNoteIdUrlHashCount = () => {
   return { type: INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT };
 };
@@ -759,6 +764,10 @@ export const increaseBlurCount = () => {
 
 export const increaseUpdateBulkEditUrlHashCount = () => {
   return { type: INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT };
+};
+
+export const increaseUpdateBulkEditCount = () => {
+  return { type: INCREASE_UPDATE_BULK_EDIT_COUNT };
 };
 
 export const handleUnsavedNote = (id, title, body, media) => async (

@@ -6,7 +6,8 @@ import {
   updatePopupUrlHash, updateNoteIdUrlHash, updateNoteId, updateBulkEditUrlHash,
 } from '../actions';
 import {
-  discardNote, changeListName, showNoteListMenuPopup, showNLIMPopup, updateSettingsPopup,
+  discardNote, changeListName, showNoteListMenuPopup, showNLIMPopup,
+  updateSettingsPopup,
 } from '../actions/chunk';
 import {
   CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT,
