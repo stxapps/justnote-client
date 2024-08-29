@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Linking } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
-import { retryDiedPins, cancelDiedPins } from '../actions';
+import { retryDiedPins, cancelDiedPins } from '../actions/chunk';
 import {
   PIN_NOTE_ROLLBACK, UNPIN_NOTE_ROLLBACK, MOVE_PINNED_NOTE_ROLLBACK,
 } from '../types/actionTypes';

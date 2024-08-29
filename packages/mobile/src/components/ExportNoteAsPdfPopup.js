@@ -5,7 +5,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
-import { updateExportNoteAsPdfProgress } from '../actions';
+import { updateExportNoteAsPdfProgress } from '../actions/chunk';
 import {
   DOMAIN_NAME, HASH_SUPPORT, SM_WIDTH, NO_PERMISSION_GRANTED,
 } from '../types/const';

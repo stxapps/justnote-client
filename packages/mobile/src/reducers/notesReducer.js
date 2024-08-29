@@ -3,7 +3,7 @@ import { loop, Cmd } from 'redux-loop';
 import {
   tryUpdateFetched, tryUpdateFetchedMore, cleanUpSslts, runAfterFetchTask, unpinNotes,
   tryUpdateSynced,
-} from '../actions';
+} from '../importWrapper';
 import {
   FETCH, FETCH_COMMIT, UPDATE_FETCHED, FETCH_MORE_COMMIT, UPDATE_FETCHED_MORE,
   SET_SHOWING_NOTE_INFOS, ADD_NOTE, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK, UPDATE_NOTE,

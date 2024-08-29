@@ -129,6 +129,11 @@ export const getUrlPathQueryHash = (url) => {
   return url.split('/').slice(i).join('/');
 };
 
+export const getUserUsername = (userData) => {
+  if (!isObject(userData) || !isString(userData.username)) return '';
+  return userData.username;
+};
+
 export const getUserImageUrl = (userData) => {
 
   let userImage = null;

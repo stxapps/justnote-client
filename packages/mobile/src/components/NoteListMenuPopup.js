@@ -5,10 +5,10 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
+import { signOut, updatePopup, updateBulkEdit } from '../actions';
 import {
-  sync, updateSynced, signOut, updatePopup, updateSettingsPopup, updateSettingsViewId,
-  updateBulkEdit, lockCurrentList,
-} from '../actions';
+  sync, updateSynced, updateSettingsPopup, updateSettingsViewId, lockCurrentList,
+} from '../actions/chunk';
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import {
   DOMAIN_NAME, HASH_SUPPORT, SIGN_UP_POPUP, NOTE_LIST_MENU_POPUP,

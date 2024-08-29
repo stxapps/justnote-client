@@ -3,7 +3,8 @@ import { View, TouchableOpacity, Animated } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path, Circle } from 'react-native-svg';
 
-import { updatePopup, showNoteListMenuPopup } from '../actions';
+import { updatePopup } from '../actions';
+import { showNoteListMenuPopup } from '../actions/chunk';
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import { SEARCH_POPUP, LG_WIDTH, UPDATING, SHOW_SYNCED } from '../types/const';
 import { rotateAnimConfig } from '../types/animConfigs';

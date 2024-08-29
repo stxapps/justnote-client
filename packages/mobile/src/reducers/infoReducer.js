@@ -1,6 +1,6 @@
 import { loop, Cmd } from 'redux-loop';
 
-import { tryUpdateInfo } from '../actions';
+import { tryUpdateInfo } from '../importWrapper';
 import {
   INIT, FETCH_COMMIT, UPDATE_INFO_COMMIT, UPDATE_INFO_ROLLBACK, UPDATE_UNCHANGED_INFO,
   REQUEST_PURCHASE_COMMIT, RESTORE_PURCHASES_COMMIT, REFRESH_PURCHASES_COMMIT,

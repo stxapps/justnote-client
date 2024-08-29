@@ -3,7 +3,7 @@ import { FlatList, View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { Flow } from 'react-native-animated-spinkit';
 
-import { fetchMore, updateFetchedMore } from '../actions';
+import { fetchMore, updateFetchedMore } from '../actions/chunk';
 import { LG_WIDTH, BLK_MODE, ADDED_DT, UPDATED_DT } from '../types/const';
 import {
   getNotes, getHasMoreNotes, getIsFetchingMore, getHasFetchedMore, getThemeMode,

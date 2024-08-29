@@ -3,9 +3,10 @@ import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
+import { updatePopup } from '../actions';
 import {
-  changeListName, updatePopup, updateQueryString, updateSidebarListNamesMode,
-} from '../actions';
+  changeListName, updateQueryString, updateSidebarListNamesMode,
+} from '../actions/chunk';
 import {
   SIDEBAR_POPUP, MY_NOTES, TRASH, ARCHIVE, LG_WIDTH,
   SIDEBAR_LIST_NAMES_MODE_CHANGE_TAG_NAME,

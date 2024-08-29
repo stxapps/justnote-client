@@ -4,9 +4,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
 import {
-  updateNoteId, updateBulkEdit, showNLIMPopup, addSelectedNoteIds,
-  deleteSelectedNoteIds, updateQueryString,
+  updateNoteId, updateBulkEdit, addSelectedNoteIds, deleteSelectedNoteIds,
 } from '../actions';
+import { showNLIMPopup, updateQueryString } from '../actions/chunk';
 import { makeIsNoteIdSelected, makeGetNoteDate, makeGetTnAndDns } from '../selectors';
 import { isBusyStatus, isPinningStatus, isTaggingStatus, stripHtml } from '../utils';
 

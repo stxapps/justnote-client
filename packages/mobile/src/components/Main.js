@@ -1,9 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
-import {
-  addAppStateChangeListener, copyToAppGroupShare, endIapConnection,
-} from '../actions';
+import { addAppStateChangeListener, copyToAppGroupShare } from '../actions';
+import { endIapConnection } from '../actions/iap';
 import { LG_WIDTH } from '../types/const';
 
 import { useSafeAreaFrame } from '.';

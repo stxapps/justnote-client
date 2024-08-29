@@ -4,7 +4,8 @@ import {
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { updatePopup, unpinNotes, movePinnedNote } from '../actions';
+import { updatePopup } from '../actions';
+import { unpinNotes, movePinnedNote } from '../actions/chunk';
 import {
   PIN_MENU_POPUP, PIN_UP, PIN_DOWN, UNPIN, SWAP_LEFT, SWAP_RIGHT,
 } from '../types/const';

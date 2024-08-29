@@ -5,7 +5,8 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
-import { updateNoteId, updatePopup, updateEditorScrollEnabled } from '../actions';
+import { updateNoteId, updatePopup } from '../actions';
+import { updateEditorScrollEnabled } from '../actions/chunk';
 import { NEW_NOTE, NEW_NOTE_OBJ, SIDEBAR_POPUP } from '../types/const';
 import { makeGetUnsavedNote } from '../selectors';
 import { getNote } from '../utils';

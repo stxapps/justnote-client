@@ -6,9 +6,10 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
+import { updatePopup } from '../actions';
 import {
-  updatePopup, moveNotes, moveToListName, updateSettingsPopup, updateSettingsViewId,
-} from '../actions';
+  moveNotes, moveToListName, updateSettingsPopup, updateSettingsViewId,
+} from '../actions/chunk';
 import {
   LIST_NAMES_POPUP, TRASH, LIST_NAMES_MODE_MOVE_NOTES, LIST_NAMES_MODE_MOVE_LIST_NAME,
   SETTINGS_VIEW_LISTS,

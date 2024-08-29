@@ -5,9 +5,8 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
-import {
-  signOut, updatePopup, updateSettingsPopup, updateSettingsViewId,
-} from '../actions';
+import { signOut, updatePopup } from '../actions';
+import { updateSettingsPopup, updateSettingsViewId } from '../actions/chunk';
 import {
   DOMAIN_NAME, HASH_SUPPORT, PROFILE_POPUP, SETTINGS_VIEW_ACCOUNT,
 } from '../types/const';

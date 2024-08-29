@@ -4,9 +4,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 import { Circle } from 'react-native-animated-spinkit';
 
-import {
-  updateNoteId, increaseSaveNoteCount, increaseDiscardNoteCount,
-} from '../actions';
+import { updateNoteId } from '../actions';
+import { increaseSaveNoteCount, increaseDiscardNoteCount } from '../actions/chunk';
 import {
   NEW_NOTE, ADDED, VALID, LG_WIDTH, BLK_MODE, NOTE_COMMANDS_MODE_NETB,
 } from '../types/const';

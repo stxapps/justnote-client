@@ -3,12 +3,13 @@ import { View, Text, TouchableOpacity, Switch, Platform } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
+import { updatePopup } from '../actions';
 import {
   updateDoDeleteOldNotesInTrash, updateSortOn, updateDoDescendingOrder,
   updateNoteDateShowingMode, updateNoteDateFormat, updateDoSectionNotesByMonth,
   updateDoMoreEditorFontSizes, updateDoUseLocalTheme, updateTheme,
-  updateUpdatingThemeMode, updatePopup,
-} from '../actions';
+  updateUpdatingThemeMode,
+} from '../actions/chunk';
 import {
   DATE_FORMAT_MENU_POPUP, ADDED_DT, UPDATED_DT, NOTE_DATE_SHOWING_MODE_HIDE,
   NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS, NOTE_DATE_FORMAT_TEXTS,

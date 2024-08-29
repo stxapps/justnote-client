@@ -1,6 +1,6 @@
 import { loop, Cmd } from 'redux-loop';
 
-import { cleanUpPins } from '../actions';
+import { cleanUpPins } from '../importWrapper';
 import {
   PIN_NOTE, PIN_NOTE_COMMIT, PIN_NOTE_ROLLBACK, UNPIN_NOTE, UNPIN_NOTE_COMMIT,
   UNPIN_NOTE_ROLLBACK, MOVE_PINNED_NOTE, MOVE_PINNED_NOTE_COMMIT,

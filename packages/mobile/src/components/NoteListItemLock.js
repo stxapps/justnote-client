@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
-import { showLockMenuPopup, showUNEPopup } from '../actions';
+import { showLockMenuPopup, showUNEPopup } from '../actions/chunk';
 import { makeGetDoShowTitle } from '../selectors';
 
 import { useTailwind } from '.';

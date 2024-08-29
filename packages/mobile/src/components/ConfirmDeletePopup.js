@@ -5,7 +5,8 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
-import { updatePopup, deleteNotes, deleteListNames, deleteTagNames } from '../actions';
+import { updatePopup } from '../actions';
+import { deleteNotes, deleteListNames, deleteTagNames } from '../actions/chunk';
 import {
   CONFIRM_DELETE_POPUP, DELETE_ACTION_LIST_NAME, DELETE_ACTION_TAG_NAME,
 } from '../types/const';

@@ -7,9 +7,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 import KeyboardManager from 'react-native-keyboard-manager';
 
+import { updatePopup } from '../actions';
 import {
-  updatePopup, updateTagEditor, addTagEditorTagName, updateTagData,
-} from '../actions';
+  updateTagEditor, addTagEditorTagName, updateTagData,
+} from '../actions/chunk';
 import {
   TAG_EDITOR_POPUP, TAGGED, ADD_TAGS, MANAGE_TAGS, BLK_MODE, SM_WIDTH, LG_WIDTH,
   NOT_SUPPORTED,

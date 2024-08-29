@@ -9,9 +9,8 @@ import { Dirs } from 'react-native-file-access';
 import { Circle } from 'react-native-animated-spinkit';
 
 import fileApi from '../apis/localFile';
-import {
-  updateNoteId, mergeNotes, handleUnsavedNote, deleteUnsavedNotes,
-} from '../actions';
+import { updateNoteId, handleUnsavedNote, deleteUnsavedNotes } from '../actions';
+import { mergeNotes } from '../actions/chunk';
 import {
   DOMAIN_NAME, HASH_SUPPORT, MERGING, DIED_MERGING, LG_WIDTH, BLK_MODE, IMAGES, UTF8,
 } from '../types/const';

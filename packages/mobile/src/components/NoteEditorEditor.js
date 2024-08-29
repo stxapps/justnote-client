@@ -6,11 +6,14 @@ import { Dirs } from 'react-native-file-access';
 
 import fileApi from '../apis/localFile';
 import {
-  updateEditorFocused, updateEditorBusy, saveNote, discardNote, onUpdateNoteId,
-  onChangeListName, onUpdateQueryString, onUpdateBulkEdit, onShowNoteListMenuPopup,
-  onShowNLIMPopup, onShowUNEPopup, updateEditorIsUploading, updateEditingNote,
-  handleUnsavedNote, increaseWebViewKeyCount,
+  onUpdateNoteId, onUpdateBulkEdit, handleUnsavedNote, increaseWebViewKeyCount,
 } from '../actions';
+import {
+  updateEditorFocused, updateEditorBusy, saveNote, discardNote, onChangeListName,
+  onUpdateQueryString, onShowNoteListMenuPopup, onShowNLIMPopup, onShowUNEPopup,
+  updateEditorIsUploading, updateEditingNote,
+} from '../actions/chunk';
+
 import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, UTF8, VALID } from '../types/const';
 import { getThemeMode, getDoMoreEditorFontSizes } from '../selectors';
 import {

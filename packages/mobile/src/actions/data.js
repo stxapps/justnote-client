@@ -11,7 +11,8 @@ import ImageResizer from '@bam.tech/react-native-image-resizer';
 import dataApi from '../apis/data';
 import serverApi from '../apis/server';
 import fileApi from '../apis/localFile';
-import { updatePopupUrlHash, sync, syncAndWait } from '../actions';
+import { updatePopupUrlHash } from '../actions';
+import { sync, syncAndWait } from '../actions/chunk';
 import {
   UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
   UPDATE_DELETE_ALL_DATA_PROGRESS, UPDATE_DELETE_SYNC_DATA_PROGRESS, DELETE_ALL_DATA,

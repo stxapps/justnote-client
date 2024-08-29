@@ -4,10 +4,11 @@ import {
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 
+import { updatePopup } from '../actions';
 import {
-  updatePopup, updateMoveAction, updateListNamesMode, bulkPinNotes,
-  bulkUnpinNotes, updateTagEditorPopup,
-} from '../actions';
+  updateMoveAction, updateListNamesMode, bulkPinNotes, bulkUnpinNotes,
+  updateTagEditorPopup,
+} from '../actions/chunk';
 import {
   BULK_EDIT_MENU_POPUP, LIST_NAMES_POPUP, MOVE_TO, PIN, UNPIN, MANAGE_TAGS, MY_NOTES,
   ARCHIVE, TRASH, MOVE_ACTION_NOTE_COMMANDS, LIST_NAMES_MODE_MOVE_NOTES,

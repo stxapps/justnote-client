@@ -5,10 +5,11 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
+import { updatePopup, updateNoteId, updateBulkEdit } from '../actions';
 import {
-  updatePopup, discardNote, updateNoteId, changeListName, updateBulkEdit,
-  showNoteListMenuPopup, showNLIMPopup, updateSettingsPopup,
-} from '../actions';
+  discardNote, changeListName, showNoteListMenuPopup, showNLIMPopup,
+  updateSettingsPopup,
+} from '../actions/chunk';
 import {
   CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_NOTE_ID,
   DISCARD_ACTION_CHANGE_LIST_NAME, DISCARD_ACTION_UPDATE_BULK_EDIT,

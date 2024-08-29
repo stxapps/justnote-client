@@ -4,11 +4,12 @@ import {
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 
+import { updatePopup } from '../actions';
 import {
-  updatePopup, moveNotesWithAction, pinNotes, updateMoveAction,
-  updateDeleteAction, updateListNamesMode, shareNote, exportNoteAsPdf,
-  showAddLockEditorPopup, lockNote, updateTagEditorPopup,
-} from '../actions';
+  moveNotesWithAction, pinNotes, updateMoveAction, updateDeleteAction,
+  updateListNamesMode, shareNote, exportNoteAsPdf, showAddLockEditorPopup, lockNote,
+  updateTagEditorPopup,
+} from '../actions/chunk';
 import {
   MY_NOTES, TRASH, ARCHIVE, REMOVE, RESTORE, DELETE, MOVE_TO, PIN, MANAGE_PIN, PINNED,
   SHARE, EXPORT_AS_PDF, NOTE_LIST_ITEM_MENU_POPUP, LIST_NAMES_POPUP, PIN_MENU_POPUP,

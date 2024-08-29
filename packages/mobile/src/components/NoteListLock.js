@@ -3,7 +3,8 @@ import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
-import { updatePopup, updateSelectingListName, updateLockAction } from '../actions';
+import { updatePopup } from '../actions';
+import { updateSelectingListName, updateLockAction } from '../actions/chunk';
 import { LOCK_EDITOR_POPUP, LOCK_ACTION_UNLOCK_LIST } from '../types/const';
 
 import { useTailwind } from '.';

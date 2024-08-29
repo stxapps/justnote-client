@@ -3,10 +3,10 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
+import { updatePopup } from '../actions';
 import {
-  updatePopup, moveNotesWithAction, updateMoveAction, updateDeleteAction,
-  updateListNamesMode,
-} from '../actions';
+  moveNotesWithAction, updateMoveAction, updateDeleteAction, updateListNamesMode,
+} from '../actions/chunk';
 import {
   LIST_NAMES_POPUP, BULK_EDIT_MENU_POPUP, CONFIRM_DELETE_POPUP, MY_NOTES, ARCHIVE,
   TRASH, LG_WIDTH, MOVE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_COMMANDS,

@@ -5,7 +5,8 @@ import {
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { updatePopup, updateNoteDateFormat } from '../actions';
+import { updatePopup } from '../actions';
+import { updateNoteDateFormat } from '../actions/chunk';
 import {
   DATE_FORMAT_MENU_POPUP, NOTE_DATE_FORMATS, NOTE_DATE_FORMAT_TEXTS,
 } from '../types/const';

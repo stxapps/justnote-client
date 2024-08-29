@@ -3,7 +3,8 @@ import { ScrollView, View, Text, TouchableOpacity, Linking } from 'react-native'
 import { useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
-import { updateNoteId, retryDiedNotes, cancelDiedNotes } from '../actions';
+import { updateNoteId } from '../actions';
+import { retryDiedNotes, cancelDiedNotes } from '../actions/chunk';
 import { DOMAIN_NAME, HASH_SUPPORT, LG_WIDTH } from '../types/const';
 
 import { useSafeAreaFrame, useTailwind } from '.';

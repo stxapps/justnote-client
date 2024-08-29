@@ -3,7 +3,8 @@ import { View, Text, TouchableOpacity, Animated, BackHandler } from 'react-nativ
 import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 
-import { updateBulkEdit, updateNoteId, fetch, sync } from '../actions';
+import { updateBulkEdit, updateNoteId } from '../actions';
+import { fetch, sync } from '../actions/chunk';
 import {
   SD_HUB_URL, TRASH, NEW_NOTE, NEW_NOTE_OBJ, MAX_SELECTED_NOTE_IDS,
   SD_MAX_SELECTED_NOTE_IDS, VALID, LOCKED,
