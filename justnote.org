@@ -25,6 +25,7 @@
 ** anytype.io
 ** grugnotes.com
 ** github.com/flxzt/rnote
+** affine.pro, github.com/toeverything/AFFiNE
 * Same Name
 ** jusnote.com - The most powerful software for managing the legal practice
 ** justnotepad.com
