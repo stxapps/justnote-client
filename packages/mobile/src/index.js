@@ -9,6 +9,7 @@ import {
   SafeAreaProvider, initialWindowMetrics, SafeAreaView,
 } from 'react-native-safe-area-context';
 import KeyboardManager from 'react-native-keyboard-manager';
+import SystemNavigationBar from 'react-native-system-navigation-bar';
 
 import reducers from './reducers';
 import { BLK_MODE } from './types/const';
@@ -52,8 +53,22 @@ const _Root = () => {
   const backgroundColorRef = useRef(backgroundColor);
 
   const updateStatusBar = () => {
-    StatusBar.setBarStyle(themeModeRef.current === BLK_MODE ? 'light-content' : 'dark-content');
-    if (Platform.OS === 'android') StatusBar.setBackgroundColor(backgroundColorRef.current);
+    const statusBarStyle = (
+      themeModeRef.current === BLK_MODE ? 'light-content' : 'dark-content'
+    );
+    const statusBgColor = backgroundColorRef.current;
+    const navBarStyle = themeModeRef.current === BLK_MODE ? 'light' : 'dark';
+    const navBgColor = backgroundColorRef.current;
+
+    if (Platform.OS === 'ios') {
+      StatusBar.setBarStyle(statusBarStyle);
+    } else if (Platform.OS === 'android') {
+      SystemNavigationBar.setNavigationColor(statusBgColor, navBarStyle, 'status');
+      SystemNavigationBar.setNavigationColor(navBgColor, navBarStyle, 'navigation');
+
+      StatusBar.setBarStyle(statusBarStyle);
+      StatusBar.setBackgroundColor(statusBgColor);
+    }
   };
 
   useEffect(() => {
