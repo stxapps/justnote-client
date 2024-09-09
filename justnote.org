@@ -296,7 +296,7 @@
 - yarn add --dev redux-flipper react-native-flipper@0.164.0
 - yarn add jest-diff queue event-target-fallback
 - yarn add @bam.tech/react-native-image-resizer
-- yarn add react-native-system-navigation-bar
+- yarn add react-native-system-navigation-bar @vonovak/react-native-theme-control
 - Font
   + Create react-native.config.js
   + Run npx react-native-asset

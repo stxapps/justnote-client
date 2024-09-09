@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@bam.tech/react-native-image-resizer": "^3.0.7",
+    "@vonovak/react-native-theme-control": "^6.0.1",
     "@wewatch/lexorank": "^1.0.3",
     "axios": "^1.7.4",
     "event-target-fallback": "^1.0.0",
