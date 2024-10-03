@@ -212,7 +212,7 @@ const Landing = () => {
                       </span>
                     </div>
                     <h3 className={tailwind('mt-8 text-lg font-medium tracking-tight text-gray-900')}>Account</h3>
-                    <p className={tailwind('mt-5 text-left text-base text-gray-500')}><a className={tailwind('rounded font-medium text-indigo-600 hover:underline focus:outline-none focus:ring-2 focus:ring-indigo-500')} href="https://docs.stacks.co/stacks-101/accounts" target="_blank" rel="noreferrer">Your account</a> is cryptographically generated; only you, with your Secret Key, can control it.</p>
+                    <p className={tailwind('mt-5 text-left text-base text-gray-500')}><a className={tailwind('rounded font-medium text-indigo-600 hover:underline focus:outline-none focus:ring-2 focus:ring-indigo-500')} href="https://docs.stacks.co/concepts/network-fundamentals/accounts" target="_blank" rel="noreferrer">Your account</a> is cryptographically generated; only you, with your Secret Key, can control it.</p>
                     <h4 className={tailwind('mt-7 text-left text-base font-medium tracking-tight text-gray-900')}>No ban on your owned account</h4>
                     <p className={tailwind('mt-3 text-left text-base text-gray-500')}>Your account cannot be locked, banned, or deleted by anyone, as your Secret Key is required to access and modify your account.</p>
                   </div>
@@ -252,7 +252,7 @@ const Landing = () => {
                       </span>
                     </div>
                     <h3 className={tailwind('mt-8 text-lg font-medium tracking-tight text-gray-900')}>Data Storage</h3>
-                    <p className={tailwind('mt-5 text-left text-base text-gray-500')}>Your data lives in <a className={tailwind('rounded font-medium text-indigo-600 hover:underline focus:outline-none focus:ring-2 focus:ring-indigo-500')} href="https://docs.stacks.co/stacks-in-depth/gaia" target="_blank" rel="noreferrer">a data server</a> of your choice; only you, with your Secret Key, can change it.</p>
+                    <p className={tailwind('mt-5 text-left text-base text-gray-500')}>Your data lives in <a className={tailwind('rounded font-medium text-indigo-600 hover:underline focus:outline-none focus:ring-2 focus:ring-indigo-500')} href="https://docs.stacks.co/concepts/gaia" target="_blank" rel="noreferrer">a data server</a> of your choice; only you, with your Secret Key, can change it.</p>
                     <h4 className={tailwind('mt-7 text-left text-base font-medium tracking-tight text-gray-900')}>No lock out of your own data</h4>
                     <p className={tailwind('mt-3 text-left text-base text-gray-500')}>You can manage your data and set permissions directly, as you can host your own data server or choose any data server provider.</p>
                   </div>

@@ -26,6 +26,9 @@
 ** grugnotes.com
 ** github.com/flxzt/rnote
 ** affine.pro, github.com/toeverything/AFFiNE
+** github.com/maltaisn/another-notes-app
+** getupnote.com
+** noteplan.co
 * Same Name
 ** jusnote.com - The most powerful software for managing the legal practice
 ** justnotepad.com
