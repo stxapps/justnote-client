@@ -271,35 +271,35 @@
 - aws-cli supports multiple users/profiles, add in ~/.aws/config and ~/.aws/credentials
 - every command follows by --profile <name>
 ** Native steps
-- npx react-native init Justnotecc
-- yarn add redux react-redux redux-loop reselect
-- yarn add react-native-fast-image react-native-svg url-parse
-- yarn add react-native-safe-area-context
-- yarn add react-native-keyboard-manager
-- yarn add react-native-animated-spinkit
-- yarn add react-native-webview
-- yarn add react-native-file-access
-- yarn add react-native-mmkv-storage (use 0.4.4 for now to be able to debug)
+- npx @react-native-community/cli@latest init Justnotecc --pm npm
+- npm i redux@4.2.1 react-redux@8.1.3 redux-loop@6.2.0 reselect@4.1.8
+- npm i react-native-svg
+- npm i -D react-native-svg-transformer
+  + Update metro.config.js to work with .svg
+- npm i url-parse
+- npm i react-native-animated-spinkit
+- npm i react-native-safe-area-context
+- npm i react-native-keyboard-manager
+- npm i react-native-webview
+- npm i react-native-file-access
+- npm i react-native-mmkv-storage@0.4.4
   + Add pickFirst in build.gradle
   + Add proguard rules
   + require iOS target to 11.0
-- yarn add https://github.com/stxapps/tailwind-rn#96848a8d2c2370e4f5e57a773ace172c4073157d
-- yarn add 'https://gitpkg.now.sh/stxapps/blockstack-react-native/BlockstackSDK?51209bd3b6201bb56dfb5b652a7faedd555f7648
-- yarn add babel-plugin-inline-import --dev
-  + Update babel.config.js to work with .svg
-- yarn add @welldone-software/why-did-you-render --dev
-- yarn add typescript@4.0.8 --dev
-- yarn add @types/react-native --dev
-- yarn add react-native-iap@8.2.1 @wewatch/lexorank axios@0.27.2
-- yarn add https://github.com/stxapps/react-native-device-time-format#63f4a9158a91c391d67317a489ccfe8ec28a7c84
-- yarn add https://github.com/stxapps/react-native-html-to-pdf#77aed8df9caa3b48f7cf19933bc6d6576fe817ce
-- yarn add react-native-document-picker react-native-share react-native-zip-archive
-- yarn add htmlparser2
-- yarn add react-native-flag-secure
-- yarn add --dev redux-flipper react-native-flipper@0.164.0
-- yarn add jest-diff queue event-target-fallback
-- yarn add @bam.tech/react-native-image-resizer
-- yarn add react-native-system-navigation-bar @vonovak/react-native-theme-control
+- npm i https://github.com/stxapps/tailwind-rn#96848a8d2c2370e4f5e57a773ace172c4073157d
+- npm i 'https://gitpkg.now.sh/stxapps/blockstack-react-native/BlockstackSDK?3d5bcd6ea9a17f00c76be5913009f2c02f13b95f'
+- npm i @welldone-software/why-did-you-render -D
+- npm i react-native-iap @wewatch/lexorank axios
+- npm i https://github.com/stxapps/react-native-device-time-format#63f4a9158a91c391d67317a489ccfe8ec28a7c84
+- npm i https://github.com/stxapps/react-native-html-to-pdf#77aed8df9caa3b48f7cf19933bc6d6576fe817ce
+- npm i react-native-document-picker react-native-share react-native-zip-archive
+- npm i htmlparser2
+- npm i react-native-flag-secure
+- npm i jest-diff queue event-target-fallback
+- npm i @bam.tech/react-native-image-resizer
+- npm i react-native-default-preference
+- npm i https://github.com/stxapps/react-native-receive-sharing-intent#d1b4aa9140e0ad28e1a8403814125a733c92172c
+- npm i react-native-system-navigation-bar @vonovak/react-native-theme-control
 - Font
   + Create react-native.config.js
   + Run npx react-native-asset
@@ -352,6 +352,7 @@
       > Search Paths/Library Search Paths: both Debug and Release add "${SDKROOT}/usr/lib/swift" non-recursive (developer.apple.com/forums/thread/655438)
   + Targets -> Justnotecc -> Build Settings -> Packaging -> Product Name: Justnotecc
   + Targets -> Justnotecc -> Build Settings -> Build Options -> Always embed Swift standard libraries: $(inherited)
+  + Right click on Save to Justnote in Xcode sidebar, convert to group, make sure not buildable folder
 - Setup Universal Link and App Link on server
    + Upload assetlinks.json to justnote.cc/.well-known/, *not .wellknown!*
     ~ assume debug.keystore unchanged: git update-index --assume-unchanged packages/mobile/android/app/debug.keystore
@@ -362,14 +363,13 @@
     ~ *Need sha256 from Play Store Console* at Release Management > App signing > App signing certificate > SHA-256 certificate fingerprint (medium.com/@joeykaan/the-definitive-guide-to-app-links-eef50a4c26e9)
    + Upload apple-app-site-association to justnote.cc/.well-known, *not .wellknown and content type application/json!*
 - Share to Justnote
-  + yarn add https://github.com/stxapps/react-native-receive-sharing-intent#c3acb5afdae0087aef58ad806e8208ef2f280f7e
+  + Install react-native-receive-sharing-intent and react-native-default-preference
   + In android/app/src/main/AndroidManifest.xml, add ShareActivity
   + Create ShareActivity.java file, update values in String and Style
   + Add AppRegistry in mobile/index.js, Create share.js file
   + Listen to MainActivity's onResume and onPause
     ~ Update MainActivity, use DeviceEventEmitter to emit and listen to custom events
     ~ Not add appStateChange in init, add in Main.js instead
-  + yarn add react-native-default-preference
   + File -> New -> Target -> Share Extension
     ~ Save to Justnote, Swift
     ~ Check iOS target the same as main app

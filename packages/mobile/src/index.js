@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Text, TextInput, Platform, StatusBar, Keyboard } from 'react-native';
 import { Provider, useSelector } from 'react-redux';
-import { legacy_createStore as createStore, compose, applyMiddleware } from 'redux';
+import { legacy_createStore as createStore, compose } from 'redux';
 import { install as installReduxLoop } from 'redux-loop';
 import {
   SafeAreaProvider, initialWindowMetrics, SafeAreaView,
@@ -28,10 +28,8 @@ TextInput.defaultProps.allowFontScaling = false;
 
 let enhancers;
 if (__DEV__) {
-  const createDebugger = require('redux-flipper').default;
   enhancers = compose(
     installReduxLoop({ ENABLE_THUNK_MIGRATION: true }),
-    applyMiddleware(createDebugger()),
   );
 } else {
   enhancers = compose(
