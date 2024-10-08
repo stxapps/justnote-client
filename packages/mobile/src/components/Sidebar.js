@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import Svg, { SvgXml, Path } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 
 import { updateNoteId } from '../actions';
 import { NEW_NOTE, NEW_NOTE_OBJ, BLK_MODE, VALID } from '../types/const';
@@ -12,8 +12,8 @@ import SidebarSearchInput from './SidebarSearchInput';
 import SidebarListNames from './SidebarListNames';
 import LoadingSidebarListNames from './LoadingSidebarListNames';
 
-import logoFull from '../images/logo-full.svg';
-import logoFullBlk from '../images/logo-full-blk.svg';
+import Logo from '../images/logo-full.svg';
+import LogoBlk from '../images/logo-full-blk.svg';
 
 const Sidebar = () => {
 
@@ -35,7 +35,7 @@ const Sidebar = () => {
   return (
     <View style={tailwind('h-full w-full min-w-56 bg-gray-100 pt-5 pb-4 blk:bg-gray-800')}>
       <View style={tailwind('flex-shrink-0 justify-center px-6')}>
-        <SvgXml width={108} height={32} xml={themeMode === BLK_MODE ? logoFullBlk : logoFull} />
+        {themeMode === BLK_MODE ? <LogoBlk width={108} height={32} /> : <Logo width={108} height={32} />}
       </View>
       <View style={tailwind('flex-1')}>
         {/* Sidebar Search */}

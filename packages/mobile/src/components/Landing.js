@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
-import Svg, { SvgXml, Path } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 
 import { updatePopup } from '../actions';
 import {
@@ -14,7 +14,7 @@ import SignUpPopup from './SignUpPopup';
 import SignInPopup from './SignInPopup';
 import ConfirmAsDummyPopup from './ConfirmAsDummyPopup';
 
-import logoFull from '../images/logo-full.svg';
+import Logo from '../images/logo-full.svg';
 
 const Landing = () => {
 
@@ -43,7 +43,7 @@ const Landing = () => {
           </TouchableOpacity>
         </View>
         <View style={cache('L_middleView', [tailwind('max-w-lg flex-1 items-start justify-center self-center p-6 lg:p-8'), { minHeight: 256 }])}>
-          <SvgXml width={135} height={40} xml={logoFull} />
+          <Logo width={135} height={40} />
           <Text style={tailwind('pt-3 text-xl font-normal text-gray-500')}>A note-taking app that you can use easily, take notes rapidly, and, importantly, truly own your account and data.</Text>
         </View>
         <View style={tailwind('items-center justify-center p-6 lg:p-8')}>

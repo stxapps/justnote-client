@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Linking } from 'react-native';
 import { useSelector } from 'react-redux';
-import { SvgXml, Svg, Path } from 'react-native-svg';
+import { Svg, Path } from 'react-native-svg';
 
 import {
   DOMAIN_NAME, HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY,
@@ -11,8 +11,8 @@ import { getThemeMode } from '../selectors';
 
 import { useTailwind } from '.';
 
-import shortLogo from '../images/logo-short.svg';
-import shortLogoBlk from '../images/logo-short-blk.svg';
+import Logo from '../images/logo-short.svg';
+import LogoBlk from '../images/logo-short-blk.svg';
 
 const SettingsPopupAbout = (props) => {
 
@@ -30,7 +30,7 @@ const SettingsPopupAbout = (props) => {
       </View>
       <View style={tailwind('mt-5 md:mt-0')}>
         <View style={tailwind('hidden md:flex')}>
-          <SvgXml width={28} height={28} xml={themeMode === BLK_MODE ? shortLogoBlk : shortLogo} />
+          {themeMode === BLK_MODE ? <LogoBlk width={28} height={28} /> : <Logo width={28} height={28} />}
         </View>
         <View style={tailwind('-ml-2 items-start justify-start md:flex-row md:pt-8')}>
           <View style={tailwind('py-2')}>
