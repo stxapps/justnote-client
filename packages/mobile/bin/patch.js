@@ -71,6 +71,17 @@ const patchAnsiStyles = () => {
   );
 };
 
+const patchMmkv = () => {
+  const match = "    implementation 'com.tencent:mmkv-static:1.2.7'";
+  const repmt = "    implementation 'com.tencent:mmkv-static:1.2.8'";
+
+  replaceMatchedLine(
+    'node_modules/react-native-mmkv-storage/android/build.gradle',
+    [{ match, repmt }],
+  );
+};
+
 patchTypeReactRedux();
 patchTypeReselect();
 patchAnsiStyles();
+patchMmkv();

@@ -1,5 +1,6 @@
 package com.justnotecc
 
+import android.util.Log
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
@@ -18,11 +19,10 @@ class MainActivity : ReactActivity() {
     super.onPause()
 
     try {
-      val reactContext = getReactInstanceManager().getCurrentReactContext()
-      if (reactContext != null) {
-        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-            .emit("onMainActivityPause", null)
-      }
+      reactInstanceManager
+        .currentReactContext
+        ?.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+        ?.emit("onMainActivityPause", null)
     } catch (err: Exception) {
       Log.d("MainActivity", "Emit onMainActivityPause error", err)
     }
@@ -32,11 +32,10 @@ class MainActivity : ReactActivity() {
     super.onResume()
 
     try {
-      val reactContext = getReactInstanceManager().getCurrentReactContext()
-      if (reactContext != null) {
-        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-            .emit("onMainActivityResume", null)
-      }
+      reactInstanceManager
+        .currentReactContext
+        ?.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+        ?.emit("onMainActivityResume", null)
     } catch (err: Exception) {
       Log.d("MainActivity", "Emit onMainActivityResume error", err)
     }

@@ -14,7 +14,7 @@ class ShareActivity : ReactActivity() {
    */
   override fun getMainComponentName(): String = "Save to Justnote"
 
-  override fun onNewIntent(Intent intent) {
+  override fun onNewIntent(intent: Intent?) {
     super.onNewIntent(intent)
     setIntent(intent)
   }
