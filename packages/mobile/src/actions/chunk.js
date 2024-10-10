@@ -3494,8 +3494,14 @@ export const updateThemeCustomOptions = () => async (dispatch, getState) => {
 };
 
 export const shareNote = () => async (dispatch, getState) => {
-  const { listName, selectingNoteId } = getState().display;
-  const note = getState().notes[listName][selectingNoteId];
+  const notes = getState().notes;
+  const selectingNoteId = getState().display.selectingNoteId;
+
+  const note = getNote(selectingNoteId, notes);
+  if (!isObject(note)) {
+    console.log('In shareNote, invalid selectingNoteId:', selectingNoteId);
+    return;
+  }
 
   try {
     await Share.open({
@@ -3540,10 +3546,17 @@ export const exportNoteAsPdf = () => async (dispatch, getState) => {
   dispatch(updateExportNoteAsPdfProgress({ total: 1, done: 0 }));
   await sleep(16);
 
+  const notes = getState().notes;
+  const selectingNoteId = getState().display.selectingNoteId;
+
+  const note = getNote(selectingNoteId, notes);
+  if (!isObject(note)) {
+    console.log('In exportNoteAsPdf, invalid selectingNoteId:', selectingNoteId);
+    return;
+  }
+
   let name, file;
   try {
-    const { listName, selectingNoteId } = getState().display;
-    const note = getState().notes[listName][selectingNoteId];
     const body = await replaceImageUrls(note.body);
 
     let html = `${jhfp}`;
