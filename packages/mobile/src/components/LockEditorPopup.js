@@ -316,7 +316,7 @@ const LockEditorPopup = () => {
             </View>
             <View style={tailwind('absolute top-0 right-0 p-1')}>
               <TouchableOpacity onPress={onCancelBtnClick} style={tailwind('h-7 w-7 items-center justify-center')}>
-                <Svg width={20} height={20} style={tailwind('rounded font-normal text-gray-400 blk:text-gray-500')} stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                <Svg width={20} height={20} style={tailwind('font-normal text-gray-400 blk:text-gray-500')} stroke="currentColor" fill="none" viewBox="0 0 24 24">
                   <Path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </Svg>
               </TouchableOpacity>
