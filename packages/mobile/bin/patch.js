@@ -57,20 +57,6 @@ const patchTypeReselect = () => {
   );
 };
 
-const patchAnsiStyles = () => {
-
-  const match1 = '				const matches = /(?<colorString>[a-f\\d]{6}|[a-f\\d]{3})/i.exec(hex.toString(16));';
-  const repmt1 = '				const matches = /([a-f\\d]{6}|[a-f\\d]{3})/i.exec(hex.toString(16));';
-
-  const match2 = '				let {colorString} = matches.groups;';
-  const repmt2 = '				let colorString = matches[1];';
-
-  replaceMatchedLine(
-    'node_modules/jest-diff/node_modules/ansi-styles/index.js',
-    [{ match: match1, repmt: repmt1 }, { match: match2, repmt: repmt2 }],
-  );
-};
-
 const patchMmkv = () => {
   const match = "    implementation 'com.tencent:mmkv-static:1.2.7'";
   const repmt = "    implementation 'com.tencent:mmkv-static:1.2.8'";
@@ -83,5 +69,4 @@ const patchMmkv = () => {
 
 patchTypeReactRedux();
 patchTypeReselect();
-patchAnsiStyles();
 patchMmkv();
