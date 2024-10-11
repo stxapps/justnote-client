@@ -9,10 +9,10 @@
     "export-ckeditor-as-string": "node bin/export-ckeditor-as-string.js ../../../justnote-editor-in-webview/core-js/minified.js ../../../justnote-editor-in-webview/js/ckeditor.js ../../../justnote-editor-in-webview/css/tailwind.css ../../../justnote-editor-in-webview/css/ckeditor.css ../../../justnote-editor-in-webview/index.html ./ckeditor.js",
     "export-jhfp-as-string": "node bin/export-jhfp-as-string.js ../../../justnote-html-for-pdf/css/tailwind.css ../../../justnote-html-for-pdf/css/ckeditor.css ../../../justnote-html-for-pdf/index.html ./jhfp.js",
     "android": "react-native run-android",
-    "android-release": "react-native run-android --variant=release",
+    "android-release": "react-native run-android --mode release",
     "ios-install": "npx pod-install",
     "ios": "react-native run-ios",
-    "ios-release": "react-native run-ios --configuration Release",
+    "ios-release": "react-native run-ios --mode Release",
     "start": "react-native start",
     "test": "jest",
     "lint": "eslint ."

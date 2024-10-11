@@ -32,3 +32,4 @@
   private static *** mmkvLogImp(...);
   private static *** onContentChangedByOuterProcess(***);
 }
+-dontwarn org.slf4j.impl.StaticLoggerBinder
