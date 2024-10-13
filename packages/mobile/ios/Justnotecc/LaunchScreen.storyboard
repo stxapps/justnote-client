@@ -18,19 +18,19 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="LaunchImage" translatesAutoresizingMaskIntoConstraints="NO" id="akt-Ie-1NH">
-                                <rect key="frame" x="162" y="251.33333333333334" width="106" height="105.66666666666666"/>
+                                <rect key="frame" x="162" y="262.66666666666669" width="106" height="105.66666666666669"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" relation="lessThanOrEqual" constant="128" id="Mq4-pz-0Yg"/>
                                     <constraint firstAttribute="width" secondItem="akt-Ie-1NH" secondAttribute="height" multiplier="1:1" id="hiL-yC-wkj"/>
+                                    <constraint firstAttribute="width" relation="lessThanOrEqual" constant="128" id="xTS-cW-IbE"/>
                                 </constraints>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="akt-Ie-1NH" firstAttribute="top" secondItem="Bcu-3y-fUS" secondAttribute="bottom" multiplier="0.333333" constant="-48" id="kv2-IZ-1uB"/>
-                            <constraint firstItem="akt-Ie-1NH" firstAttribute="centerX" secondItem="Bcu-3y-fUS" secondAttribute="centerX" id="mAF-5q-uH4"/>
-                            <constraint firstItem="akt-Ie-1NH" firstAttribute="width" secondItem="Bcu-3y-fUS" secondAttribute="width" multiplier="0.246" priority="750" id="wKW-oC-qp3"/>
+                            <constraint firstItem="akt-Ie-1NH" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="bottom" multiplier="0.333333" constant="-48" id="kv2-IZ-1uB"/>
+                            <constraint firstItem="akt-Ie-1NH" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="mAF-5q-uH4"/>
+                            <constraint firstItem="akt-Ie-1NH" firstAttribute="width" secondItem="Ze5-6b-2t3" secondAttribute="width" multiplier="0.246" priority="750" id="wKW-oC-qp3"/>
                         </constraints>
                     </view>
                 </viewController>

@@ -29,15 +29,6 @@
 #endif
 }
 
-- (void)customizeRootView:(RCTRootView *)rootView
-{
-  [super customizeRootView:rootView];
-
-  UIStoryboard *sb = [UIStoryboard storyboardWithName:@"LaunchScreen" bundle:nil];
-  UIViewController *vc = [sb instantiateInitialViewController];
-  rootView.loadingView = vc.view;
-}
-
 - (BOOL)application:(UIApplication *)application
             openURL:(NSURL *)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
