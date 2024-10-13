@@ -1,7 +1,7 @@
 //import './wdyr';
 
-import React, { useEffect, useRef } from 'react';
-import { Text, TextInput, Platform, StatusBar, Keyboard } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Text, TextInput, Platform, StatusBar } from 'react-native';
 import { Provider, useSelector } from 'react-redux';
 import { legacy_createStore as createStore, compose } from 'redux';
 import { install as installReduxLoop } from 'redux-loop';
@@ -44,60 +44,53 @@ if (Platform.OS === 'ios') {
   KeyboardManager.setEnableAutoToolbar(false);
 }
 
+/**
+ * @return {'light-content'|'dark-content'}
+ */
+const getStBarStyle = (themeMode) => {
+  return themeMode === BLK_MODE ? 'light-content' : 'dark-content';
+};
+
+const getNavBarStyle = (themeMode) => {
+  return themeMode === BLK_MODE ? 'light' : 'dark';
+};
+
+const getBgColor = (themeMode) => {
+  return themeMode === BLK_MODE ? 'rgb(17, 24, 39)' : 'white';
+};
+
+const updateAndroidStyle = async (themeMode) => {
+  if (Platform.OS !== 'android') return;
+
+  const navBarStyle = getNavBarStyle(themeMode);
+  const navBgColor = getBgColor(themeMode);
+  const appBgColor = getBgColor(themeMode);
+
+  try {
+    await SystemNavigationBar.setNavigationColor(
+      navBgColor, navBarStyle, 'navigation'
+    );
+    await setAppBackground(appBgColor);
+  } catch (error) {
+    console.log('In src/index.js, updateAndroidStyle error:', error);
+  }
+};
+
 const _Root = () => {
   const themeMode = useSelector(state => getThemeMode(state));
-  const backgroundColor = themeMode === BLK_MODE ? 'rgb(17, 24, 39)' : 'white';
-
-  const themeModeRef = useRef(themeMode);
-  const backgroundColorRef = useRef(backgroundColor);
-
-  const updateStatusBar = async () => {
-    const statusBarStyle = (
-      themeModeRef.current === BLK_MODE ? 'light-content' : 'dark-content'
-    );
-    const statusBgColor = backgroundColorRef.current;
-    const navBarStyle = themeModeRef.current === BLK_MODE ? 'light' : 'dark';
-    const navBgColor = backgroundColorRef.current;
-    const appBgColor = backgroundColorRef.current;
-
-    try {
-      if (Platform.OS === 'ios') {
-        StatusBar.setBarStyle(statusBarStyle);
-      } else if (Platform.OS === 'android') {
-        await SystemNavigationBar.setNavigationColor(
-          statusBgColor, navBarStyle, 'status'
-        );
-        await SystemNavigationBar.setNavigationColor(
-          navBgColor, navBarStyle, 'navigation'
-        );
-        await setAppBackground(appBgColor);
-
-        StatusBar.setBarStyle(statusBarStyle);
-        StatusBar.setBackgroundColor(statusBgColor);
-      }
-    } catch (error) {
-      console.log('In src/index.js, updateStatusBar error:', error);
-    }
-  };
+  const [stBarStyle, setStBarStyle] = useState(getStBarStyle(themeMode));
+  const [bgColor, setBgColor] = useState(getBgColor(themeMode));
 
   useEffect(() => {
-    themeModeRef.current = themeMode;
-    backgroundColorRef.current = backgroundColor;
-    updateStatusBar();
-  }, [themeMode, backgroundColor]);
+    setStBarStyle(getStBarStyle(themeMode));
+    setBgColor(getBgColor(themeMode));
 
-  useEffect(() => {
-    const willShowSub = Keyboard.addListener('keyboardWillShow', updateStatusBar);
-    const didHideSub = Keyboard.addListener('keyboardDidHide', updateStatusBar);
-
-    return () => {
-      willShowSub.remove();
-      didHideSub.remove();
-    };
-  }, []);
+    updateAndroidStyle(themeMode);
+  }, [themeMode]);
 
   return (
-    <SafeAreaView style={cache('SI_safeAreaView', { flex: 1, backgroundColor }, [themeMode])}>
+    <SafeAreaView style={cache('SI_safeAreaView', { flex: 1, backgroundColor: bgColor }, [bgColor])}>
+      <StatusBar barStyle={stBarStyle} backgroundColor={bgColor} />
       <App />
     </SafeAreaView>
   );
