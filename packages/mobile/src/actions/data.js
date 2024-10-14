@@ -37,6 +37,8 @@ import {
 import { initialSettingsState, initialInfoState } from '../types/initialStates';
 import vars from '../vars';
 
+import { increaseUpdateStatusBarStyleCount } from '.';
+
 const _getBestMap = (fpath, idMap) => {
   // Export from Windows, path separator is \
   if (!fpath.includes('/') && fpath.includes('\\')) {
@@ -1445,6 +1447,8 @@ const _importAllData = async (dispatch, getState) => {
       type: DocumentPickerTypes.zip,
       copyTo: 'cachesDirectory',
     });
+    dispatch(increaseUpdateStatusBarStyleCount());
+
     const result = results[0];
     if (!isObject(result) || !isString(result.fileCopyUri)) {
       dispatch(updateImportAllDataProgress(null));
@@ -1463,6 +1467,8 @@ const _importAllData = async (dispatch, getState) => {
     await unzip(fileCopyPath, importDPath);
     await parseImportedFile(dispatch, getState, importDPath);
   } catch (error) {
+    dispatch(increaseUpdateStatusBarStyleCount());
+
     dispatch(updateImportAllDataProgress(null));
     if (DocumentPicker.isCancel(error)) return;
 
@@ -1513,11 +1519,14 @@ const _canExport = (noteMeta, lockSettings, toRootIds) => {
   return true;
 };
 
-export const saveAs = async (filePath, fileName) => {
+export const saveAs = async (dispatch, filePath, fileName) => {
   if (Platform.OS === 'ios') {
     try {
       await Share.open({ url: 'file://' + filePath });
+      dispatch(increaseUpdateStatusBarStyleCount());
     } catch (error) {
+      dispatch(increaseUpdateStatusBarStyleCount());
+
       if (isObject(error)) {
         if (
           isObject(error.error) &&
@@ -1794,7 +1803,7 @@ export const exportAllData = () => async (dispatch, getState) => {
     if (doFileExist) await FileSystem.unlink(filePath);
 
     await zip(exportDPath, filePath);
-    await saveAs(filePath, fileName);
+    await saveAs(dispatch, filePath, fileName);
 
     if (errorResponses.length > 0) {
       progress.total = -1;

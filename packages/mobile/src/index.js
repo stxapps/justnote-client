@@ -1,7 +1,7 @@
 //import './wdyr';
 
-import React, { useState, useEffect } from 'react';
-import { Text, TextInput, Platform, StatusBar } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Text, TextInput, Platform, StatusBar, Keyboard, AppState } from 'react-native';
 import { Provider, useSelector } from 'react-redux';
 import { legacy_createStore as createStore, compose } from 'redux';
 import { install as installReduxLoop } from 'redux-loop';
@@ -59,18 +59,38 @@ const getBgColor = (themeMode) => {
   return themeMode === BLK_MODE ? 'rgb(17, 24, 39)' : 'white';
 };
 
+const updateIosStyle = (themeMode) => {
+  if (Platform.OS !== 'ios') return;
+
+  const stBarStyle = getStBarStyle(themeMode);
+
+  try {
+    StatusBar.setBarStyle(stBarStyle);
+  } catch (error) {
+    console.log('In src/index.js, updateIosStyle error:', error);
+  }
+};
+
 const updateAndroidStyle = async (themeMode) => {
   if (Platform.OS !== 'android') return;
 
+  const stBarStyle = getStBarStyle(themeMode);
+  const stBgColor = getBgColor(themeMode);
   const navBarStyle = getNavBarStyle(themeMode);
   const navBgColor = getBgColor(themeMode);
   const appBgColor = getBgColor(themeMode);
 
   try {
     await SystemNavigationBar.setNavigationColor(
+      stBgColor, navBarStyle, 'status'
+    );
+    await SystemNavigationBar.setNavigationColor(
       navBgColor, navBarStyle, 'navigation'
     );
     await setAppBackground(appBgColor);
+
+    StatusBar.setBarStyle(stBarStyle);
+    StatusBar.setBackgroundColor(stBgColor);
   } catch (error) {
     console.log('In src/index.js, updateAndroidStyle error:', error);
   }
@@ -78,19 +98,56 @@ const updateAndroidStyle = async (themeMode) => {
 
 const _Root = () => {
   const themeMode = useSelector(state => getThemeMode(state));
-  const [stBarStyle, setStBarStyle] = useState(getStBarStyle(themeMode));
-  const [bgColor, setBgColor] = useState(getBgColor(themeMode));
+  const updateStBarStyleCount = useSelector(
+    state => state.display.updateStatusBarStyleCount
+  );
+  const themeModeRef = useRef(themeMode);
+  const prevUpdateStBarStyleCount = useRef(updateStBarStyleCount);
 
   useEffect(() => {
-    setStBarStyle(getStBarStyle(themeMode));
-    setBgColor(getBgColor(themeMode));
+    themeModeRef.current = themeMode;
 
+    updateIosStyle(themeMode);
     updateAndroidStyle(themeMode);
   }, [themeMode]);
 
+  useEffect(() => {
+    const willShowSub = Keyboard.addListener('keyboardWillShow', () => {
+      updateIosStyle(themeModeRef.current);
+    });
+    const didHideSub = Keyboard.addListener('keyboardDidHide', () => {
+      updateIosStyle(themeModeRef.current);
+    });
+
+    return () => {
+      willShowSub.remove();
+      didHideSub.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    const changeSub = AppState.addEventListener('change', (nextAppState) => {
+      if (nextAppState === 'active') updateIosStyle(themeModeRef.current);
+    });
+
+    return () => {
+      changeSub.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (updateStBarStyleCount !== prevUpdateStBarStyleCount.current) {
+      if (updateStBarStyleCount > prevUpdateStBarStyleCount.current) {
+        updateIosStyle(themeModeRef.current);
+      }
+      prevUpdateStBarStyleCount.current = updateStBarStyleCount;
+    }
+  }, [updateStBarStyleCount]);
+
+  const bgColor = getBgColor(themeMode);
+
   return (
     <SafeAreaView style={cache('SI_safeAreaView', { flex: 1, backgroundColor: bgColor }, [bgColor])}>
-      <StatusBar barStyle={stBarStyle} backgroundColor={bgColor} />
       <App />
     </SafeAreaView>
   );

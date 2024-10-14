@@ -98,6 +98,7 @@ import vars from '../vars';
 import {
   syncQueue, taskQueue, updateNoteIdUrlHash, updatePopupUrlHash, updateBulkEditUrlHash,
   updateNoteId, updatePopup, increaseBlurCount, handleUnsavedNote, deleteUnsavedNotes,
+  increaseUpdateStatusBarStyleCount,
 } from '.';
 import { checkPurchases } from './iap';
 
@@ -3507,7 +3508,10 @@ export const shareNote = () => async (dispatch, getState) => {
     await Share.open({
       message: note.title + '\n\n' + stripHtml(note.body, true),
     });
+    dispatch(increaseUpdateStatusBarStyleCount());
   } catch (error) {
+    dispatch(increaseUpdateStatusBarStyleCount());
+
     if (isObject(error)) {
       if (
         isObject(error.error) &&
@@ -3592,7 +3596,10 @@ export const exportNoteAsPdf = () => async (dispatch, getState) => {
     dispatch(updateExportNoteAsPdfProgress(null));
     try {
       await Share.open({ url: 'file://' + file.filePath });
+      dispatch(increaseUpdateStatusBarStyleCount());
     } catch (error) {
+      dispatch(increaseUpdateStatusBarStyleCount());
+
       if (isObject(error)) {
         if (
           isObject(error.error) &&

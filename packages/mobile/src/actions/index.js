@@ -19,7 +19,7 @@ import {
   INCREASE_WEBVIEW_KEY_COUNT, UPDATE_UNSAVED_NOTE, DELETE_UNSAVED_NOTES,
   UPDATE_STACKS_ACCESS, REQUEST_PURCHASE, UPDATE_SYSTEM_THEME_MODE,
   UPDATE_IS_24H_FORMAT, UPDATE_LOCKS_FOR_ACTIVE_APP, UPDATE_LOCKS_FOR_INACTIVE_APP,
-  RESET_STATE,
+  INCREASE_UPDATE_STATUS_BAR_STYLE_COUNT, RESET_STATE,
 } from '../types/actionTypes';
 import {
   DOMAIN_NAME, APP_URL_SCHEME, APP_DOMAIN_NAME, BLOCKSTACK_AUTH, APP_GROUP_SHARE,
@@ -573,4 +573,8 @@ export const updateLockSettings = () => async (dispatch, getState) => {
 
 export const showSWWUPopup = () => async (dispatch, getState) => {
   dispatch(updatePopup(SWWU_POPUP, true));
+};
+
+export const increaseUpdateStatusBarStyleCount = () => {
+  return { type: INCREASE_UPDATE_STATUS_BAR_STYLE_COUNT };
 };

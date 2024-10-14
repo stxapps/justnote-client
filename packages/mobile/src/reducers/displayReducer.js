@@ -16,10 +16,10 @@ import {
   UPDATE_PAYWALL_FEATURE, UPDATE_LOCK_ACTION, ADD_LOCK_NOTE, LOCK_NOTE, ADD_LOCK_LIST,
   LOCK_LIST, UPDATE_LOCKS_FOR_ACTIVE_APP, UPDATE_LOCKS_FOR_INACTIVE_APP,
   UPDATE_TAG_DATA_S_STEP_COMMIT, UPDATE_TAG_DATA_T_STEP_COMMIT,
-  UPDATE_SELECTING_TAG_NAME, DELETE_TAG_NAMES, UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS,
-  UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
-  UPDATE_DELETE_ALL_DATA_PROGRESS, UPDATE_DELETE_SYNC_DATA_PROGRESS, DELETE_ALL_DATA,
-  RESET_STATE,
+  UPDATE_SELECTING_TAG_NAME, DELETE_TAG_NAMES, INCREASE_UPDATE_STATUS_BAR_STYLE_COUNT,
+  UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS, UPDATE_IMPORT_ALL_DATA_PROGRESS,
+  UPDATE_EXPORT_ALL_DATA_PROGRESS, UPDATE_DELETE_ALL_DATA_PROGRESS,
+  UPDATE_DELETE_SYNC_DATA_PROGRESS, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   SD_HUB_URL, SIGN_UP_POPUP, SIGN_IN_POPUP, PROFILE_POPUP, NOTE_LIST_MENU_POPUP,
@@ -114,6 +114,7 @@ const initialState = {
   lockAction: null,
   doForceLock: false,
   exitColsPanelFullScreenCount: 0,
+  updateStatusBarStyleCount: 0,
   exportNoteAsPdfProgress: null,
   importAllDataProgress: null,
   exportAllDataProgress: null,
@@ -950,6 +951,13 @@ const displayReducer = (state = initialState, action) => {
     // Only tag name for now
     if (!tagNames.includes(state.queryString)) return state;
     return { ...state, queryString: '' };
+  }
+
+  if (action.type === INCREASE_UPDATE_STATUS_BAR_STYLE_COUNT) {
+    return {
+      ...state,
+      updateStatusBarStyleCount: state.updateStatusBarStyleCount + 1,
+    };
   }
 
   if (action.type === UPDATE_EXPORT_NOTE_AS_PDF_PROGRESS) {
