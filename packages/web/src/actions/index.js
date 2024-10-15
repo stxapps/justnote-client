@@ -13,7 +13,7 @@ import {
   INCREASE_BLUR_COUNT, INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT,
   INCREASE_UPDATE_BULK_EDIT_COUNT, INCREASE_WEBVIEW_KEY_COUNT, UPDATE_UNSAVED_NOTE,
   DELETE_UNSAVED_NOTES, UPDATE_STACKS_ACCESS, UPDATE_SYSTEM_THEME_MODE,
-  UPDATE_IS_24H_FORMAT, RESET_STATE,
+  UPDATE_IS_24H_FORMAT, INCREASE_UPDATE_STATUS_BAR_STYLE_COUNT, RESET_STATE,
 } from '../types/actionTypes';
 import {
   HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY, HASH_PRICING,
@@ -841,4 +841,8 @@ export const updateLockSettings = () => async (dispatch, getState) => {
 
 export const showSWWUPopup = () => async (dispatch, getState) => {
   dispatch(updatePopup(SWWU_POPUP, true));
+};
+
+export const increaseUpdateStatusBarStyleCount = () => {
+  return { type: INCREASE_UPDATE_STATUS_BAR_STYLE_COUNT };
 };
