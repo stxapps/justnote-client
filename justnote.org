@@ -14,6 +14,7 @@
 ** usejournal.com
 ** getpolarized.io
 ** standardnotes.com
+** joplin
 ** simplenote.com
 ** github.com/zadam/trilium
 ** github.com/logseq/logseq
@@ -283,7 +284,6 @@
 - npm i react-native-webview
 - npm i react-native-file-access
 - npm i react-native-mmkv-storage@0.4.4
-  + Add pickFirst in build.gradle
   + Add proguard rules
   + require iOS target to 11.0
 - npm i https://github.com/stxapps/tailwind-rn#96848a8d2c2370e4f5e57a773ace172c4073157d
@@ -300,6 +300,7 @@
 - npm i react-native-default-preference
 - npm i https://github.com/stxapps/react-native-receive-sharing-intent#d1b4aa9140e0ad28e1a8403814125a733c92172c
 - npm i react-native-system-navigation-bar @vonovak/react-native-theme-control
+- npm uninstall typescript && npm i typescript@5.5.4 -D
 - Font
   + Create react-native.config.js
   + Run npx react-native-asset
