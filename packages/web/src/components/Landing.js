@@ -329,7 +329,7 @@ const Landing = () => {
                 <li className={tailwind('hidden lg:list-item')}>
                   <figure className={tailwind('mx-auto max-w-2xl rounded-2xl bg-white p-6 shadow-md ring-1 ring-gray-900/5')}>
                     <blockquote>
-                      <p className={tailwind(`text-lg tracking-tight text-gray-800 before:content-['“'] after:content-['”']`)}>The dark theme is beautifully implemented. Thank you <a className={tailwind('rounded hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://twitter.com/justnotecc" target="_blank" rel="noreferrer">@justnotecc</a></p>
+                      <p className={tailwind(`text-lg tracking-tight text-gray-800 before:content-['“'] after:content-['”']`)}>The dark theme is beautifully implemented. Thank you <a className={tailwind('rounded hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://x.com/justnotecc" target="_blank" rel="noreferrer">@justnotecc</a></p>
                     </blockquote>
                     <figcaption className={tailwind('mt-6 flex items-center')}>
                       <div className={tailwind('overflow-hidden rounded-full bg-gray-50')}>
@@ -337,7 +337,7 @@ const Landing = () => {
                       </div>
                       <div className={tailwind('ml-4')}>
                         <div className={tailwind('text-base font-medium leading-6 tracking-tight text-gray-800')}>Daniel Holenstein</div>
-                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://twitter.com/DanielHolenste2/status/1582937273754333184" target="_blank" rel="noreferrer">@DanielHolenste2</a>
+                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://x.com/DanielHolenste2/status/1582937273754333184" target="_blank" rel="noreferrer">@DanielHolenste2</a>
                       </div>
                     </figcaption>
                   </figure>
@@ -345,7 +345,7 @@ const Landing = () => {
                 <li className={tailwind('lg:mt-8')}>
                   <figure className={tailwind('mx-auto max-w-2xl rounded-2xl bg-white p-6 shadow-md ring-1 ring-gray-900/5')}>
                     <blockquote>
-                      <p className={tailwind(`text-lg tracking-tight text-gray-800 before:content-['“'] after:content-['”']`)}>Hey, quick check out on this secure and privacy-focused notes taking application, where your identity can be controlled safely and everything kept simple and fast + device syncing: <a className={tailwind('rounded hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://twitter.com/justnotecc" target="_blank" rel="noreferrer">@justnotecc</a></p>
+                      <p className={tailwind(`text-lg tracking-tight text-gray-800 before:content-['“'] after:content-['”']`)}>Hey, quick check out on this secure and privacy-focused notes taking application, where your identity can be controlled safely and everything kept simple and fast + device syncing: <a className={tailwind('rounded hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://x.com/justnotecc" target="_blank" rel="noreferrer">@justnotecc</a></p>
                     </blockquote>
                     <figcaption className={tailwind('mt-6 flex items-center')}>
                       <div className={tailwind('overflow-hidden rounded-full bg-gray-50')}>
@@ -353,7 +353,7 @@ const Landing = () => {
                       </div>
                       <div className={tailwind('ml-4')}>
                         <div className={tailwind('text-base font-medium leading-6 tracking-tight text-gray-800')}>Meme</div>
-                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://twitter.com/Mefnat/status/1741634298669596779" target="_blank" rel="noreferrer">@Mefnat</a>
+                        <a className={tailwind('mt-1 rounded text-sm text-gray-500 hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://x.com/Mefnat/status/1741634298669596779" target="_blank" rel="noreferrer">@Mefnat</a>
                       </div>
                     </figcaption>
                   </figure>
@@ -381,7 +381,7 @@ const Landing = () => {
                 <li className={tailwind('lg:mt-8')}>
                   <figure className={tailwind('mx-auto max-w-2xl rounded-2xl bg-white p-6 shadow-md ring-1 ring-gray-900/5')}>
                     <blockquote>
-                      <p className={tailwind(`text-lg tracking-tight text-gray-800 before:content-['“'] after:content-['”']`)}>Take your note-taking game to the next level with <a className={tailwind('rounded hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://twitter.com/hashtag/Justnote" target="_blank" rel="noreferrer">#Justnote</a>! Securely and conveniently jot down your ideas on any device. Inspired by Evernote, Google Keep, Joplin, and Notion. Built on <a className={tailwind('rounded hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://twitter.com/hashtag/Stacks" target="_blank" rel="noreferrer">#Stacks</a>.</p>
+                      <p className={tailwind(`text-lg tracking-tight text-gray-800 before:content-['“'] after:content-['”']`)}>Take your note-taking game to the next level with <a className={tailwind('rounded hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://x.com/hashtag/Justnote" target="_blank" rel="noreferrer">#Justnote</a>! Securely and conveniently jot down your ideas on any device. Inspired by Evernote, Google Keep, Joplin, and Notion. Built on <a className={tailwind('rounded hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://x.com/hashtag/Stacks" target="_blank" rel="noreferrer">#Stacks</a>.</p>
                     </blockquote>
                     <figcaption className={tailwind('mt-6 flex items-center')}>
                       <div className={tailwind('overflow-hidden rounded-full bg-gray-50')}>
@@ -417,7 +417,7 @@ const Landing = () => {
                     <img className={tailwind('mx-auto h-10 w-10 rounded-full')} src={creator} alt="" />
                   </div>
                   <div className={tailwind('mt-3 text-center md:mt-0 md:ml-4 md:flex md:items-center')}>
-                    <a className={tailwind('rounded text-base font-medium text-gray-500 hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://twitter.com/0xc22b" target="_blank" rel="noreferrer">@0xc22b</a>
+                    <a className={tailwind('rounded text-base font-medium text-gray-500 hover:underline focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://x.com/0xc22b" target="_blank" rel="noreferrer">@0xc22b</a>
                     <svg className={tailwind('mx-1 hidden h-5 w-5 text-green-600 md:block')} fill="currentColor" viewBox="0 0 20 20">
                       <path d="M11 0h3L9 20H6l5-20z" />
                     </svg>
