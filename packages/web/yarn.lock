@@ -1175,13 +1175,19 @@
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
 "@ckeditor/ckeditor5-build-decoupled-document@file:../../../ckeditor5/packages/ckeditor5-build-decoupled-document":
-  version "40.1.0"
+  version "43.3.1"
 
-"@ckeditor/ckeditor5-react@^6.2.0":
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/@ckeditor/ckeditor5-react/-/ckeditor5-react-6.2.0.tgz#13e59d607f327eb11133e5b202440c6b119a4960"
-  integrity sha512-i/6OdxJ3iOCU7eiZXS8KYhK645PEAMISs9eFz60c0AFXZX5NTMvNWM68ac/J5sfg+IQ9U6mJ3flSykbJVlf0kA==
+"@ckeditor/ckeditor5-integrations-common@^2.1.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@ckeditor/ckeditor5-integrations-common/-/ckeditor5-integrations-common-2.2.0.tgz#3eb75e21eddc880c87a675125ec3fcfe0c258847"
+  integrity sha512-qH68tqgyMibuejo+VAJ+iSH3ZmZweqBEzaawv9hZb4zzSMkBityWBjSc2hKXMtmJgCNsbSK84cyHpa5J/MNyLg==
+
+"@ckeditor/ckeditor5-react@^9.3.1":
+  version "9.3.1"
+  resolved "https://registry.yarnpkg.com/@ckeditor/ckeditor5-react/-/ckeditor5-react-9.3.1.tgz#5ed94789eb5d26bf8d185185c7dfcc57f2bfb97d"
+  integrity sha512-2lc1ICGCOZ0loC6DeMFwhkhrodLYUsOnC2wdgMiaXnEWRI/fU0SWBAoLbsMH7i6zpq29s+ZWMEImRVbly8SmEA==
   dependencies:
+    "@ckeditor/ckeditor5-integrations-common" "^2.1.0"
     prop-types "^15.7.2"
 
 "@csstools/normalize.css@*":
