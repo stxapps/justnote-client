@@ -326,7 +326,7 @@ const _ConflictItem = (props) => {
   const editorConfig = useMemo(() => {
     return {
       placeholder: 'Start writing...',
-      removePlugins: ['Autoformat'],
+      removePlugins: ['Autoformat', 'MediaEmbed'],
       fontSize: {
         options: [
           'tiny', 'small', 'default', 'big', 'huge',
