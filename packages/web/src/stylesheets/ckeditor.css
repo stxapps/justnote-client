@@ -361,18 +361,41 @@
 .ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list {
   display: flex;
   flex-direction: row;
+  padding: 0;
+}
+
+.ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list .ck.ck-list__item {
+  min-width: auto;
+}
+
+.ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list__item .ck.ck-button {
+  padding: calc(var(--ck-line-height-base)*.2*var(--ck-font-size-base)) calc(var(--ck-line-height-base)*.4*var(--ck-font-size-base));
+  background-color: transparent;
+}
+
+.ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list__item .ck.ck-button.ck-off:not(.ck-disabled):hover {
+  background-color: var(--ck-color-list-button-hover-background);
+}
+
+.ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list__item .ck.ck-button.ck-on {
+  background-color: var(--ck-color-list-button-on-background);
+  color: var(--ck-color-list-button-on-text);
+}
+
+.ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list__item .ck.ck-list-item-button__check-holder {
+  display: none;
+}
+
+.ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list__item .ck.ck-button__label {
+  line-height: calc(var(--ck-line-height-base)*1.2*var(--ck-font-size-base));
 }
 
 .blk-mode .ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list {
   background-color: var(--jn-editor-gray-800);
 }
 
-.blk-mode .ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list .ck.ck-button.ck-off:not(.ck-disabled):hover {
+.blk-mode .ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list__item .ck.ck-button.ck-off:not(.ck-disabled):hover {
   background-color: var(--jn-editor-gray-700);
-}
-
-.ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list .ck.ck-list__item {
-  min-width: auto;
 }
 
 .default-font-sizes .ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list .ck.ck-list__item:not(:nth-child(1)):not(:nth-child(2)):not(:nth-child(3)):not(:nth-child(4)):not(:nth-child(5)) {
@@ -457,32 +480,33 @@
   display: none;
 }
 
-.ck-content .todo-list .todo-list__label>input {
-  top: -1px;
-  left: -22px;
-  margin-right: -8px;
+.ck-editor__editable.ck-content .todo-list .todo-list__label>span[contenteditable=false]>input {
   background-color: var(--jn-editor-white);
 }
 
-.ck-content .todo-list .todo-list__label>input:before {
+.ck-editor__editable.ck-content .todo-list .todo-list__label>span[contenteditable=false]>input:before {
   border: 1px solid var(--jn-editor-gray-700);
 }
 
-.ck-content .todo-list .todo-list__label>input:focus {
+.ck-editor__editable.ck-content .todo-list .todo-list__label>span[contenteditable=false]>input:focus {
   outline-color: transparent;
   box-shadow: none;
 }
 
-.ck-content .todo-list .todo-list__label>input:checked {
+.ck-editor__editable.ck-content .todo-list .todo-list__label>span[contenteditable=false]>input:checked {
   background-color: transparent;
 }
 
-.blk-mode .ck-content .todo-list .todo-list__label>input {
+.blk-mode .ck-editor__editable.ck-content .todo-list .todo-list__label>span[contenteditable=false]>input {
   background-color: var(--jn-editor-gray-900);
 }
 
-.blk-mode .ck-content .todo-list .todo-list__label>input:before {
+.blk-mode .ck-editor__editable.ck-content .todo-list .todo-list__label>span[contenteditable=false]>input:before {
   border: 1px solid var(--jn-editor-gray-300);
+}
+
+.blk-mode .ck-editor__editable.ck-content .todo-list .todo-list__label>span[contenteditable=false]>input[checked]:before {
+  border-color: #26ab33;
 }
 
 .blk-mode .ck.ck-balloon-panel {
