@@ -13,7 +13,7 @@ import {
   LIST_NAMES_MODE_MOVE_NOTES, NOTE_COMMANDS_MODE_NETB,
 } from '../types/const';
 import { getListNameMap } from '../selectors';
-import { getListNameDisplayName, getAllListNames } from '../utils';
+import { getListNameDisplayName } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
@@ -131,9 +131,7 @@ const NoteCommands = (props) => {
   let isMoveToBtnShown = (
     [ARCHIVE].includes(rListName) ||
     (
-      (!isUserSignedIn || mode === NOTE_COMMANDS_MODE_NETB) &&
-      rListName === MY_NOTES &&
-      getAllListNames(listNameMap).length > 3
+      (!isUserSignedIn || mode === NOTE_COMMANDS_MODE_NETB) && rListName === MY_NOTES
     )
   );
   let isMoreBtnShown = isUserSignedIn && [MY_NOTES, ARCHIVE].includes(rListName);

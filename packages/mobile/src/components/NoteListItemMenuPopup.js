@@ -20,7 +20,7 @@ import {
 import {
   getListNameMap, makeGetPinStatus, makeGetTagStatus, makeGetLockNoteStatus,
 } from '../selectors';
-import { getListNameDisplayName, getAllListNames } from '../utils';
+import { getListNameDisplayName } from '../utils';
 import { popupFMV } from '../types/animConfigs';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
@@ -151,9 +151,6 @@ const NoteListItemMenuPopup = () => {
       menu = NOTE_ITEM_POPUP_MENU[listName];
     } else {
       menu = NOTE_ITEM_POPUP_MENU[MY_NOTES];
-    }
-    if (listName === MY_NOTES && getAllListNames(listNameMap).length === 3) {
-      menu = menu.slice(0, -1);
     }
     if (queryString) menu = QUERY_STRING_MENU;
 
