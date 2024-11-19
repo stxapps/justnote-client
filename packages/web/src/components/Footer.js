@@ -12,27 +12,30 @@ const Footer = () => {
   return (
     <footer className={tailwind('bg-white')}>
       <div className={tailwind('mx-auto max-w-7xl overflow-hidden py-12 px-4 sm:px-6 lg:px-8')}>
-        <nav className={tailwind('-mx-5 -my-2 sm:flex sm:flex-wrap sm:justify-center')} aria-label="Footer">
+        <nav className={tailwind('-mx-5 -my-2 md:flex md:flex-wrap md:justify-center')} aria-label="Footer">
           <div className={tailwind('px-3 py-1')}>
             <a className={tailwind('block rounded-sm px-2 py-1 text-base text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400')} href={'/' + HASH_ABOUT}>About</a>
           </div>
-          <div className={tailwind('mt-2 px-3 py-1 sm:mt-0')}>
+          <div className={tailwind('mt-2 px-3 py-1 md:mt-0')}>
             <a className={tailwind('block rounded-sm px-2 py-1 text-base text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400')} href={'/' + HASH_TERMS}>Terms</a>
           </div>
-          <div className={tailwind('mt-2 px-3 py-1 sm:mt-0')}>
+          <div className={tailwind('mt-2 px-3 py-1 md:mt-0')}>
             <a className={tailwind('block rounded-sm px-2 py-1 text-base text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400')} href={'/' + HASH_PRIVACY}>Privacy</a>
           </div>
-          <div className={tailwind('mt-2 px-3 py-1 sm:mt-0')}>
+          <div className={tailwind('mt-2 px-3 py-1 md:mt-0')}>
             <a className={tailwind('block rounded-sm px-2 py-1 text-base text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400')} href={'/' + HASH_PRICING}>Pricing</a>
           </div>
-          <div className={tailwind('mt-2 px-3 py-1 sm:mt-0')}>
+          <div className={tailwind('mt-2 px-3 py-1 md:mt-0')}>
             <a className={tailwind('block rounded-sm px-2 py-1 text-base text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400')} href={'/' + HASH_SUPPORT}>Support</a>
           </div>
-          <div className={tailwind('mt-2 px-3 py-1 sm:mt-0')}>
+          <div className={tailwind('mt-2 px-3 py-1 md:mt-0')}>
             <a className={tailwind('block rounded-sm px-2 py-1 text-base text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://docs.justnote.cc" target="_blank" rel="noreferrer">Docs</a>
           </div>
-          <div className={tailwind('mt-2 px-3 py-1 sm:mt-0')}>
+          <div className={tailwind('mt-2 px-3 py-1 md:mt-0')}>
             <a className={tailwind('block rounded-sm px-2 py-1 text-base text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://medium.com/@stxapps" target="_blank" rel="noreferrer">Blog</a>
+          </div>
+          <div className={tailwind('mt-2 px-3 py-1 md:mt-0')}>
+            <a className={tailwind('block rounded-sm px-2 py-1 text-base text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400')} href="https://status.justnote.cc" target="_blank" rel="noreferrer">Status</a>
           </div>
         </nav>
         <div className={tailwind('mt-8 flex items-center justify-center space-x-6')}>
