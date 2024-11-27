@@ -14,7 +14,6 @@
 ** usejournal.com
 ** getpolarized.io
 ** standardnotes.com
-** joplin
 ** simplenote.com
 ** github.com/zadam/trilium
 ** github.com/logseq/logseq
