@@ -1,16 +1,16 @@
 import { loop, Cmd } from 'redux-loop';
 
 import {
-  tryUpdateFetched, tryUpdateFetchedMore, cleanUpSslts, runAfterFetchTask, unpinNotes,
-  tryUpdateSynced,
+  updateHubAddr, tryUpdateFetched, tryUpdateFetchedMore, cleanUpSslts,
+  runAfterFetchTask, unpinNotes, tryUpdateSynced,
 } from '../importWrapper';
 import {
-  FETCH, FETCH_COMMIT, UPDATE_FETCHED, FETCH_MORE_COMMIT, UPDATE_FETCHED_MORE,
-  SET_SHOWING_NOTE_INFOS, ADD_NOTE, ADD_NOTE_COMMIT, ADD_NOTE_ROLLBACK, UPDATE_NOTE,
-  UPDATE_NOTE_COMMIT, UPDATE_NOTE_ROLLBACK, MOVE_NOTES, MOVE_NOTES_COMMIT,
-  MOVE_NOTES_ROLLBACK, DELETE_NOTES, DELETE_NOTES_COMMIT, DELETE_NOTES_ROLLBACK,
-  CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH_COMMIT, MERGE_NOTES_COMMIT, SYNC_COMMIT,
-  DELETE_ALL_DATA, RESET_STATE,
+  FETCH, FETCH_COMMIT, FETCH_ROLLBACK, UPDATE_FETCHED, FETCH_MORE_COMMIT,
+  UPDATE_FETCHED_MORE, SET_SHOWING_NOTE_INFOS, ADD_NOTE, ADD_NOTE_COMMIT,
+  ADD_NOTE_ROLLBACK, UPDATE_NOTE, UPDATE_NOTE_COMMIT, UPDATE_NOTE_ROLLBACK, MOVE_NOTES,
+  MOVE_NOTES_COMMIT, MOVE_NOTES_ROLLBACK, DELETE_NOTES, DELETE_NOTES_COMMIT,
+  DELETE_NOTES_ROLLBACK, CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
+  MERGE_NOTES_COMMIT, SYNC_COMMIT, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   MY_NOTES, TRASH, ARCHIVE, ID, STATUS, ADDED, ADDING, DIED_ADDING, UPDATING,
@@ -63,6 +63,16 @@ const notesReducer = (state = initialState, action) => {
       newState,
       Cmd.run(
         tryUpdateFetched(action.payload),
+        { args: [Cmd.dispatch, Cmd.getState] }
+      )
+    );
+  }
+
+  if (action.type === FETCH_ROLLBACK) {
+    return loop(
+      state,
+      Cmd.run(
+        updateHubAddr(),
         { args: [Cmd.dispatch, Cmd.getState] }
       )
     );
