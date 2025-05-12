@@ -415,7 +415,7 @@ const _getInfosFromNotes = (sortedCfNts, pinnedNotes, noPinnedNotes) => {
 };
 
 export const tryUpdateFetched = (payload) => async (dispatch, getState) => {
-  dispatch(updateHubAddr());
+  if (!vars.syncMode.doSyncMode) dispatch(updateHubAddr());
   dispatch(updateFetched(payload));
   dispatch(deleteFetchingInfo(payload.fthId));
 };
@@ -3017,6 +3017,8 @@ export const syncAndWait = (doForceListFPaths = false, updateAction = 0) => asyn
 export const tryUpdateSynced = (updateAction, haveUpdate) => async (
   dispatch, getState
 ) => {
+  dispatch(updateHubAddr());
+
   if (vars.sync.updateAction < updateAction) updateAction = vars.sync.updateAction;
   if (!haveUpdate) haveUpdate = vars.sync.haveUpdate;
   [vars.sync.updateAction, vars.sync.haveUpdate] = [Infinity, false];

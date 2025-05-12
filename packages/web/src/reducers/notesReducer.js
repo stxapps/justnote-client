@@ -10,7 +10,7 @@ import {
   ADD_NOTE_ROLLBACK, UPDATE_NOTE, UPDATE_NOTE_COMMIT, UPDATE_NOTE_ROLLBACK, MOVE_NOTES,
   MOVE_NOTES_COMMIT, MOVE_NOTES_ROLLBACK, DELETE_NOTES, DELETE_NOTES_COMMIT,
   DELETE_NOTES_ROLLBACK, CANCEL_DIED_NOTES, DELETE_OLD_NOTES_IN_TRASH_COMMIT,
-  MERGE_NOTES_COMMIT, SYNC_COMMIT, DELETE_ALL_DATA, RESET_STATE,
+  MERGE_NOTES_COMMIT, SYNC_COMMIT, SYNC_ROLLBACK, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
   MY_NOTES, TRASH, ARCHIVE, ID, STATUS, ADDED, ADDING, DIED_ADDING, UPDATING,
@@ -448,6 +448,16 @@ const notesReducer = (state = initialState, action) => {
       state,
       Cmd.run(
         tryUpdateSynced(updateAction, haveUpdate), { args: [Cmd.dispatch, Cmd.getState] }
+      )
+    );
+  }
+
+  if (action.type === SYNC_ROLLBACK) {
+    return loop(
+      state,
+      Cmd.run(
+        updateHubAddr(),
+        { args: [Cmd.dispatch, Cmd.getState] }
       )
     );
   }

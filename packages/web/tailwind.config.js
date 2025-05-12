@@ -22,6 +22,7 @@ module.exports = {
         '64': '16rem',
       },
       lineHeight: {
+        '5.5': '1.375rem',
         '6.5': '1.625rem',
       },
       cursor: {
