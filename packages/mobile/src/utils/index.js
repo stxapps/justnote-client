@@ -157,6 +157,18 @@ export const getUserImageUrl = (userData) => {
   return userImageUrl;
 };
 
+export const getUserHubAddr = (userData) => {
+  let hubAddr = null;
+  if (
+    isObject(userData) &&
+    isObject(userData.gaiaHubConfig) &&
+    isString(userData.gaiaHubConfig.address)
+  ) {
+    hubAddr = userData.gaiaHubConfig.address;
+  }
+  return hubAddr;
+};
+
 export const throttle = (func, limit) => {
   let lastFunc;
   let lastRan;

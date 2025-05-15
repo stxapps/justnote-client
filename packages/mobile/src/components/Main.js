@@ -37,6 +37,7 @@ import ConfirmDiscardPopup from './ConfirmDiscardPopup';
 import ConfirmExitDummyPopup from './ConfirmExitDummyPopup';
 import PaywallPopup from './PaywallPopup';
 import AccessErrorPopup from './AccessErrorPopup';
+import HubErrorPopup from './HubErrorPopup';
 
 const Main = () => {
 
@@ -96,6 +97,7 @@ const Main = () => {
       <SignInPopup />
       <PaywallPopup />
       <AccessErrorPopup />
+      <HubErrorPopup />
     </React.Fragment>
   );
 };

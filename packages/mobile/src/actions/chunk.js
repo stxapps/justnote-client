@@ -5,6 +5,7 @@ import { FileSystem } from 'react-native-file-access';
 import Share from 'react-native-share';
 import { diffLinesRaw, DIFF_EQUAL, DIFF_DELETE, DIFF_INSERT } from 'jest-diff';
 
+import userSession from '../userSession';
 import dataApi from '../apis/data';
 import serverApi from '../apis/server';
 import fileApi from '../apis/localFile';
@@ -52,14 +53,14 @@ import {
   UPDATE_TAG_DATA_S_STEP_ROLLBACK, UPDATE_TAG_DATA_T_STEP,
   UPDATE_TAG_DATA_T_STEP_COMMIT, UPDATE_TAG_DATA_T_STEP_ROLLBACK, CANCEL_DIED_TAGS,
   UPDATE_TAG_NAME_EDITORS, ADD_TAG_NAMES, UPDATE_TAG_NAMES, MOVE_TAG_NAME,
-  DELETE_TAG_NAMES, UPDATE_SELECTING_TAG_NAME,
+  DELETE_TAG_NAMES, UPDATE_SELECTING_TAG_NAME, UPDATE_HUB_ADDR,
 } from '../types/actionTypes';
 import {
-  SD_HUB_URL, BULK_EDIT_MENU_POPUP, PAYWALL_POPUP, SETTINGS_POPUP,
+  HR_HUB_URL, SD_HUB_URL, BULK_EDIT_MENU_POPUP, PAYWALL_POPUP, SETTINGS_POPUP,
   SETTINGS_LISTS_MENU_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP,
   NOTE_LIST_MENU_POPUP, NOTE_LIST_ITEM_MENU_POPUP, LOCK_EDITOR_POPUP, LOCK_MENU_POPUP,
-  TAG_EDITOR_POPUP, MOVE_ACTION_NOTE_COMMANDS, MOVE_ACTION_NOTE_ITEM_MENU,
-  DELETE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_ITEM_MENU,
+  TAG_EDITOR_POPUP, HUB_ERROR_POPUP, MOVE_ACTION_NOTE_COMMANDS,
+  MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_ITEM_MENU,
   DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_LIST_NAME,
   DISCARD_ACTION_UPDATE_TAG_NAME, MY_NOTES, TRASH, ID, NEW_NOTE, NEW_NOTE_OBJ,
   DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES, N_DAYS, CD_ROOT,
@@ -89,7 +90,7 @@ import {
   extractNoteFPath, extractSsltFPath, validateTagNameDisplayName,
   getTagNameObjFromDisplayName, getTagNameObj, getTags, getRawTags, extractTagFPath,
   createTagFPath, getNoteMainIds, getPerformFilesResultsPerId,
-  batchPerformFilesIfEnough,
+  batchPerformFilesIfEnough, getUserHubAddr,
 } from '../utils';
 import { _ } from '../utils/obj';
 import { initialSettingsState, initialTagEditorState } from '../types/initialStates';
@@ -105,6 +106,21 @@ import { checkPurchases } from './iap';
 const jhfp = require('../../jhfp');
 
 const DIFF_UPDATE = 'DIFF_UPDATE';
+
+export const updateHubAddr = () => async (dispatch, getState) => {
+  try {
+    if (!getState().user.isUserSignedIn) return;
+    if (getState().user.hubUrl === HR_HUB_URL) {
+      dispatch(updatePopup(HUB_ERROR_POPUP, true));
+    }
+
+    const userData = await userSession.loadUserData();
+    const hubAddr = getUserHubAddr(userData);
+    dispatch({ type: UPDATE_HUB_ADDR, payload: { hubAddr } });
+  } catch (error) {
+    console.log('updateHubAddr error:', error);
+  }
+};
 
 export const changeListName = (listName, doCheckEditing) => async (
   dispatch, getState
@@ -402,6 +418,7 @@ const _getInfosFromNotes = (sortedCfNts, pinnedNotes, noPinnedNotes) => {
 };
 
 export const tryUpdateFetched = (payload) => async (dispatch, getState) => {
+  if (!vars.syncMode.doSyncMode) dispatch(updateHubAddr());
   dispatch(updateFetched(payload));
   dispatch(deleteFetchingInfo(payload.fthId));
 };
@@ -2955,6 +2972,8 @@ export const syncAndWait = (doForceListFPaths = false, updateAction = 0) => asyn
 export const tryUpdateSynced = (updateAction, haveUpdate) => async (
   dispatch, getState
 ) => {
+  dispatch(updateHubAddr());
+
   if (vars.sync.updateAction < updateAction) updateAction = vars.sync.updateAction;
   if (!haveUpdate) haveUpdate = vars.sync.haveUpdate;
   [vars.sync.updateAction, vars.sync.haveUpdate] = [Infinity, false];

@@ -1,5 +1,9 @@
 import * as actionChunk from './actions/chunk';
 
+export const updateHubAddr = () => async (dispatch, getState) => {
+  dispatch(actionChunk.updateHubAddr());
+};
+
 export const tryUpdateFetched = (payload) => async (dispatch, getState) => {
   dispatch(actionChunk.tryUpdateFetched(payload));
 };

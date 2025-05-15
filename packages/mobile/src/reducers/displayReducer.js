@@ -28,9 +28,9 @@ import {
   SETTINGS_LISTS_MENU_POPUP, SETTINGS_TAGS_MENU_POPUP, TIME_PICK_POPUP,
   DATE_FORMAT_MENU_POPUP, LOCK_MENU_POPUP, LOCK_EDITOR_POPUP, CONFIRM_DELETE_POPUP,
   CONFIRM_DISCARD_POPUP, CONFIRM_AS_DUMMY_POPUP, CONFIRM_EXIT_DUMMY_POPUP,
-  ACCESS_ERROR_POPUP, STALE_ERROR_POPUP, USE_SYNC_ERROR_POPUP, SWWU_POPUP, MY_NOTES,
-  TRASH, ARCHIVE, UPDATING, DIED_ADDING, DIED_UPDATING, DIED_MOVING,
-  MAX_SELECTED_NOTE_IDS, SD_MAX_SELECTED_NOTE_IDS, SETTINGS_VIEW_ACCOUNT,
+  ACCESS_ERROR_POPUP, STALE_ERROR_POPUP, USE_SYNC_ERROR_POPUP, HUB_ERROR_POPUP,
+  SWWU_POPUP, MY_NOTES, TRASH, ARCHIVE, UPDATING, DIED_ADDING, DIED_UPDATING,
+  DIED_MOVING, MAX_SELECTED_NOTE_IDS, SD_MAX_SELECTED_NOTE_IDS, SETTINGS_VIEW_ACCOUNT,
 } from '../types/const';
 import {
   doContainListName, doContainTagName, isObject, isString, isNumber,
@@ -80,6 +80,7 @@ const initialState = {
   isAccessErrorPopupShown: false,
   isStaleErrorPopupShown: false,
   isUseSyncErrorPopupShown: false,
+  isHubErrorPopupShown: false,
   isSWWUPopupShown: false, // isServiceWorkerWaitUpdatePopupShown
   isHandlingSignIn: false,
   isBulkEditing: false,
@@ -338,6 +339,10 @@ const displayReducer = (state = initialState, action) => {
     if (id === USE_SYNC_ERROR_POPUP) {
       const newState = { ...state, isUseSyncErrorPopupShown: isShown };
       return newState;
+    }
+
+    if (id === HUB_ERROR_POPUP) {
+      return { ...state, isHubErrorPopupShown: isShown };
     }
 
     if (id === SWWU_POPUP) {
