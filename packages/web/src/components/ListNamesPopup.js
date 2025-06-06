@@ -16,9 +16,9 @@ import {
   getMaxListNameChildrenSize,
 } from '../utils';
 import { popupBgFMV, popupFMV, slideFMV } from '../types/animConfigs';
+import { computePositionStyle } from '../utils/popup';
 
-import { useSafeAreaFrame, useTailwind } from '.';
-import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
+import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 
 const MODE_MOVE_NOTES = LIST_NAMES_MODE_MOVE_NOTES;
 const MODE_MOVE_LIST_NAME = LIST_NAMES_MODE_MOVE_LIST_NAME;
@@ -26,6 +26,7 @@ const MODE_MOVE_LIST_NAME = LIST_NAMES_MODE_MOVE_LIST_NAME;
 const ListNamesPopup = () => {
 
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
+  const insets = useSafeAreaInsets();
   const isShown = useSelector(state => state.display.isListNamesPopupShown);
   const anchorPosition = useSelector(state => state.display.listNamesPopupPosition);
   const mode = useSelector(state => state.display.listNamesMode);
@@ -274,19 +275,18 @@ const ListNamesPopup = () => {
     );
   };
 
-  const layouts = createLayouts(
+  const posStyle = computePositionStyle(
     derivedAnchorPosition,
     { width: popupWidth, height: popupHeight },
-    { width: safeAreaWidth, height: safeAreaHeight }
+    { x: 0, y: 0, width: safeAreaWidth, height: safeAreaHeight },
+    null,
+    insets,
+    8,
   );
-  const popupPosition = computePosition(layouts, null, 8);
-
-  const { top, left, topOrigin, leftOrigin } = popupPosition;
-  const popupStyle = { top, left, width: popupWidth, height: popupHeight };
-  const popupClassNames = getOriginClassName(topOrigin, leftOrigin);
+  const popupStyle = { ...posStyle, width: popupWidth, height: popupHeight };
 
   const panel = (
-    <motion.div key="LNP_popup" style={popupStyle} className={tailwind(`fixed overflow-auto rounded-md bg-white shadow-xl ring-1 ring-black ring-opacity-5 blk:bg-gray-800 blk:ring-white blk:ring-opacity-25 ${popupClassNames}`)} variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+    <motion.div key="LNP_popup" style={popupStyle} className={tailwind('fixed overflow-auto rounded-md bg-white shadow-xl ring-1 ring-black ring-opacity-5 blk:bg-gray-800 blk:ring-white blk:ring-opacity-25')} variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
       {_render()}
     </motion.div>
   );

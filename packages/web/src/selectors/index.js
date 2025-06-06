@@ -9,9 +9,8 @@ import {
   isStringIn, isObject, isString, isEqual, isTitleEqual, isBodyEqual, getListNameObj,
   getMainId, getValidProduct as _getValidProduct, getValidPurchase as _getValidPurchase,
   listNoteMetas, getNoteFPaths, getSsltFPaths, getPinFPaths, getPins,
-  doEnableExtraFeatures, getFormattedNoteDate, isNumber, isMobile as _isMobile,
-  getDataParentIds, getNote, doesIncludeFetchingMore, getLockListStatus, getTagFPaths,
-  getTags, getTagNameObj,
+  doEnableExtraFeatures, getFormattedNoteDate, isNumber, getDataParentIds, getNote,
+  doesIncludeFetchingMore, getLockListStatus, getTagFPaths, getTags, getTagNameObj,
 } from '../utils';
 import { tailwind } from '../stylesheets/tailwind';
 import {
@@ -188,24 +187,68 @@ export const makeGetListNameEditor = () => {
   );
 };
 
+const _getInsets = (insetTop, insetRight, insetBottom, insetLeft) => {
+  let [top, right, bottom, left] = [0, 0, 0, 0];
+  if (isNumber(insetTop)) top = Math.round(insetTop);
+  if (isNumber(insetRight)) right = Math.round(insetRight);
+  if (isNumber(insetBottom)) bottom = Math.round(insetBottom);
+  if (isNumber(insetLeft)) left = Math.round(insetLeft);
+  return { left, top, right, bottom };
+};
+
 export const getSafeAreaFrame = createSelector(
   state => state.window.width,
   state => state.window.height,
   state => state.window.visualWidth,
   state => state.window.visualHeight,
-  (windowWidth, windowHeight, visualWidth, visualHeight) => {
-    const isMobile = _isMobile();
+  state => state.window.insetTop,
+  state => state.window.insetRight,
+  state => state.window.insetBottom,
+  state => state.window.insetLeft,
+  (
+    windowWidth, windowHeight, visualWidth, visualHeight,
+    insetTop, insetRight, insetBottom, insetLeft,
+  ) => {
 
     [windowWidth, windowHeight] = [Math.round(windowWidth), Math.round(windowHeight)];
-    [visualWidth, visualHeight] = [Math.round(visualWidth), Math.round(visualHeight)];
 
-    const width = isMobile && isNumber(visualWidth) ? visualWidth : windowWidth;
-    const height = isMobile && isNumber(visualHeight) ? visualHeight : windowHeight;
+    let [width, height] = [windowWidth, windowHeight];
+
+    if (isNumber(visualWidth)) {
+      visualWidth = Math.round(visualWidth);
+      width = visualWidth;
+    } else {
+      visualWidth = windowWidth;
+    }
+
+    if (isNumber(visualHeight)) {
+      visualHeight = Math.round(visualHeight);
+      height = visualHeight;
+    } else {
+      visualHeight = windowHeight;
+    }
+
+    const assumeKeyboard = windowHeight - visualHeight > 80;
+
+    const insets = _getInsets(insetTop, insetRight, insetBottom, insetLeft);
+    width = width - insets.left - insets.right;
+    height = height - insets.top - (assumeKeyboard ? 0 : insets.bottom);
 
     return {
       x: 0, y: 0, width, height, windowWidth, windowHeight, visualWidth, visualHeight,
     };
-  }
+  },
+);
+
+export const getSafeAreaInsets = createSelector(
+  state => state.window.insetTop,
+  state => state.window.insetRight,
+  state => state.window.insetBottom,
+  state => state.window.insetLeft,
+  (insetTop, insetRight, insetBottom, insetLeft) => {
+    const insets = _getInsets(insetTop, insetRight, insetBottom, insetLeft);
+    return insets;
+  },
 );
 
 export const getValidProduct = createSelector(

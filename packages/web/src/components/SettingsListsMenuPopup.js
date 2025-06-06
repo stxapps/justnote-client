@@ -14,13 +14,14 @@ import {
 } from '../types/const';
 import { makeGetListNameEditor, makeGetLockListStatus } from '../selectors';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
+import { computePositionStyle } from '../utils/popup';
 
-import { useSafeAreaFrame, useTailwind } from '.';
-import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
+import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 
 const SettingsListsMenuPopup = () => {
 
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
+  const insets = useSafeAreaInsets();
   const getListNameEditor = useMemo(makeGetListNameEditor, []);
   const getLockListStatus = useMemo(makeGetLockListStatus, []);
   const isShown = useSelector(state => state.display.isSettingsListsMenuPopupShown);
@@ -169,21 +170,20 @@ const SettingsListsMenuPopup = () => {
     </div>
   );
 
-  let popupClassNames = 'fixed min-w-36 overflow-auto rounded-md bg-white shadow-xl ring-1 ring-black ring-opacity-5 blk:bg-gray-800 blk:ring-white blk:ring-opacity-25';
+  const popupClassNames = 'fixed min-w-36 overflow-auto rounded-md bg-white shadow-xl ring-1 ring-black ring-opacity-5 blk:bg-gray-800 blk:ring-white blk:ring-opacity-25';
+
   let panel;
   if (popupSize) {
-
     const maxHeight = safeAreaHeight - 16;
-    const layouts = createLayouts(
+    const posStyle = computePositionStyle(
       anchorPosition,
       { width: popupSize.width, height: Math.min(popupSize.height, maxHeight) },
-      { width: safeAreaWidth, height: safeAreaHeight },
+      { x: 0, y: 0, width: safeAreaWidth, height: safeAreaHeight },
+      null,
+      insets,
+      8,
     );
-    const popupPosition = computePosition(layouts, null, 8);
-
-    const { top, left, topOrigin, leftOrigin } = popupPosition;
-    const popupStyle = { top, left, maxHeight };
-    popupClassNames += ' ' + getOriginClassName(topOrigin, leftOrigin);
+    const popupStyle = { ...posStyle, maxHeight };
 
     panel = (
       <motion.div key="SLMP_popup" ref={popup} style={popupStyle} className={tailwind(popupClassNames)} variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
-import { getSafeAreaFrame, getThemeMode, getTailwind } from '../selectors';
+import {
+  getSafeAreaFrame, getSafeAreaInsets, getThemeMode, getTailwind,
+} from '../selectors';
 
 export const useStateWithLocalStorage = (defaultValue, localStorageKey) => {
 
@@ -19,6 +21,10 @@ export const useStateWithLocalStorage = (defaultValue, localStorageKey) => {
 
 export const useSafeAreaFrame = () => {
   return useSelector(state => getSafeAreaFrame(state));
+};
+
+export const useSafeAreaInsets = () => {
+  return useSelector(state => getSafeAreaInsets(state));
 };
 
 export const useTailwind = () => {

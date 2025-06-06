@@ -109,12 +109,6 @@ export const VIEW_AS_WEBPAGE = 'View as Webpage';
 export const SHARE = 'Share';
 export const EXPORT_AS_PDF = 'Export as PDF';
 
-export const ZERO = 'ZERO'; // top or left of the window
-export const CENTER = 'CENTER'; // center of the window
-export const EDGE = 'EDGE'; // bottom or right of the window
-export const AT_TRIGGER = 'AT_TRIGGER'; // top or left of the trigger
-export const EDGE_TRIGGER = 'EDGE_TRIGGER'; // bottom or right of the trigger
-
 export const CD_ROOT = 'cdroot';
 export const NOTES = 'notes';
 export const SSLTS = 'sslts';

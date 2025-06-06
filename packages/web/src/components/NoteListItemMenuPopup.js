@@ -20,9 +20,9 @@ import {
 } from '../selectors';
 import { getListNameDisplayName } from '../utils';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
+import { computePositionStyle } from '../utils/popup';
 
-import { useSafeAreaFrame, useTailwind } from '.';
-import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
+import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 
 export const NOTE_ITEM_POPUP_MENU = {
   [MY_NOTES]: [ARCHIVE, REMOVE, MOVE_TO],
@@ -34,6 +34,7 @@ const QUERY_STRING_MENU = [REMOVE];
 const NoteListItemMenuPopup = () => {
 
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
+  const insets = useSafeAreaInsets();
   const getPinStatus = useMemo(makeGetPinStatus, []);
   const getTagStatus = useMemo(makeGetTagStatus, []);
   const getLockNoteStatus = useMemo(makeGetLockNoteStatus, []);
@@ -161,21 +162,20 @@ const NoteListItemMenuPopup = () => {
     </div>
   );
 
-  let popupClassNames = 'fixed min-w-[8rem] overflow-auto rounded-md bg-white shadow-xl ring-1 ring-black ring-opacity-5 blk:bg-gray-800 blk:ring-white blk:ring-opacity-25';
+  const popupClassNames = 'fixed min-w-[8rem] overflow-auto rounded-md bg-white shadow-xl ring-1 ring-black ring-opacity-5 blk:bg-gray-800 blk:ring-white blk:ring-opacity-25';
+
   let panel;
   if (popupSize) {
-
     const maxHeight = safeAreaHeight - 16;
-    const layouts = createLayouts(
+    const posStyle = computePositionStyle(
       anchorPosition,
       { width: popupSize.width, height: Math.min(popupSize.height, maxHeight) },
-      { width: safeAreaWidth, height: safeAreaHeight },
+      { x: 0, y: 0, width: safeAreaWidth, height: safeAreaHeight },
+      null,
+      insets,
+      8,
     );
-    const popupPosition = computePosition(layouts, null, 8);
-
-    const { top, left, topOrigin, leftOrigin } = popupPosition;
-    const popupStyle = { top, left, maxHeight };
-    popupClassNames += ' ' + getOriginClassName(topOrigin, leftOrigin);
+    const popupStyle = { ...posStyle, maxHeight };
 
     panel = (
       <motion.div key="NLI_MenuPopup_popup" ref={popup} style={popupStyle} className={tailwind(popupClassNames)} variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">

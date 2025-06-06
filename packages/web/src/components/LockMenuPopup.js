@@ -8,13 +8,14 @@ import {
   LOCK_MENU_POPUP, LOCK_EDITOR_POPUP, LOCK_ACTION_REMOVE_LOCK_NOTE, REMOVE_LOCK,
 } from '../types/const';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
+import { computePositionStyle } from '../utils/popup';
 
-import { useSafeAreaFrame, useTailwind } from '.';
-import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
+import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 
 const LockMenuPopup = () => {
 
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
+  const insets = useSafeAreaInsets();
   const isShown = useSelector(state => state.display.isLockMenuPopupShown);
   const anchorPosition = useSelector(state => state.display.lockMenuPopupPosition);
   const [popupSize, setPopupSize] = useState(null);
@@ -59,21 +60,20 @@ const LockMenuPopup = () => {
     </div>
   );
 
-  let popupClassNames = 'fixed min-w-32 max-w-64 overflow-auto rounded-md bg-white shadow-xl ring-1 ring-black ring-opacity-5 blk:bg-gray-800 blk:ring-white blk:ring-opacity-25';
+  const popupClassNames = 'fixed min-w-32 max-w-64 overflow-auto rounded-md bg-white shadow-xl ring-1 ring-black ring-opacity-5 blk:bg-gray-800 blk:ring-white blk:ring-opacity-25';
+
   let panel;
   if (popupSize) {
-
     const maxHeight = safeAreaHeight - 16;
-    const layouts = createLayouts(
+    const posStyle = computePositionStyle(
       anchorPosition,
       { width: popupSize.width, height: Math.min(popupSize.height, maxHeight) },
-      { width: safeAreaWidth, height: safeAreaHeight },
+      { x: 0, y: 0, width: safeAreaWidth, height: safeAreaHeight },
+      null,
+      insets,
+      8,
     );
-    const popupPosition = computePosition(layouts, null, 8);
-
-    const { top, left, topOrigin, leftOrigin } = popupPosition;
-    const popupStyle = { top, left, maxHeight };
-    popupClassNames += ' ' + getOriginClassName(topOrigin, leftOrigin);
+    const popupStyle = { ...posStyle, maxHeight };
 
     panel = (
       <motion.div key="LockMP_popup" ref={popup} style={popupStyle} className={tailwind(popupClassNames)} variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">

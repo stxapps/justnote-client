@@ -1,17 +1,20 @@
 import {
-  INIT, UPDATE_HREF, UPDATE_WINDOW_SIZE, UPDATE_VISUAL_SIZE, UPDATE_SYSTEM_THEME_MODE,
-  UPDATE_IS_24H_FORMAT,
+  INIT, UPDATE_HREF, UPDATE_WINDOW, UPDATE_SYSTEM_THEME_MODE, UPDATE_IS_24H_FORMAT,
 } from '../types/actionTypes';
 import { WHT_MODE } from '../types/const';
-import { getWindowSize } from '../utils';
+import { getWindowSize, getWindowInsets } from '../utils';
 
-const { windowWidth, windowHeight, visualWidth, visualHeight } = getWindowSize();
+const [size, insets] = [getWindowSize(), getWindowInsets()];
 const initialState = {
   href: null,
-  width: windowWidth,
-  height: windowHeight,
-  visualWidth,
-  visualHeight,
+  width: size.width,
+  height: size.height,
+  visualWidth: size.visualWidth,
+  visualHeight: size.visualHeight,
+  insetTop: insets.top,
+  insetRight: insets.right,
+  insetBottom: insets.bottom,
+  insetLeft: insets.left,
   themeMode: WHT_MODE,
   is24HFormat: null,
 };
@@ -22,10 +25,6 @@ const windowReducer = (state = initialState, action) => {
     return {
       ...state,
       href: action.payload.href,
-      width: action.payload.windowWidth,
-      height: action.payload.windowHeight,
-      visualWidth: action.payload.visualWidth,
-      visualHeight: action.payload.visualHeight,
       themeMode: action.payload.systemThemeMode,
       is24HFormat: action.payload.is24HFormat,
     };
@@ -35,20 +34,8 @@ const windowReducer = (state = initialState, action) => {
     return { ...state, href: action.payload };
   }
 
-  if (action.type === UPDATE_WINDOW_SIZE) {
-    return {
-      ...state,
-      width: action.payload.windowWidth,
-      height: action.payload.windowHeight,
-    };
-  }
-
-  if (action.type === UPDATE_VISUAL_SIZE) {
-    return {
-      ...state,
-      visualWidth: action.payload.visualWidth,
-      visualHeight: action.payload.visualHeight,
-    };
+  if (action.type === UPDATE_WINDOW) {
+    return { ...state, ...action.payload };
   }
 
   if (action.type === UPDATE_SYSTEM_THEME_MODE) {

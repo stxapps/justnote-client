@@ -12,13 +12,14 @@ import {
   ARCHIVE, TRASH, MOVE_ACTION_NOTE_COMMANDS, LIST_NAMES_MODE_MOVE_NOTES,
 } from '../types/const';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
+import { computePositionStyle } from '../utils/popup';
 
-import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
-import { useSafeAreaFrame, useTailwind } from '.';
+import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 
 const BulkEditMenuPopup = () => {
 
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
+  const insets = useSafeAreaInsets();
   const isShown = useSelector(state => state.display.isBulkEditMenuPopupShown);
   const anchorPosition = useSelector(state => state.display.bulkEditMenuPopupPosition);
   const listName = useSelector(state => state.display.listName);
@@ -102,20 +103,20 @@ const BulkEditMenuPopup = () => {
     </div>
   );
 
-  let popupClassNames = 'fixed min-w-36 overflow-auto rounded-lg bg-white shadow-xl ring-1 ring-black ring-opacity-5 blk:bg-gray-800 blk:ring-white blk:ring-opacity-25';
+  const popupClassNames = 'fixed min-w-36 overflow-auto rounded-lg bg-white shadow-xl ring-1 ring-black ring-opacity-5 blk:bg-gray-800 blk:ring-white blk:ring-opacity-25';
+
   let panel;
   if (popupSize) {
     const maxHeight = safeAreaHeight - 16;
-    const layouts = createLayouts(
+    const posStyle = computePositionStyle(
       anchorPosition,
       { width: popupSize.width, height: Math.min(popupSize.height, maxHeight) },
-      { width: safeAreaWidth, height: safeAreaHeight },
+      { x: 0, y: 0, width: safeAreaWidth, height: safeAreaHeight },
+      null,
+      insets,
+      8,
     );
-    const popupPosition = computePosition(layouts, null, 8);
-
-    const { top, left, topOrigin, leftOrigin } = popupPosition;
-    const popupStyle = { top, left, maxHeight };
-    popupClassNames += ' ' + getOriginClassName(topOrigin, leftOrigin);
+    const popupStyle = { ...posStyle, maxHeight };
 
     panel = (
       <motion.div key="BEMP_popup" ref={popup} style={popupStyle} className={tailwind(popupClassNames)} variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">

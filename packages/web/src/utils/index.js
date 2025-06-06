@@ -1962,10 +1962,10 @@ export const doContainStaleNotes = (notes) => {
 };
 
 export const getWindowSize = () => {
-  let windowWidth = null, windowHeight = null, visualWidth = null, visualHeight = null;
-  if (isObject(window)) {
-    if (isNumber(window.innerWidth)) windowWidth = window.innerWidth;
-    if (isNumber(window.innerHeight)) windowHeight = window.innerHeight;
+  let width = null, height = null, visualWidth = null, visualHeight = null;
+  if (typeof window !== 'undefined' && isObject(window)) {
+    if (isNumber(window.innerWidth)) width = window.innerWidth;
+    if (isNumber(window.innerHeight)) height = window.innerHeight;
 
     if (isObject(window.visualViewport)) {
       if (isNumber(window.visualViewport.width)) {
@@ -1977,7 +1977,33 @@ export const getWindowSize = () => {
     }
   }
 
-  return { windowWidth, windowHeight, visualWidth, visualHeight };
+  return { width, height, visualWidth, visualHeight };
+};
+
+export const getWindowInsets = () => {
+  let top = null, right = null, bottom = null, left = null;
+  if (
+    typeof window !== 'undefined' &&
+    isObject(window) &&
+    isObject(document.documentElement)
+  ) {
+    const cs = window.getComputedStyle(document.documentElement);
+    const st = cs.getPropertyValue('--env-safe-area-inset-top');
+    const sr = cs.getPropertyValue('--env-safe-area-inset-right');
+    const sb = cs.getPropertyValue('--env-safe-area-inset-bottom');
+    const sl = cs.getPropertyValue('--env-safe-area-inset-left');
+
+    // Assume always in pixels (px)
+    const [nt, nr] = [parseFloat(st), parseFloat(sr)];
+    const [nb, nl] = [parseFloat(sb), parseFloat(sl)];
+
+    if (isNumber(nt)) top = nt;
+    if (isNumber(nr)) right = nr;
+    if (isNumber(nb)) bottom = nb;
+    if (isNumber(nl)) left = nl;
+  }
+
+  return { top, right, bottom, left };
 };
 
 export const getVisualViewPortOffsetTop = () => {

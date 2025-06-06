@@ -6,9 +6,9 @@ import idxApi from '../apis';
 import lsgApi from '../apis/localSg';
 import { updateStgsAndInfo } from '../importWrapper';
 import {
-  INIT, UPDATE_HREF, UPDATE_WINDOW_SIZE, UPDATE_VISUAL_SIZE, UPDATE_USER,
-  UPDATE_HANDLING_SIGN_IN, UPDATE_SEARCH_STRING, UPDATE_NOTE_ID, UPDATE_POPUP,
-  UPDATE_BULK_EDITING, ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, REFRESH_FETCHED,
+  INIT, UPDATE_HREF, UPDATE_WINDOW, UPDATE_USER, UPDATE_HANDLING_SIGN_IN,
+  UPDATE_SEARCH_STRING, UPDATE_NOTE_ID, UPDATE_POPUP, UPDATE_BULK_EDITING,
+  ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, REFRESH_FETCHED,
   INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT, INCREASE_UPDATE_NOTE_ID_COUNT,
   INCREASE_BLUR_COUNT, INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT,
   INCREASE_UPDATE_BULK_EDIT_COUNT, INCREASE_WEBVIEW_KEY_COUNT, UPDATE_UNSAVED_NOTE,
@@ -24,7 +24,7 @@ import {
 import {
   throttle, extractUrl, urlHashToObj, objToUrlHash, isBusyStatus, isEqual,
   separateUrlAndParam, getUserUsername, getUserImageUrl, sleep, isObject, isString,
-  isNumber, isTitleEqual, isBodyEqual, getWindowSize, getNote,
+  isNumber, isTitleEqual, isBodyEqual, getWindowInsets, getNote,
   getEditingListNameEditors, getEditingTagNameEditors,
 } from '../utils';
 import vars from '../vars';
@@ -49,8 +49,6 @@ export const init = () => async (dispatch, getState) => {
 
   handleUrlHash();
 
-  const { windowWidth, windowHeight, visualWidth, visualHeight } = getWindowSize();
-
   const darkMatches = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const is24HFormat = null;
   const localSettings = await idxApi.getLocalSettings();
@@ -74,10 +72,6 @@ export const init = () => async (dispatch, getState) => {
       userImage,
       userHubUrl,
       href: window.location.href,
-      windowWidth,
-      windowHeight,
-      visualWidth,
-      visualHeight,
       systemThemeMode: darkMatches ? BLK_MODE : WHT_MODE,
       is24HFormat,
       localSettings,
@@ -110,21 +104,31 @@ export const init = () => async (dispatch, getState) => {
     handleScreenRotation(prevWidth)(dispatch, getState);
     prevWidth = window.innerWidth;
 
+    const insets = getWindowInsets();
     dispatch({
-      type: UPDATE_WINDOW_SIZE,
+      type: UPDATE_WINDOW,
       payload: {
-        windowWidth: window.innerWidth,
-        windowHeight: window.innerHeight,
+        width: window.innerWidth,
+        height: window.innerHeight,
+        insetTop: insets.top,
+        insetRight: insets.right,
+        insetBottom: insets.bottom,
+        insetLeft: insets.left,
       },
     });
   }, 16));
   if (isObject(window.visualViewport)) {
     window.visualViewport.addEventListener('resize', throttle(() => {
+      const insets = getWindowInsets();
       dispatch({
-        type: UPDATE_VISUAL_SIZE,
+        type: UPDATE_WINDOW,
         payload: {
           visualWidth: window.visualViewport.width,
           visualHeight: window.visualViewport.height,
+          insetTop: insets.top,
+          insetRight: insets.right,
+          insetBottom: insets.bottom,
+          insetLeft: insets.left,
         },
       });
     }, 16));

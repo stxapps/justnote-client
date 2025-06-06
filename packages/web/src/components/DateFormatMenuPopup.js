@@ -8,13 +8,14 @@ import {
   DATE_FORMAT_MENU_POPUP, NOTE_DATE_FORMATS, NOTE_DATE_FORMAT_TEXTS,
 } from '../types/const';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
+import { computePositionStyle } from '../utils/popup';
 
-import { useSafeAreaFrame, useTailwind } from '.';
-import { computePosition, createLayouts, getOriginClassName } from './MenuPopupRenderer';
+import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 
 const DateFormatMenuPopup = () => {
 
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
+  const insets = useSafeAreaInsets();
   const isShown = useSelector(state => state.display.isDateFormatMenuPopupShown);
   const anchorPosition = useSelector(state => state.display.dateFormatMenuPopupPosition);
   const [popupSize, setPopupSize] = useState(null);
@@ -63,22 +64,20 @@ const DateFormatMenuPopup = () => {
     </div>
   );
 
-  let popupClassNames = 'fixed min-w-[6rem] overflow-auto rounded-md bg-white shadow-xl ring-1 ring-black ring-opacity-5 blk:bg-gray-800 blk:ring-white blk:ring-opacity-25';
+  const popupClassNames = 'fixed min-w-[6rem] overflow-auto rounded-md bg-white shadow-xl ring-1 ring-black ring-opacity-5 blk:bg-gray-800 blk:ring-white blk:ring-opacity-25';
+
   let panel;
   if (popupSize) {
-
     const maxHeight = Math.min(safeAreaHeight - 16, (44 * 5) + (44 / 2) + 4);
-    const layouts = createLayouts(
+    const posStyle = computePositionStyle(
       anchorPosition,
       { width: popupSize.width, height: Math.min(popupSize.height, maxHeight) },
-      { width: safeAreaWidth, height: safeAreaHeight },
+      { x: 0, y: 0, width: safeAreaWidth, height: safeAreaHeight },
+      null,
+      insets,
+      8,
     );
-    const popupPosition = computePosition(layouts, null, 8);
-
-    const { top, left, topOrigin, leftOrigin } = popupPosition;
-    const popupStyle = { top, left, maxHeight };
-    popupClassNames += ' ' + getOriginClassName(topOrigin, leftOrigin);
-
+    const popupStyle = /** @type any */({ ...posStyle, maxHeight });
     if (popupSize.width < anchorPosition.width) popupStyle.width = anchorPosition.width;
 
     panel = (
