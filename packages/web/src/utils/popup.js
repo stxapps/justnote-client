@@ -6,16 +6,16 @@ const CENTER_TRIGGER = 'CENTER_TRIGGER'; // center of the trigger
 const EDGE_TRIGGER = 'EDGE_TRIGGER'; // bottom or right of the trigger
 
 // oDim: options dimension, oSpc: options and window space
-// wDim: window dimension
-// tPos: trigger position, tDim: trigger dimension
-// iBgn: inset begin, iEd: inset end
-const axisPosition = (oDim, oSpc, wDim, tPos, tDim, iBgn, iEd) => {
-  // if options are bigger than window dimension, then render at 0
-  if (oDim > wDim - iBgn - iEd) {
+// wDim: safe area window dimension
+// tPos: trigger position incl. inset begin, tDim: trigger dimension
+// iBgn: inset begin
+const axisPosition = (oDim, oSpc, wDim, tPos, tDim, iBgn) => {
+  // if options are bigger than safe area window dimension, then render at 0
+  if (oDim > wDim) {
     return [oSpc, ZERO];
   }
   // render at trigger position if possible
-  if (tPos + oDim + oSpc + iEd <= wDim) {
+  if (tPos + oDim + oSpc <= iBgn + wDim) {
     return [tPos, AT_TRIGGER];
   }
   // aligned to the trigger from the bottom (right)
@@ -26,11 +26,11 @@ const axisPosition = (oDim, oSpc, wDim, tPos, tDim, iBgn, iEd) => {
   const pos = Math.round(tPos + (tDim / 2) - (oDim / 2));
   // top boundary overflows, render at window center instead
   if (pos - oSpc - iBgn < 0) {
-    return [Math.round((wDim - oDim) / 2), CENTER];
+    return [Math.round(iBgn + ((wDim - oDim) / 2)), CENTER];
   }
   // bottom boundary overflows, render at window center instead
-  if (pos + oDim + oSpc + iEd > wDim) {
-    return [Math.round((wDim - oDim) / 2), CENTER];
+  if (pos + oDim + oSpc > iBgn + wDim) {
+    return [Math.round(iBgn + ((wDim - oDim) / 2)), CENTER];
   }
   // if everything ok, render in center position
   return [pos, CENTER_TRIGGER];
@@ -48,13 +48,13 @@ const computePosition = (
     tHeight = tHeight + hOffset;
   }
   const { height: oHeight, width: oWidth } = optionsLayout;
-  const { x: wX, y: wY, width: wWidth, height: wHeight } = windowLayout;
+  const { width: wWidth, height: wHeight } = windowLayout;
 
   const [top, topOrigin] = axisPosition(
-    oHeight, popupMargin, wHeight, tY - wY, tHeight, insets.top, insets.bottom,
+    oHeight, popupMargin, wHeight, tY, tHeight, insets.top,
   );
   const [left, leftOrigin] = axisPosition(
-    oWidth, popupMargin, wWidth, tX - wX, tWidth, insets.left, insets.right,
+    oWidth, popupMargin, wWidth, tX, tWidth, insets.left,
   );
 
   return { top, left, topOrigin, leftOrigin };

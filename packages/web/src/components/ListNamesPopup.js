@@ -276,7 +276,7 @@ const ListNamesPopup = () => {
   const posStyle = computePositionStyle(
     derivedAnchorPosition,
     { width: popupWidth, height: popupHeight },
-    { x: 0, y: 0, width: safeAreaWidth, height: safeAreaHeight },
+    { width: safeAreaWidth, height: safeAreaHeight },
     null,
     insets,
     8,

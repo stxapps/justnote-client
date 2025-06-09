@@ -72,7 +72,7 @@ const DateFormatMenuPopup = () => {
     const posStyle = computePositionStyle(
       anchorPosition,
       { width: popupSize.width, height: Math.min(popupSize.height, maxHeight) },
-      { x: 0, y: 0, width: safeAreaWidth, height: safeAreaHeight },
+      { width: safeAreaWidth, height: safeAreaHeight },
       null,
       insets,
       8,
