@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import Url from 'url-parse';
@@ -9,17 +9,19 @@ import {
 } from '../actions/chunk';
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import {
-  HASH_SUPPORT, NOTE_LIST_MENU_POPUP, SETTINGS_VIEW_ACCOUNT, LG_WIDTH, SHOW_SYNCED,
-  LOCK, UNLOCKED,
+  HASH_SUPPORT, NOTE_LIST_MENU_POPUP, SETTINGS_VIEW_ACCOUNT, SHOW_SYNCED, LOCK,
+  UNLOCKED,
 } from '../types/const';
 import { getCurrentLockListStatus, getCanChangeListNames } from '../selectors';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
+import { computePositionStyle } from '../utils/popup';
 
-import { useSafeAreaFrame, useTailwind } from '.';
+import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 
 const NoteListMenuPopup = () => {
 
-  const { width: safeAreaWidth } = useSafeAreaFrame();
+  const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
+  const insets = useSafeAreaInsets();
   const isShown = useSelector(state => state.display.isNoteListMenuPopupShown);
   const anchorPosition = useSelector(state => state.display.noteListMenuPopupPosition);
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
@@ -27,6 +29,8 @@ const NoteListMenuPopup = () => {
   const doSyncMode = useSelector(state => state.localSettings.doSyncMode);
   const lockStatus = useSelector(state => getCurrentLockListStatus(state));
   const canChangeListNames = useSelector(state => getCanChangeListNames(state));
+  const [popupSize, setPopupSize] = useState(null);
+  const popup = useRef(null);
   const cancelBtn = useRef(null);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
@@ -142,21 +146,19 @@ const NoteListMenuPopup = () => {
   };
 
   useEffect(() => {
-    if (isShown) cancelBtn.current.focus();
+    if (isShown) {
+      const s = popup.current.getBoundingClientRect();
+      setPopupSize(s);
+
+      cancelBtn.current.focus();
+    } else {
+      setPopupSize(null);
+    }
   }, [isShown]);
 
   if (!isShown) return (
     <AnimatePresence key="AP_NL_MenuPopup" />
   );
-
-  const popupStyle = { top: anchorPosition.top + 4 };
-  if (safeAreaWidth < LG_WIDTH) {
-    popupStyle.right = safeAreaWidth - anchorPosition.right + 12;
-    popupStyle.transformOrigin = 'top right';
-  } else {
-    popupStyle.left = anchorPosition.left + 4;
-    popupStyle.transformOrigin = 'top left';
-  }
 
   const supportAndSignOutButtons = (
     <React.Fragment>
@@ -215,14 +217,42 @@ const NoteListMenuPopup = () => {
     );
   }
 
-  return (
-    <AnimatePresence key="AP_NL_MenuPopup">
-      <motion.button key="NL_MenuPopup_cancelBtn" ref={cancelBtn} onClick={onNoteListMenuCancelBtnClick} className={tailwind('fixed inset-0 h-full w-full cursor-default bg-black bg-opacity-25 focus:outline-none')} variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden" />
-      <motion.div key="NL_MenuPopup_popup" style={popupStyle} className={tailwind('absolute rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 blk:bg-gray-800 blk:ring-white blk:ring-opacity-25')} variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+  const popupClassNames = 'fixed min-w-36 overflow-auto rounded-lg bg-white shadow-xl ring-1 ring-black ring-opacity-5 blk:bg-gray-800 blk:ring-white blk:ring-opacity-25';
+
+  let panel;
+  if (popupSize) {
+    const maxHeight = safeAreaHeight - 16;
+    const posStyle = computePositionStyle(
+      anchorPosition,
+      { width: popupSize.width, height: Math.min(popupSize.height, maxHeight) },
+      { x: 0, y: 0, width: safeAreaWidth, height: safeAreaHeight },
+      { x: 0, y: 0, width: -8, height: 0 },
+      insets,
+      8,
+    );
+    const popupStyle = { ...posStyle, maxHeight };
+
+    panel = (
+      <motion.div key="NL_MenuPopup_popup" ref={popup} style={popupStyle} className={tailwind(popupClassNames)} variants={popupFMV} initial="hidden" animate="visible" exit="hidden" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
         <div className={tailwind('py-1')}>
           {buttons}
         </div>
       </motion.div>
+    );
+  } else {
+    panel = (
+      <div key="NL_MenuPopup_popup" ref={popup} style={{ top: safeAreaHeight, left: safeAreaWidth }} className={tailwind(popupClassNames)} role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+        <div className={tailwind('py-1')}>
+          {buttons}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <AnimatePresence key="AP_NL_MenuPopup">
+      <motion.button key="NL_MenuPopup_cancelBtn" ref={cancelBtn} onClick={onNoteListMenuCancelBtnClick} className={tailwind('fixed inset-0 h-full w-full cursor-default bg-black bg-opacity-25 focus:outline-none')} variants={popupBgFMV} initial="hidden" animate="visible" exit="hidden" />
+      {panel}
     </AnimatePresence>
   );
 };

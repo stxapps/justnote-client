@@ -14,11 +14,12 @@ import {
 } from '../types/const';
 import { dialogBgFMV, dialogFMV } from '../types/animConfigs';
 
-import { useSafeAreaFrame, useTailwind } from '.';
+import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 
 const LockEditorPopup = () => {
 
   const { height: safeAreaHeight, windowHeight } = useSafeAreaFrame();
+  const insets = useSafeAreaInsets();
   const isShown = useSelector(state => state.display.isLockEditorPopupShown);
   const lockAction = useSelector(state => state.display.lockAction);
   const selectingNoteId = useSelector(state => state.display.selectingNoteId);
@@ -114,6 +115,11 @@ const LockEditorPopup = () => {
 
   if (!isShown) return <AnimatePresence key="AP_LockP" />;
 
+  const canvasStyle = {
+    paddingTop: insets.top, paddingBottom: insets.bottom,
+    paddingLeft: insets.left, paddingRight: insets.right,
+  };
+
   // Use windowHeight to move along with a virtual keyboard on SettingsLists.
   let theHeight = safeAreaHeight;
   if ([LOCK_ACTION_ADD_LOCK_LIST, LOCK_ACTION_REMOVE_LOCK_LIST,].includes(lockAction)) {
@@ -177,7 +183,7 @@ const LockEditorPopup = () => {
 
   return (
     <AnimatePresence key="AP_LockP">
-      <div className={tailwind('fixed inset-0 overflow-hidden')}>
+      <div style={canvasStyle} className={tailwind('fixed inset-0 overflow-hidden')}>
         <div className={tailwind('flex items-center justify-center p-4')} style={{ minHeight: theHeight }}>
           <div className={tailwind('fixed inset-0')}>
             <motion.button onClick={onCancelBtnClick} className={tailwind('absolute inset-0 h-full w-full cursor-default bg-black bg-opacity-25 focus:outline-none')} variants={dialogBgFMV} initial="hidden" animate="visible" exit="hidden" />
