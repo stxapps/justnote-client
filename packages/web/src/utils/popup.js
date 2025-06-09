@@ -12,7 +12,7 @@ const EDGE_TRIGGER = 'EDGE_TRIGGER'; // bottom or right of the trigger
 const axisPosition = (oDim, oSpc, wDim, tPos, tDim, iBgn) => {
   // if options are bigger than safe area window dimension, then render at 0
   if (oDim > wDim) {
-    return [oSpc, ZERO];
+    return [iBgn + oSpc, ZERO];
   }
   // render at trigger position if possible
   if (tPos + oDim + oSpc <= iBgn + wDim) {
