@@ -187,13 +187,11 @@ const ListNamesPopup = () => {
   if (longestDisplayName.length > 26) popupWidth = 256;
   else if (longestDisplayName.length > 14) popupWidth = 208;
 
-  let popupHeight = Math.min(315, 44 * (maxChildrenSize + 1) + 51);
-  if (maxChildrenSize > 4) {
+  let popupHeight = 44 * (maxChildrenSize + 1) + 51;
+  if (popupHeight > safeAreaHeight - 16) {
     popupHeight = getLastHalfHeight(
       Math.min(popupHeight, safeAreaHeight - 16), 44, 0, 51, 0.5
     );
-  } else if (maxChildrenSize > 3) {
-    popupHeight = Math.min(popupHeight, safeAreaHeight - 16);
   }
 
   const renderListNameBtns = () => {
