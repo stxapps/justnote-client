@@ -3,13 +3,15 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { updatePopupUrlHash } from '../actions';
 import { updateSelectingListName, updateLockAction } from '../actions/chunk';
-import { LOCK_EDITOR_POPUP, LOCK_ACTION_UNLOCK_LIST } from '../types/const';
+import { LOCK_EDITOR_POPUP, LOCK_ACTION_UNLOCK_LIST, LOCKED } from '../types/const';
+import { getCurrentLockListStatus } from '../selectors';
 
 import { useTailwind } from '.';
 
 const NoteListLock = () => {
 
   const listName = useSelector(state => state.display.listName);
+  const lockStatus = useSelector(state => getCurrentLockListStatus(state));
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
@@ -19,8 +21,10 @@ const NoteListLock = () => {
     updatePopupUrlHash(LOCK_EDITOR_POPUP, true);
   };
 
+  if (lockStatus !== LOCKED) return null;
+
   return (
-    <div className={tailwind('flex-shrink flex-grow overflow-y-auto pb-[5.5rem] lg:pb-0')}>
+    <div className={tailwind('absolute inset-0 bg-white overflow-y-auto pb-[5.5rem] lg:pb-0 blk:bg-gray-900')}>
       <div className={tailwind('mt-32 mb-24 px-4 sm:px-6')}>
         <button onClick={onLockBtnClick} className={tailwind('group block w-full focus:outline-none')}>
           <div className={tailwind('mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gray-200 blk:bg-gray-700')}>

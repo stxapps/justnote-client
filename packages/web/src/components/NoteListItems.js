@@ -194,7 +194,7 @@ const NoteListItems = (props) => {
   else fetchMoreBtn = renderFetchMoreBtn();
 
   return (
-    <div ref={flatList} className={tailwind('flex-shrink flex-grow overflow-y-auto pb-[5.5rem] lg:pb-0')}>
+    <div ref={flatList} className={tailwind('h-full overflow-y-auto pb-[5.5rem] lg:pb-0')}>
       {items.length === 0 && renderEmpty()}
       {items.length > 0 && renderItems()}
       {fetchMoreBtn}

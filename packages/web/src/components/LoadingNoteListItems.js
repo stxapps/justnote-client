@@ -35,7 +35,7 @@ const LoadingNoteListItems = () => {
   const tailwind = useTailwind();
 
   return (
-    <div className={tailwind('flex-shrink flex-grow overflow-hidden')}>
+    <div className={tailwind('h-full overflow-hidden')}>
       <div className={tailwind('mt-5')}>
         <ul className={tailwind('-my-5 animate-pulse divide-y divide-gray-200 blk:divide-gray-700')}>
           <LoadingNoteListItem />

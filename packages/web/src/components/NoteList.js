@@ -6,11 +6,9 @@ import { updateNoteIdUrlHash } from '../actions';
 import { fetch } from '../actions/chunk';
 import {
   SD_HUB_URL, TRASH, NEW_NOTE, NEW_NOTE_OBJ, MAX_SELECTED_NOTE_IDS,
-  SD_MAX_SELECTED_NOTE_IDS, VALID, LOCKED,
+  SD_MAX_SELECTED_NOTE_IDS, VALID,
 } from '../types/const';
-import {
-  getIsShowingNoteInfosNull, makeGetUnsavedNote, getCurrentLockListStatus,
-} from '../selectors';
+import { getIsShowingNoteInfosNull, makeGetUnsavedNote } from '../selectors';
 import { popupFMV } from '../types/animConfigs';
 
 import { useTailwind } from '.';
@@ -33,7 +31,6 @@ const NoteList = (props) => {
     state => state.display.isSelectedNoteIdsMaxErrorShown
   );
   const unsavedNote = useSelector(state => getUnsavedNote(state, NEW_NOTE_OBJ));
-  const lockStatus = useSelector(state => getCurrentLockListStatus(state));
   const maxSelectedNoteIds = useSelector(state => {
     if (state.user.hubUrl === SD_HUB_URL) return SD_MAX_SELECTED_NOTE_IDS;
     return MAX_SELECTED_NOTE_IDS;
@@ -95,8 +92,11 @@ const NoteList = (props) => {
 
   let noteListItems = <LoadingNoteListItems />;
   if (!isShowingNoteInfosNull) {
-    if (lockStatus === LOCKED) noteListItems = <NoteListLock />;
-    else noteListItems = <NoteListItems />;
+    noteListItems = (
+      <>
+        <NoteListItems />
+        <NoteListLock />
+      </>);
   }
 
   return (
@@ -104,7 +104,9 @@ const NoteList = (props) => {
       {/* TopBar */}
       <NoteListTopBar onSidebarOpenBtnClick={onSidebarOpenBtnClick} />
       {/* Main */}
-      {noteListItems}
+      <div className={tailwind('relative flex-shrink flex-grow min-h-0')}>
+        {noteListItems}
+      </div>
       {/* Add button */}
       {!isBulkEditing && (listName !== TRASH) && <button onClick={onAddBtnClick} className={tailwind('absolute right-4 bottom-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-600 text-white shadow-md hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 lg:hidden')}>
         <svg className={tailwind('h-10 w-10')} viewBox={isUnsavedValid ? '0 0 20 20' : '0 0 40 40'} fill="currentColor" xmlns="http://www.w3.org/2000/svg">
