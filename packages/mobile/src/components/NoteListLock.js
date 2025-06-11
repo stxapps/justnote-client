@@ -5,13 +5,15 @@ import Svg, { Path } from 'react-native-svg';
 
 import { updatePopup } from '../actions';
 import { updateSelectingListName, updateLockAction } from '../actions/chunk';
-import { LOCK_EDITOR_POPUP, LOCK_ACTION_UNLOCK_LIST } from '../types/const';
+import { LOCK_EDITOR_POPUP, LOCK_ACTION_UNLOCK_LIST, LOCKED } from '../types/const';
+import { getCurrentLockListStatus } from '../selectors';
 
 import { useTailwind } from '.';
 
 const NoteListLock = () => {
 
   const listName = useSelector(state => state.display.listName);
+  const lockStatus = useSelector(state => getCurrentLockListStatus(state));
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
@@ -21,8 +23,10 @@ const NoteListLock = () => {
     dispatch(updatePopup(LOCK_EDITOR_POPUP, true));
   };
 
+  if (lockStatus !== LOCKED) return null;
+
   return (
-    <View style={tailwind('flex-shrink flex-grow')}>
+    <View style={tailwind('absolute inset-0 bg-white blk:bg-gray-900')}>
       <ScrollView>
         <View style={tailwind('pb-20 lg:pb-0')}>
           <View style={tailwind('mt-32 mb-24 w-full items-center px-4 sm:px-6')}>

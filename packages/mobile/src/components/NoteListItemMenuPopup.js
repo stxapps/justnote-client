@@ -22,9 +22,9 @@ import {
 } from '../selectors';
 import { getListNameDisplayName } from '../utils';
 import { popupFMV } from '../types/animConfigs';
+import { computePositionTranslate } from '../utils/popup';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
-import { computePosition, createLayouts, getOriginTranslate } from './MenuPopupRenderer';
 
 export const NOTE_ITEM_POPUP_MENU = {
   [MY_NOTES]: [ARCHIVE, REMOVE, MOVE_TO],
@@ -225,37 +225,36 @@ const NoteListItemMenuPopup = () => {
     </View>
   );
 
-  let popupClassNames = 'absolute rounded-md bg-white shadow-lg blk:border blk:border-gray-700 blk:bg-gray-800';
-  let panel;
-  let bgStyle = { opacity: 0 };
-  if (popupSize) {
+  const popupClassNames = 'absolute rounded-md bg-white shadow-lg blk:border blk:border-gray-700 blk:bg-gray-800';
 
-    const layouts = createLayouts(
+  let panel, bgStyle = { opacity: 0 };
+  if (popupSize) {
+    const posTrn = computePositionTranslate(
       derivedAnchorPosition,
       { width: popupSize.width, height: popupSize.height },
-      { width: safeAreaWidth + insets.left, height: safeAreaHeight + insets.top },
-    );
-    const popupPosition = computePosition(layouts, null, 8);
-
-    const { top, left, topOrigin, leftOrigin } = popupPosition;
-    const { startX, startY } = getOriginTranslate(
-      topOrigin, leftOrigin, popupSize.width, popupSize.height
+      { width: safeAreaWidth, height: safeAreaHeight },
+      null,
+      insets,
+      8,
     );
 
-    const popupStyle = { top, left, opacity: popupAnim, transform: [] };
+    const popupStyle = {
+      top: posTrn.top, left: posTrn.left, opacity: popupAnim, transform: [],
+    };
     popupStyle.transform.push({
       translateX: popupAnim.interpolate({
-        inputRange: [0, 1], outputRange: [startX, 0],
+        inputRange: [0, 1], outputRange: [posTrn.startX, 0],
       }),
     });
     popupStyle.transform.push({
       translateY: popupAnim.interpolate({
-        inputRange: [0, 1], outputRange: [startY, 0],
+        inputRange: [0, 1], outputRange: [posTrn.startY, 0],
       }),
     });
     popupStyle.transform.push({
       scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }),
     });
+
     /* @ts-expect-error */
     bgStyle = { opacity: popupAnim };
 

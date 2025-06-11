@@ -186,21 +186,18 @@ const NoteListItems = () => {
   }, [hasMore, hasFetchedMore, isFetchingMore]);
 
   return (
-    <View style={tailwind('flex-shrink flex-grow')}>
-      <FlatList
-        ref={flatList}
-        contentContainerStyle={tailwind('')}
-        data={data}
-        keyExtractor={getItemId}
-        renderItem={renderItem}
-        ListEmptyComponent={renderEmpty}
-        onEndReached={onEndReached}
-        onEndReachedThreshold={0.2}
-        removeClippedSubviews={false}
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-        overScrollMode="always" />
-    </View>
+    <FlatList
+      ref={flatList}
+      data={data}
+      keyExtractor={getItemId}
+      renderItem={renderItem}
+      ListEmptyComponent={renderEmpty}
+      onEndReached={onEndReached}
+      onEndReachedThreshold={0.2}
+      removeClippedSubviews={false}
+      onScroll={onScroll}
+      scrollEventThrottle={16}
+      overScrollMode="always" />
   );
 };
 

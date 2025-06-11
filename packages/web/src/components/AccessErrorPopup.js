@@ -37,7 +37,7 @@ const AccessErrorPopup = () => {
   };
 
   return (
-    <div style={canvasStyle} className={tailwind('fixed inset-x-0 top-14 flex items-start justify-center sm:top-0')}>
+    <div style={canvasStyle} className={tailwind('fixed inset-x-0 top-14 flex items-start justify-center md:top-0')}>
       <div className={tailwind('relative m-4 rounded-md bg-red-50 p-4 shadow-lg')}>
         <div className={tailwind('flex')}>
           <div className={tailwind('flex-shrink-0')}>

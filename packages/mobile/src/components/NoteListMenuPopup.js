@@ -12,16 +12,17 @@ import {
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import {
   DOMAIN_NAME, HASH_SUPPORT, SIGN_UP_POPUP, NOTE_LIST_MENU_POPUP,
-  CONFIRM_EXIT_DUMMY_POPUP, SETTINGS_VIEW_ACCOUNT, LG_WIDTH, SHOW_SYNCED, LOCK, UNLOCKED,
+  CONFIRM_EXIT_DUMMY_POPUP, SETTINGS_VIEW_ACCOUNT, SHOW_SYNCED, LOCK, UNLOCKED,
 } from '../types/const';
 import { getCurrentLockListStatus, getCanChangeListNames } from '../selectors';
 import { popupFMV, rotateAnimConfig } from '../types/animConfigs';
+import { computePositionTranslate } from '../utils/popup';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 
 const NoteListMenuPopup = () => {
 
-  const { width: safeAreaWidth } = useSafeAreaFrame();
+  const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
   const insets = useSafeAreaInsets();
   const isShown = useSelector(state => state.display.isNoteListMenuPopupShown);
   const anchorPosition = useSelector(state => state.display.noteListMenuPopupPosition);
@@ -30,6 +31,7 @@ const NoteListMenuPopup = () => {
   const lockStatus = useSelector(state => getCurrentLockListStatus(state));
   const canChangeListNames = useSelector(state => getCanChangeListNames(state));
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
+  const [popupSize, setPopupSize] = useState(null);
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
   const [derivedIsShown, setDerivedIsShown] = useState(isShown);
   const [derivedAnchorPosition, setDerivedAnchorPosition] = useState(anchorPosition);
@@ -38,11 +40,14 @@ const NoteListMenuPopup = () => {
   const popupBackHandler = useRef(null);
   const syncAnim = useRef(new Animated.Value(0)).current;
   const syncAnimObj = useRef(null);
+  const didClick = useRef(false);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
   const onNoteListMenuCancelBtnClick = useCallback(() => {
+    if (didClick.current) return;
     dispatch(updatePopup(NOTE_LIST_MENU_POPUP, false, null));
+    didClick.current = true;
   }, [dispatch]);
 
   const onSyncBtnClick = () => {
@@ -94,6 +99,12 @@ const NoteListMenuPopup = () => {
   const onExitDummyBtnClick = () => {
     onNoteListMenuCancelBtnClick();
     dispatch(updatePopup(CONFIRM_EXIT_DUMMY_POPUP, true));
+  };
+
+  const onPopupLayout = (e) => {
+    if (!popupSize) {
+      setPopupSize(e.nativeEvent.layout);
+    }
   };
 
   const registerPopupBackHandler = useCallback((doRegister) => {
@@ -176,12 +187,21 @@ const NoteListMenuPopup = () => {
   };
 
   useEffect(() => {
+    if (isShown && popupSize) {
+      Animated.timing(popupAnim, { toValue: 1, ...popupFMV.visible }).start();
+    }
+  }, [isShown, popupSize, popupAnim]);
+
+  useEffect(() => {
     let didMount = true;
     if (isShown) {
-      Animated.timing(popupAnim, { toValue: 1, ...popupFMV.visible }).start();
+      didClick.current = false;
     } else {
       Animated.timing(popupAnim, { toValue: 0, ...popupFMV.hidden }).start(() => {
-        if (didMount) setDidCloseAnimEnd(true);
+        if (didMount) {
+          setPopupSize(null);
+          setDidCloseAnimEnd(true);
+        }
       });
     }
 
@@ -220,51 +240,6 @@ const NoteListMenuPopup = () => {
   }
 
   if (!derivedAnchorPosition) return null;
-
-  const popupStyle = {
-    top: derivedAnchorPosition.top + 4,
-    opacity: popupAnim,
-    transform: [],
-  };
-  if (safeAreaWidth < LG_WIDTH) {
-    popupStyle.right = (
-      (safeAreaWidth + insets.left + insets.right) - derivedAnchorPosition.right + 12
-    );
-    popupStyle.transform.push({
-      translateX: popupAnim.interpolate({
-        inputRange: [0, 1], outputRange: [0.05 * 148, 0],
-      }),
-    });
-    popupStyle.transform.push({
-      translateY: popupAnim.interpolate({
-        inputRange: [0, 1], outputRange: [-1 * 0.05 * 184, 0],
-      }),
-    });
-  } else {
-    popupStyle.left = derivedAnchorPosition.left + 4;
-    if (derivedIsBulkEditing) {
-      popupStyle.transform.push({
-        translateX: popupAnim.interpolate({
-          inputRange: [0, 1], outputRange: [-1 * 0.05 * 88, 0],
-        }),
-      });
-    } else {
-      popupStyle.transform.push({
-        translateX: popupAnim.interpolate({
-          inputRange: [0, 1], outputRange: [-1 * 0.05 * 148, 0],
-        }),
-      });
-    }
-    popupStyle.transform.push({
-      translateY: popupAnim.interpolate({
-        inputRange: [0, 1], outputRange: [-1 * 0.05 * 52, 0],
-      }),
-    });
-  }
-  popupStyle.transform.push({
-    scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }),
-  });
-  const bgStyle = { opacity: popupAnim };
 
   const supportAndSignOutButtons = (
     <React.Fragment>
@@ -335,17 +310,63 @@ const NoteListMenuPopup = () => {
     );
   }
 
-  return (
-    <React.Fragment>
-      <TouchableWithoutFeedback onPress={onNoteListMenuCancelBtnClick}>
-        <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
-      </TouchableWithoutFeedback>
-      <Animated.View style={[tailwind('absolute rounded-md bg-white shadow-lg blk:border blk:border-gray-700 blk:bg-gray-800'), popupStyle]}>
+  const popupClassNames = 'absolute min-w-36 rounded-md bg-white shadow-lg blk:border blk:border-gray-700 blk:bg-gray-800';
+
+  let panel, bgStyle = { opacity: 0 };
+  if (popupSize) {
+    const posTrn = computePositionTranslate(
+      derivedAnchorPosition,
+      { width: popupSize.width, height: popupSize.height },
+      { width: safeAreaWidth, height: safeAreaHeight },
+      { x: 0, y: 0, width: -8, height: 0 },
+      insets,
+      8,
+    );
+
+    const popupStyle = {
+      top: posTrn.top, left: posTrn.left, opacity: popupAnim, transform: [],
+    };
+    popupStyle.transform.push({
+      translateX: popupAnim.interpolate({
+        inputRange: [0, 1], outputRange: [posTrn.startX, 0],
+      }),
+    });
+    popupStyle.transform.push({
+      translateY: popupAnim.interpolate({
+        inputRange: [0, 1], outputRange: [posTrn.startY, 0],
+      }),
+    });
+    popupStyle.transform.push({
+      scale: popupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }),
+    });
+
+    /* @ts-expect-error */
+    bgStyle = { opacity: popupAnim };
+
+    panel = (
+      <Animated.View onLayout={onPopupLayout} style={[tailwind(popupClassNames), popupStyle]}>
         <View style={tailwind('py-1')}>
           {buttons}
         </View>
       </Animated.View>
-    </React.Fragment>
+    );
+  } else {
+    panel = (
+      <Animated.View onLayout={onPopupLayout} style={[tailwind(popupClassNames), { top: safeAreaHeight + 256, left: safeAreaWidth + 256 }]}>
+        <View style={tailwind('py-1')}>
+          {buttons}
+        </View>
+      </Animated.View>
+    );
+  }
+
+  return (
+    <View style={tailwind('absolute inset-0')}>
+      <TouchableWithoutFeedback onPress={onNoteListMenuCancelBtnClick}>
+        <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
+      </TouchableWithoutFeedback>
+      {panel}
+    </View>
   );
 };
 

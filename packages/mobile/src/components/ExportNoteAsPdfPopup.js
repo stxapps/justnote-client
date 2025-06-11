@@ -89,7 +89,10 @@ const _ExportNoteAsPdfCompletePopup = () => {
 
   if (!isShown && didCloseAnimEnd) return null;
 
-  const canvasStyle = { paddingLeft: 16 + insets.left, paddingRight: 16 + insets.right };
+  const canvasStyle = {
+    paddingTop: insets.top, paddingBottom: insets.bottom,
+    paddingLeft: insets.left, paddingRight: insets.right
+  };
   const popupStyle = {
     opacity: popupAnim,
     transform: [
@@ -99,30 +102,32 @@ const _ExportNoteAsPdfCompletePopup = () => {
   const bgStyle = { opacity: popupAnim };
 
   return (
-    <View style={[tailwind('absolute inset-0 items-center justify-end px-4 pt-4 pb-20 sm:justify-center sm:p-0'), canvasStyle]}>
+    <View style={[tailwind('absolute inset-0'), canvasStyle]}>
       <TouchableWithoutFeedback onPress={onCancelBtnClick}>
         <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
       </TouchableWithoutFeedback>
-      <Animated.View style={[tailwind('w-full max-w-lg rounded-lg bg-white px-4 py-5 shadow-xl blk:border blk:border-gray-700 blk:bg-gray-800 sm:my-8 sm:p-6 sm:pb-6'), popupStyle]}>
-        <View style={tailwind('items-center sm:flex-row sm:items-start')}>
-          <View style={tailwind('h-12 w-12 flex-shrink-0 flex-grow-0 items-center justify-center rounded-full bg-green-100 sm:h-10 sm:w-10')}>
-            <Svg width={24} height={24} style={tailwind('font-normal text-green-600')} viewBox="0 0 20 20" fill="currentColor">
-              <Path fillRule="evenodd" clipRule="evenodd" d="M16.7069 5.29303C16.8944 5.48056 16.9997 5.73487 16.9997 6.00003C16.9997 6.26519 16.8944 6.5195 16.7069 6.70703L8.70692 14.707C8.51939 14.8945 8.26508 14.9998 7.99992 14.9998C7.73475 14.9998 7.48045 14.8945 7.29292 14.707L3.29292 10.707C3.11076 10.5184 3.00997 10.2658 3.01224 10.0036C3.01452 9.74143 3.11969 9.49062 3.3051 9.30521C3.49051 9.1198 3.74132 9.01464 4.00352 9.01236C4.26571 9.01008 4.51832 9.11087 4.70692 9.29303L7.99992 12.586L15.2929 5.29303C15.4804 5.10556 15.7348 5.00024 15.9999 5.00024C16.2651 5.00024 16.5194 5.10556 16.7069 5.29303Z" />
-            </Svg>
-          </View>
-          <View style={tailwind('mt-3 flex-shrink flex-grow sm:mt-0 sm:ml-4')}>
-            <Text style={tailwind('text-center text-lg font-medium leading-6 text-gray-900 blk:text-white sm:text-left')}>Export completed</Text>
-            <View style={tailwind('mt-2')}>
-              <Text style={tailwind('text-center text-sm font-normal text-gray-500 blk:text-gray-400 sm:text-left')}>The exported PDF file - {derivedFName} - has been saved in Downloads.</Text>
+      <View style={tailwind('flex-1 items-center justify-end px-4 pt-4 pb-20 sm:justify-center sm:p-0')}>
+        <Animated.View style={[tailwind('w-full max-w-lg rounded-lg bg-white px-4 py-5 shadow-xl blk:border blk:border-gray-700 blk:bg-gray-800 sm:my-8 sm:p-6 sm:pb-6'), popupStyle]}>
+          <View style={tailwind('items-center sm:flex-row sm:items-start')}>
+            <View style={tailwind('h-12 w-12 flex-shrink-0 flex-grow-0 items-center justify-center rounded-full bg-green-100 sm:h-10 sm:w-10')}>
+              <Svg width={24} height={24} style={tailwind('font-normal text-green-600')} viewBox="0 0 20 20" fill="currentColor">
+                <Path fillRule="evenodd" clipRule="evenodd" d="M16.7069 5.29303C16.8944 5.48056 16.9997 5.73487 16.9997 6.00003C16.9997 6.26519 16.8944 6.5195 16.7069 6.70703L8.70692 14.707C8.51939 14.8945 8.26508 14.9998 7.99992 14.9998C7.73475 14.9998 7.48045 14.8945 7.29292 14.707L3.29292 10.707C3.11076 10.5184 3.00997 10.2658 3.01224 10.0036C3.01452 9.74143 3.11969 9.49062 3.3051 9.30521C3.49051 9.1198 3.74132 9.01464 4.00352 9.01236C4.26571 9.01008 4.51832 9.11087 4.70692 9.29303L7.99992 12.586L15.2929 5.29303C15.4804 5.10556 15.7348 5.00024 15.9999 5.00024C16.2651 5.00024 16.5194 5.10556 16.7069 5.29303Z" />
+              </Svg>
+            </View>
+            <View style={tailwind('mt-3 flex-shrink flex-grow sm:mt-0 sm:ml-4')}>
+              <Text style={tailwind('text-center text-lg font-medium leading-6 text-gray-900 blk:text-white sm:text-left')}>Export completed</Text>
+              <View style={tailwind('mt-2')}>
+                <Text style={tailwind('text-center text-sm font-normal text-gray-500 blk:text-gray-400 sm:text-left')}>The exported PDF file - {derivedFName} - has been saved in Downloads.</Text>
+              </View>
             </View>
           </View>
-        </View>
-        <View style={tailwind('mt-5 sm:mt-4 sm:ml-10 sm:flex-row sm:pl-4')}>
-          <TouchableOpacity onPress={onCancelBtnClick} style={tailwind('w-full rounded-md border border-gray-300 bg-white px-4 py-2 shadow-sm blk:border-gray-400 blk:bg-gray-800 sm:w-auto')}>
-            <Text style={tailwind('text-center text-base font-medium text-gray-700 blk:text-gray-300 sm:text-sm')}>Close</Text>
-          </TouchableOpacity>
-        </View>
-      </Animated.View>
+          <View style={tailwind('mt-5 sm:mt-4 sm:ml-10 sm:flex-row sm:pl-4')}>
+            <TouchableOpacity onPress={onCancelBtnClick} style={tailwind('w-full rounded-md border border-gray-300 bg-white px-4 py-2 shadow-sm blk:border-gray-400 blk:bg-gray-800 sm:w-auto')}>
+              <Text style={tailwind('text-center text-base font-medium text-gray-700 blk:text-gray-300 sm:text-sm')}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+      </View>
     </View>
   );
 };
@@ -130,6 +135,7 @@ const _ExportNoteAsPdfCompletePopup = () => {
 const _ExportNoteAsPdfErrorPopup = () => {
 
   const { width: safeAreaWidth } = useSafeAreaFrame();
+  const insets = useSafeAreaInsets();
   const progress = useSelector(state => state.display.exportNoteAsPdfProgress);
   const didClick = useRef(false);
   const dispatch = useDispatch();
@@ -146,6 +152,10 @@ const _ExportNoteAsPdfErrorPopup = () => {
   }, [progress]);
 
   if (!isObject(progress) || progress.total !== -1) return null;
+
+  const canvasStyle = {
+    paddingTop: insets.top, paddingLeft: insets.left, paddingRight: insets.right,
+  };
 
   let title, body;
   if (progress.error === NO_PERMISSION_GRANTED) {
@@ -167,7 +177,7 @@ const _ExportNoteAsPdfErrorPopup = () => {
   }
 
   return (
-    <View style={tailwind('absolute inset-x-0 top-14 flex-row items-start justify-center md:top-0')}>
+    <View style={[tailwind('absolute inset-x-0 top-14 flex-row items-start justify-center md:top-0'), canvasStyle]}>
       <View style={tailwind('w-full max-w-md')}>
         <View style={tailwind('m-4 rounded-md bg-red-50 p-4 shadow-lg')}>
           <View style={tailwind('flex-row')}>
@@ -177,7 +187,7 @@ const _ExportNoteAsPdfErrorPopup = () => {
               </Svg>
             </View>
             <View style={tailwind('ml-3 flex-shrink flex-grow lg:mt-0.5')}>
-              <Text style={tailwind('text-left text-base font-medium text-red-800 lg:text-sm')}>{title}</Text>
+              <Text style={tailwind('mr-4 text-left text-base font-medium text-red-800 lg:text-sm')}>{title}</Text>
               {body}
             </View>
           </View>

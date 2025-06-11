@@ -96,7 +96,7 @@ const updateAndroidStyle = async (themeMode) => {
   }
 };
 
-const _Root = () => {
+const InnerRoot = () => {
   const themeMode = useSelector(state => getThemeMode(state));
   const updateStBarStyleCount = useSelector(
     state => state.display.updateStatusBarStyleCount
@@ -157,7 +157,7 @@ const Root = () => {
   return (
     <Provider store={store}>
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-        <_Root />
+        <InnerRoot />
       </SafeAreaProvider>
     </Provider>
   );

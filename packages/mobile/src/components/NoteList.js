@@ -7,11 +7,9 @@ import { updateBulkEdit, updateNoteId } from '../actions';
 import { fetch, sync } from '../actions/chunk';
 import {
   SD_HUB_URL, TRASH, NEW_NOTE, NEW_NOTE_OBJ, MAX_SELECTED_NOTE_IDS,
-  SD_MAX_SELECTED_NOTE_IDS, VALID, LOCKED,
+  SD_MAX_SELECTED_NOTE_IDS, VALID,
 } from '../types/const';
-import {
-  getIsShowingNoteInfosNull, makeGetUnsavedNote, getCurrentLockListStatus,
-} from '../selectors';
+import { getIsShowingNoteInfosNull, makeGetUnsavedNote } from '../selectors';
 import { popupFMV } from '../types/animConfigs';
 
 import { useTailwind } from '.';
@@ -34,7 +32,6 @@ const NoteList = (props) => {
     state => state.display.isSelectedNoteIdsMaxErrorShown
   );
   const unsavedNote = useSelector(state => getUnsavedNote(state, NEW_NOTE_OBJ));
-  const lockStatus = useSelector(state => getCurrentLockListStatus(state));
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
   const isUserDummy = useSelector(state => state.user.isUserDummy);
   const maxSelectedNoteIds = useSelector(state => {
@@ -143,8 +140,12 @@ const NoteList = (props) => {
 
   let noteListItems = <LoadingNoteListItems />;
   if (!isShowingNoteInfosNull) {
-    if (lockStatus === LOCKED) noteListItems = <NoteListLock />;
-    else noteListItems = <NoteListItems />;
+    noteListItems = (
+      <>
+        <NoteListItems />
+        <NoteListLock />
+      </>
+    );
   }
 
   return (
@@ -152,7 +153,9 @@ const NoteList = (props) => {
       {/* TopBar */}
       <NoteListTopBar onSidebarOpenBtnClick={onSidebarOpenBtnClick} />
       {/* Main */}
-      {noteListItems}
+      <View style={tailwind('flex-shrink flex-grow min-h-0')}>
+        {noteListItems}
+      </View>
       {/* Add button */}
       {!isBulkEditing && (listName !== TRASH) && <TouchableOpacity onPress={onAddBtnClick} style={tailwind('absolute right-4 bottom-4 h-16 w-16 items-center justify-center rounded-full bg-green-600 shadow-md lg:relative lg:hidden')}>
         <Svg width={40} height={40} style={tailwind('font-normal text-white')} viewBox={isUnsavedValid ? '0 0 20 20' : '0 0 40 40'} fill="currentColor">

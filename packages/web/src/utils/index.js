@@ -1984,6 +1984,7 @@ export const getWindowInsets = () => {
   let top = null, right = null, bottom = null, left = null;
   if (
     typeof window !== 'undefined' &&
+    typeof document !== 'undefined' &&
     isObject(window) &&
     isObject(document.documentElement)
   ) {

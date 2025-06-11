@@ -20,9 +20,9 @@ import {
   getMaxListNameChildrenSize,
 } from '../utils';
 import { popupFMV, slideFMV } from '../types/animConfigs';
+import { computePositionStyle, computePositionTranslate } from '../utils/popup';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
-import { computePosition, createLayouts, getOriginTranslate } from './MenuPopupRenderer';
 
 const MODE_MOVE_NOTES = LIST_NAMES_MODE_MOVE_NOTES;
 const MODE_MOVE_LIST_NAME = LIST_NAMES_MODE_MOVE_LIST_NAME;
@@ -213,13 +213,11 @@ const ListNamesPopup = () => {
   if (longestDisplayName.length > 26) popupWidth = 256;
   else if (longestDisplayName.length > 14) popupWidth = 208;
 
-  let popupHeight = Math.min(315, 44 * (maxChildrenSize + 1) + 51);
-  if (maxChildrenSize > 4) {
+  let popupHeight = 44 * (maxChildrenSize + 1) + 51;
+  if (popupHeight > safeAreaHeight - 16) {
     popupHeight = getLastHalfHeight(
       Math.min(popupHeight, safeAreaHeight - 16), 44, 0, 51, 0.5
     );
-  } else if (maxChildrenSize > 3) {
-    popupHeight = Math.min(popupHeight, safeAreaHeight - 16);
   }
 
   const renderListNameBtns = () => {
@@ -309,31 +307,28 @@ const ListNamesPopup = () => {
     );
   };
 
-  const layouts = createLayouts(
+  const posTrn = computePositionTranslate(
     derivedAnchorPosition,
     { width: popupWidth, height: popupHeight },
-    { width: safeAreaWidth + insets.left, height: safeAreaHeight + insets.top },
-  );
-  const popupPosition = computePosition(layouts, null, 8);
-
-  const { top, left, topOrigin, leftOrigin } = popupPosition;
-  const { startX, startY } = getOriginTranslate(
-    topOrigin, leftOrigin, popupWidth, popupHeight
+    { width: safeAreaWidth, height: safeAreaHeight },
+    null,
+    insets,
+    8,
   );
 
   const popupStyle = {
-    top, left,
+    top: posTrn.top, left: posTrn.left,
     width: popupWidth, height: popupHeight,
     opacity: popupAnim, transform: [],
   };
   popupStyle.transform.push({
     translateX: popupAnim.interpolate({
-      inputRange: [0, 1], outputRange: [startX, 0],
+      inputRange: [0, 1], outputRange: [posTrn.startX, 0],
     }),
   });
   popupStyle.transform.push({
     translateY: popupAnim.interpolate({
-      inputRange: [0, 1], outputRange: [startY, 0],
+      inputRange: [0, 1], outputRange: [posTrn.startY, 0],
     }),
   });
   popupStyle.transform.push({

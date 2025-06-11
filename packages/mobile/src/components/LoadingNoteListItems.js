@@ -36,7 +36,7 @@ const LoadingNoteListItems = () => {
   const tailwind = useTailwind();
 
   return (
-    <View style={tailwind('flex-shrink flex-grow')}>
+    <View style={tailwind('flex-1 overflow-hidden')}>
       <LoadingNoteListItem />
       <LoadingNoteListItem />
       <LoadingNoteListItem />
