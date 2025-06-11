@@ -91,7 +91,7 @@ const _ExportNoteAsPdfCompletePopup = () => {
 
   const canvasStyle = {
     paddingTop: insets.top, paddingBottom: insets.bottom,
-    paddingLeft: insets.left, paddingRight: insets.right
+    paddingLeft: insets.left, paddingRight: insets.right,
   };
   const popupStyle = {
     opacity: popupAnim,

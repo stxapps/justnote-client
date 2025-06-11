@@ -20,7 +20,7 @@ import {
   getMaxListNameChildrenSize,
 } from '../utils';
 import { popupFMV, slideFMV } from '../types/animConfigs';
-import { computePositionStyle, computePositionTranslate } from '../utils/popup';
+import { computePositionTranslate } from '../utils/popup';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 

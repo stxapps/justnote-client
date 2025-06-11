@@ -39,7 +39,7 @@ const axisPosition = (oDim, oSpc, wDim, tPos, tDim, iBgn) => {
 const computePosition = (
   triggerLayout, optionsLayout, windowLayout, triggerOffsets, insets, popupMargin = 0,
 ) => {
-  let { x: tX, y: tY, height: tHeight, width: tWidth } = triggerLayout;
+  let { x: tX, y: tY, width: tWidth, height: tHeight } = triggerLayout;
   if (triggerOffsets) {
     const { x: xOffset, y: yOffset, width: wOffset, height: hOffset } = triggerOffsets;
     tX = tX + xOffset;
@@ -47,7 +47,7 @@ const computePosition = (
     tWidth = tWidth + wOffset;
     tHeight = tHeight + hOffset;
   }
-  const { height: oHeight, width: oWidth } = optionsLayout;
+  const { width: oWidth, height: oHeight } = optionsLayout;
   const { width: wWidth, height: wHeight } = windowLayout;
 
   const [top, topOrigin] = axisPosition(
