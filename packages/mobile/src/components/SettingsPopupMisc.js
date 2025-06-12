@@ -19,7 +19,7 @@ import {
 import {
   getRawThemeMode, getRawThemeCustomOptions, getThemeMode, getNoteDateExample,
 } from '../selectors';
-import { getFormattedTime } from '../utils';
+import { getFormattedTime, getRect } from '../utils';
 
 import { useTailwind } from '.';
 
@@ -85,9 +85,7 @@ const SettingsPopupMisc = (props) => {
 
   const onDateFormatBtnClick = () => {
     dateFormatBtn.current.measure((_fx, _fy, width, height, x, y) => {
-      const rect = {
-        x, y, width, height, top: y, bottom: y + height, left: x, right: x + width,
-      };
+      const rect = getRect(x, y, width, height);
       dispatch(updatePopup(DATE_FORMAT_MENU_POPUP, true, rect));
     });
   };
@@ -122,9 +120,7 @@ const SettingsPopupMisc = (props) => {
     whtTimeBtn.current.measure((_fx, _fy, width, height, x, y) => {
       dispatch(updateUpdatingThemeMode(WHT_MODE));
 
-      const rect = {
-        x, y, width, height, top: y, right: x + width, bottom: y + height, left: x,
-      };
+      const rect = getRect(x, y, width, height);
       dispatch(updatePopup(TIME_PICK_POPUP, true, rect));
     });
   };
@@ -133,9 +129,7 @@ const SettingsPopupMisc = (props) => {
     blkTimeBtn.current.measure((_fx, _fy, width, height, x, y) => {
       dispatch(updateUpdatingThemeMode(BLK_MODE));
 
-      const rect = {
-        x, y, width, height, top: y, right: x + width, bottom: y + height, left: x,
-      };
+      const rect = getRect(x, y, width, height);
       dispatch(updatePopup(TIME_PICK_POPUP, true, rect));
     });
   };

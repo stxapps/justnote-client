@@ -3013,3 +3013,20 @@ export const throwIfPerformFilesError = (data, results) => {
   const resultsPerId = getPerformFilesResultsPerId(results);
   _throwIfPerformFilesError(data, resultsPerId);
 };
+
+export const getRect = (x, y, width, height) => {
+  const rect = {
+    x, y, width, height, left: x, right: x + width, top: y, bottom: y + height,
+  };
+  return rect;
+};
+
+export const adjustRect = (rect, oX, oY, oW, oH) => {
+  const newX = rect.x + oX, newY = rect.y + oY;
+  const newW = rect.width + oW, newH = rect.height + oH;
+  const nRect = {
+    x: newX, y: newY, width: newW, height: newH,
+    top: newY, bottom: newY + newH, left: newX, right: newX + newW,
+  };
+  return nRect;
+};

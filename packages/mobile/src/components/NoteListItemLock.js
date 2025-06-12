@@ -5,6 +5,7 @@ import Svg, { Path } from 'react-native-svg';
 
 import { showLockMenuPopup, showUNEPopup } from '../actions/chunk';
 import { makeGetDoShowTitle } from '../selectors';
+import { getRect, adjustRect } from '../utils';
 
 import { useTailwind } from '.';
 
@@ -27,16 +28,9 @@ const NoteListItemLock = (props) => {
     if (isBulkEditing) return;
 
     menuBtn.current.measure((_fx, _fy, width, height, x, y) => {
-      const newX = x + 12;
-      const newY = y + 4;
-      const newWidth = width - 12 - 8;
-      const newHeight = height - 4 - 4;
-      const rect = {
-        x: newX, y: newY, width: newWidth, height: newHeight,
-        top: newY, bottom: newY + newHeight, left: newX, right: newX + newWidth,
-      };
-
-      dispatch(showLockMenuPopup(note.id, rect));
+      const rect = getRect(x, y, width, height);
+      const nRect = adjustRect(rect, 12, 4, -20, -8);
+      dispatch(showLockMenuPopup(note.id, nRect));
     });
   };
 

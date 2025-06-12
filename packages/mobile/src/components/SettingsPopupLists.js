@@ -17,7 +17,7 @@ import {
   MODE_VIEW, MODE_EDIT, SM_WIDTH, BLK_MODE,
 } from '../types/const';
 import { getListNameMap, makeGetListNameEditor, getThemeMode } from '../selectors';
-import { validateListNameDisplayName } from '../utils';
+import { validateListNameDisplayName, getRect } from '../utils';
 import { initialListNameEditorState } from '../types/initialStates';
 
 import { useSafeAreaFrame, useTailwind } from '.';
@@ -213,9 +213,7 @@ const _ListNameEditor = (props) => {
   const onMenuBtnClick = () => {
     if (!menuBtn.current) return;
     menuBtn.current.measure((_fx, _fy, width, height, x, y) => {
-      const rect = {
-        x, y, width, height, top: y, right: x + width, bottom: y + height, left: x,
-      };
+      const rect = getRect(x, y, width, height);
       dispatch(updateSelectingListName(listNameObj.listName));
       dispatch(updatePopup(SETTINGS_LISTS_MENU_POPUP, true, rect));
     });

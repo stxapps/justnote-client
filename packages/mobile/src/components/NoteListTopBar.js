@@ -8,6 +8,7 @@ import { showNoteListMenuPopup } from '../actions/chunk';
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import { SEARCH_POPUP, LG_WIDTH, UPDATING, SHOW_SYNCED } from '../types/const';
 import { rotateAnimConfig } from '../types/animConfigs';
+import { getRect, adjustRect } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
@@ -30,10 +31,9 @@ const NoteListTopBar = (props) => {
 
   const onMenuBtnClick = () => {
     menuBtn.current.measure((_fx, _fy, width, height, x, y) => {
-      const rect = {
-        x, y, width, height, top: y, right: x + width, bottom: y + height, left: x,
-      };
-      dispatch(showNoteListMenuPopup(rect, true));
+      const rect = getRect(x, y, width, height);
+      const nRect = adjustRect(rect, 0, 0, -12, 0);
+      dispatch(showNoteListMenuPopup(nRect, true));
     });
   };
 
