@@ -103,7 +103,7 @@ const BulkEditMenuPopup = () => {
     </div>
   );
 
-  const popupClassNames = 'fixed min-w-36 overflow-auto rounded-lg bg-white shadow-xl ring-1 ring-black ring-opacity-5 blk:bg-gray-800 blk:ring-white blk:ring-opacity-25';
+  const popupClassNames = 'fixed min-w-36 overflow-auto rounded-md bg-white shadow-xl ring-1 ring-black ring-opacity-5 blk:bg-gray-800 blk:ring-white blk:ring-opacity-25';
 
   let panel;
   if (popupSize) {

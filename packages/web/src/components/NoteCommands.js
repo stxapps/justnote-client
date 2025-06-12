@@ -11,7 +11,7 @@ import {
   LIST_NAMES_MODE_MOVE_NOTES, NOTE_COMMANDS_MODE_NETB,
 } from '../types/const';
 import { getListNameMap } from '../selectors';
-import { getListNameDisplayName } from '../utils';
+import { getListNameDisplayName, adjustRect } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
@@ -62,56 +62,28 @@ const NoteCommands = (props) => {
     dispatch(updateMoveAction(MOVE_ACTION_NOTE_COMMANDS));
     dispatch(updateListNamesMode(LIST_NAMES_MODE_MOVE_NOTES));
 
-    const _rect = moveToBtn.current.getBoundingClientRect();
+    const rect = moveToBtn.current.getBoundingClientRect();
 
-    let rect;
+    let nRect;
     if (safeAreaWidth < LG_WIDTH) {
-      const newX = _rect.x + 4, newY = _rect.y + 4;
-      const newWidth = _rect.width - 12, newHeight = _rect.height - 12;
-      rect = {
-        x: newX, y: newY,
-        width: newWidth, height: newHeight,
-        top: newY, bottom: newY + newHeight,
-        left: newX, right: newX + newWidth,
-      };
+      nRect = adjustRect(rect, 4, 12, -14, -12);
     } else {
-      const newY = _rect.y - 8;
-      const newHeight = _rect.height + 16;
-      rect = {
-        x: _rect.x, y: newY,
-        width: _rect.width, height: newHeight,
-        top: newY, bottom: newY + newHeight,
-        left: _rect.x, right: _rect.x + _rect.width,
-      };
+      nRect = adjustRect(rect, 0, -4, 0, 4);
     }
-    updatePopupUrlHash(LIST_NAMES_POPUP, true, rect);
+    updatePopupUrlHash(LIST_NAMES_POPUP, true, nRect);
     if (isFullScreen) onToggleFullScreen();
   };
 
   const onMoreBtnClick = () => {
-    const _rect = moreBtn.current.getBoundingClientRect();
+    const rect = moreBtn.current.getBoundingClientRect();
 
-    let rect;
+    let nRect;
     if (safeAreaWidth < LG_WIDTH) {
-      const newX = _rect.x + 4, newY = _rect.y + 4;
-      const newWidth = _rect.width - 12, newHeight = _rect.height - 12;
-      rect = {
-        x: newX, y: newY,
-        width: newWidth, height: newHeight,
-        top: newY, bottom: newY + newHeight,
-        left: newX, right: newX + newWidth,
-      };
+      nRect = adjustRect(rect, 4, 12, -14, -12);
     } else {
-      const newY = _rect.y - 8;
-      const newHeight = _rect.height + 16;
-      rect = {
-        x: _rect.x, y: newY,
-        width: _rect.width, height: newHeight,
-        top: newY, bottom: newY + newHeight,
-        left: _rect.x, right: _rect.x + _rect.width,
-      };
+      nRect = adjustRect(rect, 0, -4, 0, 4);
     }
-    updatePopupUrlHash(BULK_EDIT_MENU_POPUP, true, rect);
+    updatePopupUrlHash(BULK_EDIT_MENU_POPUP, true, nRect);
     if (isFullScreen) onToggleFullScreen();
   };
 

@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { showLockMenuPopup, showUNEPopup } from '../actions/chunk';
 import { makeGetDoShowTitle } from '../selectors';
+import { adjustRect } from '../utils';
 
 import { useTailwind } from '.';
 
@@ -23,17 +24,9 @@ const NoteListItemLock = (props) => {
   const onMenuBtnClick = (e) => {
     if (isBulkEditing) return;
 
-    const _rect = e.currentTarget.getBoundingClientRect();
-    const newX = _rect.x + 12;
-    const newY = _rect.y + 4;
-    const newWidth = _rect.width - 12 - 8;
-    const newHeight = _rect.height - 4 - 4;
-    const rect = {
-      x: newX, y: newY, width: newWidth, height: newHeight,
-      top: newY, bottom: newY + newHeight, left: newX, right: newX + newWidth,
-    };
-
-    dispatch(showLockMenuPopup(note.id, rect));
+    const rect = e.currentTarget.getBoundingClientRect();
+    const nRect = adjustRect(rect, 12, 4, -20, -8);
+    dispatch(showLockMenuPopup(note.id, nRect));
   };
 
   let title = '';

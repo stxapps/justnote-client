@@ -226,7 +226,7 @@ const NoteListMenuPopup = () => {
       anchorPosition,
       { width: popupSize.width, height: Math.min(popupSize.height, maxHeight) },
       { width: safeAreaWidth, height: safeAreaHeight },
-      { x: 0, y: 0, width: -8, height: 0 },
+      null,
       insets,
       8,
     );

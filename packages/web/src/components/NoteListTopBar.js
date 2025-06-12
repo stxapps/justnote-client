@@ -5,6 +5,7 @@ import { updatePopupUrlHash } from '../actions';
 import { showNoteListMenuPopup } from '../actions/chunk';
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import { SEARCH_POPUP, LG_WIDTH, UPDATING, SHOW_SYNCED } from '../types/const';
+import { adjustRect } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
@@ -25,7 +26,8 @@ const NoteListTopBar = (props) => {
 
   const onMenuBtnClick = () => {
     const rect = menuBtn.current.getBoundingClientRect();
-    dispatch(showNoteListMenuPopup(rect, true));
+    const nRect = adjustRect(rect, 0, 0, -12, 0);
+    dispatch(showNoteListMenuPopup(nRect, true));
   };
 
   const onSearchBtnClick = () => {

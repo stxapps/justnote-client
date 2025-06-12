@@ -9,7 +9,7 @@ import { showNLIMPopup, updateQueryString } from '../actions/chunk';
 import { LG_WIDTH } from '../types/const';
 import { makeIsNoteIdSelected, makeGetNoteDate, makeGetTnAndDns } from '../selectors';
 import {
-  isNumber, isBusyStatus, isPinningStatus, isTaggingStatus, stripHtml,
+  isNumber, isBusyStatus, isPinningStatus, isTaggingStatus, stripHtml, adjustRect,
 } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
@@ -120,16 +120,9 @@ const NoteListItemContent = (props) => {
   };
 
   const onMenuBtnClick = (e) => {
-    const _rect = e.currentTarget.getBoundingClientRect();
-    const newX = _rect.x + 12;
-    const newY = _rect.y + 4;
-    const newWidth = _rect.width - 12 - 8;
-    const newHeight = _rect.height - 4 - 4;
-    const rect = {
-      x: newX, y: newY, width: newWidth, height: newHeight,
-      top: newY, bottom: newY + newHeight, left: newX, right: newX + newWidth,
-    };
-    dispatch(showNLIMPopup(note.id, rect, true));
+    const rect = e.currentTarget.getBoundingClientRect();
+    const nRect = adjustRect(rect, 12, 4, -20, -8);
+    dispatch(showNLIMPopup(note.id, nRect, true));
   };
 
   useEffect(() => {
