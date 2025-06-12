@@ -32,7 +32,7 @@ const NoteListTopBar = (props) => {
   const onMenuBtnClick = () => {
     menuBtn.current.measure((_fx, _fy, width, height, x, y) => {
       const rect = getRect(x, y, width, height);
-      const nRect = adjustRect(rect, 0, 0, -12, 0);
+      const nRect = adjustRect(rect, 0, 0, -8, 0);
       dispatch(showNoteListMenuPopup(nRect, true));
     });
   };
