@@ -1285,7 +1285,7 @@ PODS:
     - React-Core
   - react-native-receive-sharing-intent (1.0.4):
     - React
-  - react-native-safe-area-context (4.11.0):
+  - react-native-safe-area-context (5.4.1):
     - React-Core
   - react-native-theme-control (6.0.2):
     - DoubleConversion
@@ -1964,7 +1964,7 @@ SPEC CHECKSUMS:
   react-native-image-resizer: 9fe82f440e55e8fa20af971a0786ff9b07ee8714
   react-native-mmkv-storage: de748556b40897f18a0f5893443f0ce492ccfbcf
   react-native-receive-sharing-intent: d61b53b07626b405befc062765c63e009d00bb33
-  react-native-safe-area-context: ca0ebcd9798c5a45863c608c961d4f3f984b6ed2
+  react-native-safe-area-context: dde2052b903c11d677c320b599c3244021c34ce8
   react-native-theme-control: e35de2257ebabee4e89e87f73c5040f79d8169c5
   react-native-webview: 1d14b6d22fe11c300bac255eafe1ef5202c8c525
   React-nativeconfig: 8c83d992b9cc7d75b5abe262069eaeea4349f794
