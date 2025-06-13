@@ -16,7 +16,7 @@ const About = () => {
 
   return (
     <React.Fragment>
-      <div className={tailwind('pt-6')}>
+      <div className={tailwind('bg-white pt-6')}>
         <TopBar />
         <div className={tailwind('relative overflow-hidden py-16')}>
           <div className={tailwind('hidden lg:absolute lg:inset-y-0 lg:block lg:h-full lg:w-full')}>

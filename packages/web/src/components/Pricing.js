@@ -47,7 +47,7 @@ const Pricing = () => {
 
   return (
     <React.Fragment>
-      <div className={tailwind('pt-6')}>
+      <div className={tailwind('bg-white pt-6')}>
         <TopBar />
         <div className={tailwind('mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8')}>
           <div className={tailwind('')}>
