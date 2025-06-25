@@ -14,6 +14,8 @@ import {
   canvasFMV, sideBarOverlayFMV, sideBarFMV, popupFMV,
 } from '../types/animConfigs';
 
+import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
+
 import SettingsPopupAccount from './SettingsPopupAccount';
 import { SettingsPopupIap, SettingsPopupIapRestore } from './SettingsPopupIap';
 import {
@@ -25,8 +27,6 @@ import SettingsPopupTags from './SettingsPopupTags';
 import SettingsPopupMisc from './SettingsPopupMisc';
 import SettingsPopupAbout from './SettingsPopupAbout';
 import SettingsPopupConflict from './SettingsPopupConflict';
-
-import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 
 const VIEW_ACCOUNT = SETTINGS_VIEW_ACCOUNT;
 const VIEW_IAP = SETTINGS_VIEW_IAP;

@@ -241,7 +241,7 @@ const NoteListMenuPopup = () => {
     );
   } else {
     panel = (
-      <div key="NL_MenuPopup_popup" ref={popup} style={{ top: safeAreaHeight, left: safeAreaWidth }} className={tailwind(popupClassNames)} role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+      <div key="NL_MenuPopup_popup" ref={popup} style={{ top: safeAreaHeight + 256, left: safeAreaWidth + 256 }} className={tailwind(popupClassNames)} role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
         <div className={tailwind('py-1')}>
           {buttons}
         </div>
