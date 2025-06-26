@@ -4,21 +4,9 @@ import {
   useSafeAreaFrame as useWindowFrame, useSafeAreaInsets as useScreenInsets,
 } from 'react-native-safe-area-context';
 
-import { getThemeMode, getTailwind } from '../selectors';
-
-const getSafeAreaInsets = (
-  windowX, windowY, windowWidth, windowHeight, screenWidth, screenHeight, screenInsets,
-) => {
-  const left = Math.max(screenInsets.left - windowX, 0);
-  const top = Math.max(screenInsets.top - windowY, 0);
-  const right = Math.max(
-    (windowX + windowWidth) - (screenWidth - screenInsets.right), 0
-  );
-  const bottom = Math.max(
-    (windowY + windowHeight) - (screenHeight - screenInsets.bottom), 0
-  );
-  return { left, top, right, bottom };
-};
+import {
+  getSafeAreaFrame, getSafeAreaInsets, getThemeMode, getTailwind,
+} from '../selectors';
 
 export const useSafeAreaFrame = () => {
   const {
@@ -28,19 +16,14 @@ export const useSafeAreaFrame = () => {
   const screenInsets = useScreenInsets();
 
   const safeAreaInsets = getSafeAreaInsets(
-    windowX, windowY, windowWidth, windowHeight, screenWidth, screenHeight, screenInsets,
+    windowX, windowY, windowWidth, windowHeight,
+    screenWidth, screenHeight, screenInsets,
   );
 
-  const safeAreaX = windowX + safeAreaInsets.left;
-  const safeAreaY = windowY + safeAreaInsets.top;
-  const safeAreaWidth = windowWidth - safeAreaInsets.left - safeAreaInsets.right;
-  const safeAreaHeight = windowHeight - safeAreaInsets.top - safeAreaInsets.bottom;
-
-  return { x: safeAreaX, y: safeAreaY, width: safeAreaWidth, height: safeAreaHeight };
+  return getSafeAreaFrame(windowWidth, windowHeight, safeAreaInsets);
 };
 
 export const useSafeAreaInsets = () => {
-
   const {
     x: windowX, y: windowY, width: windowWidth, height: windowHeight,
   } = useWindowFrame();
@@ -48,7 +31,8 @@ export const useSafeAreaInsets = () => {
   const screenInsets = useScreenInsets();
 
   return getSafeAreaInsets(
-    windowX, windowY, windowWidth, windowHeight, screenWidth, screenHeight, screenInsets,
+    windowX, windowY, windowWidth, windowHeight,
+    screenWidth, screenHeight, screenInsets,
   );
 };
 

@@ -16,6 +16,7 @@ import { tailwind } from '../stylesheets/tailwind';
 import {
   initialListNameEditorState, initialTagNameEditorState,
 } from '../types/initialStates';
+import vars from '../vars';
 
 export const getListNameMap = createSelector(
   state => state.settings.listNameMap,
@@ -196,7 +197,7 @@ const _getInsets = (insetTop, insetRight, insetBottom, insetLeft) => {
   return { left, top, right, bottom };
 };
 
-export const getSafeAreaFrame = createSelector(
+const getSafeAreaFrameFromState = createSelector(
   state => state.window.width,
   state => state.window.height,
   state => state.window.visualWidth,
@@ -235,12 +236,13 @@ export const getSafeAreaFrame = createSelector(
     height = height - insets.top - (assumeKeyboard ? 0 : insets.bottom);
 
     return {
-      x: 0, y: 0, width, height, windowWidth, windowHeight, visualWidth, visualHeight,
+      x: insets.left, y: insets.top, width, height,
+      windowWidth, windowHeight, visualWidth, visualHeight,
     };
   },
 );
 
-export const getSafeAreaInsets = createSelector(
+const getSafeAreaInsetsFromState = createSelector(
   state => state.window.insetTop,
   state => state.window.insetRight,
   state => state.window.insetBottom,
@@ -249,6 +251,55 @@ export const getSafeAreaInsets = createSelector(
     const insets = _getInsets(insetTop, insetRight, insetBottom, insetLeft);
     return insets;
   },
+);
+
+const getSafeAreaFrameFromArgs = createSelector(
+  (...args) => args[0],
+  (...args) => args[1],
+  (...args) => args[2],
+  (windowWidth, windowHeight, safeAreaInsets) => {
+    const safeAreaX = safeAreaInsets.left;
+    const safeAreaY = safeAreaInsets.top;
+    const safeAreaWidth = windowWidth - safeAreaInsets.left - safeAreaInsets.right;
+    const safeAreaHeight = windowHeight - safeAreaInsets.top - safeAreaInsets.bottom;
+
+    return {
+      x: safeAreaX, y: safeAreaY, width: safeAreaWidth, height: safeAreaHeight,
+      windowWidth, windowHeight,
+    };
+  },
+);
+
+const getSafeAreaInsetsFromArgs = createSelector(
+  (...args) => args[0],
+  (...args) => args[1],
+  (...args) => args[2],
+  (...args) => args[3],
+  (...args) => args[4],
+  (...args) => args[5],
+  (...args) => args[6],
+  (
+    windowX, windowY, windowWidth, windowHeight,
+    screenWidth, screenHeight, screenInsets,
+  ) => {
+    const left = Math.max(screenInsets.left - windowX, 0);
+    const top = Math.max(screenInsets.top - windowY, 0);
+    const right = Math.max(
+      (windowX + windowWidth) - (screenWidth - screenInsets.right), 0
+    );
+    const bottom = Math.max(
+      (windowY + windowHeight) - (screenHeight - screenInsets.bottom), 0
+    );
+    return { left, top, right, bottom };
+  },
+);
+
+export const getSafeAreaFrame = (
+  vars.platform.isReactNative ? getSafeAreaFrameFromArgs : getSafeAreaFrameFromState
+);
+
+export const getSafeAreaInsets = (
+  vars.platform.isReactNative ? getSafeAreaInsetsFromArgs : getSafeAreaInsetsFromState
 );
 
 export const getValidProduct = createSelector(
