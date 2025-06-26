@@ -153,7 +153,7 @@ const NoteList = (props) => {
       {/* TopBar */}
       <NoteListTopBar onSidebarOpenBtnClick={onSidebarOpenBtnClick} />
       {/* Main */}
-      <View style={tailwind('flex-shrink flex-grow min-h-0')}>
+      <View style={tailwind('min-h-0 flex-shrink flex-grow')}>
         {noteListItems}
       </View>
       {/* Add button */}

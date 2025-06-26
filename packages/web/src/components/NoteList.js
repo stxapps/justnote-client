@@ -104,7 +104,7 @@ const NoteList = (props) => {
       {/* TopBar */}
       <NoteListTopBar onSidebarOpenBtnClick={onSidebarOpenBtnClick} />
       {/* Main */}
-      <div className={tailwind('relative flex-shrink flex-grow min-h-0')}>
+      <div className={tailwind('relative min-h-0 flex-shrink flex-grow')}>
         {noteListItems}
       </div>
       {/* Add button */}

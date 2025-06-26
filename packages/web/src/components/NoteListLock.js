@@ -24,7 +24,7 @@ const NoteListLock = () => {
   if (lockStatus !== LOCKED) return null;
 
   return (
-    <div className={tailwind('absolute inset-0 bg-white overflow-y-auto pb-[5.5rem] lg:pb-0 blk:bg-gray-900')}>
+    <div className={tailwind('absolute inset-0 overflow-y-auto bg-white pb-[5.5rem] blk:bg-gray-900 lg:pb-0')}>
       <div className={tailwind('mt-32 mb-24 px-4 sm:px-6')}>
         <button onClick={onLockBtnClick} className={tailwind('group block w-full focus:outline-none')}>
           <div className={tailwind('mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gray-200 blk:bg-gray-700')}>
