@@ -36,7 +36,17 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "./plugins/blockstack-plugin.js"
+      "./plugins/blockstack-plugin.js",
+      [
+        "expo-share-intent",
+        {
+          "iosActivationRules": {
+            "NSExtensionActivationSupportsText": true,
+            "NSExtensionActivationSupportsWebURLWithMaxCount": 1
+          },
+          "androidIntentFilters": ["text/*"]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
