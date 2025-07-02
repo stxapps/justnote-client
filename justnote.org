@@ -430,3 +430,29 @@
   + edit packages/ckeditor5-build-decoupled-document/src/ckeditor.js
   + add packages/ckeditor5-build-decoupled-document/src/objecturluploadadapter.js
   + run patch.js
+* Expo
+- npx create-expo-app --template tabs
+- npx expo install expo-dev-client -- --save-dev
+- npm i 'https://gitpkg.now.sh/stxapps/blockstack-react-native/BlockstackSDK?3d5bcd6ea9a17f00c76be5913009f2c02f13b95f'
+- npx expo install react-native-mmkv-storage@0.4.4
+- npx expo install react-native-flag-secure
+- npm i react-redux redux redux-thunk reselect
+- npx expo install redux-devtools-expo-dev-plugin
+- npm i url-parse @wewatch/lexorank event-target-fallback queue
+- npm i htmlparser2@9.1.0 jest-diff@29.7.0
+- npx expo install expo-share-intent@^4.1.1
+- npx expo install react-native-file-access
+- npx expo install expo-navigation-bar
+- npx expo install expo-localization
+- npx expo install expo-iap
+- npx expo install expo-print
+- npx expo install react-native-zip-archive
+- npx expo install expo-document-picker
+- npx expo install expo-image-manipulator
+- npx expo install react-native-svg
+- npx expo install react-native-svg-transformer -- --save-dev
+- npx expo install react-native-webview
+- npx expo install react-native-keyboard-controller
+- npx expo install react-native-animated-spinkit
+- npx expo install react-native-share
+- npx expo install expo-build-properties
