@@ -11,7 +11,7 @@ import {
   SIDEBAR_POPUP, MY_NOTES, TRASH, ARCHIVE, LG_WIDTH,
   SIDEBAR_LIST_NAMES_MODE_CHANGE_TAG_NAME,
 } from '../types/const';
-import { getListNameMap, getCanChangeListNames } from '../selectors';
+import { getCanChangeListNames } from '../selectors';
 import { getListNameObj } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
@@ -21,7 +21,7 @@ const MODE_CHANGE_TAG_NAME = SIDEBAR_LIST_NAMES_MODE_CHANGE_TAG_NAME;
 const SidebarListNames = () => {
 
   const mode = useSelector(state => state.display.sidebarListNamesMode);
-  const listNameMap = useSelector(getListNameMap);
+  const listNameMap = useSelector(state => state.settings.listNameMap);
   const canChangeListNames = useSelector(state => getCanChangeListNames(state));
   const tagNameMap = useSelector(state => state.settings.tagNameMap);
   const dispatch = useDispatch();

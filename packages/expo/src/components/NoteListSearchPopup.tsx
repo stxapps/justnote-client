@@ -68,7 +68,9 @@ const NoteListSearchPopup = () => {
       });
     } else {
       Animated.timing(popupAnim, { toValue: 0, ...popupFMV.hidden }).start(() => {
-        if (didMount) setDidCloseAnimEnd(true);
+        requestAnimationFrame(() => {
+          if (didMount) setDidCloseAnimEnd(true);
+        });
       });
       if (prevIsShown.current && searchInput.current) searchInput.current.blur();
       prevIsShown.current = isShown;

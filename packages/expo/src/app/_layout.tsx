@@ -13,7 +13,8 @@ import {
   makeStore, AppStore, useDispatch, useSelector,
 } from '@/store';
 import { bindAddNextActionRef } from '@/store-next';
-import { init, handleAppStateChange } from '@/actions';
+import { init } from '@/actions';
+import { handleAppStateChange } from '@/actions/piece';
 import { useAppState } from '@/components';
 import { BLK_MODE } from '@/types/const';
 import { getThemeMode } from '@/selectors';

@@ -190,11 +190,15 @@ const NavPanel = () => {
     let didMount = true;
     if (isSidebarShown) {
       Animated.timing(sidebarAnim, { toValue: 0, ...sidebarFMV.visible }).start(() => {
-        if (didMount) setDidSidebarAnimEnd(true);
+        requestAnimationFrame(() => {
+          if (didMount) setDidSidebarAnimEnd(true);
+        });
       });
     } else {
       Animated.timing(sidebarAnim, { toValue: 1, ...sidebarFMV.hidden }).start(() => {
-        if (didMount) setDidSidebarAnimEnd(true);
+        requestAnimationFrame(() => {
+          if (didMount) setDidSidebarAnimEnd(true);
+        });
       });
     }
 
@@ -211,10 +215,12 @@ const NavPanel = () => {
       Animated.timing(rightPanelAnim, { toValue: 0, ...sidebarFMV.visible }).start();
     } else {
       Animated.timing(rightPanelAnim, { toValue: 1, ...sidebarFMV.hidden }).start(() => {
-        if (didMount && !note) {
-          if (note !== derivedNote) setDerivedNote(note);
-          if (unsavedNote !== derivedUnsavedNote) setDerivedUnsavedNote(unsavedNote);
-        }
+        requestAnimationFrame(() => {
+          if (didMount && !note) {
+            if (note !== derivedNote) setDerivedNote(note);
+            if (unsavedNote !== derivedUnsavedNote) setDerivedUnsavedNote(unsavedNote);
+          }
+        });
       });
     }
 

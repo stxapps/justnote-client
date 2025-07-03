@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text } from 'react-native';
 
 import { useSelector } from '../store';
-import { getListNameMap } from '../selectors';
 import { getListNameDisplayName, getTagNameDisplayName } from '../utils';
 
 import { useTailwind } from '.';
@@ -17,7 +16,7 @@ const NoteListTopBarTitle = () => {
 const TopBarTitleListName = () => {
   const listName = useSelector(state => state.display.listName);
   const didFetch = useSelector(state => state.display.didFetch);
-  const listNameMap = useSelector(getListNameMap);
+  const listNameMap = useSelector(state => state.settings.listNameMap);
   const tailwind = useTailwind();
 
   if (!didFetch) {

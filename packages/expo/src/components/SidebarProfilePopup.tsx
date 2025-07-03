@@ -71,7 +71,9 @@ const SidebarProfilePopup = () => {
       Animated.timing(popupAnim, { toValue: 1, ...popupFMV.visible }).start();
     } else {
       Animated.timing(popupAnim, { toValue: 0, ...popupFMV.hidden }).start(() => {
-        if (didMount) setDidCloseAnimEnd(true);
+        requestAnimationFrame(() => {
+          if (didMount) setDidCloseAnimEnd(true);
+        });
       });
     }
 

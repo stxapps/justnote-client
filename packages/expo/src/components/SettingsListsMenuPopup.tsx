@@ -147,10 +147,12 @@ const SettingsListsMenuPopup = () => {
       didClick.current = false;
     } else {
       Animated.timing(popupAnim, { toValue: 0, ...popupFMV.hidden }).start(() => {
-        if (didMount) {
-          setPopupSize(null);
-          setDidCloseAnimEnd(true);
-        }
+        requestAnimationFrame(() => {
+          if (didMount) {
+            setPopupSize(null);
+            setDidCloseAnimEnd(true);
+          }
+        });
       });
     }
 

@@ -12,7 +12,6 @@ import {
   TRASH, LG_WIDTH, MOVE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_COMMANDS,
   LIST_NAMES_MODE_MOVE_NOTES, NOTE_COMMANDS_MODE_NETB,
 } from '../types/const';
-import { getListNameMap } from '../selectors';
 import { getListNameDisplayName, getRect, adjustRect } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
@@ -25,7 +24,7 @@ const NoteCommands = (props) => {
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const listName = useSelector(state => state.display.listName);
   const queryString = useSelector(state => state.display.queryString);
-  const listNameMap = useSelector(getListNameMap);
+  const listNameMap = useSelector(state => state.settings.listNameMap);
   const resetDidClickCount = useSelector(state => state.display.resetDidClickCount);
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
   const moveToBtn = useRef(null);

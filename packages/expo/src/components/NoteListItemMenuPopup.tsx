@@ -18,7 +18,7 @@ import {
   MANAGE_TAGS, TAGGED,
 } from '../types/const';
 import {
-  getListNameMap, makeGetPinStatus, makeGetTagStatus, makeGetLockNoteStatus,
+  makeGetPinStatus, makeGetTagStatus, makeGetLockNoteStatus,
 } from '../selectors';
 import { getListNameDisplayName } from '../utils';
 import { popupFMV } from '../types/animConfigs';
@@ -46,7 +46,7 @@ const NoteListItemMenuPopup = () => {
   );
   const listName = useSelector(state => state.display.listName);
   const queryString = useSelector(state => state.display.queryString);
-  const listNameMap = useSelector(state => getListNameMap(state));
+  const listNameMap = useSelector(state => state.settings.listNameMap);
   const selectingNoteId = useSelector(state => state.display.selectingNoteId);
   const pinStatus = useSelector(state => getPinStatus(state, selectingNoteId));
   const tagStatus = useSelector(state => getTagStatus(state, selectingNoteId));
@@ -183,10 +183,12 @@ const NoteListItemMenuPopup = () => {
       didClick.current = false;
     } else {
       Animated.timing(popupAnim, { toValue: 0, ...popupFMV.hidden }).start(() => {
-        if (didMount) {
-          setPopupSize(null);
-          setDidCloseAnimEnd(true);
-        }
+        requestAnimationFrame(() => {
+          if (didMount) {
+            setPopupSize(null);
+            setDidCloseAnimEnd(true);
+          }
+        });
       });
     }
 

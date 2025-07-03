@@ -93,7 +93,9 @@ const ConfirmDiscardPopup = () => {
       didClick.current = false;
     } else {
       Animated.timing(popupAnim, { toValue: 0, ...dialogFMV.hidden }).start(() => {
-        if (didMount) setDidCloseAnimEnd(true);
+        requestAnimationFrame(() => {
+          if (didMount) setDidCloseAnimEnd(true);
+        });
       });
     }
 

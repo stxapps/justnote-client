@@ -128,7 +128,9 @@ const TagEditorPopup = () => {
       Animated.timing(popupAnim, { toValue: 1, ...dialogFMV.visible }).start();
     } else {
       Animated.timing(popupAnim, { toValue: 0, ...dialogFMV.hidden }).start(() => {
-        if (didMount) setDidCloseAnimEnd(true);
+        requestAnimationFrame(() => {
+          if (didMount) setDidCloseAnimEnd(true);
+        });
       });
     }
 

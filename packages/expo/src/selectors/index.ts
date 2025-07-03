@@ -20,13 +20,6 @@ import {
 } from '../types/initialStates';
 import vars from '../vars';
 
-export const getListNameMap = createSelector(
-  state => state.settings.listNameMap,
-  (listNameMap) => {
-    return listNameMap;
-  }
-);
-
 export const makeIsNoteIdSelected = () => {
   return createSelector(
     state => state.display.selectedNoteIds,
@@ -135,13 +128,6 @@ export const getNotes = createSelectorNotes(
 
     return { sortedCfNts: cNotes, pinnedNotes: spNotes, noPinnedNotes: ssNotes };
   }
-);
-
-export const getHasMoreNotes = createSelector(
-  state => state.display.hasMoreNotes,
-  (hasMoreNotes) => {
-    return hasMoreNotes;
-  },
 );
 
 export const getIsFetchingMore = createSelector(

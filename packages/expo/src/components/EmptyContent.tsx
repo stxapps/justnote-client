@@ -4,7 +4,6 @@ import Svg, { Path } from 'react-native-svg';
 
 import { useSelector } from '../store';
 import { MY_NOTES, TRASH, ARCHIVE } from '../types/const';
-import { getListNameMap } from '../selectors';
 import { getListNameDisplayName, getTagNameDisplayName } from '../utils';
 
 import { useTailwind } from '.';
@@ -13,7 +12,7 @@ const EmptyContent = () => {
 
   const listName = useSelector(state => state.display.listName);
   const queryString = useSelector(state => state.display.queryString);
-  const listNameMap = useSelector(getListNameMap);
+  const listNameMap = useSelector(state => state.settings.listNameMap);
   const tagNameMap = useSelector(state => state.settings.tagNameMap);
   const searchString = useSelector(state => state.display.searchString);
   const tailwind = useTailwind();

@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from '../store';
 import { fetchMore, updateFetchedMore } from '../actions/chunk';
 import { LG_WIDTH, BLK_MODE, ADDED_DT, UPDATED_DT } from '../types/const';
 import {
-  getNotes, getHasMoreNotes, getIsFetchingMore, getHasFetchedMore, getThemeMode,
+  getNotes, getIsFetchingMore, getHasFetchedMore, getThemeMode,
   getDoSectionNotesByMonth,
 } from '../selectors';
 import { isObject, getFullYearMonth } from '../utils';
@@ -27,7 +27,7 @@ const NoteListItems = () => {
 
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const notes = useSelector(state => getNotes(state));
-  const hasMore = useSelector(state => getHasMoreNotes(state));
+  const hasMore = useSelector(state => state.display.hasMoreNotes);
   const isFetchingMore = useSelector(state => getIsFetchingMore(state));
   const hasFetchedMore = useSelector(state => getHasFetchedMore(state));
   const listChangedCount = useSelector(state => state.display.listChangedCount);

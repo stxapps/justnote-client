@@ -15,7 +15,7 @@ import {
   VALID_LIST_NAME, LIST_NAME_MSGS, SETTINGS_LISTS_MENU_POPUP, SWAP_LEFT, SWAP_RIGHT,
   MODE_VIEW, MODE_EDIT, SM_WIDTH, BLK_MODE,
 } from '../types/const';
-import { getListNameMap, makeGetListNameEditor, getThemeMode } from '../selectors';
+import { makeGetListNameEditor, getThemeMode } from '../selectors';
 import { validateListNameDisplayName, getRect } from '../utils';
 import { initialListNameEditorState } from '../types/initialStates';
 
@@ -24,7 +24,7 @@ import { useSafeAreaFrame, useTailwind } from '.';
 const SettingsPopupLists = (props) => {
 
   const { onSidebarOpenBtnClick } = props;
-  const listNameMap = useSelector(getListNameMap);
+  const listNameMap = useSelector(state => state.settings.listNameMap);
   const tailwind = useTailwind();
 
   const validateDisplayName = (listName, displayName) => {

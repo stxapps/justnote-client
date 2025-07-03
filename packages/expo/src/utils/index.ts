@@ -1350,6 +1350,19 @@ export const copyFPaths = (fpaths) => {
   };
 };
 
+const EMPTY_ARRAYS = {};
+const getEmptyArray = (key) => {
+  // Some functions are used as an input of createSelector.
+  // Returning a same object to fix warning: An input selector returned a different
+  //   result when passed same arguments (InputStabilityCheck).
+  if (Array.isArray(EMPTY_ARRAYS[key]) && EMPTY_ARRAYS[key].length === 0) {
+    return EMPTY_ARRAYS[key];
+  }
+
+  EMPTY_ARRAYS[key] = [];
+  return EMPTY_ARRAYS[key];
+};
+
 export const getNoteFPaths = (state) => {
   if (
     isObject(state.cachedFPaths) &&
@@ -1358,7 +1371,7 @@ export const getNoteFPaths = (state) => {
   ) {
     return state.cachedFPaths.fpaths.noteFPaths;
   }
-  return [];
+  return getEmptyArray('getNoteFPaths');
 };
 
 export const getSsltFPaths = (state) => {
@@ -1369,7 +1382,7 @@ export const getSsltFPaths = (state) => {
   ) {
     return state.cachedFPaths.fpaths.ssltFPaths;
   }
-  return [];
+  return getEmptyArray('getSsltFPaths');
 };
 
 export const getStaticFPaths = (state) => {
@@ -1380,7 +1393,7 @@ export const getStaticFPaths = (state) => {
   ) {
     return state.cachedFPaths.fpaths.staticFPaths;
   }
-  return [];
+  return getEmptyArray('getStaticFPaths');
 };
 
 export const getSettingsFPaths = (state) => {
@@ -1391,7 +1404,7 @@ export const getSettingsFPaths = (state) => {
   ) {
     return state.cachedFPaths.fpaths.settingsFPaths;
   }
-  return [];
+  return getEmptyArray('getSettingsFPaths');
 };
 
 export const getInfoFPath = (state) => {
@@ -1758,7 +1771,7 @@ export const getPinFPaths = (state) => {
   ) {
     return state.cachedFPaths.fpaths.pinFPaths;
   }
-  return [];
+  return getEmptyArray('getPinFPaths');
 };
 
 export const getRawPins = createSelector(
@@ -2655,7 +2668,7 @@ export const getTagFPaths = (state) => {
   ) {
     return state.cachedFPaths.fpaths.tagFPaths;
   }
-  return [];
+  return getEmptyArray('getTagFPaths');
 };
 
 export const getRawTags = createSelector(

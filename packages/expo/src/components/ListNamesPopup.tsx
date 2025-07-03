@@ -14,7 +14,6 @@ import {
   LIST_NAMES_POPUP, TRASH, LIST_NAMES_MODE_MOVE_NOTES, LIST_NAMES_MODE_MOVE_LIST_NAME,
   SETTINGS_VIEW_LISTS,
 } from '../types/const';
-import { getListNameMap } from '../selectors';
 import {
   getLastHalfHeight, getListNameObj, getLongestListNameDisplayName,
   getMaxListNameChildrenSize,
@@ -36,7 +35,7 @@ const ListNamesPopup = () => {
   const mode = useSelector(state => state.display.listNamesMode);
   const listName = useSelector(state => state.display.listName);
   const selectingListName = useSelector(state => state.display.selectingListName);
-  const listNameMap = useSelector(getListNameMap);
+  const listNameMap = useSelector(state => state.settings.listNameMap);
 
   const [currentListName, setCurrentListName] = useState(null);
   const [didCloseAnimEnd, setDidCloseAnimEnd] = useState(!isShown);
@@ -121,8 +120,10 @@ const ListNamesPopup = () => {
 
   const onForwardBtnClick = (selectedListName) => {
     Animated.timing(slideAnim, { toValue: 1, ...slideFMV }).start(() => {
-      setCurrentListName(selectedListName);
-      setForwardCount(forwardCount + 1);
+      requestAnimationFrame(() => {
+        setCurrentListName(selectedListName);
+        setForwardCount(forwardCount + 1);
+      });
     });
   };
 
@@ -151,9 +152,11 @@ const ListNamesPopup = () => {
       Animated.timing(popupAnim, { toValue: 1, ...popupFMV.visible }).start();
     } else {
       Animated.timing(popupAnim, { toValue: 0, ...popupFMV.hidden }).start(() => {
-        if (didMount) {
-          setDidCloseAnimEnd(true);
-        }
+        requestAnimationFrame(() => {
+          if (didMount) {
+            setDidCloseAnimEnd(true);
+          }
+        });
       });
     }
 

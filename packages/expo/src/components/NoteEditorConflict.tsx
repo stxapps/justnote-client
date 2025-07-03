@@ -14,7 +14,7 @@ import { mergeNotes } from '../actions/chunk';
 import {
   DOMAIN_NAME, HASH_SUPPORT, MERGING, DIED_MERGING, LG_WIDTH, BLK_MODE, IMAGES, UTF8,
 } from '../types/const';
-import { getListNameMap, getThemeMode } from '../selectors';
+import { getThemeMode } from '../selectors';
 import {
   getListNameDisplayName, getFormattedDT, splitOnFirst, escapeDoubleQuotes,
   getListNameAndNote,
@@ -204,7 +204,7 @@ const _NoteEditorUnsavedConflict = (props) => {
 const _ConflictItem = (props) => {
 
   const { listName, note, status, isUnsaved, doHideChooseBtn } = props;
-  const listNameMap = useSelector(getListNameMap);
+  const listNameMap = useSelector(state => state.settings.listNameMap);
   const themeMode = useSelector(state => getThemeMode(state));
   const [isOpen, setIsOpen] = useState(false);
   const [didOpen, setDidOpen] = useState(false);
