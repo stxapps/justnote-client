@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  View, Text, TouchableOpacity, TextInput, Animated, BackHandler, Keyboard,
+  View, Text, TouchableOpacity, TextInput, Animated, BackHandler, Keyboard, Platform,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
@@ -101,11 +101,12 @@ const NoteListSearchPopup = () => {
     ],
   };
   const searchClearBtnClasses = searchString.length === 0 ? 'hidden relative' : 'flex absolute';
+  const searchInputClasses = Platform.OS === 'ios' ? 'leading-5 py-1.5' : 'py-1';
 
   return (
     <Animated.View style={[tailwind('h-14 flex-row items-center justify-between border-b border-gray-200 pl-4 pr-2 blk:border-gray-700 sm:pl-6 sm:pr-4 lg:hidden'), popupStyle]}>
       <View style={tailwind('flex-1 rounded-md bg-white shadow-sm blk:bg-gray-900')}>
-        <TextInput ref={searchInput} onChange={onSearchInputChange} style={tailwind('w-full rounded-md border border-gray-300 bg-white py-1.5 pl-9 pr-6 text-base font-normal leading-5 text-gray-700 blk:border-gray-600 blk:bg-gray-900 blk:text-gray-200')} placeholder="Search" placeholderTextColor={themeMode === BLK_MODE ? 'rgb(156, 163, 175)' : 'rgb(107, 114, 128)'} value={searchString} autoCapitalize="none" />
+        <TextInput ref={searchInput} onChange={onSearchInputChange} style={tailwind(`w-full rounded-md border border-gray-300 bg-white pl-9 pr-6 text-base font-normal text-gray-700 blk:border-gray-600 blk:bg-gray-900 blk:text-gray-200 ${searchInputClasses}`)} placeholder="Search" placeholderTextColor={themeMode === BLK_MODE ? 'rgb(156, 163, 175)' : 'rgb(107, 114, 128)'} value={searchString} autoCapitalize="none" />
         <View style={tailwind('absolute inset-y-0 left-0 justify-center pl-3')}>
           <Svg width={16} height={16} style={tailwind('mr-3 font-normal text-gray-400 blk:text-gray-500')} viewBox="0 0 20 20" fill="currentColor">
             <Path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />

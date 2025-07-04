@@ -215,9 +215,6 @@ const TagEditorPopup = () => {
     paddingLeft: insets.left, paddingRight: insets.right,
   };
 
-  const inputStyle: any = { paddingVertical: Platform.OS === 'ios' ? 6 : 5 };
-  if (Platform.OS === 'ios') inputStyle.lineHeight = 18;
-
   let title = 'Tags';
   let desc = (
     <React.Fragment>Enter a new tag and press the Add button.</React.Fragment>
@@ -245,6 +242,9 @@ const TagEditorPopup = () => {
       );
     }
   }
+
+  const inputStyle: any = { paddingVertical: Platform.OS === 'ios' ? 6 : 5.5 };
+  if (Platform.OS === 'ios') inputStyle.lineHeight = 18;
 
   return (
     <KeyboardAvoidingView style={[tailwind('absolute inset-0'), canvasStyle]} behavior="padding" enabled={Platform.OS === 'android'}>

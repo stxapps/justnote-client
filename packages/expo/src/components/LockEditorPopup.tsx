@@ -261,6 +261,7 @@ const LockEditorPopup = () => {
     lockAction === LOCK_ACTION_ADD_LOCK_LIST && selectingListName === MY_NOTES
   );
   const isAddLock = isAddLockNote || isAddLockList;
+  const textInputClasses = Platform.OS === 'ios' ? 'leading-4 py-2' : 'py-1.5';
 
   return (
     <KeyboardAvoidingView style={[tailwind('absolute inset-0'), canvasStyle]} behavior="padding" enabled={Platform.OS === 'android'}>
@@ -275,7 +276,7 @@ const LockEditorPopup = () => {
               {desc}
               <View style={tailwind([LOCK_ACTION_ADD_LOCK_NOTE, LOCK_ACTION_ADD_LOCK_LIST].includes(lockAction) ? 'pt-1' : 'pt-3.5')}>
                 <View style={tailwind('mt-1 rounded-md bg-white shadow-sm blk:bg-gray-800')}>
-                  <TextInput ref={passwordInput} onChange={onPasswordInputChange} style={tailwind('w-full rounded-md border border-gray-300 bg-white py-2 pl-4 pr-6 text-sm font-normal leading-4 text-gray-700 blk:border-gray-600 blk:bg-gray-800 blk:text-gray-200')} placeholder="Password" placeholderTextColor={themeMode === BLK_MODE ? 'rgb(156, 163, 175)' : 'rgb(107, 114, 128)'} value={passwordInputValue} autoCapitalize="none" secureTextEntry={!doShowPassword} />
+                  <TextInput ref={passwordInput} onChange={onPasswordInputChange} style={tailwind(`w-full rounded-md border border-gray-300 bg-white pl-4 pr-6 text-sm font-normal text-gray-700 blk:border-gray-600 blk:bg-gray-800 blk:text-gray-200 ${textInputClasses}`)} placeholder="Password" placeholderTextColor={themeMode === BLK_MODE ? 'rgb(156, 163, 175)' : 'rgb(107, 114, 128)'} value={passwordInputValue} autoCapitalize="none" secureTextEntry={!doShowPassword} />
                   <TouchableOpacity onPress={() => setDoShowPassword(!doShowPassword)} style={tailwind('absolute inset-y-0 right-0 items-center justify-center pr-2')}>
                     <Svg width={16} height={16} style={tailwind('font-normal text-gray-400 blk:text-gray-500')} viewBox="0 0 20 20" fill="currentColor">
                       {doShowPassword && <React.Fragment>
