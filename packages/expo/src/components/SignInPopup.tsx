@@ -3,6 +3,7 @@ import {
   View, TouchableWithoutFeedback, BackHandler, Animated, Linking, Platform,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 import { useSelector, useDispatch } from '../store';
 import { updatePopup, updateStacksAccess, updateUserData } from '../actions';
@@ -169,7 +170,7 @@ const SignInPopup = () => {
   const bgStyle = { opacity: popupAnim };
 
   return (
-    <View style={[tailwind('absolute inset-0'), canvasStyle]}>
+    <KeyboardAvoidingView style={[tailwind('absolute inset-0'), canvasStyle]} behavior="padding" enabled={Platform.OS === 'android'}>
       {/* No cancel on background of SignInPopup */}
       <TouchableWithoutFeedback>
         <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
@@ -181,7 +182,7 @@ const SignInPopup = () => {
           </View>
         </Animated.View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

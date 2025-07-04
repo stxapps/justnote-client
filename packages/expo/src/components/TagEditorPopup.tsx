@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  View, Text, TouchableOpacity, TouchableWithoutFeedback, TextInput,
+  ScrollView, View, Text, TouchableOpacity, TouchableWithoutFeedback, TextInput,
   Animated, BackHandler, Platform, Keyboard,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 import { useSelector, useDispatch } from '../store';
 import { updatePopup } from '../actions';
@@ -215,7 +215,7 @@ const TagEditorPopup = () => {
     paddingLeft: insets.left, paddingRight: insets.right,
   };
 
-  const inputStyle: any = { paddingVertical: Platform.OS === 'ios' ? 6 : 1 };
+  const inputStyle: any = { paddingVertical: Platform.OS === 'ios' ? 6 : 5 };
   if (Platform.OS === 'ios') inputStyle.lineHeight = 18;
 
   let title = 'Tags';
@@ -247,14 +247,14 @@ const TagEditorPopup = () => {
   }
 
   return (
-    <View style={[tailwind('absolute inset-0'), canvasStyle]}>
+    <KeyboardAvoidingView style={[tailwind('absolute inset-0'), canvasStyle]} behavior="padding" enabled={Platform.OS === 'android'}>
       {/* No cancel on background of TagEditorPopup */}
       <TouchableWithoutFeedback>
         <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
       </TouchableWithoutFeedback>
       <View style={tailwind(`flex-1 items-center justify-center p-4 ${Platform.OS === 'ios' ? 'lg:justify-start' : ''}`)}>
         <Animated.View style={[tailwind('w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-xl blk:border blk:border-gray-700 blk:bg-gray-800'), popupStyle]}>
-          <KeyboardAwareScrollView style={{ maxHeight: panelHeight }} keyboardShouldPersistTaps="handled" bottomOffset={16}>
+          <ScrollView style={{ maxHeight: panelHeight }} automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps="handled">
             <View style={tailwind('px-4 pt-8 pb-4 sm:px-6 sm:pb-6')}>
               <Text style={tailwind('text-left text-xl font-semibold text-gray-800 blk:text-gray-100')}>{title}</Text>
               {tagEditor.values.length === 0 && <View style={tailwind('pt-4')}>
@@ -303,10 +303,10 @@ const TagEditorPopup = () => {
                 </TouchableOpacity>
               </View>
             </View>
-          </KeyboardAwareScrollView>
+          </ScrollView>
         </Animated.View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

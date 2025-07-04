@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  View, Text, TouchableOpacity, TouchableWithoutFeedback, Switch, TextInput,
+  ScrollView, View, Text, TouchableOpacity, TouchableWithoutFeedback, Switch, TextInput,
   BackHandler, Animated, Platform, Keyboard,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { Circle } from 'react-native-animated-spinkit';
 
 import { useSelector, useDispatch } from '../store';
@@ -263,13 +263,13 @@ const LockEditorPopup = () => {
   const isAddLock = isAddLockNote || isAddLockList;
 
   return (
-    <View style={[tailwind('absolute inset-0'), canvasStyle]}>
+    <KeyboardAvoidingView style={[tailwind('absolute inset-0'), canvasStyle]} behavior="padding" enabled={Platform.OS === 'android'}>
       <TouchableWithoutFeedback onPress={onCancelBtnClick}>
         <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
       </TouchableWithoutFeedback>
       <View style={tailwind(`flex-1 items-center justify-center p-4 ${Platform.OS === 'ios' ? 'lg:justify-start' : ''}`)}>
         <Animated.View style={[tailwind('w-full overflow-hidden rounded-lg bg-white shadow-xl blk:border blk:border-gray-700 blk:bg-gray-800'), popupStyle]}>
-          <KeyboardAwareScrollView style={{ maxHeight: panelHeight }} keyboardShouldPersistTaps="handled" bottomOffset={16}>
+          <ScrollView style={{ maxHeight: panelHeight }} automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps="handled">
             <View style={tailwind('px-4 pt-8 pb-4 sm:px-6 sm:pb-6')}>
               <Text style={tailwind('text-left text-xl font-semibold text-gray-900 blk:text-white')}>{title}</Text>
               {desc}
@@ -316,13 +316,13 @@ const LockEditorPopup = () => {
                 </TouchableOpacity>
               </View>
             </View>
-          </KeyboardAwareScrollView>
+          </ScrollView>
           {isLoadingShown && <View style={tailwind('absolute inset-0 flex items-center justify-center bg-white bg-opacity-25 blk:bg-gray-800 blk:bg-opacity-25')}>
             <Circle size={20} color={themeMode === BLK_MODE ? 'rgb(156, 163, 175)' : 'rgb(107, 114, 128)'} />
           </View>}
         </Animated.View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
