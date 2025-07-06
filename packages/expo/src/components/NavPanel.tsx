@@ -1,11 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   View, TouchableOpacity, TouchableWithoutFeedback, Animated, BackHandler, PanResponder,
-  Platform, KeyboardAvoidingView,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-// doesn't work on tablet split view
-//import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 import { useSelector, useDispatch } from '../store';
 import { updateNoteId, updatePopup } from '../actions';
@@ -269,37 +266,35 @@ const NavPanel = () => {
   };
 
   return (
-    <KeyboardAvoidingView style={tailwind('flex-1')} behavior="padding" enabled={Platform.OS === 'android'}>
-      <View {...viewPanResponder.panHandlers} style={tailwind('flex-1 bg-white blk:bg-gray-900')}>
-        {/* Main panel */}
-        <NoteList onSidebarOpenBtnClick={onSidebarOpenBtnClick} />
-        {/* Sidebar */}
-        <View style={tailwind(leftCanvasClassNames)}>
-          <TouchableWithoutFeedback onPress={onSidebarCloseBtnClick}>
-            <Animated.View style={[tailwind('absolute inset-0 bg-white blk:bg-gray-900'), leftOverlayStyle]} />
-          </TouchableWithoutFeedback>
-          <Animated.View style={[tailwind('absolute top-0 right-0 p-1'), leftOverlayStyle]}>
-            <TouchableOpacity onPress={onSidebarCloseBtnClick} style={tailwind('h-7 w-7 items-center justify-center')}>
-              <Svg width={20} height={20} style={tailwind('font-normal text-gray-400 blk:text-gray-400')} stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                <Path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </Svg>
-            </TouchableOpacity>
-          </Animated.View>
-          <Animated.View style={[tailwind('h-full max-w-64 flex-1 bg-gray-100 pr-2 blk:bg-gray-800'), leftPanelStyle]}>
-            <Sidebar />
-          </Animated.View>
-          <View style={tailwind('h-full w-14 flex-shrink-0')}>
-            {/* Force sidebar to shrink to fit close icon */}
-          </View>
-        </View>
-        {/* Right panel */}
-        <View style={tailwind(rightCanvasClassNames)}>
-          <Animated.View style={[tailwind('h-full w-full'), rightPanelStyle]}>
-            <NoteEditor note={derivedNote} unsavedNote={derivedUnsavedNote} width={safeAreaWidth} />
-          </Animated.View>
+    <View {...viewPanResponder.panHandlers} style={tailwind('flex-1 bg-white blk:bg-gray-900')}>
+      {/* Main panel */}
+      <NoteList onSidebarOpenBtnClick={onSidebarOpenBtnClick} />
+      {/* Sidebar */}
+      <View style={tailwind(leftCanvasClassNames)}>
+        <TouchableWithoutFeedback onPress={onSidebarCloseBtnClick}>
+          <Animated.View style={[tailwind('absolute inset-0 bg-white blk:bg-gray-900'), leftOverlayStyle]} />
+        </TouchableWithoutFeedback>
+        <Animated.View style={[tailwind('absolute top-0 right-0 p-1'), leftOverlayStyle]}>
+          <TouchableOpacity onPress={onSidebarCloseBtnClick} style={tailwind('h-7 w-7 items-center justify-center')}>
+            <Svg width={20} height={20} style={tailwind('font-normal text-gray-400 blk:text-gray-400')} stroke="currentColor" fill="none" viewBox="0 0 24 24">
+              <Path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </Svg>
+          </TouchableOpacity>
+        </Animated.View>
+        <Animated.View style={[tailwind('h-full max-w-64 flex-1 bg-gray-100 pr-2 blk:bg-gray-800'), leftPanelStyle]}>
+          <Sidebar />
+        </Animated.View>
+        <View style={tailwind('h-full w-14 flex-shrink-0')}>
+          {/* Force sidebar to shrink to fit close icon */}
         </View>
       </View>
-    </KeyboardAvoidingView>
+      {/* Right panel */}
+      <View style={tailwind(rightCanvasClassNames)}>
+        <Animated.View style={[tailwind('h-full w-full'), rightPanelStyle]}>
+          <NoteEditor note={derivedNote} unsavedNote={derivedUnsavedNote} width={safeAreaWidth} />
+        </Animated.View>
+      </View>
+    </View>
   );
 };
 

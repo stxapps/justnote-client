@@ -4,7 +4,6 @@ import {
   Animated, BackHandler, Platform, Keyboard,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 import { useSelector, useDispatch } from '../store';
 import { updatePopup } from '../actions';
@@ -18,12 +17,13 @@ import {
 import { getThemeMode } from '../selectors';
 import { dialogFMV } from '../types/animConfigs';
 
-import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
+import { useSafeAreaFrame, useSafeAreaInsets, useKeyboardHeight, useTailwind } from '.';
 
 const TagEditorPopup = () => {
 
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
   const insets = useSafeAreaInsets();
+  const keyboardHeight = useKeyboardHeight(Platform.OS === 'android');
   const isShown = useSelector(state => state.display.isTagEditorPopupShown);
   const tagEditor = useSelector(state => state.tagEditor);
   const themeMode = useSelector(state => getThemeMode(state));
@@ -158,7 +158,7 @@ const TagEditorPopup = () => {
 
   // safeAreaHeight doesn't include status bar height, but minus it anyway.
   const statusBarHeight = 24;
-  const appHeight = safeAreaHeight - statusBarHeight;
+  const appHeight = Math.max(safeAreaHeight - statusBarHeight - keyboardHeight, 128);
   const panelHeight = Math.min(480, appHeight * 0.9);
 
   const popupStyle: any = {
@@ -211,7 +211,7 @@ const TagEditorPopup = () => {
   }
 
   const canvasStyle = {
-    paddingTop: insets.top, paddingBottom: insets.bottom,
+    paddingTop: insets.top, paddingBottom: insets.bottom + keyboardHeight,
     paddingLeft: insets.left, paddingRight: insets.right,
   };
 
@@ -247,7 +247,7 @@ const TagEditorPopup = () => {
   if (Platform.OS === 'ios') inputStyle.lineHeight = 18;
 
   return (
-    <KeyboardAvoidingView style={[tailwind('absolute inset-0'), canvasStyle]} behavior="padding" enabled={Platform.OS === 'android'}>
+    <View style={[tailwind('absolute inset-0'), canvasStyle]}>
       {/* No cancel on background of TagEditorPopup */}
       <TouchableWithoutFeedback>
         <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
@@ -306,7 +306,7 @@ const TagEditorPopup = () => {
           </ScrollView>
         </Animated.View>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 

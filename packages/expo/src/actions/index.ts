@@ -1,4 +1,4 @@
-import { Appearance, Alert } from 'react-native';
+import { Keyboard, Appearance, Alert } from 'react-native';
 import { getCalendars } from 'expo-localization';
 import 'event-target-fallback'; // Polyfill Event and EventTarget for queue.
 import TaskQueue from 'queue';
@@ -84,6 +84,15 @@ export const init = () => async (dispatch, getState) => {
       unsavedNotes,
       lockSettings,
     },
+  });
+
+  const kbMtx = Keyboard.metrics();
+  if (isObject(kbMtx) && isNumber(kbMtx.height)) vars.keyboard.height = kbMtx.height;
+  Keyboard.addListener('keyboardDidShow', (e) => {
+    vars.keyboard.height = e.endCoordinates.height;
+  });
+  Keyboard.addListener('keyboardDidHide', () => {
+    vars.keyboard.height = 0;
   });
 
   Appearance.addChangeListener((e) => {

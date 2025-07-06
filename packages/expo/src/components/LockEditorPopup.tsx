@@ -4,7 +4,6 @@ import {
   BackHandler, Animated, Platform, Keyboard,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { Circle } from 'react-native-animated-spinkit';
 
 import { useSelector, useDispatch } from '../store';
@@ -21,12 +20,13 @@ import {
 import { getThemeMode } from '../selectors';
 import { dialogFMV } from '../types/animConfigs';
 
-import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
+import { useSafeAreaFrame, useSafeAreaInsets, useKeyboardHeight, useTailwind } from '.';
 
 const LockEditorPopup = () => {
 
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
   const insets = useSafeAreaInsets();
+  const keyboardHeight = useKeyboardHeight(Platform.OS === 'android');
   const isShown = useSelector(state => state.display.isLockEditorPopupShown);
   const lockAction = useSelector(state => state.display.lockAction);
   const selectingNoteId = useSelector(state => state.display.selectingNoteId);
@@ -181,13 +181,13 @@ const LockEditorPopup = () => {
   if (!isShown && didCloseAnimEnd) return null;
 
   const canvasStyle = {
-    paddingTop: insets.top, paddingBottom: insets.bottom,
+    paddingTop: insets.top, paddingBottom: insets.bottom + keyboardHeight,
     paddingLeft: insets.left, paddingRight: insets.right,
   };
 
   // safeAreaHeight doesn't include status bar height, but minus it anyway.
   const statusBarHeight = 24;
-  const appHeight = safeAreaHeight - statusBarHeight;
+  const appHeight = Math.max(safeAreaHeight - statusBarHeight - keyboardHeight, 128);
   const panelHeight = Math.min(480 - 40, appHeight * 0.9);
 
   const popupStyle: any = {
@@ -264,7 +264,7 @@ const LockEditorPopup = () => {
   const textInputClasses = Platform.OS === 'ios' ? 'leading-4 py-2' : 'py-1.5';
 
   return (
-    <KeyboardAvoidingView style={[tailwind('absolute inset-0'), canvasStyle]} behavior="padding" enabled={Platform.OS === 'android'}>
+    <View style={[tailwind('absolute inset-0'), canvasStyle]}>
       <TouchableWithoutFeedback onPress={onCancelBtnClick}>
         <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
       </TouchableWithoutFeedback>
@@ -323,7 +323,7 @@ const LockEditorPopup = () => {
           </View>}
         </Animated.View>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 

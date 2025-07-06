@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Text, TextInput, Appearance, Keyboard } from 'react-native';
+import { Text, TextInput, Appearance } from 'react-native';
 import { Provider as ReduxProvider } from 'react-redux';
 import { StatusBar } from 'expo-status-bar';
 import * as NavigationBar from 'expo-navigation-bar';
@@ -19,7 +19,6 @@ import { useAppState } from '@/components';
 import { BLK_MODE } from '@/types/const';
 import { getThemeMode } from '@/selectors';
 import cache from '@/utils/cache';
-import vars from '@/vars';
 
 // @ts-expect-error
 Text.defaultProps = Text.defaultProps || {};
@@ -35,8 +34,6 @@ function Initializer() {
   const pathname = usePathname();
   const prevAppState = useRef(null);
   const prevPathname = useRef(null);
-  const keyboardDidShowListener = useRef(null);
-  const keyboardDidHideListener = useRef(null);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -55,20 +52,6 @@ function Initializer() {
     prevAppState.current = appState;
     prevPathname.current = pathname;
   }, [appState, pathname, dispatch]);
-
-  useEffect(() => {
-    keyboardDidShowListener.current = Keyboard.addListener('keyboardDidShow', (e) => {
-      vars.keyboard.height = e.endCoordinates.height;
-    });
-    keyboardDidHideListener.current = Keyboard.addListener('keyboardDidHide', () => {
-      vars.keyboard.height = 0;
-    });
-
-    return () => {
-      keyboardDidShowListener.current.remove();
-      keyboardDidHideListener.current.remove();
-    };
-  }, []);
 
   return null;
 }

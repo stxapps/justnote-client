@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Dimensions, AppState, AppStateStatus } from 'react-native';
+import { useState, useEffect, useRef } from 'react';
+import { Dimensions, AppState, AppStateStatus, Keyboard } from 'react-native';
 import {
   useSafeAreaFrame as useWindowFrame, useSafeAreaInsets as useScreenInsets,
 } from 'react-native-safe-area-context';
@@ -8,6 +8,7 @@ import { useSelector } from '../store';
 import {
   getSafeAreaFrame, getSafeAreaInsets, getThemeMode, getTailwind,
 } from '../selectors';
+import { isObject, isNumber } from '../utils';
 
 export const useSafeAreaFrame = () => {
   const {
@@ -35,6 +36,49 @@ export const useSafeAreaInsets = () => {
     windowX, windowY, windowWidth, windowHeight,
     screenWidth, screenHeight, screenInsets,
   );
+};
+
+const getKbHt = () => {
+  const kbMtx = Keyboard.metrics();
+  if (isObject(kbMtx) && isNumber(kbMtx.height)) return kbMtx.height;
+  return 0;
+};
+export const useKeyboardHeight = (enabled = true) => {
+  const [height, setHeight] = useState(enabled ? getKbHt() : 0);
+  const heightRef = useRef(height);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const chkAndSetHeight = (e) => {
+      const newHeight = e.endCoordinates.height;
+      if (heightRef.current !== newHeight) setHeight(newHeight);
+      heightRef.current = newHeight;
+    };
+    const resetHeight = () => {
+      if (heightRef.current !== 0) setHeight(0);
+      heightRef.current = 0;
+    };
+
+    const willShowSub = Keyboard.addListener('keyboardWillShow', chkAndSetHeight);
+    const didShowSub = Keyboard.addListener('keyboardDidShow', chkAndSetHeight);
+    const willChgSub = Keyboard.addListener('keyboardWillChangeFrame', chkAndSetHeight);
+    const didChgSub = Keyboard.addListener('keyboardDidChangeFrame', chkAndSetHeight);
+    const willHideSub = Keyboard.addListener('keyboardWillHide', resetHeight);
+    const didHideSub = Keyboard.addListener('keyboardDidHide', resetHeight);
+
+    return () => {
+      if (!enabled) return;
+      willShowSub.remove();
+      didShowSub.remove();
+      willChgSub.remove();
+      didChgSub.remove();
+      willHideSub.remove();
+      didHideSub.remove();
+    };
+  }, []);
+
+  return height;
 };
 
 export const useTailwind = () => {

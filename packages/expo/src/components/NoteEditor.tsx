@@ -1,12 +1,12 @@
-import React, { useRef } from 'react';
-import { View, Text } from 'react-native';
+import React, { useRef, useMemo } from 'react';
+import { View, Text, Platform } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { useSelector } from '../store';
 import { DUMMY_NOTE_OBJ, DUMMY_UNSAVED_NOTE_OBJ, INVALID } from '../types/const';
 import { isDiedStatus } from '../utils';
 
-import { useTailwind } from '.';
+import { useKeyboardHeight, useTailwind } from '.';
 import NoteEditorTopBar from './NoteEditorTopBar';
 import NoteEditorEditor from './NoteEditorEditor';
 import NoteEditorBulkEdit from './NoteEditorBulkEdit';
@@ -19,11 +19,21 @@ import NoteEditorLock from './NoteEditorLock';
 const NoteEditor = (props) => {
 
   const { note, unsavedNote, isFullScreen, onToggleFullScreen, width } = props;
+  const keyboardHeight = useKeyboardHeight(Platform.OS === 'android');
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const isContentEditor = useRef(false);
   const tailwind = useTailwind();
 
   const isUnsavedInvalid = unsavedNote.status === INVALID;
+
+  const viewStyle = useMemo(() => {
+    const classNames = 'h-full w-full bg-white blk:bg-gray-900';
+    if (keyboardHeight > 0) {
+      return [tailwind(classNames), { paddingBottom: keyboardHeight }];
+    }
+
+    return tailwind(classNames);
+  }, [keyboardHeight, tailwind]);
 
   const _render = () => {
     isContentEditor.current = false;
@@ -56,7 +66,7 @@ const NoteEditor = (props) => {
     isContentEditor.current = true;
     return (
       <View style={tailwind('h-full w-full bg-white blk:bg-gray-900')}>
-        <View style={tailwind('h-full w-full bg-white blk:bg-gray-900')}>
+        <View style={viewStyle}>
           <NoteEditorTopBar note={note} unsavedNote={unsavedNote} isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} width={width} />
           <NoteEditorEditor key="NoteEditorEditor" note={note} unsavedNote={unsavedNote} />
         </View>

@@ -3,7 +3,6 @@ import {
   View, TouchableWithoutFeedback, BackHandler, Animated, Linking, Platform,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 import { useSelector, useDispatch } from '../store';
 import { updatePopup, updateStacksAccess, updateUserData } from '../actions';
@@ -15,7 +14,7 @@ import { splitOnFirst, escapeDoubleQuotes } from '../utils';
 import cache from '../utils/cache';
 import { dialogFMV } from '../types/animConfigs';
 
-import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
+import { useSafeAreaFrame, useSafeAreaInsets, useKeyboardHeight, useTailwind } from '.';
 
 const stacksAccessSignIn = require('../../stacks-access-sign-in');
 
@@ -26,6 +25,7 @@ const SignInPopup = () => {
   // state.window.height is from Dimensions, need to manually calculate safe height.
   const { width: safeAreaWidth, height: safeAreaHeight } = useSafeAreaFrame();
   const insets = useSafeAreaInsets();
+  const keyboardHeight = useKeyboardHeight(Platform.OS === 'android');
   const isShown = useSelector(state => state.display.isSignInPopupShown);
   const viewId = useSelector(state => state.stacksAccess.viewId);
   const walletData = useSelector(state => state.stacksAccess.walletData);
@@ -149,13 +149,13 @@ const SignInPopup = () => {
   if (!isShown && didCloseAnimEnd) return null;
 
   const canvasStyle = {
-    paddingTop: insets.top, paddingBottom: insets.bottom,
+    paddingTop: insets.top, paddingBottom: insets.bottom + keyboardHeight,
     paddingLeft: insets.left, paddingRight: insets.right,
   };
 
   // safeAreaHeight doesn't include status bar height, but minus it anyway.
   const statusBarHeight = 24;
-  let appHeight = safeAreaHeight - statusBarHeight;
+  let appHeight = Math.max(safeAreaHeight - statusBarHeight - keyboardHeight, 128);
   const panelHeight = Math.min(480 - 40, appHeight * 0.9);
 
   const popupStyle: any = {
@@ -170,7 +170,7 @@ const SignInPopup = () => {
   const bgStyle = { opacity: popupAnim };
 
   return (
-    <KeyboardAvoidingView style={[tailwind('absolute inset-0'), canvasStyle]} behavior="padding" enabled={Platform.OS === 'android'}>
+    <View style={[tailwind('absolute inset-0'), canvasStyle]}>
       {/* No cancel on background of SignInPopup */}
       <TouchableWithoutFeedback>
         <Animated.View style={[tailwind('absolute inset-0 bg-black bg-opacity-25'), bgStyle]} />
@@ -182,7 +182,7 @@ const SignInPopup = () => {
           </View>
         </Animated.View>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 

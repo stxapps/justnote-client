@@ -159,7 +159,7 @@ const SignUpPopup = () => {
 
   // safeAreaHeight doesn't include status bar height, but minus it anyway.
   const statusBarHeight = 24;
-  let appHeight = safeAreaHeight - statusBarHeight;
+  let appHeight = Math.max(safeAreaHeight - statusBarHeight, 128);
   const panelHeight = Math.min(576 - 40, appHeight * 0.9);
 
   const popupStyle = {
