@@ -36,6 +36,7 @@ const config: ExpoConfig = {
   "icon": "./src/images/icon.png",
   "scheme": "justnotecc",
   "userInterfaceStyle": "automatic",
+  "backgroundColor": "#111827",
   "newArchEnabled": true,
   "splash": {
     "image": "./src/images/splash-icon.png",
@@ -53,12 +54,26 @@ const config: ExpoConfig = {
       "NSPhotoLibraryUsageDescription": "Select a picture for use in your note.",
       "NSCameraUsageDescription": "Take a picture for use in your note."
     },
+    //entitlements
     "privacyManifests": {
-
+      "NSPrivacyAccessedAPITypes": [
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+          "NSPrivacyAccessedAPITypeReasons": ["C617.1", "3B52.1"]
+        },
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+          "NSPrivacyAccessedAPITypeReasons": ["CA92.1", "1C8F.1"]
+        },
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
+          "NSPrivacyAccessedAPITypeReasons": ["35F9.1"]
+        }
+      ]
     },
-    "bundleIdentifier": "com.justnotecc",
-    "appleTeamId": "",
-    "version": "",
+    "bundleIdentifier": "com.justnotecc.justnote",
+    "appleTeamId": process.env.APPLE_TEAM_ID,
+    "version": "0.32.0",
     "buildNumber": "1"
   },
   "android": {
@@ -139,7 +154,7 @@ const config: ExpoConfig = {
           "NSExtensionActivationSupportsWebURLWithMaxCount": 1
         },
         "iosShareExtensionName": "Save to Justnote",
-        "iosAppGroupIdentifier": "com.justnotecc",
+        "iosAppGroupIdentifier": "group.justnotecc.share",
         "androidIntentFilters": ["text/*"]
       }
     ],
