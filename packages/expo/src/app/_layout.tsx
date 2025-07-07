@@ -94,11 +94,9 @@ export default function Root() {
   return (
     <ShareIntentProvider
       options={{
-        debug: true,
-        resetOnBackground: true,
-        onResetShareIntent: () =>
-          // used when app going in background and when the reset button is pressed
-          router.replace('/' as ExternalPathString),
+        debug: false,
+        resetOnBackground: false,
+        onResetShareIntent: () => router.replace('/' as ExternalPathString),
       }}
     >
       <ReduxProvider store={storeRef.current}>

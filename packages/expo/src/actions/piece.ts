@@ -26,9 +26,11 @@ export const handleAppStateChange = (appState, pathname) => async (
   if (appState === APP_STATE_ACTIVE && pathname === '/') {
     vars.appState.timeoutId = setTimeout(async () => {
       await _handleAppStateChange(appState, pathname, dispatch, getState);
+      vars.appState.lastChangeDT = Date.now();
     }, 400);
   } else {
     await _handleAppStateChange(appState, pathname, dispatch, getState);
+    vars.appState.lastChangeDT = Date.now();
   }
 };
 
@@ -45,7 +47,6 @@ const _handleAppStateChange = async (appState, pathname, dispatch, getState) => 
     const doForceLock = getState().display.doForceLock;
 
     const isLong = (Date.now() - vars.appState.lastChangeDT) > 21 * 60 * 1000;
-    vars.appState.lastChangeDT = Date.now();
 
     const lockedLists = getState().lockSettings.lockedLists;
     const doNoChangeMyNotes = (
@@ -70,6 +71,7 @@ const _handleAppStateChange = async (appState, pathname, dispatch, getState) => 
 
     // 3 cases: landing, dummy, signed in. The latter two need to, the first is fine.
     if (vars.translucentAdding.didExit) dispatch(increaseWebViewKeyCount());
+    vars.translucentAdding.didExit = false;
 
     if (isUserSignedIn) {
       const { purchaseStatus } = getState().iap;
@@ -82,6 +84,8 @@ const _handleAppStateChange = async (appState, pathname, dispatch, getState) => 
     if (!isUserSignedIn) return;
 
     let didShare = vars.translucentAdding.didShare;
+    vars.translucentAdding.didShare = false;
+
     const interval = (Date.now() - vars.sync.lastSyncDT) / 1000 / 60 / 60;
     if (!didShare && interval < 0.3) return;
 
@@ -91,9 +95,6 @@ const _handleAppStateChange = async (appState, pathname, dispatch, getState) => 
   let isInactive = appState === APP_STATE_INACTIVE;
   if (Platform.OS === 'android') isInactive = appState === APP_STATE_BACKGROUND;
   if (isInactive) {
-    vars.translucentAdding.didExit = false;
-    vars.translucentAdding.didShare = false;
-
     if (!isUserSignedIn) return;
 
     const { purchaseStatus } = getState().iap;
