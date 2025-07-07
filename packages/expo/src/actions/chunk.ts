@@ -3592,7 +3592,6 @@ export const exportNoteAsPdf = () => async (dispatch, getState) => {
     let html = `${jhfp}`;
     html = html.replace(/__-title-__/g, note.title);
     html = html.replace(/__-body-__/g, body);
-    if (Platform.OS === 'ios') html = html.replace(' mx-12 my-16"', '"');
 
     name = note.title ? `${note.title}` : '';
     for (const ch of ['\\', '/', ':', '*', '?', '"', '<', '>', '|']) {
@@ -3603,11 +3602,7 @@ export const exportNoteAsPdf = () => async (dispatch, getState) => {
     if (name.length > 56) name = name.slice(0, 56);
     name += ` ${getFormattedTimeStamp(new Date())}`;
 
-    const options: any = { html };
-    if (Platform.OS === 'ios') {
-      options.margins = { left: 48, top: 64, right: 48, bottom: 64 };
-    }
-
+    const options: any = { html, left: 48, top: 64, right: 48, bottom: 64 };
     file = await Print.printToFileAsync(options);
   } catch (error) {
     dispatch(updateExportNoteAsPdfProgress({ total: -1, done: -1, error: `${error}` }));
