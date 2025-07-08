@@ -113,7 +113,7 @@ const Adding = () => {
           </View>
         </View>
         <View style={tailwind(`flex-1 items-center ${classes}`)}>
-          <View style={tailwind('items-center w-full max-w-md px-4 md:px-6 lg:px-8')}>
+          <View style={tailwind('w-full max-w-md items-center px-4 md:px-6 lg:px-8')}>
             {content}
           </View>
         </View>
@@ -129,7 +129,7 @@ const Adding = () => {
     );
 
     return (
-      <View style={tailwind('items-end w-full mt-16')}>
+      <View style={tailwind('mt-16 w-full items-end')}>
         {rightLink}
       </View>
     );
@@ -184,7 +184,7 @@ const Adding = () => {
             <Path fillRule="evenodd" clipRule="evenodd" d="M8.25706 3.09882C9.02167 1.73952 10.9788 1.73952 11.7434 3.09882L17.3237 13.0194C18.0736 14.3526 17.1102 15.9999 15.5805 15.9999H4.4199C2.89025 15.9999 1.92682 14.3526 2.67675 13.0194L8.25706 3.09882ZM11.0001 13C11.0001 13.5523 10.5524 14 10.0001 14C9.44784 14 9.00012 13.5523 9.00012 13C9.00012 12.4477 9.44784 12 10.0001 12C10.5524 12 11.0001 12.4477 11.0001 13ZM10.0001 5C9.44784 5 9.00012 5.44772 9.00012 6V9C9.00012 9.55228 9.44784 10 10.0001 10C10.5524 10 11.0001 9.55228 11.0001 9V6C11.0001 5.44772 10.5524 5 10.0001 5Z" />
           </Svg>
         </View>
-        <Text style={tailwind('w-full text-center text-base font-normal text-gray-500 blk:text-gray-400')}>Please sign in first</Text>
+        <Text style={tailwind('mt-5 w-full text-center text-base font-normal text-gray-500 blk:text-gray-400')}>Please sign in first</Text>
         {renderNav()}
       </>
     );
@@ -200,7 +200,7 @@ const Adding = () => {
             <Path fillRule="evenodd" clipRule="evenodd" d="M8.25706 3.09882C9.02167 1.73952 10.9788 1.73952 11.7434 3.09882L17.3237 13.0194C18.0736 14.3526 17.1102 15.9999 15.5805 15.9999H4.4199C2.89025 15.9999 1.92682 14.3526 2.67675 13.0194L8.25706 3.09882ZM11.0001 13C11.0001 13.5523 10.5524 14 10.0001 14C9.44784 14 9.00012 13.5523 9.00012 13C9.00012 12.4477 9.44784 12 10.0001 12C10.5524 12 11.0001 12.4477 11.0001 13ZM10.0001 5C9.44784 5 9.00012 5.44772 9.00012 6V9C9.00012 9.55228 9.44784 10 10.0001 10C10.5524 10 11.0001 9.55228 11.0001 9V6C11.0001 5.44772 10.5524 5 10.0001 5Z" />
           </Svg>
         </View>
-        <Text style={tailwind('mt-5 w-full text-center text-base font-normal text-gray-600')}>No text found to save to Justnote</Text>
+        <Text style={tailwind('mt-5 w-full text-center text-base font-normal text-gray-500 blk:text-gray-400')}>No text found to save to Justnote</Text>
         {renderNav()}
       </>
     );
@@ -211,13 +211,13 @@ const Adding = () => {
   const renderError = () => {
     const content = (
       <>
-        <View style={tailwind('h-24 w-full items-center justify-center')}>
-          <Svg style={tailwind('font-normal text-red-500')} width={64} height={64} viewBox="0 0 20 20" fill="currentColor">
+        <View style={tailwind('w-full items-center justify-center')}>
+          <Svg style={tailwind('font-normal text-red-500')} width={96} height={96} viewBox="0 0 20 20" fill="currentColor">
             <Path fillRule="evenodd" clipRule="evenodd" d="M18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10ZM11 14C11 14.5523 10.5523 15 10 15C9.44772 15 9 14.5523 9 14C9 13.4477 9.44772 13 10 13C10.5523 13 11 13.4477 11 14ZM10 5C9.44772 5 9 5.44772 9 6V10C9 10.5523 9.44772 11 10 11C10.5523 11 11 10.5523 11 10V6C11 5.44772 10.5523 5 10 5Z" />
           </Svg>
         </View>
-        <Text style={tailwind('mt-2 w-full text-center text-lg font-semibold text-gray-800')}>Oops..., something went wrong!</Text>
-        <Text style={tailwind('mt-4 w-full text-center text-base font-normal text-gray-500')}>Please wait for a moment and try again. If the problem persists, please contact us.</Text>
+        <Text style={tailwind('mt-2 w-full text-center text-lg font-semibold text-gray-800 blk:text-gray-100')}>Oops..., something went wrong!</Text>
+        <Text style={tailwind('mt-4 w-full text-center text-base font-normal text-gray-500 blk:text-gray-400')}>Please wait for a moment and try again. If the problem persists, please contact us.</Text>
         {renderNav()}
       </>
     );
