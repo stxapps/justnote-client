@@ -431,6 +431,7 @@
   + add packages/ckeditor5-build-decoupled-document/src/objecturluploadadapter.js
   + run patch.js
 * Expo
+** install
 - npx create-expo-app --template tabs
 - npx expo install expo-dev-client -- --save-dev
 - npm i 'https://gitpkg.now.sh/stxapps/blockstack-react-native/BlockstackSDK?3d5bcd6ea9a17f00c76be5913009f2c02f13b95f'
@@ -456,3 +457,19 @@
 - npx expo install react-native-animated-spinkit
 - npx expo install react-native-share
 - npx expo install expo-build-properties
+** build
+- npx expo prebuild --clean
+- ios
+  + open ios/Justnote.xcworkspace
+  + choose Justnote on the right pane
+  + targets: Justnote, on General, update Version
+  + targets: Justnote, on Signing & Capabilities, add In-App Purchase
+  + targets: Justnote, on Build Phases, add Target Dependency: SavetoJustnote
+  + targets: SavetoJustnote, on General, update Version
+  + targets: SavetoJustnote, on General, Display Name: Save to Justnote
+  + targets: SavetoJustnote, on Signing & Capabilities, select team
+- android
+  + copy justnote-android-upload-key.keystore to android/app
+  + update keystore info in android/gradle.properties
+  + update signingConfigs/release in android/app/build.gradle
+  + change in buildTypes/release signingConfig to signingConfigs.release

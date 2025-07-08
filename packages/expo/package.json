@@ -1,7 +1,8 @@
 {
-  "name": "justnotecc",
+  "name": "Justnotecc",
   "main": "expo-router/entry",
   "version": "0.0.0",
+  "private": true,
   "scripts": {
     "patch-js": "node bin/patch.js",
     "export-stacks-access-as-string": "node bin/export-stacks-access-as-string.js ../../../stacks-access-in-webview .",
@@ -9,7 +10,9 @@
     "export-jhfp-as-string": "node bin/export-jhfp-as-string.js ../../../justnote-html-for-pdf/css/tailwind.css ../../../justnote-html-for-pdf/css/ckeditor.css ../../../justnote-html-for-pdf/index.html ./jhfp.js",
     "prebuild": "npx expo prebuild --clean",
     "android": "npx expo run:android",
+    "android-release": "npx expo run:android --variant release",
     "ios": "npx expo run:ios",
+    "ios-release": "npx expo run:ios --configuration Release",
     "start": "npx expo start",
     "web": "expo start --web",
     "test": "jest --watchAll"
@@ -74,6 +77,5 @@
     "react-native-svg-transformer": "^1.5.1",
     "react-test-renderer": "19.0.0",
     "typescript": "~5.8.3"
-  },
-  "private": true
+  }
 }

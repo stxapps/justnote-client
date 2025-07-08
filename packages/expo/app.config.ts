@@ -54,7 +54,6 @@ const config: ExpoConfig = {
       "NSPhotoLibraryUsageDescription": "Select a picture for use in your note.",
       "NSCameraUsageDescription": "Take a picture for use in your note."
     },
-    //entitlements
     "privacyManifests": {
       "NSPrivacyAccessedAPITypes": [
         {
