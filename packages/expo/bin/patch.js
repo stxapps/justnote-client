@@ -26,10 +26,18 @@ const replaceMatchedLine = (fpath, actionObjs) => {
 const patchMmkv = () => {
   const match = "    implementation 'com.tencent:mmkv-static:1.2.7'";
   const repmt = "    implementation 'com.tencent:mmkv-static:1.2.8'";
-
   replaceMatchedLine(
     'node_modules/react-native-mmkv-storage/android/build.gradle',
     [{ match, repmt }],
+  );
+
+  const match1 = "                  value:(BOOL *)value";
+  const repmt1 = "                  value:(BOOL)value";
+  const match2 = "                  isArray:(BOOL *)isArray";
+  const repmt2 = "                  isArray:(BOOL)isArray";
+  replaceMatchedLine(
+    'node_modules/react-native-mmkv-storage/ios/MMKVStorage.m',
+    [{ match: match1, repmt: repmt1 }, { match: match2, repmt: repmt2 }],
   );
 };
 
