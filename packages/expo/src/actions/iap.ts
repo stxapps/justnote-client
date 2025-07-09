@@ -287,12 +287,12 @@ export const initIapConnectionAndGetProducts = (doForce = false) => async (
 export const requestPurchase = (product) => async (dispatch, getState) => {
   dispatch({ type: REQUEST_PURCHASE });
   try {
-    const { productId, offerToken } = product;
+    const { id, offerToken } = product;
     await iapApi.requestPurchase({
       request: {
-        sku: productId,
-        skus: [productId],
-        subscriptionOffers: [{ sku: productId, offerToken }],
+        sku: id,
+        skus: [id],
+        subscriptionOffers: [{ sku: id, offerToken }],
       },
       type: 'subs',
     });

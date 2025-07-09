@@ -19,7 +19,7 @@ import {
   BLK_MODE,
 } from '../types/const';
 import { getValidProduct, getValidPurchase, getThemeMode } from '../selectors';
-import { getFormattedDate, isString } from '../utils';
+import { getFormattedDate, isString, isFldStr } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
@@ -123,15 +123,13 @@ const IapHome = (props) => {
   let actionPanel;
   if (product && canMakePayments) {
     if (purchaseStatus === null) {
-      //subscriptionPeriodNumberIOS
-      //subscriptionPeriodUnitIOS
-      //subscriptionPeriodAndroid
-      //freeTrialPeriodAndroid
+      let price = product.localizedPrice;
+      if (!isFldStr(price)) price = product.displayPrice;
 
       actionPanel = (
         <View style={tailwind('mt-6 items-start justify-start')}>
           <TouchableOpacity onPress={onRequestBtnClick} style={tailwind('rounded-md border border-gray-400 bg-white px-3.5 py-1.5 shadow-sm blk:border-gray-400 blk:bg-gray-900')}>
-            <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-300')}>Subscribe for {product.localizedPrice} / year</Text>
+            <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-300')}>Subscribe for {price} / year</Text>
           </TouchableOpacity>
         </View>
       );

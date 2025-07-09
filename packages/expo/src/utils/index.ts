@@ -1119,7 +1119,7 @@ export const deriveInfoState = (info, initialState) => {
 export const getValidProduct = (products) => {
   if (!Array.isArray(products) || products.length === 0) return null;
   for (const product of products) {
-    if (product.productId === COM_JUSTNOTECC_SUPPORTER) return product;
+    if (product.id === COM_JUSTNOTECC_SUPPORTER) return product;
   }
   return null;
 };
