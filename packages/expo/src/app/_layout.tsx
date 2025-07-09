@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Text, TextInput, Appearance } from 'react-native';
+import { Text, TextInput, Appearance, Platform } from 'react-native';
 import { Provider as ReduxProvider } from 'react-redux';
 import { StatusBar } from 'expo-status-bar';
 import * as NavigationBar from 'expo-navigation-bar';
@@ -70,7 +70,7 @@ const InnerRoot = () => {
     //   also when share, pick a file.
     //   still need increaseUpdateStatusBarStyleCount?
     Appearance.setColorScheme(themeMode === BLK_MODE ? 'dark' : 'light');
-    NavigationBar.setStyle('auto');
+    if (Platform.OS === 'android') NavigationBar.setStyle('auto');
   }, [themeMode]);
 
   return (
