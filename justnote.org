@@ -462,7 +462,7 @@
 - ios
   + open ios/Justnote.xcworkspace
   + choose Justnote on the right pane
-  + targets: Justnote, on General, update Version
+  + targets: Justnote, on General, update Version, App Category
   + targets: Justnote, on Signing & Capabilities, add In-App Purchase
   + targets: Justnote, on Build Phases, add Target Dependency: SavetoJustnote
   + targets: SavetoJustnote, on General, update Version

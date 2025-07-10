@@ -43,7 +43,7 @@ const verifyPurchase = async (rawPurchase: iapApi.ProductPurchase) => {
   const productId = rawPurchase.id;
 
   let token;
-  if (rawPurchase.platform === 'ios') token = rawPurchase.transactionReceipt;
+  if (rawPurchase.platform === 'ios') token = rawPurchase.jwsRepresentationIos;
   else if (rawPurchase.platform === 'android') token = rawPurchase.purchaseTokenAndroid;
 
   if (!token) {
@@ -124,7 +124,7 @@ const getPurchases = (
 
   let statusResult;
   try {
-    const statusResult = await getIapStatus(doForce);
+    statusResult = await getIapStatus(doForce);
 
     if (serverOnly) {
       dispatch({ type: commitAction, payload: statusResult });
