@@ -68,7 +68,7 @@ const NoteEditorEditor = (props) => {
   const isScrollEnabled = useSelector(state => state.editor.isScrollEnabled);
   const themeMode = useSelector(state => getThemeMode(state));
   const [isHtmlReady, setHtmlReady] = useState(Platform.OS === 'ios' ? false : true);
-  const [isEditorReady, setEditorReady] = useState(false);
+  const [editorReadyCount, setEditorReadyCount] = useState(0);
   const [terminateCount, setTerminateCount] = useState(0);
   const webView = useRef(null);
   const hackInput = useRef(null);
@@ -299,7 +299,7 @@ const NoteEditorEditor = (props) => {
     } else if (change === 'data' && to === 'webView') {
       onGetData(value);
     } else if (change === 'editor' && to === 'isReady') {
-      setEditorReady(value === 'true');
+      setEditorReadyCount(c => c + 1);
     } else if (change === 'clear' && to === 'editingObjectUrlContents') {
       editingObjectUrlContents.current = {};
     } else if (change === 'add' && to === 'editingObjectUrlContents') {
@@ -334,36 +334,36 @@ const NoteEditorEditor = (props) => {
   }, [note.id, isFocused]);
 
   useEffect(() => {
-    if (!isEditorReady) return;
+    if (editorReadyCount === 0) return;
     setThemeMode(themeMode);
-  }, [isEditorReady, themeMode]);
+  }, [editorReadyCount, themeMode]);
 
   useEffect(() => {
-    if (!isEditorReady) return;
+    if (editorReadyCount === 0) return;
     setEditorFontSizes(doMoreEditorFontSizes);
-  }, [isEditorReady, doMoreEditorFontSizes]);
+  }, [editorReadyCount, doMoreEditorFontSizes]);
 
   useEffect(() => {
-    if (!isEditorReady) return;
+    if (editorReadyCount === 0) return;
     setInitData();
-  }, [isEditorReady, setInitData]);
+  }, [editorReadyCount, setInitData]);
 
   useEffect(() => {
-    if (!isEditorReady) return;
+    if (editorReadyCount === 0) return;
     setEditable((note.id === NEW_NOTE || note.status === ADDED) && !isEditorBusy);
-  }, [isEditorReady, note.id, note.status, isEditorBusy]);
+  }, [editorReadyCount, note.id, note.status, isEditorBusy]);
 
   useEffect(() => {
-    if (!isEditorReady || !webView.current) return;
+    if (editorReadyCount === 0 || !webView.current) return;
 
     let visible = 'false';
     if (note.id === NEW_NOTE && unsavedNote.status === null) visible = 'true';
     webView.current.injectJavaScript('window.justnote.setVisiblePoweredBy(' + visible + '); true;');
-  }, [isEditorReady, note.id, unsavedNote.status]);
+  }, [editorReadyCount, note.id, unsavedNote.status]);
 
   useEffect(() => {
     if (webViewKeyCount !== prevWebViewKeyCount.current) {
-      setEditorReady(false);
+      setEditorReadyCount(0);
       setTerminateCount(c => c + 1);
 
       prevWebViewKeyCount.current = webViewKeyCount;
@@ -371,7 +371,7 @@ const NoteEditorEditor = (props) => {
   }, [webViewKeyCount]);
 
   useEffect(() => {
-    if (!isEditorReady || !webView.current) return;
+    if (editorReadyCount === 0 || !webView.current) return;
     if (checkToFocusCount !== prevCheckToFocusCount.current) {
       if (note.id === NEW_NOTE || unsavedNote.status === VALID) focusTitleInput();
       else blurTitleInput();
@@ -379,52 +379,52 @@ const NoteEditorEditor = (props) => {
       webView.current.injectJavaScript('window.justnote.scrollTo(0, 0); true;');
       prevCheckToFocusCount.current = checkToFocusCount;
     }
-  }, [isEditorReady, checkToFocusCount, note.id, unsavedNote.status, focusTitleInput]);
+  }, [editorReadyCount, checkToFocusCount, note.id, unsavedNote.status, focusTitleInput]);
 
   useEffect(() => {
-    if (!isEditorReady || !webView.current) return;
+    if (editorReadyCount === 0 || !webView.current) return;
     if (saveNoteCount !== prevSaveNoteCount.current) {
       getDataAction.current = GET_DATA_SAVE_NOTE;
       webView.current.injectJavaScript('window.justnote.getData(); true;');
       prevSaveNoteCount.current = saveNoteCount;
     }
-  }, [isEditorReady, saveNoteCount]);
+  }, [editorReadyCount, saveNoteCount]);
 
   useEffect(() => {
-    if (!isEditorReady || !webView.current) return;
+    if (editorReadyCount === 0 || !webView.current) return;
     if (discardNoteCount !== prevDiscardNoteCount.current) {
       getDataAction.current = GET_DATA_DISCARD_NOTE;
       webView.current.injectJavaScript('window.justnote.getData(); true;');
       prevDiscardNoteCount.current = discardNoteCount;
     }
-  }, [isEditorReady, discardNoteCount]);
+  }, [editorReadyCount, discardNoteCount]);
 
   useEffect(() => {
-    if (!isEditorReady || !webView.current) return;
+    if (editorReadyCount === 0 || !webView.current) return;
     if (updateNoteIdCount !== prevUpdateNoteIdCount.current) {
       getDataAction.current = GET_DATA_UPDATE_NOTE_ID;
       webView.current.injectJavaScript('window.justnote.getData(); true;');
       prevUpdateNoteIdCount.current = updateNoteIdCount;
     }
-  }, [isEditorReady, updateNoteIdCount]);
+  }, [editorReadyCount, updateNoteIdCount]);
 
   useEffect(() => {
-    if (!isEditorReady || !webView.current) return;
+    if (editorReadyCount === 0 || !webView.current) return;
     if (changeListNameCount !== prevChangeListNameCount.current) {
       getDataAction.current = GET_DATA_CHANGE_LIST_NAME;
       webView.current.injectJavaScript('window.justnote.getData(); true;');
       prevChangeListNameCount.current = changeListNameCount;
     }
-  }, [isEditorReady, changeListNameCount]);
+  }, [editorReadyCount, changeListNameCount]);
 
   useEffect(() => {
-    if (!isEditorReady || !webView.current) return;
+    if (editorReadyCount === 0 || !webView.current) return;
     if (updateQueryStringCount !== prevUpdateQueryStringCount.current) {
       getDataAction.current = GET_DATA_UPDATE_QUERY_STRING;
       webView.current.injectJavaScript('window.justnote.getData(); true;');
       prevUpdateQueryStringCount.current = updateQueryStringCount;
     }
-  }, [isEditorReady, updateQueryStringCount]);
+  }, [editorReadyCount, updateQueryStringCount]);
 
   useEffect(() => {
     /*
@@ -441,79 +441,79 @@ const NoteEditorEditor = (props) => {
         1.3 When isFocused is changed from true to false, blur is called
         2.1 Or programatically call blur i.e. just showing discard confirm
      */
-    if (!isEditorReady) return;
+    if (editorReadyCount === 0) return;
     if (focusTitleCount !== prevFocusTitleCount.current) {
       doResetEditorBusy.current = true;
       focusTitleInput();
       prevFocusTitleCount.current = focusTitleCount;
     }
-  }, [isEditorReady, focusTitleCount, focusTitleInput]);
+  }, [editorReadyCount, focusTitleCount, focusTitleInput]);
 
   useEffect(() => {
-    if (!isEditorReady) return;
+    if (editorReadyCount === 0) return;
     if (setInitDataCount !== prevSetInitDataCount.current) {
       setInitData();
       prevSetInitDataCount.current = setInitDataCount;
     }
-  }, [isEditorReady, setInitDataCount, setInitData]);
+  }, [editorReadyCount, setInitDataCount, setInitData]);
 
   useEffect(() => {
-    if (!isEditorReady) return;
+    if (editorReadyCount === 0) return;
     if (blurCount !== prevBlurCount.current) {
       blurTitleInput();
       prevBlurCount.current = blurCount;
     }
-  }, [isEditorReady, blurCount]);
+  }, [editorReadyCount, blurCount]);
 
   useEffect(() => {
-    if (!isEditorReady || !webView.current) return;
+    if (editorReadyCount === 0 || !webView.current) return;
     if (updateBulkEditCount !== prevUpdateBulkEditCount.current) {
       getDataAction.current = GET_DATA_UPDATE_BULK_EDIT;
       webView.current.injectJavaScript('window.justnote.getData(); true;');
       prevUpdateBulkEditCount.current = updateBulkEditCount;
     }
-  }, [isEditorReady, updateBulkEditCount]);
+  }, [editorReadyCount, updateBulkEditCount]);
 
   useEffect(() => {
-    if (!isEditorReady || !webView.current) return;
+    if (editorReadyCount === 0 || !webView.current) return;
     if (showNoteListMenuPopupCount !== prevShowNoteListMenuPopupCount.current) {
       getDataAction.current = GET_DATA_SHOW_NOTE_LIST_MENU_POPUP;
       webView.current.injectJavaScript('window.justnote.getData(); true;');
       prevShowNoteListMenuPopupCount.current = showNoteListMenuPopupCount;
     }
-  }, [isEditorReady, showNoteListMenuPopupCount]);
+  }, [editorReadyCount, showNoteListMenuPopupCount]);
 
   useEffect(() => {
-    if (!isEditorReady || !webView.current) return;
+    if (editorReadyCount === 0 || !webView.current) return;
     if (showNLIMPopupCount !== prevShowNLIMPopupCount.current) {
       getDataAction.current = GET_DATA_SHOW_NLIM_POPUP;
       webView.current.injectJavaScript('window.justnote.getData(); true;');
       prevShowNLIMPopupCount.current = showNLIMPopupCount;
     }
-  }, [isEditorReady, showNLIMPopupCount]);
+  }, [editorReadyCount, showNLIMPopupCount]);
 
   useEffect(() => {
-    if (!isEditorReady || !webView.current) return;
+    if (editorReadyCount === 0 || !webView.current) return;
     if (showUNEPopupCount !== prevShowUNEPopupCount.current) {
       getDataAction.current = GET_DATA_SHOW_UNE_POPUP;
       webView.current.injectJavaScript('window.justnote.getData(); true;');
       prevShowUNEPopupCount.current = showUNEPopupCount;
     }
-  }, [isEditorReady, showUNEPopupCount]);
+  }, [editorReadyCount, showUNEPopupCount]);
 
   useEffect(() => {
     onUpdateIsUploading(false);
   }, [note.id, onUpdateIsUploading]);
 
   useEffect(() => {
-    if (!isEditorReady) {
+    if (editorReadyCount === 0) {
       prevIsScrollEnabled.current = isScrollEnabled;
       return;
     }
 
     if (webView.current) webView.current.injectJavaScript('window.justnote.setScrollEnabled(' + isScrollEnabled + '); true;');
     prevIsScrollEnabled.current = isScrollEnabled;
-  }, [isEditorReady, isScrollEnabled]);
+  }, [editorReadyCount, isScrollEnabled]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -522,7 +522,7 @@ const NoteEditorEditor = (props) => {
         doHighlightTitle = true;
       }
 
-      if (isEditorReady && webView.current) {
+      if (editorReadyCount && webView.current) {
         if (searchString !== prevSearchString.current) {
           if (searchString) {
             const escapedSearchString = escapeDoubleQuotes(searchString);
@@ -542,7 +542,7 @@ const NoteEditorEditor = (props) => {
 
       prevSearchString.current = searchString;
     }, 100);
-  }, [isEditorReady, searchString, note.id, note.title, isFocused]);
+  }, [editorReadyCount, searchString, note.id, note.title, isFocused]);
 
   useEffect(() => {
     const writeHtml = async () => {
