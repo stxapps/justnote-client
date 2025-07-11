@@ -1462,7 +1462,10 @@ const _importAllData = async (dispatch, getState) => {
     });
     dispatch(increaseUpdateStatusBarStyleCount());
 
-    if (gResult.canceled) return;
+    if (gResult.canceled) {
+      dispatch(updateImportAllDataProgress(null));      
+      return;
+    }
 
     const result = gResult.assets[0]
     if (!isObject(result) || !isString(result.uri)) {
@@ -1481,7 +1484,6 @@ const _importAllData = async (dispatch, getState) => {
     await parseImportedFile(dispatch, getState, importDPath);
   } catch (error) {
     dispatch(increaseUpdateStatusBarStyleCount());
-
     dispatch(updateImportAllDataProgress(null));
     Alert.alert('Read file failed!', `Could not read the content in the file. Please recheck your file.\n\n${error}`);
   }
