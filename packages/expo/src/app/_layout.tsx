@@ -61,17 +61,16 @@ const getBgColor = (themeMode) => {
 };
 
 const InnerRoot = () => {
+  const statusBarStyleCount = useSelector(
+    state => state.display.updateStatusBarStyleCount
+  );
   const themeMode = useSelector(state => getThemeMode(state));
   const bgColor = getBgColor(themeMode);
 
   useEffect(() => {
-    // TODO: Check esp. on iOS
-    //   Do need to force when app state is active, keyboard show and hide?
-    //   also when share, pick a file.
-    //   still need increaseUpdateStatusBarStyleCount?
     Appearance.setColorScheme(themeMode === BLK_MODE ? 'dark' : 'light');
     if (Platform.OS === 'android') NavigationBar.setStyle('auto');
-  }, [themeMode]);
+  }, [statusBarStyleCount, themeMode]);
 
   return (
     <SafeAreaView style={cache('SI_safeAreaView', { flex: 1, backgroundColor: bgColor }, [bgColor])}>

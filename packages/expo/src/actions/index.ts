@@ -1,4 +1,4 @@
-import { Keyboard, Appearance, Alert } from 'react-native';
+import { Keyboard, Appearance, AppState, Alert } from 'react-native';
 import { getCalendars } from 'expo-localization';
 import 'event-target-fallback'; // Polyfill Event and EventTarget for queue.
 import TaskQueue from 'queue';
@@ -90,14 +90,20 @@ export const init = () => async (dispatch, getState) => {
   if (isObject(kbMtx) && isNumber(kbMtx.height)) vars.keyboard.height = kbMtx.height;
   Keyboard.addListener('keyboardDidShow', (e) => {
     vars.keyboard.height = e.endCoordinates.height;
+    dispatch(increaseUpdateStatusBarStyleCount());
   });
   Keyboard.addListener('keyboardDidHide', () => {
     vars.keyboard.height = 0;
+    dispatch(increaseUpdateStatusBarStyleCount());
   });
 
   Appearance.addChangeListener((e) => {
     const systemThemeMode = e.colorScheme === 'dark' ? BLK_MODE : WHT_MODE;
     dispatch({ type: UPDATE_SYSTEM_THEME_MODE, payload: systemThemeMode });
+  });
+
+  AppState.addEventListener('change', (nextAppState) => {
+    if (nextAppState === 'active') dispatch(increaseUpdateStatusBarStyleCount());
   });
 
   _getDispatch = () => dispatch;
