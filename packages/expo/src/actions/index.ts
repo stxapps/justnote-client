@@ -88,6 +88,10 @@ export const init = () => async (dispatch, getState) => {
 
   const kbMtx = Keyboard.metrics();
   if (isObject(kbMtx) && isNumber(kbMtx.height)) vars.keyboard.height = kbMtx.height;
+  Keyboard.addListener('keyboardWillShow', (e) => {
+    vars.keyboard.height = e.endCoordinates.height;
+    dispatch(increaseUpdateStatusBarStyleCount());
+  });
   Keyboard.addListener('keyboardDidShow', (e) => {
     vars.keyboard.height = e.endCoordinates.height;
     dispatch(increaseUpdateStatusBarStyleCount());
