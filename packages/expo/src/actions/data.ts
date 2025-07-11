@@ -129,8 +129,8 @@ const _getListHtml = (listObj) => {
 };
 
 const _getImageType = (fext) => {
-  if (fext.toLowerCase() === 'png') return 'PNG';
-  return 'JPEG';
+  if (fext.toLowerCase() === 'png') return 'png';
+  return 'jpeg';
 };
 
 const _resizeImage = async (srcFPath, imageType, maxWidth = 1688, maxHeight = 1688) => {
