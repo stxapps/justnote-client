@@ -3602,7 +3602,7 @@ export const exportNoteAsPdf = () => async (dispatch, getState) => {
     if (name.length > 56) name = name.slice(0, 56);
     name += ` ${getFormattedTimeStamp(new Date())}`;
 
-    const options: any = { html, left: 48, top: 64, right: 48, bottom: 64 };
+    const options = { html, margins: { left: 48, top: 64, right: 48, bottom: 64 } };
     file = await Print.printToFileAsync(options);
   } catch (error) {
     dispatch(updateExportNoteAsPdfProgress({ total: -1, done: -1, error: `${error}` }));
