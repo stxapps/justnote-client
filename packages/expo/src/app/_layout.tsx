@@ -67,8 +67,8 @@ const InnerRoot = () => {
   useEffect(() => {
     Appearance.setColorScheme(themeMode === BLK_MODE ? 'dark' : 'light');
     if (Platform.OS === 'ios') {
-      const stBarStyle = themeMode === BLK_MODE ? 'light-content' : 'dark-content';
-      NativeStatusBar.setBarStyle(stBarStyle);
+      const barStyle = themeMode === BLK_MODE ? 'light-content' : 'dark-content';
+      NativeStatusBar.setBarStyle(barStyle);
     }
     if (Platform.OS === 'android') NavigationBar.setStyle('auto');
   }, [statusBarStyleCount, themeMode]);
