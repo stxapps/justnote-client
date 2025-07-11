@@ -1,7 +1,7 @@
 import { Platform, Alert, PermissionsAndroid } from 'react-native';
 import { LexoRank } from '@wewatch/lexorank';
 import * as Print from 'expo-print';
-import { FileSystem } from 'react-native-file-access';
+import { FileSystem, Dirs } from 'react-native-file-access';
 import Share from 'react-native-share';
 import { diffLinesRaw, DIFF_EQUAL, DIFF_DELETE, DIFF_INSERT } from 'jest-diff';
 
@@ -3609,10 +3609,14 @@ export const exportNoteAsPdf = () => async (dispatch, getState) => {
     return;
   }
 
+  const fname = name + '.pdf';
+
   if (Platform.OS === 'ios') {
     dispatch(updateExportNoteAsPdfProgress(null));
     try {
-      await Share.open({ url: file.uri });
+      const url = (new URL(`file://${Dirs.CacheDir}/${fname}`)).href;
+      await FileSystem.cp(file.uri, url);
+      await Share.open({ url });
       dispatch(increaseUpdateStatusBarStyleCount());
     } catch (error) {
       dispatch(increaseUpdateStatusBarStyleCount());
@@ -3651,7 +3655,6 @@ export const exportNoteAsPdf = () => async (dispatch, getState) => {
       }
     }
 
-    const fname = name + '.pdf';
     try {
       await FileSystem.cpExternal(file.uri, fname, 'downloads');
     } catch (error) {
