@@ -15,7 +15,8 @@
     "ios-release": "npx expo run:ios --configuration Release",
     "start": "npx expo start",
     "web": "expo start --web",
-    "test": "jest --watchAll"
+    "test": "jest --watchAll",
+    "lint": "npx expo lint"
   },
   "jest": {
     "preset": "jest-expo"
@@ -76,6 +77,8 @@
     "jest-expo": "~53.0.9",
     "react-native-svg-transformer": "^1.5.1",
     "react-test-renderer": "19.0.0",
-    "typescript": "~5.8.3"
+    "typescript": "~5.8.3",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~9.2.0"
   }
 }
