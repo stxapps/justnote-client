@@ -182,7 +182,7 @@ const TimePickPopup = () => {
   );
 };
 
-const _TimePickHour = (props) => {
+const InnerTimePickHour = (props) => {
 
   const { contentHeight } = props;
   const hour = useSelector(state => state.timePick.hour);
@@ -255,7 +255,7 @@ const _TimePickHour = (props) => {
   );
 };
 
-const _TimePickHourItem = (props) => {
+const InnerTimePickHourItem = (props) => {
 
   const { item } = props;
   const getIsSelected = useMemo(makeIsTimePickHourItemSelected, []);
@@ -275,7 +275,7 @@ const _TimePickHourItem = (props) => {
   );
 };
 
-const _TimePickMinute = (props) => {
+const InnerTimePickMinute = (props) => {
 
   const { contentHeight } = props;
   const minute = useSelector(state => state.timePick.minute);
@@ -339,7 +339,7 @@ const _TimePickMinute = (props) => {
   );
 };
 
-const _TimePickMinuteItem = (props) => {
+const InnerTimePickMinuteItem = (props) => {
 
   const { item } = props;
   const getIsSelected = useMemo(makeIsTimePickMinuteItemSelected, []);
@@ -359,9 +359,9 @@ const _TimePickMinuteItem = (props) => {
   );
 };
 
-const TimePickHour = React.memo(_TimePickHour);
-const TimePickHourItem = React.memo(_TimePickHourItem);
-const TimePickMinute = React.memo(_TimePickMinute);
-const TimePickMinuteItem = React.memo(_TimePickMinuteItem);
+const TimePickHour = React.memo(InnerTimePickHour);
+const TimePickHourItem = React.memo(InnerTimePickHourItem);
+const TimePickMinute = React.memo(InnerTimePickMinute);
+const TimePickMinuteItem = React.memo(InnerTimePickMinuteItem);
 
 export default React.memo(TimePickPopup);

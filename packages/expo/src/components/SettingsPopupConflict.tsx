@@ -31,7 +31,7 @@ const SettingsPopupConflict = (props) => {
   );
 };
 
-const _ConflictItem = (props) => {
+const InnerConflictItem = (props) => {
 
   const { content, status } = props;
   const [isOpen, setIsOpen] = useState(false);
@@ -111,6 +111,6 @@ const _ConflictItem = (props) => {
   );
 };
 
-const ConflictItem = React.memo(_ConflictItem);
+const ConflictItem = React.memo(InnerConflictItem);
 
 export default React.memo(SettingsPopupConflict);

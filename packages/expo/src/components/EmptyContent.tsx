@@ -65,7 +65,7 @@ const EmptyContent = () => {
           </Svg>
         </View>
         <Text style={tailwind('mt-6 text-center text-base font-semibold tracking-wide text-gray-800 blk:text-gray-200 lg:text-sm')}>No notes in {displayName}</Text>
-        <Text style={[tailwind('mt-4 text-center text-sm font-normal tracking-wide text-gray-500 blk:text-gray-400'), { lineHeight: 22 }]}>Tap <Text style={tailwind('text-sm font-semibold text-gray-600 blk:text-gray-300')}>"+ New Note"</Text> button to add a new note.</Text>
+        <Text style={[tailwind('mt-4 text-center text-sm font-normal tracking-wide text-gray-500 blk:text-gray-400'), { lineHeight: 22 }]}>Tap <Text style={tailwind('text-sm font-semibold text-gray-600 blk:text-gray-300')}>&quot;+ New Note&quot;</Text> button to add a new note.</Text>
       </View>
     );
   }
@@ -79,7 +79,7 @@ const EmptyContent = () => {
           </Svg>
         </View>
         <Text style={tailwind('mt-6 text-center text-base font-semibold tracking-wide text-gray-800 blk:text-gray-200 lg:text-sm')}>No notes in {displayName}</Text>
-        <Text style={[tailwind('mt-4 text-center text-sm font-normal tracking-wide text-gray-500 blk:text-gray-400'), { lineHeight: 22 }]}>Tap <Text style={tailwind('text-sm font-semibold text-gray-600 blk:text-gray-300')}>"Remove"</Text> from the menu to move notes you don't need anymore here.</Text>
+        <Text style={[tailwind('mt-4 text-center text-sm font-normal tracking-wide text-gray-500 blk:text-gray-400'), { lineHeight: 22 }]}>Tap <Text style={tailwind('text-sm font-semibold text-gray-600 blk:text-gray-300')}>&quot;Remove&quot;</Text> from the menu to move notes you don&apos;t need anymore here.</Text>
       </View>
     );
   }

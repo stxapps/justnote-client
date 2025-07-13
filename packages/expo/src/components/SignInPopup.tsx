@@ -16,7 +16,7 @@ import { dialogFMV } from '../types/animConfigs';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useKeyboardHeight, useTailwind } from '.';
 
-const stacksAccessSignIn = require('../../stacks-access-sign-in');
+import stacksAccessSignIn from '../../stacks-access-sign-in';
 
 const SignInPopup = () => {
 

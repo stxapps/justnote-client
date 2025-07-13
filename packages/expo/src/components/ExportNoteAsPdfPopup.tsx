@@ -14,7 +14,7 @@ import { isObject } from '../utils';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 
-const _ExportNoteAsPdfCompletePopup = () => {
+const InnerExportNoteAsPdfCompletePopup = () => {
 
   const insets = useSafeAreaInsets();
   const progress = useSelector(state => state.display.exportNoteAsPdfProgress);
@@ -134,7 +134,7 @@ const _ExportNoteAsPdfCompletePopup = () => {
   );
 };
 
-const _ExportNoteAsPdfErrorPopup = () => {
+const InnerExportNoteAsPdfErrorPopup = () => {
 
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const insets = useSafeAreaInsets();
@@ -164,7 +164,7 @@ const _ExportNoteAsPdfErrorPopup = () => {
     title = 'Permission denied!';
     body = (
       <React.Fragment>
-        <Text style={tailwind('mt-2.5 text-sm font-normal leading-6 text-red-700')}>We don't have permission to save the exported PDF file in Downloads.</Text>
+        <Text style={tailwind('mt-2.5 text-sm font-normal leading-6 text-red-700')}>We don&apos;t have permission to save the exported PDF file in Downloads.</Text>
         <Text style={tailwind('mt-2 text-sm font-normal leading-6 text-red-700')}>Please grant this permission in Settings -{'>'} Apps -{'>'} Permissions.</Text>
       </React.Fragment>
     );
@@ -204,5 +204,7 @@ const _ExportNoteAsPdfErrorPopup = () => {
   );
 };
 
-export const ExportNoteAsPdfCompletePopup = React.memo(_ExportNoteAsPdfCompletePopup);
-export const ExportNoteAsPdfErrorPopup = React.memo(_ExportNoteAsPdfErrorPopup);
+export const ExportNoteAsPdfCompletePopup = React.memo(
+  InnerExportNoteAsPdfCompletePopup
+);
+export const ExportNoteAsPdfErrorPopup = React.memo(InnerExportNoteAsPdfErrorPopup);

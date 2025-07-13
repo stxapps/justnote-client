@@ -56,7 +56,7 @@ const SettingsPopupLists = (props) => {
   );
 };
 
-const _ListNameEditor = (props) => {
+const InnerListNameEditor = (props) => {
 
   const { listNameObj, validateDisplayName, level } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
@@ -341,6 +341,6 @@ const _ListNameEditor = (props) => {
   );
 };
 
-const ListNameEditor = React.memo(_ListNameEditor);
+const ListNameEditor = React.memo(InnerListNameEditor);
 
 export default React.memo(SettingsPopupLists);

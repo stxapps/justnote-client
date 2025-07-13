@@ -23,13 +23,13 @@ import { popupFMV } from '../types/animConfigs';
 import cache from '../utils/cache';
 import vars from '../vars';
 
-const ckeditor = require('../../ckeditor');
+import ckeditor from '../../ckeditor';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
 const HTML_FNAME = 'ckeditor.html';
 
-const _NoteEditorSavedConflict = (props) => {
+const InnerNoteEditorSavedConflict = (props) => {
 
   const { note: conflictedNote, width } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
@@ -125,7 +125,7 @@ const _NoteEditorSavedConflict = (props) => {
   );
 };
 
-const _NoteEditorUnsavedConflict = (props) => {
+const InnerNoteEditorUnsavedConflict = (props) => {
 
   const { note, unsavedNote, width } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
@@ -201,7 +201,7 @@ const _NoteEditorUnsavedConflict = (props) => {
   );
 };
 
-const _ConflictItem = (props) => {
+const InnerConflictItem = (props) => {
 
   const { listName, note, status, isUnsaved, doHideChooseBtn } = props;
   const listNameMap = useSelector(state => state.settings.listNameMap);
@@ -382,7 +382,7 @@ const _ConflictItem = (props) => {
   );
 };
 
-const ConflictItem = React.memo(_ConflictItem);
+const ConflictItem = React.memo(InnerConflictItem);
 
-export const NoteEditorSavedConflict = React.memo(_NoteEditorSavedConflict);
-export const NoteEditorUnsavedConflict = React.memo(_NoteEditorUnsavedConflict);
+export const NoteEditorSavedConflict = React.memo(InnerNoteEditorSavedConflict);
+export const NoteEditorUnsavedConflict = React.memo(InnerNoteEditorUnsavedConflict);

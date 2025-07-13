@@ -103,7 +103,7 @@ import {
 } from '.';
 import { checkPurchases } from './iap';
 
-const jhfp = require('../../jhfp');
+import jhfp from '../../jhfp';
 
 const DIFF_UPDATE = 'DIFF_UPDATE';
 

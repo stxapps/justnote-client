@@ -16,7 +16,7 @@
     "start": "npx expo start",
     "web": "expo start --web",
     "test": "jest --watchAll",
-    "lint": "npx expo lint"
+    "lint": "npx expo lint --no-cache"
   },
   "jest": {
     "preset": "jest-expo"

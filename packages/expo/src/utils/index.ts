@@ -986,7 +986,7 @@ export const deriveFPaths = (media, noteMedia) => {
 };
 
 const fallbackCopyTextToClipboard = (text) => {
-  var textArea = document.createElement('textarea');
+  const textArea = document.createElement('textarea');
   textArea.value = text;
 
   // Avoid scrolling to bottom
@@ -999,8 +999,8 @@ const fallbackCopyTextToClipboard = (text) => {
   textArea.select();
 
   try {
-    var successful = document.execCommand('copy');
-    var msg = successful ? 'successful' : 'unsuccessful';
+    const successful = document.execCommand('copy');
+    const msg = successful ? 'successful' : 'unsuccessful';
     console.log('Fallback: Copying text command was ' + msg);
   } catch (error) {
     console.error('Fallback: Oops, unable to copy', error);
@@ -3056,7 +3056,7 @@ export const getResErrMsg = async (res) => {
     const json = await res.json();
     bodyText = json.error;
   } catch (error) {
-    console.log('No json error attr from http response body.');
+    console.log('No json error attr from http response body.', error);
   }
 
   let msg = `${res.status}`;

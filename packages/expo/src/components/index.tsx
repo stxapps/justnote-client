@@ -76,7 +76,7 @@ export const useKeyboardHeight = (enabled = true) => {
       willHideSub.remove();
       didHideSub.remove();
     };
-  }, []);
+  }, [enabled]);
 
   return height;
 };

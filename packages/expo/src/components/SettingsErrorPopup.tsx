@@ -10,7 +10,7 @@ import { DOMAIN_NAME, HASH_SUPPORT, DIED_UPDATING, SM_WIDTH } from '../types/con
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 
-const _SettingsUpdateErrorPopup = () => {
+const InnerSettingsUpdateErrorPopup = () => {
 
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const insets = useSafeAreaInsets();
@@ -72,7 +72,7 @@ const _SettingsUpdateErrorPopup = () => {
   );
 };
 
-const _SettingsConflictErrorPopup = () => {
+const InnerSettingsConflictErrorPopup = () => {
 
   const insets = useSafeAreaInsets();
   const isSettingsPopupShown = useSelector(state => state.display.isSettingsPopupShown);
@@ -150,5 +150,5 @@ const _SettingsConflictErrorPopup = () => {
   );
 };
 
-export const SettingsUpdateErrorPopup = React.memo(_SettingsUpdateErrorPopup);
-export const SettingsConflictErrorPopup = React.memo(_SettingsConflictErrorPopup);
+export const SettingsUpdateErrorPopup = React.memo(InnerSettingsUpdateErrorPopup);
+export const SettingsConflictErrorPopup = React.memo(InnerSettingsConflictErrorPopup);

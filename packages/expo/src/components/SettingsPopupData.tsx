@@ -17,7 +17,7 @@ import { isString } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
-const _SettingsPopupData = (props) => {
+const InnerSettingsPopupData = (props) => {
 
   const {
     onSidebarOpenBtnClick, onToImportAllDataViewBtnClick,
@@ -47,7 +47,7 @@ const _SettingsPopupData = (props) => {
       </View>
       <View style={tailwind('mt-6 md:mt-0')}>
         <Text style={tailwind('text-base font-medium leading-5 text-gray-800 blk:text-gray-100')}>Data Server</Text>
-        <Text style={tailwind('mt-3.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Justnote stores your data in a Stacks data server. You can specify which Stacks data server to store your data in. By default, your Stacks data server is at <Text onPress={() => Linking.openURL(hubNameUrl)} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>{hubName}</Text> provided by <Text onPress={() => Linking.openURL(hubProviderUrl)} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>{hubProvider}</Text>. You can also deploy your own Stacks data server. To change your Stacks data server, you must record your server's information on the Stacks blockchain. Justnote stores your data on the server specified in the blockchain. For more details, please visit <Text onPress={() => Linking.openURL('https://docs.stacks.co/concepts/gaia')} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>Stacks Gaia</Text>.</Text>
+        <Text style={tailwind('mt-3.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Justnote stores your data in a Stacks data server. You can specify which Stacks data server to store your data in. By default, your Stacks data server is at <Text onPress={() => Linking.openURL(hubNameUrl)} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>{hubName}</Text> provided by <Text onPress={() => Linking.openURL(hubProviderUrl)} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>{hubProvider}</Text>. You can also deploy your own Stacks data server. To change your Stacks data server, you must record your server&apos;s information on the Stacks blockchain. Justnote stores your data on the server specified in the blockchain. For more details, please visit <Text onPress={() => Linking.openURL('https://docs.stacks.co/concepts/gaia')} style={tailwind('text-base font-normal leading-6.5 text-gray-500 underline blk:text-gray-400')}>Stacks Gaia</Text>.</Text>
         {isString(hubAddr) && <View style={tailwind('mt-6 sm:flex-row')}>
           <Text style={tailwind('flex-shrink-0 flex-grow-0 text-base font-normal text-gray-500 blk:text-gray-400')}>App hub address:</Text>
           <View style={tailwind('flex-shrink flex-grow pt-1 sm:pt-0 sm:pl-3')}>
@@ -83,7 +83,7 @@ const _SettingsPopupData = (props) => {
   );
 };
 
-const _SettingsPopupDataImport = (props) => {
+const InnerSettingsPopupDataImport = (props) => {
 
   const { onBackToDataViewBtnClick } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
@@ -180,7 +180,7 @@ const _SettingsPopupDataImport = (props) => {
   );
 };
 
-const _SettingsPopupDataExport = (props) => {
+const InnerSettingsPopupDataExport = (props) => {
 
   const { onBackToDataViewBtnClick } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
@@ -280,7 +280,7 @@ const _SettingsPopupDataExport = (props) => {
   );
 };
 
-const _SettingsPopupDataDelete = (props) => {
+const InnerSettingsPopupDataDelete = (props) => {
 
   const { onBackToDataViewBtnClick } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
@@ -400,14 +400,14 @@ const _SettingsPopupDataDelete = (props) => {
       <Text style={tailwind('mt-6 text-base font-normal leading-6.5 text-red-500 blk:text-red-500')}>This action CANNOT be undone.</Text>
       <View style={tailwind('mt-6 flex-row items-center')}>
         <Switch onValueChange={onConfirmInputChange} style={tailwind('flex-shrink-0 flex-grow-0')} value={didCheckConfirm} thumbColor={Platform.OS === 'android' ? didCheckConfirm ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} ios_backgroundColor={switchIosTrackColorOff} />
-        <Text style={tailwind('ml-2 flex-shrink flex-grow text-base font-normal text-gray-500 blk:text-gray-400')}>Yes, I'm absolutely sure I want to delete all my data.</Text>
+        <Text style={tailwind('ml-2 flex-shrink flex-grow text-base font-normal text-gray-500 blk:text-gray-400')}>Yes, I&apos;m absolutely sure I want to delete all my data.</Text>
       </View>
       {actionPanel}
     </View>
   );
 };
 
-const _SettingsPopupDataDeleteSync = (props) => {
+const InnerSettingsPopupDataDeleteSync = (props) => {
 
   const { onBackToDataViewBtnClick } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
@@ -509,8 +509,8 @@ const _SettingsPopupDataDeleteSync = (props) => {
   );
 };
 
-export const SettingsPopupData = React.memo(_SettingsPopupData);
-export const SettingsPopupDataImport = React.memo(_SettingsPopupDataImport);
-export const SettingsPopupDataExport = React.memo(_SettingsPopupDataExport);
-export const SettingsPopupDataDelete = React.memo(_SettingsPopupDataDelete);
-export const SettingsPopupDataDeleteSync = React.memo(_SettingsPopupDataDeleteSync);
+export const SettingsPopupData = React.memo(InnerSettingsPopupData);
+export const SettingsPopupDataImport = React.memo(InnerSettingsPopupDataImport);
+export const SettingsPopupDataExport = React.memo(InnerSettingsPopupDataExport);
+export const SettingsPopupDataDelete = React.memo(InnerSettingsPopupDataDelete);
+export const SettingsPopupDataDeleteSync = React.memo(InnerSettingsPopupDataDeleteSync);

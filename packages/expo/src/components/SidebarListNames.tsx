@@ -87,7 +87,7 @@ const SidebarListNames = () => {
   );
 };
 
-const _SidebarListName = (props) => {
+const InnerSidebarListName = (props) => {
 
   const { listNameObj, level, isChildless } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
@@ -191,9 +191,9 @@ const _SidebarListName = (props) => {
   );
 };
 
-const SidebarListName = React.memo(_SidebarListName);
+const SidebarListName = React.memo(InnerSidebarListName);
 
-const _SidebarTagName = (props) => {
+const InnerSidebarTagName = (props) => {
 
   const { tagNameObj } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
@@ -227,6 +227,6 @@ const _SidebarTagName = (props) => {
   );
 };
 
-const SidebarTagName = React.memo(_SidebarTagName);
+const SidebarTagName = React.memo(InnerSidebarTagName);
 
 export default React.memo(SidebarListNames);

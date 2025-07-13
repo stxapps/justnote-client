@@ -56,7 +56,7 @@ const SettingsPopupTags = (props) => {
   );
 };
 
-const _TagNameEditor = (props) => {
+const InnerTagNameEditor = (props) => {
 
   const { tagNameObj, validateDisplayName } = props;
   const key = tagNameObj ? tagNameObj.tagName : 'newTagNameEditor';
@@ -311,6 +311,6 @@ const _TagNameEditor = (props) => {
   );
 };
 
-const TagNameEditor = React.memo(_TagNameEditor);
+const TagNameEditor = React.memo(InnerTagNameEditor);
 
 export default React.memo(SettingsPopupTags);

@@ -50,7 +50,7 @@ const NoteEditor = (props) => {
             </View>
           </View>
           <View style={tailwind('absolute inset-x-0 bottom-8')}>
-            <Text style={tailwind('text-center text-sm font-normal text-gray-500 blk:text-gray-400')}>Click "+ New Note" button or select your note</Text>
+            <Text style={tailwind('text-center text-sm font-normal text-gray-500 blk:text-gray-400')}>Click &quot;+ New Note&quot; button or select your note</Text>
           </View>
         </View>
       );

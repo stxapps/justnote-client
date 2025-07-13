@@ -89,6 +89,7 @@ const Adding = () => {
     try {
       await addText(text);
     } catch (error) {
+      console.log('adding.addText error:', error);
       prevText.current = null;
       setType(RENDER_ERROR);
       return;
@@ -96,7 +97,7 @@ const Adding = () => {
 
     setType(RENDER_ADDED);
     vars.translucentAdding.didShare = true;
-  }, [shareIntent, error, isUserSignedIn, type]);
+  }, [shareIntent, error, isUserSignedIn]);
 
   useEffect(() => {
     process();

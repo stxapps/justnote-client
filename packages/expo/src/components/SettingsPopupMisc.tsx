@@ -233,7 +233,7 @@ const SettingsPopupMisc = (props) => {
   blkTime = getFormattedTime(blkTime, is24HFormat).time;
 
   let systemText = (
-    <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Choose appearance to be <Text style={tailwind('text-base font-semibold leading-6.5 text-gray-500 blk:text-gray-300')}>Light</Text>, <Text style={tailwind('text-base font-semibold leading-6.5 text-gray-500 blk:text-gray-300')}>Dark</Text>, <Text style={tailwind('text-base font-semibold leading-6.5 text-gray-500 blk:text-gray-300')}>System</Text> (uses your device's setting), or <Text style={tailwind('text-base font-semibold leading-6.5 text-gray-500 blk:text-gray-300')}>Custom</Text> (schedules times to change appearance automatically). For Sync, your choosing is synced across your devices. For Device, you can choose and use the setting for this device only.</Text>
+    <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Choose appearance to be <Text style={tailwind('text-base font-semibold leading-6.5 text-gray-500 blk:text-gray-300')}>Light</Text>, <Text style={tailwind('text-base font-semibold leading-6.5 text-gray-500 blk:text-gray-300')}>Dark</Text>, <Text style={tailwind('text-base font-semibold leading-6.5 text-gray-500 blk:text-gray-300')}>System</Text> (uses your device&apos;s setting), or <Text style={tailwind('text-base font-semibold leading-6.5 text-gray-500 blk:text-gray-300')}>Custom</Text> (schedules times to change appearance automatically). For Sync, your choosing is synced across your devices. For Device, you can choose and use the setting for this device only.</Text>
   );
   if (!isSystemShown) {
     systemText = (
@@ -394,7 +394,7 @@ const SettingsPopupMisc = (props) => {
       <View style={tailwind('mt-10 flex-row items-center justify-between')}>
         <View style={tailwind('flex-shrink flex-grow')}>
           <Text style={tailwind('text-base font-medium leading-5 text-gray-800 blk:text-gray-100')}>Note Date Showing</Text>
-          <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Show notes' added date or updated date when you browse your notes. It will appear on the top right of each note.</Text>
+          <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Show notes&apos; added date or updated date when you browse your notes. It will appear on the top right of each note.</Text>
         </View>
         <View style={tailwind('ml-4 h-6 w-11 flex-shrink-0 flex-grow-0')}>
           <Switch onValueChange={onDoShowDateBtnClick} value={doShowDate} thumbColor={Platform.OS === 'android' ? doShowDate ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} ios_backgroundColor={switchIosTrackColorOff} />

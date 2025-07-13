@@ -9,7 +9,6 @@ import { ImageManipulator } from 'expo-image-manipulator';
 import dataApi from '../apis/data';
 import serverApi from '../apis/server';
 import fileApi from '../apis/localFile';
-import { updatePopupUrlHash } from '../actions';
 import { sync, syncAndWait } from '../actions/chunk';
 import {
   UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
@@ -35,7 +34,7 @@ import {
 import { initialSettingsState, initialInfoState } from '../types/initialStates';
 import vars from '../vars';
 
-import { increaseUpdateStatusBarStyleCount } from '.';
+import { updatePopupUrlHash, increaseUpdateStatusBarStyleCount } from '.';
 
 const _getBestMap = (fpath, idMap) => {
   // Export from Windows, path separator is \
@@ -1463,7 +1462,7 @@ const _importAllData = async (dispatch, getState) => {
     dispatch(increaseUpdateStatusBarStyleCount());
 
     if (gResult.canceled) {
-      dispatch(updateImportAllDataProgress(null));      
+      dispatch(updateImportAllDataProgress(null));
       return;
     }
 

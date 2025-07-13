@@ -23,7 +23,7 @@ import {
 import cache from '../utils/cache';
 import vars from '../vars';
 
-const ckeditor = require('../../ckeditor');
+import ckeditor from '../../ckeditor';
 
 import { useTailwind } from '.';
 
