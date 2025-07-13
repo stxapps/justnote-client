@@ -256,7 +256,8 @@ const NavPanel = () => {
     }],
   };
 
-  const rightCanvasClassNames = derivedNote === null ? 'hidden relative' : 'absolute inset-0';
+  let rightCanvasClassNames = 'absolute inset-0';
+  if (derivedNote === null) rightCanvasClassNames += ' opacity-0 pointer-events-none';
   const rightPanelStyle = {
     transform: [{
       translateX: rightPanelAnim.interpolate({
