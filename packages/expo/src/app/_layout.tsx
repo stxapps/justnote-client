@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Text, TextInput, Platform } from 'react-native';
+import { Text, TextInput, Platform, StatusBar as RnStatusBar } from 'react-native';
 import { Provider as ReduxProvider } from 'react-redux';
 import { StatusBar } from 'expo-status-bar';
 import * as NavigationBar from 'expo-navigation-bar';
@@ -63,6 +63,10 @@ const InnerRoot = () => {
   const themeMode = useSelector(state => getThemeMode(state));
 
   useEffect(() => {
+    if (Platform.OS === 'ios') {
+      const txtColor = themeMode === BLK_MODE ? 'light-content' : 'dark-content';
+      RnStatusBar.setBarStyle(txtColor);
+    }
     if (Platform.OS === 'android') {
       NavigationBar.setStyle(themeMode === BLK_MODE ? 'dark' : 'light');
     }
