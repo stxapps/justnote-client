@@ -1,7 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import {
-  Text, TextInput, Appearance, Platform, StatusBar as NativeStatusBar,
-} from 'react-native';
+import { Text, TextInput, Platform } from 'react-native';
 import { Provider as ReduxProvider } from 'react-redux';
 import { StatusBar } from 'expo-status-bar';
 import * as NavigationBar from 'expo-navigation-bar';
@@ -65,20 +63,18 @@ const InnerRoot = () => {
   const themeMode = useSelector(state => getThemeMode(state));
 
   useEffect(() => {
-    Appearance.setColorScheme(themeMode === BLK_MODE ? 'dark' : 'light');
-    if (Platform.OS === 'ios') {
-      const barStyle = themeMode === BLK_MODE ? 'light-content' : 'dark-content';
-      NativeStatusBar.setBarStyle(barStyle);
+    if (Platform.OS === 'android') {
+      NavigationBar.setStyle(themeMode === BLK_MODE ? 'dark' : 'light');
     }
-    if (Platform.OS === 'android') NavigationBar.setStyle('auto');
   }, [statusBarStyleCount, themeMode]);
 
+  const txtColor = themeMode === BLK_MODE ? 'light' : 'dark';
   const bgColor = themeMode === BLK_MODE ? 'rgb(17, 24, 39)' : 'white';
 
   return (
     <SafeAreaView style={cache('SI_safeAreaView', { flex: 1, backgroundColor: bgColor }, [bgColor])}>
       <Slot />
-      <StatusBar style="auto" />
+      <StatusBar animated={false} style={txtColor} />
     </SafeAreaView>
   );
 };
