@@ -1,12 +1,11 @@
 import React, { useEffect, useRef } from 'react';
-import { Text, TextInput, Platform, StatusBar as RnStatusBar } from 'react-native';
+import { Text, TextInput, Platform, StatusBar } from 'react-native';
 import { Provider as ReduxProvider } from 'react-redux';
-import { StatusBar } from 'expo-status-bar';
-import * as NavigationBar from 'expo-navigation-bar';
 import { Slot, useRouter, usePathname, ExternalPathString } from 'expo-router';
 import { ShareIntentProvider } from 'expo-share-intent';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
+import { SystemBars } from 'react-native-edge-to-edge';
 import 'expo-dev-client';
 
 import {
@@ -65,10 +64,7 @@ const InnerRoot = () => {
   useEffect(() => {
     if (Platform.OS === 'ios') {
       const txtColor = themeMode === BLK_MODE ? 'light-content' : 'dark-content';
-      RnStatusBar.setBarStyle(txtColor);
-    }
-    if (Platform.OS === 'android') {
-      NavigationBar.setStyle(themeMode === BLK_MODE ? 'dark' : 'light');
+      StatusBar.setBarStyle(txtColor);
     }
   }, [statusBarStyleCount, themeMode]);
 
@@ -78,7 +74,7 @@ const InnerRoot = () => {
   return (
     <SafeAreaView style={cache('SI_safeAreaView', { flex: 1, backgroundColor: bgColor }, [bgColor])}>
       <Slot />
-      <StatusBar animated={false} style={txtColor} />
+      <SystemBars style={txtColor} />
     </SafeAreaView>
   );
 };

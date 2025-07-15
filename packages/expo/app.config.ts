@@ -134,6 +134,15 @@ const config: ExpoConfig = {
         }
       }
     ],
+    [
+      "react-native-edge-to-edge",
+      {
+        "android": {
+          "parentTheme": "Default",
+          "enforceNavigationBarContrast": false
+        }
+      }
+    ],
     "expo-router",
     "expo-localization",
     "./plugins/blockstack-plugin.ts",
