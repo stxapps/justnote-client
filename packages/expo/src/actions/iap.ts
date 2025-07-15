@@ -15,7 +15,7 @@ import {
   COM_JUSTNOTECC_SUPPORTER, SIGNED_TEST_STRING, VALID, INVALID, ACTIVE, UNKNOWN, ERROR,
 } from '../types/const';
 import {
-  sleep, getLatestPurchase, getValidPurchase, applySubscriptionOfferDetails,
+  isFldStr, sleep, getLatestPurchase, getValidPurchase, applySubscriptionOfferDetails,
   getResErrMsg,
 } from '../utils';
 import vars from '../vars';
@@ -210,7 +210,10 @@ const iapUpdatedListener = (dispatch, getState) => async (rawPurchase) => {
 
 const iapErrorListener = (dispatch, getState) => async (error) => {
   console.log('Error in iapErrorListener: ', error);
-  if (error.code === 'E_USER_CANCELLED') {
+  if (
+    error.code === 'E_USER_CANCELLED' ||
+    (isFldStr(error.message) && error.message.includes('User cancelled'))
+  ) {
     dispatch(updateIapPurchaseStatus(null, null));
   } else {
     dispatch({ type: REQUEST_PURCHASE_ROLLBACK });
@@ -301,7 +304,10 @@ export const requestPurchase = (product) => async (dispatch, getState) => {
     dispatch(increaseUpdateStatusBarStyleCount());
 
     console.log('Error when request purchase: ', error);
-    if (error.code === 'E_USER_CANCELLED') {
+    if (
+      error.code === 'E_USER_CANCELLED' ||
+      (isFldStr(error.message) && error.message.includes('User cancelled'))
+    ) {
       dispatch(updateIapPurchaseStatus(null, null));
     } else {
       dispatch({ type: REQUEST_PURCHASE_ROLLBACK });
