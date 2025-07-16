@@ -299,7 +299,8 @@ const NoteEditorEditor = (props) => {
     } else if (change === 'data' && to === 'webView') {
       onGetData(value);
     } else if (change === 'editor' && to === 'isReady') {
-      setEditorReadyCount(c => c + 1);
+      if (value === 'true') setEditorReadyCount(c => c + 1);
+      else setEditorReadyCount(0);
     } else if (change === 'clear' && to === 'editingObjectUrlContents') {
       editingObjectUrlContents.current = {};
     } else if (change === 'add' && to === 'editingObjectUrlContents') {
@@ -522,7 +523,7 @@ const NoteEditorEditor = (props) => {
         doHighlightTitle = true;
       }
 
-      if (editorReadyCount && webView.current) {
+      if (editorReadyCount > 0 && webView.current) {
         if (searchString !== prevSearchString.current) {
           if (searchString) {
             const escapedSearchString = escapeDoubleQuotes(searchString);
