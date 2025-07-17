@@ -72,7 +72,7 @@ const config: ExpoConfig = {
     },
     "bundleIdentifier": "com.justnotecc.justnote",
     "appleTeamId": process.env.APPLE_TEAM_ID,
-    "version": "0.32.0",
+    "version": "0.33.0",
     "buildNumber": "1"
   },
   "android": {
@@ -88,8 +88,8 @@ const config: ExpoConfig = {
       "android.permission.WRITE_EXTERNAL_STORAGE"
     ],
     "package": "com.justnotecc",
-    "versionCode": 58,
-    "version": "0.32.0"
+    "versionCode": 59,
+    "version": "0.33.0"
   },
   "web": {
     "bundler": "metro",
