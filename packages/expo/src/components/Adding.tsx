@@ -58,6 +58,7 @@ const Adding = () => {
   const { shareIntent, error, resetShareIntent } = useShareIntentContext();
   const { height: safeAreaHeight } = useSafeAreaFrame();
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
+  const isUserDummy = useSelector(state => state.user.isUserDummy);
   const themeMode = useSelector(state => getThemeMode(state));
   const [type, setType] = useState(null);
   const prevText = useRef(null);
@@ -123,9 +124,13 @@ const Adding = () => {
   };
 
   const renderNav = (doHide = false) => {
+    let rightText = 'Go to Welcome >';
+    if (isUserSignedIn || isUserDummy) rightText = 'Go to My Notes >';
+    if (doHide) rightText = '';
+
     let rightLink = (
       <TouchableOpacity onPress={() => resetShareIntent()} disabled={doHide}>
-        <Text style={tailwind('text-right text-base font-medium text-gray-500 blk:text-gray-300')}>{doHide ? '' : isUserSignedIn ? 'Go to My List >' : 'Go to Welcome >'}</Text>
+        <Text style={tailwind('text-right text-base font-medium text-gray-500 blk:text-gray-300')}>{rightText}</Text>
       </TouchableOpacity>
     );
 

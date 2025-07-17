@@ -122,7 +122,9 @@ const ListNamesPopup = () => {
     Animated.timing(slideAnim, { toValue: 1, ...slideFMV }).start(() => {
       requestAnimationFrame(() => {
         setCurrentListName(selectedListName);
-        setForwardCount(forwardCount + 1);
+        requestAnimationFrame(() => {
+          setForwardCount(forwardCount + 1);
+        });
       });
     });
   };

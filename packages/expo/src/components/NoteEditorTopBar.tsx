@@ -69,7 +69,7 @@ const NoteEditorTopBar = (props) => {
 
   const renderLoading = () => {
     return (
-      <View style={tailwind('h-full justify-center px-4 lg:px-1')}>
+      <View style={tailwind('h-full justify-center px-4 lg:h-5 lg:px-1')}>
         <Circle size={20} color={themeMode === BLK_MODE ? 'rgb(156, 163, 175)' : 'rgb(107, 114, 128)'} />
       </View>
     );
