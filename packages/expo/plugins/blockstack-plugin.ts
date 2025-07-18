@@ -5,7 +5,7 @@ module.exports = function withBlockstack(config) {
     const lines = config.modResults.contents.split('\n');
 
     const rnfaLine = '$RNFANoPrivacyAPI = true';
-    const bcksckLine = "  pod 'Blockstack', :git => 'https://github.com/bracedotto/blockstack-ios.git', :commit => '5b4ffc1'";
+    const bcksckLine = "  pod 'Blockstack', :git => 'https://github.com/stxapps/blockstack-ios.git', :commit => '5b4ffc1'";
 
     let foundRNFA = false, foundBcksck = false, sIdx = null;
     for (let i = 0; i < lines.length; i++) {
