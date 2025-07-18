@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { Dimensions, AppState, AppStateStatus, Keyboard } from 'react-native';
+import { Dimensions, AppState, AppStateStatus, Keyboard, Platform } from 'react-native';
 import {
   useSafeAreaFrame as useWindowFrame, useSafeAreaInsets as useScreenInsets,
 } from 'react-native-safe-area-context';
+import { useNavigationMode } from 'react-native-navigation-mode';
 
 import { useSelector } from '../store';
 import {
@@ -102,4 +103,12 @@ export const useAppState = () => {
   }, []);
 
   return appState;
+};
+
+export const useCanEdgeHorizontalSwipe = () => {
+  const { navigationMode, loading, error } = useNavigationMode();
+
+  if (Platform.OS !== 'android') return true;
+  if (loading || error) return false;
+  return !navigationMode.isGestureNavigation;
 };

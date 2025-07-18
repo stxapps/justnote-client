@@ -12,7 +12,9 @@ import { makeGetUnsavedNote } from '../selectors';
 import { getNote } from '../utils';
 import { sidebarFMV } from '../types/animConfigs';
 
-import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
+import {
+  useSafeAreaFrame, useSafeAreaInsets, useTailwind, useCanEdgeHorizontalSwipe,
+} from '.';
 import Sidebar from './Sidebar';
 import NoteList from './NoteList';
 import NoteEditor from './NoteEditor';
@@ -34,6 +36,7 @@ const NavPanel = () => {
   const [derivedNote, setDerivedNote] = useState(note);
   const [derivedUnsavedNote, setDerivedUnsavedNote] = useState(unsavedNote);
   const tailwind = useTailwind();
+  const canSwipe = useCanEdgeHorizontalSwipe();
 
   const isSidebarShown = useSelector(state => state.display.isSidebarPopupShown);
   const [didSidebarAnimEnd, setDidSidebarAnimEnd] = useState(true);
@@ -49,6 +52,7 @@ const NavPanel = () => {
   const dispatch = useDispatch();
 
   const shouldSetPanResponder = useCallback((_, gestureState) => {
+    if (!canSwipe) return false;
     if (gestureState.numberActiveTouches > 1) return false;
 
     const maxX = (safeAreaWidth + insets.left + insets.right) * 0.25;

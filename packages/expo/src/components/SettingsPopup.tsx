@@ -18,7 +18,10 @@ import {
 import { getThemeMode } from '../selectors';
 import { dialogFMV, sidebarFMV, popupFMV } from '../types/animConfigs';
 
-import { useSafeAreaFrame, useSafeAreaInsets, useKeyboardHeight, useTailwind } from '.';
+import {
+  useSafeAreaFrame, useSafeAreaInsets, useKeyboardHeight, useTailwind,
+  useCanEdgeHorizontalSwipe,
+} from '.';
 
 import SettingsPopupAccount from './SettingsPopupAccount';
 import { SettingsPopupIap, SettingsPopupIapRestore } from './SettingsPopupIap';
@@ -72,8 +75,10 @@ const SettingsPopup = () => {
   const didSwipeToOpenSidebar = useRef(false);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
+  const canSwipe = useCanEdgeHorizontalSwipe();
 
   const shouldSetPanResponder = useCallback((_, gestureState) => {
+    if (!canSwipe) return false;
     if (gestureState.numberActiveTouches > 1) return false;
 
     const maxX = (safeAreaWidth + insets.left + insets.right) * 0.25;

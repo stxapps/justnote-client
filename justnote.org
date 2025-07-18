@@ -458,6 +458,7 @@
 - npx expo install react-native-share
 - npx expo install expo-build-properties
 - npx expo lint
+- npx expo install react-native-navigation-mode
 ** build
 - npx expo prebuild --clean
 - ios
