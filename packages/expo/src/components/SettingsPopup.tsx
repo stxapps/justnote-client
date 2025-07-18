@@ -98,7 +98,7 @@ const SettingsPopup = () => {
     }
 
     return false;
-  }, [isSidebarShown, safeAreaWidth, insets, dispatch]);
+  }, [canSwipe, isSidebarShown, safeAreaWidth, insets, dispatch]);
 
   const onPanResponderMove = useCallback((_, gestureState) => {
     const width = safeAreaWidth + insets.left + insets.right;
