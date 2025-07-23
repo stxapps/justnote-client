@@ -102,7 +102,7 @@ const Adding = () => {
 
   useEffect(() => {
     process();
-  }, [process])
+  }, [process]);
 
   const _render = (content) => {
     const classes = safeAreaHeight >= 640 ? '-mt-24 justify-center' : 'pt-28 md:pt-36';

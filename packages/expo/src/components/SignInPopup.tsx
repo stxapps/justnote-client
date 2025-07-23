@@ -155,7 +155,7 @@ const SignInPopup = () => {
 
   // safeAreaHeight doesn't include status bar height, but minus it anyway.
   const statusBarHeight = 24;
-  let appHeight = Math.max(safeAreaHeight - statusBarHeight - keyboardHeight, 128);
+  const appHeight = Math.max(safeAreaHeight - statusBarHeight - keyboardHeight, 128);
   const panelHeight = Math.min(480 - 40, appHeight * 0.9);
 
   const popupStyle: any = {
