@@ -214,14 +214,17 @@ const ListNamesPopup = () => {
     setPrevBackCount(backCount);
   }
 
+  // Only on iPhone, if line height is 20, the text height is 22.7,
+  //   so must use height and verticle center on menu items instead of py-[x].
+
   let popupWidth = 168;
   if (longestDisplayName.length > 26) popupWidth = 256;
   else if (longestDisplayName.length > 14) popupWidth = 208;
 
-  let popupHeight = 44 * (maxChildrenSize + 1) + 51;
+  let popupHeight = 44 + (44 * maxChildrenSize) + 52;
   if (popupHeight > safeAreaHeight - 16) {
     popupHeight = getLastHalfHeight(
-      Math.min(popupHeight, safeAreaHeight - 16), 44, 0, 51, 0.5
+      Math.min(popupHeight, safeAreaHeight - 16), 44, 0, 52, 0.5
     );
   }
 
@@ -229,7 +232,7 @@ const ListNamesPopup = () => {
     return (
       <View style={tailwind('-mt-0.5')}>
         {children.map(obj => {
-          let btnClassNames = 'py-3';
+          let btnClassNames = 'h-11';
           if (!obj.children || obj.children.length === 0) btnClassNames += ' pr-4';
 
           let disabled = false, forwardDisabled = false;
@@ -303,9 +306,9 @@ const ListNamesPopup = () => {
             <ScrollView>{renderListNameBtns()}</ScrollView>
           </Animated.View>
         </View>
-        <View style={tailwind('flex-shrink-0 flex-grow-0 flex-row items-center justify-end border-t border-gray-200 px-3 py-2.5 blk:border-gray-600')}>
-          <TouchableOpacity onPress={onMoveHereBtnClick} style={tailwind(`rounded-md border bg-white px-3 py-1.5 blk:bg-gray-800 ${moveHereDisabled ? 'border-gray-300 blk:border-gray-600' : 'border-gray-400 blk:border-gray-400'}`)} disabled={moveHereDisabled}>
-            <Text style={tailwind(`text-xs font-normal ${moveHereDisabled ? 'text-gray-400 blk:text-gray-500' : 'text-gray-500 blk:text-gray-300'}`)}>{moveHereDisabled ? 'View only' : 'Move here'}</Text>
+        <View style={tailwind('h-13 flex-shrink-0 flex-grow-0 flex-row items-center justify-end border-t border-gray-200 px-3 blk:border-gray-600')}>
+          <TouchableOpacity onPress={onMoveHereBtnClick} style={tailwind(`rounded-md border bg-white px-3 py-1 blk:bg-gray-800 ${moveHereDisabled ? 'border-gray-300 blk:border-gray-600' : 'border-gray-400 blk:border-gray-400'}`)} disabled={moveHereDisabled}>
+            <Text style={tailwind(`text-xs leading-4.5 font-normal ${moveHereDisabled ? 'text-gray-400 blk:text-gray-500' : 'text-gray-500 blk:text-gray-300'}`)}>{moveHereDisabled ? 'View only' : 'Move here'}</Text>
           </TouchableOpacity>
         </View>
       </React.Fragment>

@@ -173,10 +173,10 @@ const NoteListItems = () => {
   useEffect(() => {
     setTimeout(() => {
       if (flatList.current) {
-        flatList.current.scrollToOffset({ offset: 0, animated: true });
+        flatList.current.scrollToOffset({ offset: 0, animated: false });
       }
       vars.scrollPanel.scrollY = 0;
-    }, 1);
+    }, 100);
   }, [listChangedCount]);
 
   useEffect(() => {
