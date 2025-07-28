@@ -88,8 +88,8 @@ const config: ExpoConfig = {
       "android.permission.WRITE_EXTERNAL_STORAGE"
     ],
     "package": "com.justnotecc",
-    "versionCode": 59,
-    "version": "0.33.0"
+    "versionCode": 60,
+    "version": "0.33.1"
   },
   "web": {
     "bundler": "metro",
