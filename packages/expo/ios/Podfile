@@ -15,7 +15,7 @@ prepare_react_native_project!
 
 $RNFANoPrivacyAPI = true
 target 'Justnote' do
-  pod 'Blockstack', :git => 'https://github.com/bracedotto/blockstack-ios.git', :commit => '5b4ffc1'
+  pod 'Blockstack', :git => 'https://github.com/stxapps/blockstack-ios.git', :commit => '5b4ffc1'
   use_expo_modules!
 
   if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
