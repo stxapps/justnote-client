@@ -525,6 +525,10 @@
   background-color: var(--jn-editor-gray-700);
 }
 
+.blk-mode .ck.ck-balloon-panel .ck.ck-button.ck-off.ck-button-action:not(.ck-disabled):hover {
+  background: var(--ck-color-button-action-hover-background);
+}
+
 .blk-mode .ck.ck-balloon-panel a.ck.ck-button.ck-off:not(.ck-disabled):hover {
   background: none;
 }
