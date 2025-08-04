@@ -149,6 +149,10 @@
 
   --ck-font-size-base: 15px;
   --ck-toolbar-dropdown-max-width: 96vw;
+
+  --ck-content-font-family: Inter ui-sans-serif system-ui sans-serif "Apple Color Emoji" "Segoe UI Emoji" "Segoe UI Symbol" "Noto Color Emoji";
+  --ck-content-line-height: 1.5;
+  --ck-content-word-break: break-word;
 }
 
 .not-mobile {
@@ -274,28 +278,34 @@
 }
 
 .ck.ck-editor__editable {
+  --ck-content-font-size: 17px;
   font-size: 17px;
 }
 
 @media (min-width: 1024px) {
   .ck.ck-editor__editable {
+  --ck-content-font-size: 16px;
     font-size: 16px;
   }
 }
 
 .ck.ck-editor__editable {
+  --ck-content-font-color: var(--jn-editor-gray-800);
   color: var(--jn-editor-gray-800);
 }
 
 .preview-mode .ck.ck-editor__editable {
+  --ck-content-font-color: var(--jn-editor-gray-600);
   color: var(--jn-editor-gray-600);
 }
 
 .blk-mode .ck.ck-editor__editable {
+  --ck-content-font-color: var(--jn-editor-gray-200);
   color: var(--jn-editor-gray-200);
 }
 
 .blk-mode .preview-mode .ck.ck-editor__editable {
+  --ck-content-font-color: var(--jn-editor-gray-300);
   color: var(--jn-editor-gray-300);
 }
 

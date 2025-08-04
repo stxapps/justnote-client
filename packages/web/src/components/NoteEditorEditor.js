@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ckeditor from '@ckeditor/ckeditor5-build-decoupled-document';
+import ckeditor from 'justnote-editor';
 
 import fileApi from '../apis/localFile';
 import {
@@ -681,6 +681,7 @@ const NoteEditorEditor = (props) => {
 
   const editorConfig = useMemo(() => {
     return {
+      licenseKey: 'GPL',
       placeholder: 'Start writing...',
       removePlugins: ['Autoformat', 'MediaEmbed'],
       fontSize: {

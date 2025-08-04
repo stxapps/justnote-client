@@ -237,7 +237,7 @@
 - yarn add @welldone-software/why-did-you-render
 - yarn add file-saver
 - yarn add @ckeditor/ckeditor5-react
-- yarn add file:../../../ckeditor5/packages/ckeditor5-build-decoupled-document
+- yarn add file:../../../justnote-editor
 - yarn add @types/node @types/react @types/react-dom @types/jest @types/url-parse @types/file-saver
 - fix webpack 5 issue
   + yarn add react-app-rewired stream-browserify crypto-browserify assert util buffer process

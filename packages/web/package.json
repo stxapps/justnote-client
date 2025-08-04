@@ -16,8 +16,7 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
-    "@ckeditor/ckeditor5-build-decoupled-document": "file:../../../ckeditor5/packages/ckeditor5-build-decoupled-document",
-    "@ckeditor/ckeditor5-react": "^9.3.1",
+    "@ckeditor/ckeditor5-react": "^11.0.0",
     "@stacks/auth": "^6.16.1",
     "@stacks/encryption": "^6.16.1",
     "@stacks/storage": "^6.16.1",
@@ -48,6 +47,7 @@
     "framer-motion": "^11.3.30",
     "idb-keyval": "^6.2.1",
     "jest-diff": "^29.7.0",
+    "justnote-editor": "file:../../../justnote-editor",
     "postcss": "^8.4.31",
     "process": "^0.11.10",
     "queue": "^7.0.0",

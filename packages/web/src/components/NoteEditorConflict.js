@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ckeditor from '@ckeditor/ckeditor5-build-decoupled-document';
+import ckeditor from 'justnote-editor';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import fileApi from '../apis/localFile';
@@ -325,6 +325,7 @@ const _ConflictItem = (props) => {
 
   const editorConfig = useMemo(() => {
     return {
+      licenseKey: 'GPL',
       placeholder: 'Start writing...',
       removePlugins: ['Autoformat', 'MediaEmbed'],
       fontSize: {
