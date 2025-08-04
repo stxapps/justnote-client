@@ -284,7 +284,7 @@
 
 @media (min-width: 1024px) {
   .ck.ck-editor__editable {
-  --ck-content-font-size: 16px;
+    --ck-content-font-size: 16px;
     font-size: 16px;
   }
 }
