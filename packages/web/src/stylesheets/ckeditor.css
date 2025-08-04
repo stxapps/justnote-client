@@ -480,6 +480,14 @@
   display: none;
 }
 
+.ck-content .todo-list li {
+  margin-bottom: 0;
+}
+
+.ck-content .todo-list li .todo-list {
+  margin-top: 0;
+}
+
 .ck-editor__editable.ck-content .todo-list .todo-list__label>span[contenteditable=false]>input {
   background-color: var(--jn-editor-white);
 }
