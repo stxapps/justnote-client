@@ -92,8 +92,8 @@ android {
         applicationId 'com.justnotecc'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 60
-        versionName "0.33.1"
+        versionCode 61
+        versionName "0.34.0"
     }
     signingConfigs {
         debug {
