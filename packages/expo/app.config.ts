@@ -72,7 +72,7 @@ const config: ExpoConfig = {
     },
     "bundleIdentifier": "com.justnotecc.justnote",
     "appleTeamId": process.env.APPLE_TEAM_ID,
-    "version": "0.33.1",
+    "version": "0.34.0",
     "buildNumber": "1"
   },
   "android": {
