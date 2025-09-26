@@ -476,3 +476,21 @@
   + update keystore info in android/gradle.properties
   + update signingConfigs/release in android/app/build.gradle
   + change in buildTypes/release signingConfig to signingConfigs.release
+* Next
+** Install
+- npx create-next-app@latest justnotecc
+  + Choose typescript, tailwind and eslint
+  + scripts dev - add --experimental-https --hostname
+- npm i redux react-redux redux-thunk reselect
+- npm i -D @tailwindcss/forms @tailwindcss/typography
+- npm i @stacks/auth@6.16.1 @stacks/encryption@6.16.1 @stacks/storage@6.16.1 @stacks/wallet-sdk@6.16.1
+- npm i url-parse file-saver @wewatch/lexorank blueimp-load-image idb-keyval queue
+- npm i jest-diff@29.7.0
+- npm i @zip.js/zip.js
+- npm i motion
+- npm i @serwist/next && npm i -D serwist
+- npm install -D @types/url-parse @types/file-saver
+- npm install -D @stylistic/eslint-plugin
+- npm i eslint-plugin-tailwindcss@beta -D
+- npm i @ckeditor/ckeditor5-react
+- npm i file:../../../justnote-editor
