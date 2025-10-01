@@ -21,33 +21,33 @@ export const viewport = {
 };
 
 export const metadata: Metadata = {
-  title: '',
-  description: '',
+  title: 'Justnote - Simple & Private Taking Notes',
+  description: 'A simple, fast, privacy-focused note-taking app that you can use easily, take notes rapidly, and, importantly, truly own your account and data.',
   openGraph: {
-    title: '',
-    description: '',
+    title: 'Justnote - Simple & Private Taking Notes',
+    description: 'A simple, fast, privacy-focused note-taking app that you can use easily, take notes rapidly, and, importantly, truly own your account and data.',
     images: [
       {
-        url: '',
+        url: 'https://justnote.cc/twitter-card-image-pattern1.png',
       },
     ],
-    siteName: '',
-    url: '',
+    siteName: 'Justnote',
+    url: 'https://justnote.cc',
     type: 'website',
   },
   twitter: {
-    title: '',
-    description: '',
-    images: [''],
+    title: 'Justnote - Simple & Private Taking Notes',
+    description: 'A simple, fast, privacy-focused note-taking app that you can use easily, take notes rapidly, and, importantly, truly own your account and data.',
+    images: ['https://justnote.cc/twitter-card-image-pattern1.png'],
     card: 'summary_large_image',
-    site: '',
+    site: '@justnotecc',
   },
 };
 
 export default function Layout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${inter.variable}`}>
-      <body className="min-h-full antialiased">
+      <body className="antialiased">
         <InnerLayout>
           {children}
         </InnerLayout>

@@ -1081,7 +1081,7 @@ export const moveNotesWithAction = (toListName, moveAction) => async (
       selectingNoteId === noteId
     )
   ) {
-    updateNoteId(null)
+    updateNoteId(null);
   }
 
   if (moveAction === MOVE_ACTION_NOTE_COMMANDS) {

@@ -294,32 +294,14 @@ const InnerConflictItem = (props) => {
   }, [isEditorReady, setInitData]);
 
   useEffect(() => {
-    // Need to place <link> of tailwind.css + ckeditor.css below <style> of CKEditor
-    //   so that custom styles override default styles.
+    // CKEditor injects its <style> tag at the end of the <head>.
+    // To allow our custom styles to override it, we need to move it to the beginning.
     const head = document.head || document.getElementsByTagName('head')[0];
-    const last = head.lastElementChild;
-    if (
-      last.tagName.toLowerCase() === 'link' &&
-      /* @ts-expect-error */
-      last.href && last.href.includes('/static/css/') && last.href.endsWith('.css')
-    ) {
-      return;
-    }
+    const ckStyle = head.querySelector('style[data-cke="true"]');
 
-    const hrefs = [];
-    for (const link of head.getElementsByTagName('link')) {
-      if (
-        link.href && link.href.includes('/static/css/') && link.href.endsWith('.css')
-      ) {
-        hrefs.push(link.href);
-      }
-    }
-
-    for (const href of hrefs) {
-      const link = document.createElement('link');
-      link.href = href;
-      link.rel = 'stylesheet';
-      head.appendChild(link);
+    // If the style exists and it's not already the first child, move it.
+    if (ckStyle && head.firstChild !== ckStyle) {
+      head.insertBefore(ckStyle, head.firstChild);
     }
   }, []);
 

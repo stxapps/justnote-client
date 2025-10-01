@@ -30,7 +30,7 @@ const TagEditorPopup = () => {
   const onSaveBtnClick = () => {
     if (didClick.current) return;
     onPopupCloseBtnClick();
-    dispatch(updateTagData(tagEditor.ids, tagEditor.values))
+    dispatch(updateTagData(tagEditor.ids, tagEditor.values));
     didClick.current = true;
   };
 
