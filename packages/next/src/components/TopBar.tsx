@@ -1,8 +1,8 @@
 import React from 'react';
 import Image from 'next/image';
 
-import { useSelector } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { useSelector, useDispatch } from '../store';
+import { updatePopup } from '../actions';
 import { SIGN_IN_POPUP } from '../types/const';
 
 import { useTailwind } from '.';
@@ -13,10 +13,11 @@ import logoShort from '../images/logo-short.svg';
 const TopBar = () => {
 
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
+  const dispatch = useDispatch();
   const tailwind = useTailwind();
 
   const onSignInBtnClick = () => {
-    updatePopupUrlHash(SIGN_IN_POPUP, true);
+    dispatch(updatePopup(SIGN_IN_POPUP, true));
   };
 
   return (

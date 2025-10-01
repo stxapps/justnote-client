@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopupUrlHash, updateUserData } from '../actions';
+import { updatePopup, updateUserData } from '../actions';
 import {
   DOMAIN_NAME, APP_NAME, APP_ICON_NAME, APP_SCOPES, SIGN_UP_POPUP, SIGN_IN_POPUP,
 } from '../types/const';
@@ -21,24 +21,34 @@ const SignUpPopup = () => {
   const appIconUrl = useMemo(() => {
     return extractUrl(window.location.href).origin + '/' + APP_ICON_NAME;
   }, []);
+  const didClick = useRef(false);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
   const onPopupCloseBtnClick = () => {
-    updatePopupUrlHash(SIGN_UP_POPUP, false);
+    if (didClick.current) return;
+    dispatch(updatePopup(SIGN_UP_POPUP, false));
+    didClick.current = true;
   };
 
   const onSignInBtnClick = () => {
-    updatePopupUrlHash(SIGN_IN_POPUP, true, null, true);
+    if (didClick.current) return;
+    dispatch(updatePopup(SIGN_IN_POPUP, true, null, SIGN_UP_POPUP));
+    didClick.current = true;
   };
 
   const onBackedUpBtnClick = (data) => {
+    if (didClick.current) return;
     onPopupCloseBtnClick();
     dispatch(updateUserData(data));
+    didClick.current = true;
   };
 
   useEffect(() => {
-    if (isShown) cancelBtn.current.focus();
+    if (isShown) {
+      cancelBtn.current.focus();
+      didClick.current = false;
+    }
   }, [isShown]);
 
   if (!isShown) return <AnimatePresence key="AnimatePresence_SUP" />;

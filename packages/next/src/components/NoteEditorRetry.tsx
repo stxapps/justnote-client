@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
 import { useDispatch } from '../store';
-import { updateNoteIdUrlHash } from '../actions';
+import { updateNoteId } from '../actions';
 import { retryDiedNotes, cancelDiedNotes } from '../actions/chunk';
 import { HASH_SUPPORT, LG_WIDTH } from '../types/const';
 
@@ -17,7 +17,7 @@ const NoteEditorRetry = (props) => {
 
   const onRightPanelCloseBtnClick = () => {
     if (didClick.current) return;
-    updateNoteIdUrlHash(null);
+    dispatch(updateNoteId(null));
     didClick.current = true;
   };
 

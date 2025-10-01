@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { updatePopup } from '../actions';
 import {
   updateLockEditor, addLockNote, removeLockNote, unlockNote, addLockList,
   removeLockList, unlockList,
@@ -42,7 +42,7 @@ const LockEditorPopup = () => {
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;
-    updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
+    dispatch(updatePopup(LOCK_EDITOR_POPUP, false, null));
     didClick.current = true;
   };
 

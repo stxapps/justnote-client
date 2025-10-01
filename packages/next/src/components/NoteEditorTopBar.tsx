@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
 import { useSelector, useDispatch } from '../store';
-import { updateNoteIdUrlHash } from '../actions';
+import { updateNoteId } from '../actions';
 import { increaseSaveNoteCount, increaseDiscardNoteCount } from '../actions/chunk';
 import {
   NEW_NOTE, ADDED, VALID, LG_WIDTH, NOTE_COMMANDS_MODE_NETB,
@@ -27,7 +27,7 @@ const NoteEditorTopBar = (props) => {
   const onRightPanelCloseBtnClick = () => {
     if (didClick.current || isEditorUploading) return;
     if (isEditorFocused) dispatch(increaseDiscardNoteCount());
-    else dispatch(updateNoteIdUrlHash(null, false, true));
+    else dispatch(updateNoteId(null, false, true));
     didClick.current = true;
   };
 

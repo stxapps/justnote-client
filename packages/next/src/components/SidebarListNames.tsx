@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { updatePopup } from '../actions';
 import {
   changeListName, updateQueryString, updateSidebarListNamesMode,
 } from '../actions/chunk';
@@ -93,7 +93,7 @@ const InnerSidebarListName = (props) => {
 
   const onListNameBtnClick = () => {
     dispatch(changeListName(listNameObj.listName, true));
-    if (safeAreaWidth < LG_WIDTH) updatePopupUrlHash(SIDEBAR_POPUP, false, null);
+    if (safeAreaWidth < LG_WIDTH) dispatch(updatePopup(SIDEBAR_POPUP, false, null));
   };
 
   const onExpandBtnClick = () => {
@@ -195,7 +195,7 @@ const InnerSidebarTagName = (props) => {
 
   const onTagNameBtnClick = () => {
     dispatch(updateQueryString(tagNameObj.tagName, true));
-    if (safeAreaWidth < LG_WIDTH) updatePopupUrlHash(SIDEBAR_POPUP, false, null);
+    if (safeAreaWidth < LG_WIDTH) dispatch(updatePopup(SIDEBAR_POPUP, false, null));
   };
 
   // Only tag name for now

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { updatePopup } from '../actions';
 import {
   moveNotesWithAction, updateMoveAction, updateDeleteAction, updateListNamesMode,
 } from '../actions/chunk';
@@ -53,7 +53,7 @@ const NoteCommands = (props) => {
 
   const onDeleteBtnClick = () => {
     dispatch(updateDeleteAction(DELETE_ACTION_NOTE_COMMANDS));
-    updatePopupUrlHash(CONFIRM_DELETE_POPUP, true, null);
+    dispatch(updatePopup(CONFIRM_DELETE_POPUP, true, null));
     if (isFullScreen) onToggleFullScreen();
   };
 
@@ -69,7 +69,7 @@ const NoteCommands = (props) => {
     } else {
       nRect = adjustRect(rect, 0, -4, 0, 4);
     }
-    updatePopupUrlHash(LIST_NAMES_POPUP, true, nRect);
+    dispatch(updatePopup(LIST_NAMES_POPUP, true, nRect));
     if (isFullScreen) onToggleFullScreen();
   };
 
@@ -82,7 +82,7 @@ const NoteCommands = (props) => {
     } else {
       nRect = adjustRect(rect, 0, -4, 0, 4);
     }
-    updatePopupUrlHash(BULK_EDIT_MENU_POPUP, true, nRect);
+    dispatch(updatePopup(BULK_EDIT_MENU_POPUP, true, nRect));
     if (isFullScreen) onToggleFullScreen();
   };
 

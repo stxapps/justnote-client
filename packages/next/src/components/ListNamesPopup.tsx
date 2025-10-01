@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, animate } from 'motion/react';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { updatePopup } from '../actions';
 import {
   moveNotes, moveToListName, updateSettingsPopup, updateSettingsViewId,
 } from '../actions/chunk';
@@ -69,20 +69,15 @@ const ListNamesPopup = () => {
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;
-    updatePopupUrlHash(LIST_NAMES_POPUP, false, null);
+    dispatch(updatePopup(LIST_NAMES_POPUP, false, null));
     didClick.current = true;
   };
 
   const onNewBtnClick = () => {
     if (didClick.current) return;
-    onCancelBtnClick();
 
-    // As this and closing listNames popup both call window.history.back(),
-    //   need to be in different js clock cycle.
-    setTimeout(() => {
-      dispatch(updateSettingsViewId(SETTINGS_VIEW_LISTS, false));
-      dispatch(updateSettingsPopup(true));
-    }, 100);
+    dispatch(updateSettingsViewId(SETTINGS_VIEW_LISTS, false));
+    dispatch(updateSettingsPopup(true, false, LIST_NAMES_POPUP));
     didClick.current = true;
   };
 
@@ -92,9 +87,7 @@ const ListNamesPopup = () => {
     if (derivedMode === MODE_MOVE_LIST_NAME) {
       dispatch(moveToListName(derivedSelectingListName, selectedListName));
     } else if (derivedMode === MODE_MOVE_NOTES) {
-      // As this and closing listNames popup both call window.history.back(),
-      //   need to be in different js clock cycle.
-      setTimeout(() => dispatch(moveNotes(selectedListName)), 100);
+      dispatch(moveNotes(selectedListName));
     } else {
       console.log('In ListNamesPopup.onLnItemBtnClick, invalid mode:', derivedMode);
     }
@@ -107,11 +100,7 @@ const ListNamesPopup = () => {
     if (derivedMode === MODE_MOVE_LIST_NAME) {
       dispatch(moveToListName(derivedSelectingListName, currentListName));
     } else if (derivedMode === MODE_MOVE_NOTES) {
-      // As this and closing listNames popup both call window.history.back(),
-      //   need to be in different js clock cycle.
-      setTimeout(() => {
-        if (currentListName) dispatch(moveNotes(currentListName));
-      }, 100);
+      if (currentListName) dispatch(moveNotes(currentListName));
     } else {
       console.log('In ListNamesPopup.onMoveHereBtnClick, invalid mode:', derivedMode);
     }

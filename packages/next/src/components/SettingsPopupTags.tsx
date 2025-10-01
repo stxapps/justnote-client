@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { updatePopup } from '../actions';
 import {
   addTagNames, updateTagNames, moveTagName, checkDeleteTagName, updateSelectingTagName,
-  updateTagNameEditors
+  updateTagNameEditors,
 } from '../actions/chunk';
 import {
   VALID_TAG_NAME, TAG_NAME_MSGS, SETTINGS_TAGS_MENU_POPUP, SWAP_LEFT, SWAP_RIGHT,
@@ -195,7 +195,7 @@ const InnerTagNameEditor = (props) => {
   const onMenuBtnClick = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     dispatch(updateSelectingTagName(tagNameObj.tagName));
-    updatePopupUrlHash(SETTINGS_TAGS_MENU_POPUP, true, rect);
+    dispatch(updatePopup(SETTINGS_TAGS_MENU_POPUP, true, rect));
   };
 
   useEffect(() => {

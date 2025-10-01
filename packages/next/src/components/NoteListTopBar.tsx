@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { updatePopup } from '../actions';
 import { showNoteListMenuPopup } from '../actions/chunk';
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import { SEARCH_POPUP, LG_WIDTH, UPDATING, SHOW_SYNCED } from '../types/const';
@@ -31,7 +31,7 @@ const NoteListTopBar = (props) => {
   };
 
   const onSearchBtnClick = () => {
-    updatePopupUrlHash(SEARCH_POPUP, true, null);
+    dispatch(updatePopup(SEARCH_POPUP, true, null));
   };
 
   if (safeAreaWidth < LG_WIDTH && isBulkEditing) return <NoteListTopBarBulkEdit />;

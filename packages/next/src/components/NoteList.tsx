@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { useSelector, useDispatch } from '../store';
-import { updateNoteIdUrlHash } from '../actions';
+import { updateNoteId } from '../actions';
 import { fetch } from '../actions/chunk';
 import {
   SD_HUB_URL, TRASH, NEW_NOTE, NEW_NOTE_OBJ, MAX_SELECTED_NOTE_IDS,
@@ -46,7 +46,7 @@ const NoteList = (props) => {
   const isUnsavedValid = unsavedNote.status === VALID;
 
   const onAddBtnClick = () => {
-    dispatch(updateNoteIdUrlHash(NEW_NOTE, false, true));
+    dispatch(updateNoteId(NEW_NOTE, false, true));
   };
 
   const renderMaxError = () => {
@@ -96,7 +96,8 @@ const NoteList = (props) => {
       <>
         <NoteListItems />
         <NoteListLock />
-      </>);
+      </>
+    );
   }
 
   return (

@@ -2,10 +2,11 @@ import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { updatePopup } from '../actions';
 import { deleteNotes, deleteListNames, deleteTagNames } from '../actions/chunk';
 import {
-  CONFIRM_DELETE_POPUP, DELETE_ACTION_LIST_NAME, DELETE_ACTION_TAG_NAME, SM_WIDTH,
+  CONFIRM_DELETE_POPUP, DELETE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_ITEM_MENU,
+  DELETE_ACTION_LIST_NAME, DELETE_ACTION_TAG_NAME, SM_WIDTH,
 } from '../types/const';
 import { dialogBgFMV, dialogFMV } from '../types/animConfigs';
 
@@ -26,23 +27,28 @@ const ConfirmDeletePopup = () => {
 
   const onConfirmDeleteCancelBtnClick = () => {
     if (didClick.current) return;
-    updatePopupUrlHash(CONFIRM_DELETE_POPUP, false, null);
+    dispatch(updatePopup(CONFIRM_DELETE_POPUP, false, null));
     didClick.current = true;
   };
 
   const onConfirmDeleteOkBtnClick = () => {
     if (didClick.current) return;
 
-    if (deleteAction === DELETE_ACTION_LIST_NAME) {
+    if ([
+      DELETE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_ITEM_MENU,
+    ].includes(deleteAction)) {
+      dispatch(deleteNotes());
+      dispatch(updatePopup(CONFIRM_DELETE_POPUP, false, null));
+    } else if (deleteAction === DELETE_ACTION_LIST_NAME) {
       dispatch(deleteListNames([selectingListName]));
+      dispatch(updatePopup(CONFIRM_DELETE_POPUP, false, null));
     } else if (deleteAction === DELETE_ACTION_TAG_NAME) {
       dispatch(deleteTagNames([selectingTagName]));
+      dispatch(updatePopup(CONFIRM_DELETE_POPUP, false, null));
     } else {
-      // As this and closing confirmDelete popup both call window.history.back(),
-      //   need to be in different js clock cycle.
-      setTimeout(() => dispatch(deleteNotes()), 100);
+      console.log('In ConfirmDeletePopup, invalid deleteAction: ', deleteAction);
+      return; // Don't set didClick to true
     }
-    onConfirmDeleteCancelBtnClick();
 
     didClick.current = true;
   };

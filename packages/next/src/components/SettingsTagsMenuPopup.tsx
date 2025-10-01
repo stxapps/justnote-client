@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { updatePopup } from '../actions';
 import { moveTagName, updateTagNameEditors } from '../actions/chunk';
 import {
   SETTINGS_TAGS_MENU_POPUP, MODE_EDIT, SWAP_LEFT, SWAP_RIGHT,
@@ -33,7 +33,7 @@ const SettingsTagsMenuPopup = () => {
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;
-    updatePopupUrlHash(SETTINGS_TAGS_MENU_POPUP, false, null);
+    dispatch(updatePopup(SETTINGS_TAGS_MENU_POPUP, false, null));
     didClick.current = true;
   };
 
@@ -67,15 +67,9 @@ const SettingsTagsMenuPopup = () => {
   const onDeleteBtnClick = () => {
     if (didClick.current) return;
     onCancelBtnClick();
-
-    // As this and showing ConfirmDeletePopup both change url hash,
-    //   need to be in different js clock cycle.
-    setTimeout(() => {
-      dispatch(updateTagNameEditors({
-        [selectingTagName]: { isCheckingCanDelete: true },
-      }));
-    }, 100);
-
+    dispatch(updateTagNameEditors({
+      [selectingTagName]: { isCheckingCanDelete: true },
+    }));
     didClick.current = true;
   };
 

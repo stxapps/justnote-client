@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { useSelector, useDispatch } from '../store';
-import { updateSearchString, updatePopupUrlHash } from '../actions';
+import { updateSearchString, updatePopup } from '../actions';
 import { SEARCH_POPUP } from '../types/const';
 import { popupFMV } from '../types/animConfigs';
 
@@ -14,6 +14,7 @@ const NoteListSearchPopup = () => {
   const searchString = useSelector(state => state.display.searchString);
   const searchInput = useRef(null);
   const prevIsShown = useRef(isShown);
+  const didClick = useRef(false);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
@@ -27,12 +28,15 @@ const NoteListSearchPopup = () => {
   };
 
   const onSearchCancelBtnClick = () => {
-    updatePopupUrlHash(SEARCH_POPUP, false, null);
+    if (didClick.current) return;
+    dispatch(updatePopup(SEARCH_POPUP, false, null));
+    didClick.current = true;
   };
 
   useEffect(() => {
     if (isShown) {
       if (!prevIsShown.current && searchInput.current) searchInput.current.focus();
+      didClick.current = false;
     } else {
       if (prevIsShown.current && searchInput.current) searchInput.current.blur();
     }

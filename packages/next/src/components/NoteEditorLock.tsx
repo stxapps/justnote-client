@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 
-import { useSelector } from '../store';
-import { updateNoteIdUrlHash } from '../actions';
+import { useSelector, useDispatch } from '../store';
+import { updateNoteId } from '../actions';
 import { LG_WIDTH, LOCKED, NEW_NOTE } from '../types/const';
 import { makeGetLockNoteStatus, getCurrentLockListStatus } from '../selectors';
 import { isObject } from '../utils';
@@ -16,13 +16,14 @@ const NoteEditorLock = (props) => {
   const lockNoteStatus = useSelector(state => getLockNoteStatus(state, note));
   const lockListStatus = useSelector(state => getCurrentLockListStatus(state));
   const didClick = useRef(false);
+  const dispatch = useDispatch();
   const tailwind = useTailwind();
 
   const isLocked = [lockNoteStatus, lockListStatus].includes(LOCKED);
 
   const onRightPanelCloseBtnClick = () => {
     if (didClick.current) return;
-    updateNoteIdUrlHash(null);
+    dispatch(updateNoteId(null));
     didClick.current = true;
   };
 

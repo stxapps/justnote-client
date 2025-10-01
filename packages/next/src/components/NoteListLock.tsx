@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { updatePopup } from '../actions';
 import { updateSelectingListName, updateLockAction } from '../actions/chunk';
 import { LOCK_EDITOR_POPUP, LOCK_ACTION_UNLOCK_LIST, LOCKED } from '../types/const';
 import { getCurrentLockListStatus } from '../selectors';
@@ -18,7 +18,7 @@ const NoteListLock = () => {
   const onLockBtnClick = () => {
     dispatch(updateSelectingListName(listName));
     dispatch(updateLockAction(LOCK_ACTION_UNLOCK_LIST));
-    updatePopupUrlHash(LOCK_EDITOR_POPUP, true);
+    dispatch(updatePopup(LOCK_EDITOR_POPUP, true));
   };
 
   if (lockStatus !== LOCKED) return null;

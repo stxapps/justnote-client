@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { updatePopup } from '../actions';
 import {
   moveNotesWithAction, pinNotes, updateMoveAction,
   updateDeleteAction, updateListNamesMode, viewNoteAsWebpage, showAddLockEditorPopup,
@@ -58,7 +58,7 @@ const NoteListItemMenuPopup = () => {
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;
-    updatePopupUrlHash(NOTE_LIST_ITEM_MENU_POPUP, false, null);
+    dispatch(updatePopup(NOTE_LIST_ITEM_MENU_POPUP, false, null));
     didClick.current = true;
   };
 
@@ -76,25 +76,32 @@ const NoteListItemMenuPopup = () => {
       dispatch(moveNotesWithAction(MY_NOTES, MOVE_ACTION_NOTE_ITEM_MENU));
     } else if (text === DELETE) {
       dispatch(updateDeleteAction(DELETE_ACTION_NOTE_ITEM_MENU));
-      updatePopupUrlHash(CONFIRM_DELETE_POPUP, true, null);
+      dispatch(updatePopup(CONFIRM_DELETE_POPUP, true, null));
       return; // Don't set didClick to true
     } else if (text === MOVE_TO) {
       dispatch(updateMoveAction(MOVE_ACTION_NOTE_ITEM_MENU));
       dispatch(updateListNamesMode(LIST_NAMES_MODE_MOVE_NOTES));
-      updatePopupUrlHash(LIST_NAMES_POPUP, true, anchorPosition, true);
+      dispatch(updatePopup(
+        LIST_NAMES_POPUP, true, anchorPosition, NOTE_LIST_ITEM_MENU_POPUP
+      ));
     } else if (text === PIN) {
-      onCancelBtnClick();
-      dispatch(pinNotes([selectingNoteId]));
+      dispatch(pinNotes([selectingNoteId], NOTE_LIST_ITEM_MENU_POPUP));
     } else if (text === MANAGE_PIN) {
-      updatePopupUrlHash(PIN_MENU_POPUP, true, anchorPosition, true);
+      dispatch(updatePopup(
+        PIN_MENU_POPUP, true, anchorPosition, NOTE_LIST_ITEM_MENU_POPUP
+      ));
     } else if (text === ADD_TAGS || text === MANAGE_TAGS) {
-      dispatch(updateTagEditorPopup(true, text === ADD_TAGS));
+      dispatch(updateTagEditorPopup(
+        true, text === ADD_TAGS, NOTE_LIST_ITEM_MENU_POPUP
+      ));
     } else if (text === VIEW_AS_WEBPAGE) {
       onCancelBtnClick();
       dispatch(viewNoteAsWebpage());
     } else if (text === LOCK) {
       if (lockStatus === null) {
-        dispatch(showAddLockEditorPopup(LOCK_ACTION_ADD_LOCK_NOTE));
+        dispatch(showAddLockEditorPopup(
+          LOCK_ACTION_ADD_LOCK_NOTE, NOTE_LIST_ITEM_MENU_POPUP
+        ));
       } else if (lockStatus === UNLOCKED) {
         onCancelBtnClick();
         dispatch(lockNote(selectingNoteId));

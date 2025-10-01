@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
+import type { EditorConfig } from '@ckeditor/ckeditor5-core';
 import ckeditor from 'justnote-editor';
 
 import { useSelector, useDispatch } from '../store';
 import fileApi from '../apis/localFile';
-import {
-  onUpdateNoteIdUrlHash, onUpdateNoteId, onUpdateBulkEditUrlHash, handleUnsavedNote,
-} from '../actions';
+import { onUpdateNoteId, onUpdateBulkEdit, handleUnsavedNote } from '../actions';
 import {
   updateEditorFocused, updateEditorBusy, saveNote, discardNote, onChangeListName,
   onUpdateQueryString, onShowNoteListMenuPopup, onShowNLIMPopup, onShowUNEPopup,
@@ -26,11 +25,10 @@ import { useSafeAreaFrame, useTailwind } from '.';
 
 const GET_DATA_SAVE_NOTE = 'GET_DATA_SAVE_NOTE';
 const GET_DATA_DISCARD_NOTE = 'GET_DATA_DISCARD_NOTE';
-const GET_DATA_UPDATE_NOTE_ID_URL_HASH = 'GET_DATA_UPDATE_NOTE_ID_URL_HASH';
 const GET_DATA_UPDATE_NOTE_ID = 'GET_DATA_UPDATE_NOTE_ID';
 const GET_DATA_CHANGE_LIST_NAME = 'GET_DATA_CHANGE_LIST_NAME';
 const GET_DATA_UPDATE_QUERY_STRING = 'GET_DATA_UPDATE_QUERY_STRING';
-const GET_DATA_UPDATE_BULK_EDIT_URL_HASH = 'GET_DATA_UPDATE_BULK_EDIT_URL_HASH';
+const GET_DATA_UPDATE_BULK_EDIT = 'GET_DATA_UPDATE_BULK_EDIT';
 const GET_DATA_SHOW_NOTE_LIST_MENU_POPUP = 'GET_DATA_SHOW_NOTE_LIST_MENU_POPUP';
 const GET_DATA_SHOW_NLIM_POPUP = 'GET_DATA_SHOW_NLIM_POPUP';
 const GET_DATA_SHOW_UNE_POPUP = 'GET_DATA_SHOW_UNE_POPUP';
@@ -46,9 +44,6 @@ const NoteEditorEditor = (props) => {
   const checkToFocusCount = useSelector(state => state.editor.checkToFocusCount);
   const saveNoteCount = useSelector(state => state.editor.saveNoteCount);
   const discardNoteCount = useSelector(state => state.editor.discardNoteCount);
-  const updateNoteIdUrlHashCount = useSelector(
-    state => state.editor.updateNoteIdUrlHashCount
-  );
   const updateNoteIdCount = useSelector(state => state.editor.updateNoteIdCount);
   const changeListNameCount = useSelector(state => state.editor.changeListNameCount);
   const updateQueryStringCount = useSelector(
@@ -59,9 +54,7 @@ const NoteEditorEditor = (props) => {
   const updateEditorWidthCount = useSelector(
     state => state.editor.updateEditorWidthCount
   );
-  const updateBulkEditUrlHashCount = useSelector(
-    state => state.editor.updateBulkEditUrlHashCount
-  );
+  const updateBulkEditCount = useSelector(state => state.editor.updateBulkEditCount);
   const showNoteListMenuPopupCount = useSelector(
     state => state.editor.showNoteListMenuPopupCount
   );
@@ -78,14 +71,13 @@ const NoteEditorEditor = (props) => {
   const prevCheckToFocusCount = useRef(0); // First mount always checks.
   const prevSaveNoteCount = useRef(saveNoteCount);
   const prevDiscardNoteCount = useRef(discardNoteCount);
-  const prevUpdateNoteIdUrlHashCount = useRef(updateNoteIdUrlHashCount);
   const prevUpdateNoteIdCount = useRef(updateNoteIdCount);
   const prevChangeListNameCount = useRef(changeListNameCount);
   const prevUpdateQueryStringCount = useRef(updateQueryStringCount);
   const prevFocusTitleCount = useRef(focusTitleCount);
   const prevSetInitDataCount = useRef(setInitDataCount);
   const prevUpdateEditorWidthCount = useRef(updateEditorWidthCount);
-  const prevUpdateBulkEditUrlHashCount = useRef(updateBulkEditUrlHashCount);
+  const prevUpdateBulkEditCount = useRef(updateBulkEditCount);
   const prevShowNoteListMenuPopupCount = useRef(showNoteListMenuPopupCount);
   const prevShowNLIMPopupCount = useRef(showNLIMPopupCount);
   const prevShowUNEPopupCount = useRef(showUNEPopupCount);
@@ -125,7 +117,7 @@ const NoteEditorEditor = (props) => {
     if (titleInput.current) titleInput.current.blur();
     setTimeout(() => {
       if (titleInput.current) titleInput.current.focus();
-    }, 1);
+    }, 100);
   };
 
   const blurTitleInput = () => {
@@ -215,8 +207,6 @@ const NoteEditorEditor = (props) => {
       //   after dispatching UPDATE_NOTE_ROLLBACK
       //   guess because CKEditor.setData still working on updated version
       //   then suddenly got upmounted.
-      // Also, in handleScreenRotation, calling updateNoteIdUrlHash(null)
-      //   guess it's the same reason.
       console.log('NoteEditorEditor.setInitData: ckeditor.setData error ', error);
     }
 
@@ -300,16 +290,14 @@ const NoteEditorEditor = (props) => {
       dispatch(saveNote(title, body, media));
     } else if (action === GET_DATA_DISCARD_NOTE) {
       dispatch(discardNote(true, title, body));
-    } else if (action === GET_DATA_UPDATE_NOTE_ID_URL_HASH) {
-      dispatch(onUpdateNoteIdUrlHash(title, body, media));
     } else if (action === GET_DATA_UPDATE_NOTE_ID) {
       dispatch(onUpdateNoteId(title, body, media));
     } else if (action === GET_DATA_CHANGE_LIST_NAME) {
       dispatch(onChangeListName(title, body, media));
     } else if (action === GET_DATA_UPDATE_QUERY_STRING) {
       dispatch(onUpdateQueryString(title, body, media));
-    } else if (action === GET_DATA_UPDATE_BULK_EDIT_URL_HASH) {
-      dispatch(onUpdateBulkEditUrlHash(title, body, media));
+    } else if (action === GET_DATA_UPDATE_BULK_EDIT) {
+      dispatch(onUpdateBulkEdit(title, body, media));
     } else if (action === GET_DATA_SHOW_NOTE_LIST_MENU_POPUP) {
       dispatch(onShowNoteListMenuPopup(title, body, media));
     } else if (action === GET_DATA_SHOW_NLIM_POPUP) {
@@ -385,7 +373,7 @@ const NoteEditorEditor = (props) => {
       }
     }
 
-    window.JustnoteReactWebApp = {
+    (window as any).JustnoteReactWebApp = {
       updateIsUploading: onUpdateIsUploading, addObjectUrlFiles: onAddObjectUrlFiles,
     };
 
@@ -478,15 +466,6 @@ const NoteEditorEditor = (props) => {
 
   useEffect(() => {
     if (!isEditorReady) return;
-    if (updateNoteIdUrlHashCount !== prevUpdateNoteIdUrlHashCount.current) {
-      getDataAction.current = GET_DATA_UPDATE_NOTE_ID_URL_HASH;
-      onGetData();
-      prevUpdateNoteIdUrlHashCount.current = updateNoteIdUrlHashCount;
-    }
-  }, [isEditorReady, updateNoteIdUrlHashCount, onGetData]);
-
-  useEffect(() => {
-    if (!isEditorReady) return;
     if (updateNoteIdCount !== prevUpdateNoteIdCount.current) {
       getDataAction.current = GET_DATA_UPDATE_NOTE_ID;
       onGetData();
@@ -559,12 +538,12 @@ const NoteEditorEditor = (props) => {
 
   useEffect(() => {
     if (!isEditorReady) return;
-    if (updateBulkEditUrlHashCount !== prevUpdateBulkEditUrlHashCount.current) {
-      getDataAction.current = GET_DATA_UPDATE_BULK_EDIT_URL_HASH;
+    if (updateBulkEditCount !== prevUpdateBulkEditCount.current) {
+      getDataAction.current = GET_DATA_UPDATE_BULK_EDIT;
       onGetData();
-      prevUpdateBulkEditUrlHashCount.current = updateBulkEditUrlHashCount;
+      prevUpdateBulkEditCount.current = updateBulkEditCount;
     }
-  }, [isEditorReady, updateBulkEditUrlHashCount, onGetData]);
+  }, [isEditorReady, updateBulkEditCount, onGetData]);
 
   useEffect(() => {
     if (!isEditorReady) return;
@@ -679,7 +658,7 @@ const NoteEditorEditor = (props) => {
     };
   }, [dispatch]);
 
-  const editorConfig = useMemo(() => {
+  const editorConfig: EditorConfig = useMemo(() => {
     return {
       licenseKey: 'GPL',
       placeholder: 'Start writing...',

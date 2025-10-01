@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { updatePopup } from '../actions';
 import { updateLockAction } from '../actions/chunk';
 import {
   LOCK_MENU_POPUP, LOCK_EDITOR_POPUP, LOCK_ACTION_REMOVE_LOCK_NOTE, REMOVE_LOCK,
@@ -27,14 +27,14 @@ const LockMenuPopup = () => {
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;
-    updatePopupUrlHash(LOCK_MENU_POPUP, false, null);
+    dispatch(updatePopup(LOCK_MENU_POPUP, false, null));
     didClick.current = true;
   };
 
   const onRemoveBtnClick = () => {
     if (didClick.current) return;
     dispatch(updateLockAction(LOCK_ACTION_REMOVE_LOCK_NOTE));
-    updatePopupUrlHash(LOCK_EDITOR_POPUP, true, null, true);
+    dispatch(updatePopup(LOCK_EDITOR_POPUP, true, null, LOCK_MENU_POPUP));
     didClick.current = true;
   };
 

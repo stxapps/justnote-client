@@ -8,7 +8,6 @@ import { useSafeAreaFrame } from '.';
 import ScrollControl from './ScrollControl';
 import ColsPanel from './ColsPanel';
 import NavPanel from './NavPanel';
-import SidebarProfilePopup from './SidebarProfilePopup';
 import NoteListMenuPopup from './NoteListMenuPopup';
 import NoteListItemMenuPopup from './NoteListItemMenuPopup';
 import PinMenuPopup from './PinMenuPopup';
@@ -59,7 +58,6 @@ const Main = () => {
     <React.Fragment>
       <ScrollControl />
       {panel}
-      <SidebarProfilePopup />
       <NoteListMenuPopup />
       <NoteListItemMenuPopup />
       <PinMenuPopup />

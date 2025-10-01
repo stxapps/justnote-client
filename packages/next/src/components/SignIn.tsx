@@ -79,9 +79,9 @@ const SignIn = (props) => {
 
   useEffect(() => {
     if (viewId === VIEW_YOUR) {
-      if (window.PasswordCredential) {
-        const opts = { password: true, mediation: 'required' };
-        navigator.credentials.get(opts).then((cred) => {
+      if ((window as any).PasswordCredential) {
+        const opts: any = { password: true, mediation: 'required' };
+        navigator.credentials.get(opts).then((cred: any) => {
           if (cred && cred.password) setSecretKeyInput(cred.password);
         });
       }

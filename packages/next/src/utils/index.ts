@@ -190,28 +190,27 @@ export const throttle = (func, limit) => {
   };
 };
 
-export const debounce = (func, wait, immediate = null) => {
-  let timeout;
+export const debounce = <T extends (...args: any[]) => any>(
+  func: T,
+  wait: number,
+  immediate = false
+) => {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
 
-  return function () {
-    let context = this;
-    let args = arguments;
+  return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
+    const context = this;
 
-    let later = function () {
+    const later = () => {
       timeout = null;
       if (!immediate) func.apply(context, args);
     };
 
-    let callNow = immediate && !timeout;
+    const callNow = immediate && !timeout;
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
 
     if (callNow) func.apply(context, args);
   };
-};
-
-export const oneClick = (func) => {
-
 };
 
 export const sleep = ms => {
@@ -3078,4 +3077,27 @@ export const getPopupHistoryStateIndex = (states, hs) => {
 
   const idx = states.findIndex(s => s.phsId === hs.phsId);
   return idx;
+};
+
+export const reorderPopupHistoryStates = (states, idx, type, id) => {
+  /* searchPopup and bulkEdit can intertween:
+       open popup -> bulkEdit:true -> close popup
+       bulkEdit:true -> open popup -> bulkEdit:false
+     causing browser history and vars.popupHistory misalign.
+     Find from the left of idx, and move it to the idx.
+  */
+  if (idx < 0) return states;
+
+  const tiIdx = states.findIndex(s => s.type === type && s.id === id);
+  if (tiIdx < 0 || tiIdx >= idx) return states;
+
+  const newStates = states.map(s => {
+    return { ...s };
+  });
+  for (let i = tiIdx; i < idx; i++) {
+    newStates[i] = { ...states[i + 1], phsId: states[i].phsId };
+  }
+  newStates[idx] = { ...states[tiIdx], phsId: states[idx].phsId };
+
+  return newStates;
 };

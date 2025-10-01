@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
-import Url from 'url-parse';
 
 import { useSelector, useDispatch } from '../store';
-import { signOut, updatePopupUrlHash, updateBulkEditUrlHash } from '../actions';
+import { signOut, updatePopup, updateBulkEdit, linkTo } from '../actions';
 import {
   sync, updateSynced, updateSettingsPopup, updateSettingsViewId, lockCurrentList,
 } from '../actions/chunk';
@@ -32,67 +32,69 @@ const NoteListMenuPopup = () => {
   const [popupSize, setPopupSize] = useState(null);
   const popup = useRef(null);
   const cancelBtn = useRef(null);
+  const didClick = useRef(false);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
+  const router = useRouter();
 
   const onNoteListMenuCancelBtnClick = () => {
-    updatePopupUrlHash(NOTE_LIST_MENU_POPUP, false, null);
+    if (didClick.current) return;
+    dispatch(updatePopup(NOTE_LIST_MENU_POPUP, false, null));
+    didClick.current = true;
   };
 
   const onSyncBtnClick = () => {
-    onNoteListMenuCancelBtnClick();
+    if (didClick.current) return;
+    dispatch(updatePopup(NOTE_LIST_MENU_POPUP, false));
     if (syncProgress && syncProgress.status === SHOW_SYNCED) {
       dispatch(updateSynced());
     } else {
       dispatch(sync(true));
     }
+    didClick.current = true;
   };
 
   const onSelectBtnClick = () => {
-    onNoteListMenuCancelBtnClick();
-
-    // As this and showing settings popup both change url hash,
-    //   need to be in different js clock cycle.
-    setTimeout(() => {
-      dispatch(updateBulkEditUrlHash(true, null, false, true));
-    }, 100);
+    if (didClick.current) return;
+    dispatch(updateBulkEdit(true, null, NOTE_LIST_MENU_POPUP, false, true));
+    didClick.current = true;
   };
 
   const onSettingsBtnClick = () => {
-    onNoteListMenuCancelBtnClick();
-
-    // As this and showing settings popup both change url hash,
-    //   need to be in different js clock cycle.
-    setTimeout(() => {
-      dispatch(updateSettingsViewId(SETTINGS_VIEW_ACCOUNT, true));
-      dispatch(updateSettingsPopup(true));
-    }, 100);
+    if (didClick.current) return;
+    dispatch(updateSettingsViewId(SETTINGS_VIEW_ACCOUNT, true));
+    dispatch(updateSettingsPopup(true, false, NOTE_LIST_MENU_POPUP));
+    didClick.current = true;
   };
 
   const onSupportBtnClick = () => {
-    const urlObj = new Url(window.location.href, {});
-    urlObj.set('pathname', '/');
-    urlObj.set('hash', HASH_SUPPORT);
-    window.location.replace(urlObj.toString());
+    if (didClick.current) return;
+    dispatch(updatePopup(NOTE_LIST_MENU_POPUP, false));
+    dispatch(linkTo(router, '/' + HASH_SUPPORT));
+    didClick.current = true;
   };
 
   const onSignOutBtnClick = () => {
-    onNoteListMenuCancelBtnClick();
+    if (didClick.current) return;
+    // Need to call history.back() properly
+    dispatch(updatePopup(NOTE_LIST_MENU_POPUP, false));
     dispatch(signOut());
+    didClick.current = true;
   };
 
   const onExitBtnClick = () => {
-    onNoteListMenuCancelBtnClick();
-
-    // As this and closing menu popup both call window.history.back(),
-    //   need to be in different js clock cycle.
-    setTimeout(() => updateBulkEditUrlHash(false), 100);
+    if (didClick.current) return;
+    dispatch(updatePopup(NOTE_LIST_MENU_POPUP, false));
+    dispatch(updateBulkEdit(false));
+    didClick.current = true;
   };
 
   const onLockBtnClick = () => {
-    onNoteListMenuCancelBtnClick();
+    if (didClick.current) return;
+    dispatch(updatePopup(NOTE_LIST_MENU_POPUP, false));
     // Wait for the close animation to finish first
     setTimeout(() => dispatch(lockCurrentList()), 100);
+    didClick.current = true;
   };
 
   const renderSyncBtn = () => {
@@ -151,6 +153,7 @@ const NoteListMenuPopup = () => {
       setPopupSize(s);
 
       cancelBtn.current.focus();
+      didClick.current = false;
     } else {
       setPopupSize(null);
     }

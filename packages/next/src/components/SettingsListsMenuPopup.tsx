@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { updatePopup } from '../actions';
 import {
   moveListName, updateListNameEditors, updateListNamesMode, updateLockAction,
   showAddLockEditorPopup,
@@ -40,7 +40,7 @@ const SettingsListsMenuPopup = () => {
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;
-    updatePopupUrlHash(SETTINGS_LISTS_MENU_POPUP, false, null);
+    dispatch(updatePopup(SETTINGS_LISTS_MENU_POPUP, false, null));
     didClick.current = true;
   };
 
@@ -74,35 +74,33 @@ const SettingsListsMenuPopup = () => {
   const onMoveToBtnClick = () => {
     if (didClick.current) return;
     dispatch(updateListNamesMode(LIST_NAMES_MODE_MOVE_LIST_NAME));
-    updatePopupUrlHash(LIST_NAMES_POPUP, true, anchorPosition, true);
+    dispatch(updatePopup(
+      LIST_NAMES_POPUP, true, anchorPosition, SETTINGS_LISTS_MENU_POPUP,
+    ));
     didClick.current = true;
   };
 
   const onDeleteBtnClick = () => {
     if (didClick.current) return;
     onCancelBtnClick();
-
-    // As this and showing ConfirmDeletePopup both change url hash,
-    //   need to be in different js clock cycle.
-    setTimeout(() => {
-      dispatch(updateListNameEditors({
-        [selectingListName]: { isCheckingCanDelete: true },
-      }));
-    }, 100);
-
+    dispatch(updateListNameEditors({
+      [selectingListName]: { isCheckingCanDelete: true },
+    }));
     didClick.current = true;
   };
 
   const onAddLockBtnClick = () => {
     if (didClick.current) return;
-    dispatch(showAddLockEditorPopup(LOCK_ACTION_ADD_LOCK_LIST));
+    dispatch(showAddLockEditorPopup(
+      LOCK_ACTION_ADD_LOCK_LIST, SETTINGS_LISTS_MENU_POPUP,
+    ));
     didClick.current = true;
   };
 
   const onRemoveLockBtnClick = () => {
     if (didClick.current) return;
     dispatch(updateLockAction(LOCK_ACTION_REMOVE_LOCK_LIST));
-    updatePopupUrlHash(LOCK_EDITOR_POPUP, true, null, true);
+    dispatch(updatePopup(LOCK_EDITOR_POPUP, true, null, SETTINGS_LISTS_MENU_POPUP));
     didClick.current = true;
   };
 

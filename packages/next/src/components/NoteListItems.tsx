@@ -160,7 +160,7 @@ const NoteListItems = (props) => {
           flatList.current.scrollTo(0, 0);
           vars.scrollPanel.scrollY = 0;
         }
-      }, 1);
+      }, 100);
     }
   }, [listChangedCount]);
 

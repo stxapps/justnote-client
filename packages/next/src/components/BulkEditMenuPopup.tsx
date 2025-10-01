@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { updatePopup } from '../actions';
 import {
   updateMoveAction, updateListNamesMode, bulkPinNotes, bulkUnpinNotes,
   updateTagEditorPopup,
@@ -34,7 +34,7 @@ const BulkEditMenuPopup = () => {
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;
-    updatePopupUrlHash(BULK_EDIT_MENU_POPUP, false, null);
+    dispatch(updatePopup(BULK_EDIT_MENU_POPUP, false, null));
     didClick.current = true;
   };
 
@@ -44,19 +44,16 @@ const BulkEditMenuPopup = () => {
     if (text === MOVE_TO) {
       dispatch(updateMoveAction(MOVE_ACTION_NOTE_COMMANDS));
       dispatch(updateListNamesMode(LIST_NAMES_MODE_MOVE_NOTES));
-      updatePopupUrlHash(LIST_NAMES_POPUP, true, anchorPosition, true);
+      dispatch(updatePopup(
+        LIST_NAMES_POPUP, true, anchorPosition, BULK_EDIT_MENU_POPUP
+      ));
     } else if (text === PIN) {
-      onCancelBtnClick();
-      // As this and closing the popup both might call window.history.back(),
-      //   if bulkEditing is true, need to be in different js clock cycle.
-      setTimeout(() => dispatch(bulkPinNotes(selectedNoteIds)), 100);
+      dispatch(bulkPinNotes(selectedNoteIds, BULK_EDIT_MENU_POPUP));
     } else if (text === UNPIN) {
       onCancelBtnClick();
-      // As this and closing the popup both might call window.history.back(),
-      //   if bulkEditing is true, need to be in different js clock cycle.
-      setTimeout(() => dispatch(bulkUnpinNotes(selectedNoteIds)), 100);
+      dispatch(bulkUnpinNotes(selectedNoteIds));
     } else if (text === MANAGE_TAGS) {
-      dispatch(updateTagEditorPopup(true, true));
+      dispatch(updateTagEditorPopup(true, true, BULK_EDIT_MENU_POPUP));
     } else {
       console.log(`In BulkEditMenuPopup, invalid text: ${text}`);
       return; // Don't set didClick to true

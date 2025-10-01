@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 
-import { useSelector } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { useSelector, useDispatch } from '../store';
+import { updatePopup } from '../actions';
 import { SIDEBAR_POPUP, NEW_NOTE, NEW_NOTE_OBJ } from '../types/const';
 import {
   canvasFMV, sideBarOverlayFMV, sideBarFMV, rightPanelFMV,
@@ -34,6 +34,7 @@ const NavPanel = () => {
   const unsavedNote = useSelector(state => getUnsavedNote(state, note));
   const [derivedNote, setDerivedNote] = useState(note);
   const [derivedUnsavedNote, setDerivedUnsavedNote] = useState(unsavedNote);
+  const dispatch = useDispatch();
   const tailwind = useTailwind();
 
   const isMobile = useMemo(() => _isMobile(), []);
@@ -48,11 +49,11 @@ const NavPanel = () => {
   }, [safeAreaHeight, windowHeight, isMobile]);
 
   const onSidebarOpenBtnClick = () => {
-    updatePopupUrlHash(SIDEBAR_POPUP, true, null);
+    dispatch(updatePopup(SIDEBAR_POPUP, true, null));
   };
 
   const onSidebarCloseBtnClick = () => {
-    updatePopupUrlHash(SIDEBAR_POPUP, false, null);
+    dispatch(updatePopup(SIDEBAR_POPUP, false, null));
   };
 
   const onRightPanelAnimEnd = () => {

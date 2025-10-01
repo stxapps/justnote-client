@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
-import Url from 'url-parse';
 
-import { useSelector } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { useSelector, useDispatch } from '../store';
+import { updatePopup, linkTo } from '../actions';
 import {
   HASH_FRAGMENT_IDENTIFIER, HASH_LANDING_MOBILE, SIGN_UP_POPUP, SM_WIDTH, MD_WIDTH,
 } from '../types/const';
@@ -38,7 +38,9 @@ const Landing = () => {
   const href = useSelector(state => state.window.href);
   const ubiquitousSection = useRef(null);
   const safeAreaWidthRef = useRef(safeAreaWidth);
+  const dispatch = useDispatch();
   const tailwind = useTailwind();
+  const router = useRouter();
 
   const hashId = useMemo(() => {
     const { hash } = extractUrl(href);
@@ -48,14 +50,11 @@ const Landing = () => {
 
   const onSignUpBtnClick = () => {
     if (isUserSignedIn) {
-      const urlObj = new Url(window.location.href, {});
-      urlObj.set('pathname', '/');
-      urlObj.set('hash', '');
-      window.location.href = urlObj.toString();
+      dispatch(linkTo(router, '/'));
       return;
     }
 
-    updatePopupUrlHash(SIGN_UP_POPUP, true);
+    dispatch(updatePopup(SIGN_UP_POPUP, true));
   };
 
   useEffect(() => {

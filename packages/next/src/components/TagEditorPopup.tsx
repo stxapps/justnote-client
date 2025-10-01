@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { updatePopup } from '../actions';
 import { updateTagEditor, addTagEditorTagName, updateTagData } from '../actions/chunk';
 import {
   TAG_EDITOR_POPUP, TAGGED, ADD_TAGS, MANAGE_TAGS, NOT_SUPPORTED,
@@ -23,16 +23,14 @@ const TagEditorPopup = () => {
 
   const onPopupCloseBtnClick = () => {
     if (didClick.current) return;
-    updatePopupUrlHash(TAG_EDITOR_POPUP, false);
+    dispatch(updatePopup(TAG_EDITOR_POPUP, false));
     didClick.current = true;
   };
 
   const onSaveBtnClick = () => {
     if (didClick.current) return;
     onPopupCloseBtnClick();
-    // As this and closing the popup both might call window.history.back(),
-    //   if bulkEditing is true, need to be in different js clock cycle.
-    setTimeout(() => dispatch(updateTagData(tagEditor.ids, tagEditor.values)), 100);
+    dispatch(updateTagData(tagEditor.ids, tagEditor.values))
     didClick.current = true;
   };
 

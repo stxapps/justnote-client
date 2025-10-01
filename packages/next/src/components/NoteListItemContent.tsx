@@ -2,22 +2,19 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 
 import { useSelector, useDispatch } from '../store';
 import {
-  updateNoteIdUrlHash, updateNoteId, updateBulkEditUrlHash, addSelectedNoteIds,
-  deleteSelectedNoteIds,
+  updateNoteId, updateBulkEdit, addSelectedNoteIds, deleteSelectedNoteIds,
 } from '../actions';
 import { showNLIMPopup, updateQueryString } from '../actions/chunk';
-import { LG_WIDTH } from '../types/const';
 import { makeIsNoteIdSelected, makeGetNoteDate, makeGetTnAndDns } from '../selectors';
 import {
   isNumber, isBusyStatus, isPinningStatus, isTaggingStatus, stripHtml, adjustRect,
 } from '../utils';
 
-import { useSafeAreaFrame, useTailwind } from '.';
+import { useTailwind } from '.';
 
 const NoteListItemContent = (props) => {
 
   const { note, pinStatus, tagStatus } = props;
-  const { width: safeAreaWidth } = useSafeAreaFrame();
   const getIsNoteIdSelected = useMemo(makeIsNoteIdSelected, []);
   const getNoteDate = useMemo(makeGetNoteDate, []);
   const getTnAndDns = useMemo(makeGetTnAndDns, []);
@@ -44,7 +41,7 @@ const NoteListItemContent = (props) => {
     clickPressTimer.current = setTimeout(() => {
       isLongPress.current = true;
       if (!isBulkEditing) {
-        dispatch(updateBulkEditUrlHash(true, isBusy ? null : note.id, false, true));
+        dispatch(updateBulkEdit(true, isBusy ? null : note.id, null, false, true));
       }
     }, 500);
   };
@@ -67,11 +64,7 @@ const NoteListItemContent = (props) => {
             else dispatch(addSelectedNoteIds([note.id]));
           }
         } else {
-          if (safeAreaWidth < LG_WIDTH) {
-            dispatch(updateNoteIdUrlHash(note.id, false, true));
-          } else {
-            dispatch(updateNoteId(note.id, false, true));
-          }
+          dispatch(updateNoteId(note.id, false, true));
         }
       }
       clickPressTimer.current = null;
@@ -83,7 +76,7 @@ const NoteListItemContent = (props) => {
     touchPressTimer.current = setTimeout(() => {
       isLongPress.current = true;
       if (!isBulkEditing) {
-        dispatch(updateBulkEditUrlHash(true, isBusy ? null : note.id, false, true));
+        dispatch(updateBulkEdit(true, isBusy ? null : note.id, null, false, true));
       }
     }, 500);
   };
@@ -107,11 +100,7 @@ const NoteListItemContent = (props) => {
             else dispatch(addSelectedNoteIds([note.id]));
           }
         } else {
-          if (safeAreaWidth < LG_WIDTH) {
-            dispatch(updateNoteIdUrlHash(note.id, false, true));
-          } else {
-            dispatch(updateNoteId(note.id, false, true));
-          }
+          dispatch(updateNoteId(note.id, false, true));
         }
       }
       touchPressTimer.current = null;

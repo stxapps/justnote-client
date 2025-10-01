@@ -2,19 +2,11 @@ import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { useSelector, useDispatch } from '../store';
+import { updatePopup } from '../actions';
+import { discardNote, updateSettingsPopup } from '../actions/chunk';
 import {
-  updatePopupUrlHash, updateNoteIdUrlHash, updateNoteId, updateBulkEditUrlHash,
-} from '../actions';
-import {
-  discardNote, changeListName, showNoteListMenuPopup, showNLIMPopup,
-  updateSettingsPopup,
-} from '../actions/chunk';
-import {
-  CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT,
-  DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH, DISCARD_ACTION_UPDATE_NOTE_ID,
-  DISCARD_ACTION_CHANGE_LIST_NAME, DISCARD_ACTION_UPDATE_BULK_EDIT_URL_HASH,
-  DISCARD_ACTION_SHOW_NOTE_LIST_MENU_POPUP, DISCARD_ACTION_SHOW_NLIM_POPUP,
-  DISCARD_ACTION_UPDATE_LIST_NAME, DISCARD_ACTION_UPDATE_TAG_NAME, SM_WIDTH,
+  CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_LIST_NAME,
+  DISCARD_ACTION_UPDATE_TAG_NAME, SM_WIDTH,
 } from '../types/const';
 import { dialogBgFMV, dialogFMV } from '../types/animConfigs';
 
@@ -33,49 +25,25 @@ const ConfirmDiscardPopup = () => {
 
   const onConfirmDiscardCancelBtnClick = () => {
     if (didClick.current) return;
-    updatePopupUrlHash(CONFIRM_DISCARD_POPUP, false, null);
+    dispatch(updatePopup(CONFIRM_DISCARD_POPUP, false, null));
     didClick.current = true;
   };
 
   const onConfirmDiscardOkBtnClick = () => {
     if (didClick.current) return;
 
+    onConfirmDiscardCancelBtnClick();
     if (discardAction === DISCARD_ACTION_CANCEL_EDIT) {
-      // As this and closing confirmDiscard popup both change url hash,
-      //   need to be in different js clock cycle.
-      setTimeout(() => dispatch(discardNote(false)), 100);
-    } else if (discardAction === DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH) {
-      // As this and closing confirmDiscard popup both call window.history.back(),
-      //   need to be in different js clock cycle.
-      setTimeout(() => dispatch(updateNoteIdUrlHash(null, true, false)), 100);
-    } else if (discardAction === DISCARD_ACTION_UPDATE_NOTE_ID) {
-      dispatch(updateNoteId(null, true, false));
-    } else if (discardAction === DISCARD_ACTION_CHANGE_LIST_NAME) {
-      dispatch(changeListName(null, false));
-    } else if (discardAction === DISCARD_ACTION_UPDATE_BULK_EDIT_URL_HASH) {
-      // As this and closing confirmDiscard popup both change url hash,
-      //   need to be in different js clock cycle.
-      setTimeout(() => dispatch(updateBulkEditUrlHash(true, null, true, false)), 100);
-    } else if (discardAction === DISCARD_ACTION_SHOW_NOTE_LIST_MENU_POPUP) {
-      // As this and closing confirmDiscard popup both change url hash,
-      //   need to be in different js clock cycle.
-      setTimeout(() => dispatch(showNoteListMenuPopup(null, false)), 100);
-    } else if (discardAction === DISCARD_ACTION_SHOW_NLIM_POPUP) {
-      // As this and closing confirmDiscard popup both change url hash,
-      //   need to be in different js clock cycle.
-      setTimeout(() => dispatch(showNLIMPopup(null, null, false)), 100);
+      dispatch(discardNote(false));
     } else if (
       discardAction === DISCARD_ACTION_UPDATE_LIST_NAME ||
       discardAction === DISCARD_ACTION_UPDATE_TAG_NAME
     ) {
-      // As this and closing confirmDiscard popup both change url hash,
-      //   need to be in different js clock cycle.
-      setTimeout(() => dispatch(updateSettingsPopup(false, false)), 100);
+      dispatch(updateSettingsPopup(false, false));
     } else {
       console.log(`Invalid discard action: ${discardAction}`);
     }
 
-    onConfirmDiscardCancelBtnClick();
     didClick.current = true;
   };
 

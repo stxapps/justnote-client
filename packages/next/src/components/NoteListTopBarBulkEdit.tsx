@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { useSelector } from '../store';
-import { updateBulkEditUrlHash } from '../actions';
+import { useSelector, useDispatch } from '../store';
+import { updateBulkEdit } from '../actions';
 import { NOTE_COMMANDS_MODE_NLTBBE } from '../types/const';
 import { getSelectedNoteIdsLength } from '../selectors';
 
@@ -11,10 +11,11 @@ import NoteCommands from './NoteCommands';
 const NoteListTopBarBulkEdit = () => {
 
   const selectedNoteIdsLength = useSelector(getSelectedNoteIdsLength);
+  const dispatch = useDispatch();
   const tailwind = useTailwind();
 
   const onBulkEditCancelBtnClick = () => {
-    updateBulkEditUrlHash(false);
+    dispatch(updateBulkEdit(false));
   };
 
   return (

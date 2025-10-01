@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
+import type { EditorConfig } from '@ckeditor/ckeditor5-core';
 import ckeditor from 'justnote-editor';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { useSelector, useDispatch } from '../store';
 import fileApi from '../apis/localFile';
-import { updateNoteIdUrlHash, handleUnsavedNote, deleteUnsavedNotes } from '../actions';
+import { updateNoteId, handleUnsavedNote, deleteUnsavedNotes } from '../actions';
 import { mergeNotes } from '../actions/chunk';
 import {
   HASH_SUPPORT, MERGING, DIED_MERGING, LG_WIDTH, CD_ROOT, BLK_MODE,
@@ -26,11 +27,12 @@ const InnerNoteEditorSavedConflict = (props) => {
   const { note: conflictedNote } = props;
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const didClick = useRef(false);
+  const dispatch = useDispatch();
   const tailwind = useTailwind();
 
   const onRightPanelCloseBtnClick = () => {
     if (didClick.current) return;
-    updateNoteIdUrlHash(null);
+    dispatch(updateNoteId(null));
     didClick.current = true;
   };
 
@@ -116,7 +118,7 @@ const InnerNoteEditorUnsavedConflict = (props) => {
 
   const onRightPanelCloseBtnClick = () => {
     if (didClick.current) return;
-    updateNoteIdUrlHash(null);
+    dispatch(updateNoteId(null));
     didClick.current = true;
   };
 
@@ -273,8 +275,6 @@ const InnerConflictItem = (props) => {
       //   after dispatching UPDATE_NOTE_ROLLBACK
       //   guess because CKEditor.setData still working on updated version
       //   then suddenly got upmounted.
-      // Also, in handleScreenRotation, calling updateNoteIdUrlHash(null)
-      //   guess it's the same reason.
       console.log('NoteEditorEditor.setInitData: ckeditor.setData error ', error);
     }
   }, [note.body, note.media, replaceWithContents, replaceWithFiles]);
@@ -323,7 +323,7 @@ const InnerConflictItem = (props) => {
     }
   }, []);
 
-  const editorConfig = useMemo(() => {
+  const editorConfig: EditorConfig = useMemo(() => {
     return {
       licenseKey: 'GPL',
       placeholder: 'Start writing...',

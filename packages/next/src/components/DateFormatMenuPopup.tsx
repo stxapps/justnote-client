@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { updatePopup } from '../actions';
 import { updateNoteDateFormat } from '../actions/chunk';
 import {
   DATE_FORMAT_MENU_POPUP, NOTE_DATE_FORMATS, NOTE_DATE_FORMAT_TEXTS,
@@ -27,7 +27,7 @@ const DateFormatMenuPopup = () => {
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;
-    updatePopupUrlHash(DATE_FORMAT_MENU_POPUP, false, null);
+    dispatch(updatePopup(DATE_FORMAT_MENU_POPUP, false, null));
     didClick.current = true;
   };
 

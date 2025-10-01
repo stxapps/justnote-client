@@ -1,4 +1,3 @@
-import Url from 'url-parse';
 import TaskQueue from 'queue';
 
 import userSession from '../userSession';
@@ -6,38 +5,41 @@ import idxApi from '../apis';
 import lsgApi from '../apis/localSg';
 import { updateStgsAndInfo } from '../importWrapper';
 import {
-  INIT, UPDATE_HREF, UPDATE_WINDOW, UPDATE_USER,
+  INIT, UPDATE_HREF, UPDATE_WINDOW, UPDATE_USER, INCREASE_REDIRECT_TO_MAIN_COUNT,
   UPDATE_SEARCH_STRING, UPDATE_NOTE_ID, UPDATE_POPUP, UPDATE_BULK_EDITING,
   ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, REFRESH_FETCHED,
-  INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT, INCREASE_UPDATE_NOTE_ID_COUNT,
-  INCREASE_BLUR_COUNT, INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT,
-  INCREASE_UPDATE_BULK_EDIT_COUNT, INCREASE_WEBVIEW_KEY_COUNT, UPDATE_UNSAVED_NOTE,
-  DELETE_UNSAVED_NOTES, UPDATE_STACKS_ACCESS, UPDATE_SYSTEM_THEME_MODE,
-  UPDATE_IS_24H_FORMAT, INCREASE_UPDATE_STATUS_BAR_STYLE_COUNT, RESET_STATE,
+  INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_BLUR_COUNT, INCREASE_UPDATE_BULK_EDIT_COUNT,
+  INCREASE_WEBVIEW_KEY_COUNT, UPDATE_UNSAVED_NOTE, DELETE_UNSAVED_NOTES,
+  UPDATE_STACKS_ACCESS, UPDATE_SYSTEM_THEME_MODE, UPDATE_IS_24H_FORMAT,
+  INCREASE_UPDATE_STATUS_BAR_STYLE_COUNT, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
-  HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY, HASH_PRICING,
-  HASH_SUPPORT, SEARCH_POPUP, SETTINGS_POPUP, CONFIRM_DELETE_POPUP,
-  CONFIRM_DISCARD_POPUP, SWWU_POPUP, TRASH, NEW_NOTE, NEW_NOTE_OBJ, LG_WIDTH, WHT_MODE,
-  BLK_MODE, PADDLE_RANDOM_ID,
+  SIGN_UP_POPUP, SIGN_IN_POPUP, NOTE_LIST_MENU_POPUP, NOTE_LIST_ITEM_MENU_POPUP,
+  LIST_NAMES_POPUP, PIN_MENU_POPUP, BULK_EDIT_MENU_POPUP, TAG_EDITOR_POPUP,
+  SIDEBAR_POPUP, SEARCH_POPUP, SETTINGS_POPUP, SETTINGS_LISTS_MENU_POPUP,
+  SETTINGS_TAGS_MENU_POPUP, TIME_PICK_POPUP, DATE_FORMAT_MENU_POPUP,
+  CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP, CONFIRM_AS_DUMMY_POPUP,
+  CONFIRM_EXIT_DUMMY_POPUP, PAYWALL_POPUP, LOCK_MENU_POPUP, LOCK_EDITOR_POPUP,
+  SWWU_POPUP, TRASH, NEW_NOTE, NEW_NOTE_OBJ, LG_WIDTH, WHT_MODE, BLK_MODE,
+  PADDLE_RANDOM_ID,
 } from '../types/const';
 import {
-  throttle, urlHashToObj, objToUrlHash, isBusyStatus, isEqual,
-  getUserUsername, getUserImageUrl, sleep, isObject, isString,
-  isNumber, isTitleEqual, isBodyEqual, getWindowInsets, getNote,
-  getEditingListNameEditors, getEditingTagNameEditors,
+  throttle, isBusyStatus, getUserUsername, getUserImageUrl, isEqual, isObject,
+  isString, isNumber, isFldStr, isTitleEqual, isBodyEqual, getWindowInsets, getNote,
+  getEditingListNameEditors, getEditingTagNameEditors, randomString,
+  getPopupHistoryStateIndex, reorderPopupHistoryStates,
 } from '../utils';
 import vars from '../vars';
 
 const navQueue = new TaskQueue({ concurrency: 1, autostart: true, timeout: 1200 });
 navQueue.addEventListener('timeout', (e) => {
-  console.log('navQueue timed out:', e.detail.job.toString().replace(/\n/g, ''));
+  console.log('navQueue timed out:', e);
 });
 
 export const syncQueue = new TaskQueue({ concurrency: 1, autostart: true });
 export const taskQueue = new TaskQueue({ concurrency: 1, autostart: true });
 
-let popStateListener, hashChangeListener, _didInit;
+let popStateListener, _didInit;
 export const init = () => async (dispatch, getState) => {
   if (_didInit) return;
   _didInit = true;
@@ -51,8 +53,6 @@ export const init = () => async (dispatch, getState) => {
     userImage = getUserImageUrl(userData);
     userHubUrl = userData.hubUrl;
   }
-
-  handleUrlHash();
 
   const darkMatches = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const is24HFormat = null;
@@ -84,24 +84,10 @@ export const init = () => async (dispatch, getState) => {
     },
   });
 
-  // Let hash get updated first before add an listener by using setTimeout.
-  // popStateListener can be a local variable,
-  //   but make it the same as hashChangeListener.
   popStateListener = () => {
     onPopStateChange(dispatch, getState);
   };
-  setTimeout(() => {
-    window.addEventListener('popstate', popStateListener);
-  }, 1);
-
-  // hashChangeListener can't be a local variable
-  //   as need to be removed and added when rotating.
-  hashChangeListener = (e) => {
-    onUrlHashChange(e.oldURL, e.newURL, dispatch, getState);
-  };
-  setTimeout(() => {
-    window.addEventListener('hashchange', hashChangeListener);
-  }, 1);
+  window.addEventListener('popstate', popStateListener);
 
   let prevWidth = window.innerWidth;
   window.addEventListener('resize', throttle(() => {
@@ -221,28 +207,225 @@ const handleScreenRotation = (prevWidth) => (dispatch, getState) => {
   const noteId = getState().display.noteId;
   if (noteId) {
     if (fromLg) {
-      window.removeEventListener('hashchange', hashChangeListener);
-      setTimeout(() => {
-        updateNoteIdUrlHash(noteId);
-        setTimeout(() => {
-          window.addEventListener('hashchange', hashChangeListener);
-        }, 100);
-      }, 100);
+      // Must insert UPDATE_NOTE_ID in vars.popupHistory.states
+      //   at the current index or before it if some popups are shown.
+      // The popups can be ListNamesPopup, SettingsPopup, etc.
+      // Do nothing for now.
     } else if (toLg) {
-      window.removeEventListener('hashchange', hashChangeListener);
-      setTimeout(() => {
-        window.history.back();
-        setTimeout(() => {
-          window.addEventListener('hashchange', hashChangeListener);
-        }, 100);
-      }, 100);
+      // Move UPDATE_NOTE_ID to the current index in vars.popupHistory.states
+      // Call window.history.back()
+      // Prevent browser forward button by check, if yes, back()
+      // Do nothing for now
+    }
+  }
+};
+
+const getCanBckPopups = (getState) => {
+  const state = getState();
+  const canBckPopups = {
+    [SIGN_UP_POPUP]: {
+      canFwd: true, isShown: state.display.isSignUpPopupShown,
+    },
+    [SIGN_IN_POPUP]: {
+      canFwd: true, isShown: state.display.isSignInPopupShown,
+    },
+    [NOTE_LIST_MENU_POPUP]: {
+      canFwd: false, isShown: state.display.isNoteListMenuPopupShown,
+    },
+    [NOTE_LIST_ITEM_MENU_POPUP]: {
+      canFwd: false, isShown: state.display.isNoteListItemMenuPopupShown,
+    },
+    [LIST_NAMES_POPUP]: {
+      canFwd: false, isShown: state.display.isListNamesPopupShown,
+    },
+    [PIN_MENU_POPUP]: {
+      canFwd: false, isShown: state.display.isPinMenuPopupShown,
+    },
+    [BULK_EDIT_MENU_POPUP]: {
+      canFwd: false, isShown: state.display.isBulkEditMenuPopupShown,
+    },
+    [TAG_EDITOR_POPUP]: {
+      canFwd: false, isShown: state.display.isTagEditorPopupShown,
+    },
+    [SIDEBAR_POPUP]: {
+      canFwd: true, isShown: state.display.isSidebarPopupShown,
+    },
+    [SEARCH_POPUP]: {
+      canFwd: true, isShown: state.display.isSearchPopupShown,
+    },
+    [SETTINGS_POPUP]: {
+      canFwd: true, isShown: state.display.isSettingsPopupShown,
+    },
+    [SETTINGS_LISTS_MENU_POPUP]: {
+      canFwd: false, isShown: state.display.isSettingsListsMenuPopupShown,
+    },
+    [SETTINGS_TAGS_MENU_POPUP]: {
+      canFwd: false, isShown: state.display.isSettingsTagsMenuPopupShown,
+    },
+    [TIME_PICK_POPUP]: {
+      canFwd: false, isShown: state.display.isTimePickPopupShown,
+    },
+    [DATE_FORMAT_MENU_POPUP]: {
+      canFwd: false, isShown: state.display.isDateFormatMenuPopupShown,
+    },
+    [CONFIRM_DELETE_POPUP]: {
+      canFwd: false, isShown: state.display.isConfirmDeletePopupShown,
+    },
+    [CONFIRM_DISCARD_POPUP]: {
+      canFwd: false, isShown: state.display.isConfirmDiscardPopupShown,
+    },
+    [CONFIRM_AS_DUMMY_POPUP]: {
+      canFwd: false, isShown: state.display.isConfirmAsDummyPopupShown,
+    },
+    [CONFIRM_EXIT_DUMMY_POPUP]: {
+      canFwd: false, isShown: state.display.isConfirmExitDummyPopupShown,
+    },
+    [PAYWALL_POPUP]: {
+      canFwd: false, isShown: state.display.isPaywallPopupShown,
+    },
+    [LOCK_MENU_POPUP]: {
+      canFwd: false, isShown: state.display.isLockMenuPopupShown,
+    },
+    [LOCK_EDITOR_POPUP]: {
+      canFwd: false, isShown: state.display.isLockEditorPopupShown,
+    },
+  };
+  return canBckPopups;
+};
+
+const canPopupBckBtn = (canBckPopups, id) => {
+  if (isObject(canBckPopups[id])) return true;
+  return false;
+};
+
+const canPopupFwdBtn = (canBckPopups, id) => {
+  if (isObject(canBckPopups[id])) return canBckPopups[id].canFwd;
+  return false;
+};
+
+const isPopupShownWthId = (canBckPopups, id) => {
+  if (isObject(canBckPopups[id])) return canBckPopups[id].isShown;
+  console.log('Called isPopupShownWthId with unsupported id:', id);
+  return false;
+};
+
+const onPopStateChange = (dispatch, getState) => {
+  const chs = window.history.state;
+  const idx = getPopupHistoryStateIndex(vars.popupHistory.states, chs);
+
+  // Note id & Bulk edit
+  let noteId = null, isBulkEditing = false;
+  if (idx >= 0) {
+    for (let i = idx; i >= 0; i--) {
+      const phs = vars.popupHistory.states[i];
+      if (phs.type === UPDATE_NOTE_ID && noteId === null) noteId = phs.id;
+      if (phs.type === UPDATE_BULK_EDITING) isBulkEditing = true;
+    }
+  }
+
+  const curNoteId = getState().display.noteId;
+  const curIsBulkEditing = getState().display.isBulkEditing;
+
+  /* noteId    curNoteId
+      null        null                do nothing
+      null        not null            unsaved & update id null
+      not null    null                update id
+      not null    not null    same    do nothing
+                              diff    unsaved & update id
+     bulkEdit  curBulkEdit
+      false      false                do nothing
+      false      true                 set false
+      true       false                unsaved & set true
+      true       true                 do nothing
+  */
+  if (
+    (!isFldStr(noteId) && isFldStr(curNoteId)) ||
+    (isFldStr(noteId) && isFldStr(curNoteId) && noteId !== curNoteId) ||
+    (isBulkEditing && !curIsBulkEditing)
+  ) {
+    // press back button, need to move editingNote to unsavedNote here.
+    const isEditorFocused = getState().display.isEditorFocused;
+    if (isEditorFocused) dispatch(handleUnsavedNote(curNoteId));
+  }
+
+  if (
+    (!isFldStr(noteId) && isFldStr(curNoteId)) ||
+    (isFldStr(noteId) && !isFldStr(curNoteId)) ||
+    (isFldStr(noteId) && isFldStr(curNoteId) && noteId !== curNoteId)
+  ) {
+    dispatch({ type: UPDATE_NOTE_ID, payload: noteId });
+  }
+  if (
+    (!isBulkEditing && curIsBulkEditing) ||
+    (isBulkEditing && !curIsBulkEditing)
+  ) {
+    dispatch({ type: UPDATE_BULK_EDITING, payload: isBulkEditing });
+  }
+
+  // Popups
+  const canBckPopups = getCanBckPopups(getState);
+
+  const hss = vars.popupHistory.states.slice(idx + 1);
+  const cPopupIds = hss.filter(s => s.type === UPDATE_POPUP).map(s => s.id);
+  const uPopupIds = [...new Set(cPopupIds)];
+  for (const id of uPopupIds) {
+    if (isPopupShownWthId(canBckPopups, id)) {
+      if (id === SETTINGS_POPUP) {
+        // Must keep align with updateSettingsPopup(false, false)
+        //   and if forward, must keep align with updateSettingsPopup(true).
+        dispatch(updateStgsAndInfo());
+      }
+      dispatch({
+        type: UPDATE_POPUP, payload: { id, isShown: false },
+      });
+
+      if (id === SEARCH_POPUP) {
+        // Clear search string
+        //   and need to defocus too to prevent keyboard appears on mobile
+        dispatch(updateSearchString(''));
+
+        if (window.document.activeElement instanceof HTMLInputElement) {
+          window.document.activeElement.blur();
+        }
+      }
+    }
+  }
+
+  /* action    canPopupFwdBtn    isShown
+     forward       true           true       do nothing
+     forward       true           false      set show
+     forward       false          true       Impossible (do nothing)
+     forward       false          false      go back
+     back          true           true       do nothing
+     back          true           false      Impossible (set show)
+     back          false          true       do nothing
+     back          false          false      Impossible (set show)
+  */
+  if (idx >= 0) { // Support forward by open the current one if can.
+    const phs = vars.popupHistory.states[idx];
+    if (phs.type === UPDATE_POPUP) {
+      if (canPopupFwdBtn(canBckPopups, phs.id)) {
+        if (!isPopupShownWthId(canBckPopups, phs.id)) {
+          dispatch({
+            type: UPDATE_POPUP, payload: { id: phs.id, isShown: true },
+          });
+        }
+      } else {
+        if (!isPopupShownWthId(canBckPopups, phs.id)) {
+          window.history.back();
+        }
+      }
     }
   }
 };
 
 export const signOut = () => async (dispatch, getState) => {
-  userSession.signUserOut();
-  await resetState(dispatch);
+  // Wait for menuPopup to close first so the popup does not get already unmount.
+  const task = async () => {
+    userSession.signUserOut();
+    await resetState(dispatch);
+  };
+  navQueue.push(task);
 };
 
 export const updateUserData = (data) => async (dispatch, getState) => {
@@ -271,7 +454,7 @@ export const updateUserSignedIn = () => async (dispatch, getState) => {
     },
   });
 
-  redirectToMain();
+  dispatch({ type: INCREASE_REDIRECT_TO_MAIN_COUNT });
 };
 
 const resetState = async (dispatch) => {
@@ -292,382 +475,104 @@ const resetState = async (dispatch) => {
   dispatch({ type: RESET_STATE });
 };
 
-export const handleUrlHash = () => {
-  const allowedHashes = [
-    HASH_LANDING, HASH_LANDING_MOBILE, HASH_ABOUT, HASH_TERMS, HASH_PRIVACY,
-    HASH_PRICING, HASH_SUPPORT,
-  ];
+export const updateStacksAccess = (data) => {
+  return { type: UPDATE_STACKS_ACCESS, payload: data };
+};
 
-  const urlObj = new Url(window.location.href, {});
-  if (urlObj.hash === '' || allowedHashes.includes(urlObj.hash)) return;
+const updateNoteIdInQueue = (id, dispatch, getState) => () => {
+  return new Promise<void>((resolve) => {
+    const curValue = getState().display.noteId;
 
-  let newHash = '';
-  for (const allowedHash of allowedHashes) {
-    if (urlObj.hash.startsWith(allowedHash)) {
-      newHash = allowedHash;
-      break;
+    vars.displayReducer.doRightPanelAnimateHidden = true;
+    dispatch({ type: UPDATE_NOTE_ID, payload: id });
+
+    /* id       curValue
+       null       null       phs valid       back
+       null       null       phs invalid     do nothing
+       null       not-null   phs valid       back
+       null       not-null   phs invalid     do nothing (width >= LG)
+       not-null   null       width < LG      history.push
+       not-null   null       width >= LG     do nothing
+       not-null   not-null   width < LG      Impossible (do nothing)
+       not-null   not-null   width >= LG     do nothing
+    */
+    const safeAreaWidth = getState().window.width;
+    const chs = window.history.state;
+    const idx = getPopupHistoryStateIndex(vars.popupHistory.states, chs);
+    const type = UPDATE_NOTE_ID;
+    if (
+      isFldStr(id) && !isFldStr(curValue) &&
+      isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH
+    ) {
+      const phs = { phsId: `${Date.now()}-${randomString(4)}`, type, id };
+
+      if (idx >= 0) {
+        vars.popupHistory.states = [
+          ...vars.popupHistory.states.slice(0, idx + 1), phs,
+        ];
+      } else {
+        vars.popupHistory.states = [phs];
+      }
+      window.history.pushState({ phsId: phs.phsId }, '', window.location.href);
+
+      resolve();
+      return;
     }
-  }
 
-  urlObj.set('hash', newHash);
-  window.location.replace(urlObj.toString());
-};
+    let backId = null;
+    if (!isFldStr(id) && idx >= 0) {
+      for (let i = idx; i >= 0; i--) {
+        const phs = vars.popupHistory.states[i];
+        if (phs.type === type) {
+          backId = phs.id;
+          break;
+        }
+      }
+    }
+    if (isFldStr(backId)) {
+      vars.popupHistory.states = reorderPopupHistoryStates(
+        vars.popupHistory.states, idx, type, backId
+      );
 
-const redirectToMain = () => {
-  // Need timeout for window.history.back() to update the href first.
-  setTimeout(() => {
-    const urlObj = new Url(window.location.href, {});
-    if (urlObj.pathname === '/' && urlObj.hash === '') return;
+      const onPopState = () => {
+        window.removeEventListener('popstate', onPopState);
+        resolve();
+      };
+      window.addEventListener('popstate', onPopState);
+      window.history.back();
+      return;
+    }
 
-    window.location.href = '/';
-  }, 1);
-};
-
-export const onPopStateChange = (dispatch, getState) => {
-  dispatch({
-    type: UPDATE_HREF,
-    payload: window.location.href,
+    resolve();
   });
 };
 
-export const onUrlHashChange = (oldUrl, newUrl, dispatch, getState) => {
-
-  const oldUrlObj = new Url(oldUrl, {});
-  const oldHashObj = urlHashToObj(oldUrlObj.hash);
-
-  const newUrlObj = new Url(newUrl, {});
-  const newHashObj = urlHashToObj(newUrlObj.hash);
-
-  // Note id
-  if ('n' in oldHashObj && 'n' in newHashObj) {
-    if (oldHashObj['n'] === newHashObj['n']) {
-      // something else changed, do nothing here.
-    } else {
-      // maybe user fast clicks
-    }
-  } else if ('n' in oldHashObj && !('n' in newHashObj)) {
-    // press back button, need to move editingNote to unsavedNote here.
-    if (!vars.updateNoteIdUrlHash.didCall) {
-      // Can't use oldHashObj['n'] as new saved/updated noteId not apply to the hash.
-      const { noteId, isEditorFocused } = getState().display;
-      if (isEditorFocused) dispatch(handleUnsavedNote(noteId));
-    }
-
-    // Unselect note id
-    dispatch(updateNoteId(null));
-  } else if (!('n' in oldHashObj) && 'n' in newHashObj) {
-    // Select note id
-    dispatch(updateNoteId(newHashObj['n']));
-  }
-  vars.updateNoteIdUrlHash.didCall = false;
-
-  // Popup
-  if ('p' in oldHashObj && 'p' in newHashObj) {
-    if (oldHashObj['p'] === newHashObj['p']) {
-      // something else changed, do nothing here.
-    } else {
-      // i.e. from settingsListsMenuPopup to listNamesPopup
-      dispatch(updatePopup(oldHashObj['p'], false, null));
-
-      let anchorPosition = null;
-      if (newHashObj['ppt']) anchorPosition = {
-        x: parseInt(newHashObj['ppx']),
-        y: parseInt(newHashObj['ppy']),
-        width: parseInt(newHashObj['ppw']),
-        height: parseInt(newHashObj['pph']),
-        top: parseInt(newHashObj['ppt']),
-        right: parseInt(newHashObj['ppr']),
-        bottom: parseInt(newHashObj['ppb']),
-        left: parseInt(newHashObj['ppl']),
-      };
-      dispatch(updatePopup(newHashObj['p'], true, anchorPosition));
-    }
-  } else if ('p' in oldHashObj && !('p' in newHashObj)) {
-    // Close popup
-    dispatch(updatePopup(oldHashObj['p'], false, null));
-  } else if (!('p' in oldHashObj) && 'p' in newHashObj) {
-    // Open popup
-    let anchorPosition = null;
-    if (newHashObj['ppt']) anchorPosition = {
-      x: parseInt(newHashObj['ppx']),
-      y: parseInt(newHashObj['ppy']),
-      width: parseInt(newHashObj['ppw']),
-      height: parseInt(newHashObj['pph']),
-      top: parseInt(newHashObj['ppt']),
-      right: parseInt(newHashObj['ppr']),
-      bottom: parseInt(newHashObj['ppb']),
-      left: parseInt(newHashObj['ppl']),
-    };
-    dispatch(updatePopup(newHashObj['p'], true, anchorPosition));
-  }
-
-  // search popup
-  if ('sp' in oldHashObj && 'sp' in newHashObj) {
-    if (oldHashObj['sp'] === newHashObj['sp']) {
-      // something else changed, do nothing here.
-    } else {
-      throw new Error(`Shouldn't reach here!`);
-    }
-  } else if ('sp' in oldHashObj && !('sp' in newHashObj)) {
-    // Close search popup
-    dispatch(updatePopup(SEARCH_POPUP, false, null));
-  } else if (!('sp' in oldHashObj) && 'sp' in newHashObj) {
-    // Open search popup
-    dispatch(updatePopup(SEARCH_POPUP, true, null));
-  }
-
-  // settings popup
-  if ('stp' in oldHashObj && 'stp' in newHashObj) {
-    if (oldHashObj['stp'] === newHashObj['stp']) {
-      // something else changed, do nothing here.
-    } else {
-      throw new Error(`Shouldn't reach here!`);
-    }
-  } else if ('stp' in oldHashObj && !('stp' in newHashObj)) {
-    // press back button, need to call save settings and info here.
-    if (!vars.updateSettingsPopup.didCall) dispatch(updateStgsAndInfo());
-
-    // Close settings popup
-    dispatch(updatePopup(SETTINGS_POPUP, false, null));
-  } else if (!('stp' in oldHashObj) && 'stp' in newHashObj) {
-    // Open settings popup
-    dispatch(updatePopup(SETTINGS_POPUP, true, null));
-  }
-  vars.updateSettingsPopup.didCall = false;
-
-  // confirm delete popup
-  if ('cdp' in oldHashObj && 'cdp' in newHashObj) {
-    if (oldHashObj['cdp'] === newHashObj['cdp']) {
-      // something else changed, do nothing here.
-    } else {
-      throw new Error(`Shouldn't reach here!`);
-    }
-  } else if ('cdp' in oldHashObj && !('cdp' in newHashObj)) {
-    // Close confirm delete popup
-    dispatch(updatePopup(CONFIRM_DELETE_POPUP, false, null));
-  } else if (!('cdp' in oldHashObj) && 'cdp' in newHashObj) {
-    // Open confirm delete popup
-    dispatch(updatePopup(CONFIRM_DELETE_POPUP, true, null));
-  }
-
-  // confirm discard popup
-  if ('cdip' in oldHashObj && 'cdip' in newHashObj) {
-    if (oldHashObj['cdip'] === newHashObj['cdip']) {
-      // something else changed, do nothing here.
-    } else {
-      throw new Error(`Shouldn't reach here!`);
-    }
-  } else if ('cdip' in oldHashObj && !('cdip' in newHashObj)) {
-    // Close confirm discard popup
-    dispatch(updatePopup(CONFIRM_DISCARD_POPUP, false, null));
-  } else if (!('cdip' in oldHashObj) && 'cdip' in newHashObj) {
-    // Open confirm discard popup
-    dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true, null));
-  }
-
-  // is bulk editing?
-  if ('ibe' in oldHashObj && 'ibe' in newHashObj) {
-    if (oldHashObj['ibe'] === newHashObj['ibe']) {
-      // something else changed, do nothing here.
-    } else {
-      throw new Error(`Shouldn't reach here!`);
-    }
-  } else if ('ibe' in oldHashObj && !('ibe' in newHashObj)) {
-    // Exit bulk editing
-    dispatch(updateBulkEdit(false));
-  } else if (!('ibe' in oldHashObj) && 'ibe' in newHashObj) {
-    // Enter bulk editing
-    dispatch(updateBulkEdit(true));
-  }
-};
-
-export const updateUrlHash = (q, doReplace = false) => {
-  const hashObj = { ...urlHashToObj(window.location.hash), ...q };
-  const updatedHash = objToUrlHash(hashObj);
-
-  if (doReplace) {
-    const urlObj = new Url(window.location.href, {});
-    urlObj.set('hash', updatedHash);
-    window.location.replace(urlObj.toString());
-  } else window.location.hash = updatedHash;
-};
-
-const _updateNoteIdUrlHash = (id) => {
-  vars.updateNoteIdUrlHash.didCall = true;
-  vars.displayReducer.doRightPanelAnimateHidden = true;
-
-  if (!id) {
-    window.history.back();
-    return;
-  }
-
-  const obj = { n: id };
-  updateUrlHash(obj);
-};
-
-export const updateNoteIdUrlHash = (
+export const updateNoteId = (
   id, doGetIdFromState = false, doCheckEditing = false
-) => {
-  if (!doGetIdFromState && !doCheckEditing) {
-    _updateNoteIdUrlHash(id);
-    return;
-  }
+) => async (dispatch, getState) => {
 
-  return async (dispatch, getState) => {
-    // id can be both null and non-null so need doGetIdFromState, can't just check if.
-    if (doGetIdFromState) id = vars.updateNoteId.updatingNoteId;
-    if (doCheckEditing) {
-      if (Date.now() - vars.updateNoteId.dt < 400) return;
-      vars.updateNoteId.dt = Date.now();
+  // id can be both null and non-null so need doGetIdFromState, can't just check if.
+  if (doGetIdFromState) id = vars.updateNoteId.updatingNoteId;
+  if (doCheckEditing) {
+    if (Date.now() - vars.updateNoteId.dt < 400) return;
+    vars.updateNoteId.dt = Date.now();
 
-      if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
-      if (vars.deleteOldNotes.ids && vars.deleteOldNotes.ids.includes(id)) return;
+    if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
+    if (vars.deleteOldNotes.ids && vars.deleteOldNotes.ids.includes(id)) return;
 
-      const isEditorUploading = getState().editor.isUploading;
-      if (isEditorUploading) return;
+    const isEditorUploading = getState().editor.isUploading;
+    if (isEditorUploading) return;
 
-      const isEditorFocused = getState().display.isEditorFocused;
-      if (isEditorFocused) {
-        vars.updateNoteId.updatingNoteId = id;
-        dispatch(increaseUpdateNoteIdUrlHashCount());
-        return;
-      }
+    const isEditorFocused = getState().display.isEditorFocused;
+    if (isEditorFocused) {
+      vars.updateNoteId.updatingNoteId = id;
+      dispatch(increaseUpdateNoteIdCount());
+      return;
     }
-
-    _updateNoteIdUrlHash(id);
-  };
-};
-
-export const onUpdateNoteIdUrlHash = (title, body, media) => async (
-  dispatch, getState
-) => {
-  const { noteId } = getState().display;
-  dispatch(updateNoteIdUrlHash(null, true, false));
-  dispatch(handleUnsavedNote(noteId, title, body, media));
-};
-
-export const updatePopupUrlHash = (
-  id, isShown, anchorPosition = null, doReplace = false
-) => {
-  if (!isShown) {
-    window.history.back();
-    return;
   }
 
-  // searchPopup and confirmDeletePopup uses diff key because can display together with others
-  let obj;
-  if (id === SEARCH_POPUP) obj = { sp: true };
-  else if (id === SETTINGS_POPUP) obj = { stp: true };
-  else if (id === CONFIRM_DELETE_POPUP) obj = { cdp: true };
-  else if (id === CONFIRM_DISCARD_POPUP) obj = { cdip: true };
-  else {
-    obj = {
-      p: id,
-      ppx: anchorPosition ? Math.round(anchorPosition.x) : null,
-      ppy: anchorPosition ? Math.round(anchorPosition.y) : null,
-      ppw: anchorPosition ? Math.round(anchorPosition.width) : null,
-      pph: anchorPosition ? Math.round(anchorPosition.height) : null,
-      ppt: anchorPosition ? Math.round(anchorPosition.top) : null,
-      ppr: anchorPosition ? Math.round(anchorPosition.right) : null,
-      ppb: anchorPosition ? Math.round(anchorPosition.bottom) : null,
-      ppl: anchorPosition ? Math.round(anchorPosition.left) : null,
-    };
-  }
-  updateUrlHash(obj, doReplace);
-};
-
-export const _updateBulkEditUrlHash = (isBulkEditing) => {
-  if (!isBulkEditing) {
-    window.history.back();
-    return;
-  }
-
-  const obj = {
-    ibe: true,
-    p: null,
-    ppx: null, ppy: null, ppw: null, pph: null,
-    ppt: null, ppr: null, ppb: null, ppl: null,
-  };
-  updateUrlHash(obj);
-};
-
-export const updateBulkEditUrlHash = (
-  isBulkEditing, selectedNoteId = null, doGetIdFromState = false, doCheckEditing = false
-) => {
-  if (!isBulkEditing && !doCheckEditing) {
-    _updateBulkEditUrlHash(isBulkEditing);
-    return;
-  }
-
-  return async (dispatch, getState) => {
-    if (doGetIdFromState) selectedNoteId = vars.updateBulkEdit.selectedNoteId;
-    if (doCheckEditing) {
-      if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
-
-      const listName = getState().display.listName;
-      const queryString = getState().display.queryString;
-      if (listName === TRASH && queryString === '' && vars.deleteOldNotes.ids) return;
-
-      const isEditorUploading = getState().editor.isUploading;
-      if (isEditorUploading) return;
-
-      const isEditorFocused = getState().display.isEditorFocused;
-      if (isEditorFocused) {
-        vars.updateBulkEdit.selectedNoteId = selectedNoteId;
-        dispatch(increaseUpdateBulkEditUrlHashCount());
-        return;
-      }
-    }
-
-    _updateBulkEditUrlHash(isBulkEditing);
-    if (isBulkEditing && selectedNoteId) {
-      dispatch(addSelectedNoteIds([selectedNoteId]));
-    }
-  };
-};
-
-export const onUpdateBulkEditUrlHash = (title, body, media) => async (
-  dispatch, getState
-) => {
-  const { noteId } = getState().display;
-  dispatch(updateBulkEditUrlHash(true, null, true, false));
-  dispatch(handleUnsavedNote(noteId, title, body, media));
-};
-
-export const updateSearchString = (searchString) => {
-  return { type: UPDATE_SEARCH_STRING, payload: searchString };
-};
-
-const _updateNoteId = (id) => {
-  return { type: UPDATE_NOTE_ID, payload: id };
-};
-
-export const updateNoteId = (id, doGetIdFromState = false, doCheckEditing = false) => {
-  if (!doGetIdFromState && !doCheckEditing) return _updateNoteId(id);
-
-  return async (dispatch, getState) => {
-    // id can be both null and non-null so need doGetIdFromState, can't just check if.
-    if (doGetIdFromState) id = vars.updateNoteId.updatingNoteId;
-    if (doCheckEditing) {
-      if (Date.now() - vars.updateNoteId.dt < 400) return;
-      vars.updateNoteId.dt = Date.now();
-
-      if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
-      if (vars.deleteOldNotes.ids && vars.deleteOldNotes.ids.includes(id)) return;
-
-      const isEditorUploading = getState().editor.isUploading;
-      if (isEditorUploading) return;
-
-      const isEditorFocused = getState().display.isEditorFocused;
-      if (isEditorFocused) {
-        vars.updateNoteId.updatingNoteId = id;
-        dispatch(increaseUpdateNoteIdCount());
-        return;
-      }
-    }
-
-    dispatch(_updateNoteId(id));
-  };
+  const task = updateNoteIdInQueue(id, dispatch, getState);
+  navQueue.push(task);
 };
 
 export const onUpdateNoteId = (title, body, media) => async (
@@ -692,24 +597,224 @@ export const onUpdateNoteId = (title, body, media) => async (
 const updatePopupInQueue = (
   id, isShown, anchorPosition, replaceId, dispatch, getState
 ) => () => {
+  return new Promise<void>((resolve) => {
+    const canBckPopups = getCanBckPopups(getState);
 
+    dispatch({
+      type: UPDATE_POPUP, payload: { id, isShown, anchorPosition },
+    });
+    if (isShown && isFldStr(replaceId)) {
+      dispatch({
+        type: UPDATE_POPUP, payload: { id: replaceId, isShown: false },
+      });
+    }
+
+    if (!canPopupBckBtn(canBckPopups, id)) {
+      resolve();
+      return;
+    }
+
+    /* isShown   currShown   replaceId
+         true       true       null       do nothing
+         true       true       str        back (Paywall to already open SettingsPopup)
+         true       false      null       history.push
+         true       false      str        history.replace
+         false      true       null       back
+         false      true       str        invalid (back)
+         false      false      null       do nothing
+         false      false      str        invalid (do nothing)
+    */
+    const chs = window.history.state;
+    const idx = getPopupHistoryStateIndex(vars.popupHistory.states, chs);
+    const type = UPDATE_POPUP;
+    if (isShown && !isPopupShownWthId(canBckPopups, id)) {
+      const phs = { phsId: `${Date.now()}-${randomString(4)}`, type, id };
+
+      if (isFldStr(replaceId)) {
+        if (idx >= 0) {
+          vars.popupHistory.states = [
+            ...vars.popupHistory.states.slice(0, idx),
+            phs,
+            ...vars.popupHistory.states.slice(idx + 1)
+          ];
+        } else {
+          console.log('In updatePopupInQueue, invalid replaceId:', replaceId);
+          vars.popupHistory.states = [phs];
+        }
+        window.history.replaceState({ phsId: phs.phsId }, '', window.location.href);
+      } else {
+        if (idx >= 0) {
+          vars.popupHistory.states = [
+            ...vars.popupHistory.states.slice(0, idx + 1), phs,
+          ];
+        } else {
+          vars.popupHistory.states = [phs];
+        }
+        window.history.pushState({ phsId: phs.phsId }, '', window.location.href);
+      }
+
+      resolve();
+      return;
+    }
+    if (
+      (isShown && isPopupShownWthId(canBckPopups, id) && isFldStr(replaceId)) ||
+      (!isShown && isPopupShownWthId(canBckPopups, id))
+    ) {
+      const backId = !isShown ? id : replaceId;
+      vars.popupHistory.states = reorderPopupHistoryStates(
+        vars.popupHistory.states, idx, type, backId
+      );
+
+      const onPopState = () => {
+        window.removeEventListener('popstate', onPopState);
+        resolve();
+      };
+      window.addEventListener('popstate', onPopState);
+      window.history.back();
+      return;
+    }
+
+    resolve();
+  });
 };
 
 export const updatePopup = (
   id, isShown, anchorPosition = null, replaceId = null
 ) => async (dispatch, getState) => {
-  dispatch({
-    type: UPDATE_POPUP,
-    payload: { id, isShown, anchorPosition },
-  });
+  const task = updatePopupInQueue(
+    id, isShown, anchorPosition, replaceId, dispatch, getState
+  );
+  navQueue.push(task);
+};
+
+export const updateSearchString = (searchString) => {
+  return { type: UPDATE_SEARCH_STRING, payload: searchString };
 };
 
 export const updateHref = (href) => {
   return { type: UPDATE_HREF, payload: href };
 };
 
-export const updateBulkEdit = (isBulkEditing) => {
-  return { type: UPDATE_BULK_EDITING, payload: isBulkEditing };
+const updateBulkEditInQueue = (
+  isBulkEditing, selectedNoteId, popupToReplace, dispatch, getState
+) => () => {
+  return new Promise<void>((resolve) => {
+    const curValue = getState().display.isBulkEditing;
+
+    dispatch({ type: UPDATE_BULK_EDITING, payload: isBulkEditing });
+    if (isBulkEditing && isFldStr(selectedNoteId)) {
+      dispatch(addSelectedNoteIds([selectedNoteId]));
+    }
+    if (isBulkEditing && isFldStr(popupToReplace)) {
+      dispatch({
+        type: UPDATE_POPUP, payload: { id: popupToReplace, isShown: false },
+      });
+    }
+
+    /* isBulkEditing   curValue   popupToReplace
+        true             true         null          do nothing
+        true             true         str           back
+        true             false        null          history.push
+        true             false        str           history.replace
+        false            true         null          back
+        false            true         str           not support
+        false            false        null          do nothing
+        false            false        str           not support
+    */
+    const chs = window.history.state;
+    const idx = getPopupHistoryStateIndex(vars.popupHistory.states, chs);
+    const type = UPDATE_BULK_EDITING, id = 'true';
+    if (isBulkEditing && !curValue) {
+      const phs = { phsId: `${Date.now()}-${randomString(4)}`, type, id };
+
+      if (isFldStr(popupToReplace)) {
+        if (idx >= 0) {
+          vars.popupHistory.states = [
+            ...vars.popupHistory.states.slice(0, idx),
+            phs,
+            ...vars.popupHistory.states.slice(idx + 1)
+          ];
+        } else {
+          console.log('In updateBulkEditInQueue, invalid replaceId:', popupToReplace);
+          vars.popupHistory.states = [phs];
+        }
+        window.history.replaceState({ phsId: phs.phsId }, '', window.location.href);
+      } else {
+        if (idx >= 0) {
+          vars.popupHistory.states = [
+            ...vars.popupHistory.states.slice(0, idx + 1), phs,
+          ];
+        } else {
+          vars.popupHistory.states = [phs];
+        }
+        window.history.pushState({ phsId: phs.phsId }, '', window.location.href);
+      }
+
+      resolve();
+      return;
+    }
+    if (
+      (isBulkEditing && curValue && isFldStr(popupToReplace)) ||
+      (!isBulkEditing && curValue)
+    ) {
+      vars.popupHistory.states = reorderPopupHistoryStates(
+        vars.popupHistory.states, idx, type, id
+      );
+
+      const onPopState = () => {
+        window.removeEventListener('popstate', onPopState);
+        resolve();
+      };
+      window.addEventListener('popstate', onPopState);
+      window.history.back();
+      return;
+    }
+
+    resolve();
+  });
+};
+
+export const updateBulkEdit = (
+  isBulkEditing, selectedNoteId = null, popupToReplace = null,
+  doGetIdFromState = false, doCheckEditing = false
+) => async (dispatch, getState) => {
+
+  if (doGetIdFromState) {
+    selectedNoteId = vars.updateBulkEdit.selectedNoteId;
+    popupToReplace = vars.updateBulkEdit.popupToReplace;
+  }
+  if (doCheckEditing) {
+    if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
+
+    const listName = getState().display.listName;
+    const queryString = getState().display.queryString;
+    if (listName === TRASH && queryString === '' && vars.deleteOldNotes.ids) return;
+
+    const isEditorUploading = getState().editor.isUploading;
+    if (isEditorUploading) return;
+
+    const isEditorFocused = getState().display.isEditorFocused;
+    if (isEditorFocused) {
+      vars.updateBulkEdit.selectedNoteId = selectedNoteId;
+      vars.updateBulkEdit.popupToReplace = popupToReplace;
+      dispatch(increaseUpdateBulkEditCount());
+      return;
+    }
+  }
+
+  const task = updateBulkEditInQueue(
+    isBulkEditing, selectedNoteId, popupToReplace, dispatch, getState
+  );
+  navQueue.push(task);
+};
+
+export const onUpdateBulkEdit = (title, body, media) => async (
+  dispatch, getState
+) => {
+  const { noteId } = getState().display;
+  if (vars.keyboard.height > 0) dispatch(increaseBlurCount());
+  dispatch(updateBulkEdit(true, null, null, true, false));
+  dispatch(handleUnsavedNote(noteId, title, body, media));
 };
 
 export const addSelectedNoteIds = (ids) => {
@@ -727,9 +832,7 @@ export const refreshFetched = () => async (dispatch, getState) => {
   // Check safeAreaWidth is a number to execute on web only
   //   as safeAreaWidth on mobile is always null.
   if (noteId !== null && isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
-    updateNoteIdUrlHash(null);
-    // Might not need to await but just in case.
-    await sleep(100);
+    dispatch(updateNoteId(null));
   }
 
   dispatch({ type: REFRESH_FETCHED });
@@ -739,20 +842,12 @@ export const increaseWebViewKeyCount = () => {
   return { type: INCREASE_WEBVIEW_KEY_COUNT };
 };
 
-export const increaseUpdateNoteIdUrlHashCount = () => {
-  return { type: INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT };
-};
-
 export const increaseUpdateNoteIdCount = () => {
   return { type: INCREASE_UPDATE_NOTE_ID_COUNT };
 };
 
 export const increaseBlurCount = () => {
   return { type: INCREASE_BLUR_COUNT };
-};
-
-export const increaseUpdateBulkEditUrlHashCount = () => {
-  return { type: INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT };
 };
 
 export const increaseUpdateBulkEditCount = () => {
@@ -810,10 +905,6 @@ export const deleteAllDbUnsavedNotes = () => async (dispatch, getState) => {
   await idxApi.deleteAllUnsavedNotes();
 };
 
-export const updateStacksAccess = (data) => {
-  return { type: UPDATE_STACKS_ACCESS, payload: data };
-};
-
 export const updateLocalSettings = () => async (dispatch, getState) => {
   const localSettings = getState().localSettings;
   await idxApi.putLocalSettings(localSettings);
@@ -869,10 +960,14 @@ const linkToInQueue = (router, href) => () => {
 };
 
 export const linkTo = (router, href) => async () => {
-
+  const task = linkToInQueue(router, href);
+  navQueue.push(task);
 };
 
 export const queueDeleteAllData = () => async (dispatch, getState) => {
   // Wait for SettingsPopup to close first so history.back() works correctly.
-
+  const task = async () => {
+    dispatch({ type: DELETE_ALL_DATA });
+  };
+  navQueue.push(task);
 };

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { updatePopup } from '../actions';
 import { unpinNotes, movePinnedNote } from '../actions/chunk';
 import {
   PIN_MENU_POPUP, PIN_UP, PIN_DOWN, UNPIN, SWAP_LEFT, SWAP_RIGHT,
@@ -30,7 +30,7 @@ const PinMenuPopup = () => {
 
   const onCancelBtnClick = () => {
     if (didClick.current) return;
-    updatePopupUrlHash(PIN_MENU_POPUP, false, null);
+    dispatch(updatePopup(PIN_MENU_POPUP, false, null));
     didClick.current = true;
   };
 

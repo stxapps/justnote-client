@@ -1,24 +1,22 @@
 import React from 'react';
 
 import { useSelector, useDispatch } from '../store';
-import { updateNoteIdUrlHash, updateNoteId } from '../actions';
-import { INVALID, LG_WIDTH } from '../types/const';
+import { updateNoteId } from '../actions';
+import { INVALID } from '../types/const';
 import { isDiedStatus } from '../utils';
 
-import { useSafeAreaFrame, useTailwind } from '.';
+import { useTailwind } from '.';
 
 const NoteListItemError = (props) => {
 
   const { note, unsavedNote } = props;
-  const { width: safeAreaWidth } = useSafeAreaFrame();
   const isBulkEditing = useSelector(state => state.display.isBulkEditing);
   const dispatch = useDispatch();
   const tailwind = useTailwind();
 
   const onContentBtnClick = () => {
     if (!isBulkEditing) {
-      if (safeAreaWidth < LG_WIDTH) dispatch(updateNoteIdUrlHash(note.id, false, true));
-      else dispatch(updateNoteId(note.id, false, true));
+      dispatch(updateNoteId(note.id, false, true));
     }
   };
 

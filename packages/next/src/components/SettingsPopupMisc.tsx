@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { updatePopup } from '../actions';
 import {
   updateDoSyncModeInput, updateDoDeleteOldNotesInTrash, updateSortOn,
   updateDoDescendingOrder, updateNoteDateShowingMode, updateNoteDateFormat,
@@ -82,7 +82,7 @@ const SettingsPopupMisc = (props) => {
 
   const onDateFormatBtnClick = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    updatePopupUrlHash(DATE_FORMAT_MENU_POPUP, true, rect);
+    dispatch(updatePopup(DATE_FORMAT_MENU_POPUP, true, rect));
   };
 
   const onTwoDigitBtnClick = () => {

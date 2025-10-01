@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { updatePopup } from '../actions';
 import {
   addListNames, updateListNames, moveListName, checkDeleteListName,
   updateSelectingListName, updateListNameEditors,
@@ -197,7 +197,7 @@ const InnerListNameEditor = (props) => {
   const onMenuBtnClick = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     dispatch(updateSelectingListName(listNameObj.listName));
-    updatePopupUrlHash(SETTINGS_LISTS_MENU_POPUP, true, rect);
+    dispatch(updatePopup(SETTINGS_LISTS_MENU_POPUP, true, rect));
   };
 
   const onExpandBtnClick = () => {

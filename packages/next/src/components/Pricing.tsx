@@ -1,10 +1,10 @@
 'use client';
 import React, { useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import Url from 'url-parse';
+import { useRouter } from 'next/navigation';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopupUrlHash } from '../actions';
+import { updatePopup, linkTo } from '../actions';
 import { updateSettingsPopup, updateSettingsViewId } from '../actions/chunk';
 import { SIGN_UP_POPUP, SETTINGS_VIEW_IAP } from '../types/const';
 import { getValidPurchase } from '../selectors';
@@ -24,22 +24,17 @@ const Pricing = () => {
   const purchase = useSelector(state => getValidPurchase(state));
   const dispatch = useDispatch();
   const tailwind = useTailwind();
+  const router = useRouter();
 
   const onGetStartedBtnClick = () => {
     if (isUserSignedIn) {
-      const urlObj = new Url(window.location.href, {});
-      urlObj.set('hash', '');
-      const href = urlObj.toString();
-      window.history.pushState(null, '', href);
-
-      setTimeout(() => {
-        dispatch(updateSettingsViewId(SETTINGS_VIEW_IAP, false));
-        dispatch(updateSettingsPopup(true));
-      }, 1);
+      dispatch(linkTo(router, '/'));
+      dispatch(updateSettingsViewId(SETTINGS_VIEW_IAP, false));
+      dispatch(updateSettingsPopup(true));
       return;
     }
 
-    dispatch(updatePopupUrlHash(SIGN_UP_POPUP, true));
+    dispatch(updatePopup(SIGN_UP_POPUP, true));
   };
 
   useEffect(() => {
@@ -146,4 +141,3 @@ const Pricing = () => {
 };
 
 export default React.memo(Pricing);
-

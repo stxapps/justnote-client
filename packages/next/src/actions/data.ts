@@ -5,11 +5,11 @@ import dataApi from '../apis/data';
 import serverApi from '../apis/server';
 import fileApi from '../apis/localFile';
 import { importZip } from '../importWrapper';
-import { updatePopupUrlHash } from '../actions';
+import { updatePopup, queueDeleteAllData } from '../actions';
 import { sync, syncAndWait } from '../actions/chunk';
 import {
   UPDATE_IMPORT_ALL_DATA_PROGRESS, UPDATE_EXPORT_ALL_DATA_PROGRESS,
-  UPDATE_DELETE_ALL_DATA_PROGRESS, UPDATE_DELETE_SYNC_DATA_PROGRESS, DELETE_ALL_DATA,
+  UPDATE_DELETE_ALL_DATA_PROGRESS, UPDATE_DELETE_SYNC_DATA_PROGRESS,
 } from '../types/actionTypes';
 import {
   SETTINGS_POPUP, MY_NOTES, TRASH, ARCHIVE, ADDED_DT, UPDATED_DT, N_NOTES, CD_ROOT,
@@ -1957,13 +1957,12 @@ export const deleteAllData = () => async (dispatch, getState) => {
     [values, pValues] = await deleteAllDataIfEnough(values, pValues, true);
     await fileApi.deleteFiles(staticFPaths);
 
-    // Need to close the settings popup to update the url hash,
+    // Need to close the settings popup to properly call window.history.back(),
     //   as DELETE_ALL_DATA will set isSettingsPopupShown to false.
     if (getState().display.isSettingsPopupShown) {
-      vars.updateSettingsPopup.didCall = true;
-      updatePopupUrlHash(SETTINGS_POPUP, false);
+      dispatch(updatePopup(SETTINGS_POPUP, false));
     }
-    dispatch({ type: DELETE_ALL_DATA });
+    dispatch(queueDeleteAllData());
 
     dispatch(sync(false, 1));
   } catch (error) {
