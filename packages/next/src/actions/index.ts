@@ -310,6 +310,8 @@ const isPopupShownWthId = (canBckPopups, id) => {
 };
 
 const onPopStateChange = (dispatch, getState) => {
+  const safeAreaWidth = getState().window.width;
+  const ltLg = isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH;
   const chs = window.history.state;
   const idx = getPopupHistoryStateIndex(vars.popupHistory.states, chs);
 
@@ -326,21 +328,21 @@ const onPopStateChange = (dispatch, getState) => {
   const curNoteId = getState().display.noteId;
   const curIsBulkEditing = getState().display.isBulkEditing;
 
-  /* noteId    curNoteId
-      null        null                do nothing
-      null        not null            unsaved & update id null
-      not null    null                update id
-      not null    not null    same    do nothing
-                              diff    unsaved & update id
+  /* ltLg   noteId    curNoteId
+     true    null        null                do nothing
+     true    null        not null            unsaved & update id null
+     true    not null    null                update id
+     true    not null    not null    same    do nothing
+                                     diff    unsaved & update id
      bulkEdit  curBulkEdit
-      false      false                do nothing
-      false      true                 set false
-      true       false                unsaved & set true
-      true       true                 do nothing
+      false      false               do nothing
+      false      true                set false
+      true       false               unsaved & set true
+      true       true                do nothing
   */
   if (
-    (!isFldStr(noteId) && isFldStr(curNoteId)) ||
-    (isFldStr(noteId) && isFldStr(curNoteId) && noteId !== curNoteId) ||
+    (ltLg && !isFldStr(noteId) && isFldStr(curNoteId)) ||
+    (ltLg && isFldStr(noteId) && isFldStr(curNoteId) && noteId !== curNoteId) ||
     (isBulkEditing && !curIsBulkEditing)
   ) {
     // press back button, need to move editingNote to unsavedNote here.
@@ -349,9 +351,9 @@ const onPopStateChange = (dispatch, getState) => {
   }
 
   if (
-    (!isFldStr(noteId) && isFldStr(curNoteId)) ||
-    (isFldStr(noteId) && !isFldStr(curNoteId)) ||
-    (isFldStr(noteId) && isFldStr(curNoteId) && noteId !== curNoteId)
+    (ltLg && !isFldStr(noteId) && isFldStr(curNoteId)) ||
+    (ltLg && isFldStr(noteId) && !isFldStr(curNoteId)) ||
+    (ltLg && isFldStr(noteId) && isFldStr(curNoteId) && noteId !== curNoteId)
   ) {
     dispatch({ type: UPDATE_NOTE_ID, payload: noteId });
   }
@@ -497,13 +499,11 @@ const updateNoteIdInQueue = (id, dispatch, getState) => () => {
        not-null   not-null   width >= LG     do nothing
     */
     const safeAreaWidth = getState().window.width;
+    const ltLg = isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH;
     const chs = window.history.state;
     const idx = getPopupHistoryStateIndex(vars.popupHistory.states, chs);
     const type = UPDATE_NOTE_ID;
-    if (
-      isFldStr(id) && !isFldStr(curValue) &&
-      isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH
-    ) {
+    if (ltLg && isFldStr(id) && !isFldStr(curValue)) {
       const phs = { phsId: `${Date.now()}-${randomString(4)}`, type, id };
 
       if (idx >= 0) {
