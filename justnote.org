@@ -494,3 +494,5 @@
 - npm i eslint-plugin-tailwindcss@beta -D
 - npm i @ckeditor/ckeditor5-react
 - npm i file:../../../justnote-editor
+** Steps on AWS
+- same as brace.org

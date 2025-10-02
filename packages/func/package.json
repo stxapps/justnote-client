@@ -1,0 +1,12 @@
+{
+  "name": "func",
+  "version": "0.0.0",
+  "description": "CloudFront functions for justnote.cc.",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/aws-cloudfront-function": "^1.0.5"
+  }
+}
