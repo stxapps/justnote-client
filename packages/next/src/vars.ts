@@ -138,6 +138,7 @@ const deleteSyncData = {
 };
 
 const appState = {
+  timeoutId: null,
   lastChangeDT: Date.now(),
 };
 

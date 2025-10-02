@@ -3466,7 +3466,7 @@ export const bulkUnpinNotes = (ids, doSync = false) => async (dispatch, getState
   if (ids.length === 0) return;
 
   const isBulkEditing = getState().display.isBulkEditing;
-  if (isBulkEditing) updateBulkEdit(false);
+  if (isBulkEditing) dispatch(updateBulkEdit(false));
 
   await unpinNotes(ids, doSync)(dispatch, getState);
 };

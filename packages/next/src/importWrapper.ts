@@ -60,6 +60,13 @@ export const tryUpdateInfo = () => async (dispatch, getState) => {
   dispatch(actionChunk.tryUpdateInfo());
 };
 
+export const sync = (doForceListFPaths = false, updateAction = 0) => async (
+  dispatch, getState
+) => {
+  await importActionChunk();
+  dispatch(actionChunk.sync(doForceListFPaths, updateAction));
+};
+
 export const tryUpdateSynced = (updateAction, haveUpdate) => async (
   dispatch, getState
 ) => {
