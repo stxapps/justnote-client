@@ -45,7 +45,7 @@ export const ASK_CONFIRM_URL = 'ASK_CONFIRM_URL';
 
 export const SM_WIDTH = 640;
 export const MD_WIDTH = 768;
-export const LG_WIDTH = 1024;
+export const LG_WIDTH = 992;
 export const XL_WIDTH = 1280;
 
 export const MY_NOTES = 'My Notes';

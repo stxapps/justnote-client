@@ -3454,7 +3454,10 @@ export const cleanUpPins = () => async (dispatch, getState) => {
 // Need to separate bulk edit here, not in the actions like moveNotes,
 //   because unpinNotes can be called in reducers and might intervene the isBulkEditing.
 export const bulkPinNotes = (ids, popupToReplace) => async (dispatch, getState) => {
-  if (ids.length === 0) return;
+  if (ids.length === 0) {
+    if (isFldStr(popupToReplace)) dispatch(updatePopup(popupToReplace, false));
+    return;
+  }
 
   const isBulkEditing = getState().display.isBulkEditing;
   if (isBulkEditing) dispatch(updateBulkEdit(false));

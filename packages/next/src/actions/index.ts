@@ -333,7 +333,7 @@ const onPopStateChange = (dispatch, getState) => {
      true    null        not null            unsaved & update id null
      true    not null    null                update id
      true    not null    not null    same    do nothing
-                                     diff    unsaved & update id
+                                     diff    do nothing (e.g., new -> id)
      bulkEdit  curBulkEdit
       false      false               do nothing
       false      true                set false
@@ -342,7 +342,6 @@ const onPopStateChange = (dispatch, getState) => {
   */
   if (
     (ltLg && !isFldStr(noteId) && isFldStr(curNoteId)) ||
-    (ltLg && isFldStr(noteId) && isFldStr(curNoteId) && noteId !== curNoteId) ||
     (isBulkEditing && !curIsBulkEditing)
   ) {
     // press back button, need to move editingNote to unsavedNote here.
@@ -352,8 +351,7 @@ const onPopStateChange = (dispatch, getState) => {
 
   if (
     (ltLg && !isFldStr(noteId) && isFldStr(curNoteId)) ||
-    (ltLg && isFldStr(noteId) && !isFldStr(curNoteId)) ||
-    (ltLg && isFldStr(noteId) && isFldStr(curNoteId) && noteId !== curNoteId)
+    (ltLg && isFldStr(noteId) && !isFldStr(curNoteId))
   ) {
     dispatch({ type: UPDATE_NOTE_ID, payload: noteId });
   }
