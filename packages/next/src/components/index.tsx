@@ -5,6 +5,7 @@ import { useSelector } from '../store';
 import {
   getSafeAreaFrame, getSafeAreaInsets, getThemeMode, getTailwind,
 } from '../selectors';
+import { isFldStr } from '../utils';
 
 export const useStateWithLocalStorage = (defaultValue, localStorageKey) => {
 
@@ -31,7 +32,15 @@ export const useSafeAreaInsets = () => {
 export const useTailwind = () => {
   const { width: safeAreaWidth } = useSafeAreaFrame();
   const themeMode = useSelector(state => getThemeMode(state));
-  const tailwind = getTailwind(safeAreaWidth, themeMode);
+
+  const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
+  const href = useSelector(state => state.window.href);
+
+  // Make SSR and loading state have the same width to prevent rehydration error.
+  let twWidth = 9999;
+  if ([true, false].includes(isUserSignedIn) && isFldStr(href)) twWidth = safeAreaWidth;
+
+  const tailwind = getTailwind(twWidth, themeMode);
   return tailwind;
 };
 
