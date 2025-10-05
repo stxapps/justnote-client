@@ -169,23 +169,31 @@ export const getUserHubAddr = (userData) => {
   return hubAddr;
 };
 
-export const throttle = (func, limit) => {
-  let lastFunc;
-  let lastRan;
-  return function () {
-    const context = this;
-    const args = arguments;
-    if (!lastRan) {
-      func.apply(context, args);
-      lastRan = Date.now();
-    } else {
-      clearTimeout(lastFunc);
-      lastFunc = setTimeout(function () {
-        if ((Date.now() - lastRan) >= limit) {
-          func.apply(context, args);
-          lastRan = Date.now();
-        }
-      }, limit - (Date.now() - lastRan));
+export const throttle = <T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+) => {
+  let lastCallTime = 0;
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  let lastArgs: Parameters<T> | undefined;
+  let lastThis: ThisParameterType<T> | undefined;
+
+  return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
+    lastArgs = args;
+    lastThis = this;
+
+    if (!timeoutId) {
+      const remaining = wait - (Date.now() - lastCallTime);
+      if (remaining <= 0) { // Fire the leading call
+        lastCallTime = Date.now();
+        func.apply(lastThis, lastArgs);
+      } else { // Schedule the trailing call
+        timeoutId = setTimeout(() => {
+          lastCallTime = Date.now();
+          timeoutId = undefined;
+          func.apply(lastThis, lastArgs);
+        }, remaining);
+      }
     }
   };
 };
