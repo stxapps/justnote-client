@@ -2,7 +2,7 @@ import Link from '@/components/CustomLink';
 
 export default function NotFound() {
   return (
-    <div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none lg:pl-8 lg:pr-0 xl:px-16">
+    <div className="bg-white px-4 py-16 lg:pl-8 lg:pr-0 xl:px-16">
       <div className="flex h-full flex-col items-center justify-center text-center">
         <p className="text-sm font-medium text-gray-900 dark:text-white">404</p>
         <h1 className="mt-3 text-3xl tracking-tight text-gray-900 dark:text-white">Page not found</h1>
