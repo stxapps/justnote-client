@@ -76,7 +76,7 @@ import {
   DELETE_ACTION_TAG_NAME, PUT_FILE, DELETE_FILE, TAGGED, NOT_SUPPORTED, STATUS,
 } from '../types/const';
 import {
-  isEqual, isArrayEqual, randomString, sleep, isObject, isString, isNumber, isFldStr,
+  isEqual, isArrayEqual, isObject, isString, isNumber, isFldStr, randomString, sleep,
   isTitleEqual, isBodyEqual, getStaticFPath, deriveFPaths, getListNameObj,
   getAllListNames, getMainId, createDataFName, listNoteMetas, getNoteFPaths,
   getSsltFPaths, getStaticFPaths, createSettingsFPath, getSettingsFPaths,
