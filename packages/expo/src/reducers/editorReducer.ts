@@ -2,10 +2,9 @@ import { addNextAction } from '../store-next';
 import { putDbUnsavedNote } from '../actions';
 import {
   INCREASE_WEBVIEW_KEY_COUNT, INCREASE_SAVE_NOTE_COUNT, INCREASE_DISCARD_NOTE_COUNT,
-  INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT, INCREASE_UPDATE_NOTE_ID_COUNT,
-  INCREASE_CHANGE_LIST_NAME_COUNT, INCREASE_UPDATE_QUERY_STRING_COUNT,
-  INCREASE_FOCUS_TITLE_COUNT, INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT,
-  INCREASE_UPDATE_EDITOR_WIDTH_COUNT, INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT,
+  INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_CHANGE_LIST_NAME_COUNT,
+  INCREASE_UPDATE_QUERY_STRING_COUNT, INCREASE_FOCUS_TITLE_COUNT,
+  INCREASE_SET_INIT_DATA_COUNT, INCREASE_BLUR_COUNT, INCREASE_UPDATE_EDITOR_WIDTH_COUNT,
   INCREASE_UPDATE_BULK_EDIT_COUNT, INCREASE_SHOW_NOTE_LIST_MENU_POPUP_COUNT,
   INCREASE_SHOW_NLIM_POPUP_COUNT, INCREASE_SHOW_UNE_POPUP_COUNT, DISCARD_NOTE,
   MOVE_NOTES_COMMIT, UPDATE_EDITOR_IS_UPLOADING, UPDATE_BULK_EDITING,
@@ -25,7 +24,6 @@ const initialState = {
   checkToFocusCount: 0,
   saveNoteCount: 0,
   discardNoteCount: 0,
-  updateNoteIdUrlHashCount: 0,
   updateNoteIdCount: 0,
   changeListNameCount: 0,
   updateQueryStringCount: 0,
@@ -33,7 +31,6 @@ const initialState = {
   setInitDataCount: 0,
   blurCount: 0,
   updateEditorWidthCount: 0,
-  updateBulkEditUrlHashCount: 0,
   updateBulkEditCount: 0,
   showNoteListMenuPopupCount: 0,
   showNLIMPopupCount: 0,
@@ -55,10 +52,6 @@ const editorReducer = (state = initialState, action) => {
 
   if (action.type === INCREASE_DISCARD_NOTE_COUNT) {
     return { ...state, discardNoteCount: state.discardNoteCount + 1 };
-  }
-
-  if (action.type === INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT) {
-    return { ...state, updateNoteIdUrlHashCount: state.updateNoteIdUrlHashCount + 1 };
   }
 
   if (action.type === INCREASE_UPDATE_NOTE_ID_COUNT) {
@@ -87,12 +80,6 @@ const editorReducer = (state = initialState, action) => {
 
   if (action.type === INCREASE_UPDATE_EDITOR_WIDTH_COUNT) {
     return { ...state, updateEditorWidthCount: state.updateEditorWidthCount + 1 };
-  }
-
-  if (action.type === INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT) {
-    return {
-      ...state, updateBulkEditUrlHashCount: state.updateBulkEditUrlHashCount + 1,
-    };
   }
 
   if (action.type === INCREASE_UPDATE_BULK_EDIT_COUNT) {
@@ -202,7 +189,6 @@ const editorReducer = (state = initialState, action) => {
       checkToFocusCount: state.checkToFocusCount,
       saveNoteCount: state.saveNoteCount,
       discardNoteCount: state.discardNoteCount,
-      updateNoteIdUrlHashCount: state.updateNoteIdUrlHashCount,
       updateNoteIdCount: state.updateNoteIdCount,
       changeListNameCount: state.changeListNameCount,
       updateQueryStringCount: state.updateQueryStringCount,
@@ -210,7 +196,6 @@ const editorReducer = (state = initialState, action) => {
       setInitDataCount: state.setInitDataCount,
       blurCount: state.blurCount,
       updateEditorWidthCount: state.updateEditorWidthCount,
-      updateBulkEditUrlHashCount: state.updateBulkEditUrlHashCount,
       updateBulkEditCount: state.updateBulkEditCount,
       showNoteListMenuPopupCount: state.showNoteListMenuPopupCount,
       showNLIMPopupCount: state.showNLIMPopupCount,

@@ -11,6 +11,11 @@ import serverApi from '../apis/server';
 import fileApi from '../apis/localFile';
 import ecApi from '../apis/encryption';
 import {
+  syncQueue, taskQueue, updateNoteId, updatePopup, updateBulkEdit, increaseBlurCount,
+  handleUnsavedNote, deleteUnsavedNotes, increaseUpdateStatusBarStyleCount,
+} from '../actions';
+import { checkPurchases } from '../actions/iap';
+import {
   UPDATE_LIST_NAME, UPDATE_QUERY_STRING, UPDATE_EDITOR_FOCUSED, UPDATE_EDITOR_BUSY,
   UPDATE_SELECTING_NOTE_ID, FETCH, FETCH_COMMIT, FETCH_ROLLBACK, UPDATE_FETCHED,
   FETCH_MORE, FETCH_MORE_COMMIT, FETCH_MORE_ROLLBACK, CACHE_FETCHED_MORE,
@@ -56,28 +61,26 @@ import {
   DELETE_TAG_NAMES, UPDATE_SELECTING_TAG_NAME, UPDATE_HUB_ADDR,
 } from '../types/actionTypes';
 import {
-  HR_HUB_URL, SD_HUB_URL, BULK_EDIT_MENU_POPUP, PAYWALL_POPUP, SETTINGS_POPUP,
-  SETTINGS_LISTS_MENU_POPUP, CONFIRM_DELETE_POPUP, CONFIRM_DISCARD_POPUP,
-  NOTE_LIST_MENU_POPUP, NOTE_LIST_ITEM_MENU_POPUP, LOCK_EDITOR_POPUP, LOCK_MENU_POPUP,
-  TAG_EDITOR_POPUP, HUB_ERROR_POPUP, MOVE_ACTION_NOTE_COMMANDS,
-  MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_ITEM_MENU,
-  DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_LIST_NAME,
-  DISCARD_ACTION_UPDATE_TAG_NAME, MY_NOTES, TRASH, ID, NEW_NOTE, NEW_NOTE_OBJ,
-  DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING, N_NOTES, N_DAYS, CD_ROOT,
-  INFO, INDEX, DOT_JSON, SHOW_SYNCED, LG_WIDTH, INVALID, SWAP_LEFT, SWAP_RIGHT,
-  SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS, CUSTOM_MODE, FEATURE_PIN,
-  FEATURE_APPEARANCE, FEATURE_DATE_FORMAT, FEATURE_SECTION_NOTES_BY_MONTH,
+  HR_HUB_URL, SD_HUB_URL, PAYWALL_POPUP, SETTINGS_POPUP, CONFIRM_DELETE_POPUP,
+  CONFIRM_DISCARD_POPUP, NOTE_LIST_MENU_POPUP, NOTE_LIST_ITEM_MENU_POPUP,
+  LOCK_EDITOR_POPUP, LOCK_MENU_POPUP, TAG_EDITOR_POPUP, HUB_ERROR_POPUP,
+  MOVE_ACTION_NOTE_COMMANDS, MOVE_ACTION_NOTE_ITEM_MENU, DELETE_ACTION_NOTE_COMMANDS,
+  DELETE_ACTION_NOTE_ITEM_MENU, DISCARD_ACTION_CANCEL_EDIT,
+  DISCARD_ACTION_UPDATE_LIST_NAME, DISCARD_ACTION_UPDATE_TAG_NAME, MY_NOTES, TRASH, ID,
+  NEW_NOTE, NEW_NOTE_OBJ, DIED_ADDING, DIED_UPDATING, DIED_MOVING, DIED_DELETING,
+  N_NOTES, N_DAYS, CD_ROOT, INFO, INDEX, DOT_JSON, SHOW_SYNCED, LG_WIDTH, INVALID,
+  SWAP_LEFT, SWAP_RIGHT, SETTINGS_VIEW_ACCOUNT, SETTINGS_VIEW_LISTS, CUSTOM_MODE,
+  FEATURE_PIN, FEATURE_APPEARANCE, FEATURE_DATE_FORMAT, FEATURE_SECTION_NOTES_BY_MONTH,
   FEATURE_MORE_EDITOR_FONT_SIZES, FEATURE_LOCK, FEATURE_TAG, NOTE_DATE_FORMATS,
-  NO_PERMISSION_GRANTED, VALID_PASSWORD, PASSWORD_MSGS, LOCK_ACTION_ADD_LOCK_NOTE,
-  LOCK_ACTION_UNLOCK_NOTE, LOCK_ACTION_ADD_LOCK_LIST, LOCAL_NOTE_ATTRS, TASK_TYPE,
-  TASK_DO_FORCE_LIST_FPATHS, TASK_UPDATE_ACTION, ADDED, SHOWING_STATUSES,
-  IN_USE_LIST_NAME, LIST_NAME_MSGS, VALID_TAG_NAME, DUPLICATE_TAG_NAME,
+  NO_PERMISSION_GRANTED, VALID_PASSWORD, PASSWORD_MSGS, LOCK_ACTION_UNLOCK_NOTE,
+  LOCAL_NOTE_ATTRS, TASK_TYPE, TASK_DO_FORCE_LIST_FPATHS, TASK_UPDATE_ACTION, ADDED,
+  SHOWING_STATUSES, IN_USE_LIST_NAME, LIST_NAME_MSGS, VALID_TAG_NAME, DUPLICATE_TAG_NAME,
   IN_USE_TAG_NAME, TAG_NAME_MSGS, UPDATED_DT, DELETE_ACTION_LIST_NAME,
   DELETE_ACTION_TAG_NAME, PUT_FILE, DELETE_FILE, TAGGED, NOT_SUPPORTED, STATUS,
 } from '../types/const';
 import {
-  isEqual, isArrayEqual, isObject, isString, isNumber, sleep, randomString, stripHtml,
-  isTitleEqual, isBodyEqual, getStaticFPath, deriveFPaths, getListNameObj,
+  isEqual, isArrayEqual, isObject, isString, isNumber, isFldStr, randomString, sleep,
+  stripHtml, isTitleEqual, isBodyEqual, getStaticFPath, deriveFPaths, getListNameObj,
   getAllListNames, getMainId, createDataFName, listNoteMetas, getNoteFPaths,
   getSsltFPaths, getStaticFPaths, createSettingsFPath, getSettingsFPaths,
   getLastSettingsFPaths, getInfoFPath, doEnableExtraFeatures, extractPinFPath,
@@ -95,13 +98,6 @@ import {
 import { _ } from '../utils/obj';
 import { initialSettingsState, initialTagEditorState } from '../types/initialStates';
 import vars from '../vars';
-
-import {
-  syncQueue, taskQueue, updateNoteIdUrlHash, updatePopupUrlHash, updateBulkEditUrlHash,
-  updateNoteId, updatePopup, increaseBlurCount, handleUnsavedNote, deleteUnsavedNotes,
-  increaseUpdateStatusBarStyleCount,
-} from '.';
-import { checkPurchases } from './iap';
 
 import jhfp from '../../jhfp';
 
@@ -911,9 +907,7 @@ export const addNote = (title, body, media, listName) => async (
   }
 
   if (!isNumber(insertIndex)) {
-    const safeAreaWidth = getState().window.width;
-    if (isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(null);
-    else dispatch(updateNoteId(null));
+    dispatch(updateNoteId(null));
     // Let transition done before causing rerender.
     await sleep(100);
   }
@@ -1016,15 +1010,13 @@ export const discardNote = (doCheckEditing, title = null, body = null) => async 
   if (doCheckEditing) {
     if (note && (!isTitleEqual(note.title, title) || !isBodyEqual(note.body, body))) {
       dispatch(updateDiscardAction(DISCARD_ACTION_CANCEL_EDIT));
-      updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
+      dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
       return;
     }
   }
 
   if (noteId === NEW_NOTE) {
-    const safeAreaWidth = getState().window.width;
-    if (isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) updateNoteIdUrlHash(null);
-    else dispatch(updateNoteId(null));
+    dispatch(updateNoteId(null));
     // Let transition done before causing rerender.
     setTimeout(() => dispatch(deleteUnsavedNotes([noteId])), 100);
   } else {
@@ -1091,10 +1083,7 @@ export const moveNotesWithAction = (toListName, moveAction) => async (
       selectingNoteId === noteId
     )
   ) {
-    const safeAreaWidth = getState().window.width;
-    if (!isBulkEditing && isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
-      updateNoteIdUrlHash(null);
-    } else dispatch(updateNoteId(null));
+    dispatch(updateNoteId(null));
   }
 
   if (moveAction === MOVE_ACTION_NOTE_COMMANDS) {
@@ -1104,7 +1093,7 @@ export const moveNotesWithAction = (toListName, moveAction) => async (
         return;
       }
       dispatch(_moveNotes(toListName, selectedNoteIds));
-      updateBulkEditUrlHash(false);
+      dispatch(updateBulkEdit(false));
     } else {
       dispatch(_moveNotes(toListName, [noteId]));
     }
@@ -1238,23 +1227,20 @@ export const deleteNotes = () => async (dispatch, getState) => {
       selectingNoteId === noteId
     )
   ) {
-    const safeAreaWidth = getState().window.width;
-    if (!isBulkEditing && isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
-      updateNoteIdUrlHash(null);
-    } else dispatch(updateNoteId(null));
+    dispatch(updateNoteId(null));
   }
 
   if (deleteAction === DELETE_ACTION_NOTE_COMMANDS) {
     if (isBulkEditing) {
       if (selectedNoteIds.length === 0) return;
       dispatch(_deleteNotes(selectedNoteIds));
-      updateBulkEditUrlHash(false);
+      dispatch(updateBulkEdit(false));
     } else {
       dispatch(_deleteNotes([noteId]));
     }
   } else if (deleteAction === DELETE_ACTION_NOTE_ITEM_MENU) {
     dispatch(_deleteNotes([selectingNoteId]));
-    updatePopupUrlHash(NOTE_LIST_ITEM_MENU_POPUP, false);
+    dispatch(updatePopup(NOTE_LIST_ITEM_MENU_POPUP, false));
   } else {
     console.log('In deleteNotes, invalid deleteAction: ', deleteAction);
   }
@@ -1353,10 +1339,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
       }];
       addedDT += 1;
 
-      const safeAreaWidth = getState().window.width;
-      if (isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
-        updateNoteIdUrlHash(null);
-      } else dispatch(updateNoteId(null));
+      dispatch(updateNoteId(null));
 
       let payload: any = { fromListNames, fromNotes, toListNames, toNotes };
       dispatch({ type: DELETE_NOTES, payload });
@@ -1394,7 +1377,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 export const cancelDiedNotes = (canceledIds) => async (dispatch, getState) => {
   const safeAreaWidth = getState().window.width;
   if (isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
-    updateNoteIdUrlHash(null);
+    dispatch(updateNoteId(null));
     // Need this to make sure noteId is null before deleting notes in notesReducer.
     // moveNotes and deleteNotes don't need this because of awaiting dataApi.
     await sleep(100);
@@ -1480,7 +1463,7 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
     isNumber(safeAreaWidth) &&
     safeAreaWidth < LG_WIDTH
   ) {
-    updateNoteIdUrlHash(null);
+    dispatch(updateNoteId(null));
     // Need this to make sure noteId is null before deleting notes in conflictedNotes.
     await sleep(100);
   }
@@ -1691,7 +1674,7 @@ export const showNoteListMenuPopup = (rect, doCheckEditing) => async (
     }
   }
 
-  updatePopupUrlHash(NOTE_LIST_MENU_POPUP, true, rect);
+  dispatch(updatePopup(NOTE_LIST_MENU_POPUP, true, rect));
 };
 
 export const onShowNoteListMenuPopup = (title, body, media) => async (
@@ -1730,7 +1713,7 @@ export const showNLIMPopup = (noteId, rect, doCheckEditing) => async (
   }
 
   dispatch(updateSelectingNoteId(noteId));
-  updatePopupUrlHash(NOTE_LIST_ITEM_MENU_POPUP, true, rect);
+  dispatch(updatePopup(NOTE_LIST_ITEM_MENU_POPUP, true, rect));
 };
 
 export const onShowNLIMPopup = (title, body, media) => async (
@@ -1853,9 +1836,9 @@ export const cleanUpStaticFiles = () => async (dispatch, getState) => {
   }
 };
 
-export const updateSettingsPopup = (isShown, doCheckEditing = false) => async (
-  dispatch, getState
-) => {
+export const updateSettingsPopup = (
+  isShown, doCheckEditing = false, popupToReplace = null
+) => async (dispatch, getState) => {
   /*
     A settings snapshot is made when FETCH_COMMIT and UPDATE_SETTINGS_COMMIT
     For FETCH_COMMIT and UPDATE_SETTINGS_COMMIT, check action type in snapshotReducer
@@ -1878,7 +1861,7 @@ export const updateSettingsPopup = (isShown, doCheckEditing = false) => async (
         dispatch(updateListNameEditors(editingLNEs));
 
         dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_LIST_NAME));
-        updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
+        dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
         return;
       }
 
@@ -1893,15 +1876,14 @@ export const updateSettingsPopup = (isShown, doCheckEditing = false) => async (
         dispatch(updateTagNameEditors(editingTNEs));
 
         dispatch(updateDiscardAction(DISCARD_ACTION_UPDATE_TAG_NAME));
-        updatePopupUrlHash(CONFIRM_DISCARD_POPUP, true);
+        dispatch(updatePopup(CONFIRM_DISCARD_POPUP, true));
         return;
       }
     }
     dispatch(updateStgsAndInfo());
   }
 
-  vars.updateSettingsPopup.didCall = true;
-  updatePopupUrlHash(SETTINGS_POPUP, isShown);
+  dispatch(updatePopup(SETTINGS_POPUP, isShown, null, popupToReplace));
 
   if (isShown) {
     dispatch(updateFetched(null, false, false));
@@ -1910,7 +1892,7 @@ export const updateSettingsPopup = (isShown, doCheckEditing = false) => async (
 };
 
 export const updateSettingsViewId = (
-  viewId, isSidebarShown = null, didCloseAnimEnd = null, didSidebarAnimEnd = null,
+  viewId, isSidebarShown = null, didCloseAnimEnd = null, didSidebarAnimEnd = null
 ) => async (dispatch, getState) => {
 
   const isUserSignedIn = getState().user.isUserSignedIn;
@@ -2000,7 +1982,7 @@ export const checkDeleteListName = (listNameEditorKey, listNameObj) => async (
 
   dispatch(updateSelectingListName(listNameObj.listName));
   dispatch(updateDeleteAction(DELETE_ACTION_LIST_NAME));
-  updatePopupUrlHash(CONFIRM_DELETE_POPUP, true);
+  dispatch(updatePopup(CONFIRM_DELETE_POPUP, true));
   dispatch(updateListNameEditors({
     [listNameEditorKey]: { msg: '', isCheckingCanDelete: false },
   }));
@@ -2046,7 +2028,7 @@ export const updateNoteDateShowingMode = (mode) => {
 };
 
 export const updateNoteDateFormat = (
-  dateFormat, isTwoDigit = null, isCurrentYearShown = null,
+  dateFormat, isTwoDigit = null, isCurrentYearShown = null
 ) => async (dispatch, getState) => {
   const purchases = getState().info.purchases;
 
@@ -3126,14 +3108,16 @@ export const updatePaywallFeature = (feature) => {
   return { type: UPDATE_PAYWALL_FEATURE, payload: feature };
 };
 
-export const pinNotes = (ids) => async (dispatch, getState) => {
+export const pinNotes = (ids, popupToReplace) => async (dispatch, getState) => {
   const purchases = getState().info.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
     dispatch(updatePaywallFeature(FEATURE_PIN));
-    dispatch(updatePopup(PAYWALL_POPUP, true));
+    dispatch(updatePopup(PAYWALL_POPUP, true, null, popupToReplace));
     return;
   }
+
+  if (isFldStr(popupToReplace)) dispatch(updatePopup(popupToReplace, false));
 
   const pendingSslts = getState().pendingSslts;
   const pendingPins = getState().pendingPins;
@@ -3427,20 +3411,23 @@ export const cleanUpPins = () => async (dispatch, getState) => {
 
 // Need to separate bulk edit here, not in the actions like moveNotes,
 //   because unpinNotes can be called in reducers and might intervene the isBulkEditing.
-export const bulkPinNotes = (ids) => async (dispatch, getState) => {
-  if (ids.length === 0) return;
+export const bulkPinNotes = (ids, popupToReplace) => async (dispatch, getState) => {
+  if (ids.length === 0) {
+    if (isFldStr(popupToReplace)) dispatch(updatePopup(popupToReplace, false));
+    return;
+  }
 
   const isBulkEditing = getState().display.isBulkEditing;
-  if (isBulkEditing) updateBulkEditUrlHash(false);
+  if (isBulkEditing) dispatch(updateBulkEdit(false));
 
-  await pinNotes(ids)(dispatch, getState);
+  await pinNotes(ids, popupToReplace)(dispatch, getState);
 };
 
 export const bulkUnpinNotes = (ids, doSync = false) => async (dispatch, getState) => {
   if (ids.length === 0) return;
 
   const isBulkEditing = getState().display.isBulkEditing;
-  if (isBulkEditing) updateBulkEditUrlHash(false);
+  if (isBulkEditing) dispatch(updateBulkEdit(false));
 
   await unpinNotes(ids, doSync)(dispatch, getState);
 };
@@ -3684,23 +3671,19 @@ export const updateLockEditor = (payload) => {
   return { type: UPDATE_LOCK_EDITOR, payload };
 };
 
-export const showAddLockEditorPopup = (actionType) => async (dispatch, getState) => {
+export const showAddLockEditorPopup = (actionType, popupToReplace) => async (
+  dispatch, getState
+) => {
   const purchases = getState().info.purchases;
 
   if (!doEnableExtraFeatures(purchases)) {
-    if (actionType === LOCK_ACTION_ADD_LOCK_NOTE) {
-      updatePopupUrlHash(NOTE_LIST_ITEM_MENU_POPUP, false, null);
-    } else if (actionType === LOCK_ACTION_ADD_LOCK_LIST) {
-      updatePopupUrlHash(SETTINGS_LISTS_MENU_POPUP, false, null);
-    }
-
     dispatch(updatePaywallFeature(FEATURE_LOCK));
-    dispatch(updatePopup(PAYWALL_POPUP, true));
+    dispatch(updatePopup(PAYWALL_POPUP, true, null, popupToReplace));
     return;
   }
 
   dispatch(updateLockAction(actionType));
-  updatePopupUrlHash(LOCK_EDITOR_POPUP, true, null, true);
+  dispatch(updatePopup(LOCK_EDITOR_POPUP, true, null, popupToReplace));
 };
 
 export const addLockNote = (
@@ -3728,7 +3711,7 @@ export const addLockNote = (
     type: ADD_LOCK_NOTE,
     payload: { noteId, noteMainId, password, doShowTitle, canExport },
   });
-  updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
+  dispatch(updatePopup(LOCK_EDITOR_POPUP, false, null));
 };
 
 export const showLockMenuPopup = (noteId, rect) => async (dispatch, getState) => {
@@ -3737,7 +3720,7 @@ export const showLockMenuPopup = (noteId, rect) => async (dispatch, getState) =>
   if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
 
   dispatch(updateSelectingNoteId(noteId));
-  updatePopupUrlHash(LOCK_MENU_POPUP, true, rect);
+  dispatch(updatePopup(LOCK_MENU_POPUP, true, rect));
 };
 
 export const removeLockNote = (noteId, password) => async (dispatch, getState) => {
@@ -3774,7 +3757,7 @@ export const removeLockNote = (noteId, password) => async (dispatch, getState) =
   }
 
   dispatch({ type: REMOVE_LOCK_NOTE, payload: { noteMainId } });
-  updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
+  dispatch(updatePopup(LOCK_EDITOR_POPUP, false, null));
 };
 
 export const lockNote = (noteId) => async (dispatch, getState) => {
@@ -3812,7 +3795,7 @@ export const showUNEPopup = (noteId, doCheckEditing) => async (dispatch, getStat
 
   dispatch(updateSelectingNoteId(noteId));
   dispatch(updateLockAction(LOCK_ACTION_UNLOCK_NOTE));
-  updatePopupUrlHash(LOCK_EDITOR_POPUP, true);
+  dispatch(updatePopup(LOCK_EDITOR_POPUP, true));
 };
 
 export const onShowUNEPopup = (title, body, media) => async (dispatch, getState) => {
@@ -3856,16 +3839,8 @@ export const unlockNote = (noteId, password) => async (dispatch, getState) => {
   }
 
   dispatch({ type: UNLOCK_NOTE, payload: { noteMainId, unlockedDT: Date.now() } });
-  updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
-
-  const safeAreaWidth = getState().window.width;
-  if (isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
-    // As this and hiding lock editor popup both change url hash,
-    //   need to be in different js clock cycle.
-    setTimeout(() => {
-      updateNoteIdUrlHash(noteId);
-    }, 100);
-  } else dispatch(updateNoteId(noteId));
+  dispatch(updatePopup(LOCK_EDITOR_POPUP, false, null));
+  dispatch(updateNoteId(noteId));
 };
 
 export const addLockList = (
@@ -3886,7 +3861,7 @@ export const addLockList = (
     type: ADD_LOCK_LIST,
     payload: { listName, password, canChangeListNames, canExport },
   });
-  updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
+  dispatch(updatePopup(LOCK_EDITOR_POPUP, false, null));
 };
 
 export const removeLockList = (listName, password) => async (dispatch, getState) => {
@@ -3916,7 +3891,7 @@ export const removeLockList = (listName, password) => async (dispatch, getState)
   }
 
   dispatch({ type: REMOVE_LOCK_LIST, payload: { listName } });
-  updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
+  dispatch(updatePopup(LOCK_EDITOR_POPUP, false, null));
 };
 
 export const lockCurrentList = () => async (dispatch, getState) => {
@@ -3951,7 +3926,7 @@ export const unlockList = (listName, password) => async (dispatch, getState) => 
   }
 
   dispatch({ type: UNLOCK_LIST, payload: { listName, unlockedDT: Date.now() } });
-  updatePopupUrlHash(LOCK_EDITOR_POPUP, false, null);
+  dispatch(updatePopup(LOCK_EDITOR_POPUP, false, null));
 };
 
 const cleanUpLocks = async (dispatch, getState) => {
@@ -4067,43 +4042,29 @@ const _initTagEditorState = (getState) => {
   return editor;
 };
 
-export const updateTagEditorPopup = (isShown, doCheckEnableExtraFeatures) => async (
-  dispatch, getState
-) => {
+export const updateTagEditorPopup = (
+  isShown, doCheckEnableExtraFeatures, popupToReplace
+) => async (dispatch, getState) => {
   if (isShown) {
     if (doCheckEnableExtraFeatures) {
       const purchases = getState().info.purchases;
       if (!doEnableExtraFeatures(purchases)) {
-        if (getState().display.isNoteListItemMenuPopupShown) {
-          updatePopupUrlHash(NOTE_LIST_ITEM_MENU_POPUP, false, null);
-        }
-        if (getState().display.isBulkEditMenuPopupShown) {
-          updatePopupUrlHash(BULK_EDIT_MENU_POPUP, false, null);
-        }
-
         dispatch(updatePaywallFeature(FEATURE_TAG));
-        dispatch(updatePopup(PAYWALL_POPUP, true));
+        dispatch(updatePopup(PAYWALL_POPUP, true, null, popupToReplace));
         return;
       }
     }
 
     const payload = _initTagEditorState(getState);
     if (payload.mode === INVALID) {
-      if (getState().display.isNoteListItemMenuPopupShown) {
-        updatePopupUrlHash(NOTE_LIST_ITEM_MENU_POPUP, false, null);
-      }
-      if (getState().display.isBulkEditMenuPopupShown) {
-        updatePopupUrlHash(BULK_EDIT_MENU_POPUP, false, null);
-      }
+      if (isFldStr(popupToReplace)) dispatch(updatePopup(popupToReplace, false));
       return;
     }
 
     dispatch({ type: UPDATE_TAG_EDITOR, payload });
-    updatePopupUrlHash(TAG_EDITOR_POPUP, true, null, true);
-    return;
   }
 
-  updatePopupUrlHash(TAG_EDITOR_POPUP, false);
+  dispatch(updatePopup(TAG_EDITOR_POPUP, isShown, null, popupToReplace));
 };
 
 export const updateTagEditor = (values, hints, displayName, color, msg) => {
@@ -4171,7 +4132,7 @@ export const updateTagData = (ids, values) => async (dispatch, getState) => {
     }
   }
 
-  if (isBulkEditing) updateBulkEditUrlHash(false);
+  if (isBulkEditing) dispatch(updateBulkEdit(false));
 
   if (!Array.isArray(ids) || ids.length === 0) {
     console.log('In updateTagData, invalid ids: ', ids);
@@ -4657,7 +4618,7 @@ export const checkDeleteTagName = (tagNameEditorKey, tagNameObj) => async (
 
   dispatch(updateSelectingTagName(tagNameObj.tagName));
   dispatch(updateDeleteAction(DELETE_ACTION_TAG_NAME));
-  updatePopupUrlHash(CONFIRM_DELETE_POPUP, true);
+  dispatch(updatePopup(CONFIRM_DELETE_POPUP, true));
   dispatch(updateTagNameEditors({
     [tagNameEditorKey]: { msg: '', isCheckingCanDelete: false },
   }));

@@ -10,7 +10,7 @@ module.exports = defineConfig([
     plugins: {
       '@stylistic': stylistic,
     },
-    'rules': {
+    rules: {
       'import/no-named-as-default-member': 0,
       '@stylistic/semi': [1, 'always'],
       '@stylistic/no-extra-semi': [1],

@@ -9,7 +9,6 @@ import SignUpPopup from './SignUpPopup';
 import SignInPopup from './SignInPopup';
 import ColsPanel from './ColsPanel';
 import NavPanel from './NavPanel';
-import SidebarProfilePopup from './SidebarProfilePopup';
 import NoteListMenuPopup from './NoteListMenuPopup';
 import NoteListItemMenuPopup from './NoteListItemMenuPopup';
 import PinMenuPopup from './PinMenuPopup';
@@ -61,7 +60,6 @@ const Main = () => {
   return (
     <React.Fragment>
       {panel}
-      <SidebarProfilePopup />
       <NoteListMenuPopup />
       <NoteListItemMenuPopup />
       <PinMenuPopup />

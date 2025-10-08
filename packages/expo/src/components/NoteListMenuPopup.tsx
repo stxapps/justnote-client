@@ -60,14 +60,12 @@ const NoteListMenuPopup = () => {
   };
 
   const onSelectBtnClick = () => {
-    onNoteListMenuCancelBtnClick();
-    dispatch(updateBulkEdit(true, null, false, true));
+    dispatch(updateBulkEdit(true, null, NOTE_LIST_MENU_POPUP, false, true));
   };
 
   const onSettingsBtnClick = () => {
-    onNoteListMenuCancelBtnClick();
     dispatch(updateSettingsViewId(SETTINGS_VIEW_ACCOUNT, true));
-    dispatch(updateSettingsPopup(true));
+    dispatch(updateSettingsPopup(true, false, NOTE_LIST_MENU_POPUP));
   };
 
   const onSupportBtnClick = () => {

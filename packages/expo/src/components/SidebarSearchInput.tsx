@@ -29,7 +29,7 @@ const SidebarSearchInput = () => {
 
   return (
     <View style={tailwind('mt-6 hidden pl-3 pr-1 lg:flex')}>
-      <View style={tailwind('mt-1 rounded-md bg-white shadow-sm blk:bg-gray-800')}>
+      <View style={tailwind('mt-1 rounded-md bg-white shadow-xs blk:bg-gray-800')}>
         <TextInput onChange={onSearchInputChange} style={tailwind(`w-full rounded-md border border-gray-300 bg-white pl-9 pr-6 text-sm font-normal text-gray-700 blk:border-gray-600 blk:bg-gray-800 blk:text-gray-200 ${searchInputClasses}`)} placeholder="Search" placeholderTextColor={themeMode === BLK_MODE ? 'rgb(156, 163, 175)' : 'rgb(107, 114, 128)'} value={searchString} autoCapitalize="none" />
         <View style={tailwind('absolute inset-y-0 left-0 justify-center pl-3')}>
           <Svg width={16} height={16} style={tailwind('mr-3 font-normal text-gray-400 blk:text-gray-500')} viewBox="0 0 20 20" fill="currentColor">

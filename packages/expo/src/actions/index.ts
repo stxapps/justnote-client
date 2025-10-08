@@ -8,10 +8,8 @@ import idxApi from '../apis';
 import ldbApi from '../apis/localDb';
 import {
   INIT, UPDATE_USER, UPDATE_SEARCH_STRING, UPDATE_NOTE_ID, UPDATE_POPUP,
-  UPDATE_BULK_EDITING, ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS,
-  REFRESH_FETCHED, INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT,
-  INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_BLUR_COUNT,
-  INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT, INCREASE_UPDATE_BULK_EDIT_COUNT,
+  UPDATE_BULK_EDITING, ADD_SELECTED_NOTE_IDS, DELETE_SELECTED_NOTE_IDS, REFRESH_FETCHED,
+  INCREASE_UPDATE_NOTE_ID_COUNT, INCREASE_BLUR_COUNT, INCREASE_UPDATE_BULK_EDIT_COUNT,
   INCREASE_WEBVIEW_KEY_COUNT, UPDATE_UNSAVED_NOTE, DELETE_UNSAVED_NOTES,
   UPDATE_STACKS_ACCESS, UPDATE_SYSTEM_THEME_MODE, UPDATE_IS_24H_FORMAT,
   INCREASE_UPDATE_STATUS_BAR_STYLE_COUNT, RESET_STATE,
@@ -21,7 +19,7 @@ import {
   NEW_NOTE_OBJ, LG_WIDTH, WHT_MODE, BLK_MODE,
 } from '../types/const';
 import {
-  isObject, isString, isNumber, sleep, getUserImageUrl, isTitleEqual, isBodyEqual,
+  isObject, isString, isNumber, isFldStr, getUserImageUrl, isTitleEqual, isBodyEqual,
   getNote,
 } from '../utils';
 import vars from '../vars';
@@ -29,7 +27,7 @@ import vars from '../vars';
 export const syncQueue = new TaskQueue({ concurrency: 1, autostart: true });
 export const taskQueue = new TaskQueue({ concurrency: 1, autostart: true });
 
-let _getDispatch, _didInit;
+let _didInit;
 export const init = () => async (dispatch, getState) => {
   if (_didInit) return;
   _didInit = true;
@@ -77,7 +75,6 @@ export const init = () => async (dispatch, getState) => {
       username,
       userImage,
       userHubUrl,
-      href: null,
       systemThemeMode: darkMatches ? BLK_MODE : WHT_MODE,
       is24HFormat,
       localSettings,
@@ -109,8 +106,6 @@ export const init = () => async (dispatch, getState) => {
   AppState.addEventListener('change', (nextAppState) => {
     if (nextAppState === 'active') dispatch(increaseUpdateStatusBarStyleCount());
   });
-
-  _getDispatch = () => dispatch;
 };
 
 export const signOut = () => async (dispatch, getState) => {
@@ -172,58 +167,35 @@ const resetState = async (dispatch) => {
   dispatch({ type: RESET_STATE });
 };
 
-export const updateNoteIdUrlHash = (
+export const updateStacksAccess = (data) => {
+  return { type: UPDATE_STACKS_ACCESS, payload: data };
+};
+
+export const updateNoteId = (
   id, doGetIdFromState = false, doCheckEditing = false
-) => {
-  _getDispatch()(updateNoteId(id));
-};
+) => async (dispatch, getState) => {
 
-export const updatePopupUrlHash = (
-  id, isShown, anchorPosition = null, doReplace = false
-) => {
-  _getDispatch()(updatePopup(id, isShown, anchorPosition));
-};
+  // id can be both null and non-null so need doGetIdFromState, can't just check if.
+  if (doGetIdFromState) id = vars.updateNoteId.updatingNoteId;
+  if (doCheckEditing) {
+    if (Date.now() - vars.updateNoteId.dt < 400) return;
+    vars.updateNoteId.dt = Date.now();
 
-export const updateBulkEditUrlHash = (
-  isBulkEditing, selectedNoteId = null, doGetIdFromState = false, doCheckEditing = false
-) => {
-  _getDispatch()(updateBulkEdit(isBulkEditing));
-};
+    if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
+    if (vars.deleteOldNotes.ids && vars.deleteOldNotes.ids.includes(id)) return;
 
-export const updateSearchString = (searchString) => {
-  return { type: UPDATE_SEARCH_STRING, payload: searchString };
-};
+    const isEditorUploading = getState().editor.isUploading;
+    if (isEditorUploading) return;
 
-const _updateNoteId = (id) => {
-  return { type: UPDATE_NOTE_ID, payload: id };
-};
-
-export const updateNoteId = (id, doGetIdFromState = false, doCheckEditing = false) => {
-  if (!doGetIdFromState && !doCheckEditing) return _updateNoteId(id);
-
-  return async (dispatch, getState) => {
-    // id can be both null and non-null so need doGetIdFromState, can't just check if.
-    if (doGetIdFromState) id = vars.updateNoteId.updatingNoteId;
-    if (doCheckEditing) {
-      if (Date.now() - vars.updateNoteId.dt < 400) return;
-      vars.updateNoteId.dt = Date.now();
-
-      if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
-      if (vars.deleteOldNotes.ids && vars.deleteOldNotes.ids.includes(id)) return;
-
-      const isEditorUploading = getState().editor.isUploading;
-      if (isEditorUploading) return;
-
-      const isEditorFocused = getState().display.isEditorFocused;
-      if (isEditorFocused) {
-        vars.updateNoteId.updatingNoteId = id;
-        dispatch(increaseUpdateNoteIdCount());
-        return;
-      }
+    const isEditorFocused = getState().display.isEditorFocused;
+    if (isEditorFocused) {
+      vars.updateNoteId.updatingNoteId = id;
+      dispatch(increaseUpdateNoteIdCount());
+      return;
     }
+  }
 
-    dispatch(_updateNoteId(id));
-  };
+  dispatch({ type: UPDATE_NOTE_ID, payload: id });
 };
 
 export const onUpdateNoteId = (title, body, media) => async (
@@ -245,46 +217,60 @@ export const onUpdateNoteId = (title, body, media) => async (
   dispatch(handleUnsavedNote(noteId, title, body, media));
 };
 
-export const updatePopup = (id, isShown, anchorPosition = null) => {
-  return {
-    type: UPDATE_POPUP,
-    payload: { id, isShown, anchorPosition },
-  };
+export const updatePopup = (
+  id, isShown, anchorPosition = null, replaceId = null
+) => async (dispatch, getState) => {
+  dispatch({
+    type: UPDATE_POPUP, payload: { id, isShown, anchorPosition },
+  });
+  if (isShown && isFldStr(replaceId)) {
+    dispatch({
+      type: UPDATE_POPUP, payload: { id: replaceId, isShown: false },
+    });
+  }
 };
 
-const _updateBulkEdit = (isBulkEditing) => {
-  return { type: UPDATE_BULK_EDITING, payload: isBulkEditing };
+export const updateSearchString = (searchString) => {
+  return { type: UPDATE_SEARCH_STRING, payload: searchString };
 };
 
 export const updateBulkEdit = (
-  isBulkEditing, selectedNoteId = null, doGetIdFromState = false, doCheckEditing = false
-) => {
-  if (!isBulkEditing && !doCheckEditing) return _updateBulkEdit(isBulkEditing);
+  isBulkEditing, selectedNoteId = null, popupToReplace = null,
+  doGetIdFromState = false, doCheckEditing = false
+) => async (dispatch, getState) => {
 
-  return async (dispatch, getState) => {
-    if (doGetIdFromState) selectedNoteId = vars.updateBulkEdit.selectedNoteId;
-    if (doCheckEditing) {
-      if (vars.updateSettings.doFetch) return;
+  if (doGetIdFromState) {
+    selectedNoteId = vars.updateBulkEdit.selectedNoteId;
+    popupToReplace = vars.updateBulkEdit.popupToReplace;
+  }
+  if (doCheckEditing) {
+    if (vars.updateSettings.doFetch || vars.syncMode.didChange) return;
 
-      const listName = getState().display.listName;
-      if (listName === TRASH && vars.deleteOldNotes.ids) return;
+    const listName = getState().display.listName;
+    const queryString = getState().display.queryString;
+    if (listName === TRASH && queryString === '' && vars.deleteOldNotes.ids) return;
 
-      const isEditorUploading = getState().editor.isUploading;
-      if (isEditorUploading) return;
+    const isEditorUploading = getState().editor.isUploading;
+    if (isEditorUploading) return;
 
-      const isEditorFocused = getState().display.isEditorFocused;
-      if (isEditorFocused) {
-        vars.updateBulkEdit.selectedNoteId = selectedNoteId;
-        dispatch(increaseUpdateBulkEditCount());
-        return;
-      }
+    const isEditorFocused = getState().display.isEditorFocused;
+    if (isEditorFocused) {
+      vars.updateBulkEdit.selectedNoteId = selectedNoteId;
+      vars.updateBulkEdit.popupToReplace = popupToReplace;
+      dispatch(increaseUpdateBulkEditCount());
+      return;
     }
+  }
 
-    dispatch(_updateBulkEdit(isBulkEditing));
-    if (isBulkEditing && selectedNoteId) {
-      dispatch(addSelectedNoteIds([selectedNoteId]));
-    }
-  };
+  dispatch({ type: UPDATE_BULK_EDITING, payload: isBulkEditing });
+  if (isBulkEditing && isFldStr(selectedNoteId)) {
+    dispatch(addSelectedNoteIds([selectedNoteId]));
+  }
+  if (isBulkEditing && isFldStr(popupToReplace)) {
+    dispatch({
+      type: UPDATE_POPUP, payload: { id: popupToReplace, isShown: false },
+    });
+  }
 };
 
 export const onUpdateBulkEdit = (title, body, media) => async (
@@ -292,7 +278,7 @@ export const onUpdateBulkEdit = (title, body, media) => async (
 ) => {
   const { noteId } = getState().display;
   if (vars.keyboard.height > 0) dispatch(increaseBlurCount());
-  dispatch(updateBulkEdit(true, null, true, false));
+  dispatch(updateBulkEdit(true, null, null, true, false));
   dispatch(handleUnsavedNote(noteId, title, body, media));
 };
 
@@ -311,9 +297,7 @@ export const refreshFetched = () => async (dispatch, getState) => {
   // Check safeAreaWidth is a number to execute on web only
   //   as safeAreaWidth on mobile is always null.
   if (noteId !== null && isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
-    updateNoteIdUrlHash(null);
-    // Might not need to await but just in case.
-    await sleep(100);
+    dispatch(updateNoteId(null));
   }
 
   dispatch({ type: REFRESH_FETCHED });
@@ -321,10 +305,6 @@ export const refreshFetched = () => async (dispatch, getState) => {
 
 export const increaseWebViewKeyCount = () => {
   return { type: INCREASE_WEBVIEW_KEY_COUNT };
-};
-
-export const increaseUpdateNoteIdUrlHashCount = () => {
-  return { type: INCREASE_UPDATE_NOTE_ID_URL_HASH_COUNT };
 };
 
 export const increaseUpdateNoteIdCount = () => {
@@ -335,17 +315,13 @@ export const increaseBlurCount = () => {
   return { type: INCREASE_BLUR_COUNT };
 };
 
-export const increaseUpdateBulkEditUrlHashCount = () => {
-  return { type: INCREASE_UPDATE_BULK_EDIT_URL_HASH_COUNT };
-};
-
 export const increaseUpdateBulkEditCount = () => {
   return { type: INCREASE_UPDATE_BULK_EDIT_COUNT };
 };
 
-export const handleUnsavedNote = (id, title, body, media) => async (
-  dispatch, getState
-) => {
+export const handleUnsavedNote = (
+  id, title = null, body = null, media = null
+) => async (dispatch, getState) => {
   const {
     editingNoteId, editingNoteTitle, editingNoteBody, editingNoteMedia,
   } = getState().editor;
@@ -392,10 +368,6 @@ export const deleteDbUnsavedNotes = (ids) => async (dispatch, getState) => {
 
 export const deleteAllDbUnsavedNotes = () => async (dispatch, getState) => {
   await idxApi.deleteAllUnsavedNotes();
-};
-
-export const updateStacksAccess = (data) => {
-  return { type: UPDATE_STACKS_ACCESS, payload: data };
 };
 
 export const updateLocalSettings = () => async (dispatch, getState) => {

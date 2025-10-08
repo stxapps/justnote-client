@@ -42,7 +42,7 @@ const Sidebar = () => {
         <SidebarSearchInput />
         {/* Add Button */}
         <View style={tailwind('mt-6 hidden pl-3 pr-1 lg:flex')}>
-          <TouchableOpacity onPress={onAddBtnClick} style={tailwind('w-full rounded-md border border-green-600 bg-green-600 py-2 shadow-sm')}>
+          <TouchableOpacity onPress={onAddBtnClick} style={tailwind('w-full rounded-md border border-green-600 bg-green-600 py-2 shadow-xs')}>
             <View style={tailwind('flex-col')}>
               <Text style={tailwind('pl-9 text-sm font-medium text-white')}>{isUnsavedValid ? 'Edit Note' : 'New Note'}</Text>
               <View style={tailwind('absolute inset-y-0 left-0 justify-center pl-3')}>

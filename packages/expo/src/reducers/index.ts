@@ -25,6 +25,7 @@ import pendingTagsReducer from './pendingTagsReducer';
 import timePickReducer from './timePickReducer';
 import lockSettingsReducer from './lockSettingsReducer';
 import lockEditorReducer from './lockEditorReducer';
+import appStateReducer from './appStateReducer';
 
 const reducers = combineReducers({
   window: windowReducer,
@@ -52,6 +53,7 @@ const reducers = combineReducers({
   timePick: timePickReducer,
   lockSettings: lockSettingsReducer,
   lockEditor: lockEditorReducer,
+  appState: appStateReducer,
 });
 
 export default reducers;

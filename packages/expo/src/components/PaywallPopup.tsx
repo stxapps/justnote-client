@@ -142,10 +142,10 @@ const PaywallPopup = () => {
             </View>
           </View>
           <View style={tailwind('mt-5 sm:mt-6 sm:flex-row sm:items-center sm:justify-between')}>
-            <TouchableOpacity onPress={onOkBtnClick} style={tailwind('w-full rounded-md border border-gray-800 bg-gray-800 py-2 shadow-sm sm:mr-1.5 sm:flex-shrink sm:flex-grow')}>
+            <TouchableOpacity onPress={onOkBtnClick} style={tailwind('w-full rounded-md border border-gray-800 bg-gray-800 py-2 shadow-xs sm:mr-1.5 sm:flex-shrink sm:flex-grow')}>
               <Text style={tailwind('text-center text-base font-medium text-white sm:text-sm')}>More info</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={onCancelBtnClick} style={[tailwind('mt-3 w-full rounded-md border border-gray-400 bg-white shadow-sm sm:mt-0 sm:ml-1.5 sm:flex-shrink sm:flex-grow'), cancelBtnStyle]}>
+            <TouchableOpacity onPress={onCancelBtnClick} style={[tailwind('mt-3 w-full rounded-md border border-gray-400 bg-white shadow-xs sm:mt-0 sm:ml-1.5 sm:flex-shrink sm:flex-grow'), cancelBtnStyle]}>
               <Text style={tailwind('text-center text-base font-normal text-gray-500 sm:text-sm')}>Cancel</Text>
             </TouchableOpacity>
           </View>

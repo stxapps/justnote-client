@@ -10,7 +10,7 @@ import {
   updateDeleteSyncDataProgress,
 } from '../actions/data';
 import {
-  DOMAIN_NAME, HASH_SUPPORT, SD_HUB_URL, SM_WIDTH, BLK_MODE,
+  DOMAIN_NAME, HASH_SUPPORT, SD_HUB_URL, MD_WIDTH, BLK_MODE,
 } from '../types/const';
 import { getThemeMode } from '../selectors';
 import { isString } from '../utils';
@@ -111,7 +111,7 @@ const InnerSettingsPopupDataImport = (props) => {
   if (!importAllDataProgress) {
     actionPanel = (
       <TouchableOpacity onPress={onImportAllDataBtnClick} style={tailwind('mt-6 mb-4 items-start justify-start')}>
-        <View style={tailwind('rounded-md border border-gray-300 bg-white px-2 py-2 shadow-sm blk:border-gray-400 blk:bg-gray-900')}>
+        <View style={tailwind('rounded-md border border-gray-300 bg-white px-2 py-2 shadow-xs blk:border-gray-400 blk:bg-gray-900')}>
           <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-300')}>Choose a file</Text>
         </View>
       </TouchableOpacity>
@@ -169,7 +169,7 @@ const InnerSettingsPopupDataImport = (props) => {
     <View style={tailwind('p-4 md:p-6 md:pt-4')}>
       <View style={tailwind('border-b border-gray-200 blk:border-gray-700 md:border-b-0')}>
         <TouchableOpacity onPress={onBackToDataViewBtnClick} style={tailwind('pb-1 md:pb-0')}>
-          <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-400')}>{'<'} {safeAreaWidth < SM_WIDTH ? 'Settings / ' : ''}Data</Text>
+          <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-400')}>{'<'} {safeAreaWidth < MD_WIDTH ? 'Settings / ' : ''}Data</Text>
         </TouchableOpacity>
         <Text style={tailwind('pb-2 text-xl font-medium leading-6 text-gray-800 blk:text-gray-100 md:pb-0')}>Import Data</Text>
       </View>
@@ -211,7 +211,7 @@ const InnerSettingsPopupDataExport = (props) => {
   if (!exportAllDataProgress) {
     actionPanel = (
       <TouchableOpacity onPress={onExportAllDataBtnClick} style={tailwind('mt-6 mb-4 items-start justify-start')}>
-        <View style={tailwind('rounded-md border border-gray-300 bg-white px-2 py-2 shadow-sm blk:border-gray-400 blk:bg-gray-900')}>
+        <View style={tailwind('rounded-md border border-gray-300 bg-white px-2 py-2 shadow-xs blk:border-gray-400 blk:bg-gray-900')}>
           <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-300')}>Export All My Data</Text>
         </View>
       </TouchableOpacity>
@@ -269,7 +269,7 @@ const InnerSettingsPopupDataExport = (props) => {
     <View style={tailwind('p-4 md:p-6 md:pt-4')}>
       <View style={tailwind('border-b border-gray-200 blk:border-gray-700 md:border-b-0')}>
         <TouchableOpacity onPress={onBackToDataViewBtnClick} style={tailwind('pb-1 md:pb-0')}>
-          <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-400')}>{'<'} {safeAreaWidth < SM_WIDTH ? 'Settings / ' : ''}Data</Text>
+          <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-400')}>{'<'} {safeAreaWidth < MD_WIDTH ? 'Settings / ' : ''}Data</Text>
         </TouchableOpacity>
         <Text style={tailwind('pb-2 text-xl font-medium leading-6 text-gray-800 blk:text-gray-100 md:pb-0')}>Export All Data</Text>
       </View>
@@ -331,7 +331,7 @@ const InnerSettingsPopupDataDelete = (props) => {
   if (!deleteAllDataProgress) {
     actionPanel = (
       <View style={tailwind('mt-6 mb-4 items-start justify-start')}>
-        <TouchableOpacity onPress={onDeleteAllDataBtnClick} style={tailwind('rounded-md border border-gray-300 bg-white px-2 py-2 shadow-sm blk:border-gray-400 blk:bg-gray-900')}>
+        <TouchableOpacity onPress={onDeleteAllDataBtnClick} style={tailwind('rounded-md border border-gray-300 bg-white px-2 py-2 shadow-xs blk:border-gray-400 blk:bg-gray-900')}>
           <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-300')}>Delete All My Data</Text>
         </TouchableOpacity>
         {isRequiredConfirmShown && <Text style={tailwind('mt-2 text-base font-normal text-red-600 blk:text-red-500')}>Please confirm by checking the box above first.</Text>}
@@ -390,7 +390,7 @@ const InnerSettingsPopupDataDelete = (props) => {
     <View style={tailwind('p-4 md:p-6 md:pt-4')}>
       <View style={tailwind('border-b border-gray-200 blk:border-gray-700 md:border-b-0')}>
         <TouchableOpacity onPress={onBackToDataViewBtnClick} style={tailwind('pb-1 md:pb-0')}>
-          <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-400')}>{'<'} {safeAreaWidth < SM_WIDTH ? 'Settings / ' : ''}Data</Text>
+          <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-400')}>{'<'} {safeAreaWidth < MD_WIDTH ? 'Settings / ' : ''}Data</Text>
         </TouchableOpacity>
         <Text style={tailwind('pb-2 text-xl font-medium leading-6 text-gray-800 blk:text-gray-100 md:pb-0')}>Delete All Data</Text>
       </View>
@@ -438,7 +438,7 @@ const InnerSettingsPopupDataDeleteSync = (props) => {
   if (!deleteSyncDataProgress) {
     actionPanel = (
       <TouchableOpacity onPress={onDeleteSyncDataBtnClick} style={tailwind('mt-7 mb-4 items-start justify-start')}>
-        <View style={tailwind('rounded-md border border-gray-300 bg-white px-2 py-2 shadow-sm blk:border-gray-400 blk:bg-gray-900')}>
+        <View style={tailwind('rounded-md border border-gray-300 bg-white px-2 py-2 shadow-xs blk:border-gray-400 blk:bg-gray-900')}>
           <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-300')}>Clean Up Sync Logs</Text>
         </View>
       </TouchableOpacity>
@@ -496,7 +496,7 @@ const InnerSettingsPopupDataDeleteSync = (props) => {
     <View style={tailwind('p-4 md:p-6 md:pt-4')}>
       <View style={tailwind('border-b border-gray-200 blk:border-gray-700 md:border-b-0')}>
         <TouchableOpacity onPress={onBackToDataViewBtnClick} style={tailwind('pb-1 md:pb-0')}>
-          <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-400')}>{'<'} {safeAreaWidth < SM_WIDTH ? 'Settings / ' : ''}Data</Text>
+          <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-400')}>{'<'} {safeAreaWidth < MD_WIDTH ? 'Settings / ' : ''}Data</Text>
         </TouchableOpacity>
         <Text style={tailwind('pb-2 text-xl font-medium leading-6 text-gray-800 blk:text-gray-100 md:pb-0')}>Clean Up Sync Logs</Text>
       </View>

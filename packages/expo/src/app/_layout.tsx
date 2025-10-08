@@ -31,8 +31,8 @@ TextInput.defaultProps.allowFontScaling = false;
 function Initializer() {
   const appState = useAppState();
   const pathname = usePathname();
-  const prevAppState = useRef(null);
-  const prevPathname = useRef(null);
+  const prevAppState = useRef(appState);
+  const prevPathname = useRef(pathname);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -40,11 +40,6 @@ function Initializer() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (prevAppState.current === null || prevPathname.current === null) {
-      prevAppState.current = appState;
-      prevPathname.current = pathname;
-      return;
-    }
     if (appState !== prevAppState.current || pathname !== prevPathname.current) {
       dispatch(handleAppStateChange(appState, pathname));
     }

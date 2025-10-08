@@ -126,7 +126,7 @@ const NoteListItems = () => {
   const renderFetchMoreBtn = useCallback(() => {
     return (
       <View style={tailwind('my-6 px-4 sm:px-6')}>
-        <TouchableOpacity onPress={onFetchMoreBtnClick} style={tailwind('w-full items-center rounded-md border border-gray-300 bg-white px-4 py-2 shadow-sm blk:border-gray-500 blk:bg-gray-900')}>
+        <TouchableOpacity onPress={onFetchMoreBtnClick} style={tailwind('w-full items-center rounded-md border border-gray-300 bg-white px-4 py-2 shadow-xs blk:border-gray-500 blk:bg-gray-900')}>
           <Text style={tailwind('text-sm font-medium text-gray-500 blk:text-gray-400')}>More</Text>
         </TouchableOpacity>
       </View>
@@ -144,7 +144,7 @@ const NoteListItems = () => {
   const renderUpdateFetchedBtn = useCallback(() => {
     return (
       <View style={tailwind('my-6 px-4 sm:px-6')}>
-        <TouchableOpacity onPress={onUpdateFetchedBtnClick} style={tailwind('w-full items-center rounded-md border border-gray-300 bg-white px-4 py-2 shadow-sm blk:border-gray-500 blk:bg-gray-900')}>
+        <TouchableOpacity onPress={onUpdateFetchedBtnClick} style={tailwind('w-full items-center rounded-md border border-gray-300 bg-white px-4 py-2 shadow-xs blk:border-gray-500 blk:bg-gray-900')}>
           <Text style={tailwind('text-sm font-medium text-gray-500 blk:text-gray-400')}>Show more</Text>
         </TouchableOpacity>
       </View>

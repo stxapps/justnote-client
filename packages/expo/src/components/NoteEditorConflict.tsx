@@ -176,7 +176,7 @@ const InnerNoteEditorUnsavedConflict = (props) => {
           <Text style={tailwind('pt-5 text-lg font-medium text-gray-800 blk:text-gray-200')}>Found an unsaved version.</Text>
           <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-400')}>Please choose to continue editing the unsaved version or discard it.</Text>
           <View style={tailwind('flex-row items-center pt-6')}>
-            <TouchableOpacity onPress={onEditBtnClick} style={tailwind('flex-row items-center rounded-md border border-gray-300 bg-white px-4 py-2 shadow-sm blk:border-gray-600 blk:bg-gray-900')}>
+            <TouchableOpacity onPress={onEditBtnClick} style={tailwind('flex-row items-center rounded-md border border-gray-300 bg-white px-4 py-2 shadow-xs blk:border-gray-600 blk:bg-gray-900')}>
               <Svg width={20} height={20} style={tailwind('mr-1 font-normal text-gray-500 blk:text-gray-400')} viewBox="0 0 20 20" fill="currentColor">
                 <Path d="M13.586 3.58601C13.7705 3.39499 13.9912 3.24262 14.2352 3.13781C14.4792 3.03299 14.7416 2.97782 15.0072 2.97551C15.2728 2.9732 15.5361 3.0238 15.7819 3.12437C16.0277 3.22493 16.251 3.37343 16.4388 3.56122C16.6266 3.74901 16.7751 3.97231 16.8756 4.2181C16.9762 4.46389 17.0268 4.72725 17.0245 4.99281C17.0222 5.25837 16.967 5.52081 16.8622 5.76482C16.7574 6.00883 16.605 6.22952 16.414 6.41401L15.621 7.20701L12.793 4.37901L13.586 3.58601ZM11.379 5.79301L3 14.172V17H5.828L14.208 8.62101L11.378 5.79301H11.379Z" />
               </Svg>
@@ -363,7 +363,7 @@ const InnerConflictItem = (props) => {
           </TouchableOpacity>
         </View>
         {!doHideChooseBtn && <View style={tailwind('py-3 pl-2.5 sm:flex-shrink-0 sm:flex-grow-0 sm:pl-6 sm:pr-4')}>
-          <TouchableOpacity onPress={onChooseBtnClick} style={tailwind('flex-row items-center self-start rounded-md border border-gray-300 bg-white px-4 py-2 shadow-sm blk:border-gray-500 blk:bg-gray-800')}>
+          <TouchableOpacity onPress={onChooseBtnClick} style={tailwind('flex-row items-center self-start rounded-md border border-gray-300 bg-white px-4 py-2 shadow-xs blk:border-gray-500 blk:bg-gray-800')}>
             <Svg width={20} height={20} style={tailwind('mr-1 font-normal text-gray-500 blk:text-gray-300')} viewBox="0 0 20 20" fill="currentColor">
               <Path fillRule="evenodd" clipRule="evenodd" d="M16.7069 5.29303C16.8944 5.48056 16.9997 5.73487 16.9997 6.00003C16.9997 6.26519 16.8944 6.5195 16.7069 6.70703L8.70692 14.707C8.51939 14.8945 8.26508 14.9998 7.99992 14.9998C7.73475 14.9998 7.48045 14.8945 7.29292 14.707L3.29292 10.707C3.11076 10.5184 3.00997 10.2658 3.01224 10.0036C3.01452 9.74143 3.11969 9.49062 3.3051 9.30521C3.49051 9.1198 3.74132 9.01464 4.00352 9.01236C4.26571 9.01008 4.51832 9.11087 4.70692 9.29303L7.99992 12.586L15.2929 5.29303C15.4804 5.10556 15.7348 5.00024 15.9999 5.00024C16.2651 5.00024 16.5194 5.10556 16.7069 5.29303Z" />
             </Svg>

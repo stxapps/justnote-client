@@ -124,7 +124,7 @@ const InnerExportNoteAsPdfCompletePopup = () => {
             </View>
           </View>
           <View style={tailwind('mt-5 sm:mt-4 sm:ml-10 sm:flex-row sm:pl-4')}>
-            <TouchableOpacity onPress={onCancelBtnClick} style={tailwind('w-full rounded-md border border-gray-300 bg-white px-4 py-2 shadow-sm blk:border-gray-400 blk:bg-gray-800 sm:w-auto')}>
+            <TouchableOpacity onPress={onCancelBtnClick} style={tailwind('w-full rounded-md border border-gray-300 bg-white px-4 py-2 shadow-xs blk:border-gray-400 blk:bg-gray-800 sm:w-auto')}>
               <Text style={tailwind('text-center text-base font-medium text-gray-700 blk:text-gray-300 sm:text-sm')}>Close</Text>
             </TouchableOpacity>
           </View>

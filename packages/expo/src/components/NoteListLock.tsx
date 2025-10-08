@@ -38,7 +38,7 @@ const NoteListLock = () => {
               </View>
               <Text style={tailwind('mt-6 text-center text-base font-semibold tracking-wide text-gray-800 blk:text-gray-200 lg:text-sm')}>This list is locked</Text>
               <View style={tailwind('mt-4 items-center justify-center')}>
-                <View style={tailwind('rounded-md border border-gray-300 bg-white px-2.5 py-1.5 shadow-sm blk:border-gray-400 blk:bg-gray-900')}>
+                <View style={tailwind('rounded-md border border-gray-300 bg-white px-2.5 py-1.5 shadow-xs blk:border-gray-400 blk:bg-gray-900')}>
                   <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-300')}>Unlock</Text>
                 </View>
               </View>

@@ -11,6 +11,7 @@ const initialState = {
   height: size.height,
   visualWidth: size.visualWidth,
   visualHeight: size.visualHeight,
+  visualScale: size.visualScale,
   insetTop: insets.top,
   insetRight: insets.right,
   insetBottom: insets.bottom,
@@ -24,7 +25,6 @@ const windowReducer = (state = initialState, action) => {
   if (action.type === INIT) {
     return {
       ...state,
-      href: action.payload.href,
       themeMode: action.payload.systemThemeMode,
       is24HFormat: action.payload.is24HFormat,
     };

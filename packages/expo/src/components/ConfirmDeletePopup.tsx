@@ -8,7 +8,8 @@ import { useSelector, useDispatch } from '../store';
 import { updatePopup } from '../actions';
 import { deleteNotes, deleteListNames, deleteTagNames } from '../actions/chunk';
 import {
-  CONFIRM_DELETE_POPUP, DELETE_ACTION_LIST_NAME, DELETE_ACTION_TAG_NAME,
+  CONFIRM_DELETE_POPUP, DELETE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_ITEM_MENU,
+  DELETE_ACTION_LIST_NAME, DELETE_ACTION_TAG_NAME,
 } from '../types/const';
 import { dialogFMV } from '../types/animConfigs';
 
@@ -38,14 +39,21 @@ const ConfirmDeletePopup = () => {
   const onConfirmDeleteOkBtnClick = () => {
     if (didClick.current) return;
 
-    if (deleteAction === DELETE_ACTION_LIST_NAME) {
+    if ([
+      DELETE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_ITEM_MENU,
+    ].includes(deleteAction)) {
+      dispatch(deleteNotes());
+      dispatch(updatePopup(CONFIRM_DELETE_POPUP, false, null));
+    } else if (deleteAction === DELETE_ACTION_LIST_NAME) {
       dispatch(deleteListNames([selectingListName]));
+      dispatch(updatePopup(CONFIRM_DELETE_POPUP, false, null));
     } else if (deleteAction === DELETE_ACTION_TAG_NAME) {
       dispatch(deleteTagNames([selectingTagName]));
+      dispatch(updatePopup(CONFIRM_DELETE_POPUP, false, null));
     } else {
-      dispatch(deleteNotes());
+      console.log('In ConfirmDeletePopup, invalid deleteAction: ', deleteAction);
+      return; // Don't set didClick to true
     }
-    onConfirmDeleteCancelBtnClick();
 
     didClick.current = true;
   };
@@ -129,10 +137,10 @@ const ConfirmDeletePopup = () => {
             </View>
           </View>
           <View style={tailwind('mt-5 sm:mt-4 sm:ml-10 sm:flex-row sm:pl-4')}>
-            <TouchableOpacity onPress={onConfirmDeleteOkBtnClick} style={tailwind('w-full rounded-md border border-red-600 bg-red-600 px-4 py-2 shadow-sm blk:border-red-500 blk:bg-red-500 sm:w-auto')}>
+            <TouchableOpacity onPress={onConfirmDeleteOkBtnClick} style={tailwind('w-full rounded-md border border-red-600 bg-red-600 px-4 py-2 shadow-xs blk:border-red-500 blk:bg-red-500 sm:w-auto')}>
               <Text style={tailwind('text-center text-base font-medium text-white sm:text-sm')}>Delete</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={onConfirmDeleteCancelBtnClick} style={tailwind('mt-3 w-full rounded-md border border-gray-300 bg-white px-4 py-2 shadow-sm blk:border-gray-400 blk:bg-gray-800 sm:mt-0 sm:ml-3 sm:w-auto')}>
+            <TouchableOpacity onPress={onConfirmDeleteCancelBtnClick} style={tailwind('mt-3 w-full rounded-md border border-gray-300 bg-white px-4 py-2 shadow-xs blk:border-gray-400 blk:bg-gray-800 sm:mt-0 sm:ml-3 sm:w-auto')}>
               <Text style={tailwind('text-center text-base font-medium text-gray-700 blk:text-gray-300 sm:text-sm')}>Cancel</Text>
             </TouchableOpacity>
           </View>

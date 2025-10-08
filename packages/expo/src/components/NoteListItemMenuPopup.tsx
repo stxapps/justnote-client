@@ -87,18 +87,19 @@ const NoteListItemMenuPopup = () => {
     } else if (text === MOVE_TO) {
       dispatch(updateMoveAction(MOVE_ACTION_NOTE_ITEM_MENU));
       dispatch(updateListNamesMode(LIST_NAMES_MODE_MOVE_NOTES));
-
-      onCancelBtnClick();
-      dispatch(updatePopup(LIST_NAMES_POPUP, true, anchorPosition));
+      dispatch(updatePopup(
+        LIST_NAMES_POPUP, true, anchorPosition, NOTE_LIST_ITEM_MENU_POPUP
+      ));
     } else if (text === PIN) {
-      onCancelBtnClick();
-      dispatch(pinNotes([selectingNoteId]));
+      dispatch(pinNotes([selectingNoteId], NOTE_LIST_ITEM_MENU_POPUP));
     } else if (text === MANAGE_PIN) {
-      onCancelBtnClick();
-      dispatch(updatePopup(PIN_MENU_POPUP, true, anchorPosition));
+      dispatch(updatePopup(
+        PIN_MENU_POPUP, true, anchorPosition, NOTE_LIST_ITEM_MENU_POPUP
+      ));
     } else if (text === ADD_TAGS || text === MANAGE_TAGS) {
-      onCancelBtnClick();
-      dispatch(updateTagEditorPopup(true, text === ADD_TAGS));
+      dispatch(updateTagEditorPopup(
+        true, text === ADD_TAGS, NOTE_LIST_ITEM_MENU_POPUP
+      ));
     } else if (text === SHARE) {
       onCancelBtnClick();
       dispatch(shareNote());
@@ -106,10 +107,12 @@ const NoteListItemMenuPopup = () => {
       onCancelBtnClick();
       dispatch(exportNoteAsPdf());
     } else if (text === LOCK) {
-      onCancelBtnClick();
       if (lockStatus === null) {
-        dispatch(showAddLockEditorPopup(LOCK_ACTION_ADD_LOCK_NOTE));
+        dispatch(showAddLockEditorPopup(
+          LOCK_ACTION_ADD_LOCK_NOTE, NOTE_LIST_ITEM_MENU_POPUP
+        ));
       } else if (lockStatus === UNLOCKED) {
+        onCancelBtnClick();
         dispatch(lockNote(selectingNoteId));
       }
     } else {

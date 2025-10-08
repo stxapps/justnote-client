@@ -169,40 +169,51 @@ export const getUserHubAddr = (userData) => {
   return hubAddr;
 };
 
-export const throttle = (func, limit) => {
-  let lastFunc;
-  let lastRan;
-  return function () {
-    const context = this;
-    const args = arguments;
-    if (!lastRan) {
-      func.apply(context, args);
-      lastRan = Date.now();
-    } else {
-      clearTimeout(lastFunc);
-      lastFunc = setTimeout(function () {
-        if ((Date.now() - lastRan) >= limit) {
-          func.apply(context, args);
-          lastRan = Date.now();
-        }
-      }, limit - (Date.now() - lastRan));
+export const throttle = <T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+) => {
+  let lastCallTime = 0;
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  let lastArgs: Parameters<T> | undefined;
+  let lastThis: ThisParameterType<T> | undefined;
+
+  return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
+    lastArgs = args;
+    lastThis = this;
+
+    if (!timeoutId) {
+      const remaining = wait - (Date.now() - lastCallTime);
+      if (remaining <= 0) { // Fire the leading call
+        lastCallTime = Date.now();
+        func.apply(lastThis, lastArgs);
+      } else { // Schedule the trailing call
+        timeoutId = setTimeout(() => {
+          lastCallTime = Date.now();
+          timeoutId = undefined;
+          func.apply(lastThis, lastArgs);
+        }, remaining);
+      }
     }
   };
 };
 
-export const debounce = (func, wait, immediate) => {
-  let timeout;
+export const debounce = <T extends (...args: any[]) => any>(
+  func: T,
+  wait: number,
+  immediate = false
+) => {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
 
-  return function () {
-    let context = this;
-    let args = arguments;
+  return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
+    const context = this;
 
-    let later = function () {
+    const later = () => {
       timeout = null;
       if (!immediate) func.apply(context, args);
     };
 
-    let callNow = immediate && !timeout;
+    const callNow = immediate && !timeout;
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
 
@@ -1981,7 +1992,8 @@ export const doContainStaleNotes = (notes) => {
 };
 
 export const getWindowSize = () => {
-  let width = null, height = null, visualWidth = null, visualHeight = null;
+  let width = null, height = null;
+  let visualWidth = null, visualHeight = null, visualScale = null;
   if (typeof window !== 'undefined' && isObject(window)) {
     if (isNumber(window.innerWidth)) width = window.innerWidth;
     if (isNumber(window.innerHeight)) height = window.innerHeight;
@@ -1993,10 +2005,13 @@ export const getWindowSize = () => {
       if (isNumber(window.visualViewport.height)) {
         visualHeight = window.visualViewport.height;
       }
+      if (isNumber(window.visualViewport.scale)) {
+        visualScale = window.visualViewport.scale;
+      }
     }
   }
 
-  return { width, height, visualWidth, visualHeight };
+  return { width, height, visualWidth, visualHeight, visualScale };
 };
 
 export const getWindowInsets = () => {
@@ -3063,4 +3078,34 @@ export const getResErrMsg = async (res) => {
   if (isFldStr(res.statusText)) msg += ' ' + res.statusText;
   if (isFldStr(bodyText)) msg += ' ' + bodyText;
   return msg;
+};
+
+export const getPopupHistoryStateIndex = (states, hs) => {
+  if (!isObject(hs) || !isFldStr(hs.phsId)) return -1;
+
+  const idx = states.findIndex(s => s.phsId === hs.phsId);
+  return idx;
+};
+
+export const reorderPopupHistoryStates = (states, idx, type, id) => {
+  /* searchPopup and bulkEdit can intertween:
+       open popup -> bulkEdit:true -> close popup
+       bulkEdit:true -> open popup -> bulkEdit:false
+     causing browser history and vars.popupHistory misalign.
+     Find from the left of idx, and move it to the idx.
+  */
+  if (idx < 0) return states;
+
+  const tiIdx = states.findIndex(s => s.type === type && s.id === id);
+  if (tiIdx < 0 || tiIdx >= idx) return states;
+
+  const newStates = states.map(s => {
+    return { ...s };
+  });
+  for (let i = tiIdx; i < idx; i++) {
+    newStates[i] = { ...states[i + 1], phsId: states[i].phsId };
+  }
+  newStates[idx] = { ...states[tiIdx], phsId: states[idx].phsId };
+
+  return newStates;
 };

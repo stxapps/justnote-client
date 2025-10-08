@@ -11,9 +11,10 @@ const App = () => {
   const isUserDummy = useSelector(state => state.user.isUserDummy);
   const isHandlingSignIn = useSelector(state => state.display.isHandlingSignIn);
 
-  if (isUserSignedIn === null || isHandlingSignIn) return <Loading />;
+  if (![true, false].includes(isUserSignedIn) || isHandlingSignIn) {
+    return <Loading />;
+  }
   if (isUserSignedIn === true || isUserDummy === true) return <Main />;
-
   return <Landing />;
 };
 

@@ -1,5 +1,9 @@
 import platformWrapper from './platformWrapper';
 
+const popupHistory = {
+  states: [],
+};
+
 export const didChange = {
   doDeleteOldNotesInTrash: false,
   sortOn: false,
@@ -47,10 +51,6 @@ const randomHouseworkTasks = {
   dt: 0,
 };
 
-const updateNoteIdUrlHash = {
-  didCall: false,
-};
-
 const updateNoteId = {
   dt: 0,
   updatingNoteId: null,
@@ -66,6 +66,7 @@ const updateQueryString = {
 
 const updateBulkEdit = {
   selectedNoteId: null,
+  popupToReplace: null,
 };
 
 const showNoteListMenuPopup = {
@@ -87,10 +88,6 @@ const deleteOldNotes = {
 
 const updateSettings = {
   doFetch: false,
-};
-
-const updateSettingsPopup = {
-  didCall: false,
 };
 
 const notesReducer = {
@@ -155,11 +152,11 @@ const translucentAdding = {
 };
 
 const vars = {
-  cachedFPaths, cachedServerFPaths, scrollPanel, keyboard, fetch, runAfterFetchTask,
-  randomHouseworkTasks, updateNoteIdUrlHash, updateNoteId, changeListName,
+  popupHistory, cachedFPaths, cachedServerFPaths, scrollPanel, keyboard, fetch,
+  runAfterFetchTask, randomHouseworkTasks, updateNoteId, changeListName,
   updateQueryString, updateBulkEdit, showNoteListMenuPopup, showNLIMPopup, showUNEPopup,
-  deleteOldNotes, updateSettings, updateSettingsPopup, notesReducer, displayReducer,
-  editorReducer, iap, platform, syncMode, sync, importAllData, deleteSyncData, appState,
-  user, translucentAdding,
+  deleteOldNotes, updateSettings, notesReducer, displayReducer, editorReducer, iap,
+  platform, syncMode, sync, importAllData, deleteSyncData, appState, user,
+  translucentAdding,
 };
 export default vars;

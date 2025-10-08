@@ -253,7 +253,7 @@ const SettingsPopupMisc = (props) => {
         <Text style={tailwind('text-base font-medium leading-5 text-gray-800 blk:text-gray-100')}>Appearance</Text>
         {systemText}
         <View style={tailwind('mt-2.5 w-full items-center justify-start')}>
-          <View style={tailwind('w-full max-w-sm rounded-md bg-white shadow-sm blk:bg-gray-900')}>
+          <View style={tailwind('w-full max-w-sm rounded-md bg-white shadow-xs blk:bg-gray-900')}>
             <View style={tailwind('flex-row justify-evenly')}>
               <TouchableOpacity onPress={() => onDoUseLocalThemeBtnClick(false)} style={tailwind('flex-shrink flex-grow rounded-tl-md border border-b-0 border-gray-300 bg-white py-4 blk:border-gray-700 blk:bg-gray-900')}>
                 <Text style={tailwind(`text-center text-sm font-medium ${themeDefaultBtnClassNames}`)}>Sync</Text>
@@ -334,7 +334,7 @@ const SettingsPopupMisc = (props) => {
             <Text style={tailwind('text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Choose whether your notes are sorted on the <Text style={tailwind('text-base font-semibold text-gray-500 blk:text-gray-400')}>added date</Text> or <Text style={tailwind('text-base font-semibold text-gray-500 blk:text-gray-400')}>updated date</Text> when you browse your notes.</Text>
           </View>
           <View style={tailwind('mt-2.5 items-center sm:ml-4 sm:flex-shrink-0 sm:flex-grow-0')}>
-            <View style={tailwind('w-full max-w-48 rounded-md bg-white shadow-sm blk:bg-gray-900 sm:w-48')}>
+            <View style={tailwind('w-full max-w-48 rounded-md bg-white shadow-xs blk:bg-gray-900 sm:w-48')}>
               <TouchableOpacity onPress={() => onSortOnInputChange(ADDED_DT)}>
                 <View style={tailwind(`flex-row rounded-tl-md rounded-tr-md border p-4 ${addedDTBtnClassNames}`)}>
                   <View style={tailwind('h-5 flex-row items-center')}>
@@ -366,7 +366,7 @@ const SettingsPopupMisc = (props) => {
             <Text style={tailwind('text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Choose whether your notes are sorted in <Text style={tailwind('text-base font-semibold leading-6.5 text-gray-500 blk:text-gray-300')}>ascending order</Text> (i.e. notes you create first appear first) or <Text style={tailwind('text-base font-semibold leading-6.5 text-gray-500 blk:text-gray-300')}>descending order</Text> (i.e. notes you create last appear first) when you browse your notes.</Text>
           </View>
           <View style={tailwind('mt-2.5 items-center sm:ml-4 sm:flex-shrink-0 sm:flex-grow-0')}>
-            <View style={tailwind('w-full max-w-48 rounded-md bg-white shadow-sm blk:bg-gray-900 sm:w-48')}>
+            <View style={tailwind('w-full max-w-48 rounded-md bg-white shadow-xs blk:bg-gray-900 sm:w-48')}>
               <TouchableOpacity onPress={() => onDoDescendingInputChange('ascending')}>
                 <View style={tailwind(`flex-row rounded-tl-md rounded-tr-md border p-4 ${ascendingBtnClassNames}`)}>
                   <View style={tailwind('h-5 flex-row items-center')}>
@@ -404,7 +404,7 @@ const SettingsPopupMisc = (props) => {
         <Text style={tailwind('text-base font-medium leading-5 text-gray-800 blk:text-gray-100')}>Note Date Formats</Text>
         <Text style={tailwind('mt-2.5 text-base font-normal leading-6.5 text-gray-500 blk:text-gray-400')}>Choose a date format for your note dates.</Text>
         <View style={tailwind('mt-2.5 w-full items-center justify-start')}>
-          <View style={tailwind('w-full max-w-sm rounded-md border border-gray-200 bg-white p-5 shadow-sm blk:border-gray-700 blk:bg-gray-900')}>
+          <View style={tailwind('w-full max-w-sm rounded-md border border-gray-200 bg-white p-5 shadow-xs blk:border-gray-700 blk:bg-gray-900')}>
             <View style={tailwind('flex-row items-center')}>
               <Text style={tailwind('mr-2 flex-shrink-0 flex-grow-0 text-base font-normal text-gray-500 blk:text-gray-400')}>Date format:</Text>
               <TouchableOpacity ref={dateFormatBtn} onPress={onDateFormatBtnClick} style={tailwind('flex-shrink flex-grow rounded-md border border-gray-300 bg-white py-1.5 pl-3 pr-10 blk:border-gray-600 blk:bg-gray-900')}>

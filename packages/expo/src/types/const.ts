@@ -10,6 +10,12 @@ export const APP_URL_SCHEME = 'justnotecc';
 export const APP_DOMAIN_NAME = 'justnotecc://app';
 export const BLOCKSTACK_AUTH = '/blockstack-auth';
 
+export const PATH_ABOUT = '/about';
+export const PATH_TERMS = '/terms';
+export const PATH_PRIVACY = '/privacy';
+export const PATH_PRICING = '/pricing';
+export const PATH_SUPPORT = '/support';
+
 export const HASH_FRAGMENT_IDENTIFIER = 'HASH_FRAGMENT_IDENTIFIER';
 
 export const HASH_LANDING = '#landing';
@@ -39,7 +45,7 @@ export const ASK_CONFIRM_URL = 'ASK_CONFIRM_URL';
 
 export const SM_WIDTH = 640;
 export const MD_WIDTH = 768;
-export const LG_WIDTH = 1024;
+export const LG_WIDTH = 992;
 export const XL_WIDTH = 1280;
 
 export const MY_NOTES = 'My Notes';
@@ -53,7 +59,6 @@ export const DUMMY_UNSAVED_NOTE_OBJ = { status: null, note: null };
 
 export const SIGN_UP_POPUP = 'SIGN_UP_POPUP';
 export const SIGN_IN_POPUP = 'SIGN_IN_POPUP';
-export const PROFILE_POPUP = 'PROFILE_POPUP';
 export const NOTE_LIST_MENU_POPUP = 'NOTE_LIST_MENU_POPUP';
 export const NOTE_LIST_ITEM_MENU_POPUP = 'NOTE_LIST_ITEM_MENU_POPUP';
 export const LIST_NAMES_POPUP = 'LIST_NAMES_POPUP';
@@ -174,11 +179,9 @@ export const DELETE_ACTION_LIST_NAME = 2;
 export const DELETE_ACTION_TAG_NAME = 3;
 
 export const DISCARD_ACTION_CANCEL_EDIT = 0;
-export const DISCARD_ACTION_UPDATE_NOTE_ID_URL_HASH = 1;
 export const DISCARD_ACTION_UPDATE_NOTE_ID = 2;
 export const DISCARD_ACTION_CHANGE_LIST_NAME = 3;
 export const DISCARD_ACTION_UPDATE_SYNCED = 4;
-export const DISCARD_ACTION_UPDATE_BULK_EDIT_URL_HASH = 5;
 export const DISCARD_ACTION_UPDATE_BULK_EDIT = 6;
 export const DISCARD_ACTION_SHOW_NOTE_LIST_MENU_POPUP = 8;
 export const DISCARD_ACTION_SHOW_NLIM_POPUP = 7;

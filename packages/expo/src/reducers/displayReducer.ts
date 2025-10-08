@@ -22,7 +22,7 @@ import {
   UPDATE_DELETE_SYNC_DATA_PROGRESS, DELETE_ALL_DATA, RESET_STATE,
 } from '../types/actionTypes';
 import {
-  SD_HUB_URL, SIGN_UP_POPUP, SIGN_IN_POPUP, PROFILE_POPUP, NOTE_LIST_MENU_POPUP,
+  SD_HUB_URL, SIGN_UP_POPUP, SIGN_IN_POPUP, NOTE_LIST_MENU_POPUP,
   NOTE_LIST_ITEM_MENU_POPUP, LIST_NAMES_POPUP, PIN_MENU_POPUP, BULK_EDIT_MENU_POPUP,
   TAG_EDITOR_POPUP, PAYWALL_POPUP, SIDEBAR_POPUP, SEARCH_POPUP, SETTINGS_POPUP,
   SETTINGS_LISTS_MENU_POPUP, SETTINGS_TAGS_MENU_POPUP, TIME_PICK_POPUP,
@@ -45,8 +45,6 @@ const initialState = {
   noteId: null,
   isSignUpPopupShown: false,
   isSignInPopupShown: false,
-  isProfilePopupShown: false,
-  profilePopupPosition: null,
   isNoteListMenuPopupShown: false,
   noteListMenuPopupPosition: null,
   isNoteListItemMenuPopupShown: false,
@@ -183,12 +181,6 @@ const displayReducer = (state = initialState, action) => {
 
     if (id === SIGN_IN_POPUP) {
       return { ...state, isSignInPopupShown: isShown };
-    }
-
-    if (id === PROFILE_POPUP) {
-      return {
-        ...state, isProfilePopupShown: isShown, profilePopupPosition: anchorPosition,
-      };
     }
 
     if (id === NOTE_LIST_MENU_POPUP) {

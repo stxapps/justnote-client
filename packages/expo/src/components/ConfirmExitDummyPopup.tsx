@@ -115,10 +115,10 @@ const ConfirmExitDummyPopup = () => {
             </View>
           </View>
           <View style={tailwind('mt-5 sm:mt-4 sm:ml-10 sm:flex-row sm:pl-4')}>
-            <TouchableOpacity onPress={onOkBtnClick} style={tailwind('w-full rounded-md border border-red-600 bg-red-600 px-4 py-2 shadow-sm blk:border-red-500 blk:bg-red-500 sm:w-auto')}>
+            <TouchableOpacity onPress={onOkBtnClick} style={tailwind('w-full rounded-md border border-red-600 bg-red-600 px-4 py-2 shadow-xs blk:border-red-500 blk:bg-red-500 sm:w-auto')}>
               <Text style={tailwind('text-center text-base font-medium text-white sm:text-sm')}>Delete everything and exit</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={onCancelBtnClick} style={tailwind('mt-3 w-full rounded-md border border-gray-300 bg-white px-4 py-2 shadow-sm blk:border-gray-400 blk:bg-gray-800 sm:mt-0 sm:ml-3 sm:w-auto')}>
+            <TouchableOpacity onPress={onCancelBtnClick} style={tailwind('mt-3 w-full rounded-md border border-gray-300 bg-white px-4 py-2 shadow-xs blk:border-gray-400 blk:bg-gray-800 sm:mt-0 sm:ml-3 sm:w-auto')}>
               <Text style={tailwind('text-center text-base font-medium text-gray-700 blk:text-gray-300 sm:text-sm')}>Cancel</Text>
             </TouchableOpacity>
           </View>

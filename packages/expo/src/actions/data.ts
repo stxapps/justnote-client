@@ -15,10 +15,10 @@ import {
   UPDATE_DELETE_ALL_DATA_PROGRESS, UPDATE_DELETE_SYNC_DATA_PROGRESS, DELETE_ALL_DATA,
 } from '../types/actionTypes';
 import {
-  SETTINGS_POPUP, MY_NOTES, TRASH, ARCHIVE, ADDED_DT, UPDATED_DT, N_NOTES, CD_ROOT,
-  NOTES, SSLTS, IMAGES, SETTINGS, INFO, PINS, TAGS, INDEX, DOT_JSON,
-  NOTE_DATE_SHOWING_MODE_HIDE, NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS,
-  IMAGE_FILE_EXTS, HTML_FILE_EXTS, PUT_FILE, DELETE_FILE, UTF8,
+  MY_NOTES, TRASH, ARCHIVE, ADDED_DT, UPDATED_DT, N_NOTES, CD_ROOT, NOTES, SSLTS,
+  IMAGES, SETTINGS, INFO, PINS, TAGS, INDEX, DOT_JSON, NOTE_DATE_SHOWING_MODE_HIDE,
+  NOTE_DATE_SHOWING_MODE_SHOW, NOTE_DATE_FORMATS, IMAGE_FILE_EXTS, HTML_FILE_EXTS,
+  PUT_FILE, DELETE_FILE, UTF8,
 } from '../types/const';
 import {
   isEqual, isObject, isString, isNumber, randomString, getStaticFPath, getMainId,
@@ -34,7 +34,7 @@ import {
 import { initialSettingsState, initialInfoState } from '../types/initialStates';
 import vars from '../vars';
 
-import { updatePopupUrlHash, increaseUpdateStatusBarStyleCount } from '.';
+import { increaseUpdateStatusBarStyleCount } from '.';
 
 const _getBestMap = (fpath, idMap) => {
   // Export from Windows, path separator is \
@@ -2035,14 +2035,7 @@ export const deleteAllData = () => async (dispatch, getState) => {
     [values, pValues] = await deleteAllDataIfEnough(values, pValues, true);
     await fileApi.deleteFiles(staticFPaths);
 
-    // Need to close the settings popup to update the url hash,
-    //   as DELETE_ALL_DATA will set isSettingsPopupShown to false.
-    if (getState().display.isSettingsPopupShown) {
-      vars.updateSettingsPopup.didCall = true;
-      updatePopupUrlHash(SETTINGS_POPUP, false);
-    }
     dispatch({ type: DELETE_ALL_DATA });
-
     dispatch(sync(false, 1));
   } catch (error) {
     dispatch(updateDeleteAllDataProgress({ total: -1, done: -1, error: `${error}` }));

@@ -5,16 +5,11 @@ import {
 import Svg, { Path } from 'react-native-svg';
 
 import { useSelector, useDispatch } from '../store';
-import { updatePopup, updateNoteId, updateBulkEdit } from '../actions';
+import { updatePopup } from '../actions';
+import { discardNote, updateSettingsPopup } from '../actions/chunk';
 import {
-  discardNote, changeListName, showNoteListMenuPopup, showNLIMPopup,
-  updateSettingsPopup,
-} from '../actions/chunk';
-import {
-  CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_NOTE_ID,
-  DISCARD_ACTION_CHANGE_LIST_NAME, DISCARD_ACTION_UPDATE_BULK_EDIT,
-  DISCARD_ACTION_SHOW_NOTE_LIST_MENU_POPUP, DISCARD_ACTION_SHOW_NLIM_POPUP,
-  DISCARD_ACTION_UPDATE_LIST_NAME, DISCARD_ACTION_UPDATE_TAG_NAME,
+  CONFIRM_DISCARD_POPUP, DISCARD_ACTION_CANCEL_EDIT, DISCARD_ACTION_UPDATE_LIST_NAME,
+  DISCARD_ACTION_UPDATE_TAG_NAME,
 } from '../types/const';
 import { dialogFMV } from '../types/animConfigs';
 
@@ -42,18 +37,9 @@ const ConfirmDiscardPopup = () => {
   const onConfirmDiscardOkBtnClick = () => {
     if (didClick.current) return;
 
+    onConfirmDiscardCancelBtnClick();
     if (discardAction === DISCARD_ACTION_CANCEL_EDIT) {
       dispatch(discardNote(false));
-    } else if (discardAction === DISCARD_ACTION_UPDATE_NOTE_ID) {
-      dispatch(updateNoteId(null, true, false));
-    } else if (discardAction === DISCARD_ACTION_CHANGE_LIST_NAME) {
-      dispatch(changeListName(null, false));
-    } else if (discardAction === DISCARD_ACTION_UPDATE_BULK_EDIT) {
-      dispatch(updateBulkEdit(true, null, true, false));
-    } else if (discardAction === DISCARD_ACTION_SHOW_NOTE_LIST_MENU_POPUP) {
-      dispatch(showNoteListMenuPopup(null, false));
-    } else if (discardAction === DISCARD_ACTION_SHOW_NLIM_POPUP) {
-      dispatch(showNLIMPopup(null, null, false));
     } else if (
       discardAction === DISCARD_ACTION_UPDATE_LIST_NAME ||
       discardAction === DISCARD_ACTION_UPDATE_TAG_NAME
@@ -63,7 +49,6 @@ const ConfirmDiscardPopup = () => {
       console.log(`Invalid discard action: ${discardAction}`);
     }
 
-    onConfirmDiscardCancelBtnClick();
     didClick.current = true;
   };
 
@@ -153,10 +138,10 @@ const ConfirmDiscardPopup = () => {
             </View>
           </View>
           <View style={tailwind('mt-5 sm:mt-4 sm:ml-10 sm:flex-row sm:pl-4')}>
-            <TouchableOpacity onPress={onConfirmDiscardOkBtnClick} style={tailwind('w-full rounded-md border border-red-600 bg-red-600 px-4 py-2 shadow-sm blk:border-red-500 blk:bg-red-500 sm:w-auto')}>
+            <TouchableOpacity onPress={onConfirmDiscardOkBtnClick} style={tailwind('w-full rounded-md border border-red-600 bg-red-600 px-4 py-2 shadow-xs blk:border-red-500 blk:bg-red-500 sm:w-auto')}>
               <Text style={tailwind('text-center text-base font-medium text-white sm:text-sm')}>Discard</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={onConfirmDiscardCancelBtnClick} style={tailwind('mt-3 w-full rounded-md border border-gray-300 bg-white px-4 py-2 shadow-sm blk:border-gray-400 blk:bg-gray-800 sm:mt-0 sm:ml-3 sm:w-auto')}>
+            <TouchableOpacity onPress={onConfirmDiscardCancelBtnClick} style={tailwind('mt-3 w-full rounded-md border border-gray-300 bg-white px-4 py-2 shadow-xs blk:border-gray-400 blk:bg-gray-800 sm:mt-0 sm:ml-3 sm:w-auto')}>
               <Text style={tailwind('text-center text-base font-medium text-gray-700 blk:text-gray-300 sm:text-sm')}>Cancel</Text>
             </TouchableOpacity>
           </View>

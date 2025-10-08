@@ -97,8 +97,9 @@ const SettingsListsMenuPopup = () => {
 
   const onAddLockBtnClick = () => {
     if (didClick.current) return;
-    onCancelBtnClick();
-    dispatch(showAddLockEditorPopup(LOCK_ACTION_ADD_LOCK_LIST));
+    dispatch(showAddLockEditorPopup(
+      LOCK_ACTION_ADD_LOCK_LIST, SETTINGS_LISTS_MENU_POPUP
+    ));
     didClick.current = true;
   };
 

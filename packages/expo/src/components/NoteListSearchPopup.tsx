@@ -105,7 +105,7 @@ const NoteListSearchPopup = () => {
 
   return (
     <Animated.View style={[tailwind('h-14 flex-row items-center justify-between border-b border-gray-200 pl-4 pr-2 blk:border-gray-700 sm:pl-6 sm:pr-4 lg:hidden'), popupStyle]}>
-      <View style={tailwind('flex-1 rounded-md bg-white shadow-sm blk:bg-gray-900')}>
+      <View style={tailwind('flex-1 rounded-md bg-white shadow-xs blk:bg-gray-900')}>
         <TextInput ref={searchInput} onChange={onSearchInputChange} style={tailwind(`w-full rounded-md border border-gray-300 bg-white pl-9 pr-6 text-base font-normal text-gray-700 blk:border-gray-600 blk:bg-gray-900 blk:text-gray-200 ${searchInputClasses}`)} placeholder="Search" placeholderTextColor={themeMode === BLK_MODE ? 'rgb(156, 163, 175)' : 'rgb(107, 114, 128)'} value={searchString} autoCapitalize="none" />
         <View style={tailwind('absolute inset-y-0 left-0 justify-center pl-3')}>
           <Svg width={16} height={16} style={tailwind('mr-3 font-normal text-gray-400 blk:text-gray-500')} viewBox="0 0 20 20" fill="currentColor">

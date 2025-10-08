@@ -132,7 +132,7 @@ const InnerSidebarListName = (props) => {
       );
       expandBtn = (
         <TouchableOpacity onPress={onExpandBtnClick} style={tailwind('-ml-2.5 h-10 w-8 flex-shrink-0 flex-grow-0 items-center justify-center rounded lg:h-9')}>
-          <View style={tailwind('ml-1.5 h-3.5 w-3.5 items-center justify-center rounded-sm')}>
+          <View style={tailwind('ml-1.5 h-3.5 w-3.5 items-center justify-center rounded-xs')}>
             {expandSvg}
           </View>
         </TouchableOpacity>

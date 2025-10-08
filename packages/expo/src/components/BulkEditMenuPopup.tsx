@@ -49,19 +49,18 @@ const BulkEditMenuPopup = () => {
     if (!text || didClick.current) return;
 
     if (text === MOVE_TO) {
-      onCancelBtnClick();
       dispatch(updateMoveAction(MOVE_ACTION_NOTE_COMMANDS));
       dispatch(updateListNamesMode(LIST_NAMES_MODE_MOVE_NOTES));
-      dispatch(updatePopup(LIST_NAMES_POPUP, true, anchorPosition));
+      dispatch(updatePopup(
+        LIST_NAMES_POPUP, true, anchorPosition, BULK_EDIT_MENU_POPUP
+      ));
     } else if (text === PIN) {
-      onCancelBtnClick();
-      dispatch(bulkPinNotes(selectedNoteIds));
+      dispatch(bulkPinNotes(selectedNoteIds, BULK_EDIT_MENU_POPUP));
     } else if (text === UNPIN) {
       onCancelBtnClick();
       dispatch(bulkUnpinNotes(selectedNoteIds));
     } else if (text === MANAGE_TAGS) {
-      onCancelBtnClick();
-      dispatch(updateTagEditorPopup(true, true));
+      dispatch(updateTagEditorPopup(true, true, BULK_EDIT_MENU_POPUP));
     } else {
       console.log(`In BulkEditMenuPopup, invalid text: ${text}`);
       return; // Don't set didClick to true

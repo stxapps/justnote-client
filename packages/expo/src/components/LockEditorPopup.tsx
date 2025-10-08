@@ -275,7 +275,7 @@ const LockEditorPopup = () => {
               <Text style={tailwind('text-left text-xl font-semibold text-gray-900 blk:text-white')}>{title}</Text>
               {desc}
               <View style={tailwind([LOCK_ACTION_ADD_LOCK_NOTE, LOCK_ACTION_ADD_LOCK_LIST].includes(lockAction) ? 'pt-1' : 'pt-3.5')}>
-                <View style={tailwind('mt-1 rounded-md bg-white shadow-sm blk:bg-gray-800')}>
+                <View style={tailwind('mt-1 rounded-md bg-white shadow-xs blk:bg-gray-800')}>
                   <TextInput ref={passwordInput} onChange={onPasswordInputChange} style={tailwind(`w-full rounded-md border border-gray-300 bg-white pl-4 pr-6 text-sm font-normal text-gray-700 blk:border-gray-600 blk:bg-gray-800 blk:text-gray-200 ${textInputClasses}`)} placeholder="Password" placeholderTextColor={themeMode === BLK_MODE ? 'rgb(156, 163, 175)' : 'rgb(107, 114, 128)'} value={passwordInputValue} autoCapitalize="none" secureTextEntry={!doShowPassword} />
                   <TouchableOpacity onPress={() => setDoShowPassword(!doShowPassword)} style={tailwind('absolute inset-y-0 right-0 items-center justify-center pr-2')}>
                     <Svg width={16} height={16} style={tailwind('font-normal text-gray-400 blk:text-gray-500')} viewBox="0 0 20 20" fill="currentColor">
@@ -305,7 +305,7 @@ const LockEditorPopup = () => {
               </View>}
               <View style={tailwind(errMsg ? '' : isAddLock ? 'pt-5' : 'pt-3.5')}>
                 {errMsg && <Text style={tailwind('py-2 text-sm font-normal text-red-600')}>{errMsg}</Text>}
-                <TouchableOpacity onPress={onOkBtnClick} style={tailwind('w-full rounded-md border border-gray-800 bg-gray-800 py-2 shadow-sm blk:border-gray-500 blk:bg-gray-500')}>
+                <TouchableOpacity onPress={onOkBtnClick} style={tailwind('w-full rounded-md border border-gray-800 bg-gray-800 py-2 shadow-xs blk:border-gray-500 blk:bg-gray-500')}>
                   <Text style={tailwind('text-center text-base font-medium text-white sm:text-sm')}>{btnText}</Text>
                 </TouchableOpacity>
               </View>

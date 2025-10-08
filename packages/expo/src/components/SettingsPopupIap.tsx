@@ -15,7 +15,7 @@ import {
 } from '../types/actionTypes';
 import {
   DOMAIN_NAME, HASH_TERMS, HASH_PRIVACY, HASH_SUPPORT, VALID, INVALID, UNKNOWN, ERROR,
-  ACTIVE, NO_RENEW, GRACE, ON_HOLD, PAUSED, APPSTORE, PLAYSTORE, PADDLE, SM_WIDTH,
+  ACTIVE, NO_RENEW, GRACE, ON_HOLD, PAUSED, APPSTORE, PLAYSTORE, PADDLE, MD_WIDTH,
   BLK_MODE,
 } from '../types/const';
 import { getValidProduct, getValidPurchase, getThemeMode } from '../selectors';
@@ -128,7 +128,7 @@ const IapHome = (props) => {
 
       actionPanel = (
         <View style={tailwind('mt-6 items-start justify-start')}>
-          <TouchableOpacity onPress={onRequestBtnClick} style={tailwind('rounded-md border border-gray-400 bg-white px-3.5 py-1.5 shadow-sm blk:border-gray-400 blk:bg-gray-900')}>
+          <TouchableOpacity onPress={onRequestBtnClick} style={tailwind('rounded-md border border-gray-400 bg-white px-3.5 py-1.5 shadow-xs blk:border-gray-400 blk:bg-gray-900')}>
             <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-300')}>Subscribe for {price} / year</Text>
           </TouchableOpacity>
         </View>
@@ -529,7 +529,7 @@ const InnerSettingsPopupIapRestore = (props) => {
   if (restoreStatus === null) {
     actionPanel = (
       <View style={tailwind('mt-7 mb-4 items-start justify-start')}>
-        <TouchableOpacity onPress={onRestoreBtnClick} style={tailwind('rounded-md border border-gray-400 bg-white px-3.5 py-1.5 shadow-sm blk:border-gray-400 blk:bg-gray-900')}>
+        <TouchableOpacity onPress={onRestoreBtnClick} style={tailwind('rounded-md border border-gray-400 bg-white px-3.5 py-1.5 shadow-xs blk:border-gray-400 blk:bg-gray-900')}>
           <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-300')}>Restore my purchases</Text>
         </TouchableOpacity>
       </View>
@@ -590,7 +590,7 @@ const InnerSettingsPopupIapRestore = (props) => {
     <View style={tailwind('p-4 md:p-6 md:pt-4')}>
       <View style={tailwind('border-b border-gray-200 blk:border-gray-700 md:border-b-0')}>
         <TouchableOpacity onPress={onBackToIapViewBtnClick} style={tailwind('pb-1 md:pb-0')}>
-          <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-400')}>{'<'} {safeAreaWidth < SM_WIDTH ? 'Settings / ' : ''}Subscription</Text>
+          <Text style={tailwind('text-sm font-normal text-gray-500 blk:text-gray-400')}>{'<'} {safeAreaWidth < MD_WIDTH ? 'Settings / ' : ''}Subscription</Text>
         </TouchableOpacity>
         <Text style={tailwind('pb-2 text-xl font-medium leading-6 text-gray-800 blk:text-gray-100 md:pb-0')}>Restore Purchases</Text>
       </View>

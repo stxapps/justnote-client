@@ -50,7 +50,7 @@ const NoteListItemContent = (props) => {
 
   const onContentBtnLongClick = () => {
     if (!isBulkEditing) {
-      dispatch(updateBulkEdit(true, isBusy ? null : note.id, false, true));
+      dispatch(updateBulkEdit(true, isBusy ? null : note.id, null, false, true));
     }
   };
 
@@ -118,7 +118,7 @@ const NoteListItemContent = (props) => {
 
   return (
     <React.Fragment>
-      <View style={tailwind(`w-full flex-row items-center rounded-sm pl-3 sm:pl-5 ${viewClassNames}`)}>
+      <View style={tailwind(`w-full flex-row items-center rounded-xs pl-3 sm:pl-5 ${viewClassNames}`)}>
         {(isBulkEditing && !isBusy) && <TouchableOpacity activeOpacity={1.0} onPress={onContentBtnClick} onLongPress={onContentBtnLongClick} style={tailwind(`mr-3 h-10 w-10 items-center justify-center rounded-full border ${circleClassNames}`)}>
           <Svg style={tailwind(`h-6 w-6 font-normal ${checkClassNames}`)} viewBox="0 0 20 20" fill="currentColor">
             <Path fillRule="evenodd" clipRule="evenodd" d="M16.7071 5.29289C17.0976 5.68342 17.0976 6.31658 16.7071 6.70711L8.70711 14.7071C8.31658 15.0976 7.68342 15.0976 7.29289 14.7071L3.29289 10.7071C2.90237 10.3166 2.90237 9.68342 3.29289 9.29289C3.68342 8.90237 4.31658 8.90237 4.70711 9.29289L8 12.5858L15.2929 5.29289C15.6834 4.90237 16.3166 4.90237 16.7071 5.29289Z" />
@@ -126,7 +126,7 @@ const NoteListItemContent = (props) => {
         </TouchableOpacity>}
         <View style={tailwind('flex-1')}>
           {(note.title || noteDate) && <View style={tailwind('pr-3')}>
-            <TouchableOpacity activeOpacity={1.0} onPress={onContentBtnClick} onLongPress={onContentBtnLongClick} style={tailwind(`w-full flex-row items-center justify-between rounded-sm ${titleClassNames}`)}>
+            <TouchableOpacity activeOpacity={1.0} onPress={onContentBtnClick} onLongPress={onContentBtnLongClick} style={tailwind(`w-full flex-row items-center justify-between rounded-xs ${titleClassNames}`)}>
               <View style={tailwind('flex-1')}>
                 <Text style={tailwind('text-left text-base font-semibold text-gray-800 blk:text-gray-100 lg:text-sm')} numberOfLines={1} ellipsizeMode="tail">{note.title}</Text>
               </View>
@@ -136,7 +136,7 @@ const NoteListItemContent = (props) => {
             </TouchableOpacity>
           </View>}
           <View style={tailwind(`flex-row items-center justify-between ${isBulkEditing ? 'pr-3' : ''}`)}>
-            <TouchableOpacity activeOpacity={1.0} onPress={onContentBtnClick} onLongPress={onContentBtnLongClick} style={[tailwind('w-full flex-1 items-start justify-center rounded-sm'), { minHeight: 42 }]}>
+            <TouchableOpacity activeOpacity={1.0} onPress={onContentBtnClick} onLongPress={onContentBtnLongClick} style={[tailwind('w-full flex-1 items-start justify-center rounded-xs'), { minHeight: 42 }]}>
               <View ref={pBodyRef} collapsable={false}>
                 <Text style={tailwind('text-left text-sm font-normal text-gray-500 blk:text-gray-400')} numberOfLines={3} ellipsizeMode="tail">{body}</Text>
               </View>

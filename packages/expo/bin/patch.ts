@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 
 const replaceMatchedLine = (fpath, actionObjs) => {
   const text = fs.readFileSync(fpath, 'utf-8');
@@ -51,5 +51,26 @@ const patchExpoShareIntent = () => {
   );
 };
 
+const patchLexoRank = () => {
+  const fpath = 'node_modules/@wewatch/lexorank/package.json';
+  const text = fs.readFileSync(fpath, 'utf-8');
+
+  let outs = text.trim().split(/\r?\n/);
+
+  const match = '      "types": "./dist/types/index.d.ts",';
+  const anchor = '      "require": "./dist/cjs/index.js",';
+  if (outs.includes(match)) return;
+
+  const i = outs.indexOf(anchor);
+  if (i < 0) {
+    console.log('In patchLexoRank, invalid i:', i);
+    return;
+  }
+
+  outs = [...outs.slice(0, i), match, ...outs.slice(i)];
+  fs.writeFileSync(fpath, outs.join('\n') + '\n');
+};
+
 patchMmkv();
 patchExpoShareIntent();
+patchLexoRank();
