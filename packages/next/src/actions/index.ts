@@ -27,7 +27,7 @@ import {
   throttle, isBusyStatus, getUserUsername, getUserImageUrl, isEqual, isObject,
   isString, isNumber, isFldStr, isTitleEqual, isBodyEqual, getWindowInsets, getNote,
   getEditingListNameEditors, getEditingTagNameEditors, randomString,
-  getPopupHistoryStateIndex, reorderPopupHistoryStates,
+  getPopupHistoryStateIndex, reorderPopupHistoryStates, toPx,
 } from '../utils';
 import vars from '../vars';
 
@@ -200,8 +200,8 @@ const handleScreenRotation = (prevWidth) => (dispatch, getState) => {
   const { isUserSignedIn, isUserDummy } = getState().user;
   if (!isUserSignedIn && !isUserDummy) return;
 
-  const toLg = prevWidth < LG_WIDTH && window.innerWidth >= LG_WIDTH;
-  const fromLg = prevWidth >= LG_WIDTH && window.innerWidth < LG_WIDTH;
+  const toLg = prevWidth < toPx(LG_WIDTH) && window.innerWidth >= toPx(LG_WIDTH);
+  const fromLg = prevWidth >= toPx(LG_WIDTH) && window.innerWidth < toPx(LG_WIDTH);
   if (!toLg && !fromLg) return;
 
   const noteId = getState().display.noteId;
@@ -311,7 +311,7 @@ const isPopupShownWthId = (canBckPopups, id) => {
 
 const onPopStateChange = (dispatch, getState) => {
   const safeAreaWidth = getState().window.width;
-  const ltLg = isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH;
+  const ltLg = isNumber(safeAreaWidth) && safeAreaWidth < toPx(LG_WIDTH);
   const chs = window.history.state;
   const idx = getPopupHistoryStateIndex(vars.popupHistory.states, chs);
 
@@ -497,7 +497,7 @@ const updateNoteIdInQueue = (id, dispatch, getState) => () => {
        not-null   not-null   width >= LG     do nothing
     */
     const safeAreaWidth = getState().window.width;
-    const ltLg = isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH;
+    const ltLg = isNumber(safeAreaWidth) && safeAreaWidth < toPx(LG_WIDTH);
     const chs = window.history.state;
     const idx = getPopupHistoryStateIndex(vars.popupHistory.states, chs);
     const type = UPDATE_NOTE_ID;
@@ -829,7 +829,7 @@ export const refreshFetched = () => async (dispatch, getState) => {
 
   // Check safeAreaWidth is a number to execute on web only
   //   as safeAreaWidth on mobile is always null.
-  if (noteId !== null && isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
+  if (noteId !== null && isNumber(safeAreaWidth) && safeAreaWidth < toPx(LG_WIDTH)) {
     dispatch(updateNoteId(null));
   }
 

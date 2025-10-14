@@ -7,7 +7,7 @@ import {
 import { showNLIMPopup, updateQueryString } from '../actions/chunk';
 import { makeIsNoteIdSelected, makeGetNoteDate, makeGetTnAndDns } from '../selectors';
 import {
-  isNumber, isBusyStatus, isPinningStatus, isTaggingStatus, stripHtml, adjustRect,
+  isNumber, isBusyStatus, isPinningStatus, isTaggingStatus, stripHtml, adjustRect, toPx,
 } from '../utils';
 
 import { useTailwind } from '.';
@@ -110,7 +110,9 @@ const NoteListItemContent = (props) => {
 
   const onMenuBtnClick = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const nRect = adjustRect(rect, 12, 4, -20, -8);
+    const nRect = adjustRect(
+      rect, toPx('0.75rem'), toPx('0.25rem'), toPx('-1.25rem'), toPx('-0.5rem')
+    );
     dispatch(showNLIMPopup(note.id, nRect, true));
   };
 
@@ -127,13 +129,13 @@ const NoteListItemContent = (props) => {
 
     let _viewPbMode = 0;
     if ((note && note.title) || noteDate) {
-      if (height <= 44) _viewPbMode = 1;
-      if (height <= 24) _viewPbMode = 2;
+      if (height <= toPx('2.75rem')) _viewPbMode = 1;
+      if (height <= toPx('1.5rem')) _viewPbMode = 2;
     }
 
     let _doTitlePb = false;
     if (((note && note.title) || noteDate) && body) {
-      if (height >= 22) _doTitlePb = true;
+      if (height >= toPx('1.375rem')) _doTitlePb = true;
     }
 
     if (viewPbMode !== _viewPbMode) setViewPbMode(_viewPbMode);

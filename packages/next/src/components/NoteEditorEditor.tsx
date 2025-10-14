@@ -15,7 +15,7 @@ import { NEW_NOTE, ADDED, IMAGES, CD_ROOT, BLK_MODE, VALID } from '../types/cons
 import { getThemeMode, getDoMoreEditorFontSizes } from '../selectors';
 import {
   isString, isTitleEqual, isBodyEqual, isMobile as _isMobile, replaceObjectUrls,
-  getFileExt, debounce, containUppercase, isStringTitleIn,
+  getFileExt, debounce, containUppercase, isStringTitleIn, toPx,
 } from '../utils';
 import { isUint8Array, isBlob, convertDataUrlToBlob } from '../utils/index-web';
 
@@ -231,13 +231,13 @@ const NoteEditorEditor = (props) => {
     if (!toolbarView) return;
 
     if (isMobile) {
-      if (safeAreaWidthRef.current < 350) toolbarView.maxWidth = '224px';
-      else if (safeAreaWidthRef.current < 428) toolbarView.maxWidth = '256px';
-      else if (safeAreaWidthRef.current < 468) toolbarView.maxWidth = '216px';
+      if (safeAreaWidthRef.current < 350) toolbarView.maxWidth = '14rem';
+      else if (safeAreaWidthRef.current < 428) toolbarView.maxWidth = '16rem';
+      else if (safeAreaWidthRef.current < 468) toolbarView.maxWidth = '13.5rem';
       else toolbarView.maxWidth = '';
     } else {
-      if (safeAreaWidthRef.current < 372) toolbarView.maxWidth = '224px';
-      else if (safeAreaWidthRef.current < 400) toolbarView.maxWidth = '188px';
+      if (safeAreaWidthRef.current < 372) toolbarView.maxWidth = '14rem';
+      else if (safeAreaWidthRef.current < 400) toolbarView.maxWidth = '11.75rem';
       else toolbarView.maxWidth = '';
     }
   }, [isMobile]);

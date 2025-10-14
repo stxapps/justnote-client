@@ -4,6 +4,7 @@ import { useDispatch } from '../store';
 import { updateNoteId } from '../actions';
 import { retryDiedNotes, cancelDiedNotes } from '../actions/chunk';
 import { HASH_SUPPORT, LG_WIDTH } from '../types/const';
+import { toPx } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
@@ -37,7 +38,7 @@ const NoteEditorRetry = (props) => {
     didClick.current = false;
   }, [note.status]);
 
-  const style = safeAreaWidth < LG_WIDTH ? {} : { minWidth: 400 };
+  const style = safeAreaWidth < toPx(LG_WIDTH) ? {} : { minWidth: '25rem' };
 
   return (
     <div className={tailwind('h-full w-full overflow-auto bg-white blk:bg-gray-900')}>

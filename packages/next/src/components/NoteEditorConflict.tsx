@@ -14,7 +14,7 @@ import {
 import { getThemeMode } from '../selectors';
 import {
   isString, getListNameDisplayName, getFormattedDT, isMobile as _isMobile,
-  getListNameAndNote,
+  getListNameAndNote, toPx,
 } from '../utils';
 import { isUint8Array, isBlob, convertDataUrlToBlob } from '../utils/index-web';
 import { popupFMV } from '../types/animConfigs';
@@ -81,7 +81,7 @@ const InnerNoteEditorSavedConflict = (props) => {
     didClick.current = false;
   }, [conflictedNote]);
 
-  const style = safeAreaWidth < LG_WIDTH ? {} : { minWidth: 442 };
+  const style = safeAreaWidth < toPx(LG_WIDTH) ? {} : { minWidth: '27.625rem' };
 
   return (
     <div className={tailwind('relative h-full w-full overflow-auto bg-white blk:bg-gray-900')}>
@@ -143,7 +143,7 @@ const InnerNoteEditorUnsavedConflict = (props) => {
     didClick.current = false;
   }, [note, unsavedNote]);
 
-  const style = safeAreaWidth < LG_WIDTH ? {} : { minWidth: 442 };
+  const style = safeAreaWidth < toPx(LG_WIDTH) ? {} : { minWidth: '27.625rem' };
 
   return (
     <div className={tailwind('relative h-full w-full overflow-auto bg-white blk:bg-gray-900')}>

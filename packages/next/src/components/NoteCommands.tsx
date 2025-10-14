@@ -10,7 +10,7 @@ import {
   TRASH, LG_WIDTH, MOVE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_COMMANDS,
   LIST_NAMES_MODE_MOVE_NOTES, NOTE_COMMANDS_MODE_NETB,
 } from '../types/const';
-import { getListNameDisplayName, adjustRect } from '../utils';
+import { getListNameDisplayName, adjustRect, toPx } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
@@ -64,10 +64,10 @@ const NoteCommands = (props) => {
     const rect = moveToBtn.current.getBoundingClientRect();
 
     let nRect;
-    if (safeAreaWidth < LG_WIDTH) {
-      nRect = adjustRect(rect, 4, 12, -14, -12);
+    if (safeAreaWidth < toPx(LG_WIDTH)) {
+      nRect = adjustRect(rect, '0.25rem', '0.75rem', '-0.875rem', '-0.75rem');
     } else {
-      nRect = adjustRect(rect, 0, -4, 0, 4);
+      nRect = adjustRect(rect, '0rem', '-0.25rem', '0rem', '0.25rem');
     }
     dispatch(updatePopup(LIST_NAMES_POPUP, true, nRect));
     if (isFullScreen) onToggleFullScreen();
@@ -77,10 +77,10 @@ const NoteCommands = (props) => {
     const rect = moreBtn.current.getBoundingClientRect();
 
     let nRect;
-    if (safeAreaWidth < LG_WIDTH) {
-      nRect = adjustRect(rect, 4, 12, -14, -12);
+    if (safeAreaWidth < toPx(LG_WIDTH)) {
+      nRect = adjustRect(rect, '0.25rem', '0.75rem', '-0.875rem', '-0.75rem');
     } else {
-      nRect = adjustRect(rect, 0, -4, 0, 4);
+      nRect = adjustRect(rect, '0rem', '-0.25rem', '0rem', '0.25rem');
     }
     dispatch(updatePopup(BULK_EDIT_MENU_POPUP, true, nRect));
     if (isFullScreen) onToggleFullScreen();

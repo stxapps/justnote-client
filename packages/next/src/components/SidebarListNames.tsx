@@ -10,7 +10,7 @@ import {
   SIDEBAR_LIST_NAMES_MODE_CHANGE_TAG_NAME,
 } from '../types/const';
 import { getCanChangeListNames } from '../selectors';
-import { getListNameObj } from '../utils';
+import { getListNameObj, toPx } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
@@ -93,7 +93,9 @@ const InnerSidebarListName = (props) => {
 
   const onListNameBtnClick = () => {
     dispatch(changeListName(listNameObj.listName, true));
-    if (safeAreaWidth < LG_WIDTH) dispatch(updatePopup(SIDEBAR_POPUP, false, null));
+    if (safeAreaWidth < toPx(LG_WIDTH)) {
+      dispatch(updatePopup(SIDEBAR_POPUP, false, null));
+    }
   };
 
   const onExpandBtnClick = () => {
@@ -167,7 +169,7 @@ const InnerSidebarListName = (props) => {
     }
   }
 
-  const viewStyle = { paddingLeft: 16 * level };
+  const viewStyle = { paddingLeft: toPx('1rem') * level };
 
   return (
     <React.Fragment>
@@ -195,7 +197,9 @@ const InnerSidebarTagName = (props) => {
 
   const onTagNameBtnClick = () => {
     dispatch(updateQueryString(tagNameObj.tagName, true));
-    if (safeAreaWidth < LG_WIDTH) dispatch(updatePopup(SIDEBAR_POPUP, false, null));
+    if (safeAreaWidth < toPx(LG_WIDTH)) {
+      dispatch(updatePopup(SIDEBAR_POPUP, false, null));
+    }
   };
 
   // Only tag name for now

@@ -20,7 +20,7 @@ const NoteEditorBulkEdit = () => {
 
   return (
     <div className={tailwind('h-full w-full overflow-x-auto')}>
-      <div style={{ minWidth: 400 }} className={tailwind('relative h-full w-full bg-gray-600 px-4 sm:px-6')}>
+      <div style={{ minWidth: '25rem' }} className={tailwind('relative h-full w-full bg-gray-600 px-4 sm:px-6')}>
         <div className={tailwind('h-16 w-full')} />
         <div>
           <h3 className={tailwind('pt-5 text-lg font-medium text-white')}>{selectedNoteIdsLength} Notes selected</h3>

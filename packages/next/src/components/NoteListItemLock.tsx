@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { useSelector, useDispatch } from '../store';
 import { showLockMenuPopup, showUNEPopup } from '../actions/chunk';
 import { makeGetDoShowTitle } from '../selectors';
-import { adjustRect } from '../utils';
+import { adjustRect, toPx } from '../utils';
 
 import { useTailwind } from '.';
 
@@ -25,7 +25,9 @@ const NoteListItemLock = (props) => {
     if (isBulkEditing) return;
 
     const rect = e.currentTarget.getBoundingClientRect();
-    const nRect = adjustRect(rect, 12, 4, -20, -8);
+    const nRect = adjustRect(
+      rect, toPx('0.75rem'), toPx('0.25rem'), toPx('-1.25rem'), toPx('-0.5rem')
+    );
     dispatch(showLockMenuPopup(note.id, nRect));
   };
 

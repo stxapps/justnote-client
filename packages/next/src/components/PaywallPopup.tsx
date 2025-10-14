@@ -10,6 +10,7 @@ import {
   FEATURE_LOCK, FEATURE_TAG,
 } from '../types/const';
 import { dialogBgFMV, dialogFMV } from '../types/animConfigs';
+import { toPx } from '../utils';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 
@@ -70,7 +71,7 @@ const PaywallPopup = () => {
   }
 
   const spanStyle: any = {};
-  if (safeAreaWidth >= SM_WIDTH) spanStyle.height = safeAreaHeight;
+  if (safeAreaWidth >= toPx(SM_WIDTH)) spanStyle.height = safeAreaHeight;
 
   const cancelBtnStyle = { paddingTop: '0.44rem', paddingBottom: '0.44rem' };
 

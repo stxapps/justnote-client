@@ -8,6 +8,7 @@ import {
   DATE_FORMAT_MENU_POPUP, NOTE_DATE_FORMATS, NOTE_DATE_FORMAT_TEXTS,
 } from '../types/const';
 import { popupBgFMV, popupFMV } from '../types/animConfigs';
+import { toPx } from '../utils';
 import { computePositionStyle } from '../utils/popup';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
@@ -68,7 +69,10 @@ const DateFormatMenuPopup = () => {
 
   let panel;
   if (popupSize) {
-    const maxHeight = Math.min(safeAreaHeight - 16, (44 * 5) + (44 / 2) + 4);
+    const maxHeight = Math.min(
+      safeAreaHeight - 16,
+      (toPx('2.75rem') * 5) + (toPx('2.75rem') / 2) + toPx('0.25rem')
+    );
     const posStyle = computePositionStyle(
       anchorPosition,
       { width: popupSize.width, height: Math.min(popupSize.height, maxHeight) },

@@ -9,6 +9,7 @@ import {
   DELETE_ACTION_LIST_NAME, DELETE_ACTION_TAG_NAME, SM_WIDTH,
 } from '../types/const';
 import { dialogBgFMV, dialogFMV } from '../types/animConfigs';
+import { toPx } from '../utils';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 
@@ -70,7 +71,7 @@ const ConfirmDeletePopup = () => {
   };
 
   const spanStyle: any = {};
-  if (safeAreaWidth >= SM_WIDTH) spanStyle.height = safeAreaHeight;
+  if (safeAreaWidth >= toPx(SM_WIDTH)) spanStyle.height = safeAreaHeight;
 
   return (
     <AnimatePresence key="AP_CDP">

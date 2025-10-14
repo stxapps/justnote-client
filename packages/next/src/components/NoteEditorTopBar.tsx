@@ -6,6 +6,7 @@ import { increaseSaveNoteCount, increaseDiscardNoteCount } from '../actions/chun
 import {
   NEW_NOTE, ADDED, VALID, LG_WIDTH, NOTE_COMMANDS_MODE_NETB,
 } from '../types/const';
+import { toPx } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 import NoteCommands from './NoteCommands';
@@ -76,7 +77,7 @@ const NoteEditorTopBar = (props) => {
     didClick.current = false;
   }, [note, isEditorFocused, isConfirmDiscardPopupShown]);
 
-  const style = safeAreaWidth < LG_WIDTH ? {} : { minWidth: 496 };
+  const style = safeAreaWidth < toPx(LG_WIDTH) ? {} : { minWidth: '31rem' };
 
   // For NEW_NOTE and valid unsaved,
   //   isEditorFocused can be false, but show focusedCommands!

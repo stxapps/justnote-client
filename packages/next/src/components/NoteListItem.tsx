@@ -34,7 +34,7 @@ const NoteListItem = (props) => {
   const isTagging = isTaggingStatus(tagStatus);
 
   const renderBusy = () => {
-    const svgStyle = { top: '50px', left: '24px' };
+    const svgStyle = { top: '3.125rem', left: '1.5rem' };
 
     return (
       <div className={tailwind('absolute top-0 right-0 h-12 w-12 overflow-hidden bg-transparent')}>
@@ -48,7 +48,7 @@ const NoteListItem = (props) => {
   };
 
   const renderPinning = () => {
-    const svgStyle = { top: '28px', left: '34px' };
+    const svgStyle = { top: '1.75rem', left: '2.125rem' };
 
     return (
       <div className={tailwind('absolute top-0 left-0 h-10 w-10 overflow-hidden bg-transparent')}>
@@ -62,7 +62,7 @@ const NoteListItem = (props) => {
   };
 
   const renderPin = () => {
-    const svgStyle = { top: '27px', left: '32px' };
+    const svgStyle = { top: '1.6875rem', left: '2rem' };
 
     return (
       <div className={tailwind('absolute top-0 left-0 h-10 w-10 overflow-hidden bg-transparent')}>

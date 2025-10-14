@@ -139,15 +139,15 @@
 
   --ck-color-editable-blur-selection: hsl(0, 0%, 85%);
 
-  --ck-powered-by-line-height: 10px;
-  --ck-powered-by-padding-vertical: 2px;
-  --ck-powered-by-padding-horizontal: 4px;
+  --ck-powered-by-line-height: 0.625rem;
+  --ck-powered-by-padding-vertical: 0.125rem;
+  --ck-powered-by-padding-horizontal: 0.25rem;
   --ck-powered-by-text-color: var(--jn-editor-gray-500);
-  --ck-powered-by-border-radius: 100px;
+  --ck-powered-by-border-radius: 6.25rem;
   --ck-powered-by-background: transparent;
   --ck-powered-by-border-color: transparent;
 
-  --ck-font-size-base: 15px;
+  --ck-font-size-base: 0.9375rem;
   --ck-toolbar-dropdown-max-width: 96vw;
 
   --ck-content-font-family: Inter ui-sans-serif system-ui sans-serif "Apple Color Emoji" "Segoe UI Emoji" "Segoe UI Symbol" "Noto Color Emoji";
@@ -156,7 +156,7 @@
 }
 
 .not-mobile {
-  --ck-font-size-base: 13px;
+  --ck-font-size-base: 0.8125rem;
 }
 
 .blk-mode {
@@ -268,24 +268,24 @@
 
   --ck-color-editable-blur-selection: hsl(0, 0%, 35%);
 
-  --ck-powered-by-line-height: 10px;
-  --ck-powered-by-padding-vertical: 2px;
-  --ck-powered-by-padding-horizontal: 4px;
+  --ck-powered-by-line-height: 0.625rem;
+  --ck-powered-by-padding-vertical: 0.125rem;
+  --ck-powered-by-padding-horizontal: 0.25rem;
   --ck-powered-by-text-color: var(--jn-editor-gray-400);
-  --ck-powered-by-border-radius: 100px;
+  --ck-powered-by-border-radius: 6.25rem;
   --ck-powered-by-background: var(--jn-editor-gray-900);
   --ck-powered-by-border-color: transparent;
 }
 
 .ck.ck-editor__editable {
-  --ck-content-font-size: 17px;
-  font-size: 17px;
+  --ck-content-font-size: 1.0625rem;
+  font-size: 1.0625rem;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 62rem) {
   .ck.ck-editor__editable {
-    --ck-content-font-size: 16px;
-    font-size: 16px;
+    --ck-content-font-size: 1rem;
+    font-size: 1rem;
   }
 }
 
@@ -310,11 +310,11 @@
 }
 
 .ck.ck-editor__editable ul {
-  padding-left: 40px;
+  padding-left: 2.5rem;
 }
 
 .ck.ck-editor__editable ol {
-  padding-left: 40px;
+  padding-left: 2.5rem;
 }
 
 .ck.ck-editor__editable p a, .ck.ck-editor__editable li a {
@@ -403,11 +403,11 @@
 }
 
 .more-font-sizes .ck.ck-dropdown.ck-font-size-dropdown .ck.ck-dropdown__panel {
-  width: 296px;
+  width: 18.5rem;
 }
 
 .not-mobile.more-font-sizes .ck.ck-dropdown.ck-font-size-dropdown .ck.ck-dropdown__panel {
-  width: 258px;
+  width: 16.125rem;
 }
 
 .more-font-sizes .ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list {
@@ -417,11 +417,11 @@
 }
 
 .more-font-sizes .ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list .ck.ck-list__item:last-child .ck.ck-button__label {
-  line-height: 34px;
+  line-height: 2.125rem;
 }
 
 .not-mobile.more-font-sizes .ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list .ck.ck-list__item:last-child .ck.ck-button__label {
-  line-height: 32px;
+  line-height: 2rem;
 }
 
 .blk-mode .ck.ck-dropdown.ck-color-ui-dropdown .ck.ck-dropdown__panel {

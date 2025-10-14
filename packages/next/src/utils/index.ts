@@ -1991,6 +1991,14 @@ export const doContainStaleNotes = (notes) => {
   return false;
 };
 
+export const toPx = (rem) => {
+  let fontSize = '16px';
+  if (typeof window !== 'undefined' && isObject(window)) {
+    fontSize = getComputedStyle(window.document.documentElement).fontSize;
+  }
+  return parseFloat(rem) * parseFloat(fontSize);
+};
+
 export const getWindowSize = () => {
   let width = null, height = null;
   let visualWidth = null, visualHeight = null, visualScale = null;

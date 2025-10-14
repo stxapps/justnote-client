@@ -9,6 +9,7 @@ import {
   DISCARD_ACTION_UPDATE_TAG_NAME, SM_WIDTH,
 } from '../types/const';
 import { dialogBgFMV, dialogFMV } from '../types/animConfigs';
+import { toPx } from '../utils';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 
@@ -64,7 +65,7 @@ const ConfirmDiscardPopup = () => {
   };
 
   const spanStyle: any = {};
-  if (safeAreaWidth >= SM_WIDTH) spanStyle.height = safeAreaHeight;
+  if (safeAreaWidth >= toPx(SM_WIDTH)) spanStyle.height = safeAreaHeight;
 
   let msg = 'Are you sure you want to discard your unsaved changes to your note? All of your changes will be permanently deleted. This action cannot be undone.';
   if (discardAction === DISCARD_ACTION_UPDATE_LIST_NAME) {

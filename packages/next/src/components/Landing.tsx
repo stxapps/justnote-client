@@ -8,7 +8,7 @@ import { updatePopup, linkTo } from '../actions';
 import {
   HASH_FRAGMENT_IDENTIFIER, HASH_LANDING_MOBILE, SIGN_UP_POPUP, SM_WIDTH, MD_WIDTH,
 } from '../types/const';
-import { extractUrl, urlHashToObj, isNumber, getOffsetTop } from '../utils';
+import { extractUrl, urlHashToObj, isNumber, getOffsetTop, toPx } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 import TopBar from './TopBar';
@@ -68,8 +68,8 @@ const Landing = () => {
           const top = getOffsetTop(ubiquitousSection.current);
           if (isNumber(top)) {
             let mt = 16;
-            if (safeAreaWidthRef.current >= SM_WIDTH) mt = 0;
-            if (safeAreaWidthRef.current >= MD_WIDTH) mt = 80;
+            if (safeAreaWidthRef.current >= toPx(SM_WIDTH)) mt = 0;
+            if (safeAreaWidthRef.current >= toPx(MD_WIDTH)) mt = 80;
             window.scrollTo(0, Math.max(top - mt, 0));
           }
         }

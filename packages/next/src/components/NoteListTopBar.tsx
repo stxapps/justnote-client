@@ -5,7 +5,7 @@ import { updatePopup } from '../actions';
 import { showNoteListMenuPopup } from '../actions/chunk';
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import { SEARCH_POPUP, LG_WIDTH, UPDATING, SHOW_SYNCED } from '../types/const';
-import { adjustRect } from '../utils';
+import { adjustRect, toPx } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
@@ -26,7 +26,9 @@ const NoteListTopBar = (props) => {
 
   const onMenuBtnClick = () => {
     const rect = menuBtn.current.getBoundingClientRect();
-    const nRect = adjustRect(rect, 0, 0, -12, 0);
+    const nRect = adjustRect(
+      rect, toPx('0rem'), toPx('0rem'), toPx('-0.75rem'), toPx('0rem')
+    );
     dispatch(showNoteListMenuPopup(nRect, true));
   };
 
@@ -34,7 +36,9 @@ const NoteListTopBar = (props) => {
     dispatch(updatePopup(SEARCH_POPUP, true, null));
   };
 
-  if (safeAreaWidth < LG_WIDTH && isBulkEditing) return <NoteListTopBarBulkEdit />;
+  if (safeAreaWidth < toPx(LG_WIDTH) && isBulkEditing) {
+    return <NoteListTopBarBulkEdit />;
+  }
 
   const menuBtnSvg = (
     <svg className={tailwind('w-10 rounded-full p-2 group-focus:bg-gray-200 blk:group-focus:bg-gray-700')} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">

@@ -89,7 +89,7 @@ import {
   getEditingTagNameEditors, getNNoteMetasByQt, extractNoteFPath, extractSsltFPath,
   validateTagNameDisplayName, getTagNameObjFromDisplayName, getTagNameObj, getTags,
   getRawTags, extractTagFPath, createTagFPath, getNoteMainIds,
-  getPerformFilesResultsPerId, batchPerformFilesIfEnough, getUserHubAddr,
+  getPerformFilesResultsPerId, batchPerformFilesIfEnough, getUserHubAddr, toPx,
 } from '../utils';
 import { isUint8Array, isBlob, convertBlobToDataUrl } from '../utils/index-web';
 import { _ } from '../utils/obj';
@@ -1374,7 +1374,7 @@ export const retryDiedNotes = (ids) => async (dispatch, getState) => {
 
 export const cancelDiedNotes = (canceledIds) => async (dispatch, getState) => {
   const safeAreaWidth = getState().window.width;
-  if (isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
+  if (isNumber(safeAreaWidth) && safeAreaWidth < toPx(LG_WIDTH)) {
     dispatch(updateNoteId(null));
     // Need this to make sure noteId is null before deleting notes in notesReducer.
     // moveNotes and deleteNotes don't need this because of awaiting dataApi.
@@ -1459,7 +1459,7 @@ export const mergeNotes = (selectedId) => async (dispatch, getState) => {
     getState().display.listName !== toListName &&
     getState().display.queryString === '' &&
     isNumber(safeAreaWidth) &&
-    safeAreaWidth < LG_WIDTH
+    safeAreaWidth < toPx(LG_WIDTH)
   ) {
     dispatch(updateNoteId(null));
     // Need this to make sure noteId is null before deleting notes in conflictedNotes.
@@ -4057,7 +4057,7 @@ export const updateTagData = (ids, values) => async (dispatch, getState) => {
     const found = values.some(value => value.tagName === tagName);
     if (!found) {
       const safeAreaWidth = getState().window.width;
-      if (isNumber(safeAreaWidth) && safeAreaWidth >= LG_WIDTH) {
+      if (isNumber(safeAreaWidth) && safeAreaWidth >= toPx(LG_WIDTH)) {
         dispatch(updateNoteId(null));
       }
     }

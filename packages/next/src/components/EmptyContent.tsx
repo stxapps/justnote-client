@@ -49,7 +49,7 @@ const EmptyContent = () => {
           </svg>
         </div>
         <p className={tailwind('mt-6 text-center text-base font-semibold tracking-wide text-gray-800 blk:text-gray-200 lg:text-sm')}>No notes in #{displayName}</p>
-        <p style={{ lineHeight: '22px' }} className={tailwind('mt-4 text-center text-sm tracking-wide text-gray-500 blk:text-gray-400')}>Click <span className={tailwind('font-semibold')}>{textName}</span> from the menu to show notes here.</p>
+        <p style={{ lineHeight: '1.375rem' }} className={tailwind('mt-4 text-center text-sm tracking-wide text-gray-500 blk:text-gray-400')}>Click <span className={tailwind('font-semibold')}>{textName}</span> from the menu to show notes here.</p>
       </div>
     );
   }
@@ -63,7 +63,7 @@ const EmptyContent = () => {
           </svg>
         </div>
         <p className={tailwind('mt-6 text-center text-base font-semibold tracking-wide text-gray-800 blk:text-gray-200 lg:text-sm')}>No notes in {displayName}</p>
-        <p style={{ lineHeight: '22px' }} className={tailwind('mt-4 text-center text-sm tracking-wide text-gray-500 blk:text-gray-400')}>Click <span className={tailwind('font-semibold')}>&quot;+ New Note&quot;</span> button to add a new note.</p>
+        <p style={{ lineHeight: '1.375rem' }} className={tailwind('mt-4 text-center text-sm tracking-wide text-gray-500 blk:text-gray-400')}>Click <span className={tailwind('font-semibold')}>&quot;+ New Note&quot;</span> button to add a new note.</p>
       </div>
     );
   }
@@ -77,7 +77,7 @@ const EmptyContent = () => {
           </svg>
         </div>
         <p className={tailwind('mt-6 text-center text-base font-semibold tracking-wide text-gray-800 blk:text-gray-200 lg:text-sm')}>No notes in {displayName}</p>
-        <p style={{ lineHeight: '22px' }} className={tailwind('mt-4 text-center text-sm tracking-wide text-gray-500 blk:text-gray-400')}>Click <span className={tailwind('font-semibold')}>&quot;Remove&quot;</span> from the menu to move notes you don&apos;t need anymore here.</p>
+        <p style={{ lineHeight: '1.375rem' }} className={tailwind('mt-4 text-center text-sm tracking-wide text-gray-500 blk:text-gray-400')}>Click <span className={tailwind('font-semibold')}>&quot;Remove&quot;</span> from the menu to move notes you don&apos;t need anymore here.</p>
       </div>
     );
   }
@@ -91,7 +91,7 @@ const EmptyContent = () => {
         </svg>
       </div>
       <p className={tailwind('mt-6 text-center text-base font-semibold tracking-wide text-gray-800 blk:text-gray-200 lg:text-sm')}>No notes in {displayName}</p>
-      <p style={{ lineHeight: '22px' }} className={tailwind('mt-4 text-center text-sm tracking-wide text-gray-500 blk:text-gray-400')}>Click <span className={tailwind('font-semibold')}>{textName}</span> from the menu to move notes here.</p>
+      <p style={{ lineHeight: '1.375rem' }} className={tailwind('mt-4 text-center text-sm tracking-wide text-gray-500 blk:text-gray-400')}>Click <span className={tailwind('font-semibold')}>{textName}</span> from the menu to move notes here.</p>
     </div>
   );
 };

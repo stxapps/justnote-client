@@ -12,7 +12,7 @@ import {
 } from '../types/const';
 import {
   getLastHalfHeight, getListNameObj, getLongestListNameDisplayName,
-  getMaxListNameChildrenSize,
+  getMaxListNameChildrenSize, toPx,
 } from '../utils';
 import { popupBgFMV, popupFMV, slideFMV } from '../types/animConfigs';
 import { computePositionStyle } from '../utils/popup';
@@ -173,14 +173,16 @@ const ListNamesPopup = () => {
     setPrevBackCount(backCount);
   }
 
-  let popupWidth = 168;
-  if (longestDisplayName.length > 26) popupWidth = 256;
-  else if (longestDisplayName.length > 14) popupWidth = 208;
+  const [hedHgt, itmHgt, btmHgt] = [toPx('2.75rem'), toPx('2.75rem'), toPx('3.25rem')];
 
-  let popupHeight = 44 * (maxChildrenSize + 1) + 51;
+  let popupWidth = toPx('10.5rem');
+  if (longestDisplayName.length > 26) popupWidth = toPx('16rem');
+  else if (longestDisplayName.length > 14) popupWidth = toPx('13rem');
+
+  let popupHeight = hedHgt + (itmHgt * maxChildrenSize) + btmHgt;
   if (popupHeight > safeAreaHeight - 16) {
     popupHeight = getLastHalfHeight(
-      Math.min(popupHeight, safeAreaHeight - 16), 44, 0, 51, 0.5
+      Math.min(popupHeight, safeAreaHeight - 16), itmHgt, 0, btmHgt, 0.5
     );
   }
 
@@ -188,7 +190,7 @@ const ListNamesPopup = () => {
     return (
       <div className={tailwind('-mt-0.5')}>
         {children.map(obj => {
-          let btnClassNames = 'py-3';
+          let btnClassNames = 'h-11';
           if (!obj.children || obj.children.length === 0) btnClassNames += ' pr-4';
 
           let disabled = false, forwardDisabled = false;
@@ -254,7 +256,7 @@ const ListNamesPopup = () => {
             {renderListNameBtns()}
           </motion.div>
         </div>
-        <div className={tailwind('flex w-full flex-shrink-0 flex-grow-0 flex-row items-center justify-end border-t border-gray-200 px-3 py-2.5 blk:border-gray-600')}>
+        <div className={tailwind('flex h-13 w-full flex-shrink-0 flex-grow-0 flex-row items-center justify-end border-t border-gray-200 px-3 blk:border-gray-600')}>
           <button onClick={onMoveHereBtnClick} className={tailwind(`rounded-md border bg-white px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 blk:bg-gray-800 blk:focus:ring-gray-500 blk:focus:ring-offset-gray-800 ${moveHereDisabled ? 'border-gray-300 blk:border-gray-600' : 'border-gray-400 hover:border-gray-500 blk:border-gray-400 blk:hover:border-gray-300'} ${moveHereDisabled ? 'text-gray-400 blk:text-gray-500' : 'text-gray-500 hover:text-gray-600 blk:text-gray-300 blk:hover:text-gray-200'}`)} disabled={moveHereDisabled}>
             {moveHereDisabled ? 'View only' : 'Move here'}
           </button>
