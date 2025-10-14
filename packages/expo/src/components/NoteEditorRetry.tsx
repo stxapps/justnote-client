@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { ScrollView, View, Text, TouchableOpacity, Linking } from 'react-native';
+import { ScrollView, View, TouchableOpacity, Linking } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { useDispatch } from '../store';
@@ -9,6 +9,7 @@ import { DOMAIN_NAME, HASH_SUPPORT, LG_WIDTH } from '../types/const';
 import { toPx } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
+import Text from './CustomText';
 
 const NoteEditorRetry = (props) => {
 

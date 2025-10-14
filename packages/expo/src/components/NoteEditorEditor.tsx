@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { TextInput, Platform, Linking } from 'react-native';
+import { Platform, Linking } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Dirs } from 'react-native-file-access';
 
@@ -26,6 +26,7 @@ import vars from '../vars';
 import ckeditor from '../../ckeditor';
 
 import { useTailwind } from '.';
+import TextInput from './CustomTextInput';
 
 const GET_DATA_SAVE_NOTE = 'GET_DATA_SAVE_NOTE';
 const GET_DATA_DISCARD_NOTE = 'GET_DATA_DISCARD_NOTE';

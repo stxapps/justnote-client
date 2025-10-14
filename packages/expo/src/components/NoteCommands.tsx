@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { useSelector, useDispatch } from '../store';
@@ -15,6 +15,7 @@ import {
 import { getListNameDisplayName, getRect, adjustRect, toPx } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
+import Text from './CustomText';
 
 const NoteCommands = (props) => {
 

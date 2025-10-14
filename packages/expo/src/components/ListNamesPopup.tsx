@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
-  ScrollView, View, Text, TouchableOpacity, TouchableWithoutFeedback, Animated,
-  BackHandler,
+  ScrollView, View, TouchableOpacity, TouchableWithoutFeedback, Animated, BackHandler,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
@@ -22,6 +21,7 @@ import { popupFMV, slideFMV } from '../types/animConfigs';
 import { computePositionTranslate } from '../utils/popup';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
+import Text from './CustomText';
 
 const MODE_MOVE_NOTES = LIST_NAMES_MODE_MOVE_NOTES;
 const MODE_MOVE_LIST_NAME = LIST_NAMES_MODE_MOVE_LIST_NAME;

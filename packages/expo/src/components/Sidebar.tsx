@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { useSelector, useDispatch } from '../store';
@@ -11,6 +11,7 @@ import { useTailwind } from '.';
 import SidebarSearchInput from './SidebarSearchInput';
 import SidebarListNames from './SidebarListNames';
 import LoadingSidebarListNames from './LoadingSidebarListNames';
+import Text from './CustomText';
 
 import Logo from '../images/logo-full.svg';
 import LogoBlk from '../images/logo-full-blk.svg';

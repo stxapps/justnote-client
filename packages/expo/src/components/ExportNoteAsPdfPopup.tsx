@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
-  View, Text, TouchableOpacity, TouchableWithoutFeedback, Animated, BackHandler, Linking,
+  View, TouchableOpacity, TouchableWithoutFeedback, Animated, BackHandler, Linking,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
@@ -13,6 +13,7 @@ import { dialogFMV } from '../types/animConfigs';
 import { isObject, toPx } from '../utils';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
+import Text from './CustomText';
 
 const InnerExportNoteAsPdfCompletePopup = () => {
 

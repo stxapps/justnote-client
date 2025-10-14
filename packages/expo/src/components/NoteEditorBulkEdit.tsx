@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
+import { ScrollView, View, TouchableOpacity } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { useSelector, useDispatch } from '../store';
@@ -9,6 +9,7 @@ import { getSelectedNoteIdsLength } from '../selectors';
 
 import { useTailwind } from '.';
 import NoteCommands from './NoteCommands';
+import Text from './CustomText';
 
 const NoteEditorBulkEdit = (props) => {
 

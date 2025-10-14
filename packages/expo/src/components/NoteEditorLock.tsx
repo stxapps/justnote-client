@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useMemo } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { useSelector, useDispatch } from '../store';
@@ -9,6 +9,7 @@ import { makeGetLockNoteStatus, getCurrentLockListStatus } from '../selectors';
 import { isObject, toPx } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
+import Text from './CustomText';
 
 const NoteEditorLock = (props) => {
 

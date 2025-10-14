@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { useSelector, useDispatch } from '../store';
@@ -13,6 +13,7 @@ import {
 } from '../utils';
 
 import { useTailwind } from '.';
+import Text from './CustomText';
 
 const NoteListItemContent = (props) => {
 

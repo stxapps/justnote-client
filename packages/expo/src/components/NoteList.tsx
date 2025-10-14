@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useCallback, useMemo } from 'react';
-import { View, Text, TouchableOpacity, Animated, BackHandler } from 'react-native';
+import { View, TouchableOpacity, Animated, BackHandler } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { useSelector, useDispatch } from '../store';
@@ -17,6 +17,7 @@ import NoteListTopBar from './NoteListTopBar';
 import NoteListItems from './NoteListItems';
 import NoteListLock from './NoteListLock';
 import LoadingNoteListItems from './LoadingNoteListItems';
+import Text from './CustomText';
 
 const NoteList = (props) => {
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
+import { ScrollView, View, TouchableOpacity } from 'react-native';
 import { useShareIntentContext } from 'expo-share-intent';
 import Svg, { Path } from 'react-native-svg';
 import { Flow } from 'react-native-animated-spinkit';
@@ -18,6 +18,7 @@ import Logo from '../images/logo-short.svg';
 import LogoBlk from '../images/logo-short-blk.svg';
 
 import { useSafeAreaFrame, useTailwind } from '.';
+import Text from './CustomText';
 
 const RENDER_ADDING = 'RENDER_ADDING';
 const RENDER_ADDED = 'RENDER_ADDED';

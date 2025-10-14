@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
+import { ScrollView, View, TouchableOpacity } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { useDispatch } from '../store';
@@ -14,6 +14,7 @@ import { useSafeAreaFrame, useTailwind } from '.';
 import SignUpPopup from './SignUpPopup';
 import SignInPopup from './SignInPopup';
 import ConfirmAsDummyPopup from './ConfirmAsDummyPopup';
+import Text from './CustomText';
 
 import Logo from '../images/logo-full.svg';
 

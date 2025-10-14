@@ -1,5 +1,5 @@
 import React, { useRef, useMemo } from 'react';
-import { View, Text, Platform } from 'react-native';
+import { View, Platform } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { useSelector } from '../store';
@@ -15,6 +15,7 @@ import {
 } from './NoteEditorConflict';
 import NoteEditorRetry from './NoteEditorRetry';
 import NoteEditorLock from './NoteEditorLock';
+import Text from './CustomText';
 
 const NoteEditor = (props) => {
 

@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Linking } from 'react-native';
+import { View, TouchableOpacity, Linking } from 'react-native';
 
 import { useTailwind } from '.';
+import Text from './CustomText';
 
 const SettingsPopupAccount = (props) => {
 

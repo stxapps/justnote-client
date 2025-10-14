@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  View, Text, TouchableOpacity, TouchableWithoutFeedback, Animated, Linking, BackHandler,
+  View, TouchableOpacity, TouchableWithoutFeedback, Animated, Linking, BackHandler,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
@@ -19,6 +19,7 @@ import { popupFMV, rotateAnimConfig } from '../types/animConfigs';
 import { computePositionTranslate } from '../utils/popup';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
+import Text from './CustomText';
 
 const NoteListMenuPopup = () => {
 

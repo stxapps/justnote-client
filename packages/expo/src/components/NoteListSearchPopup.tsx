@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  View, Text, TouchableOpacity, TextInput, Animated, BackHandler, Keyboard, Platform,
+  View, TouchableOpacity, Animated, BackHandler, Keyboard, Platform,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
@@ -11,6 +11,8 @@ import { getThemeMode } from '../selectors';
 import { popupFMV } from '../types/animConfigs';
 
 import { useTailwind } from '.';
+import Text from './CustomText';
+import TextInput from './CustomTextInput';
 
 const NoteListSearchPopup = () => {
 

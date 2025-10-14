@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
-  ScrollView, View, Text, TouchableOpacity, Animated, Linking, Platform,
+  ScrollView, View, TouchableOpacity, Animated, Linking, Platform,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { WebView } from 'react-native-webview';
@@ -26,6 +26,7 @@ import vars from '../vars';
 import ckeditor from '../../ckeditor';
 
 import { useSafeAreaFrame, useTailwind } from '.';
+import Text from './CustomText';
 
 const HTML_FNAME = 'ckeditor.html';
 

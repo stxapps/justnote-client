@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
-  View, Text, TouchableOpacity, TouchableWithoutFeedback, Animated, BackHandler,
+  View, TouchableOpacity, TouchableWithoutFeedback, Animated, BackHandler,
 } from 'react-native';
 
 import { useSelector, useDispatch } from '../store';
@@ -25,6 +25,7 @@ import { popupFMV } from '../types/animConfigs';
 import { computePositionTranslate } from '../utils/popup';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
+import Text from './CustomText';
 
 export const NOTE_ITEM_POPUP_MENU = {
   [MY_NOTES]: [ARCHIVE, REMOVE, MOVE_TO],

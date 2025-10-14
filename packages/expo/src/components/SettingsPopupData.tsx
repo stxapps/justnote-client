@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, Switch, Linking, Platform } from 'react-native';
+import { View, TouchableOpacity, Switch, Linking, Platform } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { Circle } from 'react-native-animated-spinkit';
 
@@ -16,6 +16,7 @@ import { getThemeMode } from '../selectors';
 import { isString, toPx } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
+import Text from './CustomText';
 
 const InnerSettingsPopupData = (props) => {
 

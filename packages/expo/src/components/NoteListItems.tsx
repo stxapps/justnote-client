@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
-import { FlatList, View, Text, TouchableOpacity } from 'react-native';
+import { FlatList, View, TouchableOpacity } from 'react-native';
 import { Flow } from 'react-native-animated-spinkit';
 
 import { useSelector, useDispatch } from '../store';
@@ -13,9 +13,9 @@ import { isObject, getFullYearMonth, toPx } from '../utils';
 import vars from '../vars';
 
 import { useSafeAreaFrame, useTailwind } from '.';
-
 import NoteListItem from './NoteListItem';
 import EmptyContent from './EmptyContent';
+import Text from './CustomText';
 
 const SHOW_FETCH_MORE_BTN = 'SHOW_FETCH_MORE_BTN';
 const SHOW_FETCHING_MORE = 'SHOW_FETCHING_MORE';

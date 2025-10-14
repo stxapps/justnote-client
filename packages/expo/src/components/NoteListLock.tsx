@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
+import { ScrollView, View, TouchableOpacity } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { useSelector, useDispatch } from '../store';
@@ -9,6 +9,7 @@ import { LOCK_EDITOR_POPUP, LOCK_ACTION_UNLOCK_LIST, LOCKED } from '../types/con
 import { getCurrentLockListStatus } from '../selectors';
 
 import { useTailwind } from '.';
+import Text from './CustomText';
 
 const NoteListLock = () => {
 

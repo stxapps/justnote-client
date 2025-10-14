@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
+import { ScrollView, View, TouchableOpacity } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { useSelector, useDispatch } from '../store';
@@ -15,6 +15,7 @@ import { getCanChangeListNames } from '../selectors';
 import { getListNameObj, toPx } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
+import Text from './CustomText';
 
 const MODE_CHANGE_TAG_NAME = SIDEBAR_LIST_NAMES_MODE_CHANGE_TAG_NAME;
 

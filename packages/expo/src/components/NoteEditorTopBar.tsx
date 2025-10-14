@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
+import { ScrollView, View, TouchableOpacity } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { Circle } from 'react-native-animated-spinkit';
 
@@ -14,6 +14,7 @@ import { toPx } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 import NoteCommands from './NoteCommands';
+import Text from './CustomText';
 
 const NoteEditorTopBar = (props) => {
 
