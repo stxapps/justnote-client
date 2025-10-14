@@ -20,7 +20,7 @@ import {
 } from '../types/const';
 import {
   isObject, isString, isNumber, isFldStr, getUserImageUrl, isTitleEqual, isBodyEqual,
-  getNote,
+  getNote, toPx,
 } from '../utils';
 import vars from '../vars';
 
@@ -296,7 +296,7 @@ export const refreshFetched = () => async (dispatch, getState) => {
 
   // Check safeAreaWidth is a number to execute on web only
   //   as safeAreaWidth on mobile is always null.
-  if (noteId !== null && isNumber(safeAreaWidth) && safeAreaWidth < LG_WIDTH) {
+  if (noteId !== null && isNumber(safeAreaWidth) && safeAreaWidth < toPx(LG_WIDTH)) {
     dispatch(updateNoteId(null));
   }
 

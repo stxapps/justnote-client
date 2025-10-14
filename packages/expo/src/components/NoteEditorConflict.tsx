@@ -17,7 +17,7 @@ import {
 import { getThemeMode } from '../selectors';
 import {
   getListNameDisplayName, getFormattedDT, splitOnFirst, escapeDoubleQuotes,
-  getListNameAndNote,
+  getListNameAndNote, toPx,
 } from '../utils';
 import { popupFMV } from '../types/animConfigs';
 import cache from '../utils/cache';
@@ -99,7 +99,7 @@ const InnerNoteEditorSavedConflict = (props) => {
   }, [conflictedNote.status, mergeErrorAnim]);
 
   const style = {
-    width: safeAreaWidth < LG_WIDTH ? width : Math.max(442, width),
+    width: safeAreaWidth < toPx(LG_WIDTH) ? width : Math.max(442, width),
   };
 
   return (
@@ -165,7 +165,7 @@ const InnerNoteEditorUnsavedConflict = (props) => {
   }, [note, unsavedNote]);
 
   const style = {
-    width: safeAreaWidth < LG_WIDTH ? width : Math.max(442, width),
+    width: safeAreaWidth < toPx(LG_WIDTH) ? width : Math.max(442, width),
   };
 
   return (

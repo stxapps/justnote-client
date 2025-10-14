@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from '../store';
 import { updateNoteId } from '../actions';
 import { LG_WIDTH, LOCKED, NEW_NOTE } from '../types/const';
 import { makeGetLockNoteStatus, getCurrentLockListStatus } from '../selectors';
-import { isObject } from '../utils';
+import { isObject, toPx } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
@@ -36,7 +36,7 @@ const NoteEditorLock = (props) => {
   if ((isObject(note) && note.id === NEW_NOTE) || !isLocked) return null;
 
   let title, body, bottomText;
-  if (safeAreaWidth < LG_WIDTH) {
+  if (safeAreaWidth < toPx(LG_WIDTH)) {
     if (lockListStatus === LOCKED) {
       title = 'This list is locked';
       body = 'Please press back and unlock the list first.';

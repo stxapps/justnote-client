@@ -6,6 +6,7 @@ import { useDispatch } from '../store';
 import { updateNoteId } from '../actions';
 import { retryDiedNotes, cancelDiedNotes } from '../actions/chunk';
 import { DOMAIN_NAME, HASH_SUPPORT, LG_WIDTH } from '../types/const';
+import { toPx } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
@@ -40,7 +41,7 @@ const NoteEditorRetry = (props) => {
   }, [note.status]);
 
   const style = {
-    width: safeAreaWidth < LG_WIDTH ? width : Math.max(400, width),
+    width: safeAreaWidth < toPx(LG_WIDTH) ? width : Math.max(400, width),
   };
 
   return (

@@ -8,7 +8,7 @@ import { showNoteListMenuPopup } from '../actions/chunk';
 import { SYNC, SYNC_ROLLBACK } from '../types/actionTypes';
 import { SEARCH_POPUP, LG_WIDTH, UPDATING, SHOW_SYNCED } from '../types/const';
 import { rotateAnimConfig } from '../types/animConfigs';
-import { getRect, adjustRect } from '../utils';
+import { getRect, adjustRect, toPx } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
@@ -56,7 +56,9 @@ const NoteListTopBar = (props) => {
     }
   }, [syncProgress, menuBtnAnim]);
 
-  if (safeAreaWidth < LG_WIDTH && isBulkEditing) return <NoteListTopBarBulkEdit />;
+  if (safeAreaWidth < toPx(LG_WIDTH) && isBulkEditing) {
+    return <NoteListTopBarBulkEdit />;
+  }
 
   const menuBtnSvg = (
     <View style={tailwind('w-10 items-center justify-center rounded-full')}>

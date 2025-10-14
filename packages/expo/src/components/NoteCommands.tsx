@@ -12,7 +12,7 @@ import {
   TRASH, LG_WIDTH, MOVE_ACTION_NOTE_COMMANDS, DELETE_ACTION_NOTE_COMMANDS,
   LIST_NAMES_MODE_MOVE_NOTES, NOTE_COMMANDS_MODE_NETB,
 } from '../types/const';
-import { getListNameDisplayName, getRect, adjustRect } from '../utils';
+import { getListNameDisplayName, getRect, adjustRect, toPx } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 
@@ -68,7 +68,7 @@ const NoteCommands = (props) => {
       const rect = getRect(x, y, width, height);
 
       let nRect;
-      if (safeAreaWidth < LG_WIDTH) {
+      if (safeAreaWidth < toPx(LG_WIDTH)) {
         nRect = adjustRect(rect, 4, 12, -14, -12);
       } else {
         nRect = adjustRect(rect, 0, -4, 0, 4);
@@ -83,7 +83,7 @@ const NoteCommands = (props) => {
       const rect = getRect(x, y, width, height);
 
       let nRect;
-      if (safeAreaWidth < LG_WIDTH) {
+      if (safeAreaWidth < toPx(LG_WIDTH)) {
         nRect = adjustRect(rect, 4, 12, -14, -12);
       } else {
         nRect = adjustRect(rect, 0, -4, 0, 4);

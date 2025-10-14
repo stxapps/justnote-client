@@ -9,7 +9,7 @@ import {
   getNotes, getIsFetchingMore, getHasFetchedMore, getThemeMode,
   getDoSectionNotesByMonth,
 } from '../selectors';
-import { isObject, getFullYearMonth } from '../utils';
+import { isObject, getFullYearMonth, toPx } from '../utils';
 import vars from '../vars';
 
 import { useSafeAreaFrame, useTailwind } from '.';
@@ -78,7 +78,7 @@ const NoteListItems = () => {
     else if (isFetchingMore) _data.push({ id: SHOW_FETCHING_MORE });
     else _data.push({ id: SHOW_FETCH_MORE_BTN });
 
-    if (_data.length > 0 && safeAreaWidth < LG_WIDTH) {
+    if (_data.length > 0 && safeAreaWidth < toPx(LG_WIDTH)) {
       _data.push({ id: SHOW_EMPTY_SPACE });
     }
 

@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import { useDispatch } from '../store';
 import { endIapConnection } from '../actions/iap';
 import { LG_WIDTH } from '../types/const';
+import { toPx } from '../utils';
 
 import { useSafeAreaFrame } from '.';
 import SignUpPopup from './SignUpPopup';
@@ -55,7 +56,7 @@ const Main = () => {
     };
   }, []);
 
-  const panel = safeAreaWidth < LG_WIDTH ? <NavPanel /> : <ColsPanel />;
+  const panel = safeAreaWidth < toPx(LG_WIDTH) ? <NavPanel /> : <ColsPanel />;
 
   return (
     <React.Fragment>

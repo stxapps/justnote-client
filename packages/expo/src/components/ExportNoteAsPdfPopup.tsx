@@ -10,7 +10,7 @@ import {
   DOMAIN_NAME, HASH_SUPPORT, SM_WIDTH, NO_PERMISSION_GRANTED,
 } from '../types/const';
 import { dialogFMV } from '../types/animConfigs';
-import { isObject } from '../utils';
+import { isObject, toPx } from '../utils';
 
 import { useSafeAreaFrame, useSafeAreaInsets, useTailwind } from '.';
 
@@ -172,7 +172,7 @@ const InnerExportNoteAsPdfErrorPopup = () => {
     title = 'Exporting Note Error!';
     body = (
       <React.Fragment>
-        <Text style={tailwind('mt-2.5 text-sm font-normal leading-6 text-red-700')}>Please wait a moment and try again. {safeAreaWidth < SM_WIDTH ? '' : '\n'}If the problem persists, please <Text onPress={() => Linking.openURL(DOMAIN_NAME + '/' + HASH_SUPPORT)} style={tailwind('text-sm font-normal leading-6 text-red-700 underline')}>contact us</Text>.</Text>
+        <Text style={tailwind('mt-2.5 text-sm font-normal leading-6 text-red-700')}>Please wait a moment and try again. {safeAreaWidth < toPx(SM_WIDTH) ? '' : '\n'}If the problem persists, please <Text onPress={() => Linking.openURL(DOMAIN_NAME + '/' + HASH_SUPPORT)} style={tailwind('text-sm font-normal leading-6 text-red-700 underline')}>contact us</Text>.</Text>
         <Text style={tailwind('mt-2 text-sm font-normal leading-6 text-red-700')} numberOfLines={3} ellipsizeMode="tail">{progress.error}</Text>
       </React.Fragment>
     );

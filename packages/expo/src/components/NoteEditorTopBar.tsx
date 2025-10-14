@@ -10,6 +10,7 @@ import {
   NEW_NOTE, ADDED, VALID, LG_WIDTH, BLK_MODE, NOTE_COMMANDS_MODE_NETB,
 } from '../types/const';
 import { getThemeMode } from '../selectors/index';
+import { toPx } from '../utils';
 
 import { useSafeAreaFrame, useTailwind } from '.';
 import NoteCommands from './NoteCommands';
@@ -80,7 +81,7 @@ const NoteEditorTopBar = (props) => {
   }, [note, isEditorFocused, isConfirmDiscardPopupShown]);
 
   const style = {
-    width: safeAreaWidth < LG_WIDTH ? Math.max(180, width) : Math.max(496, width),
+    width: safeAreaWidth < toPx(LG_WIDTH) ? Math.max(180, width) : Math.max(496, width),
   };
 
   let commands = null;
