@@ -65,9 +65,13 @@ const NoteCommands = (props) => {
 
     let nRect;
     if (safeAreaWidth < toPx(LG_WIDTH)) {
-      nRect = adjustRect(rect, '0.25rem', '0.75rem', '-0.875rem', '-0.75rem');
+      nRect = adjustRect(
+        rect, toPx('0.25rem'), toPx('0.75rem'), toPx('-0.875rem'), toPx('-0.75rem')
+      );
     } else {
-      nRect = adjustRect(rect, '0rem', '-0.25rem', '0rem', '0.25rem');
+      nRect = adjustRect(
+        rect, toPx('0rem'), toPx('-0.25rem'), toPx('0rem'), toPx('0.25rem')
+      );
     }
     dispatch(updatePopup(LIST_NAMES_POPUP, true, nRect));
     if (isFullScreen) onToggleFullScreen();
@@ -78,9 +82,13 @@ const NoteCommands = (props) => {
 
     let nRect;
     if (safeAreaWidth < toPx(LG_WIDTH)) {
-      nRect = adjustRect(rect, '0.25rem', '0.75rem', '-0.875rem', '-0.75rem');
+      nRect = adjustRect(
+        rect, toPx('0.25rem'), toPx('0.75rem'), toPx('-0.875rem'), toPx('-0.75rem')
+      );
     } else {
-      nRect = adjustRect(rect, '0rem', '-0.25rem', '0rem', '0.25rem');
+      nRect = adjustRect(
+        rect, toPx('0rem'), toPx('-0.25rem'), toPx('0rem'), toPx('0.25rem')
+      );
     }
     dispatch(updatePopup(BULK_EDIT_MENU_POPUP, true, nRect));
     if (isFullScreen) onToggleFullScreen();
