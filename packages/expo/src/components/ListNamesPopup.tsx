@@ -217,14 +217,16 @@ const ListNamesPopup = () => {
   // Only on iPhone, if line height is 20, the text height is 22.7,
   //   so must use height and verticle center on menu items instead of py-[x].
 
+  const [hedHgt, itmHgt, btmHgt] = [44, 44, 52];
+
   let popupWidth = 168;
   if (longestDisplayName.length > 26) popupWidth = 256;
   else if (longestDisplayName.length > 14) popupWidth = 208;
 
-  let popupHeight = 44 + (44 * maxChildrenSize) + 52;
+  let popupHeight = hedHgt + (itmHgt * maxChildrenSize) + btmHgt;
   if (popupHeight > safeAreaHeight - 16) {
     popupHeight = getLastHalfHeight(
-      Math.min(popupHeight, safeAreaHeight - 16), 44, 0, 52, 0.5
+      Math.min(popupHeight, safeAreaHeight - 16), itmHgt, 0, btmHgt, 0.5
     );
   }
 
