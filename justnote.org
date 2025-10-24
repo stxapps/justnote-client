@@ -465,11 +465,12 @@
 - ios
   + open ios/Justnote.xcworkspace
   + choose Justnote on the right pane
-  + targets: Justnote, on General, update Version, App Category
+  + targets: Justnote, on General:
+    ~ update Version, App Category: Productivity, Display Name: Justnote
   + targets: Justnote, on Signing & Capabilities, add In-App Purchase
   + targets: Justnote, on Build Phases, add Target Dependency: SavetoJustnote
-  + targets: SavetoJustnote, on General, update Version
-  + targets: SavetoJustnote, on General, Display Name: Save to Justnote
+  + targets: SavetoJustnote, on General:
+    ~ update Version, Miminum iOS, Display Name: Save to Justnote
   + targets: SavetoJustnote, on Signing & Capabilities, select team
 - android
   + copy justnote-android-upload-key.keystore to android/app
