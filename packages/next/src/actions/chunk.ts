@@ -4056,10 +4056,7 @@ export const updateTagData = (ids, values) => async (dispatch, getState) => {
     const tagName = queryString.trim();
     const found = values.some(value => value.tagName === tagName);
     if (!found) {
-      const safeAreaWidth = getState().window.width;
-      if (isNumber(safeAreaWidth) && safeAreaWidth >= toPx(LG_WIDTH)) {
-        dispatch(updateNoteId(null));
-      }
+      dispatch(updateNoteId(null));
     }
   }
 
