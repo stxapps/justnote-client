@@ -41,6 +41,18 @@ const patchMmkv = () => {
   );
 };
 
+const patchMmkvGet = () => {
+  const match1 = '                        Bundle bundle = kv.decodeParcelable(key, Bundle.class);';
+  const repmt1 = '                        try { Bundle bundle = kv.decodeParcelable(key, Bundle.class);';
+  const match2 = '                        callback.invoke(null, map != null ? map : null);';
+  const repmt2 = '                        callback.invoke(null, map != null ? map : null); } catch (Exception e) { callback.invoke("Failed to decode parcelable for key " + key, null); }';
+
+  replaceMatchedLine(
+    'node_modules/react-native-mmkv-storage/android/src/main/java/com/ammarahmed/mmkv/StorageGetters.java',
+    [{ match: match1, repmt: repmt1 }, { match: match2, repmt: repmt2 }],
+  );
+};
+
 const patchExpoShareIntent = () => {
   const match = '    if (project.pbxGroupByName(group).path)';
   const repmt = '    if (project.pbxGroupByName(group)&&project.pbxGroupByName(group).path)';
@@ -72,5 +84,6 @@ const patchLexoRank = () => {
 };
 
 patchMmkv();
+patchMmkvGet();
 patchExpoShareIntent();
 patchLexoRank();

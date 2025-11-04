@@ -4,7 +4,9 @@ import {
   IS_USER_DUMMY, NOTES, SSLTS, SETTINGS, INFO, PINS, TAGS, UNSAVED_NOTES, DOT_JSON,
   PUT_FILE, DELETE_FILE,
 } from '../types/const';
-import { isObject, isString, copyFPaths, addFPath, deleteFPath } from '../utils';
+import {
+  isObject, isString, isFldStr, copyFPaths, addFPath, deleteFPath,
+} from '../utils';
 import { cachedFPaths } from '../vars';
 
 let _instance = null;
@@ -36,10 +38,38 @@ const removeItem = async (key) => {
   await getInstance().removeItem(key);
 };
 
+const getMapSafely = async (fpath) => {
+  const hasKey = await getInstance().indexer.hasKey(fpath);
+  if (!hasKey) return undefined;
+
+  let content = await getInstance().getMapAsync(fpath);
+  if (isObject(content)) {
+    try {
+      const json = JSON.stringify(content);
+      await getInstance().setStringAsync(fpath, json);
+    } catch (error) {
+      console.log(`In getMapSafely, ${fpath} migrate error:`, error);
+    }
+    return content;
+  }
+
+  content = await getInstance().getStringAsync(fpath);
+  if (isFldStr(content)) {
+    try {
+      const parsed = JSON.parse(content);
+      if (isObject(parsed)) return parsed;
+    } catch (error) {
+      console.log(`In getMapSafely, ${fpath} JSON.parse error:`, error);
+    }
+  }
+
+  return undefined;
+};
+
 const getFile = async (fpath, dangerouslyIgnoreUndefined = false) => {
   let content;
   try {
-    if (fpath.endsWith(DOT_JSON)) content = await getInstance().getMapAsync(fpath);
+    if (fpath.endsWith(DOT_JSON)) content = await getMapSafely(fpath);
     else content = await getInstance().getStringAsync(fpath);
   } catch (error) {
     console.log('In localDb.getFile, error:', error);
@@ -52,8 +82,8 @@ const getFile = async (fpath, dangerouslyIgnoreUndefined = false) => {
 };
 
 const putFile = async (fpath, content) => {
-  if (fpath.endsWith(DOT_JSON)) await getInstance().setMapAsync(fpath, content);
-  else await getInstance().setStringAsync(fpath, content);
+  if (fpath.endsWith(DOT_JSON)) content = JSON.stringify(content);
+  await getInstance().setStringAsync(fpath, content);
 
   if (isObject(cachedFPaths.fpaths) && !fpath.startsWith(UNSAVED_NOTES)) {
     const fpaths = copyFPaths(cachedFPaths.fpaths);
