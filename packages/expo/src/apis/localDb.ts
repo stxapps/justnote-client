@@ -42,6 +42,9 @@ const getMapSafely = async (fpath) => {
   const hasKey = await getInstance().indexer.hasKey(fpath);
   if (!hasKey) return undefined;
 
+  // getStringAsync on non-string values may cause JNI error: input is not valid
+  //   Modified UTF-8: illegal start byte 0x88 in call to NewStringUTF
+  //   from MMKV.decodeString. Must getMapAsync before getStringAsync.
   let content = await getInstance().getMapAsync(fpath);
   if (isObject(content)) {
     try {
