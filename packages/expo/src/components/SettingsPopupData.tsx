@@ -322,11 +322,14 @@ const InnerSettingsPopupDataDelete = (props) => {
     };
   }, [deleteAllDataProgress, dispatch]);
 
+  const isNewIos = Platform.OS === 'ios' && parseInt(Platform.Version, 10) >= 26;
+
   const switchThumbColorOn = 'rgb(34, 197, 94)';
   const switchThumbColorOff = 'rgb(243, 244, 246)';
   const switchTrackColorOn = Platform.OS === 'android' ? 'rgb(187, 247, 208)' : 'rgb(34, 197, 94)';
   const switchTrackColorOff = 'rgb(156, 163, 175)';
-  const switchIosTrackColorOff = themeMode === BLK_MODE ? 'rgb(55, 65, 81)' : 'rgb(243, 244, 246)';
+  const switchIosTrackColorOff = themeMode === BLK_MODE ?
+    isNewIos ? 'rgb(107, 114, 128)' : 'rgb(55, 65, 81)' : 'rgb(243, 244, 246)';
 
   let actionPanel;
   if (!deleteAllDataProgress) {
@@ -401,7 +404,7 @@ const InnerSettingsPopupDataDelete = (props) => {
       <Text style={tailwind('mt-6 text-base font-normal leading-6.5 text-red-500 blk:text-red-500')}>This action CANNOT be undone.</Text>
       <View style={tailwind('mt-6 flex-row items-center')}>
         <Switch onValueChange={onConfirmInputChange} style={tailwind('flex-shrink-0 flex-grow-0')} value={didCheckConfirm} thumbColor={Platform.OS === 'android' ? didCheckConfirm ? switchThumbColorOn : switchThumbColorOff : ''} trackColor={{ true: switchTrackColorOn, false: switchTrackColorOff }} ios_backgroundColor={switchIosTrackColorOff} />
-        <Text style={tailwind('ml-2 flex-shrink flex-grow text-base font-normal text-gray-500 blk:text-gray-400')}>Yes, I&apos;m absolutely sure I want to delete all my data.</Text>
+        <Text style={tailwind(`flex-shrink flex-grow text-base font-normal text-gray-500 blk:text-gray-400 ${isNewIos ? 'ml-5' : 'ml-2'}`)}>Yes, I&apos;m absolutely sure I want to delete all my data.</Text>
       </View>
       {actionPanel}
     </View>
