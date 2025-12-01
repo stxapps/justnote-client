@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ScrollView, View, TouchableOpacity } from 'react-native';
+import { useRouter, ExternalPathString } from 'expo-router';
 import { useShareIntentContext } from 'expo-share-intent';
 import Svg, { Path } from 'react-native-svg';
 import { Flow } from 'react-native-animated-spinkit';
@@ -29,8 +30,8 @@ const RENDER_ERROR = 'RENDER_ERROR';
 const getText = (intent) => {
   if (!isObject(intent)) return '';
 
-  if (isString(intent.text)) return intent.text;
-  if (isString(intent.webUrl)) return intent.webUrl;
+  if (isString(intent.text)) return intent.text.trim();
+  if (isString(intent.webUrl)) return intent.webUrl.trim();
 
   return '';
 };
@@ -56,14 +57,18 @@ const addText = async (text) => {
 };
 
 const Adding = () => {
-  const { shareIntent, error, resetShareIntent } = useShareIntentContext();
+  const {
+    isReady, hasShareIntent, shareIntent, error, resetShareIntent,
+  } = useShareIntentContext();
   const { height: safeAreaHeight } = useSafeAreaFrame();
   const isUserSignedIn = useSelector(state => state.user.isUserSignedIn);
   const isUserDummy = useSelector(state => state.user.isUserDummy);
   const themeMode = useSelector(state => getThemeMode(state));
   const [type, setType] = useState(null);
+  const timeId = useRef(null);
   const prevText = useRef(null);
   const tailwind = useTailwind();
+  const router = useRouter();
 
   const process = useCallback(async () => {
     if (![true, false].includes(isUserSignedIn)) return;
@@ -72,15 +77,18 @@ const Adding = () => {
       setType(RENDER_NOT_SIGNED_IN);
       return;
     }
+
+    if (isReady !== true) return;
     if (error) {
       setType(RENDER_ERROR);
       return;
     }
 
-    let text = getText(shareIntent);
-    text = text.trim();
+    const text = getText(shareIntent);
     if (text.length === 0) {
-      setType(RENDER_INVALID);
+      timeId.current = setTimeout(() => {
+        setType(RENDER_INVALID);
+      }, 3000);
       return;
     }
 
@@ -99,10 +107,19 @@ const Adding = () => {
 
     setType(RENDER_ADDED);
     vars.translucentAdding.didShare = true;
-  }, [shareIntent, error, isUserSignedIn]);
+  }, [isReady, shareIntent, error, isUserSignedIn]);
+
+  const onResetBtnClick = () => {
+    if (hasShareIntent) resetShareIntent();
+    else router.replace('/' as ExternalPathString);
+  };
 
   useEffect(() => {
     process();
+
+    return () => {
+      clearTimeout(timeId.current);
+    };
   }, [process]);
 
   const _render = (content) => {
@@ -130,7 +147,7 @@ const Adding = () => {
     if (doHide) rightText = '';
 
     let rightLink = (
-      <TouchableOpacity onPress={() => resetShareIntent()} disabled={doHide}>
+      <TouchableOpacity onPress={onResetBtnClick} disabled={doHide}>
         <Text style={tailwind('text-right text-base font-medium text-gray-500 blk:text-gray-300')}>{rightText}</Text>
       </TouchableOpacity>
     );
