@@ -61,6 +61,8 @@
     <array>
       <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>
     </array>
+    <key>RCTNewArchEnabled</key>
+    <true/>
     <key>RCTRootViewBackgroundColor</key>
     <integer>4279310375</integer>
     <key>UIAppFonts</key>
