@@ -434,7 +434,8 @@
 ** install
 - npx create-expo-app --template tabs
 - npx expo install expo-dev-client -- --save-dev
-- npm i file:../../../blockstack-react-native/BlockstackSDK
+- npm i file:../../../sdrive-hub-sdk/blockstack-react-native/react-native-blockstack-0.1.1.tgz
+  + In the blockstack-react-native, run npm pack
 - npx expo install react-native-mmkv-storage@0.4.4
 - npx expo install react-native-flag-secure
 - npm i react-redux redux redux-thunk reselect

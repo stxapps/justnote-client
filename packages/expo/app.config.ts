@@ -185,6 +185,11 @@ const config: ExpoConfig = {
         },
         "android": {
           "minSdkVersion": 30,
+          "packagingOptions": {
+            "pickFirst": [
+              "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+            ]
+          },
           "enableMinifyInReleaseBuilds": true,
           "extraProguardRules": proguardRules
         }
