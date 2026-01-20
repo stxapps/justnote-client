@@ -40,5 +40,6 @@
   private static *** onContentChangedByOuterProcess(***);
 }
 -dontwarn org.slf4j.impl.StaticLoggerBinder
+-keep class org.bouncycastle.** { *; }
 
 # @generated end expo-build-properties
